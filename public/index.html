@@ -9,95 +9,131 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
-        /* [Twój oryginalny kod CSS zostaje bez zmian - był świetny!] */
+        /* [Twój oryginalny kod CSS zostaje bez zmian] */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
         .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
         header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px; text-align: center; }
-        
-        /* Dodatkowy styl dla BLIK i Toasta */
-        .blik-header { 
-            background: rgba(255,255,255,0.1); 
-            border: 1px dashed rgba(255,255,255,0.5); 
-            display: inline-block; 
-            margin-top: 10px; 
-            padding: 8px 15px; 
-            border-radius: 10px; 
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .blik-header:hover { background: rgba(255,255,255,0.2); }
-        .blik-header b { color: #ffeb3b; }
-
-        #toast-msg {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #333; color: white; padding: 12px 25px; border-radius: 30px;
-            font-size: 0.9em; z-index: 9999; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        /* Twój reszta stylu */
-        nav { display: flex; justify-content: center; background: #f8f9fa; padding: 10px; gap: 5px; flex-wrap: wrap; }
-        .tab-btn { padding: 10px 15px; background: white; border: 2px solid #ddd; border-radius: 10px; cursor: pointer; font-size: 0.9em; font-weight: bold; transition: all 0.3s; }
+        header h1 { font-size: 1.8em; margin-bottom: 5px; }
+        header p { opacity: 0.9; font-size: 0.9em; }
+        .sync-status { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.85em; z-index: 1000; }
+        .sync-status.connected { background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); }
+        .sync-status.disconnected { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); }
+        nav { display: flex; justify-content: center; background: #f8f9fa; padding: 10px; gap: 8px; flex-wrap: wrap; }
+        .tab-btn { padding: 10px 20px; background: white; border: 2px solid #ddd; border-radius: 10px; cursor: pointer; font-size: 0.95em; font-weight: bold; transition: all 0.3s; }
         .tab-btn:hover { background: #667eea; color: white; border-color: #667eea; }
         .tab-btn.active { background: #1e3c72; color: white; border-color: #1e3c72; }
         .content { padding: 15px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .summary-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .summary-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 18px; border-radius: 15px; text-align: center; }
         .summary-card.danger { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); }
         .summary-card.success { background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); }
-        .summary-value { font-size: 1.5em; font-weight: bold; margin: 5px 0; }
-        .summary-label { font-size: 0.8em; opacity: 0.9; }
+        .summary-value { font-size: 1.8em; font-weight: bold; margin: 5px 0; }
+        .summary-label { font-size: 0.85em; opacity: 0.9; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
-        .player-card { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; transition: all 0.3s; }
+        .player-card { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.3s; position: relative; animation: slideIn 0.3s ease-out; }
+        .player-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
         .player-card.debt { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; }
         .player-card.paid { background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); color: white; }
         .player-card.organizer { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #333; }
-        .rank-badge { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.3); padding: 4px 8px; border-radius: 10px; font-size: 0.7em; font-weight: bold; }
-        .player-name { font-size: 1.3em; font-weight: bold; margin-bottom: 5px; }
+        .player-card.multi { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); color: white; }
+        .rank-badge { position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px); padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8em; display: flex; align-items: center; gap: 4px; }
+        .player-card.debt .rank-badge, .player-card.paid .rank-badge, .player-card.multi .rank-badge { background: rgba(255, 255, 255, 0.25); color: white; }
+        .player-card.organizer .rank-badge { background: rgba(0, 0, 0, 0.15); color: #333; }
+        .rank-emoji { font-size: 1.2em; }
+        .player-name { font-size: 1.5em; font-weight: bold; margin-bottom: 10px; padding-right: 90px; }
         
-        /* Klikalna kwota długu */
-        .player-debt { 
-            font-size: 1.8em; font-weight: bold; margin: 10px 0; 
-            cursor: pointer; display: inline-block;
-        }
-        .player-debt:hover { transform: scale(1.05); }
+        /* NOWE: Style dla długu i Blika */
+        .player-debt { font-size: 2em; font-weight: bold; margin: 10px 0; cursor: pointer; position: relative; }
+        .player-debt:active { transform: scale(0.95); }
+        .copy-hint { font-size: 0.3em; display: block; opacity: 0.7; font-weight: normal; }
 
-        .player-details { font-size: 0.8em; margin-bottom: 15px; opacity: 0.9; line-height: 1.4; }
-        .pay-btn { width: 100%; padding: 12px; background: white; color: #333; border: none; border-radius: 10px; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        .pay-btn:hover { background: #f8f9fa; transform: translateY(-2px); }
-        .pay-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .blik-info { background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; margin-top: 10px; text-align: center; cursor: pointer; border: 1px dashed rgba(255,255,255,0.5); }
+        .blik-info:hover { background: rgba(255,255,255,0.3); }
+
+        .debt-details { margin-top: 10px; font-size: 0.85em; background: rgba(0,0,0,0.1); border-radius: 8px; padding: 0; overflow: hidden; transition: all 0.3s; max-height: 0; }
+        .debt-details.active { padding: 10px; max-height: 200px; overflow-y: auto; }
+        .details-btn { background: none; border: 1px solid rgba(255,255,255,0.5); color: inherit; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75em; margin-top: 5px; }
+
+        .player-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(255,255,255,0.3); }
+        .stat { text-align: center; }
+        .stat-value { font-size: 1.2em; font-weight: bold; }
+        .stat-label { font-size: 0.8em; opacity: 0.8; }
+        .pay-btn { width: 100%; padding: 14px; margin-top: 12px; background: white; color: #333; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .pay-btn:hover { background: #f1f3f5; transform: scale(1.02); }
+        .pay-btn.paid-btn { background: rgba(255,255,255,0.3); color: white; cursor: default; }
         .admin-section { background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        .admin-section h3 { color: #1e3c72; margin-bottom: 15px; font-size: 1.2em; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; }
-        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 5px; }
-        .checkbox-item { display: flex; align-items: center; gap: 8px; background: white; padding: 8px; border-radius: 8px; border: 1px solid #eee; cursor: pointer; font-size: 0.9em; }
-        .submit-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; }
-        .weeks-list { display: flex; flex-direction: column; gap: 10px; }
-        .week-item { background: white; padding: 15px; border-radius: 12px; border-left: 5px solid #667eea; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .week-info h4 { margin-bottom: 5px; }
-        .week-info p { font-size: 0.85em; color: #666; }
-        .week-actions { display: flex; gap: 5px; }
-        .edit-btn, .delete-btn { padding: 8px 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.8em; font-weight: bold; transition: 0.3s; }
-        .edit-btn { background: #e7f3ff; color: #0061c1; }
-        .delete-btn { background: #fff0f0; color: #e03131; }
-        .sync-status { position: fixed; bottom: 20px; right: 20px; padding: 8px 15px; border-radius: 20px; font-size: 0.8em; font-weight: bold; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .status-online { background: #51cf66; color: white; }
-        .status-offline { background: #ff6b6b; color: white; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 0.9em; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .form-group small { display: block; margin-top: 5px; color: #666; font-size: 0.85em; }
+        .cost-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .preset-btn { padding: 8px 14px; background: white; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s; }
+        .preset-btn:hover { background: #667eea; color: white; border-color: #667eea; }
+        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; padding: 10px; background: white; border-radius: 8px; cursor: pointer; }
+        .checkbox-item:hover { background: #e9ecef; }
+        .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .checkbox-item label { cursor: pointer; font-size: 0.9em; }
+        .checkbox-item.multi-item { background: #e7f3ff; border: 2px solid #74b9ff; }
+        .submit-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.3s; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .submit-btn.edit-mode { background: linear-gradient(135deg, #f59f00 0%, #f76707 100%); }
+        .cancel-btn { background: #adb5bd; color: white; padding: 14px; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .cancel-btn:hover { background: #868e96; }
+        .edit-mode-banner { background: linear-gradient(135deg, #f59f00 0%, #f76707 100%); color: white; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-weight: bold; display: none; }
+        .edit-mode-banner.active { display: block; }
+        .pricing-info { background: #e7f3ff; border: 2px solid #74b9ff; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+        .pricing-info h4 { color: #0984e3; margin-bottom: 10px; font-size: 1em; }
+        .pricing-info ul { list-style: none; font-size: 0.9em; color: #333; }
+        .pricing-info li { padding: 4px 0; }
+        .weeks-list { display: grid; gap: 12px; }
+        .week-item { background: white; padding: 15px; border-radius: 10px; border-left: 5px solid #51cf66; }
+        .week-info h4 { color: #1e3c72; margin-bottom: 6px; font-size: 1em; }
+        .week-info p { color: #666; font-size: 0.85em; margin: 4px 0; }
+        .week-info .multi-info { color: #0984e3; font-size: 0.8em; }
+        .week-stats { display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap; }
+        .week-stat { text-align: center; background: #f8f9fa; padding: 8px 12px; border-radius: 8px; }
+        .week-stat-value { font-size: 1.1em; font-weight: bold; color: #1e3c72; }
+        .week-stat-label { font-size: 0.75em; color: #666; }
+        .week-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .edit-week-btn { background: #74b9ff; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: bold; }
+        .edit-week-btn:hover { background: #0984e3; }
+        .delete-week-btn { background: #ff6b6b; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: bold; }
+        .delete-week-btn:hover { background: #ee5a5a; }
+        .rank-legend { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 20px; }
+        .rank-legend h4 { color: #1e3c72; margin-bottom: 10px; font-size: 0.95em; }
+        .rank-legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+        .rank-legend-item { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: white; border-radius: 6px; font-size: 0.8em; }
+        .rank-legend-emoji { font-size: 1.2em; }
+        .players-list { display: grid; gap: 10px; }
+        .player-item { background: white; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .player-item.organizer-item { background: #fff3cd; border: 2px solid #ffc107; }
+        .player-item-name { font-weight: bold; font-size: 1em; }
+        .delete-player-btn { background: #ff6b6b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em; font-weight: bold; }
+        .delete-player-btn:hover { background: #ee5a5a; }
+        .delete-player-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Styl powiadomienia o kopiowaniu */
+        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; z-index: 2000; }
+
+        @media (max-width: 768px) { body { padding: 5px; } header h1 { font-size: 1.4em; } .tab-btn { padding: 8px 12px; font-size: 0.85em; } .content { padding: 10px; } .dashboard-grid { grid-template-columns: 1fr; } .summary-cards { grid-template-columns: 1fr 1fr 1fr; } .summary-value { font-size: 1.4em; } .summary-label { font-size: 0.75em; } .player-name { font-size: 1.3em; padding-right: 85px; } .player-debt { font-size: 1.7em; } .rank-badge { padding: 5px 8px; font-size: 0.7em; } .week-actions { flex-direction: column; } .edit-week-btn, .delete-week-btn { width: 100%; text-align: center; } }
+        @media (max-width: 400px) { .summary-cards { grid-template-columns: 1fr; } .rank-badge { position: static; display: inline-flex; margin-bottom: 8px; } .player-name { padding-right: 0; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
-    <div id="toast-msg">Skopiowano! 📋</div>
-    <div id="syncStatus" class="sync-status status-offline">⏳ Łączenie...</div>
+    <div class="sync-status" id="syncStatus">⏳ Łączenie...</div>
+    <div id="toast">Skopiowano!</div>
 
     <div class="container">
         <header>
             <h1>🏓 Rozliczenia Tenis Stołowy</h1>
-            <div class="blik-header" onclick="kopiuj('726620831')">
-                📲 BLIK (kliknij by kopiować): <b>726 620 831</b>
-            </div>
+            <p>Zarządzaj płatnościami i śledź statystyki</p>
         </header>
 
         <nav>
@@ -107,7 +143,7 @@
             <button class="tab-btn" onclick="showTab('players')">👥 Gracze</button>
         </nav>
 
-        <main class="content">
+        <div class="content">
             <div id="dashboard" class="tab-content active">
                 <div class="summary-cards">
                     <div class="summary-card danger">
@@ -119,71 +155,116 @@
                         <div class="summary-value" id="activeWeeks">0</div>
                     </div>
                     <div class="summary-card success">
-                        <div class="summary-label">Opłaconych</div>
+                        <div class="summary-label">Rozliczonych</div>
                         <div class="summary-value" id="paidPlayers">0</div>
                     </div>
                 </div>
+
                 <div id="playersGrid" class="dashboard-grid"></div>
+
+                <div class="rank-legend">
+                    <h4>🏆 Rangi (% obecności):</h4>
+                    <div class="rank-legend-grid">
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">🏆</span><span>LEGENDA 90%+</span></div>
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">⭐</span><span>Mistrz 75%+</span></div>
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">🔥</span><span>Stały 50%+</span></div>
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">👀</span><span>Gość 25%+</span></div>
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">👻</span><span>Duch &lt;25%</span></div>
+                    </div>
+                </div>
             </div>
 
             <div id="admin" class="tab-content">
                 <div class="admin-section">
-                    <div id="editModeBanner" style="display:none; background:#fff3bf; padding:10px; border-radius:10px; margin-bottom:10px; text-align:center; font-weight:bold; color:#856404; border:1px solid #ffeeba;">✏️ TRYB EDYCJI TYGODNIA</div>
+                    <div class="edit-mode-banner" id="editModeBanner">✏️ TRYB EDYCJI - edytujesz istniejący tydzień</div>
                     <h3 id="formTitle">➕ Dodaj nowy tydzień</h3>
-                    <form id="weekForm" style="margin-top:10px;">
+                    
+                    <div class="pricing-info" style="background: #fff3cd; border-color: #ffc107;">
+                        <h4>💰 Twój numer BLIK:</h4>
+                        <input type="text" id="blikNumber" placeholder="Wpisz swój numer tel. do BLIK" onchange="updateBlik(this.value)" style="margin-top:5px;">
+                    </div>
+
+                    <div class="pricing-info">
+                        <h4>💡 Przypomnienie - cennik:</h4>
+                        <ul>
+                            <li>🎯 <strong>1 stół:</strong> 30 zł / z Multi: 15 zł / 2x Multi: 0 zł</li>
+                            <li>🎯 <strong>2 stoły:</strong> 60 zł / z Multi: 45/30/15/0 zł</li>
+                            <li>💡 Inny lokal? Wpisz ile zapłaciłeś!</li>
+                        </ul>
+                    </div>
+
+                    <form id="weekForm">
                         <input type="hidden" id="editWeekId" value="">
                         <div class="form-group">
                             <label>📅 Data grania</label>
                             <input type="date" id="weekDate" required>
                         </div>
                         <div class="form-group">
-                            <label>💰 Całkowity koszt (wynajem stołów)</label>
-                            <input type="number" id="weekCost" min="0" step="0.01" required>
+                            <label>💰 Ile zapłaciłeś za stoły? (całkowity koszt)</label>
+                            <input type="number" id="weekCost" min="0" step="0.01" placeholder="np. 45" required>
+                            <div class="cost-presets">
+                                <button type="button" class="preset-btn" onclick="setCost(0)">0 zł</button>
+                                <button type="button" class="preset-btn" onclick="setCost(15)">15 zł</button>
+                                <button type="button" class="preset-btn" onclick="setCost(30)">30 zł</button>
+                                <button type="button" class="preset-btn" onclick="setCost(45)">45 zł</button>
+                                <button type="button" class="preset-btn" onclick="setCost(60)">60 zł</button>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label>✅ Obecni gracze</label>
-                            <div class="checkbox-group" id="presentPlayersChecks"></div>
+                            <label>✅ Kto był obecny?</label>
+                            <div class="checkbox-group" id="presentPlayers"></div>
                         </div>
                         <div class="form-group">
-                            <label>🏃 Posiadacze Multisport (nie płacą)</label>
-                            <div class="checkbox-group" id="multiPlayersChecks"></div>
+                            <label>🏃 Kto miał Multisport w tym tygodniu?</label>
+                            <div class="checkbox-group" id="weekMultiPlayers"></div>
                         </div>
                         <button type="submit" class="submit-btn" id="submitBtn">💾 Zapisz tydzień</button>
-                        <button type="button" class="submit-btn" id="cancelEditBtn" onclick="cancelEdit()" style="display:none; background:#666; margin-top:10px;">❌ Anuluj edycję</button>
+                        <button type="button" class="cancel-btn" id="cancelEditBtn" onclick="cancelEdit()" style="display: none;">❌ Anuluj edycję</button>
                     </form>
+                </div>
+
+                <div class="admin-section">
+                    <h3>🏃 Domyślne ustawienia Multisport</h3>
+                    <small style="color: #666; display: block; margin-bottom: 10px;">Te osoby będą domyślnie zaznaczone jako posiadacze Multi przy dodawaniu nowego tygodnia</small>
+                    <div class="checkbox-group" id="defaultMultiCheckboxes"></div>
+                </div>
+
+                <div class="admin-section">
+                    <h3>⚠️ Zarządzanie danymi</h3>
+                    <button onclick="resetAllData()" style="background: #ff6b6b; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold;">
+                        🗑️ Wyczyść wszystkie dane
+                    </button>
                 </div>
             </div>
 
             <div id="history" class="tab-content">
                 <div class="admin-section">
                     <h3>📅 Historia tygodni</h3>
-                    <div id="weeksList" class="weeks-list" style="margin-top:15px;"></div>
+                    <div id="weeksList" class="weeks-list"></div>
                 </div>
             </div>
 
             <div id="players" class="tab-content">
                 <div class="admin-section">
                     <h3>➕ Dodaj nowego gracza</h3>
-                    <form id="addPlayerForm" style="margin-top:10px; display:flex; gap:10px;">
-                        <input type="text" id="newPlayerName" placeholder="Imię gracza" required style="flex:1;">
-                        <button type="submit" class="submit-btn" style="width:auto; padding:0 20px;">Dodaj</button>
+                    <form id="addPlayerForm">
+                        <div class="form-group">
+                            <label>👤 Imię gracza</label>
+                            <input type="text" id="newPlayerName" placeholder="np. Tomek" required>
+                        </div>
+                        <button type="submit" class="submit-btn">✅ Dodaj gracza</button>
                     </form>
                 </div>
+
                 <div class="admin-section">
-                    <h3>👥 Zarządzaj graczami</h3>
-                    <div id="playersList" style="margin-top:15px;"></div>
-                </div>
-                <div class="admin-section" style="background:#fff5f5; border:1px solid #ffc9c9;">
-                    <h3 style="color:#e03131;">⚠️ Strefa Niebezpieczna</h3>
-                    <p style="font-size:0.85em; margin:5px 0 15px;">Tej operacji nie da się cofnąć.</p>
-                    <button onclick="resetAllData()" style="background:#e03131; color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:bold; cursor:pointer;">Resetuj wszystkie dane</button>
+                    <h3 id="playersListTitle">👥 Lista graczy</h3>
+                    <div id="playersList" class="players-list"></div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <script>
-        // --- TWOJA KONFIGURACJA I LOGIKA (BEZ ZMIAN) ---
         const firebaseConfig = {
           apiKey: "AIzaSyA0aSm_EoDVibcu46IRL3xaFSskApWYrMo",
           authDomain: "tenis-rozliczenia.firebaseapp.com",
@@ -199,32 +280,26 @@
         const dataRef = database.ref('appData');
 
         let PLAYERS = ['Przemek', 'Krzysztof', 'Arek', 'Rafał', 'Mariusz', 'Kamil'];
+        
         let appData = {
             players: [...PLAYERS],
             organizerName: 'Kamil',
+            organizerBlik: '',
             weeks: [],
             paidUntilWeek: {},
-            defaultMultiPlayers: ['Rafał']
+            defaultMultiPlayers: ['Rafał'] 
         };
 
-        // Dodatkowa funkcja kopiowania
-        function kopiuj(tekst) {
-            navigator.clipboard.writeText(tekst).then(() => {
-                const toast = document.getElementById('toast-msg');
-                toast.style.display = 'block';
-                setTimeout(() => { toast.style.display = 'none'; }, 2000);
-            });
-        }
+        let editingWeekId = null;
 
-        // Reszta Twojego kodu JS
         database.ref('.info/connected').on('value', (snap) => {
             const status = document.getElementById('syncStatus');
             if (snap.val() === true) {
-                status.textContent = '● Połączono';
-                status.className = 'sync-status status-online';
+                status.textContent = '✅ Online - synchronizacja aktywna';
+                status.className = 'sync-status connected';
             } else {
-                status.textContent = '○ Rozłączono';
-                status.className = 'sync-status status-offline';
+                status.textContent = '❌ Offline';
+                status.className = 'sync-status disconnected';
             }
         });
 
@@ -233,177 +308,137 @@
                 const data = snapshot.val();
                 if (data) {
                     appData = data;
-                    if (data.players) PLAYERS = data.players;
+                    PLAYERS = data.players || PLAYERS;
+                    if (!appData.weeks) appData.weeks = [];
+                    if (!appData.defaultMultiPlayers) appData.defaultMultiPlayers = [];
+                    if (!appData.paidUntilWeek) appData.paidUntilWeek = {};
+                    if (!appData.organizerBlik) appData.organizerBlik = '';
+                    
+                    appData.weeks = appData.weeks.map(week => {
+                        if (!week.multiPlayers) week.multiPlayers = [];
+                        return week;
+                    });
+                    
+                    document.getElementById('blikNumber').value = appData.organizerBlik;
                     renderAll();
                 }
             });
         }
 
         function saveData() {
-            appData.players = PLAYERS;
+            appData.players = [...PLAYERS];
             dataRef.set(appData);
+        }
+
+        function updateBlik(val) {
+            appData.organizerBlik = val;
+            saveData();
+        }
+
+        // Kopiowanie do schowka
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.style.display = 'block';
+                setTimeout(() => toast.style.display = 'none', 2000);
+            });
+        }
+
+        function toggleDetails(playerName) {
+            const el = document.getElementById(`details_${playerName}`);
+            el.classList.toggle('active');
+        }
+
+        function generateWeekId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function getWeekIndex(weekId) {
+            return appData.weeks.findIndex(w => w.id === weekId);
+        }
+
+        function getWeekById(id) {
+            return appData.weeks.find(w => w.id === id);
+        }
+
+        function setCost(value) {
+            document.getElementById('weekCost').value = value;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
         function getRank(playerName) {
-            const presenceCount = appData.weeks?.filter(w => w.present?.includes(playerName)).length || 0;
-            if (presenceCount >= 20) return { emoji: '👑', label: 'Legenda' };
-            if (presenceCount >= 10) return { emoji: '⭐', label: 'Weteran' };
-            if (presenceCount >= 5) return { emoji: '🎾', label: 'Stały gracz' };
-            return { emoji: '🌱', label: 'Nowy' };
-        }
-
-        function calculatePlayerDebt(playerName) {
-            if (playerName === appData.organizerName) return 0;
-            if (!appData.weeks || appData.weeks.length === 0) return 0;
-
-            let totalDebt = 0;
-            const paidUntilId = appData.paidUntilWeek?.[playerName];
-            const paidUntilIdx = paidUntilId ? appData.weeks.findIndex(w => w.id === paidUntilId) : -1;
-
-            appData.weeks.forEach((week, index) => {
-                if (index <= paidUntilIdx) return;
-                if (!week.present?.includes(playerName)) return;
-                if (week.cost === 0) return;
-
-                const multiPlayers = week.multiPlayers || [];
-                if (multiPlayers.includes(playerName)) return;
-
-                const payingPlayersCount = week.present.filter(p => !multiPlayers.includes(p)).length;
-                if (payingPlayersCount > 0) {
-                    totalDebt += (week.cost / payingPlayersCount);
-                }
-            });
-
-            return totalDebt;
-        }
-
-        function getPlayerDebtDetails(playerName) {
-            const details = [];
-            if (!appData.weeks) return details;
-
-            const paidUntilId = appData.paidUntilWeek?.[playerName];
-            const paidUntilIdx = paidUntilId ? appData.weeks.findIndex(w => w.id === paidUntilId) : -1;
-
-            appData.weeks.forEach((week, index) => {
-                if (index <= paidUntilIdx) return;
-                if (!week.present?.includes(playerName)) return;
-                const multiPlayers = week.multiPlayers || [];
-                if (multiPlayers.includes(playerName)) return;
-
-                const payingPlayersCount = week.present.filter(p => !multiPlayers.includes(p)).length;
-                if (payingPlayersCount > 0) {
-                    details.push(`${week.date}: ${(week.cost / payingPlayersCount).toFixed(2)} zł`);
-                }
-            });
-            return details;
-        }
-
-        function renderDashboard() {
-            const grid = document.getElementById('playersGrid');
-            grid.innerHTML = '';
-            let totalToCollect = 0;
-            let fullyPaid = 0;
-
-            PLAYERS.forEach(player => {
-                const debt = calculatePlayerDebt(player);
-                const isOrganizer = player === appData.organizerName;
-                const rank = getRank(player);
-                const debtDetails = getPlayerDebtDetails(player);
-
-                if (!isOrganizer) {
-                    totalToCollect += debt;
-                    if (debt === 0) fullyPaid++;
-                }
-
-                const card = document.createElement('div');
-                card.className = `player-card ${isOrganizer ? 'organizer' : (debt > 0 ? 'debt' : 'paid')}`;
-                
-                card.innerHTML = `
-                    <div class="rank-badge">${rank.emoji} ${rank.label}</div>
-                    <div class="player-name">${player} ${isOrganizer ? '👑' : ''}</div>
-                    <div class="player-debt" onclick="kopiuj('${debt.toFixed(2)}')">
-                        ${isOrganizer ? 'Skarbnik' : debt.toFixed(2) + ' zł'}
-                    </div>
-                    <div class="player-details">
-                        ${isOrganizer ? 'Zarządza finansami' : (debt > 0 ? 'Zaległości:<br>' + debtDetails.join('<br>') : 'Wszystko uregulowane! 🎉')}
-                    </div>
-                    ${!isOrganizer ? `<button class="pay-btn" onclick="markAsPaid('${player}')" ${debt === 0 ? 'disabled' : ''}>${debt > 0 ? '💸 Oznacz jako opłacone' : '✅ Rozliczony'}</button>` : ''}
-                `;
-                grid.appendChild(card);
-            });
-
-            document.getElementById('totalDebt').textContent = totalToCollect.toFixed(2) + ' zł';
-            document.getElementById('activeWeeks').textContent = appData.weeks?.length || 0;
-            document.getElementById('paidPlayers').textContent = fullyPaid;
-        }
-
-        function renderAdminCheckboxes() {
-            const presentCont = document.getElementById('presentPlayersChecks');
-            const multiCont = document.getElementById('multiPlayersChecks');
-            presentCont.innerHTML = '';
-            multiCont.innerHTML = '';
-
-            PLAYERS.forEach(player => {
-                const isDefaultMulti = appData.defaultMultiPlayers?.includes(player);
-                
-                presentCont.innerHTML += `
-                    <label class="checkbox-item">
-                        <input type="checkbox" class="present-check" value="${player}" checked> ${player}
-                    </label>
-                `;
-                multiCont.innerHTML += `
-                    <label class="checkbox-item">
-                        <input type="checkbox" class="multi-check" value="${player}" ${isDefaultMulti ? 'checked' : ''}> ${player}
-                    </label>
-                `;
-            });
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('weeksList');
-            list.innerHTML = '';
+            const totalWeeks = appData.weeks.length;
+            if (totalWeeks === 0) return { emoji: '❓', name: 'Nowy' };
+            const presence = appData.weeks.filter(w => w.present && w.present.includes(playerName)).length;
+            const percentage = presence / totalWeeks;
             
-            if (!appData.weeks || appData.weeks.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">Brak historii spotkań.</p>';
-                return;
-            }
-
-            [...appData.weeks].reverse().forEach(week => {
-                const item = document.createElement('div');
-                item.className = 'week-item';
-                item.innerHTML = `
-                    <div class="week-info">
-                        <h4>📅 ${week.date}</h4>
-                        <p>Koszt: ${week.cost} zł | Graczy: ${week.present?.length || 0}</p>
-                    </div>
-                    <div class="week-actions">
-                        <button class="edit-btn" onclick="editWeek('${week.id}')">Edytuj</button>
-                        <button class="delete-btn" onclick="deleteWeek('${week.id}')">Usuń</button>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
+            if (percentage >= 0.9) return { emoji: '🏆', name: 'LEGENDA' };
+            if (percentage >= 0.75) return { emoji: '⭐', name: 'Mistrz' };
+            if (percentage >= 0.5) return { emoji: '🔥', name: 'Stały' };
+            if (percentage >= 0.25) return { emoji: '👀', name: 'Gość' };
+            return { emoji: '👻', name: 'Duch' };
         }
 
-        function renderPlayers() {
-            const list = document.getElementById('playersList');
-            list.innerHTML = '';
-            PLAYERS.forEach(player => {
-                const item = document.createElement('div');
-                item.style = "display:flex; justify-content:space-between; align-items:center; padding:10px; background:white; border-radius:10px; margin-bottom:5px; border:1px solid #eee;";
-                item.innerHTML = `
-                    <span>${player} ${player === appData.organizerName ? '👑' : ''}</span>
-                    ${player !== appData.organizerName ? `<button onclick="deletePlayer('${player}')" class="delete-btn">Usuń</button>` : ''}
-                `;
-                list.appendChild(item);
+        // Kalkulacja długu ze szczegółami
+        function calculatePlayerDebtDetailed(playerName) {
+            if (playerName === appData.organizerName) return { total: 0, items: [] };
+            
+            let totalDebt = 0;
+            let items = [];
+            const paidUntilWeekId = appData.paidUntilWeek ? appData.paidUntilWeek[playerName] : null;
+            const paidUntilIndex = paidUntilWeekId ? getWeekIndex(paidUntilWeekId) : -1;
+            
+            if (!appData.weeks) return { total: 0, items: [] };
+            
+            appData.weeks.forEach((week, index) => {
+                if (index <= paidUntilIndex) return;
+                if (!week.present || !week.present.includes(playerName)) return;
+                if (week.cost === 0) return;
+                
+                const weekMulti = week.multiPlayers || [];
+                if (weekMulti.includes(playerName)) return;
+                
+                const payingPlayers = week.present.filter(p => !weekMulti.includes(p)).length;
+                
+                if (payingPlayers > 0) {
+                    const amount = week.cost / payingPlayers;
+                    totalDebt += amount;
+                    items.push({ date: week.date, amount: amount });
+                }
             });
+            
+            return { total: totalDebt, items: items };
+        }
+
+        function calculatePresence(playerName) {
+            if (!appData.weeks) return 0;
+            return appData.weeks.filter(w => w.present && w.present.includes(playerName)).length;
+        }
+
+        function hasCurrentMulti(playerName) {
+            if (!appData.weeks || appData.weeks.length === 0) {
+                return appData.defaultMultiPlayers && appData.defaultMultiPlayers.includes(playerName);
+            }
+            const lastWeek = appData.weeks[appData.weeks.length - 1];
+            return lastWeek.multiPlayers && lastWeek.multiPlayers.includes(playerName);
+        }
+
+        function markAsPaid(playerName) {
+            if (appData.weeks.length === 0) return;
+            const lastWeekId = appData.weeks[appData.weeks.length - 1].id;
+            appData.paidUntilWeek[playerName] = lastWeekId;
+            saveData();
         }
 
         function renderAll() {
@@ -416,83 +451,240 @@
             }
         }
 
-        // Akcje formularzy i przycisków
-        document.getElementById('weekForm').onsubmit = (e) => {
+        function renderDashboard() {
+            const grid = document.getElementById('playersGrid');
+            grid.innerHTML = '';
+            
+            let totalToCollect = 0;
+            let fullyPaidCount = 0;
+
+            PLAYERS.forEach(player => {
+                const debtInfo = calculatePlayerDebtDetailed(player);
+                const debt = debtInfo.total;
+                const presenceCount = calculatePresence(player);
+                const rank = getRank(player);
+                const isOrganizer = player === appData.organizerName;
+                const hasMulti = hasCurrentMulti(player);
+                
+                if (!isOrganizer) totalToCollect += debt;
+                if (!isOrganizer && debt === 0) fullyPaidCount++;
+
+                let cardClass = isOrganizer ? 'organizer' : (debt > 0 ? 'debt' : (hasMulti ? 'multi' : 'paid'));
+
+                let detailsHtml = debtInfo.items.map(i => `<div>📅 ${formatDate(i.date)}: <b>${i.amount.toFixed(2)} zł</b></div>`).join('');
+
+                grid.innerHTML += `
+                    <div class="player-card ${cardClass}">
+                        <div class="rank-badge"><span class="rank-emoji">${rank.emoji}</span> ${rank.name}</div>
+                        <div class="player-name">${player} ${isOrganizer ? '👑' : ''}</div>
+                        
+                        ${!isOrganizer ? `
+                            <div class="player-debt" onclick="copyToClipboard('${debt.toFixed(2)}')">
+                                ${debt.toFixed(2)} zł
+                                <span class="copy-hint">kliknij żeby skopiować kwotę</span>
+                            </div>
+                            <button class="details-btn" onclick="toggleDetails('${player}')">📋 Szczegóły zaległości</button>
+                            <div class="debt-details" id="details_${player}">
+                                ${detailsHtml || 'Brak zaległych tygodni'}
+                            </div>
+                        ` : `
+                            <div class="player-debt">Kierownik 😎</div>
+                            ${appData.organizerBlik ? `
+                                <div class="blik-info" onclick="copyToClipboard('${appData.organizerBlik}')">
+                                    📲 BLIK: <b>${appData.organizerBlik}</b><br>
+                                    <small>(kliknij żeby skopiować numer)</small>
+                                </div>
+                            ` : ''}
+                        `}
+                        
+                        <div class="player-stats">
+                            <div class="stat">
+                                <div class="stat-value">${presenceCount}</div>
+                                <div class="stat-label">Obecności</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${hasMulti ? '✅' : '❌'}</div>
+                                <div class="stat-label">Obecne Multi</div>
+                            </div>
+                        </div>
+
+                        ${!isOrganizer ? `
+                            <button class="pay-btn ${debt === 0 ? 'paid-btn' : ''}" 
+                                    onclick="markAsPaid('${player}')" 
+                                    ${debt === 0 ? 'disabled' : ''}>
+                                ${debt > 0 ? '💸 Oznacz jako opłacone' : '✅ Rozliczony'}
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            document.getElementById('totalDebt').textContent = `${totalToCollect.toFixed(2)} zł`;
+            document.getElementById('activeWeeks').textContent = appData.weeks.length;
+            document.getElementById('paidPlayers').textContent = `${fullyPaidCount} / ${PLAYERS.length - 1}`;
+        }
+
+        function renderAdminCheckboxes() {
+            const presentContainer = document.getElementById('presentPlayers');
+            const multiContainer = document.getElementById('weekMultiPlayers');
+            const defaultMultiContainer = document.getElementById('defaultMultiCheckboxes');
+            
+            presentContainer.innerHTML = '';
+            multiContainer.innerHTML = '';
+            defaultMultiContainer.innerHTML = '';
+
+            PLAYERS.forEach(player => {
+                presentContainer.innerHTML += `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="present_${player}" value="${player}" class="present-check" checked>
+                        <label for="present_${player}">${player}</label>
+                    </div>
+                `;
+                
+                const isDefaultMulti = appData.defaultMultiPlayers.includes(player);
+                multiContainer.innerHTML += `
+                    <div class="checkbox-item ${isDefaultMulti ? 'multi-item' : ''}">
+                        <input type="checkbox" id="multi_${player}" value="${player}" class="multi-check" ${isDefaultMulti ? 'checked' : ''}>
+                        <label for="multi_${player}">${player}</label>
+                    </div>
+                `;
+
+                defaultMultiContainer.innerHTML += `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="def_multi_${player}" value="${player}" 
+                            ${isDefaultMulti ? 'checked' : ''} 
+                            onchange="updateDefaultMulti('${player}', this.checked)">
+                        <label for="def_multi_${player}">${player}</label>
+                    </div>
+                `;
+            });
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('weeksList');
+            list.innerHTML = '';
+
+            [...appData.weeks].reverse().forEach(week => {
+                const payingPlayers = week.present.filter(p => !week.multiPlayers.includes(p)).length;
+                const costPerPerson = payingPlayers > 0 ? (week.cost / payingPlayers).toFixed(2) : 0;
+
+                list.innerHTML += `
+                    <div class="week-item">
+                        <div class="week-info">
+                            <h4>📅 ${formatDate(week.date)}</h4>
+                            <p>👥 Obecni: ${week.present.join(', ')}</p>
+                            ${week.multiPlayers.length > 0 ? `<p class="multi-info">🏃 Multi: ${week.multiPlayers.join(', ')}</p>` : ''}
+                        </div>
+                        <div class="week-stats">
+                            <div class="week-stat">
+                                <div class="week-stat-value">${week.cost} zł</div>
+                                <div class="week-stat-label">Koszt całkowity</div>
+                            </div>
+                            <div class="week-stat">
+                                <div class="week-stat-value">${costPerPerson} zł</div>
+                                <div class="week-stat-label">Koszt na głowę</div>
+                            </div>
+                        </div>
+                        <div class="week-actions">
+                            <button class="edit-week-btn" onclick="editWeek('${week.id}')">✏️ Edytuj</button>
+                            <button class="delete-week-btn" onclick="deleteWeek('${week.id}')">🗑️ Usuń</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderPlayers() {
+            const list = document.getElementById('playersList');
+            list.innerHTML = '';
+
+            PLAYERS.forEach(player => {
+                const isOrganizer = player === appData.organizerName;
+                list.innerHTML += `
+                    <div class="player-item ${isOrganizer ? 'organizer-item' : ''}">
+                        <span class="player-item-name">${player} ${isOrganizer ? '👑' : ''}</span>
+                        <button class="delete-player-btn" onclick="deletePlayer('${player}')" ${isOrganizer ? 'disabled' : ''}>
+                            🗑️ Usuń
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('weekForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const weekId = document.getElementById('editWeekId').value;
-            const newWeek = {
-                id: weekId || Date.now().toString(),
+            const present = Array.from(document.querySelectorAll('.present-check:checked')).map(cb => cb.value);
+            const multi = Array.from(document.querySelectorAll('.multi-check:checked')).map(cb => cb.value);
+            const weekData = {
+                id: editingWeekId || generateWeekId(),
                 date: document.getElementById('weekDate').value,
                 cost: parseFloat(document.getElementById('weekCost').value),
-                present: Array.from(document.querySelectorAll('.present-check:checked')).map(cb => cb.value),
-                multiPlayers: Array.from(document.querySelectorAll('.multi-check:checked')).map(cb => cb.value)
+                present: present,
+                multiPlayers: multi
             };
-
-            if (!appData.weeks) appData.weeks = [];
-            
-            if (weekId) {
-                const idx = appData.weeks.findIndex(w => w.id === weekId);
-                appData.weeks[idx] = newWeek;
+            if (editingWeekId) {
+                const index = getWeekIndex(editingWeekId);
+                appData.weeks[index] = weekData;
                 cancelEdit();
             } else {
-                appData.weeks.push(newWeek);
+                appData.weeks.push(weekData);
             }
-
             saveData();
+            document.getElementById('weekForm').reset();
+            document.getElementById('weekDate').valueAsDate = new Date();
+            renderAdminCheckboxes();
             showTab('dashboard');
-            e.target.reset();
-        };
+        });
 
-        document.getElementById('addPlayerForm').onsubmit = (e) => {
+        document.getElementById('addPlayerForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const name = document.getElementById('newPlayerName').value.trim();
+            const input = document.getElementById('newPlayerName');
+            const name = input.value.trim();
             if (name && !PLAYERS.includes(name)) {
                 PLAYERS.push(name);
                 saveData();
-                e.target.reset();
+                input.value = '';
             }
-        };
+        });
 
-        function markAsPaid(playerName) {
-            if (!appData.weeks || appData.weeks.length === 0) return;
-            if (!appData.paidUntilWeek) appData.paidUntilWeek = {};
-            const lastWeek = appData.weeks[appData.weeks.length - 1];
-            appData.paidUntilWeek[playerName] = lastWeek.id;
+        function updateDefaultMulti(player, isChecked) {
+            if (isChecked) {
+                if (!appData.defaultMultiPlayers.includes(player)) appData.defaultMultiPlayers.push(player);
+            } else {
+                appData.defaultMultiPlayers = appData.defaultMultiPlayers.filter(p => p !== player);
+            }
             saveData();
         }
 
         function editWeek(id) {
-            const week = appData.weeks.find(w => w.id === id);
+            const week = getWeekById(id);
             if (!week) return;
-
-            document.getElementById('editWeekId').value = week.id;
+            editingWeekId = id;
             document.getElementById('weekDate').value = week.date;
             document.getElementById('weekCost').value = week.cost;
-            
-            // Ustaw checkboxy obecności
             document.querySelectorAll('.present-check').forEach(cb => {
                 cb.checked = week.present.includes(cb.value);
             });
-            // Ustaw checkboxy multi
             document.querySelectorAll('.multi-check').forEach(cb => {
                 cb.checked = week.multiPlayers.includes(cb.value);
             });
-
-            document.getElementById('editModeBanner').style.display = 'block';
+            document.getElementById('editModeBanner').classList.add('active');
             document.getElementById('formTitle').style.display = 'none';
-            document.getElementById('submitBtn').textContent = '💾 Zaktualizuj tydzień';
+            document.getElementById('submitBtn').textContent = '💾 Aktualizuj tydzień';
+            document.getElementById('submitBtn').classList.add('edit-mode');
             document.getElementById('cancelEditBtn').style.display = 'block';
-            
             showTab('admin');
+            window.scrollTo(0, 0);
         }
 
         function cancelEdit() {
+            editingWeekId = null;
             document.getElementById('weekForm').reset();
-            document.getElementById('editWeekId').value = '';
             document.getElementById('weekDate').valueAsDate = new Date();
-            document.getElementById('editModeBanner').style.display = 'none';
+            document.getElementById('editModeBanner').classList.remove('active');
             document.getElementById('formTitle').style.display = 'block';
             document.getElementById('submitBtn').textContent = '💾 Zapisz tydzień';
+            document.getElementById('submitBtn').classList.remove('edit-mode');
             document.getElementById('cancelEditBtn').style.display = 'none';
             renderAdminCheckboxes();
         }
@@ -513,7 +705,7 @@
         }
 
         function resetAllData() {
-            if (confirm('⚠️ UWAGA! Czy na pewno chcesz wykasować całą historię i wszystkie rozliczenia?')) {
+            if (confirm('⚠️ UWAGA! Czy na pewno chcesz wykasować całą historię?')) {
                 appData.weeks = [];
                 appData.paidUntilWeek = {};
                 saveData();
