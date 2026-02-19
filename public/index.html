@@ -478,10 +478,6 @@
         }
         #toast.show { opacity: 1; pointer-events: auto; }
 
-        @media (max-width: 600px) {
-            .dashboard-grid       { grid-template-columns: 1fr; }
-            .blik-header-info     { flex-direction: column; padding: 12px 20px; }
-            .avatar               { width: 40px; height: 40px; font-size: 1.2em; }
         }
     </style>
 </head>
@@ -621,6 +617,7 @@
                         <div class="rank-legend-item" role="listitem"><span class="rank-legend-emoji" aria-hidden="true">👻</span> Duch &lt;25%</div>
                     </div>
                 </div>
+
             </div>
 
             <!-- Admin -->
@@ -882,10 +879,11 @@
         // ─────────────────────────────────────────────────────────
         //  Helpers
         // ─────────────────────────────────────────────────────────
-        function getRank(player) {
-            if (appData.weeks.length === 0) return { emoji: '❓', name: 'Nowy', weight: 0 };
-            const presence = appData.weeks.filter(w => w.present?.includes(player)).length;
-            const pct      = presence / appData.weeks.length;
+        function getRank(player, joinedAt = 0) {
+            const relevantWeeks = appData.weeks.slice(joinedAt);
+            if (relevantWeeks.length === 0) return { emoji: '❓', name: 'Nowy', weight: 0 };
+            const presence = relevantWeeks.filter(w => w.present?.includes(player)).length;
+            const pct      = presence / relevantWeeks.length;
             if (pct >= 0.9)  return { emoji: '🏆', name: 'LEGENDA', weight: 5 };
             if (pct >= 0.75) return { emoji: '⭐',  name: 'Mistrz',  weight: 4 };
             if (pct >= 0.5)  return { emoji: '🔥', name: 'Stały',   weight: 3 };
@@ -941,7 +939,8 @@
             }
 
             players.sort((a, b) => {
-                const rA = getRank(a), rB = getRank(b);
+                const rA = getRank(a, appData.playerJoinWeek?.[a] ?? 0);
+                const rB = getRank(b, appData.playerJoinWeek?.[b] ?? 0);
                 if (rB.weight !== rA.weight) return rB.weight - rA.weight;
                 return a.localeCompare(b, 'pl');
             });
@@ -951,9 +950,11 @@
 
             players.forEach(player => {
                 const debt        = debtCache[player];
-                const presence    = appData.weeks.filter(w => w.present?.includes(player)).length;
-                const pct         = appData.weeks.length ? (presence / appData.weeks.length * 100) : 0;
-                const rank        = getRank(player);
+                const joinedAt    = appData.playerJoinWeek?.[player] ?? 0;
+                const relevantWeeks = appData.weeks.slice(joinedAt);
+                const presence    = relevantWeeks.filter(w => w.present?.includes(player)).length;
+                const pct         = relevantWeeks.length ? (presence / relevantWeeks.length * 100) : 0;
+                const rank        = getRank(player, joinedAt);
                 const isOrganizer = player === appData.organizerName;
                 const hasMulti    = appData.weeks.length
                     ? appData.weeks[appData.weeks.length - 1].multiPlayers?.includes(player)
@@ -982,7 +983,7 @@
                         <div class="player-name">${safeName}${isOrganizer ? ' 👑' : ''}</div>
                     </div>
                     <div class="attendance-text">
-                        Obecność: ${presence}/${appData.weeks.length} (${pct.toFixed(0)}%)
+                        Obecność: ${presence}/${relevantWeeks.length} (${pct.toFixed(0)}%)
                     </div>
                     <div class="attendance-bar-container"
                          role="progressbar"
@@ -1403,6 +1404,7 @@
                 return;
             }
 
+
             // ── Anuluj edycję ─────────────────────────────────────
             if (e.target.closest('#cancelEditBtn')) {
                 editingWeekId = null;
@@ -1459,6 +1461,8 @@
                 return;
             }
             appData.players.push(name);
+            if (!appData.playerJoinWeek) appData.playerJoinWeek = {};
+            appData.playerJoinWeek[name] = appData.weeks.length;
             saveData();
             document.getElementById('newPlayerName').value = '';
             showToast(`✅ Dodano gracza: ${name}`);
