@@ -43,12 +43,6 @@
         .summary-value { font-size: 2em; font-weight: bold; margin: 5px 0; }
         .summary-label { font-size: 0.9em; opacity: 0.9; }
         
-        /* Nagłówek dashboard z sortowaniem */
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
-        .sort-buttons { display: flex; gap: 8px; }
-        .sort-btn { background: white; border: 2px solid #1e3c72; color: #1e3c72; padding: 10px 18px; border-radius: 30px; font-weight: bold; font-size: 0.9em; cursor: pointer; transition: 0.2s; min-height: 44px; }
-        .sort-btn.active { background: #1e3c72; color: white; }
-        
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-top: 10px; }
         .player-card { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.2s; position: relative; animation: slideIn 0.3s ease-out; display: flex; flex-direction: column; }
         .player-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
@@ -149,7 +143,6 @@
             .week-actions { flex-direction: column; }
             .edit-week-btn, .delete-week-btn { width: 100%; }
             .blik-header-info { font-size: 1em; padding: 8px 16px; }
-            .sort-buttons { flex-wrap: wrap; }
         }
         @media (max-width: 400px) {
             .summary-cards { grid-template-columns: 1fr; }
@@ -192,15 +185,6 @@
                     <div class="summary-card success">
                         <div class="summary-label">Rozliczonych</div>
                         <div class="summary-value" id="paidPlayers">0</div>
-                    </div>
-                </div>
-
-                <div class="dashboard-header">
-                    <span>👥 Gracze</span>
-                    <div class="sort-buttons">
-                        <button class="sort-btn active" data-sort="default">📌 Domyślne</button>
-                        <button class="sort-btn" data-sort="debt">💰 Dług ⬇️</button>
-                        <button class="sort-btn" data-sort="alpha">🔤 A-Z</button>
                     </div>
                 </div>
 
@@ -331,7 +315,6 @@
         };
 
         let editingWeekId = null;
-        let currentSort = 'default'; // domyślne sortowanie (kolejność listy)
 
         // ==================== TOAST ====================
         function showToast(message, duration = 2000) {
@@ -501,28 +484,15 @@
 
         function renderDashboard() {
             const grid = document.getElementById('playersGrid');
-            let playersToRender = [...PLAYERS];
-            
-            // Sortowanie
-            if (currentSort === 'debt') {
-                playersToRender.sort((a, b) => {
-                    const debtA = calculatePlayerDebt(a);
-                    const debtB = calculatePlayerDebt(b);
-                    return debtB - debtA; // malejąco
-                });
-            } else if (currentSort === 'alpha') {
-                playersToRender.sort((a, b) => a.localeCompare(b));
-            } else {
-                // domyślne - zachowaj oryginalną kolejność
-                playersToRender = [...PLAYERS];
-            }
+            // Sortowanie alfabetyczne graczy (ignorując organizatora? ale chcemy wszystkich)
+            const playersSorted = [...PLAYERS].sort((a, b) => a.localeCompare(b));
 
             grid.innerHTML = '';
             
             let totalToCollect = 0;
             let fullyPaidCount = 0;
 
-            playersToRender.forEach(player => {
+            playersSorted.forEach(player => {
                 const debt = calculatePlayerDebt(player);
                 const presenceCount = calculatePresence(player);
                 const rank = getRank(player);
@@ -673,13 +643,11 @@
                 return;
             }
 
-            // Sortowanie
-            if (e.target.closest('.sort-btn')) {
-                const btn = e.target.closest('.sort-btn');
-                document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentSort = btn.dataset.sort;
-                renderDashboard();
+            // Przełączanie zakładek
+            if (e.target.closest('.tab-btn')) {
+                const btn = e.target.closest('.tab-btn');
+                const tabId = btn.dataset.tab;
+                showTab(tabId);
                 return;
             }
 
