@@ -1,89 +1,672 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
-
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.9.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.9.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.9.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.9.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.9.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.9.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.9.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.9.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.9.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.9.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
-
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏓 Rozliczenia Tenis Stołowy</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        /* [Twój oryginalny kod CSS zostaje bez zmian - był świetny!] */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px; text-align: center; }
+        header h1 { font-size: 1.8em; margin-bottom: 5px; }
+        header p { opacity: 0.9; font-size: 0.9em; }
+        .sync-status { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.85em; z-index: 1000; }
+        .sync-status.connected { background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); }
+        .sync-status.disconnected { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); }
+        nav { display: flex; justify-content: center; background: #f8f9fa; padding: 10px; gap: 8px; flex-wrap: wrap; }
+        .tab-btn { padding: 10px 20px; background: white; border: 2px solid #ddd; border-radius: 10px; cursor: pointer; font-size: 0.95em; font-weight: bold; transition: all 0.3s; }
+        .tab-btn:hover { background: #667eea; color: white; border-color: #667eea; }
+        .tab-btn.active { background: #1e3c72; color: white; border-color: #1e3c72; }
+        .content { padding: 15px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .summary-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 18px; border-radius: 15px; text-align: center; }
+        .summary-card.danger { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); }
+        .summary-card.success { background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); }
+        .summary-value { font-size: 1.8em; font-weight: bold; margin: 5px 0; }
+        .summary-label { font-size: 0.85em; opacity: 0.9; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
+        .player-card { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.3s; position: relative; animation: slideIn 0.3s ease-out; }
+        .player-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .player-card.debt { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; }
+        .player-card.paid { background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); color: white; }
+        .player-card.organizer { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #333; }
+        .player-card.multi { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); color: white; }
+        .rank-badge { position: absolute; top: 12px; right: 12px; background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px); padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8em; display: flex; align-items: center; gap: 4px; }
+        .player-card.debt .rank-badge, .player-card.paid .rank-badge, .player-card.multi .rank-badge { background: rgba(255, 255, 255, 0.25); color: white; }
+        .player-card.organizer .rank-badge { background: rgba(0, 0, 0, 0.15); color: #333; }
+        .rank-emoji { font-size: 1.2em; }
+        .player-name { font-size: 1.5em; font-weight: bold; margin-bottom: 10px; padding-right: 90px; }
+        .player-debt { font-size: 2em; font-weight: bold; margin: 10px 0; }
+        .player-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(255,255,255,0.3); }
+        .stat { text-align: center; }
+        .stat-value { font-size: 1.2em; font-weight: bold; }
+        .stat-label { font-size: 0.8em; opacity: 0.8; }
+        .pay-btn { width: 100%; padding: 14px; margin-top: 12px; background: white; color: #333; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .pay-btn:hover { background: #f1f3f5; transform: scale(1.02); }
+        .pay-btn.paid-btn { background: rgba(255,255,255,0.3); color: white; cursor: default; }
+        .admin-section { background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        .admin-section h3 { color: #1e3c72; margin-bottom: 15px; font-size: 1.2em; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: bold; color: #333; font-size: 0.9em; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .form-group small { display: block; margin-top: 5px; color: #666; font-size: 0.85em; }
+        .cost-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .preset-btn { padding: 8px 14px; background: white; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s; }
+        .preset-btn:hover { background: #667eea; color: white; border-color: #667eea; }
+        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; padding: 10px; background: white; border-radius: 8px; cursor: pointer; }
+        .checkbox-item:hover { background: #e9ecef; }
+        .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .checkbox-item label { cursor: pointer; font-size: 0.9em; }
+        .checkbox-item.multi-item { background: #e7f3ff; border: 2px solid #74b9ff; }
+        .submit-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.3s; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .submit-btn.edit-mode { background: linear-gradient(135deg, #f59f00 0%, #f76707 100%); }
+        .cancel-btn { background: #adb5bd; color: white; padding: 14px; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .cancel-btn:hover { background: #868e96; }
+        .edit-mode-banner { background: linear-gradient(135deg, #f59f00 0%, #f76707 100%); color: white; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-weight: bold; display: none; }
+        .edit-mode-banner.active { display: block; }
+        .pricing-info { background: #e7f3ff; border: 2px solid #74b9ff; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+        .pricing-info h4 { color: #0984e3; margin-bottom: 10px; font-size: 1em; }
+        .pricing-info ul { list-style: none; font-size: 0.9em; color: #333; }
+        .pricing-info li { padding: 4px 0; }
+        .weeks-list { display: grid; gap: 12px; }
+        .week-item { background: white; padding: 15px; border-radius: 10px; border-left: 5px solid #51cf66; }
+        .week-info h4 { color: #1e3c72; margin-bottom: 6px; font-size: 1em; }
+        .week-info p { color: #666; font-size: 0.85em; margin: 4px 0; }
+        .week-info .multi-info { color: #0984e3; font-size: 0.8em; }
+        .week-stats { display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap; }
+        .week-stat { text-align: center; background: #f8f9fa; padding: 8px 12px; border-radius: 8px; }
+        .week-stat-value { font-size: 1.1em; font-weight: bold; color: #1e3c72; }
+        .week-stat-label { font-size: 0.75em; color: #666; }
+        .week-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .edit-week-btn { background: #74b9ff; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: bold; }
+        .edit-week-btn:hover { background: #0984e3; }
+        .delete-week-btn { background: #ff6b6b; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: bold; }
+        .delete-week-btn:hover { background: #ee5a5a; }
+        .rank-legend { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 20px; }
+        .rank-legend h4 { color: #1e3c72; margin-bottom: 10px; font-size: 0.95em; }
+        .rank-legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+        .rank-legend-item { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: white; border-radius: 6px; font-size: 0.8em; }
+        .rank-legend-emoji { font-size: 1.2em; }
+        .players-list { display: grid; gap: 10px; }
+        .player-item { background: white; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .player-item.organizer-item { background: #fff3cd; border: 2px solid #ffc107; }
+        .player-item-name { font-weight: bold; font-size: 1em; }
+        .delete-player-btn { background: #ff6b6b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em; font-weight: bold; }
+        .delete-player-btn:hover { background: #ee5a5a; }
+        .delete-player-btn:disabled { background: #ccc; cursor: not-allowed; }
+        @media (max-width: 768px) { body { padding: 5px; } header h1 { font-size: 1.4em; } .tab-btn { padding: 8px 12px; font-size: 0.85em; } .content { padding: 10px; } .dashboard-grid { grid-template-columns: 1fr; } .summary-cards { grid-template-columns: 1fr 1fr 1fr; } .summary-value { font-size: 1.4em; } .summary-label { font-size: 0.75em; } .player-name { font-size: 1.3em; padding-right: 85px; } .player-debt { font-size: 1.7em; } .rank-badge { padding: 5px 8px; font-size: 0.7em; } .week-actions { flex-direction: column; } .edit-week-btn, .delete-week-btn { width: 100%; text-align: center; } }
+        @media (max-width: 400px) { .summary-cards { grid-template-columns: 1fr; } .rank-badge { position: static; display: inline-flex; margin-bottom: 8px; } .player-name { padding-right: 0; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+</head>
+<body>
+    <div class="sync-status" id="syncStatus">⏳ Łączenie...</div>
+
+    <div class="container">
+        <header>
+            <h1>🏓 Rozliczenia Tenis Stołowy</h1>
+            <p>Zarządzaj płatnościami i śledź statystyki</p>
+        </header>
+
+        <nav>
+            <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="showTab('admin')">⚙️ Panel Admina</button>
+            <button class="tab-btn" onclick="showTab('history')">📅 Historia</button>
+            <button class="tab-btn" onclick="showTab('players')">👥 Gracze</button>
+        </nav>
+
+        <div class="content">
+            <div id="dashboard" class="tab-content active">
+                <div class="summary-cards">
+                    <div class="summary-card danger">
+                        <div class="summary-label">Do zebrania</div>
+                        <div class="summary-value" id="totalDebt">0 zł</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Tygodni</div>
+                        <div class="summary-value" id="activeWeeks">0</div>
+                    </div>
+                    <div class="summary-card success">
+                        <div class="summary-label">Rozliczonych</div>
+                        <div class="summary-value" id="paidPlayers">0</div>
+                    </div>
+                </div>
+
+                <div id="playersGrid" class="dashboard-grid"></div>
+
+                <div class="rank-legend">
+                    <h4>🏆 Rangi (% obecności):</h4>
+                    <div class="rank-legend-grid">
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">🏆</span><span>LEGENDA 90%+</span></div>
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">⭐</span><span>Mistrz 75%+</span></div>
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">🔥</span><span>Stały 50%+</span></div>
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">👀</span><span>Gość 25%+</span></div>
+                        <div class="rank-legend-item"><span class="rank-legend-emoji">👻</span><span>Duch &lt;25%</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin" class="tab-content">
+                <div class="admin-section">
+                    <div class="edit-mode-banner" id="editModeBanner">✏️ TRYB EDYCJI - edytujesz istniejący tydzień</div>
+                    <h3 id="formTitle">➕ Dodaj nowy tydzień</h3>
+                    
+                    <div class="pricing-info">
+                        <h4>💡 Przypomnienie - cennik:</h4>
+                        <ul>
+                            <li>🎯 <strong>1 stół:</strong> 30 zł / z Multi: 15 zł / 2x Multi: 0 zł</li>
+                            <li>🎯 <strong>2 stoły:</strong> 60 zł / z Multi: 45/30/15/0 zł</li>
+                            <li>💡 Inny lokal? Wpisz ile zapłaciłeś!</li>
+                        </ul>
+                    </div>
+
+                    <form id="weekForm">
+                        <input type="hidden" id="editWeekId" value="">
+                        <div class="form-group">
+                            <label>📅 Data grania</label>
+                            <input type="date" id="weekDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>💰 Ile zapłaciłeś za stoły? (całkowity koszt)</label>
+                            <input type="number" id="weekCost" min="0" step="0.01" placeholder="np. 45" required>
+                            <div class="cost-presets">
+                                <button type="button" class="preset-btn" onclick="setCost(0)">0 zł</button>
+                                <button type="button" class="preset-btn" onclick="setCost(15)">15 zł</button>
+                                <button type="button" class="preset-btn" onclick="setCost(30)">30 zł</button>
+                                <button type="button" class="preset-btn" onclick="setCost(45)">45 zł</button>
+                                <button type="button" class="preset-btn" onclick="setCost(60)">60 zł</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>✅ Kto był obecny?</label>
+                            <div class="checkbox-group" id="presentPlayers"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>🏃 Kto miał Multisport w tym tygodniu?</label>
+                            <div class="checkbox-group" id="weekMultiPlayers"></div>
+                        </div>
+                        <button type="submit" class="submit-btn" id="submitBtn">💾 Zapisz tydzień</button>
+                        <button type="button" class="cancel-btn" id="cancelEditBtn" onclick="cancelEdit()" style="display: none;">❌ Anuluj edycję</button>
+                    </form>
+                </div>
+
+                <div class="admin-section">
+                    <h3>🏃 Domyślne ustawienia Multisport</h3>
+                    <small style="color: #666; display: block; margin-bottom: 10px;">Te osoby będą domyślnie zaznaczone jako posiadacze Multi przy dodawaniu nowego tygodnia</small>
+                    <div class="checkbox-group" id="defaultMultiCheckboxes"></div>
+                </div>
+
+                <div class="admin-section">
+                    <h3>⚠️ Zarządzanie danymi</h3>
+                    <button onclick="resetAllData()" style="background: #ff6b6b; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold;">
+                        🗑️ Wyczyść wszystkie dane
+                    </button>
+                </div>
+            </div>
+
+            <div id="history" class="tab-content">
+                <div class="admin-section">
+                    <h3>📅 Historia tygodni</h3>
+                    <div id="weeksList" class="weeks-list"></div>
+                </div>
+            </div>
+
+            <div id="players" class="tab-content">
+                <div class="admin-section">
+                    <h3>➕ Dodaj nowego gracza</h3>
+                    <form id="addPlayerForm">
+                        <div class="form-group">
+                            <label>👤 Imię gracza</label>
+                            <input type="text" id="newPlayerName" placeholder="np. Tomek" required>
+                        </div>
+                        <button type="submit" class="submit-btn">✅ Dodaj gracza</button>
+                    </form>
+                </div>
+
+                <div class="admin-section">
+                    <h3 id="playersListTitle">👥 Lista graczy</h3>
+                    <div id="playersList" class="players-list"></div>
+                </div>
+            </div>
+        </div>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+        // 🔥🔥🔥 TUTAJ WKLEJ SWOJE DANE Z FIREBASE! 🔥🔥🔥
+        const firebaseConfig = {
+          apiKey: "AIzaSyA0aSm_EoDVibcu46IRL3xaFSskApWYrMo",
+          authDomain: "tenis-rozliczenia.firebaseapp.com",
+          databaseURL: "https://tenis-rozliczenia-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "tenis-rozliczenia",
+          storageBucket: "tenis-rozliczenia.firebasestorage.app",
+          messagingSenderId: "897063845076",
+          appId: "1:897063845076:web:76aa13cf2ef1759a654f41"
+        };
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const dataRef = database.ref('appData');
+
+        // ==================== DATA MODEL ====================
+        let PLAYERS = ['Przemek', 'Krzysztof', 'Arek', 'Rafał', 'Mariusz', 'Kamil'];
+        
+        let appData = {
+            players: [...PLAYERS],
+            organizerName: 'Kamil', // Twój nick!
+            weeks: [],
+            paidUntilWeek: {},
+            defaultMultiPlayers: ['Rafał'] 
+        };
+
+        let editingWeekId = null;
+
+        // ==================== FIREBASE SYNC ====================
+        database.ref('.info/connected').on('value', (snap) => {
+            const status = document.getElementById('syncStatus');
+            if (snap.val() === true) {
+                status.textContent = '✅ Online - synchronizacja aktywna';
+                status.className = 'sync-status connected';
+            } else {
+                status.textContent = '❌ Offline';
+                status.className = 'sync-status disconnected';
+            }
+        });
+
+        function loadData() {
+            dataRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    appData = data;
+                    PLAYERS = data.players || PLAYERS;
+                    if (!appData.weeks) appData.weeks = [];
+                    if (!appData.defaultMultiPlayers) appData.defaultMultiPlayers = [];
+                    if (!appData.paidUntilWeek) appData.paidUntilWeek = {};
+                    
+                    appData.weeks = appData.weeks.map(week => {
+                        if (!week.multiPlayers) week.multiPlayers = [];
+                        return week;
+                    });
+                    
+                    renderAll();
+                }
+            });
         }
-      });
+
+        function saveData() {
+            appData.players = [...PLAYERS];
+            dataRef.set(appData);
+        }
+
+        // ==================== HELPERS ====================
+        function generateWeekId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function getWeekIndex(weekId) {
+            return appData.weeks.findIndex(w => w.id === weekId);
+        }
+
+        function setCost(value) {
+            document.getElementById('weekCost').value = value;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // ==================== RANK SYSTEM ====================
+        function getRank(playerName) {
+            const totalWeeks = appData.weeks.length;
+            if (totalWeeks === 0) return { emoji: '❓', name: 'Nowy' };
+            const presence = appData.weeks.filter(w => w.present && w.present.includes(playerName)).length;
+            const percentage = presence / totalWeeks;
+            
+            if (percentage >= 0.9) return { emoji: '🏆', name: 'LEGENDA' };
+            if (percentage >= 0.75) return { emoji: '⭐', name: 'Mistrz' };
+            if (percentage >= 0.5) return { emoji: '🔥', name: 'Stały' };
+            if (percentage >= 0.25) return { emoji: '👀', name: 'Gość' };
+            return { emoji: '👻', name: 'Duch' };
+        }
+
+        // ==================== DEBT CALCULATION (NAPRAWIONE) ====================
+        function calculatePlayerDebt(playerName) {
+            if (playerName === appData.organizerName) return 0; // Organizator nie wisi samemu sobie!
+            
+            let totalDebt = 0;
+            const paidUntilWeekId = appData.paidUntilWeek ? appData.paidUntilWeek[playerName] : null;
+            const paidUntilIndex = paidUntilWeekId ? getWeekIndex(paidUntilWeekId) : -1;
+            
+            if (!appData.weeks) return 0;
+            
+            appData.weeks.forEach((week, index) => {
+                if (index <= paidUntilIndex) return;
+                if (!week.present || !week.present.includes(playerName)) return;
+                if (week.cost === 0) return;
+                
+                const weekMulti = week.multiPlayers || [];
+                if (weekMulti.includes(playerName)) return; // Ma Multi - rozliczony bezkosztowo w tym tyg.
+                
+                // UWAGA: Liczymy WSZYSTKICH graczy bez Multi (w tym organizatora, jeśli nie ma Multi)
+                const payingPlayers = week.present.filter(p => !weekMulti.includes(p)).length;
+                
+                if (payingPlayers > 0) {
+                    totalDebt += week.cost / payingPlayers;
+                }
+            });
+            
+            return totalDebt;
+        }
+
+        function calculatePresence(playerName) {
+            if (!appData.weeks) return 0;
+            return appData.weeks.filter(w => w.present && w.present.includes(playerName)).length;
+        }
+
+        function hasCurrentMulti(playerName) {
+            if (!appData.weeks || appData.weeks.length === 0) {
+                return appData.defaultMultiPlayers && appData.defaultMultiPlayers.includes(playerName);
+            }
+            const lastWeek = appData.weeks[appData.weeks.length - 1];
+            return lastWeek.multiPlayers && lastWeek.multiPlayers.includes(playerName);
+        }
+
+        function markAsPaid(playerName) {
+            if (appData.weeks.length === 0) return;
+            const lastWeekId = appData.weeks[appData.weeks.length - 1].id;
+            appData.paidUntilWeek[playerName] = lastWeekId;
+            saveData();
+        }
+
+        // ==================== RENDERING ====================
+        function renderAll() {
+            renderDashboard();
+            renderAdminCheckboxes();
+            renderHistory();
+            renderPlayers();
+            
+            // Set date to today by default
+            if (!document.getElementById('weekDate').value) {
+                document.getElementById('weekDate').valueAsDate = new Date();
+            }
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('playersGrid');
+            grid.innerHTML = '';
+            
+            let totalToCollect = 0;
+            let fullyPaidCount = 0;
+
+            PLAYERS.forEach(player => {
+                const debt = calculatePlayerDebt(player);
+                const presenceCount = calculatePresence(player);
+                const rank = getRank(player);
+                const isOrganizer = player === appData.organizerName;
+                const hasMulti = hasCurrentMulti(player);
+                
+                if (!isOrganizer) totalToCollect += debt;
+                if (!isOrganizer && debt === 0) fullyPaidCount++;
+
+                let cardClass = isOrganizer ? 'organizer' : (debt > 0 ? 'debt' : (hasMulti ? 'multi' : 'paid'));
+
+                grid.innerHTML += `
+                    <div class="player-card ${cardClass}">
+                        <div class="rank-badge"><span class="rank-emoji">${rank.emoji}</span> ${rank.name}</div>
+                        <div class="player-name">${player} ${isOrganizer ? '👑' : ''}</div>
+                        ${!isOrganizer ? `<div class="player-debt">${debt.toFixed(2)} zł</div>` : `<div class="player-debt">Kierownik 😎</div>`}
+                        
+                        <div class="player-stats">
+                            <div class="stat">
+                                <div class="stat-value">${presenceCount}</div>
+                                <div class="stat-label">Obecności</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${hasMulti ? '✅' : '❌'}</div>
+                                <div class="stat-label">Obecne Multi</div>
+                            </div>
+                        </div>
+
+                        ${!isOrganizer ? `
+                            <button class="pay-btn ${debt === 0 ? 'paid-btn' : ''}" 
+                                    onclick="markAsPaid('${player}')" 
+                                    ${debt === 0 ? 'disabled' : ''}>
+                                ${debt > 0 ? '💸 Oznacz jako opłacone' : '✅ Rozliczony'}
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            document.getElementById('totalDebt').textContent = `${totalToCollect.toFixed(2)} zł`;
+            document.getElementById('activeWeeks').textContent = appData.weeks.length;
+            document.getElementById('paidPlayers').textContent = `${fullyPaidCount} / ${PLAYERS.length - 1}`;
+        }
+
+        function renderAdminCheckboxes() {
+            const presentContainer = document.getElementById('presentPlayers');
+            const multiContainer = document.getElementById('weekMultiPlayers');
+            const defaultMultiContainer = document.getElementById('defaultMultiCheckboxes');
+            
+            presentContainer.innerHTML = '';
+            multiContainer.innerHTML = '';
+            defaultMultiContainer.innerHTML = '';
+
+            PLAYERS.forEach(player => {
+                // Present Checkbox
+                presentContainer.innerHTML += `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="present_${player}" value="${player}" class="present-check" checked>
+                        <label for="present_${player}">${player}</label>
+                    </div>
+                `;
+                
+                // Multi Checkbox (for specific week)
+                const isDefaultMulti = appData.defaultMultiPlayers.includes(player);
+                multiContainer.innerHTML += `
+                    <div class="checkbox-item ${isDefaultMulti ? 'multi-item' : ''}">
+                        <input type="checkbox" id="multi_${player}" value="${player}" class="multi-check" ${isDefaultMulti ? 'checked' : ''}>
+                        <label for="multi_${player}">${player}</label>
+                    </div>
+                `;
+
+                // Default Multi Admin
+                defaultMultiContainer.innerHTML += `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="def_multi_${player}" value="${player}" 
+                            ${isDefaultMulti ? 'checked' : ''} 
+                            onchange="updateDefaultMulti('${player}', this.checked)">
+                        <label for="def_multi_${player}">${player}</label>
+                    </div>
+                `;
+            });
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('weeksList');
+            list.innerHTML = '';
+
+            [...appData.weeks].reverse().forEach(week => {
+                const payingPlayers = week.present.filter(p => !week.multiPlayers.includes(p)).length;
+                const costPerPerson = payingPlayers > 0 ? (week.cost / payingPlayers).toFixed(2) : 0;
+
+                list.innerHTML += `
+                    <div class="week-item">
+                        <div class="week-info">
+                            <h4>📅 ${formatDate(week.date)}</h4>
+                            <p>👥 Obecni: ${week.present.join(', ')}</p>
+                            ${week.multiPlayers.length > 0 ? `<p class="multi-info">🏃 Multi: ${week.multiPlayers.join(', ')}</p>` : ''}
+                        </div>
+                        <div class="week-stats">
+                            <div class="week-stat">
+                                <div class="week-stat-value">${week.cost} zł</div>
+                                <div class="week-stat-label">Koszt całkowity</div>
+                            </div>
+                            <div class="week-stat">
+                                <div class="week-stat-value">${costPerPerson} zł</div>
+                                <div class="week-stat-label">Koszt na głowę</div>
+                            </div>
+                        </div>
+                        <div class="week-actions">
+                            <button class="edit-week-btn" onclick="editWeek('${week.id}')">✏️ Edytuj</button>
+                            <button class="delete-week-btn" onclick="deleteWeek('${week.id}')">🗑️ Usuń</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderPlayers() {
+            const list = document.getElementById('playersList');
+            list.innerHTML = '';
+
+            PLAYERS.forEach(player => {
+                const isOrganizer = player === appData.organizerName;
+                list.innerHTML += `
+                    <div class="player-item ${isOrganizer ? 'organizer-item' : ''}">
+                        <span class="player-item-name">${player} ${isOrganizer ? '👑' : ''}</span>
+                        <button class="delete-player-btn" onclick="deletePlayer('${player}')" ${isOrganizer ? 'disabled' : ''}>
+                            🗑️ Usuń
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // ==================== ACTIONS ====================
+        document.getElementById('weekForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const present = Array.from(document.querySelectorAll('.present-check:checked')).map(cb => cb.value);
+            const multi = Array.from(document.querySelectorAll('.multi-check:checked')).map(cb => cb.value);
+            
+            const weekData = {
+                id: editingWeekId || generateWeekId(),
+                date: document.getElementById('weekDate').value,
+                cost: parseFloat(document.getElementById('weekCost').value),
+                present: present,
+                multiPlayers: multi
+            };
+
+            if (editingWeekId) {
+                const index = getWeekIndex(editingWeekId);
+                appData.weeks[index] = weekData;
+                cancelEdit();
+            } else {
+                appData.weeks.push(weekData);
+            }
+
+            saveData();
+            document.getElementById('weekForm').reset();
+            document.getElementById('weekDate').valueAsDate = new Date();
+            renderAdminCheckboxes(); // Reset defaults
+            showTab('dashboard');
+        });
+
+        document.getElementById('addPlayerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('newPlayerName');
+            const name = input.value.trim();
+            if (name && !PLAYERS.includes(name)) {
+                PLAYERS.push(name);
+                saveData();
+                input.value = '';
+            }
+        });
+
+        function updateDefaultMulti(player, isChecked) {
+            if (isChecked) {
+                if (!appData.defaultMultiPlayers.includes(player)) appData.defaultMultiPlayers.push(player);
+            } else {
+                appData.defaultMultiPlayers = appData.defaultMultiPlayers.filter(p => p !== player);
+            }
+            saveData();
+        }
+
+        function editWeek(id) {
+            const week = getWeekById(id);
+            if (!week) return;
+
+            editingWeekId = id;
+            document.getElementById('weekDate').value = week.date;
+            document.getElementById('weekCost').value = week.cost;
+
+            document.querySelectorAll('.present-check').forEach(cb => {
+                cb.checked = week.present.includes(cb.value);
+            });
+            document.querySelectorAll('.multi-check').forEach(cb => {
+                cb.checked = week.multiPlayers.includes(cb.value);
+            });
+
+            document.getElementById('editModeBanner').classList.add('active');
+            document.getElementById('formTitle').style.display = 'none';
+            document.getElementById('submitBtn').textContent = '💾 Aktualizuj tydzień';
+            document.getElementById('submitBtn').classList.add('edit-mode');
+            document.getElementById('cancelEditBtn').style.display = 'block';
+            
+            showTab('admin');
+            window.scrollTo(0, 0);
+        }
+
+        function cancelEdit() {
+            editingWeekId = null;
+            document.getElementById('weekForm').reset();
+            document.getElementById('weekDate').valueAsDate = new Date();
+            
+            document.getElementById('editModeBanner').classList.remove('active');
+            document.getElementById('formTitle').style.display = 'block';
+            document.getElementById('submitBtn').textContent = '💾 Zapisz tydzień';
+            document.getElementById('submitBtn').classList.remove('edit-mode');
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            
+            renderAdminCheckboxes(); // Reset do defaults
+        }
+
+        function deleteWeek(id) {
+            if (confirm('Na pewno chcesz usunąć ten tydzień?')) {
+                appData.weeks = appData.weeks.filter(w => w.id !== id);
+                saveData();
+            }
+        }
+
+        function deletePlayer(name) {
+            if (name === appData.organizerName) return;
+            if (confirm(`Na pewno chcesz usunąć gracza ${name}? Jego historia pozostanie w statystykach, ale zniknie z głównego widoku.`)) {
+                PLAYERS = PLAYERS.filter(p => p !== name);
+                saveData();
+            }
+        }
+
+        function resetAllData() {
+            if (confirm('⚠️ UWAGA! Czy na pewno chcesz wykasować całą historię i wszystkie rozliczenia? TEGO NIE MOŻNA COFNĄĆ!')) {
+                appData.weeks = [];
+                appData.paidUntilWeek = {};
+                saveData();
+            }
+        }
+
+        // Init
+        loadData();
+
     </script>
-  </body>
+</body>
 </html>
