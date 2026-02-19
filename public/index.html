@@ -9,13 +9,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
-        /* [Twój oryginalny kod CSS zostaje bez zmian] */
+        /* [Twój oryginalny kod CSS zostaje bez zmian - był świetny!] */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
         .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
         header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px; text-align: center; }
         header h1 { font-size: 1.8em; margin-bottom: 5px; }
         header p { opacity: 0.9; font-size: 0.9em; }
+        /* BLIK header info */
+        .blik-header-info { margin-top: 10px; padding: 8px 20px; background: rgba(255,255,255,0.2); border-radius: 40px; display: inline-block; cursor: pointer; font-weight: bold; font-size: 1.1em; transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .blik-header-info:hover { background: rgba(255,255,255,0.35); }
         .sync-status { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.85em; z-index: 1000; }
         .sync-status.connected { background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); }
         .sync-status.disconnected { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); }
@@ -44,24 +47,19 @@
         .player-card.organizer .rank-badge { background: rgba(0, 0, 0, 0.15); color: #333; }
         .rank-emoji { font-size: 1.2em; }
         .player-name { font-size: 1.5em; font-weight: bold; margin-bottom: 10px; padding-right: 90px; }
-        
-        /* NOWE: Style dla długu i Blika */
-        .player-debt { font-size: 2em; font-weight: bold; margin: 10px 0; cursor: pointer; position: relative; }
-        .player-debt:active { transform: scale(0.95); }
-        .copy-hint { font-size: 0.3em; display: block; opacity: 0.7; font-weight: normal; }
-
-        .blik-info { background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; margin-top: 10px; text-align: center; cursor: pointer; border: 1px dashed rgba(255,255,255,0.5); }
-        .blik-info:hover { background: rgba(255,255,255,0.3); }
-
-        .debt-details { margin-top: 10px; font-size: 0.85em; background: rgba(0,0,0,0.1); border-radius: 8px; padding: 0; overflow: hidden; transition: all 0.3s; max-height: 0; }
-        .debt-details.active { padding: 10px; max-height: 200px; overflow-y: auto; }
-        .details-btn { background: none; border: 1px solid rgba(255,255,255,0.5); color: inherit; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75em; margin-top: 5px; }
-
+        .player-debt { font-size: 2em; font-weight: bold; margin: 10px 0; cursor: pointer; } /* klikalne */
+        .copy-hint { display: block; font-size: 0.7em; opacity: 0.7; font-weight: normal; margin-top: 2px; }
         .player-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(255,255,255,0.3); }
         .stat { text-align: center; }
         .stat-value { font-size: 1.2em; font-weight: bold; }
         .stat-label { font-size: 0.8em; opacity: 0.8; }
-        .pay-btn { width: 100%; padding: 14px; margin-top: 12px; background: white; color: #333; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        /* Przycisk szczegółów */
+        .details-btn { background: #74b9ff; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85em; margin: 8px 0 5px 0; width: 100%; font-weight: bold; transition: background 0.2s; }
+        .details-btn:hover { background: #0984e3; }
+        .debt-details-list { margin-top: 8px; background: rgba(255,255,255,0.25); backdrop-filter: blur(5px); border-radius: 8px; padding: 8px; font-size: 0.9em; max-height: 150px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.3); }
+        .debt-details-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .debt-details-item:last-child { border-bottom: none; }
+        .pay-btn { width: 100%; padding: 14px; margin-top: 8px; background: white; color: #333; border: none; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; transition: all 0.3s; }
         .pay-btn:hover { background: #f1f3f5; transform: scale(1.02); }
         .pay-btn.paid-btn { background: rgba(255,255,255,0.3); color: white; cursor: default; }
         .admin-section { background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
@@ -117,10 +115,6 @@
         .delete-player-btn { background: #ff6b6b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em; font-weight: bold; }
         .delete-player-btn:hover { background: #ee5a5a; }
         .delete-player-btn:disabled { background: #ccc; cursor: not-allowed; }
-
-        /* Styl powiadomienia o kopiowaniu */
-        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 30px; display: none; z-index: 2000; }
-
         @media (max-width: 768px) { body { padding: 5px; } header h1 { font-size: 1.4em; } .tab-btn { padding: 8px 12px; font-size: 0.85em; } .content { padding: 10px; } .dashboard-grid { grid-template-columns: 1fr; } .summary-cards { grid-template-columns: 1fr 1fr 1fr; } .summary-value { font-size: 1.4em; } .summary-label { font-size: 0.75em; } .player-name { font-size: 1.3em; padding-right: 85px; } .player-debt { font-size: 1.7em; } .rank-badge { padding: 5px 8px; font-size: 0.7em; } .week-actions { flex-direction: column; } .edit-week-btn, .delete-week-btn { width: 100%; text-align: center; } }
         @media (max-width: 400px) { .summary-cards { grid-template-columns: 1fr; } .rank-badge { position: static; display: inline-flex; margin-bottom: 8px; } .player-name { padding-right: 0; } }
         @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -128,12 +122,13 @@
 </head>
 <body>
     <div class="sync-status" id="syncStatus">⏳ Łączenie...</div>
-    <div id="toast">Skopiowano!</div>
 
     <div class="container">
         <header>
             <h1>🏓 Rozliczenia Tenis Stołowy</h1>
             <p>Zarządzaj płatnościami i śledź statystyki</p>
+            <!-- BLIK header info - klikalny numer -->
+            <div class="blik-header-info" onclick="copyBlik()">🔵 BLIK: 726620831 (kliknij by skopiować)</div>
         </header>
 
         <nav>
@@ -179,11 +174,6 @@
                     <div class="edit-mode-banner" id="editModeBanner">✏️ TRYB EDYCJI - edytujesz istniejący tydzień</div>
                     <h3 id="formTitle">➕ Dodaj nowy tydzień</h3>
                     
-                    <div class="pricing-info" style="background: #fff3cd; border-color: #ffc107;">
-                        <h4>💰 Twój numer BLIK:</h4>
-                        <input type="text" id="blikNumber" placeholder="Wpisz swój numer tel. do BLIK" onchange="updateBlik(this.value)" style="margin-top:5px;">
-                    </div>
-
                     <div class="pricing-info">
                         <h4>💡 Przypomnienie - cennik:</h4>
                         <ul>
@@ -265,6 +255,7 @@
     </div>
 
     <script>
+        // 🔥🔥🔥 TUTAJ WKLEJ SWOJE DANE Z FIREBASE! 🔥🔥🔥
         const firebaseConfig = {
           apiKey: "AIzaSyA0aSm_EoDVibcu46IRL3xaFSskApWYrMo",
           authDomain: "tenis-rozliczenia.firebaseapp.com",
@@ -275,16 +266,17 @@
           appId: "1:897063845076:web:76aa13cf2ef1759a654f41"
         };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const dataRef = database.ref('appData');
 
+        // ==================== DATA MODEL ====================
         let PLAYERS = ['Przemek', 'Krzysztof', 'Arek', 'Rafał', 'Mariusz', 'Kamil'];
         
         let appData = {
             players: [...PLAYERS],
-            organizerName: 'Kamil',
-            organizerBlik: '',
+            organizerName: 'Kamil', // Twój nick!
             weeks: [],
             paidUntilWeek: {},
             defaultMultiPlayers: ['Rafał'] 
@@ -292,6 +284,7 @@
 
         let editingWeekId = null;
 
+        // ==================== FIREBASE SYNC ====================
         database.ref('.info/connected').on('value', (snap) => {
             const status = document.getElementById('syncStatus');
             if (snap.val() === true) {
@@ -312,14 +305,12 @@
                     if (!appData.weeks) appData.weeks = [];
                     if (!appData.defaultMultiPlayers) appData.defaultMultiPlayers = [];
                     if (!appData.paidUntilWeek) appData.paidUntilWeek = {};
-                    if (!appData.organizerBlik) appData.organizerBlik = '';
                     
                     appData.weeks = appData.weeks.map(week => {
                         if (!week.multiPlayers) week.multiPlayers = [];
                         return week;
                     });
                     
-                    document.getElementById('blikNumber').value = appData.organizerBlik;
                     renderAll();
                 }
             });
@@ -330,25 +321,7 @@
             dataRef.set(appData);
         }
 
-        function updateBlik(val) {
-            appData.organizerBlik = val;
-            saveData();
-        }
-
-        // Kopiowanie do schowka
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const toast = document.getElementById('toast');
-                toast.style.display = 'block';
-                setTimeout(() => toast.style.display = 'none', 2000);
-            });
-        }
-
-        function toggleDetails(playerName) {
-            const el = document.getElementById(`details_${playerName}`);
-            el.classList.toggle('active');
-        }
-
+        // ==================== HELPERS ====================
         function generateWeekId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
@@ -374,9 +347,72 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            // event.currentTarget.classList.add('active'); - nie działa bez eventu, poprawiamy
+            const buttons = document.querySelectorAll('.tab-btn');
+            for (let btn of buttons) {
+                if (btn.textContent.includes(tabId === 'dashboard' ? 'Dashboard' : tabId === 'admin' ? 'Panel Admina' : tabId === 'history' ? 'Historia' : 'Gracze')) {
+                    btn.classList.add('active');
+                }
+            }
         }
 
+        // ==================== NOWE FUNKCJE: BLIK, KOPIOWANIE, SZCZEGÓŁY ====================
+        function copyBlik() {
+            const blikNum = '726620831';
+            navigator.clipboard.writeText(blikNum).then(() => {
+                alert('Skopiowano numer BLIK: ' + blikNum);
+            }).catch(() => {
+                prompt('Ręcznie skopiuj numer BLIK:', blikNum);
+            });
+        }
+
+        function copyDebt(amount) {
+            navigator.clipboard.writeText(amount.toString()).then(() => {
+                alert(`Skopiowano kwotę: ${amount} zł`);
+            }).catch(() => {
+                prompt('Ręcznie skopiuj kwotę:', amount);
+            });
+        }
+
+        function getDebtDetails(playerName) {
+            if (playerName === appData.organizerName) return [];
+            const paidUntilWeekId = appData.paidUntilWeek ? appData.paidUntilWeek[playerName] : null;
+            const paidUntilIndex = paidUntilWeekId ? getWeekIndex(paidUntilWeekId) : -1;
+            const details = [];
+            appData.weeks.forEach((week, index) => {
+                if (index <= paidUntilIndex) return;
+                if (!week.present || !week.present.includes(playerName)) return;
+                if (week.cost === 0) return;
+                if (week.multiPlayers && week.multiPlayers.includes(playerName)) return;
+                const payingPlayers = week.present.filter(p => !week.multiPlayers.includes(p)).length;
+                if (payingPlayers > 0) {
+                    const amount = week.cost / payingPlayers;
+                    details.push({ date: week.date, amount });
+                }
+            });
+            return details;
+        }
+
+        function toggleDebtDetails(player, event) {
+            event.stopPropagation();
+            const detailsDiv = document.getElementById(`details-${player}`);
+            if (!detailsDiv) return;
+            if (detailsDiv.style.display === 'none') {
+                const details = getDebtDetails(player);
+                if (details.length === 0) {
+                    detailsDiv.innerHTML = '<div class="debt-details-item">Brak zaległości</div>';
+                } else {
+                    detailsDiv.innerHTML = details.map(d => 
+                        `<div class="debt-details-item"><span>${formatDate(d.date)}</span><span>${d.amount.toFixed(2)} zł</span></div>`
+                    ).join('');
+                }
+                detailsDiv.style.display = 'block';
+            } else {
+                detailsDiv.style.display = 'none';
+            }
+        }
+
+        // ==================== RANK SYSTEM ====================
         function getRank(playerName) {
             const totalWeeks = appData.weeks.length;
             if (totalWeeks === 0) return { emoji: '❓', name: 'Nowy' };
@@ -390,16 +426,15 @@
             return { emoji: '👻', name: 'Duch' };
         }
 
-        // Kalkulacja długu ze szczegółami
-        function calculatePlayerDebtDetailed(playerName) {
-            if (playerName === appData.organizerName) return { total: 0, items: [] };
+        // ==================== DEBT CALCULATION (NAPRAWIONE) ====================
+        function calculatePlayerDebt(playerName) {
+            if (playerName === appData.organizerName) return 0; // Organizator nie wisi samemu sobie!
             
             let totalDebt = 0;
-            let items = [];
             const paidUntilWeekId = appData.paidUntilWeek ? appData.paidUntilWeek[playerName] : null;
             const paidUntilIndex = paidUntilWeekId ? getWeekIndex(paidUntilWeekId) : -1;
             
-            if (!appData.weeks) return { total: 0, items: [] };
+            if (!appData.weeks) return 0;
             
             appData.weeks.forEach((week, index) => {
                 if (index <= paidUntilIndex) return;
@@ -407,18 +442,17 @@
                 if (week.cost === 0) return;
                 
                 const weekMulti = week.multiPlayers || [];
-                if (weekMulti.includes(playerName)) return;
+                if (weekMulti.includes(playerName)) return; // Ma Multi - rozliczony bezkosztowo w tym tyg.
                 
+                // UWAGA: Liczymy WSZYSTKICH graczy bez Multi (w tym organizatora, jeśli nie ma Multi)
                 const payingPlayers = week.present.filter(p => !weekMulti.includes(p)).length;
                 
                 if (payingPlayers > 0) {
-                    const amount = week.cost / payingPlayers;
-                    totalDebt += amount;
-                    items.push({ date: week.date, amount: amount });
+                    totalDebt += week.cost / payingPlayers;
                 }
             });
             
-            return { total: totalDebt, items: items };
+            return totalDebt;
         }
 
         function calculatePresence(playerName) {
@@ -441,11 +475,14 @@
             saveData();
         }
 
+        // ==================== RENDERING ====================
         function renderAll() {
             renderDashboard();
             renderAdminCheckboxes();
             renderHistory();
             renderPlayers();
+            
+            // Set date to today by default
             if (!document.getElementById('weekDate').value) {
                 document.getElementById('weekDate').valueAsDate = new Date();
             }
@@ -459,8 +496,7 @@
             let fullyPaidCount = 0;
 
             PLAYERS.forEach(player => {
-                const debtInfo = calculatePlayerDebtDetailed(player);
-                const debt = debtInfo.total;
+                const debt = calculatePlayerDebt(player);
                 const presenceCount = calculatePresence(player);
                 const rank = getRank(player);
                 const isOrganizer = player === appData.organizerName;
@@ -471,31 +507,13 @@
 
                 let cardClass = isOrganizer ? 'organizer' : (debt > 0 ? 'debt' : (hasMulti ? 'multi' : 'paid'));
 
-                let detailsHtml = debtInfo.items.map(i => `<div>📅 ${formatDate(i.date)}: <b>${i.amount.toFixed(2)} zł</b></div>`).join('');
-
                 grid.innerHTML += `
                     <div class="player-card ${cardClass}">
                         <div class="rank-badge"><span class="rank-emoji">${rank.emoji}</span> ${rank.name}</div>
                         <div class="player-name">${player} ${isOrganizer ? '👑' : ''}</div>
-                        
-                        ${!isOrganizer ? `
-                            <div class="player-debt" onclick="copyToClipboard('${debt.toFixed(2)}')">
-                                ${debt.toFixed(2)} zł
-                                <span class="copy-hint">kliknij żeby skopiować kwotę</span>
-                            </div>
-                            <button class="details-btn" onclick="toggleDetails('${player}')">📋 Szczegóły zaległości</button>
-                            <div class="debt-details" id="details_${player}">
-                                ${detailsHtml || 'Brak zaległych tygodni'}
-                            </div>
-                        ` : `
-                            <div class="player-debt">Kierownik 😎</div>
-                            ${appData.organizerBlik ? `
-                                <div class="blik-info" onclick="copyToClipboard('${appData.organizerBlik}')">
-                                    📲 BLIK: <b>${appData.organizerBlik}</b><br>
-                                    <small>(kliknij żeby skopiować numer)</small>
-                                </div>
-                            ` : ''}
-                        `}
+                        ${!isOrganizer ? 
+                            `<div class="player-debt" onclick="copyDebt(${debt.toFixed(2)})">${debt.toFixed(2)} zł<small class="copy-hint">kliknij by skopiować</small></div>` : 
+                            `<div class="player-debt">Kierownik 😎</div>`}
                         
                         <div class="player-stats">
                             <div class="stat">
@@ -509,6 +527,8 @@
                         </div>
 
                         ${!isOrganizer ? `
+                            <button class="details-btn" onclick="toggleDebtDetails('${player}', event)">📋 Szczegóły zaległości</button>
+                            <div id="details-${player}" class="debt-details-list" style="display: none;"></div>
                             <button class="pay-btn ${debt === 0 ? 'paid-btn' : ''}" 
                                     onclick="markAsPaid('${player}')" 
                                     ${debt === 0 ? 'disabled' : ''}>
@@ -534,6 +554,7 @@
             defaultMultiContainer.innerHTML = '';
 
             PLAYERS.forEach(player => {
+                // Present Checkbox
                 presentContainer.innerHTML += `
                     <div class="checkbox-item">
                         <input type="checkbox" id="present_${player}" value="${player}" class="present-check" checked>
@@ -541,6 +562,7 @@
                     </div>
                 `;
                 
+                // Multi Checkbox (for specific week)
                 const isDefaultMulti = appData.defaultMultiPlayers.includes(player);
                 multiContainer.innerHTML += `
                     <div class="checkbox-item ${isDefaultMulti ? 'multi-item' : ''}">
@@ -549,6 +571,7 @@
                     </div>
                 `;
 
+                // Default Multi Admin
                 defaultMultiContainer.innerHTML += `
                     <div class="checkbox-item">
                         <input type="checkbox" id="def_multi_${player}" value="${player}" 
@@ -611,10 +634,13 @@
             });
         }
 
+        // ==================== ACTIONS ====================
         document.getElementById('weekForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            
             const present = Array.from(document.querySelectorAll('.present-check:checked')).map(cb => cb.value);
             const multi = Array.from(document.querySelectorAll('.multi-check:checked')).map(cb => cb.value);
+            
             const weekData = {
                 id: editingWeekId || generateWeekId(),
                 date: document.getElementById('weekDate').value,
@@ -622,6 +648,7 @@
                 present: present,
                 multiPlayers: multi
             };
+
             if (editingWeekId) {
                 const index = getWeekIndex(editingWeekId);
                 appData.weeks[index] = weekData;
@@ -629,10 +656,11 @@
             } else {
                 appData.weeks.push(weekData);
             }
+
             saveData();
             document.getElementById('weekForm').reset();
             document.getElementById('weekDate').valueAsDate = new Date();
-            renderAdminCheckboxes();
+            renderAdminCheckboxes(); // Reset defaults
             showTab('dashboard');
         });
 
@@ -659,20 +687,24 @@
         function editWeek(id) {
             const week = getWeekById(id);
             if (!week) return;
+
             editingWeekId = id;
             document.getElementById('weekDate').value = week.date;
             document.getElementById('weekCost').value = week.cost;
+
             document.querySelectorAll('.present-check').forEach(cb => {
                 cb.checked = week.present.includes(cb.value);
             });
             document.querySelectorAll('.multi-check').forEach(cb => {
                 cb.checked = week.multiPlayers.includes(cb.value);
             });
+
             document.getElementById('editModeBanner').classList.add('active');
             document.getElementById('formTitle').style.display = 'none';
             document.getElementById('submitBtn').textContent = '💾 Aktualizuj tydzień';
             document.getElementById('submitBtn').classList.add('edit-mode');
             document.getElementById('cancelEditBtn').style.display = 'block';
+            
             showTab('admin');
             window.scrollTo(0, 0);
         }
@@ -681,12 +713,14 @@
             editingWeekId = null;
             document.getElementById('weekForm').reset();
             document.getElementById('weekDate').valueAsDate = new Date();
+            
             document.getElementById('editModeBanner').classList.remove('active');
             document.getElementById('formTitle').style.display = 'block';
             document.getElementById('submitBtn').textContent = '💾 Zapisz tydzień';
             document.getElementById('submitBtn').classList.remove('edit-mode');
             document.getElementById('cancelEditBtn').style.display = 'none';
-            renderAdminCheckboxes();
+            
+            renderAdminCheckboxes(); // Reset do defaults
         }
 
         function deleteWeek(id) {
@@ -698,20 +732,21 @@
 
         function deletePlayer(name) {
             if (name === appData.organizerName) return;
-            if (confirm(`Na pewno chcesz usunąć gracza ${name}?`)) {
+            if (confirm(`Na pewno chcesz usunąć gracza ${name}? Jego historia pozostanie w statystykach, ale zniknie z głównego widoku.`)) {
                 PLAYERS = PLAYERS.filter(p => p !== name);
                 saveData();
             }
         }
 
         function resetAllData() {
-            if (confirm('⚠️ UWAGA! Czy na pewno chcesz wykasować całą historię?')) {
+            if (confirm('⚠️ UWAGA! Czy na pewno chcesz wykasować całą historię i wszystkie rozliczenia? TEGO NIE MOŻNA COFNĄĆ!')) {
                 appData.weeks = [];
                 appData.paidUntilWeek = {};
                 saveData();
             }
         }
 
+        // Init
         loadData();
     </script>
 </body>
