@@ -1,66 +1,76 @@
-const CACHE_NAME = 'tenis-v1';
+// Zmień tę wersję (np. na 'tenis-v2'), gdy wrzucasz nowe funkcje!
+const CACHE_NAME = 'tenis-v2';
 
-// Pliki do cache przy instalacji
 const ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json',
+  '/manifest.json'
 ];
 
-// Instalacja — zakeszuj pliki statyczne
+// Instalacja - cache'owanie podstawowych plików
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting()) // aktywuj od razu, bez czekania
+      .then(() => self.skipWaiting())
   );
 });
 
-// Aktywacja — usuń stare cache
+// Aktywacja - usuwanie wszystkich starych wersji cache
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    ).then(() => self.clients.claim())
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.filter(key => key !== CACHE_NAME)
+            .map(key => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
-// Fetch — strategia: Firebase zawsze z sieci, reszta cache-first
+// Strategia Fetch
 self.addEventListener('fetch', e => {
-  const url = e.request.url;
+  const url = new URL(e.request.url);
 
-  // Firebase, gstatic, googleapis — zawsze z sieci (real-time data)
+  // 1. ZASOBY ZEWNĘTRZNE (Firebase, Google, Chart.js) - Zawsze z sieci
   if (
-    url.includes('firebase') ||
-    url.includes('firebaseio') ||
-    url.includes('gstatic') ||
-    url.includes('googleapis') ||
-    url.includes('cloudflare')
+    url.hostname.includes('firebase') || 
+    url.hostname.includes('gstatic') || 
+    url.hostname.includes('googleapis') ||
+    url.hostname.includes('cloudflare')
   ) {
-    return; // przeglądarka obsłuży normalnie
+    return; 
   }
 
-  // Reszta — cache first, fallback do sieci
+  // 2. STRATEGIA DLA index.html (Network First)
+  // Chcemy, żeby nowa funkcjonalność była widoczna od razu, jeśli jest internet
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .then(response => {
+          // Pobrano nową wersję - zapisz ją w cache
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, copy));
+          return response;
+        })
+        .catch(() => {
+          // Brak internetu - daj wersję z cache
+          return caches.match(e.request);
+        })
+    );
+    return;
+  }
+
+  // 3. POZOSTAŁE PLIKI (Stale-while-revalidate)
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(response => {
-        // Zakeszuj nowe zasoby dynamicznie
-        if (response.ok && e.request.method === 'GET') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+    caches.match(e.request).then(cachedResponse => {
+      const fetchPromise = fetch(e.request).then(networkResponse => {
+        if (networkResponse.ok && e.request.method === 'GET') {
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, networkResponse.clone()));
         }
-        return response;
+        return networkResponse;
       });
-    }).catch(() => {
-      // Offline fallback — zwróć index.html
-      if (e.request.mode === 'navigate') {
-        return caches.match('/index.html');
-      }
+      return cachedResponse || fetchPromise;
     })
   );
 });
