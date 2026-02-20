@@ -18,6 +18,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
     <style>
         /* FIX(drobne): CSS Custom Properties — koniec z powtarzaniem kolorów dziesiątki razy */
@@ -379,6 +380,161 @@
             letter-spacing: .03em;
         }
 
+
+        /* ── Wykres słupkowy frekwencji ── */
+        .freq-chart-wrap {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .freq-chart-wrap h3 {
+            color: var(--color-primary);
+            font-size: 1em;
+            margin-bottom: 4px;
+        }
+        .freq-chart-subtitle {
+            font-size: 0.82em;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        .chart-toggle-btns {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .chart-toggle {
+            padding: 7px 18px;
+            border-radius: 30px;
+            border: 2px solid #ddd;
+            background: white;
+            font-size: 0.88em;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .chart-toggle.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+        .freq-chart-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 260px;
+        }
+        #freqChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+
+        /* ════════════════════════════════════════════
+           HALL OF FAME
+        ════════════════════════════════════════════ */
+        #halloffame { padding: 0; }
+        .hof-title {
+            color: var(--color-primary);
+            font-size: 1.2em;
+            font-weight: 900;
+            margin-bottom: 2px;
+        }
+        .hof-subtitle {
+            color: #888;
+            font-size: 0.82em;
+            margin-bottom: 16px;
+        }
+        .hof-podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 30px;
+        }
+        .hof-podium-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            max-width: 120px;
+        }
+        .hof-avatar {
+            width: 54px; height: 54px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5em; font-weight: 900;
+            color: white;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+            border: 3px solid rgba(255,255,255,0.3);
+            text-transform: uppercase;
+        }
+        .hof-podium-slot.first  .hof-avatar { border-color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+        .hof-podium-slot.second .hof-avatar { border-color: #c0c0c0; }
+        .hof-podium-slot.third  .hof-avatar { border-color: #cd7f32; }
+        .hof-podium-name { font-size: 0.85em; font-weight: 700; color: #1a1a2e; text-align: center; }
+        .hof-podium-count { font-size: 0.75em; color: #666; text-align: center; }
+        .hof-podium-bar {
+            width: 80%; border-radius: 8px 8px 0 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4em;
+        }
+        .hof-podium-slot.first  .hof-podium-bar { background: linear-gradient(180deg,#ffd700,#f0a500); height: 90px; }
+        .hof-podium-slot.second .hof-podium-bar { background: linear-gradient(180deg,#c0c0c0,#909090); height: 65px; }
+        .hof-podium-slot.third  .hof-podium-bar { background: linear-gradient(180deg,#cd7f32,#a05c20); height: 45px; }
+        .hof-chart-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .hof-donut-container {
+            position: relative;
+            width: 200px; height: 200px;
+            flex-shrink: 0;
+        }
+        #hofDonutChart { width: 100% !important; height: 100% !important; }
+        .hof-donut-center {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .hof-legend { display: flex; flex-direction: column; gap: 8px; }
+        .hof-legend-item { display: flex; align-items: center; gap: 10px; color: #333; font-size: 0.88em; }
+        .hof-legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+        .hof-legend-name { font-weight: 600; flex: 1; }
+        .hof-legend-val  { color: #888; font-size: 0.85em; }
+        .hof-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        @media (max-width: 500px) {
+            .hof-stats { grid-template-columns: repeat(2, 1fr); }
+            .hof-donut-container { width: 160px; height: 160px; }
+        }
+        .hof-stat-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 14px;
+            padding: 14px 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .hof-stat-val { font-size: 1.6em; font-weight: 900; color: #1a1a2e; line-height: 1; }
+        .hof-stat-val.gold    { color: #ffd700; }
+        .hof-stat-val.magenta { color: #e91e8c; }
+        .hof-stat-label { font-size: 0.72em; color: #888; margin-top: 5px; }
+        .hof-donut-center-num { font-size: 1.8em; font-weight: 900; color: #1a1a2e; line-height: 1; }
+        .hof-donut-center-label { font-size: 0.68em; color: #888; margin-top: 2px; }
+        .hof-empty { text-align: center; color: #aaa; padding: 60px 20px; font-size: 0.95em; }
+
         /* Panel Admina */
         .admin-section {
             background: #f8f9fa; padding: 20px;
@@ -615,6 +771,12 @@
             <button class="tab-btn"
                     role="tab"
                     aria-selected="false"
+                    aria-controls="halloffame"
+                    id="tab-halloffame"
+                    data-tab="halloffame">🏆 Hall of Fame</button>
+            <button class="tab-btn"
+                    role="tab"
+                    aria-selected="false"
                     aria-controls="admin"
                     id="tab-admin"
                     data-tab="admin">⚙️ Panel Admina</button>
@@ -772,7 +934,26 @@
                  aria-labelledby="tab-months">
                 <div class="monthly-summary">
                     <h2>📆 Zestawienie miesięczne — frekwencja</h2>
+
                     <div id="monthlySummary"></div>
+                </div>
+            </div>
+
+
+            <!-- Hall of Fame -->
+            <div id="halloffame"
+                 class="tab-content"
+                 role="tabpanel"
+                 aria-labelledby="tab-halloffame">
+                <div class="admin-section">
+                    <h2>🏆 Hall of Fame</h2>
+                    <p class="hof-subtitle">Kto gra najregularniej w tym sezonie?</p>
+                    <div class="chart-toggle-btns" role="group" aria-label="Typ wykresu">
+                        <button class="chart-toggle active" data-hof-type="radar" type="button">🕸️ Radar</button>
+                        <button class="chart-toggle" data-hof-type="bar" type="button">📊 Słupki</button>
+                        <button class="chart-toggle" data-hof-type="doughnut" type="button">🍩 Kółko</button>
+                    </div>
+                    <div id="hofContent"></div>
                 </div>
             </div>
 
@@ -1004,6 +1185,7 @@
             renderAdminCheckboxes();
             renderHistory();
             renderMonthlySummary();
+            renderHallOfFame();
             renderPlayers();
             renderTrash();
             if (!document.getElementById('weekDate').value) {
@@ -1150,6 +1332,304 @@
         // ─────────────────────────────────────────────────────────
         //  ZESTAWIENIE MIESIĘCZNE — frekwencja graczy
         // ─────────────────────────────────────────────────────────
+
+        // ─────────────────────────────────────────────────────────
+        //  WYKRES SŁUPKOWY — łączna frekwencja graczy
+        // ─────────────────────────────────────────────────────────
+        let freqChartInstance = null;
+        let freqChartType = 'bar';
+
+        function renderFreqChart() {
+            const canvas = document.getElementById('freqChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const players = getPlayers();
+            const weeks   = appData.weeks;
+
+            if (!weeks.length) {
+                canvas.closest('.freq-chart-canvas-wrap').style.display = 'none';
+                return;
+            }
+            canvas.closest('.freq-chart-canvas-wrap').style.display = 'block';
+
+            const counts = players.map(p => {
+                const joinedAt = appData.playerJoinWeek?.[p] ?? 0;
+                return weeks.slice(joinedAt).filter(w => w.present?.includes(p)).length;
+            });
+
+            const sorted   = [...counts].sort((a, b) => b - a);
+            const maxCount = sorted[0] || 1;
+
+            const PALETTE = ['#ffd700','#667eea','#51cf66','#e91e8c','#74b9ff','#f39c12'];
+            const colors  = players.map((_, i) => PALETTE[i % PALETTE.length]);
+
+            // Zniszcz stary wykres jeśli zmienił się typ
+            if (freqChartInstance && freqChartInstance.config.type !== freqChartType) {
+                freqChartInstance.destroy();
+                freqChartInstance = null;
+            }
+
+            const isRadar = freqChartType === 'radar';
+
+            const data = isRadar ? {
+                labels: players.map(p => esc(p)),
+                datasets: [{
+                    label: 'Wizyty',
+                    data: counts,
+                    backgroundColor: 'rgba(102,126,234,0.15)',
+                    borderColor:     '#667eea',
+                    borderWidth:     2.5,
+                    pointBackgroundColor: colors,
+                    pointRadius:     5,
+                }]
+            } : {
+                labels: players.map(p => esc(p)),
+                datasets: [{
+                    label: 'Wizyty',
+                    data: counts,
+                    backgroundColor: colors,
+                    borderColor:     colors.map(c => c + 'cc'),
+                    borderWidth:     2,
+                    borderRadius:    10,
+                    borderSkipped:   false,
+                }]
+            };
+
+            const tooltipLabel = ctx => {
+                const v     = isRadar ? ctx.parsed.r : ctx.parsed.y;
+                const medal = v === maxCount ? ' 🏆' : '';
+                return ` ${v} wizyt${medal}`;
+            };
+
+            const options = isRadar ? {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: tooltipLabel } }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, font: { size: 10 } },
+                        pointLabels: { font: { size: 12, weight: 'bold' } },
+                        grid: { color: 'rgba(0,0,0,0.08)' },
+                    }
+                }
+            } : {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: tooltipLabel } }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 13, weight: 'bold' } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { stepSize: 1, font: { size: 11 } },
+                        title: { display: true, text: 'Liczba wizyt', font: { size: 11 }, color: '#888' }
+                    }
+                }
+            };
+
+            if (freqChartInstance) {
+                freqChartInstance.data    = data;
+                freqChartInstance.options = options;
+                freqChartInstance.update('active');
+            } else {
+                freqChartInstance = new Chart(canvas, { type: freqChartType, data, options });
+            }
+        }
+
+
+        // ─────────────────────────────────────────────────────────
+        //  HALL OF FAME
+        // ─────────────────────────────────────────────────────────
+        let hofDonutInstance = null;
+        let hofChartType = 'radar';
+
+        const HOF_COLORS = ['#00d2ff','#51cf66','#e91e8c','#ffd700','#a855f7','#f97316'];
+
+        function renderHallOfFame() {
+            const container = document.getElementById('hofContent');
+            if (!container) return;
+
+            const players = getPlayers();
+            const weeks   = appData.weeks;
+
+            if (!weeks.length) {
+                container.innerHTML = '<div class="hof-empty">Dodaj pierwsze tygodnie żeby zobaczyć statystyki 📅</div>';
+                return;
+            }
+
+            // Dane każdego gracza
+            const stats = players.map((p, i) => {
+                const joinedAt     = appData.playerJoinWeek?.[p] ?? 0;
+                const relevant     = weeks.slice(joinedAt);
+                const count        = relevant.filter(w => w.present?.includes(p)).length;
+                const pct          = relevant.length ? Math.round(count / relevant.length * 100) : 0;
+                return { name: p, count, pct, color: HOF_COLORS[i % HOF_COLORS.length] };
+            }).sort((a, b) => b.count - a.count);
+
+            const totalPresences = stats.reduce((s, p) => s + p.count, 0);
+            const avgPerPerson   = players.length ? (totalPresences / players.length).toFixed(1) : 0;
+            const overallPct     = weeks.length && players.length
+                ? Math.round(totalPresences / (weeks.length * players.length) * 100) : 0;
+            const leader = stats[0];
+
+            // ── Podium (top 3) — pozycja po indeksie po sortowaniu, bez remisów ──
+            // stats jest już posortowany malejąco, więc stats[0]=1. stats[1]=2. stats[2]=3.
+            // Nawet przy remisie każdy dostaje inne miejsce (kolejność = kolejność dodania gracza)
+			// ── Podium z prawdziwymi remisami (ranking olimpijski) ──
+			let currentRank = 0;
+			let lastCount = null;
+
+			const ranked = stats.map((p) => {
+				if (p.count !== lastCount) {
+					currentRank += 1;
+					lastCount = p.count;
+				}
+			return { ...p, rank: currentRank };
+			});
+
+// tylko 3 miejsca medalowe (1,2,3)
+const podiumPlayers = ranked.filter(p => p.rank <= 3);
+
+const medalMap = {
+    1: { cls: 'first',  medal: '🥇' },
+    2: { cls: 'second', medal: '🥈' },
+    3: { cls: 'third',  medal: '🥉' }
+};
+
+const podiumHTML = podiumPlayers.map(p => {
+    const { cls, medal } = medalMap[p.rank];
+
+    return `
+    <div class="hof-podium-slot ${cls}">
+        <div class="hof-avatar" style="background:${p.color}">${esc(p.name.charAt(0))}</div>
+        <div class="hof-podium-name">${esc(p.name)}</div>
+        <div class="hof-podium-count">${p.count} wizyt (${p.pct}%)</div>
+        <div class="hof-podium-bar">${medal}</div>
+    </div>`;
+}).join('');
+
+            // ── Legenda ──
+            const legendHTML = stats.map(p => `
+                <div class="hof-legend-item">
+                    <div class="hof-legend-dot" style="background:${p.color}"></div>
+                    <span class="hof-legend-name">${esc(p.name)}</span>
+                    <span class="hof-legend-val">${p.count} wizyt (${p.pct}%)</span>
+                </div>`).join('');
+
+            // ── Statsy ──
+            const statsHTML = `
+                <div class="hof-stat-card">
+                    <div class="hof-stat-val">${totalPresences}</div>
+                    <div class="hof-stat-label">Łącznie obecności</div>
+                </div>
+                <div class="hof-stat-card">
+                    <div class="hof-stat-val magenta">${avgPerPerson}</div>
+                    <div class="hof-stat-label">Średnio na osobę</div>
+                </div>
+                <div class="hof-stat-card">
+                    <div class="hof-stat-val gold">${esc(leader.name)}</div>
+                    <div class="hof-stat-label">🥇 Lider</div>
+                </div>
+                <div class="hof-stat-card">
+                    <div class="hof-stat-val">${overallPct}%</div>
+                    <div class="hof-stat-label">Ogólna frekwencja</div>
+                </div>`;
+
+            // Zawsze stały wrapper 280px — kółko nie nachodzi na statsy pod spodem
+            const isDoughnut = hofChartType === 'doughnut';
+            const chartWrapHTML = isDoughnut ? `
+                <div class="hof-chart-wrap" style="margin-bottom:20px;min-height:220px;">
+                    <div style="position:relative;width:200px;height:200px;flex-shrink:0;">
+                        <canvas id="hofMainChart" role="img" aria-label="Wykres kołowy frekwencji" width="200" height="200"></canvas>
+                        <div class="hof-donut-center">
+                            <div class="hof-donut-center-num">${weeks.length}</div>
+                            <div class="hof-donut-center-label">tygodni</div>
+                        </div>
+                    </div>
+                    <div class="hof-legend">${legendHTML}</div>
+                </div>` : `
+                <div style="position:relative;width:100%;height:280px;margin-bottom:20px;">
+                    <canvas id="hofMainChart" role="img" aria-label="Wykres frekwencji"></canvas>
+                </div>
+                <div class="hof-legend" style="flex-direction:row;flex-wrap:wrap;gap:12px;margin-bottom:16px;">${legendHTML}</div>`;
+
+            container.innerHTML = `
+                <div class="hof-podium">${podiumHTML}</div>
+                ${chartWrapHTML}
+                <div class="hof-stats">${statsHTML}</div>`;
+
+            // Render chart po tym jak canvas jest w DOM
+            requestAnimationFrame(() => {
+                const canvas = document.getElementById('hofMainChart');
+                if (!canvas || typeof Chart === 'undefined') return;
+                if (hofDonutInstance) { hofDonutInstance.destroy(); hofDonutInstance = null; }
+
+                const counts = stats.map(p => p.count);
+                const labels = stats.map(p => p.name);
+                const colors = stats.map(p => p.color);
+
+                let chartCfg;
+                if (hofChartType === 'doughnut') {
+                    chartCfg = {
+                        type: 'doughnut',
+                        data: {
+                            labels,
+                            datasets: [{ data: counts.map(c => c || 0.1), backgroundColor: colors, borderColor: 'transparent', borderWidth: 0, hoverOffset: 10 }]
+                        },
+                        options: {
+                            responsive: false,
+                            animation: false,
+                            cutout: '65%',
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { callbacks: { label: ctx => ` ${labels[ctx.dataIndex]}: ${counts[ctx.dataIndex]} wizyt (${stats[ctx.dataIndex].pct}%)` } }
+                            }
+                        }
+                    };
+                } else if (hofChartType === 'radar') {
+                    chartCfg = {
+                        type: 'radar',
+                        data: {
+                            labels,
+                            datasets: [{ label: 'Wizyty', data: counts, backgroundColor: 'rgba(102,126,234,0.15)', borderColor: '#667eea', borderWidth: 2.5, pointBackgroundColor: colors, pointRadius: 5 }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.r} wizyt` } } },
+                            scales: { r: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, pointLabels: { font: { size: 12, weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.08)' } } }
+                        }
+                    };
+                } else {
+                    chartCfg = {
+                        type: 'bar',
+                        data: {
+                            labels,
+                            datasets: [{ label: 'Wizyty', data: counts, backgroundColor: colors, borderColor: colors.map(c => c + 'cc'), borderWidth: 2, borderRadius: 10, borderSkipped: false }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} wizyt${ctx.parsed.y === Math.max(...counts) ? ' 🏆' : ''}` } } },
+                            scales: {
+                                x: { grid: { display: false }, ticks: { font: { size: 13, weight: 'bold' } } },
+                                y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Liczba wizyt', color: '#888', font: { size: 11 } } }
+                            }
+                        }
+                    };
+                }
+                hofDonutInstance = new Chart(canvas, chartCfg);
+            });
+        }
+
         function renderMonthlySummary() {
             const container = document.getElementById('monthlySummary');
             if (!container) return;
@@ -1578,6 +2058,26 @@
                 return;
             }
 
+
+            // ── Toggle typ wykresu (Miesiące) ────────────────────
+            if (e.target.closest('.chart-toggle[data-chart-type]')) {
+                const btn = e.target.closest('.chart-toggle');
+                freqChartType = btn.dataset.chartType;
+                document.querySelectorAll('.chart-toggle[data-chart-type]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderFreqChart();
+                return;
+            }
+
+            // ── Toggle typ wykresu (Hall of Fame) ────────────────
+            if (e.target.closest('.chart-toggle[data-hof-type]')) {
+                const btn = e.target.closest('.chart-toggle');
+                hofChartType = btn.dataset.hofType;
+                document.querySelectorAll('.chart-toggle[data-hof-type]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderHallOfFame();
+                return;
+            }
 
             // ── Anuluj edycję ─────────────────────────────────────
             if (e.target.closest('#cancelEditBtn')) {
