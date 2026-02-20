@@ -11,6 +11,8 @@
     <meta property="og:title" content="🏓 Rozliczenia Tenis Stołowy">
     <meta property="og:description" content="Zarządzaj płatnościami i śledź statystyki">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏓</text></svg>">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192.png">
 
     <title>🏓 Rozliczenia Tenis Stołowy</title>
 
@@ -59,6 +61,108 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
+
+
+        /* ── Dark mode ── */
+        :root {
+            --bg-body:        #f0f0f0;
+            --bg-container:   #ffffff;
+            --bg-section:     #f8f9fa;
+            --bg-card-list:   #ffffff;
+            --bg-input:       #ffffff;
+            --text-main:      #1a1a2e;
+            --text-muted:     #555;
+            --border-color:   #ddd;
+            --nav-bg:         #f8f9fa;
+            --week-item-bg:   #ffffff;
+            --checkbox-bg:    #f8f9fa;
+            --checkbox-hover: #e9ecef;
+        }
+
+        [data-theme="dark"] {
+            --bg-body:        #0f0f1a;
+            --bg-container:   #1a1a2e;
+            --bg-section:     #232338;
+            --bg-card-list:   #2a2a42;
+            --bg-input:       #2a2a42;
+            --text-main:      #e8e8f0;
+            --text-muted:     #aaaacc;
+            --border-color:   #3a3a5c;
+            --nav-bg:         #141428;
+            --week-item-bg:   #2a2a42;
+            --checkbox-bg:    #232338;
+            --checkbox-hover: #2e2e50;
+        }
+
+        body {
+            background: var(--bg-body);
+        }
+
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1028 100%);
+        }
+
+        .container            { background: var(--bg-container); color: var(--text-main); }
+        nav                   { background: var(--nav-bg); }
+        .tab-btn              { background: var(--bg-card-list); border-color: var(--border-color); color: var(--text-main); }
+        .admin-section,
+        .monthly-summary,
+        .rank-legend,
+        .chart-section        { background: var(--bg-section); }
+        .form-group input     { background: var(--bg-input); border-color: var(--border-color); color: var(--text-main); }
+        .form-group label,
+        .admin-section h2,
+        .rank-legend h3,
+        .monthly-summary h2,
+        .dashboard-header h2  { color: var(--text-main); }
+        .checkbox-group       { background: var(--bg-card-list); border-color: var(--border-color); }
+        .checkbox-item        { background: var(--checkbox-bg); color: var(--text-main); }
+        .checkbox-item:hover  { background: var(--checkbox-hover); }
+        .checkbox-item label  { color: var(--text-main); }
+        .week-item            { background: var(--week-item-bg); }
+        .week-item h3,
+        .week-item p          { color: var(--text-main); }
+        .week-actions button  { background: var(--bg-section); border-color: var(--border-color); color: var(--text-main); }
+        .rank-legend-item     { background: var(--bg-card-list); color: var(--text-main); }
+        .player-list-item     { background: var(--bg-card-list); color: var(--text-main); }
+        .trash-section        { background: var(--bg-section); }
+        .monthly-table th     { background: var(--color-primary); }
+        .monthly-table td     { border-color: var(--border-color); color: var(--text-main); }
+        .monthly-table tr:nth-child(even) td { background: var(--bg-section); }
+        .monthly-table tr.month-header td    { background: var(--bg-section) !important; }
+        .monthly-bar-bg       { background: #3a3a5c; }
+        .modal-content        { background: var(--bg-container); color: var(--text-main); }
+        .modal-content input  { background: var(--bg-input); border-color: var(--border-color); color: var(--text-main); }
+        .modal-btn.cancel     { background: var(--bg-section); color: var(--text-main); }
+        .preset-btn           { background: var(--bg-card-list); border-color: var(--border-color); color: var(--text-main); }
+        .filter-toggle        { background: var(--bg-section); border-color: var(--border-color); color: var(--text-main); }
+
+        /* Dark mode toggle button */
+        .dark-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 1.1em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+            font-family: inherit;
+        }
+        .dark-toggle:hover { background: rgba(255,255,255,0.25); }
+        .dark-toggle-label {
+            font-size: 0.75em;
+            font-weight: bold;
+            letter-spacing: .03em;
+        }
+
+        header { position: relative; }
 
         /* Header */
         header {
@@ -568,6 +672,11 @@
 
     <div class="container">
         <header>
+            <button class="dark-toggle" id="darkToggle"
+                    type="button" aria-label="Przełącz tryb ciemny/jasny">
+                <span id="darkToggleIcon">🌙</span>
+                <span class="dark-toggle-label" id="darkToggleLabel">Ciemny</span>
+            </button>
             <div class="header-main">
                 <h1>🏓 Rozliczenia Tenis Stołowy</h1>
                 <p>Zarządzaj płatnościami i śledź statystyki</p>
@@ -1645,7 +1754,42 @@
         // ─────────────────────────────────────────────────────────
         //  Init
         // ─────────────────────────────────────────────────────────
+
+        // ─────────────────────────────────────────────────────────
+        //  DARK MODE
+        // ─────────────────────────────────────────────────────────
+        (function initDarkMode() {
+            const saved = localStorage.getItem('theme') || 'light';
+            applyTheme(saved);
+        })();
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const icon  = document.getElementById('darkToggleIcon');
+            const label = document.getElementById('darkToggleLabel');
+            if (icon)  icon.textContent  = theme === 'dark' ? '☀️' : '🌙';
+            if (label) label.textContent = theme === 'dark' ? 'Jasny' : 'Ciemny';
+            // Aktualizuj theme-color w meta (pasek przeglądarki na mobile)
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.content = theme === 'dark' ? '#0f0f1a' : '#1e3c72';
+            localStorage.setItem('theme', theme);
+        }
+
+        document.getElementById('darkToggle').addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
         loadData();
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('✅ SW zarejestrowany:', reg.scope))
+                    .catch(err => console.error('❌ SW błąd:', err));
+            });
+        }
     </script>
 </body>
 </html>
