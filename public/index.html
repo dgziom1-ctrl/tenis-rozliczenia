@@ -86,22 +86,23 @@
         /* FIX(semantyka): BLIK to button, nie div — dostępny klawiaturą */
         .blik-header-info {
             margin-top: 10px;
-            padding: 12px 24px;
+            padding: 10px 18px;
             background: var(--color-warning);
             color: var(--color-primary);
             border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1em;
             display: inline-flex;
             flex-direction: row;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             border: 2px solid white;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             transition: transform 0.2s;
             font-family: inherit;
             white-space: nowrap;
+            max-width: calc(100vw - 40px);
         }
         .blik-header-info:hover { transform: scale(1.02); background: var(--color-warning-dark); }
         .blik-header-info:active { transform: scale(0.98); }
@@ -112,6 +113,10 @@
             font-size: 0.75rem;
             color: white;
             white-space: nowrap;
+        }
+        @media (max-width: 400px) {
+            .blik-copy-hint { display: none; }
+            .blik-header-info { font-size: 0.95em; padding: 10px 16px; }
         }
 
         .sync-status-header {
@@ -267,7 +272,7 @@
             border-radius: 30px;
             margin: 10px 0; overflow: hidden;
         }
-        .attendance-bar-fill { height: 100%; background: #e67e22; border-radius: 30px; }
+        .attendance-bar-fill { height: 100%; background: #e91e8c; border-radius: 30px; }
 
         .player-debt {
             font-size: 2.2em; font-weight: bold;
@@ -315,6 +320,53 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .rank-legend-emoji { font-size: 1.3em; }
+
+
+        /* ── Zestawienie miesięczne ── */
+        .monthly-summary {
+            background: #f8f9fa;
+            border-radius: var(--radius-card);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .monthly-summary h2 { color: var(--color-primary); margin-bottom: 16px; font-size: 1.2em; }
+        .monthly-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        .monthly-table th {
+            background: var(--color-primary);
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 700;
+        }
+        .monthly-table th:not(:first-child) { text-align: center; }
+        .monthly-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+        .monthly-table td:not(:first-child) { text-align: center; }
+        .monthly-table tr:nth-child(even) td { background: #f1f3f5; }
+        .monthly-table tr:hover td { background: #e8eaf6; }
+        .monthly-bar-wrap {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .monthly-bar-bg {
+            flex: 1; height: 8px; background: #dee2e6;
+            border-radius: 10px; overflow: hidden; min-width: 40px;
+        }
+        .monthly-bar-fill {
+            height: 100%; background: #e91e8c;
+            border-radius: 10px; transition: width 0.3s;
+        }
+        .monthly-pct { font-size: 0.8em; color: #666; min-width: 34px; }
+        .monthly-present { font-weight: 700; color: var(--color-primary); }
+        .month-header td {
+            background: #e8eaf6 !important;
+            font-weight: 700;
+            color: var(--color-primary);
+            font-size: 0.95em;
+            letter-spacing: .03em;
+        }
 
         /* Panel Admina */
         .admin-section {
@@ -558,6 +610,12 @@
             <button class="tab-btn"
                     role="tab"
                     aria-selected="false"
+                    aria-controls="months"
+                    id="tab-months"
+                    data-tab="months">📆 Miesiące</button>
+            <button class="tab-btn"
+                    role="tab"
+                    aria-selected="false"
                     aria-controls="history"
                     id="tab-history"
                     data-tab="history">📅 Historia</button>
@@ -697,6 +755,16 @@
             </div>
 
             <!-- Historia -->
+            <div id="months"
+                 class="tab-content"
+                 role="tabpanel"
+                 aria-labelledby="tab-months">
+                <div class="monthly-summary">
+                    <h2>📆 Zestawienie miesięczne — frekwencja</h2>
+                    <div id="monthlySummary"></div>
+                </div>
+            </div>
+
             <div id="history"
                  class="tab-content"
                  role="tabpanel"
@@ -924,6 +992,7 @@
             renderDashboard();
             renderAdminCheckboxes();
             renderHistory();
+            renderMonthlySummary();
             renderPlayers();
             renderTrash();
             if (!document.getElementById('weekDate').value) {
@@ -1064,6 +1133,98 @@
                     </div>`;
                 }).join('');
             });
+        }
+
+
+        // ─────────────────────────────────────────────────────────
+        //  ZESTAWIENIE MIESIĘCZNE — frekwencja graczy
+        // ─────────────────────────────────────────────────────────
+        function renderMonthlySummary() {
+            const container = document.getElementById('monthlySummary');
+            if (!container) return;
+
+            if (!appData.weeks.length) {
+                container.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px;">Brak danych — dodaj pierwsze tygodnie 📅</p>';
+                return;
+            }
+
+            const players = getPlayers();
+
+            // Grupuj tygodnie po miesiącach (klucz: "2025-03")
+            const byMonth = {};
+            appData.weeks.forEach(week => {
+                const key = week.date.slice(0, 7); // "YYYY-MM"
+                if (!byMonth[key]) byMonth[key] = [];
+                byMonth[key].push(week);
+            });
+
+            const months = Object.keys(byMonth).sort();
+
+            // Nagłówki kolumn — gracze
+            const headers = players.map(p => `<th title="${esc(p)}">${esc(p.slice(0, 6))}${p.length > 6 ? '…' : ''}</th>`).join('');
+
+            let rows = '';
+            months.forEach(monthKey => {
+                const weeks = byMonth[monthKey];
+                const [year, month] = monthKey.split('-');
+                const monthName = new Date(+year, +month - 1, 1)
+                    .toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' });
+
+                // Nagłówek miesiąca
+                rows += `<tr class="month-header"><td colspan="${players.length + 1}">📅 ${esc(monthName)} — ${weeks.length} ${weeks.length === 1 ? 'tydzień' : weeks.length < 5 ? 'tygodnie' : 'tygodni'}</td></tr>`;
+
+                // Wiersz dla każdego gracza
+                players.forEach(player => {
+                    const joinedAt  = appData.playerJoinWeek?.[player] ?? 0;
+                    const totalSoFar = appData.weeks.slice(0, appData.weeks.indexOf(weeks[weeks.length - 1]) + 1).length;
+
+                    // Ile tygodni w tym miesiącu gracz już "istniał"
+                    const activeWeeks = weeks.filter(w => {
+                        const wIdx = appData.weeks.indexOf(w);
+                        return wIdx >= joinedAt;
+                    });
+
+                    const present = activeWeeks.filter(w => w.present?.includes(player)).length;
+                    const total   = activeWeeks.length;
+
+                    if (total === 0) {
+                        // Gracz jeszcze nie istniał w tym miesiącu
+                        rows += `<tr>
+                            <td>${esc(player)}</td>
+                            <td colspan="${players.length}" style="color:#ccc;font-size:0.8em;">dołączył później</td>
+                        </tr>`;
+                        return;
+                    }
+
+                    const pct   = Math.round(present / total * 100);
+                    const emoji = pct === 100 ? '🔥' : pct >= 75 ? '😊' : pct >= 50 ? '😐' : '😴';
+
+                    rows += `<tr>
+                        <td>${esc(player)}</td>
+                        <td>
+                            <div class="monthly-bar-wrap">
+                                <div class="monthly-bar-bg">
+                                    <div class="monthly-bar-fill" style="width:${pct}%"></div>
+                                </div>
+                                <span class="monthly-pct">${pct}%</span>
+                                <span>${emoji}</span>
+                            </div>
+                            <small style="color:#999">${present}/${total}</small>
+                        </td>
+                    </tr>`;
+                });
+            });
+
+            container.innerHTML = `
+                <table class="monthly-table" aria-label="Zestawienie miesięczne frekwencji">
+                    <thead>
+                        <tr>
+                            <th>Gracz</th>
+                            <th>Frekwencja</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
         }
 
         function renderHistory() {
