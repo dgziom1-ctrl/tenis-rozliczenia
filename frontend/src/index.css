@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* BACKGROUND AND BASE */
+body {
+  background-color: #02040a;
+  color: #e2e8f0;
+  font-family: 'Roboto Mono', monospace;
+  overflow-x: hidden;
+}
+
+/* Subtle retro grid in the background */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(0, 255, 100, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 100, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ASCII PONG ANIMATION (Pure CSS) */
+.ascii-header-container {
+  background: #05101a;
+  border: 2px solid #00f3ff;
+  padding: 20px;
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+}
+
+.ascii-pong-field {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  color: #00f3ff;
+  margin-bottom: 10px;
+  text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+}
+
+.paddle {
+  color: #ff00ff;
+}
+
+.ball-court {
+  display: inline-block;
+  width: 250px;
+  position: relative;
+  height: 1.5rem;
+  border-bottom: 1px dashed #004e54;
+}
+
+.ascii-ball {
+  position: absolute;
+  top: 0;
+  animation: ascii-bounce 1.2s infinite linear alternate;
+}
+
+@keyframes ascii-bounce {
+  0% { left: 0; color: #00f3ff; }
+  50% { color: #ff00ff; } /* Color change halfway through */
+  100% { left: calc(100% - 1ch); color: #00f3ff; }
+}
+
+/* CUSTOM UTILITIES (Tuning) */
+@layer utilities {
+  /* Sharper, less blurred boxes */
+  .cyber-box {
+    @apply bg-gray-900 border-2 border-cyan-800 shadow-lg;
+  }
+
+  .cyber-input {
+    @apply bg-black border-2 border-cyan-800 text-cyan-300 focus:border-cyan-400 outline-none transition-all duration-200 font-mono;
+  }
+
+  .cyber-button-blue {
+    @apply bg-cyan-950 border-2 border-cyan-500 text-cyan-300 hover:bg-cyan-500 hover:text-black hover:shadow-[0_0_15px_#00f3ff] transition-all duration-200 font-bold tracking-wider;
+  }
+
+  .text-neon-blue { text-shadow: 0 0 8px rgba(0, 243, 255, 0.6); }
+  .text-neon-pink { text-shadow: 0 0 8px rgba(255, 0, 255, 0.6); }
+}
+
+@layer components {
+  /* Animated bar under the header (Ping-Pong Travel) */
+  .ping-pong-loader {
+    @apply h-1 w-full relative overflow-hidden mt-4;
+    background: repeating-linear-gradient(90deg, #083344 0px, #083344 10px, #22d3ee 10px, #22d3ee 11px);
+  }
+
+  .ping-pong-loader::after {
+    content: "●";
+    @apply absolute text-[8px] -top-2 text-magenta-500;
+    animation: ball-slide 3s infinite linear;
+  }
+
+  @keyframes ball-slide {
+    0% { left: -5%; }
+    100% { left: 105%; }
+  }
+
+  /* LARGE PADDLE FOR THE HEAD */
+  .header-paddle {
+    @apply inline-block w-[22px] h-[26px] bg-[#ff00ff] relative mr-4 border-2 border-white/70 z-10 translate-y-[-5px];
+    border-radius: 50% 50% 45% 45%;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5), 0 0 15px #ff00ff;
+  }
+
+  .header-paddle::after {
+    content: "";
+    @apply absolute top-[23px] left-[8px] w-[6px] h-[15px] rounded-b-[4px] z-[-1];
+    @apply bg-[#fff5ff];
+    box-shadow: 
+      inset 0 0 3px #ff00ff, /* Internal glow simulating an edge */
+      0 0 12px #ff00ff;      /* External, soft glow */
+  }
+
+  /* Mini paddle featuring the player's name */
+  .mini-paddle {
+    @apply inline-block w-[14px] h-[15px] bg-[#ff00ff] relative mr-[8px] z-10;
+    border-radius: 50% 50% 45% 45%; 
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.3);
+    animation: paddle-shake 3s infinite ease-in-out;
+  }
+
+.mini-paddle::after {
+    /* HANDLE (Board) */
+    content: "";
+    @apply absolute top-[14px] left-[5px] w-[4px] h-[9px] bg-slate-300 rounded-b-[2px] z-[-1];
+    border-bottom: 2px solid #64748b; 
+  }
+
+  @keyframes paddle-shake {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+  }
+
+  /* Neon text for amounts */
+  .neon-amount {
+    @apply font-mono font-black text-cyan-400;
+    text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+  }
+}
