@@ -1,5 +1,5 @@
 // Zmień tę wersję (np. na 'tenis-v2'), gdy wrzucasz nowe funkcje!
-const CACHE_NAME = 'tenis-v3';
+const CACHE_NAME = 'tenis-v4';
 
 const ASSETS = [
   '/',
