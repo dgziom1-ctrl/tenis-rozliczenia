@@ -1,23 +1,16 @@
 import { Volume2, VolumeX, Smartphone, Copy, Check, Zap } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
-// ── Easter egg: kliknij PING-PONG 5 razy żeby odblokować tryb chaosu ──
 const CLICKS_NEEDED = 5;
-const MESSAGES = [
-  '🏓 1/5',
-  '🏓🏓 2/5',
-  '🏓🏓🏓 3/5... coś czuję',
-  '🏓🏓🏓🏓 4/5... prawie...',
-  '🎉 CHAOS MODE ACTIVATED',
-];
 
 export default function Header({ isMuted, setIsMuted }) {
-  const [copied,      setCopied]      = useState(false);
-  const [clickCount,  setClickCount]  = useState(0);
-  const [easterMsg,   setEasterMsg]   = useState('');
-  const [chaosMode,   setChaosMode]   = useState(false);
-  const [balls,       setBalls]       = useState([]);
-  const resetTimer = useRef(null);
+  const [copied,     setCopied]     = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+  const [chaosMode,  setChaosMode]  = useState(false);
+  const [hint,       setHint]       = useState('');
+  const [confetti,   setConfetti]   = useState([]);
+  const resetTimer  = useRef(null);
+  const chaosTimer  = useRef(null);
 
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
 
@@ -27,7 +20,6 @@ export default function Header({ isMuted, setIsMuted }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // ── Easter egg logic ────────────────────────────────────────
   const handlePingPongClick = () => {
     clearTimeout(resetTimer.current);
 
@@ -35,67 +27,91 @@ export default function Header({ isMuted, setIsMuted }) {
       const next = prev + 1;
 
       if (next >= CLICKS_NEEDED) {
-        // CHAOS MODE
-        setChaosMode(true);
-        setEasterMsg(MESSAGES[CLICKS_NEEDED - 1]);
-        spawnBalls();
-        // Wyłącz po 5 sekundach
-        setTimeout(() => {
-          setChaosMode(false);
-          setBalls([]);
-          setEasterMsg('');
-          setClickCount(0);
-        }, 5000);
+        activateChaos();
         return 0;
       }
 
-      setEasterMsg(MESSAGES[next - 1]);
+      const hints = ['', '🏓', '🏓🏓', '🏓🏓🏓 coś tu jest...', '🏓🏓🏓🏓 jeszcze raz!'];
+      setHint(hints[next]);
 
-      // Reset po 2s braku kliknięć
       resetTimer.current = setTimeout(() => {
         setClickCount(0);
-        setEasterMsg('');
+        setHint('');
       }, 2000);
 
       return next;
     });
   };
 
-  const spawnBalls = () => {
-    const newBalls = Array.from({ length: 12 }, (_, i) => ({
+  const activateChaos = () => {
+    setHint('');
+    setChaosMode(true);
+
+    // Generuj confetti
+    const items = Array.from({ length: 30 }, (_, i) => ({
       id:    i,
-      x:     Math.random() * 80 + 10,
-      delay: Math.random() * 0.5,
-      dur:   0.8 + Math.random() * 0.6,
-      emoji: ['🏓', '⚡', '🎱', '💥', '🌀'][Math.floor(Math.random() * 5)],
+      emoji: ['🏓', '🏓', '⚡', '🎱', '💥', '🌀', '🎉', '✨'][Math.floor(Math.random() * 8)],
+      x:     Math.random() * 100,
+      delay: Math.random() * 0.8,
+      dur:   1 + Math.random() * 1.5,
+      size:  16 + Math.random() * 20,
+      rotate: Math.random() * 360,
     }));
-    setBalls(newBalls);
+    setConfetti(items);
+
+    clearTimeout(chaosTimer.current);
+    chaosTimer.current = setTimeout(() => {
+      setChaosMode(false);
+      setConfetti([]);
+    }, 4000);
   };
 
-  useEffect(() => () => clearTimeout(resetTimer.current), []);
+  useEffect(() => () => {
+    clearTimeout(resetTimer.current);
+    clearTimeout(chaosTimer.current);
+  }, []);
 
   return (
     <>
-      <header className={`relative overflow-hidden rounded-t-2xl bg-gradient-to-b from-black via-gray-950 to-gray-900 transition-all duration-300 ${chaosMode ? 'animate-pulse' : ''}`}>
+      <header className="relative overflow-hidden rounded-t-2xl bg-gradient-to-b from-black via-gray-950 to-gray-900">
 
-        {/* CHAOS MODE — latające piłki */}
-        {chaosMode && balls.map(b => (
+        {/* ── CONFETTI ─────────────────────────────── */}
+        {confetti.map(c => (
           <div
-            key={b.id}
-            className="absolute text-2xl pointer-events-none z-20 animate-bounce"
+            key={c.id}
+            className="absolute pointer-events-none z-30"
             style={{
-              left:             `${b.x}%`,
-              bottom:           '0',
-              animationDuration: `${b.dur}s`,
-              animationDelay:   `${b.delay}s`,
-              filter:           'drop-shadow(0 0 8px #00d4ff)',
+              left:      `${c.x}%`,
+              top:       '-10px',
+              fontSize:  `${c.size}px`,
+              animation: `fall ${c.dur}s ${c.delay}s ease-in forwards`,
+              transform: `rotate(${c.rotate}deg)`,
             }}
           >
-            {b.emoji}
+            {c.emoji}
           </div>
         ))}
 
-        {/* GÓRNY PASEK */}
+        {/* Animacja confetti keyframes inline */}
+        <style>{`
+          @keyframes fall {
+            0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translateY(220px) rotate(720deg) scale(0.5); opacity: 0; }
+          }
+          @keyframes neonPulse {
+            0%, 100% { text-shadow: 0 0 10px #ff0080, 0 0 20px #ff0080, 0 0 40px #ff0080; }
+            50%       { text-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff, 0 0 80px #00d4ff; }
+          }
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-6px) rotate(-2deg); }
+            40%       { transform: translateX(6px) rotate(2deg); }
+            60%       { transform: translateX(-4px) rotate(-1deg); }
+            80%       { transform: translateX(4px) rotate(1deg); }
+          }
+        `}</style>
+
+        {/* ── GÓRNY PASEK ─────────────────────────── */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-cyan-900/50 bg-black/40 backdrop-blur-sm">
           <button
             onClick={handleCopy}
@@ -123,13 +139,12 @@ export default function Header({ isMuted, setIsMuted }) {
                 ? 'border-red-500/60 bg-red-950/30 text-red-400 hover:bg-red-900/40'
                 : 'border-cyan-600/60 bg-black/60 text-cyan-400 hover:bg-cyan-950/40 hover:text-cyan-300'
             }`}
-            title={isMuted ? 'Włącz dźwięk' : 'Wycisz'}
           >
             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </button>
         </div>
 
-        {/* SEKCJA GŁÓWNA */}
+        {/* ── SEKCJA GŁÓWNA ───────────────────────── */}
         <div className="px-4 py-8 flex flex-col items-center">
 
           {/* ASCII Pong */}
@@ -147,46 +162,63 @@ export default function Header({ isMuted, setIsMuted }) {
               CENTRUM DOWODZENIA
             </span>
 
-            {/* PING-PONG — klikalny easter egg */}
-            <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-2 flex-nowrap relative">
+            {/* ── PING-PONG ROW ── */}
+            <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-2 flex-nowrap">
 
               {/* Lewa rakietka */}
-              <div className={`relative flex-shrink-0 transition-transform duration-300 ${chaosMode ? 'rotate-180 scale-125' : '-rotate-45 hover:rotate-0'}`}>
+              <div className={`relative flex-shrink-0 transition-all duration-500 ${
+                chaosMode ? 'rotate-[720deg] scale-150' : '-rotate-45 hover:rotate-0'
+              }`}>
                 <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-pink-500 to-pink-700 shadow-[0_0_15px_rgba(236,72,153,0.8)] flex items-center justify-center">
                   <div className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 rounded-full bg-pink-300" />
                 </div>
                 <div className="absolute -bottom-2 sm:-bottom-3 left-1/2 -translate-x-1/2 w-1.5 sm:w-2 h-3 sm:h-4 md:h-5 bg-gradient-to-b from-amber-600 to-amber-800 rounded-b-full" />
               </div>
 
-              {/* PING-PONG text — klikalne */}
+              {/* PING-PONG — klikalne, zawsze widoczne */}
               <div className="relative flex flex-col items-center">
                 <button
                   onClick={handlePingPongClick}
-                  className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-wider sm:tracking-widest text-transparent bg-clip-text bg-gradient-to-r whitespace-nowrap select-none transition-all duration-200 active:scale-95 ${
-                    chaosMode
-                      ? 'from-yellow-400 via-red-400 to-pink-400 animate-pulse scale-110'
-                      : 'from-pink-500 via-purple-400 to-cyan-400 hover:from-yellow-400 hover:via-pink-400 hover:to-cyan-400'
-                  }`}
+                  className="relative group cursor-pointer select-none border-0 bg-transparent p-0 m-0"
                   title="Kliknij mnie..."
-                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                 >
-                  PING-PONG
+                  {/* Tekst zawsze widoczny — NIE używamy text-transparent na buttonie */}
+                  <span
+                    className={`block text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-wider sm:tracking-widest whitespace-nowrap transition-all duration-300 ${
+                      chaosMode
+                        ? 'text-yellow-300'
+                        : 'text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-cyan-400'
+                    }`}
+                    style={chaosMode ? {
+                      animation: 'neonPulse 0.4s ease-in-out infinite, shake 0.3s ease-in-out infinite',
+                    } : {}}
+                  >
+                    PING-PONG
+                  </span>
+
+                  {/* Hover glow underline */}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-cyan-400 group-hover:w-full transition-all duration-300 rounded-full" />
                 </button>
 
-                {/* Komunikat easter egg */}
-                {easterMsg && (
-                  <div className={`absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-black px-3 py-1 rounded-full border transition-all ${
-                    chaosMode
-                      ? 'text-yellow-300 border-yellow-500 bg-yellow-950/80 shadow-[0_0_12px_#ffd700]'
-                      : 'text-cyan-400 border-cyan-700 bg-black/80'
-                  }`}>
-                    {easterMsg}
+                {/* Hint counter */}
+                {hint && !chaosMode && (
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-black px-3 py-1 rounded-full border border-cyan-700 bg-black/80 text-cyan-400 animate-bounce">
+                    {hint}
+                  </div>
+                )}
+
+                {/* Chaos banner */}
+                {chaosMode && (
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-black px-4 py-1 rounded-full border-2 border-yellow-400 bg-yellow-950/90 text-yellow-300 shadow-[0_0_20px_#ffd700]">
+                    🎉 CHAOS MODE 🎉
                   </div>
                 )}
               </div>
 
               {/* Prawa rakietka */}
-              <div className={`relative flex-shrink-0 transition-transform duration-300 ${chaosMode ? '-rotate-180 scale-125' : 'rotate-45 hover:rotate-0'}`}>
+              <div className={`relative flex-shrink-0 transition-all duration-500 ${
+                chaosMode ? 'rotate-[-720deg] scale-150' : 'rotate-45 hover:rotate-0'
+              }`}>
                 <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-700 shadow-[0_0_15px_rgba(34,211,238,0.8)] flex items-center justify-center">
                   <div className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 rounded-full bg-cyan-300" />
                 </div>
@@ -195,10 +227,14 @@ export default function Header({ isMuted, setIsMuted }) {
             </div>
           </h1>
 
-          {/* Loader Bar */}
+          {/* Loader bar */}
           <div className="w-full max-w-md h-1 bg-gray-800 rounded-full overflow-hidden mt-8 mb-4">
             <div
-              className={`h-full rounded-full ${chaosMode ? 'animate-ping bg-yellow-400' : 'animate-pulse bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500'}`}
+              className={`h-full rounded-full transition-all duration-300 ${
+                chaosMode
+                  ? 'bg-gradient-to-r from-yellow-400 via-red-400 to-pink-400'
+                  : 'animate-pulse bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500'
+              }`}
               style={{ width: '100%' }}
             />
           </div>
@@ -220,7 +256,7 @@ export default function Header({ isMuted, setIsMuted }) {
           </div>
         </div>
 
-        {/* Dekoracje */}
+        {/* Dekoracje tła */}
         <div className="absolute top-0 left-1/4 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-10 right-1/4 w-24 h-24 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
         <div
