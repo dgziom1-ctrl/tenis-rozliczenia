@@ -1,88 +1,159 @@
-# 🏓 Ping-Pong Settlement System
+# 🕹️ Cyber Ponk
 
-> A real-time, cyberpunk-styled application for tracking payments and attendance for a ping-pong crew. Built for speed, designed for clarity.
-
----
-
-## ✨ Features
-
-- 💸 **Payment Tracking** – Track who owes what for table rentals
-- ✅ **One-Click Updates** – Mark players as paid instantly
-- 📊 **Dynamic Rankings** – Legend / Master / Regular / Guest / Ghost
-- 📅 **Session History** – Full history of all games organized by month
-- 🔄 **Real-time Sync** – Updates visible instantly for all users
-- 🏓 **Retro Vibes** – Animated pong header & retro sound effects (Web Audio API)
+> System rozliczeń dla rodzinnej grupy ping-pong. Kto był, ile płaci, kto zalega — wszystko w jednym miejscu.
 
 ---
 
-## 🛠️ Tech Stack
+## ✨ Funkcje
 
-| Layer        | Technology                 |
-|-------------|----------------------------|
-| Frontend    | React 19 + Vite            |
-| Styling     | Tailwind CSS               |
-| Database    | Firebase Realtime Database |
-| Hosting     | Firebase Hosting           |
-| CI/CD       | GitHub Actions             |
+### 💰 Dashboard
+- Karty graczy z aktualnym długiem w czasie rzeczywistym
+- Oznaczanie płatności jednym kliknięciem
+- **Undo** — 10 sekund na cofnięcie oznaczenia płatności
+- Szczegółowy breakdown zaległości (które tygodnie, ile za każdy)
+- Numer BLIK do szybkiego kopiowania
+
+### 📊 Frekwencja
+- **Leaderboard** z podium olimpijskim (🥇🥈🥉) i ex aequo
+- Rangi graczy: LEGENDA / MISTRZ / WETERAN / STAŁY / GOŚĆ / DUCH
+- Tytuły specjalne: 👑 Król frekwencji, 🔥 Seria, ⚡ Multi King, 💀 Rzadki gość
+- Raport miesięczny z tabelą obecności
+
+### ⚙️ Panel Admina
+- Dodawanie tygodnia z wyborem daty (dzień/miesiąc/rok)
+- Szybkie przyciski kosztów: FREE / 15 / 30 / 45 / 60 PLN
+- Wszyscy gracze domyślnie zaznaczeni
+- Multisport — automatycznie preloadowany z ustawień
+
+### 📅 Historia
+- Pełna lista rozgrywek z kosztami i składem
+- Edycja i usuwanie tygodnia **zabezpieczone hasłem**
+
+### 👥 Gracze
+- Dodawanie nowych graczy
+- Soft delete (kosz) i przywracanie
+- Usuwanie **zabezpieczone hasłem**
+
+### 🎮 Misc
+- Animacja pong w nagłówku z dźwiękami
+- Easter egg 🏓 (znajdź sam)
+- PWA — działa jak aplikacja na telefonie
+- Pełna synchronizacja w czasie rzeczywistym (Firebase)
 
 ---
 
-## 🚀 Local Setup
+## 🛠️ Tech stack
+
+| Warstwa | Technologia |
+|---------|-------------|
+| Frontend | React 18 + Vite |
+| Styling | Tailwind CSS |
+| Baza danych | Firebase Realtime Database |
+| Hosting | Firebase Hosting |
+| CI/CD | GitHub Actions |
+| Ikony | Lucide React |
+
+---
+
+## 🚀 Lokalne uruchomienie
+
+### Wymagania
+- Node.js 20+
+- Konto Firebase z projektem Realtime Database
+
+### Instalacja
 
 ```bash
-# Clone the repository
-git clone https://github.com/dgziom1/tenis-rozliczenia.git
+git clone https://github.com/twoj-login/tenis-rozliczenia.git
 cd tenis-rozliczenia/frontend
-
-# Install dependencies
 npm install
+```
 
-# Run the development server
+### Konfiguracja
+
+Utwórz plik `frontend/.env.local`:
+
+```env
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_DATABASE_URL=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+VITE_BLIK_NUMBER=...
+```
+
+> ⚠️ Plik `.env.local` jest w `.gitignore` — nigdy nie trafia do repozytorium.
+
+### Uruchomienie
+
+```bash
 npm run dev
 ```
 
+Aplikacja dostępna pod `http://localhost:5173`
+
 ---
 
-## 📁 Repository Structure
+## 🔐 Bezpieczeństwo
+
+- Klucze Firebase trzymane w **GitHub Secrets** — nie ma ich w kodzie
+- Hasło do edycji/usuwania danych chroni przed przypadkowymi zmianami
+- Firebase Rules ograniczają zapis do autoryzowanych klientów
+- Numer BLIK zakodowany przez zmienną środowiskową
+
+---
+
+## 📦 Deploy
+
+Deploy odbywa się automatycznie po każdym pushu do `main`:
+
+```
+git push origin main
+```
+
+GitHub Actions: instaluje zależności → buduje React → deployuje na Firebase Hosting.
+
+---
+
+## 🏗️ Struktura projektu
 
 ```
 tenis-rozliczenia/
-├── frontend/              # React app (Vite + Tailwind)
+├── frontend/
+│   ├── public/
+│   │   ├── manifest.json        # PWA config
+│   │   ├── icon-192v2.png
+│   │   └── icon-512v2.png
 │   ├── src/
-│   │   ├── firebase.js    # Entire "backend" logic via Firebase SDK
-│   │   ├── App.jsx
+│   │   ├── firebase.js          # Cała logika bazy danych
+│   │   ├── App.jsx              # Root + routing między tabami
 │   │   └── components/
+│   │       ├── layout/
+│   │       │   ├── Header.jsx
+│   │       │   └── Navigation.jsx
 │   │       ├── dashboard/
-│   │       ├── admin/
+│   │       │   └── DashboardTab.jsx
 │   │       ├── attendance/
+│   │       │   └── AttendanceTab.jsx
+│   │       ├── admin/
+│   │       │   └── AdminTab.jsx
 │   │       ├── history/
-│   │       ├── players/
-│   │       └── layout/
-│   └── dist/              # Build output (auto-generated)
-├── public/                # Legacy HTML version
-├── firebase.json          # Firebase Hosting configuration
-└── .github/
-    └── workflows/         # GitHub Actions – auto-deploy on push
+│   │       │   └── HistoryTab.jsx
+│   │       └── players/
+│   │           └── PlayersTab.jsx
+│   ├── index.html
+│   └── package.json
+├── .github/
+│   └── workflows/
+│       └── firebase-hosting-merge.yml
+├── firebase.json
+└── README.md
 ```
 
 ---
 
-## 🔄 Deployment
+## 👾 Credits
 
-Any push to the `main` branch automatically triggers GitHub Actions:
-
-1. Install dependencies (`npm install`)
-2. Build the app (`npm run build`)
-3. Deploy to Firebase Hosting
-
----
-
-## 🤝 Shoutout
-
-This project is a family collaboration ❤️  
-
-Huge respect to **@k-michalek** for creating the original React frontend and the cyberpunk aesthetic as part of his **cyber-pong-club** project.
-
-This version reuses his frontend components and styling while replacing the Python backend with **Firebase Realtime Database**.
-
-Thanks for the solid foundation! 🙏🏓
+Frontend design oparty na projekcie **cyber-pong-club** by [@k-michalek](https://github.com/k-michalek).
