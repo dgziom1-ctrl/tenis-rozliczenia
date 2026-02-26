@@ -78,10 +78,12 @@ export default function DashboardTab({ data, history, refreshData, playSound }) 
 
   const progressPct = undoToast ? (undoToast.secondsLeft / UNDO_SECONDS) * 100 : 0;
 
-  // Organizer na koniec
+  // Sortowanie: A-Z, organizer zawsze na końcu
   const sorted = data.players
     ? [
-        ...data.players.filter(p => p.name !== 'Kamil'),
+        ...data.players
+          .filter(p => p.name !== 'Kamil')
+          .sort((a, b) => a.name.localeCompare(b.name, 'pl')),
         ...data.players.filter(p => p.name === 'Kamil'),
       ]
     : [];
