@@ -34,7 +34,7 @@ function initState() {
     winner: null,
     rallyLen: 0,
     lastScorer: null,
-    touches: { up: false, down: false },
+    dragY: null, // bezpośrednia pozycja palca w px (współrzędne gry)
   };
 }
 
@@ -297,11 +297,17 @@ export default function PongGame({ onClose }) {
       const scale = getScale();
 
       if (st.phase === 'play') {
-        // Gracz
-        const up   = keys.ArrowUp   || keys.w || st.touches.up;
-        const down = keys.ArrowDown || keys.s || st.touches.down;
-        if (up)   st.player.y = Math.max(0,          st.player.y - PADDLE_SPD);
-        if (down) st.player.y = Math.min(H - PADDLE_H, st.player.y + PADDLE_SPD);
+        // Gracz — klawiatura lub bezpośrednie przeciąganie palcem
+        const up   = keys.ArrowUp   || keys.w;
+        const down = keys.ArrowDown || keys.s;
+        if (up)   st.player.y = Math.max(0,             st.player.y - PADDLE_SPD);
+        if (down) st.player.y = Math.min(H - PADDLE_H,  st.player.y + PADDLE_SPD);
+
+        // Przeciąganie — palec kontroluje środek paletki
+        if (st.dragY !== null) {
+          const targetY = st.dragY - PADDLE_H / 2;
+          st.player.y   = Math.max(0, Math.min(H - PADDLE_H, targetY));
+        }
 
         // AI — śledzi piłkę z opóźnieniem zależnym od trudności
         const aiCenter = st.ai.y + PADDLE_H / 2;
@@ -412,20 +418,41 @@ export default function PongGame({ onClose }) {
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); };
   }, [onClose, startCountdown]);
 
-  // ── Touch controls ────────────────────────────────────
+  // ── Touch — bezpośrednie przeciąganie paletki ────────
+  const getTouchGameY = (touch) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect  = canvas.getBoundingClientRect();
+    const relY  = touch.clientY - rect.top;
+    // Przelicz z pikseli ekranu na współrzędne gry
+    return (relY / rect.height) * H;
+  };
+
   const handleTouchStart = (e) => {
+    e.preventDefault();
+    // Ignoruj dotyk po prawej stronie (strona AI)
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    Array.from(e.touches).forEach(t => {
-      const y = t.clientY - rect.top;
-      if (y < rect.height / 2) stateRef.current.touches.up   = true;
-      else                     stateRef.current.touches.down = true;
-    });
+    const t = e.touches[0];
+    const relX = t.clientX - rect.left;
+    if (relX > rect.width / 2) return; // prawa połowa = AI, ignoruj
+    stateRef.current.dragY = getTouchGameY(t);
   };
+
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    const relX = t.clientX - rect.left;
+    if (relX > rect.width / 2) return;
+    stateRef.current.dragY = getTouchGameY(t);
+  };
+
   const handleTouchEnd = () => {
-    stateRef.current.touches.up   = false;
-    stateRef.current.touches.down = false;
+    stateRef.current.dragY = null;
   };
 
   const handleCanvasTap = () => {
@@ -461,7 +488,8 @@ export default function PongGame({ onClose }) {
           ESC — wyjdź
         </div>
         <div className="text-cyan-800 text-xs text-right sm:hidden">
-          dotknij góra/dół<br/>żeby sterować
+          przeciągnij paletkę palcem<br/>
+          (lewa strona ekranu)
         </div>
 
         <button
@@ -482,29 +510,14 @@ export default function PongGame({ onClose }) {
           className="block w-full touch-none"
           style={{ imageRendering: 'pixelated' }}
           onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onTouchCancel={handleTouchEnd}
           onClick={handleCanvasTap}
         />
       </div>
 
-      {/* Mobile touch buttons */}
-      <div className="flex gap-4 mt-4 sm:hidden">
-        <button
-          className="flex-1 py-5 rounded-xl border-2 border-cyan-700 bg-cyan-950/50 text-cyan-400 text-2xl font-black active:bg-cyan-800 active:scale-95 transition-all select-none"
-          onTouchStart={() => { stateRef.current.touches.up = true; }}
-          onTouchEnd={()   => { stateRef.current.touches.up = false; }}
-        >↑</button>
-        <button
-          className="flex-1 py-5 rounded-xl border-2 border-cyan-700 bg-cyan-950/50 text-cyan-400 text-2xl font-black active:bg-cyan-800 active:scale-95 transition-all select-none"
-          onTouchStart={() => { stateRef.current.touches.down = true; }}
-          onTouchEnd={()   => { stateRef.current.touches.down = false; }}
-        >↓</button>
-      </div>
 
-      <div className="text-cyan-900 text-xs mt-3 tracking-widest">
-        znajdź jak otworzyć tę grę 🏓
-      </div>
     </div>
   );
 }
