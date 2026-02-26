@@ -2,8 +2,8 @@ name: Automatyczny Backup Realtime Database
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Co niedzielę o północy
-  workflow_dispatch: # Przycisk do ręcznego odpalenia
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
 
 jobs:
   backup:
@@ -32,24 +32,22 @@ jobs:
             try {
               const sa = JSON.parse(process.env.SERVICE_ACCOUNT);
               
-              // W Realtime Database URL jest kluczowy. 
-              // Zazwyczaj to: https://NAZWA-PROJEKTU-default-rtdb.firebaseio.com/
-              // Jeśli masz bazę w Europie, URL może wyglądać inaczej (sprawdź w konsoli Firebase)
-              const dbUrl = \`https://\${sa.project_id}-default-rtdb.firebaseio.com\`;
+              // Ustawiamy poprawny adres URL bazy w Europie
+              const dbUrl = 'https://tenis-rozliczenia-default-rtdb.europe-west1.firebasedatabase.app';
               
               admin.initializeApp({
                 credential: admin.credential.cert(sa),
                 databaseURL: dbUrl
               });
 
-              console.log('--- Start backup RTDB dla: ' + sa.project_id + ' ---');
+              console.log('--- Start backup RTDB (Region: Europe) ---');
               
               const db = admin.database();
               const snapshot = await db.ref('/').once('value');
               const data = snapshot.val();
 
               if (!data) {
-                console.log('⚠️ Baza jest pusta!');
+                console.log('⚠️ Baza jest pusta lub nie udało się pobrać danych.');
               }
 
               if (!fs.existsSync('./backups')) fs.mkdirSync('./backups');
@@ -58,7 +56,7 @@ jobs:
               const fileName = './backups/backup_rtdb_' + date + '.json';
               
               fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
-              console.log('✅ Sukces! Dane zapisane w: ' + fileName);
+              console.log('✅ Sukces! Plik zapisany: ' + fileName);
 
             } catch (err) {
               console.error('❌ BŁĄD:', err.message);
