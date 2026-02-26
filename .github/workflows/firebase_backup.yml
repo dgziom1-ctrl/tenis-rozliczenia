@@ -2,10 +2,9 @@ name: Automatyczny Backup Realtime Database
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Co niedzielę o północy
-  workflow_dispatch: # Przycisk do ręcznego odpalenia
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
 
-# Te uprawnienia są KLUCZOWE, aby skrypt mógł zapisać plik w repozytorium
 permissions:
   contents: write
 
@@ -28,15 +27,13 @@ jobs:
         env:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          node -e "
+          cat << 'EOF' > backup.js
           const admin = require('firebase-admin');
           const fs = require('fs');
 
           async function run() {
             try {
               const sa = JSON.parse(process.env.SERVICE_ACCOUNT);
-              
-              // Twój konkretny adres URL w regionie Europa
               const dbUrl = 'https://tenis-rozliczenia-default-rtdb.europe-west1.firebasedatabase.app';
               
               admin.initializeApp({
@@ -48,4 +45,29 @@ jobs:
               
               const db = admin.database();
               const snapshot = await db.ref('/').once('value');
-              const data = snapshot.
+              const data = snapshot.val();
+
+              if (!fs.existsSync('./backups')) fs.mkdirSync('./backups');
+              
+              const date = new Date().toISOString().split('T')[0];
+              const fileName = `./backups/backup_rtdb_${date}.json`;
+              
+              fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
+              console.log(`✅ Sukces! Plik zapisany: ${fileName}`);
+              process.exit(0);
+            } catch (err) {
+              console.error('❌ BŁĄD:', err.message);
+              process.exit(1);
+            }
+          }
+          run();
+          EOF
+          node backup.js
+
+      - name: Zapisz do repozytorium
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add backups/*.json
+          git commit -m "Automatyczny backup RTDB: $(date +'%Y-%m-%d')" || exit 0
+          git push
