@@ -1,54 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Press+Start+2P&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Exo+2:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ══════════════════════════════════════════════
-   CSS VARIABLES — swapped per theme
-══════════════════════════════════════════════ */
-:root {
-  --c-bg:          #080c14;
-  --c-bg2:         #0d1520;
-  --c-border:      #155e75;
-  --c-border-dim:  #083344;
-  --c-primary:     #00d4ff;
-  --c-primary-dim: #004e5e;
-  --c-secondary:   #e91e8c;
-  --c-text:        #e2e8f0;
-  --c-text-dim:    #94a3b8;
-  --c-glow:        rgba(0,212,255,0.5);
-  --c-glow2:       rgba(233,30,140,0.5);
-  --c-grid:        rgba(0,255,100,0.05);
-  --c-radius:      0.75rem;
-  --c-font:        'Roboto Mono', monospace;
-}
-
-.theme-arcade {
-  --c-bg:          #010300;
-  --c-bg2:         #020500;
-  --c-border:      #1a4d00;
-  --c-border-dim:  #0a2200;
-  --c-primary:     #39ff14;
-  --c-primary-dim: #0d2900;
-  --c-secondary:   #ff6b00;
-  --c-text:        #c8f0b8;
-  --c-text-dim:    #3a6628;
-  --c-glow:        rgba(57,255,20,0.6);
-  --c-glow2:       rgba(255,107,0,0.6);
-  --c-grid:        rgba(57,255,20,0.04);
-  --c-radius:      0px;
-  --c-font:        'Press Start 2P', monospace;
-}
-
-/* ══ BASE ═══════════════════════════════════ */
+/* ══ BASE ════════════════════════════════════════════════ */
 body {
-  background-color: var(--c-bg);
-  color: var(--c-text);
-  font-family: var(--c-font);
+  background-color: #080c14;
+  color: #e2e8f0;
+  font-family: 'Roboto Mono', monospace;
   overflow-x: hidden;
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.3s;
 }
 
 body::before {
@@ -56,201 +19,167 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(var(--c-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+    linear-gradient(rgba(0,255,100,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,100,0.05) 1px, transparent 1px);
   background-size: 20px 20px;
   z-index: -1;
   pointer-events: none;
+  transition: background-image 0.3s;
 }
 
-/* Arcade scanlines */
+/* ══ ARCADE BODY OVERRIDES ═══════════════════════════════ */
+.theme-arcade body,
+.theme-arcade {
+  background-color: #010300;
+  color: #c8f0b8;
+}
+
 .theme-arcade body::before {
   background-image:
-    linear-gradient(var(--c-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px),
-    repeating-linear-gradient(
-      0deg, transparent, transparent 2px,
-      rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 4px
-    );
-  background-size: 20px 20px, 20px 20px, 100% 4px;
+    linear-gradient(rgba(57,255,20,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px);
 }
 
-/* ══ PONG ANIMATION ═════════════════════════ */
+/* ══ PONG ANIMATION ══════════════════════════════════════ */
 .ascii-pong-field {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
   font-size: 1.5rem;
-  color: var(--c-primary);
   margin-bottom: 10px;
 }
-.paddle { color: var(--c-secondary); }
+
+.paddle { color: #e91e8c; }
+
 .ball-court {
   display: inline-block;
   width: 250px;
   position: relative;
   height: 1.5rem;
-  border-bottom: 1px dashed var(--c-border-dim);
+  border-bottom: 1px dashed #083344;
 }
+
 .ascii-ball {
   position: absolute;
   top: 0;
   animation: ascii-bounce 1.2s infinite linear alternate;
 }
+
 @keyframes ascii-bounce {
-  0%   { left: 0; color: var(--c-primary); }
-  50%  { color: var(--c-secondary); }
-  100% { left: calc(100% - 1ch); color: var(--c-primary); }
+  0%   { left: 0; }
+  100% { left: calc(100% - 1ch); }
 }
 
-/* ══ ARCADE BLINK ═══════════════════════════ */
-@keyframes blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-.arcade-blink { animation: blink 1s step-end infinite; }
-
-@keyframes marquee {
-  0%   { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-}
-.arcade-marquee { animation: marquee 12s linear infinite; }
-
-@keyframes crt-flicker {
-  0%,100% { opacity: 1; }
-  92%      { opacity: 0.98; }
-  93%      { opacity: 0.85; }
-  94%      { opacity: 0.98; }
-}
-.theme-arcade .crt-screen {
-  animation: crt-flicker 8s infinite;
-}
-
-/* ══ UTILITIES ══════════════════════════════ */
+/* ══ UTILITIES ═══════════════════════════════════════════ */
 @layer utilities {
   .cyber-box {
-    background-color: var(--c-bg2);
-    border: 2px solid var(--c-border);
-    border-radius: var(--c-radius);
+    @apply bg-gray-900 border-2 border-cyan-800;
   }
+  .theme-arcade .cyber-box {
+    background-color: #020500;
+    border-color: #1a4d00;
+    border-radius: 0 !important;
+  }
+
   .cyber-input {
-    background-color: var(--c-bg);
-    border: 2px solid var(--c-border);
-    color: var(--c-primary);
-    border-radius: var(--c-radius);
-    font-family: var(--c-font);
-    outline: none;
-    transition: border-color 0.2s;
+    @apply bg-black border-2 border-cyan-800 text-cyan-300 focus:border-cyan-400 outline-none transition-all duration-200;
   }
-  .cyber-input:focus { border-color: var(--c-primary); }
+  .theme-arcade .cyber-input {
+    background-color: #010300;
+    border-color: #1a4d00;
+    color: #39ff14;
+    border-radius: 0 !important;
+  }
+  .theme-arcade .cyber-input:focus {
+    border-color: #39ff14;
+  }
 
   .cyber-button-blue {
-    background-color: var(--c-primary-dim);
-    border: 2px solid var(--c-primary);
-    color: var(--c-primary);
-    font-family: var(--c-font);
-    font-weight: bold;
-    border-radius: var(--c-radius);
-    transition: all 0.15s;
+    @apply bg-cyan-950 border-2 border-cyan-500 text-cyan-300 hover:bg-cyan-500 hover:text-black transition-all duration-200 font-bold;
   }
-  .cyber-button-blue:hover {
-    background-color: var(--c-primary);
-    color: var(--c-bg);
-    box-shadow: 0 0 15px var(--c-glow);
+  .theme-arcade .cyber-button-blue {
+    background-color: #0d2900;
+    border-color: #39ff14;
+    color: #39ff14;
+    border-radius: 0 !important;
+  }
+  .theme-arcade .cyber-button-blue:hover {
+    background-color: #39ff14;
+    color: #010300;
   }
 
-  .text-neon-blue  { color: var(--c-primary);    text-shadow: 0 0 8px var(--c-glow); }
-  .text-neon-pink  { color: var(--c-secondary);  text-shadow: 0 0 8px var(--c-glow2); }
-  .neon-amount     { color: var(--c-primary);    text-shadow: 0 0 8px var(--c-glow); font-weight: 900; }
+  .text-neon-blue { text-shadow: 0 0 8px rgba(0,243,255,0.6); }
+  .text-neon-pink { text-shadow: 0 0 8px rgba(255,0,255,0.6); }
+  .neon-amount { @apply font-mono font-black text-cyan-400; text-shadow: 0 0 8px rgba(34,211,238,0.6); }
 }
 
-/* ══ ARCADE OVERRIDES ═══════════════════════
-   These remap Tailwind color classes to
-   arcade palette without touching JSX
-══════════════════════════════════════════════ */
+/* ══ ARCADE COLOR OVERRIDES FOR JSX COMPONENTS ═══════════
+   Only swap colors — no font-size changes.
+   JSX components use Tailwind color classes, we remap them.
+════════════════════════════════════════════════════════ */
 
-/* Rounded → sharp */
-.theme-arcade [class*="rounded-"] { border-radius: 0 !important; }
-.theme-arcade [class*="rounded-full"] { border-radius: 2px !important; }
+/* Remove rounded corners globally in arcade */
+.theme-arcade [class*="rounded"] {
+  border-radius: 0 !important;
+}
+.theme-arcade [class*="rounded-full"] {
+  border-radius: 2px !important;
+}
 
-/* Cyan → Arcade Green */
+/* ── Cyan → Arcade Green ── */
 .theme-arcade [class*="text-cyan-3"],
 .theme-arcade [class*="text-cyan-4"] { color: #39ff14 !important; }
 .theme-arcade [class*="text-cyan-5"] { color: #28cc0e !important; }
 .theme-arcade [class*="text-cyan-6"],
 .theme-arcade [class*="text-cyan-7"] { color: #176604 !important; }
 .theme-arcade [class*="text-cyan-8"],
-.theme-arcade [class*="text-cyan-9"] { color: #0a2900 !important; }
+.theme-arcade [class*="text-cyan-9"] { color: #0a2200 !important; }
 .theme-arcade [class*="text-cyan-1"],
 .theme-arcade [class*="text-cyan-2"] { color: #c8f0b8 !important; }
 
-/* Pink/Magenta → Orange */
+/* ── Pink/Magenta → Orange ── */
 .theme-arcade [class*="text-pink-"],
-.theme-arcade [class*="text-magenta"],
-.theme-arcade [class*="text-rose-4"] { color: #ff6b00 !important; }
+.theme-arcade [class*="text-magenta-"],
+.theme-arcade [class*="text-rose-4"],
+.theme-arcade [class*="text-rose-5"] { color: #ff6b00 !important; }
 
-/* Borders */
-.theme-arcade [class*="border-cyan-8"],
-.theme-arcade [class*="border-cyan-9"] { border-color: #0d2900 !important; }
+/* ── Border Cyan → Green ── */
 .theme-arcade [class*="border-cyan-4"],
 .theme-arcade [class*="border-cyan-5"] { border-color: #39ff14 !important; }
 .theme-arcade [class*="border-cyan-6"],
 .theme-arcade [class*="border-cyan-7"] { border-color: #1a6600 !important; }
-.theme-arcade [class*="border-pink-"],
-.theme-arcade [class*="border-magenta"],
-.theme-arcade [class*="border-rose-8"] { border-color: #993300 !important; }
-.theme-arcade [class*="border-rose-6"],
-.theme-arcade [class*="border-rose-7"] { border-color: #ff6b00 !important; }
+.theme-arcade [class*="border-cyan-8"],
+.theme-arcade [class*="border-cyan-9"] { border-color: #0d2900 !important; }
 
-/* Backgrounds */
+/* ── Border Pink → Orange ── */
+.theme-arcade [class*="border-pink-"],
+.theme-arcade [class*="border-magenta-"],
+.theme-arcade [class*="border-rose-6"],
+.theme-arcade [class*="border-rose-7"],
+.theme-arcade [class*="border-rose-8"] { border-color: #cc4400 !important; }
+
+/* ── Background Cyan → Dark Green ── */
 .theme-arcade [class*="bg-cyan-9"],
 .theme-arcade [class*="bg-cyan-8"] { background-color: #020a00 !important; }
-.theme-arcade [class*="bg-rose-9"],
-.theme-arcade [class*="bg-pink-9"] { background-color: #0d0200 !important; }
 
-/* Shadows: swap cyan glow → green */
-.theme-arcade [style*="#00f3ff"],
-.theme-arcade [style*="00d4ff"],
-.theme-arcade [style*="00f3ff"] { 
-  --tw-shadow-color: rgba(57,255,20,0.5);
+/* ── Shadow glow swap ── */
+.theme-arcade [class*="shadow-"][class*="00f3ff"],
+.theme-arcade [class*="shadow-"][class*="00d4ff"] {
+  box-shadow: 0 0 15px rgba(57,255,20,0.5) !important;
 }
 
-/* Inputs / selects */
-.theme-arcade select.cyber-input option,
+/* ── Select options ── */
 .theme-arcade select option {
   background-color: #010300;
   color: #39ff14;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
 }
 
-/* Pixel font size compensation — Press Start 2P needs smaller sizes */
-.theme-arcade .text-5xl  { font-size: 1.6rem  !important; line-height: 1.4 !important; }
-.theme-arcade .text-4xl  { font-size: 1.25rem !important; line-height: 1.4 !important; }
-.theme-arcade .text-3xl  { font-size: 1.1rem  !important; line-height: 1.5 !important; }
-.theme-arcade .text-2xl  { font-size: 0.9rem  !important; line-height: 1.5 !important; }
-.theme-arcade .text-xl   { font-size: 0.75rem !important; line-height: 1.6 !important; }
-.theme-arcade .text-lg   { font-size: 0.65rem !important; line-height: 1.7 !important; }
-.theme-arcade .text-base { font-size: 0.58rem !important; line-height: 1.7 !important; }
-.theme-arcade .text-sm   { font-size: 0.5rem  !important; line-height: 1.8 !important; }
-.theme-arcade .text-xs   { font-size: 0.42rem !important; line-height: 1.8 !important; }
-
-/* Extra padding for pixel font readability */
-.theme-arcade .py-3 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
-.theme-arcade .p-3  { padding: 0.9rem !important; }
-.theme-arcade .p-4  { padding: 1.1rem !important; }
-.theme-arcade .p-6  { padding: 1.4rem !important; }
-.theme-arcade .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-.theme-arcade .px-6 { padding-left: 1.4rem !important; padding-right: 1.4rem !important; }
-.theme-arcade .gap-2 { gap: 0.6rem !important; }
-.theme-arcade .gap-3 { gap: 0.8rem !important; }
-
-/* mini-paddle */
+/* mini-paddle (shared component) */
 .mini-paddle {
   display: inline-block;
   width: 14px; height: 15px;
-  background-color: var(--c-secondary);
+  background-color: #e91e8c;
   position: relative;
   margin-right: 8px;
   border-radius: 50% 50% 45% 45%;
@@ -265,6 +194,7 @@ body::before {
   border-radius: 0 0 2px 2px;
 }
 @keyframes paddle-shake {
-  0%, 100% { transform: rotate(-10deg); }
-  50%       { transform: rotate(10deg); }
+  0%,100% { transform: rotate(-10deg); }
+  50%     { transform: rotate(10deg); }
 }
+.theme-arcade .mini-paddle { background-color: #ff6b00; border-radius: 0; }
