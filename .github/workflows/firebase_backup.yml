@@ -1,9 +1,9 @@
-name: Automatyczny Backup Firebase
+name: Automatyczny Backup Realtime Database
 
 on:
   schedule:
     - cron: '0 0 * * 0' # Co niedzielę o północy
-  workflow_dispatch: # Przycisk do ręcznego odpalenia w zakładce Actions
+  workflow_dispatch: # Przycisk do ręcznego odpalenia
 
 jobs:
   backup:
@@ -32,53 +32,39 @@ jobs:
             try {
               const sa = JSON.parse(process.env.SERVICE_ACCOUNT);
               
-              // Inicjalizacja z jawnym ID projektu i certyfikatem
+              // W Realtime Database URL jest kluczowy. 
+              // Zazwyczaj to: https://NAZWA-PROJEKTU-default-rtdb.firebaseio.com/
+              // Jeśli masz bazę w Europie, URL może wyglądać inaczej (sprawdź w konsoli Firebase)
+              const dbUrl = \`https://\${sa.project_id}-default-rtdb.firebaseio.com\`;
+              
               admin.initializeApp({
                 credential: admin.credential.cert(sa),
-                projectId: sa.project_id
+                databaseURL: dbUrl
               });
 
-              const db = admin.firestore();
-              console.log('--- Rozpoczynam backup projektu: ' + sa.project_id + ' ---');
-
-              // Pobieranie wszystkich kolekcji
-              const collections = await db.listCollections();
-              const allData = {};
-
-              if (collections.length === 0) {
-                console.log('⚠️ Nie znaleziono żadnych kolekcji w bazie (default).');
-              }
-
-              for (const col of collections) {
-                console.log('📦 Pobieranie danych z: ' + col.id);
-                const snapshot = await col.get();
-                allData[col.id] = snapshot.docs.map(doc => ({
-                  id: doc.id,
-                  ...doc.data()
-                }));
-              }
-
-              // Tworzenie folderu jeśli nie istnieje
-              if (!fs.existsSync('./backups')) {
-                fs.mkdirSync('./backups');
-              }
-
-              const date = new Date().toISOString().split('T')[0];
-              const fileName = './backups/backup_' + date + '.json';
+              console.log('--- Start backup RTDB dla: ' + sa.project_id + ' ---');
               
-              fs.writeFileSync(fileName, JSON.stringify(allData, null, 2));
-              console.log('✅ Sukces! Plik zapisany: ' + fileName);
+              const db = admin.database();
+              const snapshot = await db.ref('/').once('value');
+              const data = snapshot.val();
+
+              if (!data) {
+                console.log('⚠️ Baza jest pusta!');
+              }
+
+              if (!fs.existsSync('./backups')) fs.mkdirSync('./backups');
+              
+              const date = new Date().toISOString().split('T')[0];
+              const fileName = './backups/backup_rtdb_' + date + '.json';
+              
+              fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
+              console.log('✅ Sukces! Dane zapisane w: ' + fileName);
 
             } catch (err) {
-              console.error('❌ BŁĄD KRYTYCZNY:', err.message);
-              // Wyświetl więcej detali jeśli to NOT_FOUND
-              if (err.code === 5) {
-                console.error('Podpowiedź: Sprawdź czy w konsoli Firebase masz utworzoną bazę Firestore (Native Mode).');
-              }
+              console.error('❌ BŁĄD:', err.message);
               process.exit(1);
             }
           }
-
           run();
           "
 
@@ -87,6 +73,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add backups/*.json
-          # Commit tylko jeśli faktycznie są zmiany w plikach
-          git commit -m "Automatyczny backup: $(date +'%Y-%m-%d')" || echo "Brak zmian do zapisania"
+          git commit -m "Automatyczny backup RTDB: $(date +'%Y-%m-%d')" || exit 0
           git push
