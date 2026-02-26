@@ -291,7 +291,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, onOpenPong, t
 
             {/* CENTRUM DOWODZENIA */}
             <span className="block font-black uppercase" style={{
-              fontSize: 'clamp(1.1rem, 4vw, 2rem)',
+              fontSize: a ? 'clamp(1.1rem, 4vw, 2rem)' : 'clamp(1.6rem, 5vw, 2.8rem)',
               letterSpacing: a ? '0.05em' : '0.15em',
               fontStyle: a ? 'normal' : 'italic',
               fontFamily: C.titleFont,
@@ -327,7 +327,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, onOpenPong, t
                 <button onClick={handlePingPongClick}
                   style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}>
                   <span className="block font-black whitespace-nowrap" style={{
-                    fontSize: 'clamp(1.5rem, 5vw, 3rem)',
+                    fontSize: a ? 'clamp(1.5rem, 5vw, 3rem)' : 'clamp(2rem, 7vw, 4rem)',
                     letterSpacing: a ? '0.05em' : '0.1em',
                     fontFamily: a ? "'Press Start 2P',monospace" : 'inherit',
                     lineHeight: a ? 1.5 : 1.2,
