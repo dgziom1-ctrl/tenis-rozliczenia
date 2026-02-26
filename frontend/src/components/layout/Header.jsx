@@ -490,20 +490,24 @@ export default function Header({ isMuted, setIsMuted, isConnected, onOpenPong, t
           </div>
 
           {/* Branding */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem',
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem',
             flexWrap: 'wrap', justifyContent: 'center' }}>
             {a ? (
               <>
-                <span style={{ color: '#176604', fontFamily: "'Press Start 2P',monospace", fontSize: '0.42rem' }}>© 2024</span>
-                <span style={{ color: '#0d2900' }}>★</span>
                 <span style={{
-                  fontFamily: "'Press Start 2P',monospace", fontSize: '0.42rem',
+                  fontFamily: "'Press Start 2P',monospace", fontSize: '0.44rem',
                   color: arcadeTick ? '#39ff14' : '#0a2200',
-                  textShadow: arcadeTick ? '0 0 12px rgba(57,255,20,0.9)' : 'none',
-                  transition: 'color 0.1s, text-shadow 0.1s',
-                }}>INSERT COIN</span>
-                <span style={{ color: '#0d2900' }}>★</span>
-                <span style={{ color: '#ff6b00', fontFamily: "'Press Start 2P',monospace", fontSize: '0.42rem' }}>1UP</span>
+                  textShadow: arcadeTick ? '0 0 16px rgba(57,255,20,1), 0 0 30px rgba(57,255,20,0.4)' : 'none',
+                  transition: 'color 0.08s, text-shadow 0.08s',
+                  letterSpacing: '0.1em',
+                }}>★ INSERT COIN ★</span>
+                <span style={{ color: '#1a4d00', fontSize: '0.7rem' }}>│</span>
+                <span style={{
+                  fontFamily: "'Press Start 2P',monospace", fontSize: '0.4rem',
+                  color: isConnected ? '#39ff14' : '#ff3300',
+                  textShadow: isConnected ? '0 0 8px rgba(57,255,20,0.8)' : '0 0 8px rgba(255,51,0,0.8)',
+                  letterSpacing: '0.05em',
+                }}>{isConnected ? '● ONLINE' : '○ OFFLINE'}</span>
               </>
             ) : (
               <>
