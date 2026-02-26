@@ -2,65 +2,74 @@ name: Automatyczny Backup Firebase
 
 on:
   schedule:
-    # Uruchamia się w każdą niedzielę o 00:00 (czas UTC)
-    - cron: '0 0 * * 0'
-  workflow_dispatch: # Pozwala odpalić backup ręcznie przyciskiem w GitHubie
+    - cron: '0 0 * * 0' # Co niedzielę o północy
+  workflow_dispatch: # Przycisk do ręcznego odpalenia
 
 jobs:
   backup:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Pobranie kodu repozytorium
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Instalacja Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Instalacja bibliotek Firebase
+      - name: Install dependencies
         run: npm install firebase-admin
 
-      - name: Pobieranie danych z Firebase
+      - name: Run Backup Script
         env:
           SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
           node -e "
           const admin = require('firebase-admin');
           const fs = require('fs');
-          const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
           
-          admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-          });
-          
-          const db = admin.firestore();
-          
-          async function startBackup() {
-            const collections = await db.listCollections();
-            const allData = {};
-            
-            for (const col of collections) {
-              const snapshot = await col.get();
-              allData[col.id] = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-              }));
+          async function run() {
+            try {
+              const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
+              
+              admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+                projectId: serviceAccount.project_id
+              });
+              
+              const db = admin.firestore();
+              const collections = await db.listCollections();
+              const allData = {};
+              
+              for (const col of collections) {
+                const snapshot = await col.get();
+                allData[col.id] = snapshot.docs.map(doc => ({
+                  id: doc.id,
+                  ...doc.data()
+                }));
+              }
+              
+              if (!fs.existsSync('./backups')) fs.mkdirSync('./backups');
+              
+              const date = new Date().toISOString().split('T')[0];
+              const filePath = './backups/backup_' + date + '.json';
+              
+              fs.writeFileSync(filePath, JSON.stringify(allData, null, 2));
+              console.log('Backup zapisany pomyślnie: ' + filePath);
+            } catch (err) {
+              console.error('BŁĄD:', err.message);
+              process.exit(1);
             }
-            
-            if (!fs.existsSync('./backups')) fs.mkdirSync('./backups');
-            const date = new Date().toISOString().split('T')[0];
-            fs.writeFileSync(\`./backups/backup_\${date}.json\`, JSON.stringify(allData, null, 2));
           }
           
-          startBackup().catch(err => { console.error(err); process.exit(1); });
+          run();
           "
 
-      - name: Zapisanie backupu do repozytorium
+      - name: Commit and Push
         run: |
-          git config --local user.name "github-actions[bot]"
+          git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add backups/*.json
-          git commit -m "Automatyczny backup: $(date +'%Y-%m-%d')" || echo "Brak zmian w danych"
+          # Commit tylko jeśli są zmiany, żeby nie sypało błędem gdy nic się nie zmieniło
+          git commit -m "Automatyczny backup: $(date +'%Y-%m-%d')" || exit 0
           git push
