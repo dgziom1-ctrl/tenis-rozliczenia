@@ -6,6 +6,7 @@ import AttendanceTab from './components/attendance/AttendanceTab';
 import AdminTab from './components/admin/AdminTab';
 import HistoryTab from './components/history/HistoryTab';
 import PlayersTab from './components/players/PlayersTab';
+import PongGame from './components/easter/PongGame';
 import { subscribeToData } from './firebase';
 
 const synth = {
@@ -44,15 +45,16 @@ const synth = {
 };
 
 function App() {
-  const [activeTab,    setActiveTab]    = useState('dashboard');
-  const [isMuted,      setIsMuted]      = useState(false);
-  const [appData,      setAppData]      = useState({
-    summary: {},
-    players: [],
-    playerNames: [],
+  const [activeTab,   setActiveTab]   = useState('dashboard');
+  const [isMuted,     setIsMuted]     = useState(false);
+  const [pongOpen,    setPongOpen]    = useState(false);
+  const [appData,     setAppData]     = useState({
+    summary:             {},
+    players:             [],
+    playerNames:         [],
     defaultMultiPlayers: [],
-    deletedPlayers: [],
-    history: [],
+    deletedPlayers:      [],
+    history:             [],
   });
   const [isConnected, setIsConnected] = useState(false);
 
@@ -64,6 +66,19 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  // Easter egg — wpisz "ponk" na klawiaturze
+  useEffect(() => {
+    const SECRET = 'ponk';
+    let buffer = '';
+    const handler = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      buffer = (buffer + e.key.toLowerCase()).slice(-SECRET.length);
+      if (buffer === SECRET) { setPongOpen(true); buffer = ''; }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   const playSound  = (type) => synth.play(type, isMuted);
   const switchTab  = (tabId) => { playSound('tab'); setActiveTab(tabId); };
   const refreshData = () => {};
@@ -71,7 +86,12 @@ function App() {
   return (
     <div className="min-h-screen p-4 md:p-8 relative z-10">
       <div className="max-w-7xl mx-auto relative">
-        <Header isMuted={isMuted} setIsMuted={setIsMuted} isConnected={isConnected} />
+        <Header
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
+          isConnected={isConnected}
+          onOpenPong={() => setPongOpen(true)}
+        />
         <Navigation activeTab={activeTab} setActiveTab={switchTab} />
         <main>
           {activeTab === 'dashboard' && (
@@ -114,6 +134,8 @@ function App() {
             />
           )}
         </main>
+
+        {pongOpen && <PongGame onClose={() => setPongOpen(false)} />}
       </div>
     </div>
   );
