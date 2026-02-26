@@ -3,7 +3,7 @@ name: Automatyczny Backup Firebase
 on:
   schedule:
     - cron: '0 0 * * 0' # Co niedzielę o północy
-  workflow_dispatch: # Przycisk do ręcznego odpalenia
+  workflow_dispatch: # Przycisk do ręcznego odpalenia w zakładce Actions
 
 jobs:
   backup:
@@ -27,49 +27,66 @@ jobs:
           node -e "
           const admin = require('firebase-admin');
           const fs = require('fs');
-          
+
           async function run() {
             try {
-              const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
+              const sa = JSON.parse(process.env.SERVICE_ACCOUNT);
               
+              // Inicjalizacja z jawnym ID projektu i certyfikatem
               admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount),
-                projectId: serviceAccount.project_id
+                credential: admin.credential.cert(sa),
+                projectId: sa.project_id
               });
-              
+
               const db = admin.firestore();
+              console.log('--- Rozpoczynam backup projektu: ' + sa.project_id + ' ---');
+
+              // Pobieranie wszystkich kolekcji
               const collections = await db.listCollections();
               const allData = {};
-              
+
+              if (collections.length === 0) {
+                console.log('⚠️ Nie znaleziono żadnych kolekcji w bazie (default).');
+              }
+
               for (const col of collections) {
+                console.log('📦 Pobieranie danych z: ' + col.id);
                 const snapshot = await col.get();
                 allData[col.id] = snapshot.docs.map(doc => ({
                   id: doc.id,
                   ...doc.data()
                 }));
               }
-              
-              if (!fs.existsSync('./backups')) fs.mkdirSync('./backups');
-              
+
+              // Tworzenie folderu jeśli nie istnieje
+              if (!fs.existsSync('./backups')) {
+                fs.mkdirSync('./backups');
+              }
+
               const date = new Date().toISOString().split('T')[0];
-              const filePath = './backups/backup_' + date + '.json';
+              const fileName = './backups/backup_' + date + '.json';
               
-              fs.writeFileSync(filePath, JSON.stringify(allData, null, 2));
-              console.log('Backup zapisany pomyślnie: ' + filePath);
+              fs.writeFileSync(fileName, JSON.stringify(allData, null, 2));
+              console.log('✅ Sukces! Plik zapisany: ' + fileName);
+
             } catch (err) {
-              console.error('BŁĄD:', err.message);
+              console.error('❌ BŁĄD KRYTYCZNY:', err.message);
+              // Wyświetl więcej detali jeśli to NOT_FOUND
+              if (err.code === 5) {
+                console.error('Podpowiedź: Sprawdź czy w konsoli Firebase masz utworzoną bazę Firestore (Native Mode).');
+              }
               process.exit(1);
             }
           }
-          
+
           run();
           "
 
-      - name: Commit and Push
+      - name: Zapisz do repozytorium
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add backups/*.json
-          # Commit tylko jeśli są zmiany, żeby nie sypało błędem gdy nic się nie zmieniło
-          git commit -m "Automatyczny backup: $(date +'%Y-%m-%d')" || exit 0
+          # Commit tylko jeśli faktycznie są zmiany w plikach
+          git commit -m "Automatyczny backup: $(date +'%Y-%m-%d')" || echo "Brak zmian do zapisania"
           git push
