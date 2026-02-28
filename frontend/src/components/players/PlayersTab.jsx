@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Lock, Check, X } from 'lucide-react';
 import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer } from '../../firebase';
-
-const ADMIN_PASSWORD = 'ponk2026';
+import { ADMIN_PASSWORD, SOUND_TYPES } from '../../constants';
 
 function PasswordModal({ playerName, onConfirm, onCancel }) {
   const [input, setInput] = useState('');
@@ -47,7 +46,7 @@ function PasswordModal({ playerName, onConfirm, onCancel }) {
   );
 }
 
-export default function PlayersTab({ players, deletedPlayers, refreshData, playSound }) {
+export default function PlayersTab({ players, deletedPlayers, playSound }) {
   const [newPlayerName, setNewPlayerName] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [pwModal,       setPwModal]       = useState(null);
@@ -55,24 +54,24 @@ export default function PlayersTab({ players, deletedPlayers, refreshData, playS
   const handleAddPlayer = async (e) => {
     e.preventDefault();
     if (!newPlayerName.trim()) return;
-    playSound('success');
+    playSound(SOUND_TYPES.SUCCESS);
     await addPlayer(newPlayerName.trim());
     setNewPlayerName('');
   };
 
   const handleSoftDelete = async (playerName) => {
-    playSound('delete');
+    playSound(SOUND_TYPES.DELETE);
     await softDeletePlayer(playerName);
     setPwModal(null);
   };
 
   const handleRestore = async (playerName) => {
-    playSound('success');
+    playSound(SOUND_TYPES.SUCCESS);
     await restorePlayer(playerName);
   };
 
   const handlePermanentDelete = async (playerName) => {
-    playSound('delete');
+    playSound(SOUND_TYPES.DELETE);
     await permanentDeletePlayer(playerName);
     setConfirmDelete(null);
   };

@@ -1,9 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { History, Pencil, Trash2, Check, X, Zap, Users, Lock } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase';
-
-// Hasło do edycji/usuwania
-const ADMIN_PASSWORD = 'ponk2026';
+import { ADMIN_PASSWORD } from '../../constants';
 
 function PasswordModal({ action, onConfirm, onCancel }) {
   const [input, setInput] = useState('');
@@ -78,10 +76,10 @@ export default function HistoryTab({ history, playerNames, playSound }) {
       const row = pwModal.row;
       setEditingId(row.id);
       setEditForm({
-        date:         row.date_played,
-        cost:         row.total_cost,
-        present:      [...row.present_players],
-        multiPlayers: [...row.multisport_players],
+        date:         row.datePlayed,
+        cost:         row.totalCost,
+        present:      [...row.presentPlayers],
+        multiPlayers: [...row.multisportPlayers],
       });
     } else if (pwModal.type === 'delete') {
       setDeletingId(pwModal.rowId);
@@ -210,7 +208,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
             if (isDeleting) return (
               <div key={row.id} className="cyber-box border-rose-600 rounded-xl p-5 bg-rose-950/20">
-                <p className="text-rose-300 font-bold mb-1">Usunąć tydzień z dnia <span className="text-white">{row.date_played}</span>?</p>
+                <p className="text-rose-300 font-bold mb-1">Usunąć tydzień z dnia <span className="text-white">{row.datePlayed}</span>?</p>
                 <p className="text-rose-700 text-sm mb-4">Ta operacja jest nieodwracalna.</p>
                 <div className="flex gap-3">
                   <button onClick={() => handleDelete(row.id)}
@@ -230,21 +228,21 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                 <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm min-w-0">
                   <div>
                     <p className="text-cyan-700 text-xs tracking-wider">DATA</p>
-                    <p className="text-cyan-100 font-bold">{row.date_played}</p>
+                    <p className="text-cyan-100 font-bold">{row.datePlayed}</p>
                   </div>
                   <div>
                     <p className="text-cyan-700 text-xs tracking-wider">KOSZT</p>
-                    <p className="text-magenta-400 font-black text-neon-pink">{row.total_cost} PLN</p>
+                    <p className="text-magenta-400 font-black text-neon-pink">{row.totalCost} PLN</p>
                   </div>
                   <div>
                     <p className="text-cyan-700 text-xs tracking-wider">NA OSOBĘ</p>
-                    <p className="text-cyan-400 font-bold">{row.cost_per_person.toFixed(2)} PLN</p>
+                    <p className="text-cyan-400 font-bold">{row.costPerPerson.toFixed(2)} PLN</p>
                   </div>
                   <div className="min-w-0">
                     <p className="text-cyan-700 text-xs tracking-wider">OBECNI</p>
-                    <p className="text-cyan-600 text-xs truncate">{row.present_players.join(', ')}</p>
-                    {row.multisport_players.length > 0 && (
-                      <p className="text-emerald-600 text-xs truncate">Multi: {row.multisport_players.join(', ')}</p>
+                    <p className="text-cyan-600 text-xs truncate">{row.presentPlayers.join(', ')}</p>
+                    {row.multisportPlayers.length > 0 && (
+                      <p className="text-emerald-600 text-xs truncate">Multi: {row.multisportPlayers.join(', ')}</p>
                     )}
                   </div>
                 </div>

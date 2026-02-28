@@ -1,11 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Settings, Users, Zap, Database } from 'lucide-react';
 import { addSession } from '../../firebase';
-
-const MONTHS = [
-  'Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec',
-  'Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'
-];
+import { MONTHS, QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 
 function DatePicker({ value, onChange }) {
   const today = new Date();
@@ -38,9 +34,7 @@ function DatePicker({ value, onChange }) {
   );
 }
 
-const QUICK_COSTS = [0, 15, 30, 45, 60];
-
-export default function AdminTab({ playerNames, defaultMultiPlayers, refreshData, setActiveTab, playSound }) {
+export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
   const today = new Date().toISOString().split('T')[0];
   const [datePlayed,        setDatePlayed]        = useState(today);
   const [totalCost,         setTotalCost]         = useState('');
@@ -70,20 +64,20 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, refreshData
     );
   };
 
-  const handleSaveSession = async (e) => {
+  const handleSaveSession = useCallback(async (e) => {
     e.preventDefault();
-    playSound('success');
+    playSound(SOUND_TYPES.SUCCESS);
     await addSession({
-      date_played:        datePlayed,
-      total_cost:         parseFloat(totalCost),
-      present_players:    presentPlayers,
-      multisport_players: multisportPlayers,
+      datePlayed: datePlayed,
+      totalCost: parseFloat(totalCost),
+      presentPlayers: presentPlayers,
+      multisportPlayers: multisportPlayers,
     });
     setTotalCost('');
     setPresentPlayers([...playerNames]);
     setMultisportPlayers([...(defaultMultiPlayers || [])]);
-    setActiveTab('dashboard');
-  };
+    setActiveTab(TABS.DASHBOARD);
+  }, [datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, setActiveTab]);
 
   return (
     <div className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-300">
