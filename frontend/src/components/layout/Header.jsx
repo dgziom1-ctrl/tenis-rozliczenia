@@ -15,7 +15,8 @@ export default function Header({ isMuted, setIsMuted, isConnected, onOpenPong, t
   const chaosTimer      = useRef(null);
   const arcadeTickTimer = useRef(null);
 
-  const a          = theme === 'arcade';
+  const a = theme === 'arcade';
+  const isClean = theme === 'clean';
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
 
   // INSERT COIN blink
@@ -72,7 +73,48 @@ export default function Header({ isMuted, setIsMuted, isConnected, onOpenPong, t
   };
 
   // ── Colours & tokens ──────────────────────────────────
-  const C = a ? {
+  const C = isClean ? {
+    headerBg:      'rgba(255, 255, 255, 0.8)',
+    headerBorder:  '1px solid #D1D1D6',
+    topBarBg:      'rgba(255, 255, 255, 0.9)',
+    topBarBorder:  '1px solid #E5E5E7',
+    blikBorder:    '1px solid #D1D1D6',
+    blikLabelClr:  '#1C1C1E',
+    blikNumClr:    '#007AFF',
+    blikLabelBg:   'rgba(0, 122, 255, 0.05)',
+    iconClr:       '#007AFF',
+    copyClr:       '#86868B',
+    muteOnBorder:  '2px solid #FF3B30', muteOnClr: '#FF3B30', muteOnBg: 'rgba(255, 59, 48, 0.05)',
+    muteOffBorder: '2px solid #007AFF', muteOffClr: '#007AFF', muteOffBg: 'rgba(0, 122, 255, 0.05)',
+    titleGrad:     'linear-gradient(90deg, #1C1C1E, #1C1C1E)',
+    titleFont:     "'Inter', -apple-system, sans-serif",
+    titleAnim:     'none',
+    ppGrad:        'linear-gradient(90deg, #007AFF, #34C759)',
+    ppChaos:       { color: '#007AFF', textShadow: 'none', animation: 'none' },
+    hintStyle:     { border: '1px solid #D1D1D6', background: '#FFFFFF', color: '#007AFF', fontFamily: "'Inter', sans-serif", fontSize: '0.75rem' },
+    chaosStyle:    { border: '2px solid #007AFF', background: 'rgba(255, 255, 255, 0.95)', color: '#007AFF', textShadow: 'none', fontFamily: "'Inter', sans-serif", fontSize: '0.75rem' },
+    chaosText:     '✨ CHAOS MODE ✨',
+    loaderBg:      '#F5F5F7',
+    loaderFill:    'linear-gradient(90deg, #007AFF, #34C759)',
+    loaderChaos:   'linear-gradient(90deg, #FF9500, #FF3B30)',
+    loaderShadow:  'rgba(0, 122, 255, 0.3)',
+    paddleL:       { bg: 'linear-gradient(135deg,#007AFF,#0055AA)', shadow: '0 4px 12px rgba(0, 122, 255, 0.3)', inner: '#5AC8FA' },
+    paddleR:       { bg: 'linear-gradient(135deg,#34C759,#248A3D)',  shadow: '0 4px 12px rgba(52, 199, 89, 0.3)',  inner: '#7ED321' },
+    handleBg:      'linear-gradient(to bottom,#D1D1D6,#86868B)',
+    ballClr:       '#007AFF', ballShadow: 'rgba(0, 122, 255, 0.8)',
+    paddleClr:     '#007AFF', paddleShadow: 'rgba(0, 122, 255, 0.3)',
+    sepBg:         'linear-gradient(to bottom,#FFFFFF,#F5F5F7)',
+    sepBorder:     '1px solid #E5E5E7',
+    sepLine:       'linear-gradient(90deg,transparent,rgba(0, 122, 255, 0.2) 50%,transparent)',
+    glowBlobs:     false,
+    statusOnClr:   '#34C759', statusOnShadow: 'none',
+    statusOffClr:  '#FF3B30', statusOffShadow: 'none',
+    statusFont:    "'Inter', sans-serif",
+    statusFontSz:  '0.75rem',
+    climateClr:    null,
+    climateFontSz: '0.75rem',
+    climateFont:   "'Inter', sans-serif",
+  } : a ? {
     headerBg:      'linear-gradient(to bottom, #010300, #020500)',
     headerBorder:  '3px solid #1a4d00',
     topBarBg:      'rgba(0,0,0,0.6)',

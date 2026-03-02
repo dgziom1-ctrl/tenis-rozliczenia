@@ -1,4 +1,4 @@
-import { LayoutDashboard, Settings, History, Users, Trophy, Gamepad2, Zap } from 'lucide-react';
+import { LayoutDashboard, Settings, History, Users, Trophy, Gamepad2, Zap, ArrowRight } from 'lucide-react';
 
 export default function Navigation({ activeTab, setActiveTab, theme, onToggleTheme }) {
   const tabs = [
@@ -16,13 +16,13 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
   // Determine next theme and button text
   let nextThemeLabel, nextThemeIcon;
   if (isCyber) {
-    nextThemeLabel = isArcade ? 'SWITCH: CYBER PONK' : 'Switch → Retro Arcade';
+    nextThemeLabel = 'Retro Arcade';
     nextThemeIcon = <Gamepad2 size={14} />;
   } else if (isArcade) {
-    nextThemeLabel = 'SWITCH: CLEAN MODE';
+    nextThemeLabel = 'CLEAN MODE';
     nextThemeIcon = <Zap size={12} />;
   } else {
-    nextThemeLabel = 'Switch → Cyber Ponk';
+    nextThemeLabel = 'Cyber Ponk';
     nextThemeIcon = <Zap size={14} />;
   }
 
@@ -155,9 +155,15 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
             }
           }}
         >
-          {nextThemeIcon}
+          {/* Icon for CURRENT theme */}
+          {isCyber && <Zap size={14} />}
+          {isArcade && <Gamepad2 size={12} />}
+          {isClean && <Zap size={14} />}
+          
+          <ArrowRight size={isArcade ? 10 : 14} />
+          
+          {/* Label for NEXT theme */}
           {nextThemeLabel}
-          {nextThemeIcon}
         </button>
       </div>
     </>

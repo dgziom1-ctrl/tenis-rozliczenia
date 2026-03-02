@@ -30,7 +30,20 @@ export default function AttendanceTab({ players, history, summary }) {
   }, [players, history, totalWeeks]);
 
   const ranked = useMemo(() => {
-    return assignRankingPlaces(stats);
+    // IMPORTANT: Sort by attendancePercentage DESC before assigning places
+    const sorted = [...stats].sort((a, b) => {
+      // Primary sort: by percentage (higher first)
+      if (b.attendancePercentage !== a.attendancePercentage) {
+        return b.attendancePercentage - a.attendancePercentage;
+      }
+      // Secondary sort: by attendance count (higher first)
+      if (b.attendanceCount !== a.attendanceCount) {
+        return b.attendanceCount - a.attendanceCount;
+      }
+      // Tertiary sort: alphabetically by name
+      return a.name.localeCompare(b.name, 'pl');
+    });
+    return assignRankingPlaces(sorted);
   }, [stats]);
 
   const monthlyStats = useMemo(() => {
