@@ -1,4 +1,4 @@
-import { LayoutDashboard, Settings, History, Users, Trophy, Gamepad2, Zap, ArrowRight } from 'lucide-react';
+import { LayoutDashboard, Settings, History, Users, Trophy, Gamepad2, Zap } from 'lucide-react';
 
 export default function Navigation({ activeTab, setActiveTab, theme, onToggleTheme }) {
   const tabs = [
@@ -10,21 +10,6 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
   ];
 
   const isArcade = theme === 'arcade';
-  const isClean = theme === 'clean';
-  const isCyber = theme === 'cyber';
-
-  // Determine next theme and button text
-  let nextThemeLabel, nextThemeIcon;
-  if (isCyber) {
-    nextThemeLabel = 'Retro Arcade';
-    nextThemeIcon = <Gamepad2 size={14} />;
-  } else if (isArcade) {
-    nextThemeLabel = 'CLEAN MODE';
-    nextThemeIcon = <Zap size={12} />;
-  } else {
-    nextThemeLabel = 'Cyber Ponk';
-    nextThemeIcon = <Zap size={14} />;
-  }
 
   return (
     <>
@@ -118,52 +103,40 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
           ))}
         </div>
 
-        {/* Theme toggle - cycles through cyber → arcade → clean → cyber */}
+        {/* Theme toggle */}
         <button
           onClick={onToggleTheme}
-          aria-label={`Zmień motyw na ${isCyber ? 'Arcade' : isArcade ? 'Clean' : 'Cyber'}`}
+          aria-label={isArcade ? 'Zmień motyw na Cyber Ponk' : 'Zmień motyw na Retro Arcade'}
           style={{
             width: '100%',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
             padding: '0.6rem',
             fontWeight: 'bold',
-            fontSize: isArcade ? '0.5rem' : isClean ? '0.7rem' : '0.75rem',
-            fontFamily: isArcade ? "'Press Start 2P', monospace" : isClean ? "'Inter', sans-serif" : 'inherit',
+            fontSize: isArcade ? '0.5rem' : '0.75rem',
+            fontFamily: isArcade ? "'Press Start 2P', monospace" : 'inherit',
             letterSpacing: isArcade ? '0.04em' : 'normal',
             border: '2px solid',
-            borderRadius: isArcade ? 0 : isClean ? '12px' : '0.75rem',
+            borderRadius: isArcade ? 0 : '0.75rem',
             cursor: 'pointer',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            borderColor: isArcade ? '#cc4400' : isClean ? '#007AFF' : 'rgb(126,34,206)',
-            color: isArcade ? '#ff6b00' : isClean ? '#007AFF' : 'rgb(192,132,252)',
-            background: isArcade ? '#0d0200' : isClean ? 'rgba(0, 122, 255, 0.05)' : 'rgba(88,28,135,0.2)',
+            transition: 'all 0.2s',
+            borderColor: isArcade ? '#cc4400' : 'rgb(126,34,206)',
+            color: isArcade ? '#ff6b00' : 'rgb(192,132,252)',
+            background: isArcade ? '#0d0200' : 'rgba(88,28,135,0.2)',
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.background = isArcade ? '#ff6b00' : isClean ? '#007AFF' : 'rgb(168,85,247)';
-            e.currentTarget.style.color = isArcade ? '#010300' : isClean ? '#FFFFFF' : 'black';
-            if (isClean) {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 122, 255, 0.3)';
-            }
+            e.currentTarget.style.background = isArcade ? '#ff6b00' : 'rgb(168,85,247)';
+            e.currentTarget.style.color = isArcade ? '#010300' : 'black';
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.background = isArcade ? '#0d0200' : isClean ? 'rgba(0, 122, 255, 0.05)' : 'rgba(88,28,135,0.2)';
-            e.currentTarget.style.color = isArcade ? '#ff6b00' : isClean ? '#007AFF' : 'rgb(192,132,252)';
-            if (isClean) {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }
+            e.currentTarget.style.background = isArcade ? '#0d0200' : 'rgba(88,28,135,0.2)';
+            e.currentTarget.style.color = isArcade ? '#ff6b00' : 'rgb(192,132,252)';
           }}
         >
-          {/* Icon for CURRENT theme */}
-          {isCyber && <Zap size={14} />}
-          {isArcade && <Gamepad2 size={12} />}
-          {isClean && <Zap size={14} />}
-          
-          <ArrowRight size={isArcade ? 10 : 14} />
-          
-          {/* Label for NEXT theme */}
-          {nextThemeLabel}
+          {isArcade ? (
+            <><Zap size={12} /> SWITCH: CYBER PONK <Zap size={12} /></>
+          ) : (
+            <><Gamepad2 size={14} /> Switch → Retro Arcade <Gamepad2 size={14} /></>
+          )}
         </button>
       </div>
     </>
