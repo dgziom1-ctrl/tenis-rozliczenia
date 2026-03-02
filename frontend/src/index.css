@@ -14,6 +14,33 @@ body {
   transition: background-color 0.3s;
 }
 
+/* Focus indicators for accessibility */
+*:focus-visible {
+  outline: 3px solid rgb(34,211,238);
+  outline-offset: 2px;
+}
+
+.theme-arcade *:focus-visible {
+  outline-color: #39ff14;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgb(34,211,238);
+  outline-offset: 2px;
+}
+
+.theme-arcade button:focus-visible,
+.theme-arcade a:focus-visible,
+.theme-arcade input:focus-visible,
+.theme-arcade select:focus-visible,
+.theme-arcade textarea:focus-visible {
+  outline-color: #39ff14;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -73,6 +100,18 @@ body::before {
 
 /* ══ UTILITIES ═══════════════════════════════════════════ */
 @layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  
   .cyber-box {
     @apply bg-gray-900 border-2 border-cyan-800;
   }

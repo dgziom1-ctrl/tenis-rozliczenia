@@ -68,6 +68,14 @@ function AppContent() {
 
   return (
     <div className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : ''}`}>
+      {/* Skip to content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-500 focus:text-black focus:font-bold focus:rounded"
+      >
+        Przejdź do treści
+      </a>
+      
       <div className="max-w-7xl mx-auto relative">
         <Header
           isMuted={isMuted}
@@ -83,7 +91,7 @@ function AppContent() {
           theme={theme}
           onToggleTheme={toggleTheme}
         />
-        <main>
+        <main id="main-content" role="main" aria-label="Główna treść aplikacji">
           <Suspense fallback={<FullPageLoader message="Ładowanie zakładki..." />}>
             {activeTab === TABS.DASHBOARD && (
               <DashboardTab

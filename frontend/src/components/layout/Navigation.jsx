@@ -106,6 +106,7 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
         {/* Theme toggle */}
         <button
           onClick={onToggleTheme}
+          aria-label={isArcade ? 'Zmień motyw na Cyber Ponk' : 'Zmień motyw na Retro Arcade'}
           style={{
             width: '100%',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',

@@ -5,7 +5,6 @@ import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME } from '../.
 import { calculateDebtBreakdown } from '../../utils/calculations';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
-import { useToast } from '../common/Toast';
 
 export default function DashboardTab({ data, history, playSound }) {
   const [openDetails, setOpenDetails] = useState(null);
@@ -15,7 +14,6 @@ export default function DashboardTab({ data, history, playSound }) {
   const { showSuccess, showError } = useToast();
   const timerRef = useRef(null);
   const intervalRef = useRef(null);
-  const { showSuccess, showError } = useToast();
 
   const totalWeeks = data.summary?.totalWeeks || 0;
 
