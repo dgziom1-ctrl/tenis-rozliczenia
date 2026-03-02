@@ -94,7 +94,14 @@ function AppContent() {
   }, []);
 
   const toggleTheme = () => {
-    const next = theme === 'cyber' ? 'arcade' : 'cyber';
+    let next;
+    if (theme === 'cyber') {
+      next = 'arcade';
+    } else if (theme === 'arcade') {
+      next = 'clean';
+    } else {
+      next = 'cyber';
+    }
     setTheme(next);
     try { localStorage.setItem('ponk-theme', next); } catch {}
     synth.play(SOUND_TYPES.COIN, isMuted);
@@ -104,7 +111,9 @@ function AppContent() {
   const switchTab   = (id) => { playSound(SOUND_TYPES.TAB); setActiveTab(id); };
 
   return (
-    <div className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : ''}`}>
+    <div className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${
+      theme === 'arcade' ? 'theme-arcade' : theme === 'clean' ? 'theme-clean' : ''
+    }`}>
       <div className="max-w-7xl mx-auto relative">
         <Header
           isMuted={isMuted}

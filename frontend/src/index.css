@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Press+Start+2P&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -237,3 +238,283 @@ body::before {
   50%     { transform: rotate(10deg); }
 }
 .theme-arcade .mini-paddle { background-color: #ff6b00; border-radius: 0; }
+
+/* ══════════════════════════════════════════════════════════════
+   CLEAN THEME - Professional, Minimalist (Apple-style)
+   ══════════════════════════════════════════════════════════════ */
+
+.theme-clean {
+  background-color: #FFFFFF;
+  color: #1C1C1E;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.theme-clean body {
+  background-color: #FFFFFF;
+  color: #1C1C1E;
+}
+
+.theme-clean body::before {
+  display: none; /* No grid background */
+}
+
+/* ── Focus indicators ────────────────────────────────────────── */
+.theme-clean *:focus-visible {
+  outline: 3px solid #007AFF;
+  outline-offset: 2px;
+}
+
+.theme-clean button:focus-visible,
+.theme-clean a:focus-visible,
+.theme-clean input:focus-visible,
+.theme-clean select:focus-visible,
+.theme-clean textarea:focus-visible {
+  outline: 3px solid #007AFF;
+  outline-offset: 2px;
+}
+
+/* ── Cards & Containers ──────────────────────────────────────── */
+.theme-clean .cyber-box {
+  background: #F5F5F7;
+  border: 1px solid #D1D1D6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-clean .cyber-box:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* ── Inputs ──────────────────────────────────────────────────── */
+.theme-clean .cyber-input {
+  background: #FFFFFF;
+  border: 1px solid #D1D1D6;
+  color: #1C1C1E;
+  transition: all 0.2s ease;
+}
+
+.theme-clean .cyber-input:focus {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.theme-clean .cyber-input::placeholder {
+  color: #86868B;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.theme-clean .cyber-button-blue {
+  background: linear-gradient(180deg, #007AFF 0%, #0066CC 100%);
+  border: none;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-clean .cyber-button-blue:hover {
+  background: linear-gradient(180deg, #0066CC 0%, #0055AA 100%);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.theme-clean .cyber-button-blue:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
+}
+
+/* ── Text Colors ─────────────────────────────────────────────── */
+.theme-clean [class*="text-cyan-"] {
+  color: #007AFF !important;
+}
+
+.theme-clean [class*="text-magenta-"],
+.theme-clean [class*="text-pink-"],
+.theme-clean [class*="text-rose-"] {
+  color: #34C759 !important; /* Green for success/positive */
+}
+
+.theme-clean [class*="text-yellow-"] {
+  color: #FF9500 !important; /* Orange for warnings */
+}
+
+.theme-clean [class*="text-slate-"] {
+  color: #86868B !important; /* Gray for secondary text */
+}
+
+/* ── Borders ─────────────────────────────────────────────────── */
+.theme-clean [class*="border-cyan-"] {
+  border-color: #D1D1D6 !important;
+}
+
+.theme-clean [class*="border-magenta-"],
+.theme-clean [class*="border-rose-"] {
+  border-color: #34C759 !important;
+}
+
+.theme-clean [class*="border-yellow-"] {
+  border-color: #FF9500 !important;
+}
+
+/* ── Backgrounds ─────────────────────────────────────────────── */
+.theme-clean [class*="bg-cyan-9"],
+.theme-clean [class*="bg-gray-9"],
+.theme-clean [class*="bg-slate-9"] {
+  background-color: #F5F5F7 !important;
+}
+
+.theme-clean [class*="bg-cyan-8"],
+.theme-clean [class*="bg-gray-8"] {
+  background-color: #E5E5E7 !important;
+}
+
+.theme-clean [class*="bg-black"] {
+  background-color: #F5F5F7 !important;
+}
+
+/* ── Specific Component Overrides ────────────────────────────── */
+
+/* Header */
+.theme-clean .cyber-box[style*="background"] {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(209, 209, 214, 0.5) !important;
+}
+
+/* Navigation */
+.theme-clean button[aria-pressed="true"] {
+  background: #007AFF !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.theme-clean button[aria-pressed="false"] {
+  background: #FFFFFF !important;
+  color: #1C1C1E !important;
+  border: 1px solid #D1D1D6 !important;
+}
+
+.theme-clean button[aria-pressed="false"]:hover {
+  background: #F5F5F7 !important;
+  border-color: #007AFF !important;
+}
+
+/* Select dropdowns */
+.theme-clean select {
+  background-color: #FFFFFF;
+  border: 1px solid #D1D1D6;
+  color: #1C1C1E;
+}
+
+.theme-clean select:focus {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.theme-clean select option {
+  background-color: #FFFFFF;
+  color: #1C1C1E;
+}
+
+/* Podium & Ranking */
+.theme-clean .cyber-box[class*="border-yellow-"] {
+  background: linear-gradient(135deg, #FFF9E6 0%, #FFF4D6 100%);
+  border: 2px solid #FFD60A;
+  box-shadow: 0 4px 12px rgba(255, 214, 10, 0.15);
+}
+
+.theme-clean .cyber-box[class*="border-slate-"] {
+  background: linear-gradient(135deg, #F5F5F7 0%, #E5E5E7 100%);
+  border: 2px solid #D1D1D6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.theme-clean .cyber-box[class*="border-amber-"] {
+  background: linear-gradient(135deg, #FFF4E6 0%, #FFE8CC 100%);
+  border: 2px solid #FF9500;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.15);
+}
+
+/* Debt cards - positive (settled) */
+.theme-clean [class*="bg-cyan-950"] {
+  background: linear-gradient(135deg, #E6F7FF 0%, #D6F0FF 100%) !important;
+}
+
+/* Debt cards - negative (has debt) */
+.theme-clean [class*="bg-magenta-950"],
+.theme-clean [class*="bg-rose-950"] {
+  background: linear-gradient(135deg, #FFE6E6 0%, #FFD6D6 100%) !important;
+}
+
+/* Success green */
+.theme-clean [class*="bg-emerald-950"] {
+  background: linear-gradient(135deg, #E6F7ED 0%, #D6F0E0 100%) !important;
+  border-color: #34C759 !important;
+}
+
+.theme-clean [class*="text-emerald-"] {
+  color: #34C759 !important;
+}
+
+/* Toast notifications */
+.theme-clean [role="alert"] {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Neon effects removal */
+.theme-clean .text-neon-blue,
+.theme-clean .text-neon-pink {
+  text-shadow: none !important;
+}
+
+.theme-clean .neon-amount {
+  color: #1C1C1E;
+  text-shadow: none !important;
+}
+
+/* Animations - smooth & subtle */
+.theme-clean [class*="animate-"] {
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Disabled states */
+.theme-clean button:disabled,
+.theme-clean button[disabled] {
+  background: #E5E5E7 !important;
+  color: #86868B !important;
+  border-color: #D1D1D6 !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+/* Mini paddle icon adjustment */
+.theme-clean .mini-paddle {
+  background-color: #007AFF;
+  border-radius: 12px;
+}
+
+/* Remove all border-radius overrides for clean theme - keep the nice rounded corners */
+.theme-clean [class*="rounded"] {
+  /* Keep default rounded values - don't override to 0 */
+}
+
+/* Smooth transitions for everything */
+.theme-clean * {
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .theme-clean * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
