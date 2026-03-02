@@ -1,6 +1,9 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useAudio } from './hooks/useAudio';
 import { AppProvider, useAppData } from './contexts/AppContext';
+import { ToastProvider } from './components/common/Toast';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { FullPageLoader } from './components/common/LoadingSpinner';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
 import { SECRET_EASTER_EGG, TABS, SOUND_TYPES } from './constants';
@@ -11,14 +14,6 @@ const AdminTab = lazy(() => import('./components/admin/AdminTab'));
 const HistoryTab = lazy(() => import('./components/history/HistoryTab'));
 const PlayersTab = lazy(() => import('./components/players/PlayersTab'));
 const PongGame = lazy(() => import('./components/easter/PongGame'));
-
-function LoadingSpinner() {
-  return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <div className="text-cyan-400 animate-pulse">Ładowanie...</div>
-    </div>
-  );
-}
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
@@ -32,8 +27,12 @@ function AppContent() {
     }
   });
 
-  const { appData, isConnected } = useAppData();
+  const { appData, isConnected, isLoading } = useAppData();
   const { playSound } = useAudio(isMuted);
+
+  if (isLoading) {
+    return <FullPageLoader message="Ładowanie danych..." />;
+  }
 
   useEffect(() => {
     const handleKeydown = (e) => {
@@ -85,7 +84,7 @@ function AppContent() {
           onToggleTheme={toggleTheme}
         />
         <main>
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<FullPageLoader message="Ładowanie zakładki..." />}>
             {activeTab === TABS.DASHBOARD && (
               <DashboardTab
                 data={{ summary: appData.summary, players: appData.players }}
@@ -136,8 +135,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
+      </AppProvider>
+    </ErrorBoundary>
   );
 }

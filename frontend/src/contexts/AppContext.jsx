@@ -13,11 +13,13 @@ export function AppProvider({ children }) {
     history: [],
   });
   const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = subscribeToData((data) => {
       setAppData(data);
       setIsConnected(true);
+      setIsLoading(false);
     });
 
     return () => {
@@ -30,6 +32,7 @@ export function AppProvider({ children }) {
   const value = {
     appData,
     isConnected,
+    isLoading,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

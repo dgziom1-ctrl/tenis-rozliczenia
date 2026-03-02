@@ -111,94 +111,212 @@ function save() {
 }
 
 export async function addSession({ datePlayed, totalCost, presentPlayers, multisportPlayers }) {
-  if (!_currentData) return;
-  _currentData.weeks = [
-    ...(_currentData.weeks || []),
-    {
-      id: Date.now().toString(36),
-      date: datePlayed,
-      cost: totalCost,
-      present: presentPlayers,
-      multiPlayers: multisportPlayers,
-    },
-  ];
-  await save();
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    if (!datePlayed || totalCost < 0 || !presentPlayers || presentPlayers.length === 0) {
+      throw new Error('Nieprawidłowe dane sesji');
+    }
+    
+    _currentData.weeks = [
+      ...(_currentData.weeks || []),
+      {
+        id: Date.now().toString(36),
+        date: datePlayed,
+        cost: totalCost,
+        present: presentPlayers,
+        multiPlayers: multisportPlayers || [],
+      },
+    ];
+    
+    await save();
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding session:', error);
+    return { success: false, error: error.message || 'Nie udało się zapisać sesji' };
+  }
 }
 
 export async function updateWeek(weekId, { date, cost, present, multiPlayers }) {
-  if (!_currentData) return;
-  const idx = (_currentData.weeks || []).findIndex(w => w.id === weekId);
-  if (idx === -1) return;
-  _currentData.weeks[idx] = { id: weekId, date, cost, present, multiPlayers };
-  await save();
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    const idx = (_currentData.weeks || []).findIndex(w => w.id === weekId);
+    
+    if (idx === -1) {
+      throw new Error('Nie znaleziono sesji');
+    }
+    
+    _currentData.weeks[idx] = { id: weekId, date, cost, present, multiPlayers: multiPlayers || [] };
+    await save();
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating week:', error);
+    return { success: false, error: error.message || 'Nie udało się zaktualizować sesji' };
+  }
 }
 
 export async function deleteWeek(weekId) {
-  if (!_currentData) return;
-  _currentData.weeks = (_currentData.weeks || []).filter(w => w.id !== weekId);
-  await save();
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    _currentData.weeks = (_currentData.weeks || []).filter(w => w.id !== weekId);
+    await save();
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting week:', error);
+    return { success: false, error: error.message || 'Nie udało się usunąć sesji' };
+  }
 }
 
 export async function settlePlayer(playerName) {
-  if (!_currentData) return null;
-  const weeks = _currentData.weeks || [];
-  if (weeks.length === 0) return null;
-  const previousValue = _currentData.paidUntilWeek?.[playerName] ?? null;
-  _currentData.paidUntilWeek = {
-    ...(_currentData.paidUntilWeek || {}),
-    [playerName]: weeks[weeks.length - 1].id,
-  };
-  await save();
-  return previousValue;
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    const weeks = _currentData.weeks || [];
+    
+    if (weeks.length === 0) {
+      throw new Error('Brak sesji do rozliczenia');
+    }
+    
+    const previousValue = _currentData.paidUntilWeek?.[playerName] ?? null;
+    
+    _currentData.paidUntilWeek = {
+      ...(_currentData.paidUntilWeek || {}),
+      [playerName]: weeks[weeks.length - 1].id,
+    };
+    
+    await save();
+    return { success: true, previousValue };
+  } catch (error) {
+    console.error('Error settling player:', error);
+    return { success: false, error: error.message || 'Nie udało się rozliczyć gracza' };
+  }
 }
 
 export async function undoSettle(playerName, previousValue) {
-  if (!_currentData) return;
-  const paid = { ...(_currentData.paidUntilWeek || {}) };
-  if (previousValue === null) {
-    delete paid[playerName];
-  } else {
-    paid[playerName] = previousValue;
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    const paid = { ...(_currentData.paidUntilWeek || {}) };
+    
+    if (previousValue === null) {
+      delete paid[playerName];
+    } else {
+      paid[playerName] = previousValue;
+    }
+    
+    _currentData.paidUntilWeek = paid;
+    await save();
+    return { success: true };
+  } catch (error) {
+    console.error('Error undoing settle:', error);
+    return { success: false, error: error.message || 'Nie udało się cofnąć rozliczenia' };
   }
-  _currentData.paidUntilWeek = paid;
-  await save();
 }
 
 export async function addPlayer(name) {
-  if (!_currentData) return;
-  if ((_currentData.players || []).includes(name)) return;
-  _currentData.players = [...(_currentData.players || []), name];
-  _currentData.playerJoinWeek = {
-    ...(_currentData.playerJoinWeek || {}),
-    [name]: (_currentData.weeks || []).length,
-  };
-  await save();
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    if (!name || name.trim().length === 0) {
+      throw new Error('Nazwa gracza nie może być pusta');
+    }
+    
+    if ((_currentData.players || []).includes(name)) {
+      throw new Error('Gracz o tej nazwie już istnieje');
+    }
+    
+    _currentData.players = [...(_currentData.players || []), name];
+    _currentData.playerJoinWeek = {
+      ...(_currentData.playerJoinWeek || {}),
+      [name]: (_currentData.weeks || []).length,
+    };
+    
+    await save();
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding player:', error);
+    return { success: false, error: error.message || 'Nie udało się dodać gracza' };
+  }
 }
 
 export async function softDeletePlayer(playerName) {
-  if (!_currentData) return;
-  _currentData.players = (_currentData.players || []).filter(p => p !== playerName);
-  _currentData.deletedPlayers = [...(_currentData.deletedPlayers || []), playerName];
-  await save();
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    _currentData.players = (_currentData.players || []).filter(p => p !== playerName);
+    _currentData.deletedPlayers = [...(_currentData.deletedPlayers || []), playerName];
+    
+    await save();
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting player:', error);
+    return { success: false, error: error.message || 'Nie udało się usunąć gracza' };
+  }
 }
 
 export async function restorePlayer(playerName) {
-  if (!_currentData) return;
-  _currentData.deletedPlayers = (_currentData.deletedPlayers || []).filter(p => p !== playerName);
-  _currentData.players = [...(_currentData.players || []), playerName];
-  await save();
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    _currentData.deletedPlayers = (_currentData.deletedPlayers || []).filter(p => p !== playerName);
+    _currentData.players = [...(_currentData.players || []), playerName];
+    
+    await save();
+    return { success: true };
+  } catch (error) {
+    console.error('Error restoring player:', error);
+    return { success: false, error: error.message || 'Nie udało się przywrócić gracza' };
+  }
 }
 
 export async function permanentDeletePlayer(playerName) {
-  if (!_currentData) return;
-  _currentData.deletedPlayers = (_currentData.deletedPlayers || []).filter(p => p !== playerName);
-  await save();
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    _currentData.deletedPlayers = (_currentData.deletedPlayers || []).filter(p => p !== playerName);
+    
+    await save();
+    return { success: true };
+  } catch (error) {
+    console.error('Error permanently deleting player:', error);
+    return { success: false, error: error.message || 'Nie udało się trwale usunąć gracza' };
+  }
 }
 
 export async function saveDefaultMulti(playerNames) {
-  if (!_currentData) return;
-  _currentData.defaultMultiPlayers = playerNames;
-  await save();
+  try {
+    if (!_currentData) {
+      throw new Error('Brak połączenia z bazą danych');
+    }
+    
+    _currentData.defaultMultiPlayers = playerNames || [];
+    
+    await save();
+    return { success: true };
+  } catch (error) {
+    console.error('Error saving default multi:', error);
+    return { success: false, error: error.message || 'Nie udało się zapisać domyślnych multi' };
+  }
 }
 
 export { database };

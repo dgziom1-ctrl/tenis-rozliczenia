@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Settings, Users, Zap, Database } from 'lucide-react';
 import { addSession } from '../../firebase';
 import { MONTHS, QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
+import { useToast } from '../common/Toast';
+import { InlineSpinner } from '../common/LoadingSkeleton';
 
 function DatePicker({ value, onChange }) {
   const today = new Date();
@@ -35,11 +37,13 @@ function DatePicker({ value, onChange }) {
 }
 
 export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
+  const { showSuccess, showError } = useToast();
   const today = new Date().toISOString().split('T')[0];
   const [datePlayed,        setDatePlayed]        = useState(today);
   const [totalCost,         setTotalCost]         = useState('');
   const [presentPlayers,    setPresentPlayers]    = useState([]);
   const [multisportPlayers, setMultisportPlayers] = useState([]);
+  const [isSaving,          setIsSaving]          = useState(false);
 
   useEffect(() => {
     if (!playerNames || playerNames.length === 0) return;
@@ -66,18 +70,34 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
 
   const handleSaveSession = useCallback(async (e) => {
     e.preventDefault();
-    playSound(SOUND_TYPES.SUCCESS);
-    await addSession({
-      datePlayed: datePlayed,
-      totalCost: parseFloat(totalCost),
-      presentPlayers: presentPlayers,
-      multisportPlayers: multisportPlayers,
-    });
-    setTotalCost('');
-    setPresentPlayers([...playerNames]);
-    setMultisportPlayers([...(defaultMultiPlayers || [])]);
-    setActiveTab(TABS.DASHBOARD);
-  }, [datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, setActiveTab]);
+    
+    if (isSaving) return; // Zapobiegaj podwójnemu kliknięciu
+    
+    setIsSaving(true);
+    
+    try {
+      const result = await addSession({
+        datePlayed: datePlayed,
+        totalCost: parseFloat(totalCost),
+        presentPlayers: presentPlayers,
+        multisportPlayers: multisportPlayers,
+      });
+      
+      if (!result.success) {
+        showError(result.error || 'Nie udało się zapisać sesji');
+        return;
+      }
+      
+      playSound(SOUND_TYPES.SUCCESS);
+      showSuccess('✓ Sesja zapisana!');
+      setTotalCost('');
+      setPresentPlayers([...playerNames]);
+      setMultisportPlayers([...(defaultMultiPlayers || [])]);
+      setActiveTab(TABS.DASHBOARD);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isSaving, datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, setActiveTab, showSuccess, showError]);
 
   return (
     <div className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-300">
@@ -173,9 +193,24 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
             </div>
           )}
 
-          <button type="submit"
-            className="cyber-button-blue w-full py-4 rounded-xl text-lg font-black flex justify-center items-center gap-2">
-            <Database className="flex-shrink-0" /> ZAPISZ TYDZIEŃ
+          <button 
+            type="submit"
+            disabled={isSaving || presentPlayers.length === 0 || !totalCost}
+            className={`cyber-button-blue w-full py-4 rounded-xl text-lg font-black flex justify-center items-center gap-2 transition-opacity ${
+              isSaving || presentPlayers.length === 0 || !totalCost ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            aria-label="Zapisz tydzień"
+          >
+            {isSaving ? (
+              <>
+                <InlineSpinner size="sm" />
+                Zapisuję...
+              </>
+            ) : (
+              <>
+                <Database className="flex-shrink-0" /> ZAPISZ TYDZIEŃ
+              </>
+            )}
           </button>
         </form>
       </div>

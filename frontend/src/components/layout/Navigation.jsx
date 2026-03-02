@@ -35,6 +35,8 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
         {/* Dashboard — full width */}
         <button
           onClick={() => setActiveTab('dashboard')}
+          aria-label="Dashboard - przegląd zadłużenia"
+          aria-pressed={activeTab === 'dashboard'}
           style={{
             width: '100%',
             marginBottom: '0.5rem',
@@ -70,6 +72,8 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              aria-label={tab.label}
+              aria-pressed={activeTab === tab.id}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
                 padding: '0.75rem 0.4rem',

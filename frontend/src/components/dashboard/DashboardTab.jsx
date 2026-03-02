@@ -3,13 +3,19 @@ import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw } from 'lucide
 import { settlePlayer, undoSettle } from '../../firebase';
 import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { calculateDebtBreakdown } from '../../utils/calculations';
+import { useToast } from '../common/Toast';
+import { InlineSpinner } from '../common/LoadingSkeleton';
+import { useToast } from '../common/Toast';
 
 export default function DashboardTab({ data, history, playSound }) {
   const [openDetails, setOpenDetails] = useState(null);
   const [undoToast, setUndoToast] = useState(null);
+  const [settlingPlayer, setSettlingPlayer] = useState(null);
 
+  const { showSuccess, showError } = useToast();
   const timerRef = useRef(null);
   const intervalRef = useRef(null);
+  const { showSuccess, showError } = useToast();
 
   const totalWeeks = data.summary?.totalWeeks || 0;
 
@@ -27,8 +33,15 @@ export default function DashboardTab({ data, history, playSound }) {
   const handleSettleDebt = useCallback(async (playerName) => {
     clearUndoTimers();
     playSound(SOUND_TYPES.SUCCESS);
-    const previousValue = await settlePlayer(playerName);
-    setUndoToast({ playerName, previousValue, secondsLeft: UNDO_TIMEOUT_SECONDS });
+    
+    const result = await settlePlayer(playerName);
+    
+    if (!result.success) {
+      showError(result.error || 'Nie udało się rozliczyć gracza');
+      return;
+    }
+    
+    setUndoToast({ playerName, previousValue: result.previousValue, secondsLeft: UNDO_TIMEOUT_SECONDS });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     intervalRef.current = setInterval(() => {
@@ -40,15 +53,23 @@ export default function DashboardTab({ data, history, playSound }) {
         return { ...prev, secondsLeft: prev.secondsLeft - 1 };
       });
     }, 1000);
-  }, [clearUndoTimers, playSound]);
+  }, [clearUndoTimers, playSound, showError]);
 
   const handleUndo = useCallback(async () => {
     if (!undoToast) return;
     clearUndoTimers();
     playSound(SOUND_TYPES.CLICK);
-    await undoSettle(undoToast.playerName, undoToast.previousValue);
+    
+    const result = await undoSettle(undoToast.playerName, undoToast.previousValue);
+    
+    if (!result.success) {
+      showError(result.error || 'Nie udało się cofnąć rozliczenia');
+      return;
+    }
+    
     setUndoToast(null);
-  }, [undoToast, clearUndoTimers, playSound]);
+    showSuccess('Rozliczenie cofnięte');
+  }, [undoToast, clearUndoTimers, playSound, showError, showSuccess]);
 
   const getDebtBreakdown = useCallback((playerName, currentDebt) => {
     return calculateDebtBreakdown(playerName, currentDebt, history);
@@ -166,14 +187,26 @@ export default function DashboardTab({ data, history, playSound }) {
                     {hasDebt ? (
                       <button
                         onClick={() => handleSettleDebt(player.name)}
-                        className={`w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 ${btnStyle}`}
+                        disabled={settlingPlayer === player.name}
+                        className={`w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 ${btnStyle} ${settlingPlayer === player.name ? 'opacity-50 cursor-wait' : ''}`}
+                        aria-label={`Oznacz ${player.name} jako opłaconego`}
                       >
-                        <Receipt size={18} /> OZNACZ OPŁACONE
+                        {settlingPlayer === player.name ? (
+                          <>
+                            <InlineSpinner size="sm" />
+                            Zapisuję...
+                          </>
+                        ) : (
+                          <>
+                            <Receipt size={18} /> OZNACZ OPŁACONE
+                          </>
+                        )}
                       </button>
                     ) : (
                       <button
                         disabled
                         className={`w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 mt-10 ${btnStyle}`}
+                        aria-label={`${player.name} jest rozliczony`}
                       >
                         <CheckCircle2 size={18} /> ROZLICZONY
                       </button>

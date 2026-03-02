@@ -46,7 +46,19 @@ export default function AttendanceTab({ players, history, summary }) {
     return result;
   }, [ranked]);
 
-  const hasTop3 = ranked.some(p => p.place <= 3);
+  // Podium powinno zawierać WSZYSTKICH z miejsc 1, 2, 3 (nawet jeśli ex aequo)
+  const podiumPlayers = useMemo(() => {
+    const podium = [];
+    // Zbierz wszystkich z top 3 miejsc
+    for (let place = 1; place <= 3; place++) {
+      if (byPlace[place] && byPlace[place].length > 0) {
+        podium.push({ place, players: byPlace[place] });
+      }
+    }
+    return podium;
+  }, [byPlace]);
+
+  // Reszta to gracze z miejsca 4 i dalej
   const theRest = ranked.filter(p => p.place > 3);
 
   return (
@@ -56,22 +68,25 @@ export default function AttendanceTab({ players, history, summary }) {
           <TrendingUp className="text-magenta-500" /> Leaderboard
         </h2>
 
-        {hasTop3 && (
+        {podiumPlayers.length > 0 && (
           <div className="flex items-end justify-center gap-2 sm:gap-4 mb-8">
-            {PODIUM_ORDER.map((place) => {
-              const pod = PODIUM[place];
-              const podPlayers = byPlace[place] || [];
+            {/* Kolejność olimpijska: srebro (2) | złoto (1) | brąz (3) */}
+            {[2, 1, 3].map((targetPlace) => {
+              const podiumEntry = podiumPlayers.find(p => p.place === targetPlace);
               
-              if (podPlayers.length === 0) {
-                return <div key={place} className="flex-1 max-w-[180px]" />;
+              if (!podiumEntry) {
+                // Pusty slot jeśli nie ma nikogo na tym miejscu
+                return <div key={targetPlace} className="flex-1 max-w-[180px]" />;
               }
 
-              const exAequo = podPlayers.length > 1;
+              const pod = PODIUM[targetPlace];
+              const players = podiumEntry.players;
+              const exAequo = players.length > 1;
 
               return (
-                <div key={place} className="flex flex-col items-center flex-1 max-w-[180px]">
+                <div key={targetPlace} className="flex flex-col items-center flex-1 max-w-[180px]">
                   <div className="w-full space-y-2 mb-0">
-                    {podPlayers.map(player => {
+                    {players.map(player => {
                       const rank = getRank(player.attendancePercentage);
                       return (
                         <div key={player.name} className={`w-full rounded-xl border-2 p-3 text-center ${pod.cardStyle}`}>
@@ -90,7 +105,9 @@ export default function AttendanceTab({ players, history, summary }) {
                       );
                     })}
                     {exAequo && (
-                      <div className="text-center text-xs text-cyan-600 font-bold tracking-widest">EX AEQUO</div>
+                      <div className="text-center text-xs text-cyan-600 font-bold tracking-widest">
+                        EX AEQUO ×{players.length}
+                      </div>
                     )}
                   </div>
 
@@ -100,7 +117,7 @@ export default function AttendanceTab({ players, history, summary }) {
                   >
                     <span className="text-3xl">{pod.medal}</span>
                     <span className={`font-black text-xs opacity-70 ${pod.textColor}`}>
-                      #{place}{exAequo ? ` ×${podPlayers.length}` : ''}
+                      #{targetPlace}{exAequo ? ` ×${players.length}` : ''}
                     </span>
                   </div>
                 </div>
