@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Settings, Users, Zap, Database, CalendarDays, CheckCircle2, Calculator, Copy, Lock } from 'lucide-react';
+import { Settings, Users, Zap, Database, CalendarDays, CheckCircle2, Calculator, Copy } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
@@ -128,25 +128,8 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
   );
 }
 
-// ─── Ekran blokady (tryb tylko do odczytu) ────────────────────────────────────
-function LockedScreen({ onUnlock }) {
-  return (
-    <div className="w-full max-w-3xl mx-auto animate-in fade-in duration-300">
-      <div className="cyber-box rounded-2xl p-10 text-center border-cyan-900">
-        <Lock size={48} className="text-cyan-800 mx-auto mb-4" />
-        <h2 className="text-xl font-black text-cyan-600 mb-2">Tryb tylko do odczytu</h2>
-        <p className="text-cyan-800 text-sm mb-6">Dodawanie sesji wymaga uprawnień admina.</p>
-        <button onClick={onUnlock}
-          className="px-8 py-3 rounded-xl border-2 border-cyan-600 text-cyan-300 bg-cyan-950/50 hover:bg-cyan-600 hover:text-black font-black text-sm transition-all flex items-center justify-center gap-2 mx-auto">
-          <Lock size={16} /> ODBLOKUJ
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // ─── Główny komponent ─────────────────────────────────────────────────────────
-export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound, isAdmin, onRequestAdmin }) {
+export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
   const { showError } = useToast();
   const today = new Date().toISOString().split('T')[0];
   const [datePlayed,        setDatePlayed]        = useState(today);
@@ -203,8 +186,6 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
   }, [isSaving, datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError]);
 
   const handleSummaryClose = () => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); };
-
-  if (!isAdmin) return <LockedScreen onUnlock={onRequestAdmin} />;
 
   return (
     <>
