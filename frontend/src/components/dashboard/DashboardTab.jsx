@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, TrendingUp, Users, CalendarDays } from 'lucide-react';
+import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import { settlePlayer, undoSettle } from '../../firebase/index';
 import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { calculateDebtBreakdown } from '../../utils/calculations';
@@ -246,9 +246,6 @@ export default function DashboardTab({ data, history, playSound }) {
       <style>{SETTLE_STYLES}</style>
 
       <div className="space-y-6 animate-in fade-in duration-300">
-
-        {/* ── Hero summary banner ── */}
-        <SummaryBanner summary={data.summary} />
 
         {/* ── Undo toast ── */}
         {undoToast && (

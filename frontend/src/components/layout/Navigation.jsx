@@ -134,7 +134,7 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
         </DesktopTab>
 
         {/* 2×2 grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
           {tabs.slice(1).map(tab => (
             <DesktopTab key={tab.id} id={tab.id} activeTab={activeTab} setActiveTab={setActiveTab} a={a}>
               <tab.icon size={16} />
@@ -142,17 +142,6 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
             </DesktopTab>
           ))}
         </div>
-
-        {/* Theme toggle */}
-        <button
-          onClick={onToggleTheme}
-          aria-label={a ? 'Zmień motyw na Cyber Ponk' : 'Zmień motyw na Retro Arcade'}
-          className="theme-toggle-pill"
-          style={{ width: '100%', justifyContent: 'center' }}
-        >
-          {a ? <><Zap size={11} /> SWITCH: CYBER PONK <Zap size={11} /></>
-             : <><Gamepad2 size={13} /> Switch → Retro Arcade <Gamepad2 size={13} /></>}
-        </button>
       </div>
 
       {/* ── MOBILE BOTTOM BAR ───────────────────────────────── */}

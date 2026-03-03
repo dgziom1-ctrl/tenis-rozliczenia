@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Smartphone, Copy, Check, Zap } from 'lucide-react';
+import { Volume2, VolumeX, Smartphone, Copy, Check, Zap, Gamepad2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 const CLICKS_NEEDED = 5;
@@ -266,17 +266,43 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
               : <Copy  size={16} style={{ color: C.copyClr }} />}
           </button>
 
-          {/* Mute */}
-          <button onClick={() => setIsMuted(!isMuted)}
-            className="flex items-center justify-center w-10 h-10 transition-all duration-200"
-            style={{
-              border: isMuted ? C.muteOnBorder : C.muteOffBorder,
-              color:  isMuted ? C.muteOnClr  : C.muteOffClr,
-              background: isMuted ? C.muteOnBg : C.muteOffBg,
-              borderRadius: a ? 0 : '0.5rem',
-            }}>
-            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          </button>
+          {/* Right side: theme toggle + mute */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={onToggleTheme}
+              aria-label={a ? 'Zmień motyw na Cyber Ponk' : 'Zmień motyw na Retro Arcade'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '5px',
+                padding: a ? '5px 8px' : '5px 10px',
+                border: a ? '2px solid #cc4400' : '2px solid rgba(126,34,206,0.7)',
+                borderRadius: a ? 0 : '9999px',
+                background: a ? 'rgba(13,2,0,0.8)' : 'rgba(88,28,135,0.2)',
+                color: a ? '#ff6b00' : 'rgb(192,132,252)',
+                fontWeight: 900,
+                fontSize: a ? '0.42rem' : '0.68rem',
+                fontFamily: a ? "'Press Start 2P',monospace" : 'inherit',
+                letterSpacing: a ? '0.04em' : '0.05em',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = a ? '#ff6b00' : 'rgb(168,85,247)'; e.currentTarget.style.color = a ? '#010300' : '#000'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = a ? 'rgba(13,2,0,0.8)' : 'rgba(88,28,135,0.2)'; e.currentTarget.style.color = a ? '#ff6b00' : 'rgb(192,132,252)'; }}
+            >
+              {a ? <><Zap size={11} /> CYBER</> : <><Gamepad2 size={13} /> ARCADE</>}
+            </button>
+
+            <button onClick={() => setIsMuted(!isMuted)}
+              className="flex items-center justify-center w-10 h-10 transition-all duration-200"
+              style={{
+                border: isMuted ? C.muteOnBorder : C.muteOffBorder,
+                color:  isMuted ? C.muteOnClr  : C.muteOffClr,
+                background: isMuted ? C.muteOnBg : C.muteOffBg,
+                borderRadius: a ? 0 : '0.5rem',
+              }}>
+              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            </button>
+          </div>
         </div>
 
         {/* ══ MAIN SECTION ════════════════════════════ */}
