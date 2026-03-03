@@ -1,11 +1,11 @@
 import { LayoutDashboard, Settings, History, Users, Trophy, Gamepad2, Zap } from 'lucide-react';
 
 const tabs = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Dashboard',  arcade: 'DASH'    },
-  { id: 'attendance', icon: Trophy,           label: 'Frekwencja', arcade: 'RANK'    },
-  { id: 'admin',      icon: Settings,         label: 'Admin',      arcade: 'ADMIN'   },
-  { id: 'history',    icon: History,          label: 'Historia',   arcade: 'HIST'    },
-  { id: 'players',    icon: Users,            label: 'Gracze',     arcade: 'GRACZE'  },
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Dashboard'  },
+  { id: 'attendance', icon: Trophy,           label: 'Frekwencja' },
+  { id: 'admin',      icon: Settings,         label: 'Admin'      },
+  { id: 'history',    icon: History,          label: 'Historia'   },
+  { id: 'players',    icon: Users,            label: 'Gracze'     },
 ];
 
 export default function Navigation({ activeTab, setActiveTab, theme, onToggleTheme }) {
@@ -130,7 +130,7 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
         {/* Dashboard – full width */}
         <DesktopTab id="dashboard" activeTab={activeTab} setActiveTab={setActiveTab} a={a}>
           <LayoutDashboard size={18} />
-          {a ? 'DASHBOARD' : 'Dashboard'}
+          {a ? tabs[0].label.toUpperCase() : tabs[0].label}
         </DesktopTab>
 
         {/* 2×2 grid */}
@@ -138,7 +138,7 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
           {tabs.slice(1).map(tab => (
             <DesktopTab key={tab.id} id={tab.id} activeTab={activeTab} setActiveTab={setActiveTab} a={a}>
               <tab.icon size={16} />
-              {a ? tab.arcade : tab.label}
+              {a ? tab.label.toUpperCase() : tab.label}
             </DesktopTab>
           ))}
         </div>
@@ -155,7 +155,7 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
             className={`mobile-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
           >
             <tab.icon size={20} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
-            <span className="mobile-nav-label">{a ? tab.arcade : tab.label}</span>
+            <span className="mobile-nav-label">{a ? tab.label.toUpperCase() : tab.label}</span>
           </button>
         ))}
       </nav>
