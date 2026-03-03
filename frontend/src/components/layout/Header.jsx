@@ -478,16 +478,29 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
         }
       `}</style>
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
-        <span style={{
-          fontWeight: 900,
-          fontSize: a ? '0.52rem' : '0.85rem',
-          fontFamily: a ? "'Press Start 2P', monospace" : 'inherit',
-          letterSpacing: a ? '0.04em' : '0.15em',
-          backgroundImage: C.titleGrad,
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-        }}>
-          {a ? 'PING-PONG' : 'PING-PONG'}
-        </span>
+        {/* BLIK w sticky headerze — widoczny gdy scrollujesz */}
+        <button onClick={handleCopy}
+          style={{
+            background: 'transparent', border: 'none', padding: 0,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+          }}>
+          <Smartphone size={15} style={{ color: C.iconClr, flexShrink: 0 }} />
+          <span style={{
+            fontWeight: 900, color: C.blikLabelClr,
+            fontSize: a ? '0.42rem' : '0.65rem',
+            fontFamily: a ? "'Press Start 2P', monospace" : 'inherit',
+            letterSpacing: '0.12em',
+          }}>BLIK</span>
+          <span style={{
+            color: C.blikNumClr,
+            fontFamily: 'monospace',
+            fontSize: a ? '0.48rem' : '0.85rem',
+            fontWeight: 'bold', letterSpacing: '0.05em',
+          }}>{blikNumber}</span>
+          {copied
+            ? <Check size={13} style={{ color: '#4ade80' }} />
+            : <Copy  size={13} style={{ color: C.copyClr, opacity: 0.7 }} />}
+        </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{
