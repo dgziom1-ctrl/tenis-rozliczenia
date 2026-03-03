@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Settings, Users, Zap, Database } from 'lucide-react';
-import { addSession } from '../../firebase';
+import { addSession } from '../../firebase/index';
 import { MONTHS, QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';

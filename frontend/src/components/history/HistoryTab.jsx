@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { History, Pencil, Trash2, Check, X, Zap, Users, Lock } from 'lucide-react';
-import { updateWeek, deleteWeek } from '../../firebase';
+import { updateWeek, deleteWeek } from '../../firebase/index';
 import { ADMIN_PASSWORD } from '../../constants';
 
 function PasswordModal({ action, onConfirm, onCancel }) {
