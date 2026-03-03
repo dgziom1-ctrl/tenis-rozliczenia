@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, LayoutDashboard } from 'lucide-react';
 import { settlePlayer, undoSettle } from '../../firebase/index';
 import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { calculateDebtBreakdown } from '../../utils/calculations';
@@ -294,6 +294,14 @@ export default function DashboardTab({ data, history, playSound }) {
       ))}
 
       <div className="space-y-6 animate-in fade-in duration-300">
+
+        {/* ── Header ── */}
+        <div className="cyber-box rounded-2xl p-4 sm:p-6">
+          <h2 className="text-xl font-black text-cyan-300 flex items-center gap-3 border-b-2 border-cyan-800 pb-4 mb-0">
+            <LayoutDashboard className="text-magenta-500 flex-shrink-0" />
+            Dashboard
+          </h2>
+        </div>
 
         {/* ── Undo toast ── */}
         {undoToast && (

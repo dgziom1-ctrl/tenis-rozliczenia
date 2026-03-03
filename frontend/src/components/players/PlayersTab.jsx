@@ -104,7 +104,7 @@ export default function PlayersTab({ players, deletedPlayers, playSound }) {
       )}
 
       <div className="cyber-box rounded-2xl p-4 sm:p-8 max-w-3xl mx-auto animate-in slide-in-from-left-5 duration-300">
-        <h2 className="text-2xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
+        <h2 className="text-xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
           <Users className="text-magenta-500" /> Zarządzanie graczami
         </h2>
 

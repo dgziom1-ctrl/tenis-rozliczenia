@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Settings, Users, Zap, Database } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Settings, Users, Zap, Database, CalendarDays } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
+import { formatDate } from '../../utils/format';
 
 export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
-  const { showSuccess, showError } = useToast();
+  const dateInputRef = useRef(null);
   const today = new Date().toISOString().split('T')[0];
   const [datePlayed,        setDatePlayed]        = useState(today);
   const [totalCost,         setTotalCost]         = useState('');
@@ -71,7 +72,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
   return (
     <div className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-300">
       <div className="cyber-box rounded-2xl p-4 sm:p-8">
-        <h2 className="text-xl sm:text-2xl font-black text-cyan-300 mb-6 flex items-center gap-3">
+        <h2 className="text-xl font-black text-cyan-300 mb-6 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
           <Settings className="text-magenta-500 flex-shrink-0" />
           Dodaj nowy tydzień
         </h2>
@@ -81,13 +82,33 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
           {/* Data */}
           <div>
             <label className="block font-bold text-cyan-600 mb-2 tracking-wider text-sm">Data gry:</label>
-            <input
-              type="date"
-              value={datePlayed}
-              onChange={e => setDatePlayed(e.target.value)}
-              className="cyber-input w-full p-3 rounded-xl text-sm"
-              style={{ colorScheme: 'dark' }}
-            />
+            <div style={{ position: 'relative' }}>
+              {/* Ukryty natywny input — triggerowany kliknięciem przycisku */}
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={datePlayed}
+                onChange={e => setDatePlayed(e.target.value)}
+                style={{
+                  position: 'absolute',
+                  opacity: 0,
+                  pointerEvents: 'none',
+                  width: '100%',
+                  height: '100%',
+                  top: 0, left: 0,
+                }}
+              />
+              {/* Stylowany przycisk który odpala picker */}
+              <button
+                type="button"
+                onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.click()}
+                className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
+                style={{ cursor: 'pointer', textAlign: 'left' }}
+              >
+                <span>{formatDate(datePlayed)}</span>
+                <CalendarDays size={18} style={{ opacity: 0.6, flexShrink: 0 }} />
+              </button>
+            </div>
           </div>
 
           {/* Koszt + szybkie przyciski */}

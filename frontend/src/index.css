@@ -12,6 +12,8 @@ body {
   font-family: 'Roboto Mono', monospace;
   overflow-x: hidden;
   transition: background-color 0.3s;
+  /* Prevent rubber-band scroll from displacing fixed elements in iOS PWA */
+  overscroll-behavior-y: none;
 }
 
 /* Focus indicators for accessibility */

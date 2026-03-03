@@ -104,6 +104,14 @@ function AppContent() {
   const playSound = (t) => synth.play(t, isMuted);
   const switchTab = (id) => { playSound(SOUND_TYPES.TAB); setActiveTab(id); };
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   if (isLoading) {
     return <SpinnerOverlay message="Łączenie z bazą danych..." />;
   }
@@ -120,6 +128,7 @@ function AppContent() {
           isConnected={isConnected}
           theme={theme}
           onToggleTheme={toggleTheme}
+          scrolled={scrolled}
         />
         <Navigation
           activeTab={activeTab}
@@ -127,7 +136,7 @@ function AppContent() {
           theme={theme}
           onToggleTheme={toggleTheme}
         />
-        <main className="main-content">
+        <main className="main-content" style={scrolled ? { paddingTop: 'calc(52px + env(safe-area-inset-top, 0px))' } : {}}>
           {activeTab === 'dashboard'  && <DashboardTab  data={{ summary: appData.summary, players: appData.players }} history={appData.history} playSound={playSound} />}
           {activeTab === 'attendance' && <AttendanceTab players={appData.players} history={appData.history} summary={appData.summary} />}
           {activeTab === 'admin'      && <AdminTab      playerNames={appData.playerNames} defaultMultiPlayers={appData.defaultMultiPlayers} setActiveTab={switchTab} playSound={playSound} />}

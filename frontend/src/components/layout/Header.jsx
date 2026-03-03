@@ -3,14 +3,13 @@ import { useState, useEffect, useRef } from 'react';
 
 const CLICKS_NEEDED = 5;
 
-export default function Header({ isMuted, setIsMuted, isConnected, theme, onToggleTheme }) {
+export default function Header({ isMuted, setIsMuted, isConnected, theme, onToggleTheme, scrolled }) {
   const [copied,     setCopied]     = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [chaosMode,  setChaosMode]  = useState(false);
   const [hint,       setHint]       = useState('');
   const [confetti,   setConfetti]   = useState([]);
   const [arcadeTick, setArcadeTick] = useState(true);
-  const [scrolled,   setScrolled]   = useState(false);
 
   const resetTimer      = useRef(null);
   const chaosTimer      = useRef(null);
@@ -19,12 +18,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
   const a          = theme === 'arcade';
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
 
-  // Compact header on scroll (mobile only)
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  // Compact header on scroll passed as prop from App
 
   // INSERT COIN blink
   useEffect(() => {

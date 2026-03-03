@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { History, Pencil, Trash2, Check, X, Zap, Users, Lock, CalendarDays } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase/index';
 import { ADMIN_PASSWORD, MONTHS } from '../../constants';
@@ -23,6 +23,30 @@ function groupByMonth(history) {
     current.rows.push(row);
   }
   return groups;
+}
+
+function EditDateInput({ value, onChange }) {
+  const ref = useRef(null);
+  return (
+    <div style={{ position: 'relative' }}>
+      <input
+        ref={ref}
+        type="date"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: '100%', height: '100%', top: 0, left: 0 }}
+      />
+      <button
+        type="button"
+        onClick={() => ref.current?.showPicker?.() || ref.current?.click()}
+        className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
+        style={{ cursor: 'pointer', textAlign: 'left' }}
+      >
+        <span>{formatDate(value)}</span>
+        <CalendarDays size={16} style={{ opacity: 0.6, flexShrink: 0 }} />
+      </button>
+    </div>
+  );
 }
 
 function PasswordModal({ action, onConfirm, onCancel }) {
@@ -160,7 +184,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
       )}
 
       <div className="cyber-box rounded-2xl p-4 sm:p-6 overflow-hidden animate-in slide-in-from-right-5 duration-300">
-        <h2 className="text-2xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
+        <h2 className="text-xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
           <History className="text-magenta-500" /> Historia rozgrywek
         </h2>
 
@@ -196,9 +220,10 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       <div className="space-y-4">
                         <div>
                           <label className="block text-cyan-600 text-xs font-bold mb-1 tracking-wider">DATA</label>
-                          <input type="date" value={editForm.date}
-                            onChange={e => setEditForm(p => ({ ...p, date: e.target.value }))}
-                            className="cyber-input w-full p-3 rounded-xl text-sm" style={{ maxWidth: '100%', boxSizing: 'border-box' }}/>
+                          <EditDateInput
+                            value={editForm.date}
+                            onChange={v => setEditForm(p => ({ ...p, date: v }))}
+                          />
                         </div>
                         <div>
                           <label className="block text-cyan-600 text-xs font-bold mb-1 tracking-wider">KOSZT (PLN)</label>
