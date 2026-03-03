@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
-import { Trophy, CalendarDays, Flame, TrendingUp } from 'lucide-react';
-import { getRank, RANKS, PODIUM, PODIUM_ORDER } from '../../constants';
+import { Trophy, CalendarDays, TrendingUp, Flame } from 'lucide-react';
+import { RANKS, PODIUM, getRank } from '../../constants';
 import { calculatePlayerStats, assignRankingPlaces, groupSessionsByMonth, getSpecialTitle } from '../../utils/calculations';
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
 
 function StreakBadge({ streak }) {
   if (streak < 2) return null;
@@ -13,249 +15,213 @@ function StreakBadge({ streak }) {
   );
 }
 
-function SpecialTitle({ title }) {
-  if (!title) return null;
+function PodiumCard({ podiumEntry, totalWeeks }) {
+  const pod = PODIUM[podiumEntry.place];
+  const players = podiumEntry.players;
+  const exAequo = players.length > 1;
+
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg border ${title.color}`}>
-      {title.icon} {title.label}
-    </span>
+    <div className="flex flex-col items-center flex-1 max-w-[180px]">
+      <div className="w-full space-y-2 mb-0">
+        {players.map(player => {
+          const rank = getRank(player.attendancePercentage);
+          return (
+            <div key={player.name} className={`w-full rounded-xl border-2 p-3 text-center ${pod.cardStyle}`}>
+              <div className="text-xl mb-1">{rank.emoji}</div>
+              <div className={`font-black text-sm sm:text-base truncate ${pod.textColor}`}>{player.name}</div>
+              <div className={`font-mono text-xl font-black ${pod.textColor}`}>{player.attendancePercentage}%</div>
+              <div className="text-xs opacity-60 text-cyan-500 mb-1">{player.attendanceCount}/{totalWeeks}</div>
+              {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
+            </div>
+          );
+        })}
+        {exAequo && (
+          <div className="text-center text-xs text-cyan-600 font-bold tracking-widest">
+            EX AEQUO ×{players.length}
+          </div>
+        )}
+      </div>
+      <div
+        className={`w-full rounded-t-xl border-2 flex flex-col items-center justify-center gap-1 ${pod.cardStyle}`}
+        style={{ height: `${pod.barHeight}px` }}
+      >
+        <span className="text-3xl">{pod.medal}</span>
+        <span className={`font-black text-xs opacity-70 ${pod.textColor}`}>
+          #{podiumEntry.place}{exAequo ? ` ×${players.length}` : ''}
+        </span>
+      </div>
+    </div>
   );
 }
+
+function Podium({ podiumPlayers, totalWeeks }) {
+  if (podiumPlayers.length === 0) return null;
+  return (
+    <div className="flex items-end justify-center gap-2 sm:gap-4 mb-8">
+      {/* Olimpijska kolejność: srebro | złoto | brąz */}
+      {[2, 1, 3].map((targetPlace) => {
+        const entry = podiumPlayers.find(p => p.place === targetPlace);
+        if (!entry) return <div key={targetPlace} className="flex-1 max-w-[180px]" />;
+        return <PodiumCard key={targetPlace} podiumEntry={entry} totalWeeks={totalWeeks} />;
+      })}
+    </div>
+  );
+}
+
+function LeaderboardRow({ player, totalWeeks, stats }) {
+  const rank = getRank(player.attendancePercentage);
+  const specialTitle = getSpecialTitle(player, stats);
+  return (
+    <div className={`rounded-xl border-2 px-4 py-3 flex items-center gap-3 ${rank.bg} ${rank.border} transition-all hover:scale-[1.005]`}>
+      <span className="text-cyan-700 font-mono text-sm w-6 flex-shrink-0">#{player.place}</span>
+      <span className="text-xl flex-shrink-0">{rank.emoji}</span>
+      <span className={`font-black text-base flex-1 min-w-0 truncate ${rank.color}`}>{player.name}</span>
+      <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+        {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
+        {specialTitle && (
+          <span className={`hidden sm:inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg border ${specialTitle.color}`}>
+            {specialTitle.icon} {specialTitle.label}
+          </span>
+        )}
+        {player.multisportCount > 0 && (
+          <span className="text-emerald-400 text-xs font-bold hidden sm:inline">⚡{player.multisportCount}</span>
+        )}
+        <span className="text-cyan-600 text-xs">{player.attendanceCount}/{totalWeeks}</span>
+        <span className={`font-black text-lg w-12 text-right ${rank.color}`}>{player.attendancePercentage}%</span>
+      </div>
+    </div>
+  );
+}
+
+function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
+  const theRest = ranked.filter(p => p.place > 3);
+  return (
+    <div className="cyber-box rounded-2xl p-6">
+      <h2 className="text-xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
+        <TrendingUp className="text-magenta-500" /> Leaderboard
+      </h2>
+      <Podium podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} />
+      {theRest.length > 0 && (
+        <div className="border-t-2 border-cyan-900/50 pt-5 space-y-2">
+          {theRest.map(player => (
+            <LeaderboardRow key={player.name} player={player} totalWeeks={totalWeeks} stats={stats} />
+          ))}
+        </div>
+      )}
+      {ranked.length === 0 && (
+        <p className="text-cyan-800 text-center py-10">Dodaj sesje żeby zobaczyć ranking!</p>
+      )}
+    </div>
+  );
+}
+
+function RankGuide() {
+  return (
+    <div className="cyber-box rounded-2xl p-6">
+      <h2 className="text-xl font-black text-cyan-300 mb-4 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
+        <Trophy className="text-yellow-500" /> Rangi
+      </h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {RANKS.map((r, i) => (
+          <div key={i} className={`flex flex-col items-center p-3 rounded-xl border-2 bg-black/30 ${r.border}`}>
+            <span className="text-2xl mb-1">{r.emoji}</span>
+            <span className={`font-black text-sm ${r.color}`}>{r.name}</span>
+            <span className="text-cyan-700 font-mono text-xs mt-1">
+              {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MonthlyReport({ monthlyStats, players }) {
+  return (
+    <div className="cyber-box rounded-2xl p-4 sm:p-6 overflow-hidden">
+      <h2 className="text-xl font-black text-cyan-300 mb-6 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
+        <CalendarDays className="text-magenta-500" /> Raport miesięczny
+      </h2>
+      {monthlyStats.length === 0 ? (
+        <p className="text-cyan-700 text-center py-10">Brak danych. Dodaj pierwszy tydzień!</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[400px]">
+            <thead>
+              <tr className="bg-cyan-950 text-cyan-300 tracking-wider">
+                <th className="p-3 rounded-tl-lg">Miesiąc</th>
+                <th className="p-3">Gier</th>
+                {players?.map(p => (
+                  <th key={p.name} className="p-3 text-center text-sm">{p.name.slice(0, 3)}.</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y-2 divide-cyan-900/50">
+              {monthlyStats.map(([month, data]) => (
+                <tr key={month} className="hover:bg-cyan-900/20 transition-colors">
+                  <td className="p-3 font-bold text-cyan-100">{month}</td>
+                  <td className="p-3 text-magenta-400 font-black">{data.total}</td>
+                  {players?.map(p => {
+                    const presence = data.players[p.name] || 0;
+                    const isMax = presence === data.total;
+                    return (
+                      <td key={p.name} className="p-3 text-center">
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${
+                          isMax
+                            ? 'bg-emerald-900/50 text-emerald-400 border border-emerald-500'
+                            : presence > 0
+                            ? 'text-cyan-400'
+                            : 'text-cyan-900'
+                        }`}>
+                          {presence}
+                        </span>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function AttendanceTab({ players, history, summary }) {
   const totalWeeks = summary?.totalWeeks || 0;
 
-  const stats = useMemo(() => {
-    return calculatePlayerStats(players, history, totalWeeks);
-  }, [players, history, totalWeeks]);
+  const stats = useMemo(() => calculatePlayerStats(players, history, totalWeeks), [players, history, totalWeeks]);
 
   const ranked = useMemo(() => {
-    // IMPORTANT: Sort by attendancePercentage DESC before assigning places
     const sorted = [...stats].sort((a, b) => {
-      // Primary sort: by percentage (higher first)
-      if (b.attendancePercentage !== a.attendancePercentage) {
-        return b.attendancePercentage - a.attendancePercentage;
-      }
-      // Secondary sort: by attendance count (higher first)
-      if (b.attendanceCount !== a.attendanceCount) {
-        return b.attendanceCount - a.attendanceCount;
-      }
-      // Tertiary sort: alphabetically by name
+      if (b.attendancePercentage !== a.attendancePercentage) return b.attendancePercentage - a.attendancePercentage;
+      if (b.attendanceCount !== a.attendanceCount) return b.attendanceCount - a.attendanceCount;
       return a.name.localeCompare(b.name, 'pl');
     });
     return assignRankingPlaces(sorted);
   }, [stats]);
 
-  const monthlyStats = useMemo(() => {
-    return groupSessionsByMonth(history);
-  }, [history]);
-
-  const byPlace = useMemo(() => {
-    const result = {};
+  const podiumPlayers = useMemo(() => {
+    const byPlace = {};
     ranked.forEach(p => {
-      if (!result[p.place]) result[p.place] = [];
-      result[p.place].push(p);
+      if (!byPlace[p.place]) byPlace[p.place] = [];
+      byPlace[p.place].push(p);
     });
-    return result;
+    return [1, 2, 3]
+      .filter(place => byPlace[place]?.length > 0)
+      .map(place => ({ place, players: byPlace[place] }));
   }, [ranked]);
 
-  // Podium powinno zawierać WSZYSTKICH z miejsc 1, 2, 3 (nawet jeśli ex aequo)
-  const podiumPlayers = useMemo(() => {
-    const podium = [];
-    // Zbierz wszystkich z top 3 miejsc
-    for (let place = 1; place <= 3; place++) {
-      if (byPlace[place] && byPlace[place].length > 0) {
-        podium.push({ place, players: byPlace[place] });
-      }
-    }
-    return podium;
-  }, [byPlace]);
-
-  // Reszta to gracze z miejsca 4 i dalej
-  const theRest = ranked.filter(p => p.place > 3);
+  const monthlyStats = useMemo(() => groupSessionsByMonth(history), [history]);
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-5 duration-300">
-      <div className="cyber-box rounded-2xl p-6">
-        <h2 className="text-xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
-          <TrendingUp className="text-magenta-500" /> Leaderboard
-        </h2>
-
-        {podiumPlayers.length > 0 && (
-          <div className="flex items-end justify-center gap-2 sm:gap-4 mb-8">
-            {/* Kolejność olimpijska: srebro (2) | złoto (1) | brąz (3) */}
-            {[2, 1, 3].map((targetPlace) => {
-              const podiumEntry = podiumPlayers.find(p => p.place === targetPlace);
-              
-              if (!podiumEntry) {
-                // Pusty slot jeśli nie ma nikogo na tym miejscu
-                return <div key={targetPlace} className="flex-1 max-w-[180px]" />;
-              }
-
-              const pod = PODIUM[targetPlace];
-              const players = podiumEntry.players;
-              const exAequo = players.length > 1;
-
-              return (
-                <div key={targetPlace} className="flex flex-col items-center flex-1 max-w-[180px]">
-                  <div className="w-full space-y-2 mb-0">
-                    {players.map(player => {
-                      const rank = getRank(player.attendancePercentage);
-                      return (
-                        <div key={player.name} className={`w-full rounded-xl border-2 p-3 text-center ${pod.cardStyle}`}>
-                          <div className="text-xl mb-1">{rank.emoji}</div>
-                          <div className={`font-black text-sm sm:text-base truncate ${pod.textColor}`}>
-                            {player.name}
-                          </div>
-                          <div className={`font-mono text-xl font-black ${pod.textColor}`}>
-                            {player.attendancePercentage}%
-                          </div>
-                          <div className="text-xs opacity-60 text-cyan-500 mb-1">
-                            {player.attendanceCount}/{totalWeeks}
-                          </div>
-                          {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
-                        </div>
-                      );
-                    })}
-                    {exAequo && (
-                      <div className="text-center text-xs text-cyan-600 font-bold tracking-widest">
-                        EX AEQUO ×{players.length}
-                      </div>
-                    )}
-                  </div>
-
-                  <div
-                    className={`w-full rounded-t-xl border-2 flex flex-col items-center justify-center gap-1 ${pod.cardStyle}`}
-                    style={{ height: `${pod.barHeight}px` }}
-                  >
-                    <span className="text-3xl">{pod.medal}</span>
-                    <span className={`font-black text-xs opacity-70 ${pod.textColor}`}>
-                      #{targetPlace}{exAequo ? ` ×${players.length}` : ''}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {theRest.length > 0 && (
-          <div className="border-t-2 border-cyan-900/50 pt-5 space-y-2">
-            {theRest.map((player) => {
-              const rank = getRank(player.attendancePercentage);
-              const specialTitle = getSpecialTitle(player, stats);
-              
-              return (
-                <div
-                  key={player.name}
-                  className={`rounded-xl border-2 px-4 py-3 flex items-center gap-3 ${rank.bg} ${rank.border} transition-all hover:scale-[1.005]`}
-                >
-                  <span className="text-cyan-700 font-mono text-sm w-6 flex-shrink-0">
-                    #{player.place}
-                  </span>
-                  <span className="text-xl flex-shrink-0">{rank.emoji}</span>
-                  <span className={`font-black text-base flex-1 min-w-0 truncate ${rank.color}`}>
-                    {player.name}
-                  </span>
-
-                  <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
-                    {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
-                    {specialTitle && (
-                      <span className={`hidden sm:inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg border ${specialTitle.color}`}>
-                        {specialTitle.icon} {specialTitle.label}
-                      </span>
-                    )}
-                    {player.multisportCount > 0 && (
-                      <span className="text-emerald-400 text-xs font-bold hidden sm:inline">
-                        ⚡{player.multisportCount}
-                      </span>
-                    )}
-                    <span className="text-cyan-600 text-xs">
-                      {player.attendanceCount}/{totalWeeks}
-                    </span>
-                    <span className={`font-black text-lg w-12 text-right ${rank.color}`}>
-                      {player.attendancePercentage}%
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {ranked.length === 0 && (
-          <p className="text-cyan-800 text-center py-10">Dodaj sesje żeby zobaczyć ranking!</p>
-        )}
-      </div>
-
-      <div className="cyber-box rounded-2xl p-6">
-        <h2 className="text-xl font-black text-cyan-300 mb-4 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
-          <Trophy className="text-yellow-500" /> Rangi
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {RANKS.map((r, i) => (
-            <div key={i} className={`flex flex-col items-center p-3 rounded-xl border-2 bg-black/30 ${r.border}`}>
-              <span className="text-2xl mb-1">{r.emoji}</span>
-              <span className={`font-black text-sm ${r.color}`}>{r.name}</span>
-              <span className="text-cyan-700 font-mono text-xs mt-1">
-                {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="cyber-box rounded-2xl p-4 sm:p-6 overflow-hidden">
-        <h2 className="text-xl font-black text-cyan-300 mb-6 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
-          <CalendarDays className="text-magenta-500" /> Raport miesięczny
-        </h2>
-        {monthlyStats.length === 0 ? (
-          <p className="text-cyan-700 text-center py-10">Brak danych. Dodaj pierwszy tydzień!</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[400px]">
-              <thead>
-                <tr className="bg-cyan-950 text-cyan-300 tracking-wider">
-                  <th className="p-3 rounded-tl-lg">Miesiąc</th>
-                  <th className="p-3">Gier</th>
-                  {players?.map(p => (
-                    <th key={p.name} className="p-3 text-center text-sm">
-                      {p.name.slice(0, 3)}.
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y-2 divide-cyan-900/50">
-                {monthlyStats.map(([month, data]) => (
-                  <tr key={month} className="hover:bg-cyan-900/20 transition-colors">
-                    <td className="p-3 font-bold text-cyan-100">{month}</td>
-                    <td className="p-3 text-magenta-400 font-black">{data.total}</td>
-                    {players?.map(p => {
-                      const presence = data.players[p.name] || 0;
-                      const isMax = presence === data.total;
-                      return (
-                        <td key={p.name} className="p-3 text-center">
-                          <span
-                            className={`px-2 py-1 rounded text-xs font-bold ${
-                              isMax
-                                ? 'bg-emerald-900/50 text-emerald-400 border border-emerald-500'
-                                : presence > 0
-                                ? 'text-cyan-400'
-                                : 'text-cyan-900'
-                            }`}
-                          >
-                            {presence}
-                          </span>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} stats={stats} />
+      <RankGuide />
+      <MonthlyReport monthlyStats={monthlyStats} players={players} />
     </div>
   );
 }

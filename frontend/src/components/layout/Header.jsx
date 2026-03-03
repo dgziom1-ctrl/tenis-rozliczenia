@@ -3,13 +3,14 @@ import { useState, useEffect, useRef } from 'react';
 
 const CLICKS_NEEDED = 5;
 
-export default function Header({ isMuted, setIsMuted, isConnected, onOpenPong, theme, onToggleTheme }) {
+export default function Header({ isMuted, setIsMuted, isConnected, theme, onToggleTheme }) {
   const [copied,     setCopied]     = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [chaosMode,  setChaosMode]  = useState(false);
   const [hint,       setHint]       = useState('');
   const [confetti,   setConfetti]   = useState([]);
   const [arcadeTick, setArcadeTick] = useState(true);
+  const [scrolled,   setScrolled]   = useState(false);
 
   const resetTimer      = useRef(null);
   const chaosTimer      = useRef(null);
@@ -17,6 +18,13 @@ export default function Header({ isMuted, setIsMuted, isConnected, onOpenPong, t
 
   const a          = theme === 'arcade';
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
+
+  // Compact header on scroll (mobile only)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // INSERT COIN blink
   useEffect(() => {
@@ -421,6 +429,73 @@ export default function Header({ isMuted, setIsMuted, isConnected, onOpenPong, t
       {/* Separator */}
       <div style={{ height: '1rem', background: C.sepBg, borderBottom: C.sepBorder }}>
         <div style={{ height: '1px', background: C.sepLine }} />
+      </div>
+
+      {/* ── COMPACT STICKY HEADER (mobile only, appears on scroll) ─────────── */}
+      <style>{`
+        .compact-header {
+          display: none;
+        }
+        @media (max-width: 639px) {
+          .compact-header {
+            display: flex;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 39;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            border-bottom: 2px solid ${a ? '#1a4d00' : 'rgba(22,78,99,0.8)'};
+            background: ${a ? 'rgba(1,3,0,0.96)' : 'rgba(8,12,20,0.96)'};
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+          }
+          .compact-header.hidden-bar {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+          .compact-header.visible-bar {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
+      <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
+        <span style={{
+          fontWeight: 900,
+          fontSize: a ? '0.52rem' : '0.85rem',
+          fontFamily: a ? "'Press Start 2P', monospace" : 'inherit',
+          letterSpacing: a ? '0.04em' : '0.15em',
+          backgroundImage: C.titleGrad,
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+        }}>
+          {a ? 'PING-PONG' : 'PING-PONG'}
+        </span>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{
+            fontSize: '0.6rem', fontWeight: 'bold',
+            color: isConnected ? C.statusOnClr : C.statusOffClr,
+            textShadow: isConnected ? C.statusOnShadow : C.statusOffShadow,
+          }}>
+            {isConnected ? '● ONLINE' : '○ OFFLINE'}
+          </span>
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            style={{
+              border: isMuted ? C.muteOnBorder : C.muteOffBorder,
+              color:  isMuted ? C.muteOnClr   : C.muteOffClr,
+              background: 'transparent',
+              borderRadius: a ? 0 : '0.4rem',
+              padding: '4px 6px',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center',
+            }}
+          >
+            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+          </button>
+        </div>
       </div>
     </>
   );

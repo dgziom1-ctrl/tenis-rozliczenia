@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Lock, Check, X } from 'lucide-react';
-import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer } from '../../firebase';
+import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer } from '../../firebase/index';
 import { ADMIN_PASSWORD, SOUND_TYPES } from '../../constants';
+import { useToast } from '../common/Toast';
 
 function PasswordModal({ playerName, onConfirm, onCancel }) {
   const [input, setInput] = useState('');
@@ -50,29 +51,49 @@ export default function PlayersTab({ players, deletedPlayers, playSound }) {
   const [newPlayerName, setNewPlayerName] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [pwModal,       setPwModal]       = useState(null);
+  const { showSuccess, showError } = useToast();
 
   const handleAddPlayer = async (e) => {
     e.preventDefault();
     if (!newPlayerName.trim()) return;
+    const result = await addPlayer(newPlayerName.trim());
+    if (!result.success) {
+      showError(result.error || 'Nie udało się dodać gracza');
+      return;
+    }
     playSound(SOUND_TYPES.SUCCESS);
-    await addPlayer(newPlayerName.trim());
+    showSuccess(`✓ Dodano gracza: ${newPlayerName.trim()}`);
     setNewPlayerName('');
   };
 
   const handleSoftDelete = async (playerName) => {
+    const result = await softDeletePlayer(playerName);
+    if (!result.success) {
+      showError(result.error || 'Nie udało się usunąć gracza');
+      return;
+    }
     playSound(SOUND_TYPES.DELETE);
-    await softDeletePlayer(playerName);
+    showSuccess(`Gracz ${playerName} przeniesiony do kosza`);
     setPwModal(null);
   };
 
   const handleRestore = async (playerName) => {
+    const result = await restorePlayer(playerName);
+    if (!result.success) {
+      showError(result.error || 'Nie udało się przywrócić gracza');
+      return;
+    }
     playSound(SOUND_TYPES.SUCCESS);
-    await restorePlayer(playerName);
+    showSuccess(`✓ Przywrócono: ${playerName}`);
   };
 
   const handlePermanentDelete = async (playerName) => {
+    const result = await permanentDeletePlayer(playerName);
+    if (!result.success) {
+      showError(result.error || 'Nie udało się trwale usunąć gracza');
+      return;
+    }
     playSound(SOUND_TYPES.DELETE);
-    await permanentDeletePlayer(playerName);
     setConfirmDelete(null);
   };
 
