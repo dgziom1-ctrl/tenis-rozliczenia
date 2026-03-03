@@ -125,7 +125,7 @@ export default function PlayersTab({ players, deletedPlayers, playSound }) {
                 {p.name}
               </span>
               <button onClick={() => setPwModal(p.name)}
-                className="flex-shrink-0 bg-magenta-950 p-3 rounded-lg text-magenta-500 hover:bg-magenta-600 hover:text-black border-2 border-magenta-800 transition-all hover:shadow-[0_0_10px_#ff00ff]"
+                className="flex-shrink-0 bg-magenta-950 p-3 rounded-lg text-magenta-500 hover:bg-magenta-600 hover:text-black border-2 border-magenta-800 transition-all hover:shadow-magenta-glow"
                 title="Usuń gracza">
                 <Trash2 size={20}/>
               </button>

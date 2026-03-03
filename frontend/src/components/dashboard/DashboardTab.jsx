@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, LayoutDashboard, X, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, LayoutDashboard, X, AlertTriangle, TrendingUp, Users, CalendarDays } from 'lucide-react';
 import { settlePlayer, undoSettle } from '../../firebase/index';
 import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { calculateDebtBreakdown } from '../../utils/calculations';
@@ -59,8 +59,8 @@ function SummaryBanner({ summary }) {
         <p className="text-cyan-700 text-xs tracking-widest mb-1 flex items-center justify-center gap-1">
           <TrendingUp size={11} /> DO ZEBRANIA
         </p>
-        <p className={`font-mono font-black text-2xl sm:text-3xl ${allSettled ? 'text-emerald-400' : 'text-magenta-400'}`}
-           style={{ textShadow: allSettled ? '0 0 12px rgba(52,211,153,0.6)' : '0 0 12px rgba(255,0,255,0.5)' }}>
+        <p className={`font-mono font-black text-2xl sm:text-3xl ${allSettled ? 'text-emerald-400' : 'text-magenta-400 glow-magenta'}`}
+           style={{ textShadow: allSettled ? '0 0 12px rgba(52,211,153,0.6)' : undefined }}>
           {formatAmountShort(totalToCollect)}
           <span className="text-sm font-bold ml-1 opacity-70">zł</span>
         </p>
@@ -158,7 +158,7 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
                 <button
                   onClick={() => onSettle(player.name)}
                   disabled={isSettling}
-                  className="w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 bg-magenta-950 border-magenta-500 text-magenta-300 hover:bg-magenta-500 hover:text-black hover:shadow-[0_0_15px_#ff00ff] disabled:opacity-50 disabled:cursor-wait"
+                  className="w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 bg-magenta-950 border-magenta-500 text-magenta-300 hover:bg-magenta-500 hover:text-black hover:shadow-magenta-glow disabled:opacity-50 disabled:cursor-wait"
                   aria-label={`Oznacz ${player.name} jako opłaconego`}
                 >
                   {isSettling ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Receipt size={18} /> OZNACZ OPŁACONE</>}
@@ -187,7 +187,7 @@ function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
   if (!playerName) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="cyber-box border-magenta-500 rounded-2xl p-6 w-full max-w-sm shadow-[0_0_40px_rgba(255,0,255,0.2)]">
+      <div className="cyber-box border-magenta-500 rounded-2xl p-6 w-full max-w-sm shadow-magenta-glow">
         <div className="flex items-center gap-3 mb-4">
           <AlertTriangle className="text-magenta-400 flex-shrink-0" size={24} />
           <h3 className="font-black text-magenta-300 text-lg">Potwierdzenie</h3>
@@ -196,8 +196,7 @@ function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
           Oznaczasz <span className="text-white font-black">{playerName}</span> jako opłaconego:
         </p>
         <div className="bg-magenta-950/40 border border-magenta-800 rounded-xl p-3 mb-5 text-center">
-          <span className="text-3xl font-black text-magenta-300"
-            style={{ textShadow: '0 0 12px rgba(255,0,255,0.5)' }}>
+          <span className="text-3xl font-black text-magenta-300 glow-magenta">
             {formatAmountShort(debt)} zł
           </span>
         </div>
@@ -462,7 +461,7 @@ export default function DashboardTab({ data, history, playSound }) {
                           <button
                             onClick={() => handleSettleDebt(player.name)}
                             disabled={settlingPlayer === player.name}
-                            className="w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 bg-magenta-950 border-magenta-500 text-magenta-300 hover:bg-magenta-500 hover:text-black hover:shadow-[0_0_15px_#ff00ff] disabled:opacity-50 disabled:cursor-wait"
+                            className="w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 bg-magenta-950 border-magenta-500 text-magenta-300 hover:bg-magenta-500 hover:text-black hover:shadow-magenta-glow disabled:opacity-50 disabled:cursor-wait"
                           >
                             {settlingPlayer === player.name
                               ? <><InlineSpinner size="sm" /> Zapisuję...</>

@@ -22,8 +22,14 @@ export default {
         },
         magenta: {
           DEFAULT: '#ff00ff',
+          300: '#ff80ff',
+          400: '#ff40ff',
           500: '#ff00ff',
+          600: '#e000e0',
           700: '#bd00bd',
+          800: '#800080',
+          900: '#4d004d',
+          950: '#2a002a',
         },
       },
       animation: {

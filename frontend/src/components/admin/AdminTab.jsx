@@ -72,7 +72,7 @@ function SessionSummaryModal({ summary, onClose }) {
         {payingCount > 0 && (
           <div className="bg-magenta-950/40 border-2 border-magenta-700 rounded-xl p-4 mb-4 text-center">
             <p className="text-cyan-600 text-xs tracking-widest mb-1">KAŻDY PŁACI</p>
-            <p className="text-4xl font-black text-magenta-300" style={{ textShadow: '0 0 15px rgba(255,0,255,0.5)' }}>
+            <p className="text-4xl font-black text-magenta-300 glow-magenta-lg">
               {formatAmountShort(perPerson)}<span className="text-xl ml-1 opacity-70">zł</span>
             </p>
             {multisportCount > 0 && (
@@ -115,7 +115,7 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
       <div className="text-right">
         {payingPlayers.length > 0 ? (
           <>
-            <span className="text-magenta-300 font-black text-xl" style={{ textShadow: '0 0 8px rgba(255,0,255,0.4)' }}>
+            <span className="text-magenta-300 font-black text-xl glow-magenta-sm">
               {formatAmountShort(perPerson)} zł
             </span>
             <span className="text-cyan-700 text-xs ml-2">/ os. ({payingPlayers.length} płaci)</span>

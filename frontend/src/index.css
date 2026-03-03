@@ -153,6 +153,20 @@ body::before {
   .text-neon-blue { text-shadow: 0 0 8px rgba(0,243,255,0.6); }
   .text-neon-pink { text-shadow: 0 0 8px rgba(255,0,255,0.6); }
   .neon-amount { @apply font-mono font-black text-cyan-400; text-shadow: 0 0 8px rgba(34,211,238,0.6); }
+
+  /* Magenta glow utilities — arcade-safe */
+  .glow-magenta    { text-shadow: 0 0 12px rgba(255,0,255,0.5); }
+  .glow-magenta-sm { text-shadow: 0 0 8px rgba(255,0,255,0.4); }
+  .glow-magenta-lg { text-shadow: 0 0 15px rgba(255,0,255,0.5); }
+  .theme-arcade .glow-magenta    { text-shadow: 0 0 12px rgba(255,107,0,0.6) !important; }
+  .theme-arcade .glow-magenta-sm { text-shadow: 0 0 8px rgba(255,107,0,0.5) !important; }
+  .theme-arcade .glow-magenta-lg { text-shadow: 0 0 15px rgba(255,107,0,0.7) !important; }
+
+  /* Magenta box-shadow utility — arcade-safe */
+  .shadow-magenta-glow { box-shadow: 0 0 40px rgba(255,0,255,0.2); }
+  .theme-arcade .shadow-magenta-glow { box-shadow: 0 0 40px rgba(255,107,0,0.2) !important; }
+  .hover\:shadow-magenta-glow:hover { box-shadow: 0 0 15px #ff00ff; }
+  .theme-arcade .hover\:shadow-magenta-glow:hover { box-shadow: 0 0 15px rgba(255,107,0,0.8) !important; }
 }
 
 /* ══ ARCADE COLOR OVERRIDES FOR JSX COMPONENTS ═══════════
@@ -199,6 +213,21 @@ body::before {
 .theme-arcade [class*="border-rose-6"],
 .theme-arcade [class*="border-rose-7"],
 .theme-arcade [class*="border-rose-8"] { border-color: #cc4400 !important; }
+
+/* ── Background Magenta → Dark Orange ── */
+.theme-arcade [class*="bg-magenta-9"],
+.theme-arcade [class*="bg-magenta-8"] { background-color: #1a0500 !important; }
+.theme-arcade [class*="bg-magenta-7"],
+.theme-arcade [class*="bg-magenta-6"] { background-color: #2a0a00 !important; }
+
+/* ── Hardcoded magenta glow swap ── */
+.theme-arcade [style*="rgba(255,0,255"] {
+  text-shadow: 0 0 12px rgba(255,107,0,0.6) !important;
+  box-shadow: none !important;
+}
+.theme-arcade [class*="shadow-"][class*="ff00ff"] {
+  box-shadow: 0 0 15px rgba(255,107,0,0.6) !important;
+}
 
 /* ── Background Cyan → Dark Green ── */
 .theme-arcade [class*="bg-cyan-9"],
