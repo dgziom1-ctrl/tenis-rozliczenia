@@ -463,7 +463,10 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
             z-index: 39;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 16px;
+            padding-left: 16px;
+            padding-right: 16px;
+            padding-top: calc(8px + env(safe-area-inset-top, 0px));
+            padding-bottom: 8px;
             transition: transform 0.25s ease, opacity 0.25s ease;
             border-bottom: 2px solid ${a ? '#1a4d00' : 'rgba(22,78,99,0.8)'};
             background: ${a ? 'rgba(1,3,0,0.96)' : 'rgba(8,12,20,0.96)'};

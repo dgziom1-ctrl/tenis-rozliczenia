@@ -3,7 +3,7 @@ import { LayoutDashboard, Settings, History, Users, Trophy, Gamepad2, Zap } from
 const tabs = [
   { id: 'dashboard',  icon: LayoutDashboard, label: 'Dashboard'  },
   { id: 'attendance', icon: Trophy,           label: 'Frekwencja' },
-  { id: 'admin',      icon: Settings,         label: 'Admin'      },
+  { id: 'admin',      icon: Settings,         label: 'Sesja'      },
   { id: 'history',    icon: History,          label: 'Historia'   },
   { id: 'players',    icon: Users,            label: 'Gracze'     },
 ];
