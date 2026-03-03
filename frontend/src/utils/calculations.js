@@ -2,7 +2,9 @@
 // CALCULATION UTILITIES
 // ============================================================================
 
-import { ORGANIZER_NAME, DEBT_EPSILON } from '../constants';
+import { ORGANIZER_NAME } from '../constants';
+
+const DEBT_EPSILON = 0.05;
 
 export function roundToTwoDecimals(value) {
   return Math.round(value * 100) / 100;

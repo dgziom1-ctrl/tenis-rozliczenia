@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { subscribeToData } from '../firebase/index';
+import { subscribeToData } from '../firebase';
 
 const AppContext = createContext(null);
 

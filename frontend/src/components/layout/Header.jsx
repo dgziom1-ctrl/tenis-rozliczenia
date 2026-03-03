@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 
 const CLICKS_NEEDED = 5;
 
-export default function Header({ isMuted, setIsMuted, isConnected, theme, onToggleTheme }) {
+export default function Header({ isMuted, setIsMuted, isConnected, onOpenPong, theme, onToggleTheme }) {
   const [copied,     setCopied]     = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [chaosMode,  setChaosMode]  = useState(false);

@@ -4,23 +4,18 @@ import { SOUND_TYPES } from '../constants';
 export function useAudio(isMuted) {
   const audioContextRef = useRef(null);
 
-  const initAudioContext = useCallback(async () => {
+  const initAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    // Some browsers (especially mobile) suspend AudioContext until user interaction.
-    // Resume before every playback to avoid silent failures.
-    if (audioContextRef.current.state === 'suspended') {
-      await audioContextRef.current.resume();
     }
     return audioContextRef.current;
   }, []);
 
-  const playSound = useCallback(async (type) => {
+  const playSound = useCallback((type) => {
     if (isMuted) return;
 
     try {
-      const ctx = await initAudioContext();
+      const ctx = initAudioContext();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
