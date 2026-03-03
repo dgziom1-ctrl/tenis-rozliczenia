@@ -244,7 +244,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           style={{
             background: C.topBarBg,
             borderBottom: C.topBarBorder,
-            paddingTop: 'calc(0.75rem + env(safe-area-inset-top, 0px))',
+            paddingTop: '0.75rem',
             paddingBottom: '0.75rem',
           }}>
 

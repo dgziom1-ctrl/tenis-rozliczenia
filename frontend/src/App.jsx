@@ -109,7 +109,10 @@ function AppContent() {
   }
 
   return (
-    <div className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : ''}`}>
+    <div
+      className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : ''}`}
+      style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
+    >
       <div className="max-w-7xl mx-auto relative">
         <Header
           isMuted={isMuted}
