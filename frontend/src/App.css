@@ -116,3 +116,14 @@ button:hover {
   0% { left: -5%; }
   100% { left: 105%; }
 }
+
+/* ── Date input overlay reset ─────────────────────────────────────────────── */
+/* Ukryte date inputy używane jako picker overlay — zerujemy globalne style   */
+input[type="date"].date-overlay {
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: 16px !important; /* min 16px = brak zoom na iOS Safari */
+  box-sizing: border-box !important;
+  background: transparent !important;
+}

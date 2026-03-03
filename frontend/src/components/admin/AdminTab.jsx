@@ -1,15 +1,44 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Settings, Users, Zap, Database, CalendarDays, CheckCircle2, Calculator } from 'lucide-react';
+import { Settings, Users, Zap, Database, CalendarDays, CheckCircle2, Calculator, Copy, Lock } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { formatDate, formatAmountShort } from '../../utils/format';
 
+// ─── Generator wiadomości ─────────────────────────────────────────────────────
+function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson }) {
+  const paying = presentPlayers.filter(p => !multisportPlayers.includes(p));
+  const multi  = multisportPlayers.filter(p => presentPlayers.includes(p));
+  let msg = `🎾 Graliśmy! (${formatDate(date)})\n`;
+  msg += `💰 Koszt: ${formatAmountShort(totalCost)} zł\n`;
+  msg += `👥 Obecni (${presentPlayers.length}): ${presentPlayers.join(', ')}\n`;
+  if (paying.length > 0) {
+    msg += `💳 Każdy płaci: ${formatAmountShort(perPerson)} zł`;
+    if (paying.length !== presentPlayers.length) msg += ` (${paying.length} os.)`;
+    msg += '\n';
+  }
+  if (multi.length > 0) msg += `⚡ Multisport (gratis): ${multi.join(', ')}\n`;
+  return msg.trim();
+}
+
 // ─── Modal podsumowania po zapisaniu ─────────────────────────────────────────
 function SessionSummaryModal({ summary, onClose }) {
+  const [copied, setCopied] = useState(false);
   if (!summary) return null;
-  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson } = summary;
+  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers } = summary;
+
+  const handleCopy = () => {
+    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson });
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(msg).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500); });
+    } else {
+      const el = document.createElement('textarea');
+      el.value = msg; document.body.appendChild(el); el.select();
+      document.execCommand('copy'); document.body.removeChild(el);
+      setCopied(true); setTimeout(() => setCopied(false), 2500);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
@@ -19,7 +48,7 @@ function SessionSummaryModal({ summary, onClose }) {
           <h3 className="font-black text-emerald-300 text-xl tracking-wide">Sesja zapisana!</h3>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-5">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-black/60 border border-cyan-900 rounded-xl p-3 text-center">
             <p className="text-cyan-700 text-xs tracking-widest mb-1">DATA</p>
             <p className="text-cyan-200 font-bold text-sm">{formatDate(date)}</p>
@@ -41,25 +70,29 @@ function SessionSummaryModal({ summary, onClose }) {
         </div>
 
         {payingCount > 0 && (
-          <div className="bg-magenta-950/40 border-2 border-magenta-700 rounded-xl p-4 mb-5 text-center">
+          <div className="bg-magenta-950/40 border-2 border-magenta-700 rounded-xl p-4 mb-4 text-center">
             <p className="text-cyan-600 text-xs tracking-widest mb-1">KAŻDY PŁACI</p>
-            <p className="text-4xl font-black text-magenta-300"
-               style={{ textShadow: '0 0 15px rgba(255,0,255,0.5)' }}>
-              {formatAmountShort(perPerson)}
-              <span className="text-xl ml-1 opacity-70">zł</span>
+            <p className="text-4xl font-black text-magenta-300" style={{ textShadow: '0 0 15px rgba(255,0,255,0.5)' }}>
+              {formatAmountShort(perPerson)}<span className="text-xl ml-1 opacity-70">zł</span>
             </p>
             {multisportCount > 0 && (
-              <p className="text-emerald-600 text-xs mt-1">
-                ({payingCount} os. płaci · {multisportCount} os. gratis)
-              </p>
+              <p className="text-emerald-600 text-xs mt-1">({payingCount} os. płaci · {multisportCount} os. gratis)</p>
             )}
           </div>
         )}
 
-        <button
-          onClick={onClose}
-          className="w-full py-3 rounded-xl border-2 border-emerald-500 text-emerald-300 bg-emerald-950/50 hover:bg-emerald-500 hover:text-black font-black text-sm transition-all flex items-center justify-center gap-2"
-        >
+        {/* Kopiuj na grupkę */}
+        <button onClick={handleCopy}
+          className={`w-full py-3 rounded-xl border-2 font-bold text-sm transition-all flex items-center justify-center gap-2 mb-3 ${
+            copied
+              ? 'border-emerald-400 bg-emerald-950/50 text-emerald-300'
+              : 'border-cyan-700 bg-cyan-950/30 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-950/50'
+          }`}>
+          {copied ? <><CheckCircle2 size={15} /> SKOPIOWANO!</> : <><Copy size={15} /> KOPIUJ NA GRUPKĘ</>}
+        </button>
+
+        <button onClick={onClose}
+          className="w-full py-3 rounded-xl border-2 border-emerald-500 text-emerald-300 bg-emerald-950/50 hover:bg-emerald-500 hover:text-black font-black text-sm transition-all flex items-center justify-center gap-2">
           <CheckCircle2 size={16} /> OK, GOTOWE
         </button>
       </div>
@@ -71,10 +104,8 @@ function SessionSummaryModal({ summary, onClose }) {
 function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
   const cost = parseFloat(totalCost);
   if (!totalCost || isNaN(cost) || cost <= 0 || presentPlayers.length === 0) return null;
-
   const payingPlayers = presentPlayers.filter(p => !multisportPlayers.includes(p));
   const perPerson = payingPlayers.length > 0 ? cost / payingPlayers.length : 0;
-
   return (
     <div className="flex items-center justify-between bg-cyan-950/30 border border-cyan-800 rounded-xl px-4 py-3">
       <div className="flex items-center gap-2 text-cyan-600 text-sm font-bold">
@@ -84,8 +115,7 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
       <div className="text-right">
         {payingPlayers.length > 0 ? (
           <>
-            <span className="text-magenta-300 font-black text-xl"
-              style={{ textShadow: '0 0 8px rgba(255,0,255,0.4)' }}>
+            <span className="text-magenta-300 font-black text-xl" style={{ textShadow: '0 0 8px rgba(255,0,255,0.4)' }}>
               {formatAmountShort(perPerson)} zł
             </span>
             <span className="text-cyan-700 text-xs ml-2">/ os. ({payingPlayers.length} płaci)</span>
@@ -98,8 +128,25 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
   );
 }
 
+// ─── Ekran blokady (tryb tylko do odczytu) ────────────────────────────────────
+function LockedScreen({ onUnlock }) {
+  return (
+    <div className="w-full max-w-3xl mx-auto animate-in fade-in duration-300">
+      <div className="cyber-box rounded-2xl p-10 text-center border-cyan-900">
+        <Lock size={48} className="text-cyan-800 mx-auto mb-4" />
+        <h2 className="text-xl font-black text-cyan-600 mb-2">Tryb tylko do odczytu</h2>
+        <p className="text-cyan-800 text-sm mb-6">Dodawanie sesji wymaga uprawnień admina.</p>
+        <button onClick={onUnlock}
+          className="px-8 py-3 rounded-xl border-2 border-cyan-600 text-cyan-300 bg-cyan-950/50 hover:bg-cyan-600 hover:text-black font-black text-sm transition-all flex items-center justify-center gap-2 mx-auto">
+          <Lock size={16} /> ODBLOKUJ
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Główny komponent ─────────────────────────────────────────────────────────
-export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
+export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound, isAdmin, onRequestAdmin }) {
   const { showError } = useToast();
   const today = new Date().toISOString().split('T')[0];
   const [datePlayed,        setDatePlayed]        = useState(today);
@@ -127,43 +174,26 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
 
   const toggleMulti = (name) => {
     playSound('click');
-    setMultisportPlayers(prev =>
-      prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name]
-    );
+    setMultisportPlayers(prev => prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name]);
   };
 
   const handleSaveSession = useCallback(async (e) => {
     e.preventDefault();
     if (isSaving) return;
     setIsSaving(true);
-
     const cost = parseFloat(totalCost);
     const payingPlayers = presentPlayers.filter(p => !multisportPlayers.includes(p));
     const perPerson = payingPlayers.length > 0 ? cost / payingPlayers.length : 0;
-
     try {
-      const result = await addSession({
-        datePlayed,
-        totalCost: cost,
-        presentPlayers,
-        multisportPlayers,
-      });
-
-      if (!result.success) {
-        showError(result.error || 'Nie udało się zapisać sesji');
-        return;
-      }
-
+      const result = await addSession({ datePlayed, totalCost: cost, presentPlayers, multisportPlayers });
+      if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       playSound(SOUND_TYPES.SUCCESS);
       setSavedSummary({
-        date: datePlayed,
-        totalCost: cost,
-        presentCount: presentPlayers.length,
-        payingCount: payingPlayers.length,
-        multisportCount: multisportPlayers.length,
-        perPerson,
+        date: datePlayed, totalCost: cost,
+        presentCount: presentPlayers.length, payingCount: payingPlayers.length,
+        multisportCount: multisportPlayers.length, perPerson,
+        presentPlayers: [...presentPlayers], multisportPlayers: [...multisportPlayers],
       });
-
       setTotalCost('');
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers || [])]);
@@ -172,32 +202,25 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
     }
   }, [isSaving, datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError]);
 
-  const handleSummaryClose = () => {
-    setSavedSummary(null);
-    setActiveTab(TABS.DASHBOARD);
-  };
+  const handleSummaryClose = () => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); };
+
+  if (!isAdmin) return <LockedScreen onUnlock={onRequestAdmin} />;
 
   return (
     <>
       <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} />
-
       <div className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-300">
         <div className="cyber-box rounded-2xl p-4 sm:p-8">
           <h2 className="text-xl font-black text-cyan-300 mb-6 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
             <Settings className="text-magenta-500 flex-shrink-0" />
             Dodaj nowy tydzień
           </h2>
-
           <form onSubmit={handleSaveSession} className="space-y-5">
-
             {/* Data */}
             <div>
               <label className="block font-bold text-cyan-600 mb-2 tracking-wider text-sm">Data gry:</label>
               <div style={{ position: 'relative' }}>
-                <div
-                  className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
-                  style={{ pointerEvents: 'none' }}
-                >
+                <div className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3" style={{ pointerEvents: 'none' }}>
                   <span>{formatDate(datePlayed)}</span>
                   <CalendarDays size={18} style={{ opacity: 0.6, flexShrink: 0 }} />
                 </div>
@@ -205,112 +228,75 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
                   type="date"
                   value={datePlayed}
                   onChange={e => setDatePlayed(e.target.value)}
+                  className="date-overlay"
+                  onClick={e => e.currentTarget.showPicker?.()}
                   style={{
                     position: 'absolute', top: 0, left: 0,
                     width: '100%', height: '100%',
                     opacity: 0, cursor: 'pointer', zIndex: 2,
+                    padding: 0, border: 'none', boxSizing: 'border-box',
+                    fontSize: '16px',
                   }}
                 />
               </div>
             </div>
-
-            {/* Koszt + szybkie przyciski */}
+            {/* Koszt */}
             <div>
               <label className="block font-bold text-cyan-600 mb-2 tracking-wider text-sm">Koszt całkowity (PLN):</label>
               <div className="flex gap-2 mb-2">
                 {QUICK_COSTS.map(cost => (
-                  <button
-                    type="button"
-                    key={cost}
-                    onClick={() => { setTotalCost(String(cost)); playSound('click'); }}
+                  <button type="button" key={cost} onClick={() => { setTotalCost(String(cost)); playSound('click'); }}
                     className={`flex-1 py-2 rounded-lg border-2 font-bold text-sm transition-all ${
-                      totalCost === String(cost)
-                        ? 'border-cyan-400 bg-cyan-950 text-cyan-200 shadow-[0_0_8px_#00f3ff]'
-                        : 'border-cyan-900 bg-black text-cyan-700 hover:border-cyan-600 hover:text-cyan-400'
-                    }`}
-                  >
+                      totalCost === String(cost) ? 'border-cyan-400 bg-cyan-950 text-cyan-200 shadow-[0_0_8px_#00f3ff]' : 'border-cyan-900 bg-black text-cyan-700 hover:border-cyan-600 hover:text-cyan-400'
+                    }`}>
                     {cost === 0 ? 'FREE' : `${cost}`}
                   </button>
                 ))}
               </div>
-              <input
-                type="number"
-                value={totalCost}
-                onChange={(e) => setTotalCost(e.target.value)}
-                placeholder="lub wpisz ręcznie..."
-                className="cyber-input p-3 rounded-xl text-sm w-full"
-                required
-              />
+              <input type="number" value={totalCost} onChange={e => setTotalCost(e.target.value)}
+                placeholder="lub wpisz ręcznie..." className="cyber-input p-3 rounded-xl text-sm w-full" required />
             </div>
-
             {/* Obecni */}
             <div className="cyber-box bg-black/50 p-4 rounded-xl">
               <p className="font-bold text-cyan-400 mb-4 flex items-center gap-2 text-sm">
                 <Users size={18} className="text-magenta-500 flex-shrink-0" /> Kto był obecny?
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {playerNames.map((name) => (
-                  <button
-                    type="button"
-                    key={name}
-                    onClick={() => togglePresent(name)}
+                {playerNames.map(name => (
+                  <button type="button" key={name} onClick={() => togglePresent(name)}
                     className={`p-3 rounded-lg border-2 font-bold text-sm transition-all text-center ${
-                      presentPlayers.includes(name)
-                        ? 'border-cyan-400 bg-cyan-950 text-cyan-200 shadow-[0_0_8px_#00f3ff]'
-                        : 'border-cyan-900 bg-black hover:border-cyan-700 text-cyan-800'
-                    }`}
-                  >
+                      presentPlayers.includes(name) ? 'border-cyan-400 bg-cyan-950 text-cyan-200 shadow-[0_0_8px_#00f3ff]' : 'border-cyan-900 bg-black hover:border-cyan-700 text-cyan-800'
+                    }`}>
                     {name}
                   </button>
                 ))}
               </div>
             </div>
-
-            {/* Multi */}
+            {/* Multisport */}
             {presentPlayers.length > 0 && (
               <div className="cyber-box bg-black/50 p-4 rounded-xl border-emerald-900">
                 <p className="font-bold text-emerald-400 mb-4 flex items-center gap-2 text-sm">
                   <Zap size={18} className="text-emerald-500 flex-shrink-0" /> Kto miał Multisport (0 zł)?
                 </p>
                 <div className="grid grid-cols-2 gap-2">
-                  {presentPlayers.map((name) => (
-                    <button
-                      type="button"
-                      key={name}
-                      onClick={() => toggleMulti(name)}
+                  {presentPlayers.map(name => (
+                    <button type="button" key={name} onClick={() => toggleMulti(name)}
                       className={`p-3 rounded-lg border-2 font-bold text-sm transition-all text-center ${
-                        multisportPlayers.includes(name)
-                          ? 'border-emerald-400 bg-emerald-950 text-emerald-200 shadow-[0_0_8px_#10b981]'
-                          : 'border-emerald-900 bg-black hover:border-emerald-700 text-emerald-800'
-                      }`}
-                    >
+                        multisportPlayers.includes(name) ? 'border-emerald-400 bg-emerald-950 text-emerald-200 shadow-[0_0_8px_#10b981]' : 'border-emerald-900 bg-black hover:border-emerald-700 text-emerald-800'
+                      }`}>
                       {name}
                     </button>
                   ))}
                 </div>
               </div>
             )}
-
-            {/* Podgląd podziału kosztów na żywo */}
-            <LiveCostPreview
-              totalCost={totalCost}
-              presentPlayers={presentPlayers}
-              multisportPlayers={multisportPlayers}
-            />
-
-            <button
-              type="submit"
-              disabled={isSaving || presentPlayers.length === 0 || !totalCost}
+            {/* Podgląd live */}
+            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} />
+            <button type="submit" disabled={isSaving || presentPlayers.length === 0 || !totalCost}
               className={`cyber-button-blue w-full py-4 rounded-xl text-lg font-black flex justify-center items-center gap-2 transition-opacity ${
                 isSaving || presentPlayers.length === 0 || !totalCost ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              aria-label="Zapisz tydzień"
-            >
-              {isSaving ? (
-                <><InlineSpinner size="sm" /> Zapisuję...</>
-              ) : (
-                <><Database className="flex-shrink-0" /> ZAPISZ TYDZIEŃ</>
-              )}
+              }`}>
+              {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Database className="flex-shrink-0" /> ZAPISZ TYDZIEŃ</>}
             </button>
           </form>
         </div>

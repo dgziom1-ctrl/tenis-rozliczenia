@@ -124,6 +124,11 @@ function AppContent() {
     if (Math.abs(dy) > Math.abs(dx)) return;
     // Minimalny próg 60px
     if (Math.abs(dx) < 60) return;
+    // Ignoruj gdy gest zaczyna/kończy się na inpucie, select lub modalu (np. datepicker)
+    const target = e.target || e.srcElement;
+    const tag = target?.tagName?.toLowerCase();
+    if (tag === "input" || tag === "select" || tag === "textarea") return;
+    if (target?.closest?.('[role="dialog"]')) return;
 
     const currentIdx = TAB_ORDER.indexOf(activeTab);
     if (dx < 0) {

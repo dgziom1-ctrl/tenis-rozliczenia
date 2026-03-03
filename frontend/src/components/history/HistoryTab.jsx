@@ -41,6 +41,8 @@ function EditDateInput({ value, onChange }) {
         type="date"
         value={value}
         onChange={e => onChange(e.target.value)}
+        className="date-overlay"
+        onClick={e => e.currentTarget.showPicker?.()}
         style={{
           position: 'absolute',
           top: 0, left: 0,
@@ -49,6 +51,8 @@ function EditDateInput({ value, onChange }) {
           opacity: 0,
           cursor: 'pointer',
           zIndex: 2,
+          padding: 0, border: 'none', boxSizing: 'border-box',
+          fontSize: '16px',
         }}
       />
     </div>
