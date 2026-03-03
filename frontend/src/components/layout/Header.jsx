@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Smartphone, Copy, Check, Zap, Gamepad2 } from 'lucide-react';
+import { Volume2, VolumeX, Smartphone, Copy, Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 const CLICKS_NEEDED = 5;
@@ -44,17 +44,16 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // PING-PONG: 5 kliknięć → chaos, easter egg przez klawiaturę (ponk) lub chaos nadal aktywuje się tutaj
+  // PING-PONG: tap = toggle theme, 5 tapów = chaos
   const handlePingPongClick = () => {
     clearTimeout(resetTimer.current);
+
+    // Toggle theme on every tap
+    onToggleTheme();
+
     setClickCount(prev => {
       const next = prev + 1;
       if (next >= CLICKS_NEEDED) { activateChaos(); return 0; }
-      const hints = ['', '🏓', '🏓🏓',
-        a ? '>>> SEKRET <<<' : '🏓🏓🏓 coś tu jest...',
-        a ? '!!! JESZCZE RAZ !!!' : '🏓🏓🏓🏓 jeszcze raz!',
-      ];
-      setHint(hints[next]);
       resetTimer.current = setTimeout(() => { setClickCount(0); setHint(''); }, 2000);
       return next;
     });
@@ -266,32 +265,8 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
               : <Copy  size={16} style={{ color: C.copyClr }} />}
           </button>
 
-          {/* Right side: theme toggle + mute */}
+          {/* Right side: mute only — theme toggle via PING-PONG tap */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              onClick={onToggleTheme}
-              aria-label={a ? 'Zmień motyw na Cyber Ponk' : 'Zmień motyw na Retro Arcade'}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                padding: a ? '5px 8px' : '5px 10px',
-                border: a ? '2px solid #cc4400' : '2px solid rgba(126,34,206,0.7)',
-                borderRadius: a ? 0 : '9999px',
-                background: a ? 'rgba(13,2,0,0.8)' : 'rgba(88,28,135,0.2)',
-                color: a ? '#ff6b00' : 'rgb(192,132,252)',
-                fontWeight: 900,
-                fontSize: a ? '0.42rem' : '0.68rem',
-                fontFamily: a ? "'Press Start 2P',monospace" : 'inherit',
-                letterSpacing: a ? '0.04em' : '0.05em',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = a ? '#ff6b00' : 'rgb(168,85,247)'; e.currentTarget.style.color = a ? '#010300' : '#000'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = a ? 'rgba(13,2,0,0.8)' : 'rgba(88,28,135,0.2)'; e.currentTarget.style.color = a ? '#ff6b00' : 'rgb(192,132,252)'; }}
-            >
-              {a ? <><Zap size={11} /> CYBER</> : <><Gamepad2 size={13} /> ARCADE</>}
-            </button>
-
             <button onClick={() => setIsMuted(!isMuted)}
               className="flex items-center justify-center w-10 h-10 transition-all duration-200"
               style={{
@@ -356,10 +331,13 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
                   background: C.handleBg, borderRadius: a ? 0 : '0 0 4px 4px' }} />
               </div>
 
-              {/* PING-PONG — klikalny (5×→ chaos) */}
+              {/* PING-PONG — tap = zmiana motywu, 5× = chaos */}
               <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <button onClick={handlePingPongClick}
-                  style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}>
+                <button
+                  onClick={handlePingPongClick}
+                  aria-label={a ? 'Zmień motyw na Cyber Ponk' : 'Zmień motyw na Retro Arcade'}
+                  style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
+                >
                   <span className="block font-black whitespace-nowrap" style={{
                     fontSize: a ? 'clamp(1.5rem, 5vw, 3rem)' : 'clamp(2rem, 7vw, 4rem)',
                     letterSpacing: a ? '0.05em' : '0.1em',
@@ -375,11 +353,21 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
                   </span>
                 </button>
 
-                {hint && !chaosMode && (
-                  <div style={{ position: 'absolute', bottom: '-32px', left: '50%', transform: 'translateX(-50%)',
-                    whiteSpace: 'nowrap', fontWeight: 900, padding: '3px 10px',
-                    borderRadius: a ? 0 : '9999px', ...C.hintStyle }}>{hint}</div>
+                {/* Subtelny hint "tap = motyw" */}
+                {!chaosMode && (
+                  <div style={{
+                    marginTop: '6px',
+                    fontSize: a ? '0.38rem' : '0.6rem',
+                    fontFamily: a ? "'Press Start 2P',monospace" : 'inherit',
+                    color: a ? '#1a4d00' : 'rgba(22,78,99,0.7)',
+                    letterSpacing: '0.12em',
+                    userSelect: 'none',
+                    pointerEvents: 'none',
+                  }}>
+                    {a ? '[ TAP → CYBER ]' : '[ tap → arcade ]'}
+                  </div>
                 )}
+
                 {chaosMode && (
                   <div style={{ position: 'absolute', bottom: '-32px', left: '50%', transform: 'translateX(-50%)',
                     whiteSpace: 'nowrap', fontWeight: 900, padding: '3px 12px',
