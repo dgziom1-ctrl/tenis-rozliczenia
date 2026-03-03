@@ -280,10 +280,10 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
         </div>
 
         {/* ══ MAIN SECTION ════════════════════════════ */}
-        <div className="relative z-10 px-4 py-8 flex flex-col items-center">
+        <div className="relative z-10 px-4 py-5 flex flex-col items-center">
 
           {/* ASCII Pong */}
-          <div className="ascii-pong-field mb-4">
+          <div className="ascii-pong-field mb-2">
             <span style={{ color: C.paddleClr, fontSize: '1.5rem', fontWeight: 'bold',
               textShadow: `0 0 10px ${C.paddleShadow}` }}>「</span>
             <div className="ball-court mx-4">
@@ -393,7 +393,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           {/* Loader bar */}
           <div style={{ width: '100%', maxWidth: '28rem', height: '3px',
             background: C.loaderBg, borderRadius: a ? 0 : '9999px',
-            overflow: 'hidden', marginTop: '2rem', marginBottom: '1.25rem' }}>
+            overflow: 'hidden', marginTop: '1.25rem', marginBottom: '0.75rem' }}>
             <div className={chaosMode ? '' : 'animate-pulse'} style={{
               height: '100%', width: '100%', borderRadius: a ? 0 : '9999px',
               background: chaosMode ? C.loaderChaos : C.loaderFill,

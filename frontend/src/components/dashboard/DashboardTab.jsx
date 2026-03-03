@@ -52,32 +52,58 @@ function generateConfetti(count = 40) {
 function SummaryBanner({ summary }) {
   const { totalToCollect = 0, settledPlayers = 0, totalPlayers = 0, totalWeeks = 0 } = summary || {};
   const allSettled = totalPlayers > 0 && settledPlayers === totalPlayers;
+  const debtorsLeft = totalPlayers - settledPlayers;
 
   return (
-    <div className="cyber-box rounded-2xl p-4 sm:p-5 grid grid-cols-3 gap-3 sm:gap-6">
-      <div className="text-center">
-        <p className="text-cyan-700 text-xs tracking-widest mb-1 flex items-center justify-center gap-1">
-          <TrendingUp size={11} /> DO ZEBRANIA
+    <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-1">
+      {/* DO ZEBRANIA — najważniejsza liczba, największy font */}
+      <div className={`text-center rounded-xl py-3 px-2 ${
+        allSettled
+          ? 'bg-emerald-950/40 border border-emerald-800'
+          : 'bg-magenta-950/40 border border-magenta-900'
+      }`}>
+        <p className="text-xs tracking-widest mb-1.5 flex items-center justify-center gap-1 font-bold"
+           style={{ color: allSettled ? '#059669' : '#9f1239' }}>
+          <TrendingUp size={10} />
+          {allSettled ? 'ROZLICZONE' : 'DO ZEBRANIA'}
         </p>
-        <p className={`font-mono font-black text-2xl sm:text-3xl ${allSettled ? 'text-emerald-400' : 'text-magenta-400 glow-magenta'}`}
-           style={{ textShadow: allSettled ? '0 0 12px rgba(52,211,153,0.6)' : undefined }}>
-          {formatAmountShort(totalToCollect)}
-          <span className="text-sm font-bold ml-1 opacity-70">zł</span>
-        </p>
+        {allSettled ? (
+          <p className="font-mono font-black text-2xl sm:text-3xl text-emerald-400"
+             style={{ textShadow: '0 0 14px rgba(52,211,153,0.7)' }}>
+            ✓ 0 <span className="text-base opacity-70">zł</span>
+          </p>
+        ) : (
+          <p className="font-mono font-black text-2xl sm:text-3xl text-magenta-300 glow-magenta">
+            {formatAmountShort(totalToCollect)}
+            <span className="text-sm font-bold ml-1 opacity-70">zł</span>
+          </p>
+        )}
+        {!allSettled && debtorsLeft > 0 && (
+          <p className="text-xs mt-1" style={{ color: '#9f1239' }}>
+            {debtorsLeft} {debtorsLeft === 1 ? 'osoba' : 'osoby'}
+          </p>
+        )}
       </div>
-      <div className="text-center border-x-2 border-cyan-900">
-        <p className="text-cyan-700 text-xs tracking-widest mb-1 flex items-center justify-center gap-1">
-          <Users size={11} /> ROZLICZENI
+
+      {/* ROZLICZENI */}
+      <div className="text-center rounded-xl py-3 px-2 bg-cyan-950/20 border border-cyan-900">
+        <p className="text-cyan-700 text-xs tracking-widest mb-1.5 flex items-center justify-center gap-1 font-bold">
+          <Users size={10} /> ROZLICZENI
         </p>
         <p className="font-mono font-black text-2xl sm:text-3xl text-cyan-300">
-          {settledPlayers}<span className="text-cyan-700 text-lg">/{totalPlayers}</span>
+          {settledPlayers}
+          <span className="text-cyan-700 text-base">/{totalPlayers}</span>
         </p>
+        <p className="text-xs text-cyan-800 mt-1">graczy</p>
       </div>
-      <div className="text-center">
-        <p className="text-cyan-700 text-xs tracking-widest mb-1 flex items-center justify-center gap-1">
-          <CalendarDays size={11} /> SESJI
+
+      {/* SESJI */}
+      <div className="text-center rounded-xl py-3 px-2 bg-cyan-950/20 border border-cyan-900">
+        <p className="text-cyan-700 text-xs tracking-widest mb-1.5 flex items-center justify-center gap-1 font-bold">
+          <CalendarDays size={10} /> SESJI
         </p>
         <p className="font-mono font-black text-2xl sm:text-3xl text-cyan-300">{totalWeeks}</p>
+        <p className="text-xs text-cyan-800 mt-1">rozegranych</p>
       </div>
     </div>
   );
@@ -318,7 +344,7 @@ export default function DashboardTab({ data, history, playSound }) {
   const sortedPlayers = useMemo(() => {
     if (!data.players) return [];
     return [
-      ...data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) => a.name.localeCompare(b.name, 'pl')),
+      ...data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) => b.currentDebt - a.currentDebt || a.name.localeCompare(b.name, 'pl')),
       ...data.players.filter(p => p.name === ORGANIZER_NAME),
     ];
   }, [data.players]);
@@ -349,15 +375,14 @@ export default function DashboardTab({ data, history, playSound }) {
 
       <div className="space-y-6 animate-in fade-in duration-300">
 
-        {/* Header */}
+        {/* Header + Summary merged — jeden kontener, dwie sekcje */}
         <div className="cyber-box rounded-2xl p-4 sm:p-6">
-          <h2 className="text-xl font-black text-cyan-300 flex items-center gap-3 border-b-2 border-cyan-800 pb-4 mb-0">
+          <h2 className="text-xl font-black text-cyan-300 flex items-center gap-3 border-b-2 border-cyan-800 pb-4 mb-4">
             <LayoutDashboard className="text-magenta-500 flex-shrink-0" />
             Dashboard
           </h2>
+          <SummaryBanner summary={data.summary} />
         </div>
-
-        <SummaryBanner summary={data.summary} />
 
         {/* Undo toast */}
         {undoToast && (
@@ -376,6 +401,15 @@ export default function DashboardTab({ data, history, playSound }) {
             >
               <RotateCcw size={14} /> COFNIJ
             </button>
+          </div>
+        )}
+
+        {/* Empty state — brak sesji */}
+        {totalWeeks === 0 && (
+          <div className="cyber-box rounded-2xl p-10 text-center border-cyan-900">
+            <div className="text-5xl mb-4">🎾</div>
+            <p className="text-cyan-300 font-black text-lg mb-2">Brak rozgrywek</p>
+            <p className="text-cyan-700 text-sm">Dodaj pierwszą sesję w zakładce <span className="text-cyan-400 font-bold">Dodaj sesję</span></p>
           </div>
         )}
 

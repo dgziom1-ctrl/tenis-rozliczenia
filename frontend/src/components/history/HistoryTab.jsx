@@ -317,11 +317,11 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <button onClick={() => requestEdit(row)}
-                          className="p-2 rounded-lg border-2 border-cyan-800 text-cyan-600 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/50 transition-all" title="Edytuj">
+                          className="p-3 rounded-lg border-2 border-cyan-800 text-cyan-600 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/50 transition-all" title="Edytuj" aria-label="Edytuj sesję">
                           <Pencil size={16}/>
                         </button>
                         <button onClick={() => requestDelete(row.id)}
-                          className="p-2 rounded-lg border-2 border-magenta-900 text-magenta-700 hover:border-magenta-500 hover:text-magenta-300 hover:bg-magenta-950/50 transition-all" title="Usuń">
+                          className="p-3 rounded-lg border-2 border-magenta-900 text-magenta-700 hover:border-magenta-500 hover:text-magenta-300 hover:bg-magenta-950/50 transition-all" title="Usuń" aria-label="Usuń sesję">
                           <Trash2 size={16}/>
                         </button>
                       </div>

@@ -164,11 +164,11 @@ export default function PlayersTab({ players, deletedPlayers, playSound }) {
                       </span>
                       <div className="flex gap-2 flex-shrink-0">
                         <button onClick={() => handleRestore(name)}
-                          className="p-2 rounded-lg border-2 border-emerald-800 text-emerald-600 hover:border-emerald-500 hover:text-emerald-300 hover:bg-emerald-950/50 transition-all" title="Przywróć">
+                          className="p-3 rounded-lg border-2 border-emerald-800 text-emerald-600 hover:border-emerald-500 hover:text-emerald-300 hover:bg-emerald-950/50 transition-all" title="Przywróć">
                           <RotateCcw size={16}/>
                         </button>
                         <button onClick={() => setConfirmDelete(name)}
-                          className="p-2 rounded-lg border-2 border-rose-900 text-rose-700 hover:border-rose-500 hover:text-rose-300 hover:bg-rose-950/50 transition-all" title="Usuń na zawsze">
+                          className="p-3 rounded-lg border-2 border-rose-900 text-rose-700 hover:border-rose-500 hover:text-rose-300 hover:bg-rose-950/50 transition-all" title="Usuń na zawsze">
                           <Trash2 size={16}/>
                         </button>
                       </div>
