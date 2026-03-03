@@ -1,40 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Settings, Users, Zap, Database } from 'lucide-react';
 import { addSession } from '../../firebase/index';
-import { MONTHS, QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
+import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
-
-function DatePicker({ value, onChange }) {
-  const today = new Date();
-  const [day,   setDay]   = useState(() => parseInt(value.split('-')[2]));
-  const [month, setMonth] = useState(() => parseInt(value.split('-')[1]));
-  const [year,  setYear]  = useState(() => parseInt(value.split('-')[0]));
-
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const days  = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const years = Array.from({ length: 5 }, (_, i) => today.getFullYear() - 2 + i);
-
-  const emit = (d, m, y) => onChange(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
-
-  const handleDay   = (v) => { const d = parseInt(v); setDay(d);   emit(d, month, year); };
-  const handleMonth = (v) => { const m = parseInt(v); setMonth(m); const maxD = new Date(year, m, 0).getDate(); const safeD = Math.min(day, maxD); setDay(safeD); emit(safeD, m, year); };
-  const handleYear  = (v) => { const y = parseInt(v); setYear(y);  emit(day, month, y); };
-
-  return (
-    <div className="grid grid-cols-3 gap-2">
-      <select value={day}   onChange={e => handleDay(e.target.value)}   className="cyber-input p-3 rounded-xl text-sm cursor-pointer w-full">
-        {days.map(d => <option key={d} value={d}>{String(d).padStart(2,'0')}</option>)}
-      </select>
-      <select value={month} onChange={e => handleMonth(e.target.value)} className="cyber-input p-3 rounded-xl text-sm cursor-pointer w-full">
-        {MONTHS.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
-      </select>
-      <select value={year}  onChange={e => handleYear(e.target.value)}  className="cyber-input p-3 rounded-xl text-sm cursor-pointer w-full">
-        {years.map(y => <option key={y} value={y}>{y}</option>)}
-      </select>
-    </div>
-  );
-}
 
 export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
   const { showSuccess, showError } = useToast();
@@ -112,7 +81,13 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
           {/* Data */}
           <div>
             <label className="block font-bold text-cyan-600 mb-2 tracking-wider text-sm">Data gry:</label>
-            <DatePicker value={datePlayed} onChange={setDatePlayed} />
+            <input
+              type="date"
+              value={datePlayed}
+              onChange={e => setDatePlayed(e.target.value)}
+              className="cyber-input w-full p-3 rounded-xl text-sm"
+              style={{ colorScheme: 'dark' }}
+            />
           </div>
 
           {/* Koszt + szybkie przyciski */}
