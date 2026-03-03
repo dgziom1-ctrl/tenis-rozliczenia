@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import { History, Pencil, Trash2, Check, X, Zap, Users, Lock, CalendarDays } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase/index';
 import { ADMIN_PASSWORD, MONTHS } from '../../constants';
@@ -26,25 +26,31 @@ function groupByMonth(history) {
 }
 
 function EditDateInput({ value, onChange }) {
-  const ref = useRef(null);
   return (
     <div style={{ position: 'relative' }}>
-      <input
-        ref={ref}
-        type="date"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: '100%', height: '100%', top: 0, left: 0 }}
-      />
-      <button
-        type="button"
-        onClick={() => ref.current?.showPicker?.() || ref.current?.click()}
+      {/* Stylowany element — wizualna warstwa */}
+      <div
         className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
-        style={{ cursor: 'pointer', textAlign: 'left' }}
+        style={{ pointerEvents: 'none' }}
       >
         <span>{formatDate(value)}</span>
         <CalendarDays size={16} style={{ opacity: 0.6, flexShrink: 0 }} />
-      </button>
+      </div>
+      {/* Natywny input nakładka — klikalna, przezroczysta, na wierzchu */}
+      <input
+        type="date"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        style={{
+          position: 'absolute',
+          top: 0, left: 0,
+          width: '100%',
+          height: '100%',
+          opacity: 0,
+          cursor: 'pointer',
+          zIndex: 2,
+        }}
+      />
     </div>
   );
 }

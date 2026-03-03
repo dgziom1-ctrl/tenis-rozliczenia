@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Settings, Users, Zap, Database, CalendarDays } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
@@ -7,7 +7,6 @@ import { InlineSpinner } from '../common/LoadingSkeleton';
 import { formatDate } from '../../utils/format';
 
 export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
-  const dateInputRef = useRef(null);
   const { showSuccess, showError } = useToast();
   const today = new Date().toISOString().split('T')[0];
   const [datePlayed,        setDatePlayed]        = useState(today);
@@ -84,31 +83,29 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
           <div>
             <label className="block font-bold text-cyan-600 mb-2 tracking-wider text-sm">Data gry:</label>
             <div style={{ position: 'relative' }}>
-              {/* Ukryty natywny input — triggerowany kliknięciem przycisku */}
+              {/* Stylowany przycisk — wizualna warstwa */}
+              <div
+                className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
+                style={{ pointerEvents: 'none' }}
+              >
+                <span>{formatDate(datePlayed)}</span>
+                <CalendarDays size={18} style={{ opacity: 0.6, flexShrink: 0 }} />
+              </div>
+              {/* Natywny input nakładka — klikalna, przezroczysta, na wierzchu */}
               <input
-                ref={dateInputRef}
                 type="date"
                 value={datePlayed}
                 onChange={e => setDatePlayed(e.target.value)}
                 style={{
                   position: 'absolute',
-                  opacity: 0,
-                  pointerEvents: 'none',
+                  top: 0, left: 0,
                   width: '100%',
                   height: '100%',
-                  top: 0, left: 0,
+                  opacity: 0,
+                  cursor: 'pointer',
+                  zIndex: 2,
                 }}
               />
-              {/* Stylowany przycisk który odpala picker */}
-              <button
-                type="button"
-                onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.click()}
-                className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
-                style={{ cursor: 'pointer', textAlign: 'left' }}
-              >
-                <span>{formatDate(datePlayed)}</span>
-                <CalendarDays size={18} style={{ opacity: 0.6, flexShrink: 0 }} />
-              </button>
             </div>
           </div>
 
