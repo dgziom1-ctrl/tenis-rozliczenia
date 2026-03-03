@@ -219,12 +219,6 @@ export default function AttendanceTab({ players, history, summary }) {
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-5 duration-300">
-      <div className="cyber-box rounded-2xl p-4 sm:p-6">
-        <h2 className="text-xl font-black text-cyan-300 flex items-center gap-3 border-b-2 border-cyan-800 pb-4 mb-0">
-          <Trophy className="text-magenta-500 flex-shrink-0" />
-          Frekwencja
-        </h2>
-      </div>
       <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} stats={stats} />
       <RankGuide />
       <MonthlyReport monthlyStats={monthlyStats} players={players} />

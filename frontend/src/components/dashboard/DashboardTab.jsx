@@ -375,15 +375,6 @@ export default function DashboardTab({ data, history, playSound }) {
 
       <div className="space-y-6 animate-in fade-in duration-300">
 
-        {/* Header + Summary merged — jeden kontener, dwie sekcje */}
-        <div className="cyber-box rounded-2xl p-4 sm:p-6">
-          <h2 className="text-xl font-black text-cyan-300 flex items-center gap-3 border-b-2 border-cyan-800 pb-4 mb-4">
-            <LayoutDashboard className="text-magenta-500 flex-shrink-0" />
-            Dashboard
-          </h2>
-
-        </div>
-
         {/* Undo toast */}
         {undoToast && (
           <div className="cyber-box border-emerald-600 rounded-2xl p-4 flex items-center justify-between gap-4 relative overflow-hidden bg-emerald-950/30">

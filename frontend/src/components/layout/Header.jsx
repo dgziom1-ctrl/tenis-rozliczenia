@@ -478,7 +478,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
         }
       `}</style>
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
-        {/* BLIK w sticky headerze — widoczny gdy scrollujesz */}
+        {/* BLIK w sticky headerze */}
         <button onClick={handleCopy}
           style={{
             background: 'transparent', border: 'none', padding: 0,
@@ -486,16 +486,25 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           }}>
           <Smartphone size={15} style={{ color: C.iconClr, flexShrink: 0 }} />
           <span style={{
-            fontWeight: 900, color: C.blikLabelClr,
-            fontSize: a ? '0.42rem' : '0.65rem',
+            fontWeight: 900,
+            color: C.blikLabelClr,
+            fontSize: a ? '0.38rem' : '0.6rem',
             fontFamily: a ? "'Press Start 2P', monospace" : 'inherit',
             letterSpacing: '0.12em',
+            padding: '2px 5px',
+            background: C.blikLabelBg,
+            border: `1px solid ${a ? 'rgba(255,107,0,0.4)' : 'rgba(250,204,21,0.3)'}`,
+            borderRadius: a ? 0 : '3px',
           }}>BLIK</span>
           <span style={{
             color: C.blikNumClr,
-            fontFamily: 'monospace',
-            fontSize: a ? '0.48rem' : '0.85rem',
-            fontWeight: 'bold', letterSpacing: '0.05em',
+            fontFamily: a ? "'Press Start 2P', monospace" : 'monospace',
+            fontSize: a ? '0.44rem' : '0.9rem',
+            fontWeight: 'bold',
+            letterSpacing: '0.06em',
+            textShadow: a
+              ? '0 0 10px rgba(57,255,20,0.8), 0 0 20px rgba(57,255,20,0.4)'
+              : '0 0 10px rgba(103,232,249,0.7), 0 0 20px rgba(103,232,249,0.3)',
           }}>{blikNumber}</span>
           {copied
             ? <Check size={13} style={{ color: '#4ade80' }} />
