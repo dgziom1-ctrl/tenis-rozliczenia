@@ -8,6 +8,7 @@ import { formatDate } from '../../utils/format';
 
 export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
   const dateInputRef = useRef(null);
+  const { showSuccess, showError } = useToast();
   const today = new Date().toISOString().split('T')[0];
   const [datePlayed,        setDatePlayed]        = useState(today);
   const [totalCost,         setTotalCost]         = useState('');
