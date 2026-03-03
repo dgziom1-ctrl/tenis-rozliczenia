@@ -41,6 +41,7 @@ export default function Navigation({ activeTab, setActiveTab, theme, onToggleThe
           border-top: 2px solid;
           border-color: ${a ? '#1a4d00' : 'rgb(22,78,99)'};
           background: ${a ? '#010300' : '#080c14'};
+          /* Push content above home indicator */
           padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 

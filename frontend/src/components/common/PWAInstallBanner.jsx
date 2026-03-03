@@ -55,7 +55,7 @@ export default function PWAInstallBanner() {
   return (
     <div style={{
       position: 'fixed',
-      bottom: '72px', // nad bottom nav
+      bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))', // nad bottom nav
       left: '12px',
       right: '12px',
       zIndex: 45,

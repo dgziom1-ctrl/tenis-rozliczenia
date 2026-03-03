@@ -214,7 +214,18 @@ body::before {
   color: #39ff14;
 }
 
-/* mini-paddle (shared component) */
+/* ══ MOBILE SAFE AREA (PWA / iPhone home indicator) ══════ */
+.main-content {
+  /* desktop: no extra padding */
+}
+
+@media (max-width: 639px) {
+  .main-content {
+    /* nav height ~64px + home indicator */
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 16px));
+  }
+}
+
 .mini-paddle {
   display: inline-block;
   width: 14px; height: 15px;

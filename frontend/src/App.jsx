@@ -124,7 +124,7 @@ function AppContent() {
           theme={theme}
           onToggleTheme={toggleTheme}
         />
-        <main className="pb-24 sm:pb-0">
+        <main className="main-content">
           {activeTab === 'dashboard'  && <DashboardTab  data={{ summary: appData.summary, players: appData.players }} history={appData.history} playSound={playSound} />}
           {activeTab === 'attendance' && <AttendanceTab players={appData.players} history={appData.history} summary={appData.summary} />}
           {activeTab === 'admin'      && <AdminTab      playerNames={appData.playerNames} defaultMultiPlayers={appData.defaultMultiPlayers} setActiveTab={switchTab} playSound={playSound} />}
