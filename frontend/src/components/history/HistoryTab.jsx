@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { History, Pencil, Trash2, Check, X, Zap, Users, Lock, CalendarDays } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase/index';
 import { ADMIN_PASSWORD, MONTHS } from '../../constants';
+import { formatDate, formatAmount, formatAmountShort } from '../../utils/format';
 
 const MONTHS_PL = MONTHS; // already defined in constants
 
@@ -249,7 +250,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
                   if (isDeleting) return (
                     <div key={row.id} className="cyber-box border-rose-600 rounded-xl p-5 bg-rose-950/20">
-                      <p className="text-rose-300 font-bold mb-1">Usunąć tydzień z dnia <span className="text-white">{row.datePlayed}</span>?</p>
+                      <p className="text-rose-300 font-bold mb-1">Usunąć tydzień z dnia <span className="text-white">{formatDate(row.datePlayed)}</span>?</p>
                       <p className="text-rose-700 text-sm mb-4">Ta operacja jest nieodwracalna.</p>
                       <div className="flex gap-3">
                         <button onClick={() => handleDelete(row.id)}
@@ -269,15 +270,15 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm min-w-0">
                         <div>
                           <p className="text-cyan-700 text-xs tracking-wider">DATA</p>
-                          <p className="text-cyan-100 font-bold">{row.datePlayed}</p>
+                          <p className="text-cyan-100 font-bold">{formatDate(row.datePlayed)}</p>
                         </div>
                         <div>
                           <p className="text-cyan-700 text-xs tracking-wider">KOSZT</p>
-                          <p className="text-magenta-400 font-black text-neon-pink">{row.totalCost} PLN</p>
+                          <p className="text-magenta-400 font-black text-neon-pink">{formatAmount(row.totalCost)}</p>
                         </div>
                         <div>
                           <p className="text-cyan-700 text-xs tracking-wider">NA OSOBĘ</p>
-                          <p className="text-cyan-400 font-bold">{row.costPerPerson.toFixed(2)} PLN</p>
+                          <p className="text-cyan-400 font-bold">{formatAmount(row.costPerPerson)}</p>
                         </div>
                         <div className="min-w-0">
                           <p className="text-cyan-700 text-xs tracking-wider">OBECNI ({row.presentPlayers.length})</p>

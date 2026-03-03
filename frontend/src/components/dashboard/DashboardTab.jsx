@@ -3,6 +3,7 @@ import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw } from 'lucide
 import { settlePlayer, undoSettle } from '../../firebase/index';
 import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { calculateDebtBreakdown } from '../../utils/calculations';
+import { formatDate, formatAmountShort } from '../../utils/format';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 
@@ -26,7 +27,26 @@ const SETTLE_STYLES = `
   .settle-flash {
     animation: settleFlash 0.8s ease-out forwards !important;
   }
+  @keyframes confettiRain {
+    0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg) scale(0.5); opacity: 0; }
+  }
 `;
+
+// ─── All-settled confetti burst ───────────────────────────────────────────────
+const CONFETTI_POOL = ['🏓','🎉','⭐','✨','💚','🎊','🏆','💰','🟢','🎯'];
+
+function generateConfetti(count = 40) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    emoji: CONFETTI_POOL[Math.floor(Math.random() * CONFETTI_POOL.length)],
+    x: Math.random() * 100,
+    delay: Math.random() * 1.2,
+    dur: 2 + Math.random() * 2,
+    size: 14 + Math.random() * 22,
+    rotate: Math.random() * 360,
+  }));
+}
 
 // ─── Summary banner ───────────────────────────────────────────────────────────
 function SummaryBanner({ summary }) {
@@ -41,8 +61,8 @@ function SummaryBanner({ summary }) {
         </p>
         <p className={`font-mono font-black text-2xl sm:text-3xl ${allSettled ? 'text-emerald-400' : 'text-magenta-400'}`}
            style={{ textShadow: allSettled ? '0 0 12px rgba(52,211,153,0.6)' : '0 0 12px rgba(255,0,255,0.5)' }}>
-          {totalToCollect.toFixed(2)}
-          <span className="text-sm font-bold ml-1 opacity-70">PLN</span>
+          {formatAmountShort(totalToCollect)}
+          <span className="text-sm font-bold ml-1 opacity-70">zł</span>
         </p>
       </div>
       <div className="text-center border-x-2 border-cyan-900">
@@ -110,8 +130,8 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
               ) : (
                 <p className={`text-3xl neon-amount ${hasDebt ? '' : 'text-emerald-400'}`}
                    style={hasDebt ? {} : { textShadow: '0 0 8px rgba(52,211,153,0.5)' }}>
-                  {hasDebt ? player.currentDebt.toFixed(2) : '0.00'}
-                  <span className="text-sm ml-1">PLN</span>
+                  {formatAmountShort(player.currentDebt)}
+                  <span className="text-sm ml-1">zł</span>
                 </p>
               )}
             </div>
@@ -167,7 +187,9 @@ export default function DashboardTab({ data, history, playSound }) {
   const [openDetails,    setOpenDetails]    = useState(null);
   const [undoToast,      setUndoToast]      = useState(null);
   const [settlingPlayer, setSettlingPlayer] = useState(null);
-  const [justSettled,    setJustSettled]    = useState(null); // name of recently settled player
+  const [justSettled,    setJustSettled]    = useState(null);
+  const [confetti,       setConfetti]       = useState([]);
+  const confettiTimer = useRef(null); // name of recently settled player
 
   const { showSuccess, showError } = useToast();
   const timerRef    = useRef(null);
@@ -181,7 +203,10 @@ export default function DashboardTab({ data, history, playSound }) {
     timerRef.current = intervalRef.current = null;
   }, []);
 
-  useEffect(() => () => clearUndoTimers(), [clearUndoTimers]);
+  useEffect(() => () => {
+    clearUndoTimers();
+    clearTimeout(confettiTimer.current);
+  }, [clearUndoTimers]);
 
   const handleSettleDebt = useCallback(async (playerName) => {
     clearUndoTimers();
@@ -200,6 +225,16 @@ export default function DashboardTab({ data, history, playSound }) {
 
     // Clear flash after 1.5s
     setTimeout(() => setJustSettled(null), 1500);
+
+    // Check if everyone is now settled → confetti!
+    const nonOrg = data.players?.filter(p => p.name !== ORGANIZER_NAME) || [];
+    const willAllBeSettled = nonOrg.filter(p => p.name !== playerName).every(p => p.currentDebt <= 0.01);
+    if (willAllBeSettled && nonOrg.length > 0) {
+      clearTimeout(confettiTimer.current);
+      setConfetti(generateConfetti(50));
+      confettiTimer.current = setTimeout(() => setConfetti([]), 5000);
+      playSound(SOUND_TYPES.COIN);
+    }
 
     setUndoToast({ playerName, previousValue: result.previousValue, secondsLeft: UNDO_TIMEOUT_SECONDS });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -244,6 +279,19 @@ export default function DashboardTab({ data, history, playSound }) {
   return (
     <>
       <style>{SETTLE_STYLES}</style>
+
+      {/* ── Confetti burst when everyone settled ── */}
+      {confetti.map(c => (
+        <div key={c.id} className="fixed pointer-events-none z-50"
+          style={{
+            left: `${c.x}%`, top: '-30px',
+            fontSize: `${c.size}px`,
+            animation: `confettiRain ${c.dur}s ${c.delay}s ease-in forwards`,
+            transform: `rotate(${c.rotate}deg)`,
+          }}>
+          {c.emoji}
+        </div>
+      ))}
 
       <div className="space-y-6 animate-in fade-in duration-300">
 
@@ -315,7 +363,7 @@ export default function DashboardTab({ data, history, playSound }) {
                         ) : (
                           <p className={`text-3xl neon-amount ${player.currentDebt <= 0.01 ? 'text-emerald-400' : ''}`}
                              style={player.currentDebt <= 0.01 ? { textShadow: '0 0 8px rgba(52,211,153,0.5)' } : {}}>
-                            {player.currentDebt.toFixed(2)}<span className="text-sm ml-1">PLN</span>
+                            {formatAmountShort(player.currentDebt)}<span className="text-sm ml-1">zł</span>
                           </p>
                         )}
                       </div>
@@ -334,8 +382,8 @@ export default function DashboardTab({ data, history, playSound }) {
                             <div className="mt-2 bg-black/60 p-3 rounded-lg text-xs border border-cyan-900/50 text-left space-y-1 shadow-inner">
                               {breakdown.length > 0 ? breakdown.map((item, idx) => (
                                 <div key={idx} className="flex justify-between border-b border-cyan-900/30 pb-1 last:border-0 pt-1 first:pt-0">
-                                  <span className="text-cyan-600 tracking-wider">{item.date}</span>
-                                  <span className="text-rose-400 font-bold">{item.amount.toFixed(2)} PLN</span>
+                                  <span className="text-cyan-600 tracking-wider">{formatDate(item.date)}</span>
+                                  <span className="text-rose-400 font-bold">{formatAmountShort(item.amount)} zł</span>
                                 </div>
                               )) : <div className="text-center text-cyan-800">Przeliczam dane...</div>}
                             </div>

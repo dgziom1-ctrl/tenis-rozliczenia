@@ -10,6 +10,7 @@ import PlayersTab from './components/players/PlayersTab';
 import { subscribeToData } from './firebase/index';
 import { SOUND_TYPES } from './constants';
 import { SpinnerOverlay } from './components/common/LoadingSkeleton';
+import PWAInstallBanner from './components/common/PWAInstallBanner';
 
 const synth = {
   ctx: null,
@@ -131,6 +132,7 @@ function AppContent() {
           {activeTab === 'players'    && <PlayersTab    players={appData.players} deletedPlayers={appData.deletedPlayers} playSound={playSound} />}
         </main>
       </div>
+      <PWAInstallBanner />
     </div>
   );
 }
