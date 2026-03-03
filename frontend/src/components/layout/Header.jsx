@@ -240,8 +240,13 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
         )}
 
         {/* ══ TOP BAR: BLIK + MUTE ════════════════════ */}
-        <div className="relative z-10 flex items-center justify-between px-4 py-3"
-          style={{ background: C.topBarBg, borderBottom: C.topBarBorder }}>
+        <div className="relative z-10 flex items-center justify-between px-4"
+          style={{
+            background: C.topBarBg,
+            borderBottom: C.topBarBorder,
+            paddingTop: 'calc(0.75rem + env(safe-area-inset-top, 0px))',
+            paddingBottom: '0.75rem',
+          }}>
 
           {/* BLIK */}
           <button onClick={handleCopy}
