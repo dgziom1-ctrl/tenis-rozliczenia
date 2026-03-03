@@ -61,6 +61,11 @@ body::before {
 .theme-arcade {
   background-color: #010300;
   color: #c8f0b8;
+  background-image:
+    linear-gradient(rgba(57,255,20,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57,255,20,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-attachment: fixed;
 }
 
 .theme-arcade body::before {

@@ -381,7 +381,7 @@ export default function DashboardTab({ data, history, playSound }) {
             <LayoutDashboard className="text-magenta-500 flex-shrink-0" />
             Dashboard
           </h2>
-          <SummaryBanner summary={data.summary} />
+
         </div>
 
         {/* Undo toast */}

@@ -108,6 +108,7 @@ export function assignRankingPlaces(sortedPlayers) {
 }
 
 export function groupSessionsByMonth(history) {
+  const months = {};
 
   history.forEach(session => {
     const monthKey = session.datePlayed.slice(0, 7);
