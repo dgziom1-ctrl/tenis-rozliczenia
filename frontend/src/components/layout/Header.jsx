@@ -488,7 +488,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           <span style={{
             fontWeight: 900,
             color: C.blikLabelClr,
-            fontSize: a ? '0.38rem' : '0.6rem',
+            fontSize: a ? '0.55rem' : '0.6rem',
             fontFamily: a ? "'Press Start 2P', monospace" : 'inherit',
             letterSpacing: '0.12em',
             padding: '2px 5px',
@@ -499,7 +499,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           <span style={{
             color: C.blikNumClr,
             fontFamily: a ? "'Press Start 2P', monospace" : 'monospace',
-            fontSize: a ? '0.44rem' : '0.9rem',
+            fontSize: a ? '0.7rem' : '0.9rem',
             fontWeight: 'bold',
             letterSpacing: '0.06em',
             textShadow: a
