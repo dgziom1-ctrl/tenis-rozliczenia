@@ -194,7 +194,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
         <div className="cyber-box rounded-2xl p-4 sm:p-8">
           <h2 className="text-xl font-black text-cyan-300 mb-6 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
             <Settings className="text-magenta-500 flex-shrink-0" />
-            Dodaj nowy tydzień
+            Dodaj nową sesję
           </h2>
           <form onSubmit={handleSaveSession} className="space-y-5">
             {/* Data */}
@@ -277,7 +277,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
               className={`cyber-button-blue w-full py-4 rounded-xl text-lg font-black flex justify-center items-center gap-2 transition-opacity ${
                 isSaving || presentPlayers.length === 0 || !totalCost ? 'opacity-50 cursor-not-allowed' : ''
               }`}>
-              {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Database className="flex-shrink-0" /> ZAPISZ TYDZIEŃ</>}
+              {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Database className="flex-shrink-0" /> ZAPISZ SESJĘ</>}
             </button>
           </form>
         </div>

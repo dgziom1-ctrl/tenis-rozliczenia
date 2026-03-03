@@ -4,8 +4,11 @@
 
 export const ADMIN_PASSWORD = 'ponk2026';
 
-// Próg poniżej którego dług jest traktowany jako spłacony (floating-point tolerance)
-export const DEBT_EPSILON = 0.05;
+// Tolerancja akumulacji w calculateDebtBreakdown – suma szczegółów może odbiegać o tyle od całości
+export const BREAKDOWN_EPSILON = 0.05;
+
+// Próg poniżej którego dług jest traktowany jako spłacony (decyzja UX, nie precyzja float)
+export const SETTLED_THRESHOLD = 0.01;
 
 export const RANKS = [
   { min: 90, emoji: '🏆', name: 'LEGENDA',  color: 'text-yellow-400', bg: 'bg-yellow-950/40', border: 'border-yellow-600' },

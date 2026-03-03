@@ -1,34 +1,15 @@
 import { useState } from 'react';
 import { History, Pencil, Trash2, Check, X, Zap, Users, Lock, CalendarDays } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase/index';
-import { ADMIN_PASSWORD, MONTHS } from '../../constants';
-import { formatDate, formatAmount, formatAmountShort } from '../../utils/format';
-
-const MONTHS_PL = MONTHS; // already defined in constants
-
-function getMonthLabel(dateStr) {
-  const [y, m] = dateStr.split('-');
-  return `${MONTHS_PL[parseInt(m, 10) - 1]} ${y}`;
-}
-
-function groupByMonth(history) {
-  const groups = [];
-  let current = null;
-  for (const row of history) {
-    const label = getMonthLabel(row.datePlayed);
-    if (!current || current.label !== label) {
-      current = { label, rows: [] };
-      groups.push(current);
-    }
-    current.rows.push(row);
-  }
-  return groups;
-}
+import { ADMIN_PASSWORD } from '../../constants';
+import { groupHistoryByMonth } from '../../utils/calculations';
+import { formatDate, formatAmount } from '../../utils/format';
+import { useToast } from '../common/Toast';
+import { InlineSpinner } from '../common/LoadingSkeleton';
 
 function EditDateInput({ value, onChange }) {
   return (
     <div style={{ position: 'relative' }}>
-      {/* Stylowany element — wizualna warstwa */}
       <div
         className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
         style={{ pointerEvents: 'none' }}
@@ -36,7 +17,6 @@ function EditDateInput({ value, onChange }) {
         <span>{formatDate(value)}</span>
         <CalendarDays size={16} style={{ opacity: 0.6, flexShrink: 0 }} />
       </div>
-      {/* Natywny input nakładka — klikalna, przezroczysta, na wierzchu */}
       <input
         type="date"
         value={value}
@@ -114,18 +94,16 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const [editingId,   setEditingId]   = useState(null);
   const [editForm,    setEditForm]    = useState({});
   const [deletingId,  setDeletingId]  = useState(null);
+  const [isSaving,    setIsSaving]    = useState(false);
+  const [isDeleting,  setIsDeleting]  = useState(null); // id sesji aktualnie usuwanej
 
-  // Password modal state
   const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete', rowId, row? }
 
-  // ── Akcje po podaniu hasła ─────────────────────────
-  const requestEdit = (row) => {
-    setPwModal({ type: 'edit', row });
-  };
+  const { showError } = useToast();
 
-  const requestDelete = (id) => {
-    setPwModal({ type: 'delete', rowId: id });
-  };
+  // ── Akcje po podaniu hasła ─────────────────────────
+  const requestEdit = (row) => setPwModal({ type: 'edit', row });
+  const requestDelete = (id) => setPwModal({ type: 'delete', rowId: id });
 
   const handlePasswordConfirm = () => {
     if (pwModal.type === 'edit') {
@@ -147,14 +125,24 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const cancelEdit = () => { setEditingId(null); setEditForm({}); };
 
   const saveEdit = async () => {
-    await updateWeek(editingId, {
-      date:         editForm.date,
-      cost:         parseFloat(editForm.cost),
-      present:      editForm.present,
-      multiPlayers: editForm.multiPlayers,
-    });
-    setEditingId(null);
-    setEditForm({});
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const result = await updateWeek(editingId, {
+        date:         editForm.date,
+        cost:         parseFloat(editForm.cost),
+        present:      editForm.present,
+        multiPlayers: editForm.multiPlayers,
+      });
+      if (!result.success) {
+        showError(result.error || 'Nie udało się zapisać sesji');
+        return;
+      }
+      setEditingId(null);
+      setEditForm({});
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const togglePresent = (name) => {
@@ -176,18 +164,27 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   };
 
   const handleDelete = async (id) => {
-    await deleteWeek(id);
-    setDeletingId(null);
+    if (isDeleting) return;
+    setIsDeleting(id);
+    try {
+      const result = await deleteWeek(id);
+      if (!result.success) {
+        showError(result.error || 'Nie udało się usunąć sesji');
+        return;
+      }
+      setDeletingId(null);
+    } finally {
+      setIsDeleting(null);
+    }
   };
 
-  const grouped = groupByMonth(history);
+  const grouped = groupHistoryByMonth(history);
 
   return (
     <>
-      {/* Modal hasła */}
       {pwModal && (
         <PasswordModal
-          action={pwModal.type === 'edit' ? 'Podaj hasło żeby edytować ten tydzień.' : 'Podaj hasło żeby usunąć ten tydzień.'}
+          action={pwModal.type === 'edit' ? 'Podaj hasło żeby edytować tę sesję.' : 'Podaj hasło żeby usunąć tę sesję.'}
           onConfirm={handlePasswordConfirm}
           onCancel={() => setPwModal(null)}
         />
@@ -209,7 +206,6 @@ export default function HistoryTab({ history, playerNames, playSound }) {
         <div className="space-y-8">
           {grouped.map(({ label, rows }) => (
             <div key={label}>
-              {/* Month separator */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center gap-2 px-3 py-1 rounded-lg border border-cyan-800 bg-cyan-950/50">
                   <CalendarDays size={13} className="text-cyan-600" />
@@ -219,21 +215,17 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                 <div className="flex-1 h-px bg-gradient-to-r from-cyan-800 to-transparent" />
               </div>
 
-              {/* Rows for this month */}
               <div className="space-y-3">
                 {rows.map((row) => {
-                  const isEditing  = editingId  === row.id;
-                  const isDeleting = deletingId === row.id;
+                  const isEditingRow  = editingId  === row.id;
+                  const isDeletingRow = deletingId === row.id;
 
-                  if (isEditing) return (
+                  if (isEditingRow) return (
                     <div key={row.id} className="cyber-box border-cyan-500 rounded-xl p-4 space-y-4 bg-cyan-950/10">
                       <div className="space-y-4">
                         <div>
                           <label className="block text-cyan-600 text-xs font-bold mb-1 tracking-wider">DATA</label>
-                          <EditDateInput
-                            value={editForm.date}
-                            onChange={v => setEditForm(p => ({ ...p, date: v }))}
-                          />
+                          <EditDateInput value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
                         </div>
                         <div>
                           <label className="block text-cyan-600 text-xs font-bold mb-1 tracking-wider">KOSZT (PLN)</label>
@@ -271,29 +263,29 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                         </div>
                       )}
                       <div className="flex gap-3 pt-2">
-                        <button onClick={saveEdit}
-                          className="flex-1 py-2 rounded-xl border-2 border-cyan-500 text-cyan-300 bg-cyan-950/50 hover:bg-cyan-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2">
-                          <Check size={16}/> ZAPISZ
+                        <button onClick={saveEdit} disabled={isSaving}
+                          className="flex-1 py-2 rounded-xl border-2 border-cyan-500 text-cyan-300 bg-cyan-950/50 hover:bg-cyan-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait">
+                          {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Check size={16}/> ZAPISZ</>}
                         </button>
-                        <button onClick={cancelEdit}
-                          className="flex-1 py-2 rounded-xl border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all flex items-center justify-center gap-2">
+                        <button onClick={cancelEdit} disabled={isSaving}
+                          className="flex-1 py-2 rounded-xl border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                           <X size={16}/> ANULUJ
                         </button>
                       </div>
                     </div>
                   );
 
-                  if (isDeleting) return (
+                  if (isDeletingRow) return (
                     <div key={row.id} className="cyber-box border-rose-600 rounded-xl p-5 bg-rose-950/20">
-                      <p className="text-rose-300 font-bold mb-1">Usunąć tydzień z dnia <span className="text-white">{formatDate(row.datePlayed)}</span>?</p>
+                      <p className="text-rose-300 font-bold mb-1">Usunąć sesję z dnia <span className="text-white">{formatDate(row.datePlayed)}</span>?</p>
                       <p className="text-rose-700 text-sm mb-4">Ta operacja jest nieodwracalna.</p>
                       <div className="flex gap-3">
-                        <button onClick={() => handleDelete(row.id)}
-                          className="flex-1 py-2 rounded-xl border-2 border-rose-500 text-rose-300 bg-rose-950/50 hover:bg-rose-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2">
-                          <Trash2 size={16}/> USUŃ
+                        <button onClick={() => handleDelete(row.id)} disabled={isDeleting === row.id}
+                          className="flex-1 py-2 rounded-xl border-2 border-rose-500 text-rose-300 bg-rose-950/50 hover:bg-rose-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait">
+                          {isDeleting === row.id ? <><InlineSpinner size="sm" /> Usuwam...</> : <><Trash2 size={16}/> USUŃ</>}
                         </button>
-                        <button onClick={() => setDeletingId(null)}
-                          className="flex-1 py-2 rounded-xl border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all flex items-center justify-center gap-2">
+                        <button onClick={() => setDeletingId(null)} disabled={isDeleting === row.id}
+                          className="flex-1 py-2 rounded-xl border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                           <X size={16}/> ANULUJ
                         </button>
                       </div>

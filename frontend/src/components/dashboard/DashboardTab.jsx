@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, LayoutDashboard, X, AlertTriangle, TrendingUp, Users, CalendarDays } from 'lucide-react';
 import { settlePlayer, undoSettle } from '../../firebase/index';
-import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
+import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants';
 import { calculateDebtBreakdown } from '../../utils/calculations';
 import { formatDate, formatAmountShort } from '../../utils/format';
 import { useToast } from '../common/Toast';
@@ -75,7 +75,7 @@ function SummaryBanner({ summary }) {
       </div>
       <div className="text-center">
         <p className="text-cyan-700 text-xs tracking-widest mb-1 flex items-center justify-center gap-1">
-          <CalendarDays size={11} /> TYGODNI
+          <CalendarDays size={11} /> SESJI
         </p>
         <p className="font-mono font-black text-2xl sm:text-3xl text-cyan-300">{totalWeeks}</p>
       </div>
@@ -84,9 +84,9 @@ function SummaryBanner({ summary }) {
 }
 
 // ─── Player card ──────────────────────────────────────────────────────────────
-function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, openDetails, onToggleDetails }) {
+function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, openDetails, onToggleDetails, breakdown }) {
   const isOrganizer = player.name === ORGANIZER_NAME;
-  const hasDebt = player.currentDebt > 0.01;
+  const hasDebt = player.currentDebt > SETTLED_THRESHOLD;
   const pct = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
   const rank = getRank(pct);
 
@@ -104,7 +104,7 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
         </h3>
       </div>
 
-      {/* Body – flex-1 so all cards stretch equally */}
+      {/* Body */}
       <div className="p-5 flex flex-col flex-1">
         {/* Attendance */}
         <div className="text-sm text-cyan-700 mb-4 flex flex-col gap-1 items-center text-center">
@@ -147,7 +147,14 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
                   SZCZEGÓŁY ZALEGŁOŚCI
                 </button>
                 {openDetails && (
-                  <BreakdownList playerName={player.name} currentDebt={player.currentDebt} />
+                  <div className="mt-2 bg-black/60 p-3 rounded-lg text-xs border border-cyan-900/50 text-left space-y-1 shadow-inner">
+                    {breakdown && breakdown.length > 0 ? breakdown.map((item, idx) => (
+                      <div key={idx} className="flex justify-between border-b border-cyan-900/30 pb-1 last:border-0 pt-1 first:pt-0">
+                        <span className="text-cyan-600 tracking-wider">{formatDate(item.date)}</span>
+                        <span className="text-rose-400 font-bold">{formatAmountShort(item.amount)} zł</span>
+                      </div>
+                    )) : <div className="text-center text-cyan-800">Przeliczam dane...</div>}
+                  </div>
                 )}
               </div>
             )}
@@ -174,12 +181,6 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
       </div>
     </div>
   );
-}
-
-function BreakdownList({ playerName, currentDebt }) {
-  // This component gets breakdown from parent via prop-drilling would be ugly,
-  // so we recalculate via context passed from parent. Instead pass it directly.
-  return null; // will be replaced below
 }
 
 // ─── Modal potwierdzenia rozliczenia ─────────────────────────────────────────
@@ -227,7 +228,7 @@ export default function DashboardTab({ data, history, playSound }) {
   const [justSettled,    setJustSettled]    = useState(null);
   const [confetti,       setConfetti]       = useState([]);
   const [confirmSettle,  setConfirmSettle]  = useState(null); // { playerName, debt }
-  const confettiTimer = useRef(null); // name of recently settled player
+  const confettiTimer = useRef(null);
 
   const { showSuccess, showError } = useToast();
   const timerRef    = useRef(null);
@@ -259,7 +260,6 @@ export default function DashboardTab({ data, history, playSound }) {
     setConfirmSettle(null);
     clearUndoTimers();
 
-    // Immediate visual feedback
     setJustSettled(playerName);
     playSound(SOUND_TYPES.SUCCESS);
 
@@ -271,12 +271,11 @@ export default function DashboardTab({ data, history, playSound }) {
       return;
     }
 
-    // Clear flash after 1.5s
     setTimeout(() => setJustSettled(null), 1500);
 
-    // Check if everyone is now settled → confetti!
+    // Confetti gdy wszyscy rozliczeni
     const nonOrg = data.players?.filter(p => p.name !== ORGANIZER_NAME) || [];
-    const willAllBeSettled = nonOrg.filter(p => p.name !== playerName).every(p => p.currentDebt <= 0.01);
+    const willAllBeSettled = nonOrg.filter(p => p.name !== playerName).every(p => p.currentDebt <= SETTLED_THRESHOLD);
     if (willAllBeSettled && nonOrg.length > 0) {
       clearTimeout(confettiTimer.current);
       setConfetti(generateConfetti(50));
@@ -293,7 +292,7 @@ export default function DashboardTab({ data, history, playSound }) {
         return { ...prev, secondsLeft: prev.secondsLeft - 1 };
       });
     }, 1000);
-  }, [clearUndoTimers, confirmSettle, playSound, showError]);
+  }, [clearUndoTimers, confirmSettle, data.players, playSound, showError]);
 
   const handleUndo = useCallback(async () => {
     if (!undoToast) return;
@@ -328,7 +327,6 @@ export default function DashboardTab({ data, history, playSound }) {
     <>
       <style>{SETTLE_STYLES}</style>
 
-      {/* ── Modal potwierdzenia ── */}
       <SettleConfirmModal
         playerName={confirmSettle?.playerName}
         debt={confirmSettle?.debt}
@@ -336,7 +334,7 @@ export default function DashboardTab({ data, history, playSound }) {
         onCancel={() => setConfirmSettle(null)}
       />
 
-      {/* ── Confetti burst when everyone settled ── */}
+      {/* Confetti burst when everyone settled */}
       {confetti.map(c => (
         <div key={c.id} className="fixed pointer-events-none z-50"
           style={{
@@ -351,7 +349,7 @@ export default function DashboardTab({ data, history, playSound }) {
 
       <div className="space-y-6 animate-in fade-in duration-300">
 
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="cyber-box rounded-2xl p-4 sm:p-6">
           <h2 className="text-xl font-black text-cyan-300 flex items-center gap-3 border-b-2 border-cyan-800 pb-4 mb-0">
             <LayoutDashboard className="text-magenta-500 flex-shrink-0" />
@@ -359,7 +357,9 @@ export default function DashboardTab({ data, history, playSound }) {
           </h2>
         </div>
 
-        {/* ── Undo toast ── */}
+        <SummaryBanner summary={data.summary} />
+
+        {/* Undo toast */}
         {undoToast && (
           <div className="cyber-box border-emerald-600 rounded-2xl p-4 flex items-center justify-between gap-4 relative overflow-hidden bg-emerald-950/30">
             <div className="absolute bottom-0 left-0 h-1 bg-emerald-500 transition-all duration-1000" style={{ width: `${progressPct}%` }} />
@@ -379,104 +379,26 @@ export default function DashboardTab({ data, history, playSound }) {
           </div>
         )}
 
-        {/* ── Player cards grid ── */}
+        {/* Player cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {sortedPlayers.map((player) => {
             const showBreakdown = openDetails === player.name;
-            const breakdown = showBreakdown && player.currentDebt > 0.01
-              ? getBreakdown(player.name, player.currentDebt) : [];
+            const breakdown = showBreakdown && player.currentDebt > SETTLED_THRESHOLD
+              ? getBreakdown(player.name, player.currentDebt)
+              : [];
 
             return (
-              <div key={player.name} className={`cyber-box rounded-2xl overflow-hidden transition-all flex flex-col
-                ${player.currentDebt > 0.01 ? 'border-magenta-800 hover:border-magenta-500' : 'border-cyan-800 hover:border-cyan-500'}
-                ${justSettled === player.name ? 'settle-flash' : ''}`}>
-
-                {/* Header */}
-                <div className={`p-4 border-b-2 ${player.currentDebt > 0.01 ? 'bg-magenta-950/50 border-magenta-600' : 'bg-cyan-950/50 border-cyan-600'}`}>
-                  <h3 className={`font-black text-xl flex items-center gap-2 ${player.currentDebt > 0.01 ? 'text-magenta-300 text-neon-pink' : 'text-cyan-300 text-neon-blue'}`}>
-                    <span className="mini-paddle" /> {player.name}
-                  </h3>
-                </div>
-
-                {/* Body */}
-                <div className="p-5 flex flex-col flex-1">
-                  {/* Attendance */}
-                  <div className="text-sm text-cyan-700 mb-4 flex flex-col gap-1 items-center text-center">
-                    <span>Obecność: <span className="text-cyan-300 text-lg">{player.attendanceCount}</span> / {totalWeeks} ({totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0}%)</span>
-                    <span className={`font-bold ${getRank(totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0).color}`}>
-                      {getRank(totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0).emoji}{' '}
-                      {getRank(totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0).name}
-                    </span>
-                  </div>
-
-                  {player.name === ORGANIZER_NAME ? (
-                    <div className="flex-1 flex items-center justify-center">
-                      <div className="bg-cyan-950/30 border-cyan-800 text-cyan-600 px-6 py-4 rounded-xl border-2 w-full text-center">
-                        <p className="text-sm font-bold tracking-widest">SKARBNIK</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Debt box */}
-                      <div className={`p-4 rounded-xl border-2 shadow-inner mb-3 text-center
-                        ${player.currentDebt > 0.01 ? 'bg-magenta-950/30 border-magenta-800' : 'bg-emerald-950/30 border-emerald-900'}`}>
-                        {justSettled === player.name ? (
-                          <div style={{ animation: 'checkPop 0.4s ease-out forwards' }}>
-                            <CheckCircle2 className="text-emerald-400 mx-auto" size={32} />
-                          </div>
-                        ) : (
-                          <p className={`text-3xl neon-amount ${player.currentDebt <= 0.01 ? 'text-emerald-400' : ''}`}
-                             style={player.currentDebt <= 0.01 ? { textShadow: '0 0 8px rgba(52,211,153,0.5)' } : {}}>
-                            {formatAmountShort(player.currentDebt)}<span className="text-sm ml-1">zł</span>
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Breakdown */}
-                      {player.currentDebt > 0.01 && justSettled !== player.name && (
-                        <div className="mb-3">
-                          <button
-                            onClick={() => toggleDetails(player.name)}
-                            className="text-xs font-bold text-cyan-500 hover:text-cyan-300 flex items-center justify-center gap-1 mx-auto py-1 px-2 rounded hover:bg-cyan-900/30 transition-colors"
-                          >
-                            {showBreakdown ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                            SZCZEGÓŁY ZALEGŁOŚCI
-                          </button>
-                          {showBreakdown && (
-                            <div className="mt-2 bg-black/60 p-3 rounded-lg text-xs border border-cyan-900/50 text-left space-y-1 shadow-inner">
-                              {breakdown.length > 0 ? breakdown.map((item, idx) => (
-                                <div key={idx} className="flex justify-between border-b border-cyan-900/30 pb-1 last:border-0 pt-1 first:pt-0">
-                                  <span className="text-cyan-600 tracking-wider">{formatDate(item.date)}</span>
-                                  <span className="text-rose-400 font-bold">{formatAmountShort(item.amount)} zł</span>
-                                </div>
-                              )) : <div className="text-center text-cyan-800">Przeliczam dane...</div>}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* CTA button — always at bottom via mt-auto */}
-                      <div className="mt-auto pt-2">
-                        {player.currentDebt > 0.01 && justSettled !== player.name ? (
-                          <button
-                            onClick={() => handleSettleDebt(player.name)}
-                            disabled={settlingPlayer === player.name}
-                            className="w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 bg-magenta-950 border-magenta-500 text-magenta-300 hover:bg-magenta-500 hover:text-black hover:shadow-magenta-glow disabled:opacity-50 disabled:cursor-wait"
-                          >
-                            {settlingPlayer === player.name
-                              ? <><InlineSpinner size="sm" /> Zapisuję...</>
-                              : <><Receipt size={18} /> OZNACZ OPŁACONE</>}
-                          </button>
-                        ) : (
-                          <div className="w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 bg-black border-cyan-900 text-cyan-700 opacity-60">
-                            <CheckCircle2 size={18} /> ROZLICZONY
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+              <PlayerCard
+                key={player.name}
+                player={player}
+                totalWeeks={totalWeeks}
+                onSettle={handleSettleDebt}
+                isSettling={settlingPlayer === player.name}
+                justSettled={justSettled === player.name}
+                openDetails={showBreakdown}
+                onToggleDetails={toggleDetails}
+                breakdown={breakdown}
+              />
             );
           })}
         </div>

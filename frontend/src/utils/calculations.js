@@ -2,7 +2,7 @@
 // CALCULATION UTILITIES
 // ============================================================================
 
-import { ORGANIZER_NAME, DEBT_EPSILON } from '../constants';
+import { ORGANIZER_NAME, BREAKDOWN_EPSILON, MONTHS } from '../constants';
 
 export function roundToTwoDecimals(value) {
   return Math.round(value * 100) / 100;
@@ -58,7 +58,7 @@ export function calculateDebtBreakdown(playerName, currentDebt, history) {
         sessionId: session.id,
       });
 
-      if (accumulated >= currentDebt - DEBT_EPSILON) break;
+      if (accumulated >= currentDebt - BREAKDOWN_EPSILON) break;
     }
   }
 
@@ -108,7 +108,6 @@ export function assignRankingPlaces(sortedPlayers) {
 }
 
 export function groupSessionsByMonth(history) {
-  const months = {};
 
   history.forEach(session => {
     const monthKey = session.datePlayed.slice(0, 7);
@@ -164,4 +163,25 @@ export function getSpecialTitle(player, allPlayers) {
   }
 
   return null;
+}
+
+// Grupuje historię sesji po miesiącu dla widoku HistoryTab.
+// Zakłada, że history jest posortowane od najnowszej do najstarszej (jak zwraca Firebase).
+function getMonthLabel(dateStr) {
+  const [y, m] = dateStr.split('-');
+  return `${MONTHS[parseInt(m, 10) - 1]} ${y}`;
+}
+
+export function groupHistoryByMonth(history) {
+  const groups = [];
+  let current = null;
+  for (const row of history) {
+    const label = getMonthLabel(row.datePlayed);
+    if (!current || current.label !== label) {
+      current = { label, rows: [] };
+      groups.push(current);
+    }
+    current.rows.push(row);
+  }
+  return groups;
 }
