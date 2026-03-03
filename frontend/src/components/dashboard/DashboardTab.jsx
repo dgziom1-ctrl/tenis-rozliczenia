@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, LayoutDashboard } from 'lucide-react';
+import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, LayoutDashboard, X, AlertTriangle } from 'lucide-react';
 import { settlePlayer, undoSettle } from '../../firebase/index';
 import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { calculateDebtBreakdown } from '../../utils/calculations';
@@ -182,6 +182,44 @@ function BreakdownList({ playerName, currentDebt }) {
   return null; // will be replaced below
 }
 
+// ─── Modal potwierdzenia rozliczenia ─────────────────────────────────────────
+function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
+  if (!playerName) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <div className="cyber-box border-magenta-500 rounded-2xl p-6 w-full max-w-sm shadow-[0_0_40px_rgba(255,0,255,0.2)]">
+        <div className="flex items-center gap-3 mb-4">
+          <AlertTriangle className="text-magenta-400 flex-shrink-0" size={24} />
+          <h3 className="font-black text-magenta-300 text-lg">Potwierdzenie</h3>
+        </div>
+        <p className="text-cyan-400 text-sm mb-2">
+          Oznaczasz <span className="text-white font-black">{playerName}</span> jako opłaconego:
+        </p>
+        <div className="bg-magenta-950/40 border border-magenta-800 rounded-xl p-3 mb-5 text-center">
+          <span className="text-3xl font-black text-magenta-300"
+            style={{ textShadow: '0 0 12px rgba(255,0,255,0.5)' }}>
+            {formatAmountShort(debt)} zł
+          </span>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-3 rounded-xl border-2 border-magenta-500 text-magenta-300 bg-magenta-950/50 hover:bg-magenta-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2"
+          >
+            <Receipt size={15} /> POTWIERDŹ
+          </button>
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 rounded-xl border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all flex items-center justify-center gap-2"
+          >
+            <X size={15} /> ANULUJ
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function DashboardTab({ data, history, playSound }) {
   const [openDetails,    setOpenDetails]    = useState(null);
@@ -189,6 +227,7 @@ export default function DashboardTab({ data, history, playSound }) {
   const [settlingPlayer, setSettlingPlayer] = useState(null);
   const [justSettled,    setJustSettled]    = useState(null);
   const [confetti,       setConfetti]       = useState([]);
+  const [confirmSettle,  setConfirmSettle]  = useState(null); // { playerName, debt }
   const confettiTimer = useRef(null); // name of recently settled player
 
   const { showSuccess, showError } = useToast();
@@ -208,7 +247,17 @@ export default function DashboardTab({ data, history, playSound }) {
     clearTimeout(confettiTimer.current);
   }, [clearUndoTimers]);
 
-  const handleSettleDebt = useCallback(async (playerName) => {
+  const handleSettleDebt = useCallback((playerName) => {
+    const player = data.players?.find(p => p.name === playerName);
+    if (!player) return;
+    playSound(SOUND_TYPES.CLICK);
+    setConfirmSettle({ playerName, debt: player.currentDebt });
+  }, [data.players, playSound]);
+
+  const handleConfirmSettle = useCallback(async () => {
+    if (!confirmSettle) return;
+    const { playerName } = confirmSettle;
+    setConfirmSettle(null);
     clearUndoTimers();
 
     // Immediate visual feedback
@@ -245,7 +294,7 @@ export default function DashboardTab({ data, history, playSound }) {
         return { ...prev, secondsLeft: prev.secondsLeft - 1 };
       });
     }, 1000);
-  }, [clearUndoTimers, playSound, showError]);
+  }, [clearUndoTimers, confirmSettle, playSound, showError]);
 
   const handleUndo = useCallback(async () => {
     if (!undoToast) return;
@@ -279,6 +328,14 @@ export default function DashboardTab({ data, history, playSound }) {
   return (
     <>
       <style>{SETTLE_STYLES}</style>
+
+      {/* ── Modal potwierdzenia ── */}
+      <SettleConfirmModal
+        playerName={confirmSettle?.playerName}
+        debt={confirmSettle?.debt}
+        onConfirm={handleConfirmSettle}
+        onCancel={() => setConfirmSettle(null)}
+      />
 
       {/* ── Confetti burst when everyone settled ── */}
       {confetti.map(c => (

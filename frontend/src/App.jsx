@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ToastProvider } from './components/common/Toast';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
@@ -104,6 +104,39 @@ function AppContent() {
   const playSound = (t) => synth.play(t, isMuted);
   const switchTab = (id) => { playSound(SOUND_TYPES.TAB); setActiveTab(id); };
 
+  // ── Swipe navigation ──────────────────────────────────────────────────────
+  const TAB_ORDER = ['dashboard', 'attendance', 'admin', 'history', 'players'];
+  const touchStart = useRef(null);
+  const touchStartY = useRef(null);
+
+  const handleTouchStart = useCallback((e) => {
+    touchStart.current  = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (touchStart.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStart.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    touchStart.current = null;
+
+    // Ignoruj jeśli bardziej pionowy niż poziomy (scroll)
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    // Minimalny próg 60px
+    if (Math.abs(dx) < 60) return;
+
+    const currentIdx = TAB_ORDER.indexOf(activeTab);
+    if (dx < 0) {
+      // Swipe lewo → panel w prawo (następny)
+      const next = TAB_ORDER[currentIdx + 1];
+      if (next) switchTab(next);
+    } else {
+      // Swipe prawo → panel w lewo (poprzedni)
+      const prev = TAB_ORDER[currentIdx - 1];
+      if (prev) switchTab(prev);
+    }
+  }, [activeTab]);
+
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -136,7 +169,12 @@ function AppContent() {
           theme={theme}
           onToggleTheme={toggleTheme}
         />
-        <main className="main-content" style={scrolled ? { paddingTop: 'calc(52px + env(safe-area-inset-top, 0px))' } : {}}>
+        <main
+          className="main-content"
+          style={scrolled ? { paddingTop: 'calc(52px + env(safe-area-inset-top, 0px))' } : {}}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           {activeTab === 'dashboard'  && <DashboardTab  data={{ summary: appData.summary, players: appData.players }} history={appData.history} playSound={playSound} />}
           {activeTab === 'attendance' && <AttendanceTab players={appData.players} history={appData.history} summary={appData.summary} />}
           {activeTab === 'admin'      && <AdminTab      playerNames={appData.playerNames} defaultMultiPlayers={appData.defaultMultiPlayers} setActiveTab={switchTab} playSound={playSound} />}
