@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Trophy, CalendarDays, TrendingUp, Flame } from 'lucide-react';
+import { CalendarDays, TrendingUp, Flame } from 'lucide-react';
 import { RANKS, PODIUM, getRank } from '../../constants';
 import { calculatePlayerStats, assignRankingPlaces, groupSessionsByMonth, getSpecialTitle } from '../../utils/calculations';
 
@@ -115,26 +115,6 @@ function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
   );
 }
 
-function RankGuide() {
-  return (
-    <div className="cyber-box rounded-2xl p-6">
-      <h2 className="text-xl font-black text-cyan-300 mb-4 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
-        <Trophy className="text-yellow-500" /> Rangi
-      </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {RANKS.map((r, i) => (
-          <div key={i} className={`flex flex-col items-center p-3 rounded-xl border-2 bg-black/30 ${r.border}`}>
-            <span className="text-2xl mb-1">{r.emoji}</span>
-            <span className={`font-black text-sm ${r.color}`}>{r.name}</span>
-            <span className="text-cyan-700 font-mono text-xs mt-1">
-              {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function MonthlyReport({ monthlyStats, players }) {
   return (
@@ -152,7 +132,7 @@ function MonthlyReport({ monthlyStats, players }) {
                 <th className="p-3 rounded-tl-lg">Miesiąc</th>
                 <th className="p-3">Gier</th>
                 {players?.map(p => (
-                  <th key={p.name} className="p-3 text-center text-sm">{p.name.slice(0, 3)}.</th>
+                  <th key={p.name} className="p-3 text-center text-sm">{p.name.length > 5 ? p.name.slice(0, 5) + "." : p.name}</th>
                 ))}
               </tr>
             </thead>
@@ -220,7 +200,6 @@ export default function AttendanceTab({ players, history, summary }) {
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-5 duration-300">
       <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} stats={stats} />
-      <RankGuide />
       <MonthlyReport monthlyStats={monthlyStats} players={players} />
     </div>
   );

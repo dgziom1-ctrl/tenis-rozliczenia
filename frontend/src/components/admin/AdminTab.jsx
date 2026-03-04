@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Settings, Users, Zap, Database, CalendarDays, CheckCircle2, Calculator, Copy } from 'lucide-react';
+import { CalendarPlus, Users, Zap, CalendarDays, CheckCircle2, Calculator, Copy } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
@@ -236,7 +236,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
       <div className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-300">
         <div className="cyber-box rounded-2xl p-4 sm:p-8">
           <h2 className="text-xl font-black text-cyan-300 mb-6 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
-            <Settings className="text-magenta-500 flex-shrink-0" />
+            <CalendarPlus className="text-magenta-500 flex-shrink-0" />
             Dodaj nową sesję
           </h2>
 
@@ -271,7 +271,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
 
             {/* Cost */}
             <div>
-              <label className="block font-bold text-cyan-600 mb-2 tracking-wider text-sm">Koszt całkowity (PLN):</label>
+              <label className="block font-bold text-cyan-600 mb-2 tracking-wider text-sm">Koszt całkowity:</label>
               <div className="flex gap-2 mb-2">
                 {QUICK_COSTS.map(cost => (
                   <button
@@ -361,7 +361,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
             >
               {isSaving
                 ? <><InlineSpinner size="sm" /> Zapisuję...</>
-                : <><Database className="flex-shrink-0" /> ZAPISZ SESJĘ</>
+                : <><CheckCircle2 className="flex-shrink-0" /> ZAPISZ SESJĘ</>
               }
             </button>
           </form>

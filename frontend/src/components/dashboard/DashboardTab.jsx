@@ -1,7 +1,6 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
-  CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw,
-  X, AlertTriangle,
+  CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, X,
 } from 'lucide-react';
 import { settlePlayer, undoSettle } from '../../firebase/index';
 import { getRank, SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants';
@@ -79,9 +78,7 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
 
         {isOrganizer ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="bg-cyan-950/30 border-cyan-800 text-cyan-600 px-6 py-4 rounded-xl border-2 w-full text-center">
-              <p className="text-sm font-bold tracking-widest">SKARBNIK</p>
-            </div>
+            <p className="text-cyan-800 text-xs tracking-widest font-bold">zbiera kasę 💰</p>
           </div>
         ) : (
           <>
@@ -111,7 +108,7 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
                   className="text-xs font-bold text-cyan-500 hover:text-cyan-300 flex items-center justify-center gap-1 mx-auto py-1 px-2 rounded hover:bg-cyan-900/30 transition-colors"
                 >
                   {openDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  SZCZEGÓŁY ZALEGŁOŚCI
+                  za które sesje?
                 </button>
                 {openDetails && (
                   <div className="mt-2 bg-black/60 p-3 rounded-lg text-xs border border-cyan-900/50 text-left space-y-1 shadow-inner">
@@ -139,12 +136,12 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
                 >
                   {isSettling
                     ? <><InlineSpinner size="sm" /> Zapisuję...</>
-                    : <><Receipt size={18} /> OZNACZ OPŁACONE</>
+                    : <><Receipt size={18} /> Wpłacił 💸</>
                   }
                 </button>
               ) : (
                 <div className="w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 bg-black border-cyan-900 text-cyan-700 opacity-60 select-none">
-                  <CheckCircle2 size={18} /> ROZLICZONY
+                  <CheckCircle2 size={18} /> spłacony
                 </div>
               )}
             </div>
@@ -160,25 +157,25 @@ function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
   if (!playerName) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="cyber-box border-magenta-500 rounded-2xl p-6 w-full max-w-sm shadow-magenta-glow">
+      <div className="cyber-box border-emerald-600 rounded-2xl p-6 w-full max-w-sm shadow-[0_0_30px_rgba(16,185,129,0.2)]">
         <div className="flex items-center gap-3 mb-4">
-          <AlertTriangle className="text-magenta-400 flex-shrink-0" size={24} />
-          <h3 className="font-black text-magenta-300 text-lg">Potwierdzenie</h3>
+          <Receipt className="text-emerald-400 flex-shrink-0" size={24} />
+          <h3 className="font-black text-emerald-300 text-lg">Wpłata gotówki</h3>
         </div>
         <p className="text-cyan-400 text-sm mb-2">
-          Oznaczasz <span className="text-white font-black">{playerName}</span> jako opłaconego:
+          <span className="text-white font-black">{playerName}</span> oddał kasę:
         </p>
-        <div className="bg-magenta-950/40 border border-magenta-800 rounded-xl p-3 mb-5 text-center">
-          <span className="text-3xl font-black text-magenta-300 glow-magenta">
+        <div className="bg-emerald-950/40 border border-emerald-800 rounded-xl p-3 mb-5 text-center">
+          <span className="text-3xl font-black text-emerald-300">
             {formatAmountShort(debt)} zł
           </span>
         </div>
         <div className="flex gap-3">
           <button
             onClick={onConfirm}
-            className="flex-1 py-3 rounded-xl border-2 border-magenta-500 text-magenta-300 bg-magenta-950/50 hover:bg-magenta-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2"
+            className="flex-1 py-3 rounded-xl border-2 border-emerald-500 text-emerald-300 bg-emerald-950/50 hover:bg-emerald-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2"
           >
-            <Receipt size={15} /> POTWIERDŹ
+            <CheckCircle2 size={15} /> TAK, WPŁACIŁ
           </button>
           <button
             onClick={onCancel}

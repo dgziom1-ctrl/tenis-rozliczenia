@@ -108,6 +108,7 @@ function AppContent() {
           isMuted={isMuted}
           setIsMuted={setIsMuted}
           isConnected={isConnected}
+          isLoading={isLoading}
           theme={theme}
           onToggleTheme={toggleTheme}
           scrolled={scrolled}

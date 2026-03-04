@@ -59,7 +59,7 @@ function PasswordModal({ action, onConfirm, onCancel }) {
       <div className="cyber-box rounded-2xl p-6 w-full max-w-sm border-cyan-500">
         <div className="flex items-center gap-3 mb-6">
           <Lock className="text-cyan-400 flex-shrink-0" size={22}/>
-          <h3 className="font-black text-cyan-300 text-lg">Autoryzacja</h3>
+          <h3 className="font-black text-cyan-300 text-lg">Podaj hasło admina</h3>
         </div>
         <p className="text-cyan-700 text-sm mb-4">{action}</p>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -199,7 +199,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
           <div className="text-center py-16 space-y-3">
             <CalendarDays className="mx-auto text-cyan-900" size={48} />
             <p className="text-cyan-700 font-bold">Brak historii rozgrywek.</p>
-            <p className="text-cyan-800 text-sm">Dodaj pierwszą sesję w Panelu Admina!</p>
+            <p className="text-cyan-800 text-sm">Dodaj pierwszą sesję w zakładce Dodaj sesję!</p>
           </div>
         )}
 

@@ -24,7 +24,7 @@ function PasswordModal({ playerName, onConfirm, onCancel }) {
       <div className="cyber-box rounded-2xl p-6 w-full max-w-sm border-cyan-500">
         <div className="flex items-center gap-3 mb-4">
           <Lock className="text-cyan-400 flex-shrink-0" size={22}/>
-          <h3 className="font-black text-cyan-300 text-lg">Autoryzacja</h3>
+          <h3 className="font-black text-cyan-300 text-lg">Podaj hasło admina</h3>
         </div>
         <p className="text-cyan-700 text-sm mb-4">Podaj hasło żeby usunąć gracza: <span className="text-cyan-300 font-bold">{playerName}</span></p>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -105,7 +105,7 @@ export default function PlayersTab({ players, deletedPlayers, playSound }) {
 
       <div className="cyber-box rounded-2xl p-4 sm:p-8 max-w-3xl mx-auto animate-in slide-in-from-left-5 duration-300">
         <h2 className="text-xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
-          <Users className="text-magenta-500" /> Zarządzanie graczami
+          <Users className="text-magenta-500" /> Gracze
         </h2>
 
         <form onSubmit={handleAddPlayer} className="flex flex-col sm:flex-row gap-3 mb-10 p-4 sm:p-6 bg-black/40 rounded-xl border-2 border-cyan-900">

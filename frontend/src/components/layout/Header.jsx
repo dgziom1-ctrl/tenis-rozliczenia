@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 
 const CLICKS_NEEDED = 5;
 
-export default function Header({ isMuted, setIsMuted, isConnected, theme, onToggleTheme, scrolled }) {
+export default function Header({ isMuted, setIsMuted, isConnected, isLoading, theme, onToggleTheme, scrolled }) {
   const [copied,     setCopied]     = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [chaosMode,  setChaosMode]  = useState(false);
@@ -390,11 +390,13 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
             </div>
           </h1>
 
-          {/* Loader bar */}
+          {/* Loader bar — only visible while connecting / chaos */}
           <div style={{ width: '100%', maxWidth: '28rem', height: '3px',
             background: C.loaderBg, borderRadius: a ? 0 : '9999px',
-            overflow: 'hidden', marginTop: '1.25rem', marginBottom: '0.75rem' }}>
-            <div className={chaosMode ? '' : 'animate-pulse'} style={{
+            overflow: 'hidden', marginTop: '1.25rem', marginBottom: '0.75rem',
+            opacity: (isLoading || chaosMode) ? 1 : 0,
+            transition: 'opacity 0.6s ease' }}>
+            <div className={isLoading ? 'animate-pulse' : ''} style={{
               height: '100%', width: '100%', borderRadius: a ? 0 : '9999px',
               background: chaosMode ? C.loaderChaos : C.loaderFill,
               boxShadow: `0 0 8px ${C.loaderShadow}` }} />
@@ -405,27 +407,19 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'center' }}>
 
             {/* Hasło klimatyczne */}
-            {a ? (
-              // Arcade: INSERT COIN — miga
-              <span style={{
-                fontFamily: C.climateFont, fontSize: C.climateFontSz,
-                color: arcadeTick ? '#39ff14' : '#0a2200',
-                textShadow: arcadeTick ? '0 0 16px rgba(57,255,20,1), 0 0 30px rgba(57,255,20,0.4)' : 'none',
-                transition: 'color 0.08s, text-shadow 0.08s',
-                letterSpacing: '0.1em',
-              }}>★ INSERT COIN ★</span>
-            ) : (
-              // Cyber: JACK IN — stałe, subtelne
-              <span style={{
-                fontFamily: C.climateFont, fontSize: C.climateFontSz,
-                color: '#155e75',
-                letterSpacing: '0.2em',
-                fontWeight: 'bold',
-              }}>JACK IN</span>
+            {/* INSERT COIN — arcade only */}
+            {a && (
+              <>
+                <span style={{
+                  fontFamily: C.climateFont, fontSize: C.climateFontSz,
+                  color: arcadeTick ? '#39ff14' : '#0a2200',
+                  textShadow: arcadeTick ? '0 0 16px rgba(57,255,20,1), 0 0 30px rgba(57,255,20,0.4)' : 'none',
+                  transition: 'color 0.08s, text-shadow 0.08s',
+                  letterSpacing: '0.1em',
+                }}>★ INSERT COIN ★</span>
+                <span style={{ color: '#1a4d00', fontSize: '0.8rem' }}>│</span>
+              </>
             )}
-
-            {/* Separator */}
-            <span style={{ color: a ? '#1a4d00' : '#1f2937', fontSize: '0.8rem' }}>│</span>
 
             {/* Status ONLINE / OFFLINE */}
             <span style={{
