@@ -78,7 +78,7 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
 
         {isOrganizer ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-cyan-800 text-xs tracking-widest font-bold">ogarnia rezerwację 🏓</p>
+            <p className="text-cyan-500 text-xs tracking-widest font-bold">ogarnia rezerwację 🏓</p>
           </div>
         ) : (
           <>

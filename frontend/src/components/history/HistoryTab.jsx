@@ -228,7 +228,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                           <EditDateInput value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
                         </div>
                         <div>
-                          <label className="block text-cyan-600 text-xs font-bold mb-1 tracking-wider">KOSZT (PLN)</label>
+                          <label className="block text-cyan-600 text-xs font-bold mb-1 tracking-wider">KOSZT</label>
                           <input type="number" value={editForm.cost}
                             onChange={e => setEditForm(p => ({ ...p, cost: e.target.value }))}
                             className="cyber-input w-full p-3 rounded-xl text-sm"/>

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 
 const CLICKS_NEEDED = 5;
 
-export default function Header({ isMuted, setIsMuted, isConnected, isLoading, theme, onToggleTheme, scrolled }) {
+export default function Header({ isMuted, setIsMuted, isConnected, theme, onToggleTheme, scrolled }) {
   const [copied,     setCopied]     = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [chaosMode,  setChaosMode]  = useState(false);
@@ -394,9 +394,8 @@ export default function Header({ isMuted, setIsMuted, isConnected, isLoading, th
           <div style={{ width: '100%', maxWidth: '28rem', height: '3px',
             background: C.loaderBg, borderRadius: a ? 0 : '9999px',
             overflow: 'hidden', marginTop: '1.25rem', marginBottom: '0.75rem',
-            opacity: (isLoading || chaosMode) ? 1 : 0,
-            transition: 'opacity 0.6s ease' }}>
-            <div className={isLoading ? 'animate-pulse' : ''} style={{
+            opacity: 1 }}>
+            <div style={{
               height: '100%', width: '100%', borderRadius: a ? 0 : '9999px',
               background: chaosMode ? C.loaderChaos : C.loaderFill,
               boxShadow: `0 0 8px ${C.loaderShadow}` }} />
