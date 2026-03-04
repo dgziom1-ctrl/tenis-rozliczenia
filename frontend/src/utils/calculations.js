@@ -48,7 +48,7 @@ export function calculateDebtBreakdown(playerName, currentDebt, history, paidUnt
 
   // Find the index of the last paid session so we skip already-settled sessions
   const paidIdx = paidUntilWeekId
-    ? chronological.findIndex(s => s.sessionId === paidUntilWeekId)
+    ? chronological.findIndex(s => s.id === paidUntilWeekId)
     : -1;
 
   let accumulated = 0;
