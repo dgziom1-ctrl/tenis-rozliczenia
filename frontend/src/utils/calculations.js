@@ -38,17 +38,24 @@ export function calculateDebt(playerName, data) {
   return roundToTwoDecimals(debt);
 }
 
-export function calculateDebtBreakdown(playerName, currentDebt, history) {
+export function calculateDebtBreakdown(playerName, currentDebt, history, paidUntilWeekId) {
   if (currentDebt <= 0 || !history || history.length === 0) {
     return [];
   }
 
   // history is newest-first; debt is calculated oldest-first — align them
   const chronological = [...history].reverse();
+
+  // Find the index of the last paid session so we skip already-settled sessions
+  const paidIdx = paidUntilWeekId
+    ? chronological.findIndex(s => s.sessionId === paidUntilWeekId)
+    : -1;
+
   let accumulated = 0;
   const breakdown = [];
 
-  for (const session of chronological) {
+  for (let i = paidIdx + 1; i < chronological.length; i++) {
+    const session = chronological[i];
     const isPresent = session.presentPlayers.includes(playerName);
     const isMultisport = session.multisportPlayers.includes(playerName);
 

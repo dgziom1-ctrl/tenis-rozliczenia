@@ -67,6 +67,7 @@ export function buildUIData(rawData) {
     defaultMultiPlayers,
     deletedPlayers,
     history: buildHistory(weeks),
+    paidUntilWeek,
   };
 }
 

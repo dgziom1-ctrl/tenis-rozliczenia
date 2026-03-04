@@ -271,8 +271,8 @@ export default function DashboardTab({ data, history, playSound }) {
   }, [playSound]);
 
   const getBreakdown = useCallback(
-    (name, debt) => calculateDebtBreakdown(name, debt, history),
-    [history],
+    (name, debt) => calculateDebtBreakdown(name, debt, history, data.paidUntilWeek?.[name]),
+    [history, data.paidUntilWeek],
   );
 
   const sortedPlayers = useMemo(() => {
