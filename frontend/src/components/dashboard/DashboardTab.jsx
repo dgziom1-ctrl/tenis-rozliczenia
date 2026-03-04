@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
   CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw,
-  X, AlertTriangle, TrendingUp, Users, CalendarDays,
+  X, AlertTriangle,
 } from 'lucide-react';
 import { settlePlayer, undoSettle } from '../../firebase/index';
 import { getRank, SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants';
@@ -47,65 +47,76 @@ function generateConfetti(count = 40) {
   }));
 }
 
-// ─── Summary banner ───────────────────────────────────────────────────────────
-function SummaryBanner({ summary }) {
-  const { totalToCollect = 0, settledPlayers = 0, totalPlayers = 0, totalWeeks = 0 } = summary || {};
-  const allSettled  = totalPlayers > 0 && settledPlayers === totalPlayers;
-  const debtorsLeft = totalPlayers - settledPlayers;
+// ─── Group stats ─────────────────────────────────────────────────────────────
+function GroupStats({ summary, players, history }) {
+  const { totalWeeks = 0 } = summary || {};
+
+  // Most-present player (excluding organizer)
+  const topPlayer = useMemo(() => {
+    if (!players?.length) return null;
+    return [...players]
+      .filter(p => p.name !== ORGANIZER_NAME)
+      .sort((a, b) => b.attendanceCount - a.attendanceCount)[0] ?? null;
+  }, [players]);
+
+  // Sessions this calendar month
+  const sessionsThisMonth = useMemo(() => {
+    if (!history?.length) return 0;
+    const now = new Date();
+    const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    return history.filter(s => s.datePlayed.startsWith(prefix)).length;
+  }, [history]);
+
+  // Longest active streak among all players
+  const topStreak = useMemo(() => {
+    if (!history?.length || !players?.length) return null;
+    let best = { name: '', streak: 0 };
+    for (const player of players) {
+      let streak = 0;
+      for (const session of history) {
+        if (session.presentPlayers.includes(player.name)) streak++;
+        else break;
+      }
+      if (streak > best.streak) best = { name: player.name, streak };
+    }
+    return best.streak >= 2 ? best : null;
+  }, [players, history]);
+
+  const stats = [
+    {
+      emoji: '🏓',
+      value: totalWeeks,
+      label: 'sesji łącznie',
+    },
+    {
+      emoji: '📅',
+      value: sessionsThisMonth,
+      label: 'w tym miesiącu',
+    },
+    {
+      emoji: '👑',
+      value: topPlayer ? topPlayer.name : '—',
+      label: 'najczęściej gra',
+      small: true,
+    },
+    {
+      emoji: '🔥',
+      value: topStreak ? `${topStreak.streak}×` : '—',
+      label: topStreak ? `seria ${topStreak.name}` : 'brak serii',
+    },
+  ];
 
   return (
-    <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-1">
-      {/* DO ZEBRANIA */}
-      <div className={`text-center rounded-xl py-3 px-2 ${
-        allSettled
-          ? 'bg-emerald-950/40 border border-emerald-800'
-          : 'bg-magenta-950/40 border border-magenta-900'
-      }`}>
-        <p
-          className="text-xs tracking-widest mb-1.5 flex items-center justify-center gap-1 font-bold"
-          style={{ color: allSettled ? '#059669' : '#9f1239' }}
-        >
-          <TrendingUp size={10} />
-          {allSettled ? 'ROZLICZONE' : 'DO ZEBRANIA'}
-        </p>
-        {allSettled ? (
-          <p className="font-mono font-black text-2xl sm:text-3xl text-emerald-400"
-             style={{ textShadow: '0 0 14px rgba(52,211,153,0.7)' }}>
-            ✓ 0 <span className="text-base opacity-70">zł</span>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+      {stats.map(({ emoji, value, label, small }) => (
+        <div key={label} className="text-center rounded-xl py-3 px-2 bg-cyan-950/20 border border-cyan-900">
+          <div className="text-xl mb-1">{emoji}</div>
+          <p className={`font-black leading-tight mb-1 ${small ? 'text-base text-cyan-200 truncate px-1' : 'text-2xl sm:text-3xl font-mono text-cyan-300'}`}>
+            {value}
           </p>
-        ) : (
-          <p className="font-mono font-black text-2xl sm:text-3xl text-magenta-300 glow-magenta">
-            {formatAmountShort(totalToCollect)}
-            <span className="text-sm font-bold ml-1 opacity-70">zł</span>
-          </p>
-        )}
-        {!allSettled && debtorsLeft > 0 && (
-          <p className="text-xs mt-1" style={{ color: '#9f1239' }}>
-            {debtorsLeft} {debtorsLeft === 1 ? 'osoba' : 'osoby'}
-          </p>
-        )}
-      </div>
-
-      {/* ROZLICZENI */}
-      <div className="text-center rounded-xl py-3 px-2 bg-cyan-950/20 border border-cyan-900">
-        <p className="text-cyan-700 text-xs tracking-widest mb-1.5 flex items-center justify-center gap-1 font-bold">
-          <Users size={10} /> ROZLICZENI
-        </p>
-        <p className="font-mono font-black text-2xl sm:text-3xl text-cyan-300">
-          {settledPlayers}
-          <span className="text-cyan-700 text-base">/{totalPlayers}</span>
-        </p>
-        <p className="text-xs text-cyan-800 mt-1">graczy</p>
-      </div>
-
-      {/* SESJI */}
-      <div className="text-center rounded-xl py-3 px-2 bg-cyan-950/20 border border-cyan-900">
-        <p className="text-cyan-700 text-xs tracking-widest mb-1.5 flex items-center justify-center gap-1 font-bold">
-          <CalendarDays size={10} /> SESJI
-        </p>
-        <p className="font-mono font-black text-2xl sm:text-3xl text-cyan-300">{totalWeeks}</p>
-        <p className="text-xs text-cyan-800 mt-1">rozegranych</p>
-      </div>
+          <p className="text-cyan-800 text-xs">{label}</p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -377,10 +388,10 @@ export default function DashboardTab({ data, history, playSound }) {
 
       <div className="space-y-6 animate-in fade-in duration-300">
 
-        {/* Summary stats */}
+        {/* Group stats */}
         {totalWeeks > 0 && (
-          <div className="cyber-box rounded-2xl p-4 sm:p-6">
-            <SummaryBanner summary={data.summary} />
+          <div className="cyber-box rounded-2xl p-4 sm:p-5">
+            <GroupStats summary={data.summary} players={data.players} history={history} />
           </div>
         )}
 
