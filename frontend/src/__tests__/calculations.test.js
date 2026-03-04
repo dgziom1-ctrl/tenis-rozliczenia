@@ -82,12 +82,12 @@ describe('calculateDebtBreakdown', () => {
     expect(calculateDebtBreakdown('Alice', 50, [])).toEqual([]);
   });
 
-  it('builds breakdown from newest sessions first', () => {
+  it('builds breakdown oldest-first (w1→w2→w3)', () => {
     const breakdown = calculateDebtBreakdown('Alice', 50, history);
-    // newest first: w3(30) + w2(20) = 50, stops there
-    expect(breakdown).toHaveLength(2);
-    expect(breakdown[0].sessionId).toBe('w3');
+    // chronological: w1(15)+w2(20)+w3(30)=65 — stops once >= 50
+    expect(breakdown[0].sessionId).toBe('w1');
     expect(breakdown[1].sessionId).toBe('w2');
+    expect(breakdown[2].sessionId).toBe('w3');
   });
 
   it('skips sessions where player was not present', () => {
