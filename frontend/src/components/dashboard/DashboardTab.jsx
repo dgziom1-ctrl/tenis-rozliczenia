@@ -210,7 +210,8 @@ export default function DashboardTab({ data, history, playSound }) {
     const player = data.players?.find(p => p.name === playerName);
     if (!player) return;
     playSound(SOUND_TYPES.CLICK);
-    setConfirmSettle({ playerName, debt: player.currentDebt });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => setConfirmSettle({ playerName, debt: player.currentDebt }), 150);
   }, [data.players, playSound]);
 
   const handleConfirmSettle = useCallback(async () => {

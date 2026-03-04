@@ -60,18 +60,22 @@ function AppContent() {
   const [appData,     setAppData]     = useState(INITIAL_APP_DATA);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading,   setIsLoading]   = useState(true);
+  const [loadTimeout, setLoadTimeout] = useState(false);
 
   const [theme, persistTheme] = useTheme();
   const scrolled = useScrolled();
   const { playSound } = useAudio(isMuted);
 
   useEffect(() => {
+    const timer = setTimeout(() => setLoadTimeout(true), 8000);
     const unsub = subscribeToData((data) => {
+      clearTimeout(timer);
       setAppData(data);
       setIsConnected(true);
       setIsLoading(false);
+      setLoadTimeout(false);
     });
-    return () => { if (typeof unsub === 'function') unsub(); };
+    return () => { clearTimeout(timer); if (typeof unsub === 'function') unsub(); };
   }, []);
 
   const switchTab = useCallback((id) => {
@@ -87,7 +91,24 @@ function AppContent() {
 
 
   if (isLoading) {
-    return <SpinnerOverlay message="Łączenie z bazą danych..." />;
+    if (loadTimeout) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-8 text-center">
+          <div>
+            <div className="text-5xl mb-4">😵</div>
+            <p className="text-cyan-300 font-black text-lg mb-2">Brak połączenia</p>
+            <p className="text-cyan-700 text-sm mb-6">Sprawdź internet lub konfigurację Firebase (.env)</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 rounded-xl border-2 border-cyan-500 text-cyan-300 hover:bg-cyan-500 hover:text-black font-bold transition-all"
+            >
+              Spróbuj ponownie
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return <SpinnerOverlay message="Ładowanie..." />;
   }
 
   return (

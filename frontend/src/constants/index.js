@@ -36,7 +36,6 @@ export const MONTHS = [
 
 export const UNDO_TIMEOUT_SECONDS = 10;
 export const QUICK_COSTS = [0, 15, 30, 45, 60];
-export const SECRET_EASTER_EGG = 'ponk';
 
 export const SOUND_TYPES = {
   TAB:     'tab',
