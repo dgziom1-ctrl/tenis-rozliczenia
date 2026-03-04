@@ -1,7 +1,7 @@
 import { LayoutDashboard, Settings, History, Users, Trophy } from 'lucide-react';
 
 const tabs = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Rozliczenia', shortLabel: 'Kasa'    },
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Rozliczenia', shortLabel: 'Home'    },
   { id: 'attendance', icon: Trophy,           label: 'Frekwencja', shortLabel: 'Ranking'  },
   { id: 'admin',      icon: Settings,         label: 'Dodaj sesję',shortLabel: 'Dodaj'    },
   { id: 'history',    icon: History,          label: 'Historia',   shortLabel: 'Hist.'    },

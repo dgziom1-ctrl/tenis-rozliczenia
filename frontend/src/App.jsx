@@ -8,11 +8,10 @@ import AdminTab from './components/admin/AdminTab';
 import HistoryTab from './components/history/HistoryTab';
 import PlayersTab from './components/players/PlayersTab';
 import { subscribeToData } from './firebase/index';
-import { SOUND_TYPES, TABS, TAB_ORDER } from './constants';
+import { SOUND_TYPES, TABS } from './constants';
 import { SpinnerOverlay } from './components/common/LoadingSkeleton';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
-import { useSwipeNavigation } from './hooks/useSwipeNavigation';
 
 const INITIAL_APP_DATA = {
   summary: {},
@@ -79,20 +78,6 @@ function AppContent() {
     playSound(SOUND_TYPES.COIN);
   }, [theme, persistTheme, playSound]);
 
-  const handleSwipeLeft = useCallback(() => {
-    const nextIdx = TAB_ORDER.indexOf(activeTab) + 1;
-    if (TAB_ORDER[nextIdx]) switchTab(TAB_ORDER[nextIdx]);
-  }, [activeTab, switchTab]);
-
-  const handleSwipeRight = useCallback(() => {
-    const prevIdx = TAB_ORDER.indexOf(activeTab) - 1;
-    if (TAB_ORDER[prevIdx]) switchTab(TAB_ORDER[prevIdx]);
-  }, [activeTab, switchTab]);
-
-  const { handleTouchStart, handleTouchEnd } = useSwipeNavigation({
-    onSwipeLeft:  handleSwipeLeft,
-    onSwipeRight: handleSwipeRight,
-  });
 
   if (isLoading) {
     return <SpinnerOverlay message="Łączenie z bazą danych..." />;
@@ -121,8 +106,6 @@ function AppContent() {
         <main
           className="main-content"
           style={scrolled ? { paddingTop: 'calc(52px + env(safe-area-inset-top, 0px))' } : {}}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
         >
           {activeTab === TABS.DASHBOARD  && (
             <DashboardTab
