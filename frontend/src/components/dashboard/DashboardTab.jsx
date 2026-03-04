@@ -1,11 +1,15 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, LayoutDashboard, X, AlertTriangle, TrendingUp, Users, CalendarDays } from 'lucide-react';
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import {
+  CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw,
+  X, AlertTriangle, TrendingUp, Users, CalendarDays,
+} from 'lucide-react';
 import { settlePlayer, undoSettle } from '../../firebase/index';
-import { getRank, UNDO_TIMEOUT_SECONDS, SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants';
+import { getRank, SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants';
 import { calculateDebtBreakdown } from '../../utils/calculations';
 import { formatDate, formatAmountShort } from '../../utils/format';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
+import { useUndoTimer } from '../../hooks/useUndoTimer';
 
 // ─── CSS animations injected once ────────────────────────────────────────────
 const SETTLE_STYLES = `
@@ -20,10 +24,6 @@ const SETTLE_STYLES = `
     60%  { transform: scale(1.3) rotate(5deg); opacity: 1; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  @keyframes debtFadeOut {
-    0%   { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-8px); }
-  }
   .settle-flash {
     animation: settleFlash 0.8s ease-out forwards !important;
   }
@@ -33,17 +33,16 @@ const SETTLE_STYLES = `
   }
 `;
 
-// ─── All-settled confetti burst ───────────────────────────────────────────────
-const CONFETTI_POOL = ['🏓','🎉','⭐','✨','💚','🎊','🏆','💰','🟢','🎯'];
+const CONFETTI_POOL = ['🏓', '🎉', '⭐', '✨', '💚', '🎊', '🏆', '💰', '🟢', '🎯'];
 
 function generateConfetti(count = 40) {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
-    emoji: CONFETTI_POOL[Math.floor(Math.random() * CONFETTI_POOL.length)],
-    x: Math.random() * 100,
-    delay: Math.random() * 1.2,
-    dur: 2 + Math.random() * 2,
-    size: 14 + Math.random() * 22,
+    emoji:  CONFETTI_POOL[Math.floor(Math.random() * CONFETTI_POOL.length)],
+    x:      Math.random() * 100,
+    delay:  Math.random() * 1.2,
+    dur:    2 + Math.random() * 2,
+    size:   14 + Math.random() * 22,
     rotate: Math.random() * 360,
   }));
 }
@@ -51,19 +50,21 @@ function generateConfetti(count = 40) {
 // ─── Summary banner ───────────────────────────────────────────────────────────
 function SummaryBanner({ summary }) {
   const { totalToCollect = 0, settledPlayers = 0, totalPlayers = 0, totalWeeks = 0 } = summary || {};
-  const allSettled = totalPlayers > 0 && settledPlayers === totalPlayers;
+  const allSettled  = totalPlayers > 0 && settledPlayers === totalPlayers;
   const debtorsLeft = totalPlayers - settledPlayers;
 
   return (
     <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-1">
-      {/* DO ZEBRANIA — najważniejsza liczba, największy font */}
+      {/* DO ZEBRANIA */}
       <div className={`text-center rounded-xl py-3 px-2 ${
         allSettled
           ? 'bg-emerald-950/40 border border-emerald-800'
           : 'bg-magenta-950/40 border border-magenta-900'
       }`}>
-        <p className="text-xs tracking-widest mb-1.5 flex items-center justify-center gap-1 font-bold"
-           style={{ color: allSettled ? '#059669' : '#9f1239' }}>
+        <p
+          className="text-xs tracking-widest mb-1.5 flex items-center justify-center gap-1 font-bold"
+          style={{ color: allSettled ? '#059669' : '#9f1239' }}
+        >
           <TrendingUp size={10} />
           {allSettled ? 'ROZLICZONE' : 'DO ZEBRANIA'}
         </p>
@@ -112,9 +113,9 @@ function SummaryBanner({ summary }) {
 // ─── Player card ──────────────────────────────────────────────────────────────
 function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, openDetails, onToggleDetails, breakdown }) {
   const isOrganizer = player.name === ORGANIZER_NAME;
-  const hasDebt = player.currentDebt > SETTLED_THRESHOLD;
-  const pct = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
-  const rank = getRank(pct);
+  const hasDebt     = player.currentDebt > SETTLED_THRESHOLD;
+  const pct         = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
+  const rank        = getRank(pct);
 
   const cardBorder = hasDebt ? 'border-magenta-800 hover:border-magenta-500' : 'border-cyan-800 hover:border-cyan-500';
   const headerBg   = hasDebt ? 'bg-magenta-950/50' : 'bg-cyan-950/50';
@@ -154,8 +155,10 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
                   <CheckCircle2 className="text-emerald-400 mx-auto" size={32} />
                 </div>
               ) : (
-                <p className={`text-3xl neon-amount ${hasDebt ? '' : 'text-emerald-400'}`}
-                   style={hasDebt ? {} : { textShadow: '0 0 8px rgba(52,211,153,0.5)' }}>
+                <p
+                  className={`text-3xl neon-amount ${hasDebt ? '' : 'text-emerald-400'}`}
+                  style={hasDebt ? {} : { textShadow: '0 0 8px rgba(52,211,153,0.5)' }}
+                >
                   {formatAmountShort(player.currentDebt)}
                   <span className="text-sm ml-1">zł</span>
                 </p>
@@ -174,18 +177,20 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
                 </button>
                 {openDetails && (
                   <div className="mt-2 bg-black/60 p-3 rounded-lg text-xs border border-cyan-900/50 text-left space-y-1 shadow-inner">
-                    {breakdown && breakdown.length > 0 ? breakdown.map((item, idx) => (
+                    {breakdown?.length > 0 ? breakdown.map((item, idx) => (
                       <div key={idx} className="flex justify-between border-b border-cyan-900/30 pb-1 last:border-0 pt-1 first:pt-0">
                         <span className="text-cyan-600 tracking-wider">{formatDate(item.date)}</span>
                         <span className="text-rose-400 font-bold">{formatAmountShort(item.amount)} zł</span>
                       </div>
-                    )) : <div className="text-center text-cyan-800">Przeliczam dane...</div>}
+                    )) : (
+                      <div className="text-center text-cyan-800">Przeliczam dane...</div>
+                    )}
                   </div>
                 )}
               </div>
             )}
 
-            {/* Push button to bottom */}
+            {/* Action button */}
             <div className="mt-auto pt-2">
               {hasDebt && !justSettled ? (
                 <button
@@ -194,7 +199,10 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
                   className="w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 bg-magenta-950 border-magenta-500 text-magenta-300 hover:bg-magenta-500 hover:text-black hover:shadow-magenta-glow disabled:opacity-50 disabled:cursor-wait"
                   aria-label={`Oznacz ${player.name} jako opłaconego`}
                 >
-                  {isSettling ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Receipt size={18} /> OZNACZ OPŁACONE</>}
+                  {isSettling
+                    ? <><InlineSpinner size="sm" /> Zapisuję...</>
+                    : <><Receipt size={18} /> OZNACZ OPŁACONE</>
+                  }
                 </button>
               ) : (
                 <div className="w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 bg-black border-cyan-900 text-cyan-700 opacity-60 select-none">
@@ -209,7 +217,7 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
   );
 }
 
-// ─── Modal potwierdzenia rozliczenia ─────────────────────────────────────────
+// ─── Confirm modal ────────────────────────────────────────────────────────────
 function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
   if (!playerName) return null;
   return (
@@ -249,31 +257,21 @@ function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function DashboardTab({ data, history, playSound }) {
   const [openDetails,    setOpenDetails]    = useState(null);
-  const [undoToast,      setUndoToast]      = useState(null);
   const [settlingPlayer, setSettlingPlayer] = useState(null);
   const [justSettled,    setJustSettled]    = useState(null);
   const [confetti,       setConfetti]       = useState([]);
   const [confirmSettle,  setConfirmSettle]  = useState(null); // { playerName, debt }
+
   const confettiTimer = useRef(null);
-
   const { showSuccess, showError } = useToast();
-  const timerRef    = useRef(null);
-  const intervalRef = useRef(null);
+  const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer();
 
-  const totalWeeks = data.summary?.totalWeeks || 0;
+  const totalWeeks = data.summary?.totalWeeks ?? 0;
 
-  const clearUndoTimers = useCallback(() => {
-    if (timerRef.current)    clearTimeout(timerRef.current);
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    timerRef.current = intervalRef.current = null;
-  }, []);
+  // Cleanup confetti timer on unmount
+  useEffect(() => () => clearTimeout(confettiTimer.current), []);
 
-  useEffect(() => () => {
-    clearUndoTimers();
-    clearTimeout(confettiTimer.current);
-  }, [clearUndoTimers]);
-
-  const handleSettleDebt = useCallback((playerName) => {
+  const handleSettleRequest = useCallback((playerName) => {
     const player = data.players?.find(p => p.name === playerName);
     if (!player) return;
     playSound(SOUND_TYPES.CLICK);
@@ -284,12 +282,13 @@ export default function DashboardTab({ data, history, playSound }) {
     if (!confirmSettle) return;
     const { playerName } = confirmSettle;
     setConfirmSettle(null);
-    clearUndoTimers();
 
+    setSettlingPlayer(playerName);
     setJustSettled(playerName);
     playSound(SOUND_TYPES.SUCCESS);
 
     const result = await settlePlayer(playerName);
+    setSettlingPlayer(null);
 
     if (!result.success) {
       setJustSettled(null);
@@ -299,9 +298,12 @@ export default function DashboardTab({ data, history, playSound }) {
 
     setTimeout(() => setJustSettled(null), 1500);
 
-    // Confetti gdy wszyscy rozliczeni
-    const nonOrg = data.players?.filter(p => p.name !== ORGANIZER_NAME) || [];
-    const willAllBeSettled = nonOrg.filter(p => p.name !== playerName).every(p => p.currentDebt <= SETTLED_THRESHOLD);
+    // Confetti when everyone is settled
+    const nonOrg = data.players?.filter(p => p.name !== ORGANIZER_NAME) ?? [];
+    const willAllBeSettled = nonOrg
+      .filter(p => p.name !== playerName)
+      .every(p => p.currentDebt <= SETTLED_THRESHOLD);
+
     if (willAllBeSettled && nonOrg.length > 0) {
       clearTimeout(confettiTimer.current);
       setConfetti(generateConfetti(50));
@@ -309,44 +311,41 @@ export default function DashboardTab({ data, history, playSound }) {
       playSound(SOUND_TYPES.COIN);
     }
 
-    setUndoToast({ playerName, previousValue: result.previousValue, secondsLeft: UNDO_TIMEOUT_SECONDS });
+    startUndo(playerName, result.previousValue);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    intervalRef.current = setInterval(() => {
-      setUndoToast(prev => {
-        if (!prev || prev.secondsLeft <= 1) { clearUndoTimers(); return null; }
-        return { ...prev, secondsLeft: prev.secondsLeft - 1 };
-      });
-    }, 1000);
-  }, [clearUndoTimers, confirmSettle, data.players, playSound, showError]);
+  }, [confirmSettle, data.players, playSound, showError, startUndo]);
 
   const handleUndo = useCallback(async () => {
     if (!undoToast) return;
-    clearUndoTimers();
     playSound(SOUND_TYPES.CLICK);
 
     const result = await undoSettle(undoToast.playerName, undoToast.previousValue);
-    if (!result.success) { showError(result.error || 'Nie udało się cofnąć rozliczenia'); return; }
+    if (!result.success) {
+      showError(result.error || 'Nie udało się cofnąć rozliczenia');
+      return;
+    }
 
-    setUndoToast(null);
+    dismissUndo();
     showSuccess('Rozliczenie cofnięte');
-  }, [undoToast, clearUndoTimers, playSound, showError, showSuccess]);
+  }, [undoToast, playSound, showError, showSuccess, dismissUndo]);
 
   const toggleDetails = useCallback((playerName) => {
     playSound(SOUND_TYPES.CLICK);
     setOpenDetails(prev => prev === playerName ? null : playerName);
   }, [playSound]);
 
-  const getBreakdown = useCallback((name, debt) => calculateDebtBreakdown(name, debt, history), [history]);
-
-  const progressPct = undoToast ? (undoToast.secondsLeft / UNDO_TIMEOUT_SECONDS) * 100 : 0;
+  const getBreakdown = useCallback(
+    (name, debt) => calculateDebtBreakdown(name, debt, history),
+    [history],
+  );
 
   const sortedPlayers = useMemo(() => {
     if (!data.players) return [];
-    return [
-      ...data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) => b.currentDebt - a.currentDebt || a.name.localeCompare(b.name, 'pl')),
-      ...data.players.filter(p => p.name === ORGANIZER_NAME),
-    ];
+    const debtors   = data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) =>
+      b.currentDebt - a.currentDebt || a.name.localeCompare(b.name, 'pl'),
+    );
+    const organizer = data.players.filter(p => p.name === ORGANIZER_NAME);
+    return [...debtors, ...organizer];
   }, [data.players]);
 
   return (
@@ -362,18 +361,28 @@ export default function DashboardTab({ data, history, playSound }) {
 
       {/* Confetti burst when everyone settled */}
       {confetti.map(c => (
-        <div key={c.id} className="fixed pointer-events-none z-50"
+        <div
+          key={c.id}
+          className="fixed pointer-events-none z-50"
           style={{
             left: `${c.x}%`, top: '-30px',
             fontSize: `${c.size}px`,
             animation: `confettiRain ${c.dur}s ${c.delay}s ease-in forwards`,
             transform: `rotate(${c.rotate}deg)`,
-          }}>
+          }}
+        >
           {c.emoji}
         </div>
       ))}
 
       <div className="space-y-6 animate-in fade-in duration-300">
+
+        {/* Summary stats */}
+        {totalWeeks > 0 && (
+          <div className="cyber-box rounded-2xl p-4 sm:p-6">
+            <SummaryBanner summary={data.summary} />
+          </div>
+        )}
 
         {/* Undo toast */}
         {undoToast && (
@@ -395,16 +404,18 @@ export default function DashboardTab({ data, history, playSound }) {
           </div>
         )}
 
-        {/* Empty state — brak sesji */}
+        {/* Empty state */}
         {totalWeeks === 0 && (
           <div className="cyber-box rounded-2xl p-10 text-center border-cyan-900">
             <div className="text-5xl mb-4">🎾</div>
             <p className="text-cyan-300 font-black text-lg mb-2">Brak rozgrywek</p>
-            <p className="text-cyan-700 text-sm">Dodaj pierwszą sesję w zakładce <span className="text-cyan-400 font-bold">Dodaj sesję</span></p>
+            <p className="text-cyan-700 text-sm">
+              Dodaj pierwszą sesję w zakładce <span className="text-cyan-400 font-bold">Dodaj sesję</span>
+            </p>
           </div>
         )}
 
-        {/* Player cards grid */}
+        {/* Player cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {sortedPlayers.map((player) => {
             const showBreakdown = openDetails === player.name;
@@ -417,7 +428,7 @@ export default function DashboardTab({ data, history, playSound }) {
                 key={player.name}
                 player={player}
                 totalWeeks={totalWeeks}
-                onSettle={handleSettleDebt}
+                onSettle={handleSettleRequest}
                 isSettling={settlingPlayer === player.name}
                 justSettled={justSettled === player.name}
                 openDetails={showBreakdown}
