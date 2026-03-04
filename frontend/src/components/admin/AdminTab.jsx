@@ -12,7 +12,7 @@ function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers,
   const paying = presentPlayers.filter(p => !multisportPlayers.includes(p));
   const multi  = multisportPlayers.filter(p => presentPlayers.includes(p));
 
-  let msg = `🎾 Graliśmy! (${formatDate(date)})\n`;
+  let msg = `🏓 Graliśmy! (${formatDate(date)})\n`;
   msg += `💰 Koszt: ${formatAmountShort(totalCost)} zł\n`;
   msg += `👥 Obecni (${presentPlayers.length}): ${presentPlayers.join(', ')}\n`;
 

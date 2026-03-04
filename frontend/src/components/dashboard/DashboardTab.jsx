@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
-  CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw, X,
+  CheckCircle2, HandCoins, ChevronDown, ChevronUp, RotateCcw, X,
 } from 'lucide-react';
 import { settlePlayer, undoSettle } from '../../firebase/index';
 import { getRank, SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants';
@@ -78,7 +78,7 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
 
         {isOrganizer ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-cyan-800 text-xs tracking-widest font-bold">zbiera kasę 💰</p>
+            <p className="text-cyan-800 text-xs tracking-widest font-bold">ogarnia rezerwację 🏓</p>
           </div>
         ) : (
           <>
@@ -136,12 +136,12 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
                 >
                   {isSettling
                     ? <><InlineSpinner size="sm" /> Zapisuję...</>
-                    : <><Receipt size={18} /> Wpłacił 💸</>
+                    : <><HandCoins size={18} /> Wpłacił 💸</>
                   }
                 </button>
               ) : (
                 <div className="w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 bg-black border-cyan-900 text-cyan-700 opacity-60 select-none">
-                  <CheckCircle2 size={18} /> spłacony
+                  <CheckCircle2 size={18} /> zapłacone ✓
                 </div>
               )}
             </div>
@@ -159,7 +159,7 @@ function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <div className="cyber-box border-emerald-600 rounded-2xl p-6 w-full max-w-sm shadow-[0_0_30px_rgba(16,185,129,0.2)]">
         <div className="flex items-center gap-3 mb-4">
-          <Receipt className="text-emerald-400 flex-shrink-0" size={24} />
+          <HandCoins className="text-emerald-400 flex-shrink-0" size={24} />
           <h3 className="font-black text-emerald-300 text-lg">Potwierdzenie</h3>
         </div>
         <p className="text-cyan-400 text-sm mb-2">
@@ -335,7 +335,7 @@ export default function DashboardTab({ data, history, playSound }) {
         {/* Empty state */}
         {totalWeeks === 0 && (
           <div className="cyber-box rounded-2xl p-10 text-center border-cyan-900">
-            <div className="text-5xl mb-4">🎾</div>
+            <div className="text-5xl mb-4">🏓</div>
             <p className="text-cyan-300 font-black text-lg mb-2">Brak rozgrywek</p>
             <p className="text-cyan-700 text-sm">
               Dodaj pierwszą sesję w zakładce <span className="text-cyan-400 font-bold">Dodaj sesję</span>

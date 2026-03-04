@@ -1,10 +1,10 @@
 import { LayoutDashboard, PlusCircle, History, Users, Trophy } from 'lucide-react';
 
 const tabs = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Rozliczenia', shortLabel: 'Home'    },
-  { id: 'attendance', icon: Trophy,           label: 'Frekwencja', shortLabel: 'Ranking'  },
-  { id: 'admin',      icon: PlusCircle,         label: 'Dodaj sesję',shortLabel: 'Dodaj'    },
-  { id: 'history',    icon: History,          label: 'Historia',   shortLabel: 'Hist.'    },
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Home', shortLabel: 'Home'    },
+  { id: 'attendance', icon: Trophy,           label: 'Ranking', shortLabel: 'Ranking'  },
+  { id: 'admin',      icon: PlusCircle,         label: 'Dodaj',shortLabel: 'Dodaj'    },
+  { id: 'history',    icon: History,          label: 'Hist.',   shortLabel: 'Hist.'    },
   { id: 'players',    icon: Users,            label: 'Gracze',     shortLabel: 'Gracze'   },
 ];
 
