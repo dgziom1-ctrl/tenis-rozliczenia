@@ -108,7 +108,7 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
                   className="text-xs font-bold text-cyan-500 hover:text-cyan-300 flex items-center justify-center gap-1 mx-auto py-1 px-2 rounded hover:bg-cyan-900/30 transition-colors"
                 >
                   {openDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  za które sesje?
+                  Pokaż szczegóły
                 </button>
                 {openDetails && (
                   <div className="mt-2 bg-black/60 p-3 rounded-lg text-xs border border-cyan-900/50 text-left space-y-1 shadow-inner">
