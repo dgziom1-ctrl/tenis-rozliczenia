@@ -19,6 +19,7 @@ const INITIAL_APP_DATA = {
   playerNames: [],
   defaultMultiPlayers: [],
   deletedPlayers: [],
+  paidUntilWeek: {},
   history: [],
 };
 
@@ -136,7 +137,7 @@ function AppContent() {
         >
           {activeTab === TABS.DASHBOARD  && (
             <DashboardTab
-              data={{ summary: appData.summary, players: appData.players }}
+              data={{ summary: appData.summary, players: appData.players, paidUntilWeek: appData.paidUntilWeek }}
               history={appData.history}
               playSound={playSound}
             />
