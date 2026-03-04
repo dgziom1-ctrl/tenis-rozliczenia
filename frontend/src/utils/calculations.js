@@ -43,10 +43,12 @@ export function calculateDebtBreakdown(playerName, currentDebt, history) {
     return [];
   }
 
+  // history is newest-first; debt is calculated oldest-first — align them
+  const chronological = [...history].reverse();
   let accumulated = 0;
   const breakdown = [];
 
-  for (const session of history) {
+  for (const session of chronological) {
     const isPresent = session.presentPlayers.includes(playerName);
     const isMultisport = session.multisportPlayers.includes(playerName);
 

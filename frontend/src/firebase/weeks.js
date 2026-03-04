@@ -51,6 +51,30 @@ export async function deleteWeek(weekId) {
   try {
     const data = JSON.parse(JSON.stringify(requireData()));
     data.weeks = (data.weeks || []).filter(w => w.id !== weekId);
+
+    // Clean up paidUntilWeek entries pointing to the deleted session.
+    // If a player's "last paid" week is deleted, find the latest remaining
+    // week that still comes before their old paid position.
+    const remainingIds = new Set((data.weeks || []).map(w => w.id));
+    if (data.paidUntilWeek) {
+      for (const [player, paidId] of Object.entries(data.paidUntilWeek)) {
+        if (!remainingIds.has(paidId)) {
+          // Walk backwards through remaining weeks to find the closest predecessor
+          const originalWeeks = requireData().weeks || [];
+          const deletedIdx = originalWeeks.findIndex(w => w.id === weekId);
+          const predecessor = originalWeeks
+            .slice(0, deletedIdx)
+            .reverse()
+            .find(w => remainingIds.has(w.id));
+          if (predecessor) {
+            data.paidUntilWeek[player] = predecessor.id;
+          } else {
+            delete data.paidUntilWeek[player];
+          }
+        }
+      }
+    }
+
     await saveData(data);
     return { success: true };
   } catch (error) {
