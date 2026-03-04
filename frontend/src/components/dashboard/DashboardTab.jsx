@@ -160,10 +160,10 @@ function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
       <div className="cyber-box border-emerald-600 rounded-2xl p-6 w-full max-w-sm shadow-[0_0_30px_rgba(16,185,129,0.2)]">
         <div className="flex items-center gap-3 mb-4">
           <Receipt className="text-emerald-400 flex-shrink-0" size={24} />
-          <h3 className="font-black text-emerald-300 text-lg">Wpłata gotówki</h3>
+          <h3 className="font-black text-emerald-300 text-lg">Potwierdzenie</h3>
         </div>
         <p className="text-cyan-400 text-sm mb-2">
-          <span className="text-white font-black">{playerName}</span> oddał kasę:
+          <span className="text-white font-black">{playerName}</span> zapłacił?
         </p>
         <div className="bg-emerald-950/40 border border-emerald-800 rounded-xl p-3 mb-5 text-center">
           <span className="text-3xl font-black text-emerald-300">
@@ -175,7 +175,7 @@ function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
             onClick={onConfirm}
             className="flex-1 py-3 rounded-xl border-2 border-emerald-500 text-emerald-300 bg-emerald-950/50 hover:bg-emerald-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2"
           >
-            <CheckCircle2 size={15} /> TAK, WPŁACIŁ
+            <CheckCircle2 size={15} /> Tak
           </button>
           <button
             onClick={onCancel}
