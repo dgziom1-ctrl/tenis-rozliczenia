@@ -3,11 +3,12 @@ import { saveData } from './subscriptions';
 
 export async function addPlayer(name) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
 
     if (!name || name.trim().length === 0) {
       throw new Error('Nazwa gracza nie może być pusta');
     }
+    name = name.trim();
     if ((data.players || []).includes(name)) {
       throw new Error('Gracz o tej nazwie już istnieje');
     }
@@ -28,7 +29,7 @@ export async function addPlayer(name) {
 
 export async function softDeletePlayer(playerName) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
     data.players = (data.players || []).filter(p => p !== playerName);
     data.deletedPlayers = [...(data.deletedPlayers || []), playerName];
     await saveData(data);
@@ -41,7 +42,7 @@ export async function softDeletePlayer(playerName) {
 
 export async function restorePlayer(playerName) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
     data.deletedPlayers = (data.deletedPlayers || []).filter(p => p !== playerName);
     data.players = [...(data.players || []), playerName];
     await saveData(data);
@@ -54,7 +55,7 @@ export async function restorePlayer(playerName) {
 
 export async function permanentDeletePlayer(playerName) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
     data.deletedPlayers = (data.deletedPlayers || []).filter(p => p !== playerName);
     await saveData(data);
     return { success: true };
@@ -66,7 +67,7 @@ export async function permanentDeletePlayer(playerName) {
 
 export async function saveDefaultMulti(playerNames) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
     data.defaultMultiPlayers = playerNames || [];
     await saveData(data);
     return { success: true };

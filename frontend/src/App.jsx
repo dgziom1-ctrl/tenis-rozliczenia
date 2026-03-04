@@ -146,6 +146,7 @@ function AppContent() {
             <PlayersTab
               players={appData.players}
               deletedPlayers={appData.deletedPlayers}
+              defaultMultiPlayers={appData.defaultMultiPlayers}
               playSound={playSound}
             />
           )}

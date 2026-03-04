@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Lock, Check, X } from 'lucide-react';
-import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer } from '../../firebase/index';
+import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Lock, Check, X, Zap } from 'lucide-react';
+import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } from '../../firebase/index';
 import { ADMIN_PASSWORD, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
 
@@ -47,11 +47,29 @@ function PasswordModal({ playerName, onConfirm, onCancel }) {
   );
 }
 
-export default function PlayersTab({ players, deletedPlayers, playSound }) {
+export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayers, playSound }) {
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [savingMulti, setSavingMulti] = useState(false);
+  const [localMulti, setLocalMulti] = useState(null); // null = use prop
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [pwModal,       setPwModal]       = useState(null);
   const { showSuccess, showError } = useToast();
+
+  const currentMulti = localMulti ?? (defaultMultiPlayers || []);
+
+  const toggleDefaultMulti = async (name) => {
+    const next = currentMulti.includes(name)
+      ? currentMulti.filter(p => p !== name)
+      : [...currentMulti, name];
+    setLocalMulti(next);
+    setSavingMulti(true);
+    const result = await saveDefaultMulti(next);
+    setSavingMulti(false);
+    if (!result.success) {
+      showError('Nie udało się zapisać');
+      setLocalMulti(currentMulti); // rollback
+    }
+  };
 
   const handleAddPlayer = async (e) => {
     e.preventDefault();
@@ -132,6 +150,33 @@ export default function PlayersTab({ players, deletedPlayers, playSound }) {
             </div>
           ))}
         </div>
+
+        {/* Domyślny Multisport */}
+        {players && players.length > 0 && (
+          <div className="border-t-2 border-cyan-900 pt-6 mb-8">
+            <h3 className="text-lg font-black text-cyan-300 mb-2 flex items-center gap-2">
+              <Zap size={18} className="text-emerald-400" /> Multisport na stałe
+            </h3>
+            <p className="text-cyan-700 text-xs mb-4">Zaznaczeni gracze będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.</p>
+            <div className="grid grid-cols-2 gap-3">
+              {players.map(p => (
+                <button
+                  key={p.name}
+                  onClick={() => toggleDefaultMulti(p.name)}
+                  disabled={savingMulti}
+                  className={`p-3 rounded-xl border-2 font-bold text-sm transition-all flex items-center gap-2 ${
+                    currentMulti.includes(p.name)
+                      ? 'border-emerald-400 bg-emerald-950 text-emerald-200 shadow-[0_0_8px_#10b981]'
+                      : 'border-cyan-900 bg-black text-cyan-700 hover:border-cyan-700'
+                  }`}
+                >
+                  <Zap size={14} className={currentMulti.includes(p.name) ? 'text-emerald-400' : 'text-cyan-800'} />
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {deletedPlayers?.length > 0 && (
           <div className="border-t-2 border-cyan-900 pt-6">

@@ -8,6 +8,9 @@ export async function addSession({ datePlayed, totalCost, presentPlayers, multis
     if (!datePlayed || totalCost < 0 || !presentPlayers || presentPlayers.length === 0) {
       throw new Error('Nieprawidłowe dane sesji');
     }
+    if ((data.weeks || []).some(w => w.date === datePlayed)) {
+      throw new Error('Sesja z tą datą już istnieje');
+    }
 
     data.weeks = [
       ...(data.weeks || []),
