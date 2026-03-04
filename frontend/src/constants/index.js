@@ -54,13 +54,5 @@ export const TABS = {
   PLAYERS:    'players',
 };
 
-/** Ordered list of tab IDs used for swipe navigation */
-export const TAB_ORDER = [
-  TABS.DASHBOARD,
-  TABS.ATTENDANCE,
-  TABS.ADMIN,
-  TABS.HISTORY,
-  TABS.PLAYERS,
-];
 
 export const ORGANIZER_NAME = 'Kamil';

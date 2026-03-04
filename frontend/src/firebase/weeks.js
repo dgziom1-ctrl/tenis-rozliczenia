@@ -3,7 +3,7 @@ import { saveData } from './subscriptions';
 
 export async function addSession({ datePlayed, totalCost, presentPlayers, multisportPlayers }) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
 
     if (!datePlayed || totalCost < 0 || !presentPlayers || presentPlayers.length === 0) {
       throw new Error('Nieprawidłowe dane sesji');
@@ -30,7 +30,7 @@ export async function addSession({ datePlayed, totalCost, presentPlayers, multis
 
 export async function updateWeek(weekId, { date, cost, present, multiPlayers }) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
     const idx = (data.weeks || []).findIndex(w => w.id === weekId);
 
     if (idx === -1) throw new Error('Nie znaleziono sesji');
@@ -46,7 +46,7 @@ export async function updateWeek(weekId, { date, cost, present, multiPlayers }) 
 
 export async function deleteWeek(weekId) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
     data.weeks = (data.weeks || []).filter(w => w.id !== weekId);
     await saveData(data);
     return { success: true };

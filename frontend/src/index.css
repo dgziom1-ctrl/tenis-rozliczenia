@@ -56,6 +56,13 @@ body::before {
   transition: background-image 0.3s;
 }
 
+/* Arcade grid — applied via JS class on body when theme switches */
+body.theme-arcade-bg::before {
+  background-image:
+    linear-gradient(rgba(57,255,20,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px);
+}
+
 /* ══ ARCADE BODY OVERRIDES ═══════════════════════════════ */
 .theme-arcade body,
 .theme-arcade {

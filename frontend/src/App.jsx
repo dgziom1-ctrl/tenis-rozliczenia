@@ -30,6 +30,13 @@ function useTheme() {
   const persistTheme = useCallback((next) => {
     setTheme(next);
     try { localStorage.setItem('ponk-theme', next); } catch {}
+    document.body.classList.toggle('theme-arcade-bg', next === 'arcade');
+  }, []);
+
+  // Sync on initial load
+  useEffect(() => {
+    const stored = (() => { try { return localStorage.getItem('ponk-theme'); } catch { return null; } })();
+    document.body.classList.toggle('theme-arcade-bg', stored === 'arcade');
   }, []);
 
   return [theme, persistTheme];

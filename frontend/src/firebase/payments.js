@@ -3,14 +3,14 @@ import { saveData } from './subscriptions';
 
 export async function settlePlayer(playerName) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
     const weeks = data.weeks || [];
 
     if (weeks.length === 0) {
       throw new Error('Brak sesji do rozliczenia');
     }
 
-    const previousValue = data.paidUntilWeek?.[playerName] ?? null;
+    const previousValue = requireData().paidUntilWeek?.[playerName] ?? null;
 
     data.paidUntilWeek = {
       ...(data.paidUntilWeek || {}),
@@ -27,7 +27,7 @@ export async function settlePlayer(playerName) {
 
 export async function undoSettle(playerName, previousValue) {
   try {
-    const data = requireData();
+    const data = JSON.parse(JSON.stringify(requireData()));
     const paid = { ...(data.paidUntilWeek || {}) };
 
     if (previousValue === null) {
