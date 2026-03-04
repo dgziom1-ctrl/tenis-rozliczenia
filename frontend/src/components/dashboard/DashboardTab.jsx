@@ -314,6 +314,60 @@ export default function DashboardTab({ data, history, playSound }) {
       ))}
 
       <div className="space-y-6 animate-in fade-in duration-300">
+
+        {/* Undo toast */}
+        {undoToast && (
+          <div className="cyber-box border-emerald-600 rounded-2xl p-4 flex items-center justify-between gap-4 relative overflow-hidden bg-emerald-950/30">
+            <div className="absolute bottom-0 left-0 h-1 bg-emerald-500 transition-all duration-1000" style={{ width: `${progressPct}%` }} />
+            <div className="flex items-center gap-2 min-w-0 flex-wrap">
+              <CheckCircle2 className="text-emerald-400 flex-shrink-0" size={20} />
+              <span className="text-emerald-300 font-bold text-sm">
+                Opłacono: <span className="text-white">{undoToast.playerName}</span>
+              </span>
+              <span className="text-emerald-700 font-mono text-xs flex-shrink-0">({undoToast.secondsLeft}s)</span>
+            </div>
+            <button
+              onClick={handleUndo}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-emerald-500 text-emerald-300 hover:bg-emerald-500 hover:text-black font-bold text-sm transition-all flex-shrink-0"
+            >
+              <RotateCcw size={14} /> COFNIJ
+            </button>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {totalWeeks === 0 && (
+          <div className="cyber-box rounded-2xl p-10 text-center border-cyan-900">
+            <div className="text-5xl mb-4">🎾</div>
+            <p className="text-cyan-300 font-black text-lg mb-2">Brak rozgrywek</p>
+            <p className="text-cyan-700 text-sm">
+              Dodaj pierwszą sesję w zakładce <span className="text-cyan-400 font-bold">Dodaj sesję</span>
+            </p>
+          </div>
+        )}
+
+        {/* Player cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {sortedPlayers.map((player) => {
+            const showBreakdown = openDetails === player.name;
+            const breakdown = showBreakdown && player.currentDebt > SETTLED_THRESHOLD
+              ? getBreakdown(player.name, player.currentDebt)
+              : [];
+
+            return (
+              <PlayerCard
+                key={player.name}
+                player={player}
+                totalWeeks={totalWeeks}
+                onSettle={handleSettleRequest}
+                isSettling={settlingPlayer === player.name}
+                justSettled={justSettled === player.name}
+                openDetails={showBreakdown}
+                onToggleDetails={toggleDetails}
+                breakdown={breakdown}
+              />
+            );
+          })}
         </div>
       </div>
     </>
