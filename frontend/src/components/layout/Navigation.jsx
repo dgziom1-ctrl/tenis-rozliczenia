@@ -4,7 +4,7 @@ const tabs = [
   { id: 'dashboard',  icon: LayoutDashboard, label: 'Home', shortLabel: 'Home'    },
   { id: 'attendance', icon: Trophy,           label: 'Ranking', shortLabel: 'Ranking'  },
   { id: 'admin',      icon: PlusCircle,         label: 'Dodaj',shortLabel: 'Dodaj'    },
-  { id: 'history',    icon: History,          label: 'Hist.',   shortLabel: 'Hist.'    },
+  { id: 'history',    icon: History,          label: 'Historia', shortLabel: 'Historia' },
   { id: 'players',    icon: Users,            label: 'Gracze',     shortLabel: 'Gracze'   },
 ];
 
@@ -183,7 +183,7 @@ export default function Navigation({ activeTab, setActiveTab, theme }) {
               className={`desktop-tab ${activeTab === tab.id ? 'active' : ''}`}
             >
               <tab.icon size={16} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
-              {a ? tab.label.toUpperCase() : tab.label}
+              {tab.label.toUpperCase()}
             </button>
           ))}
         </div>
@@ -200,7 +200,7 @@ export default function Navigation({ activeTab, setActiveTab, theme }) {
             className={`mobile-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
           >
             <tab.icon size={21} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
-            <span className="mobile-nav-label">{tab.shortLabel}</span>
+            <span className="mobile-nav-label">{tab.shortLabel.toUpperCase()}</span>
           </button>
         ))}
       </nav>
