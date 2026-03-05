@@ -504,6 +504,23 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'center' }}>
 
             {/* Hasło klimatyczne */}
+            {/* JACK IN — cyber punk only */}
+            {!a && !z && (
+              <>
+                <span style={{
+                  fontFamily: 'monospace', fontSize: C.climateFontSz,
+                  color: arcadeTick ? '#22d3ee' : '#0e4a5a',
+                  textShadow: arcadeTick
+                    ? '0 0 10px rgba(34,211,238,1), 0 0 25px rgba(34,211,238,0.5), 0 0 50px rgba(34,211,238,0.2)'
+                    : 'none',
+                  transition: 'color 0.15s, text-shadow 0.15s',
+                  letterSpacing: '0.15em',
+                  fontWeight: 'bold',
+                }}>⚡ JACK IN ⚡</span>
+                <span style={{ color: 'rgba(22,78,99,0.6)', fontSize: '0.8rem' }}>│</span>
+              </>
+            )}
+
             {/* INSERT COIN — arcade only */}
             {a && (
               <>
