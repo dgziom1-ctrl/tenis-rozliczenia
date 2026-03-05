@@ -134,8 +134,7 @@ function AppContent() {
           theme={theme}
         />
         <main
-          className="main-content"
-          style={scrolled ? { paddingTop: 'calc(52px + env(safe-area-inset-top, 0px))' } : {}}
+          className={`main-content${scrolled ? ' main-content--scrolled' : ''}`}
         >
           {activeTab === TABS.DASHBOARD  && (
             <DashboardTab
