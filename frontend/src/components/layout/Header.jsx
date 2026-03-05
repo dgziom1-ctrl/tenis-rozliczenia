@@ -119,43 +119,43 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     climateFontSz: '0.44rem',
     climateFont:   "'Press Start 2P',monospace",
   } : z ? {
-    // ── ZEN NATURE / DRUIDISM ─────────────────────────
-    headerBg:      'linear-gradient(to bottom, #f0ebe0, #ede8df)',
-    headerBorder:  '2px solid #c2b49a',
-    topBarBg:      'rgba(240,235,224,0.85)',
-    topBarBorder:  '1px solid rgba(165,143,112,0.35)',
-    blikBorder:    '1px solid rgba(45,106,79,0.45)',
-    blikLabelClr:  '#8b5e3c',
-    blikNumClr:    '#2d6a4f',
-    blikLabelBg:   'rgba(139,94,60,0.09)',
-    iconClr:       '#2d6a4f',
-    copyClr:       'rgba(45,106,79,0.45)',
-    muteOnBorder:  '2px solid rgba(180,70,50,0.5)', muteOnClr: '#b44632', muteOnBg: 'rgba(180,70,50,0.08)',
-    muteOffBorder: '2px solid rgba(45,106,79,0.5)', muteOffClr: '#2d6a4f', muteOffBg: 'transparent',
-    titleGrad:     'linear-gradient(90deg, #1a4a35, #2d6a4f, #4a8c6a)',
+    // ── ZEN GRANIT / DRUIDISM ─────────────────────────
+    headerBg:      'linear-gradient(to bottom, #2d3633, #252d2a)',
+    headerBorder:  '2px solid #3a4a46',
+    topBarBg:      'rgba(30,38,36,0.85)',
+    topBarBorder:  '1px solid rgba(68,85,80,0.5)',
+    blikBorder:    '1px solid rgba(94,184,154,0.35)',
+    blikLabelClr:  '#a0c4b8',
+    blikNumClr:    '#7dcfb6',
+    blikLabelBg:   'rgba(94,184,154,0.08)',
+    iconClr:       '#7dcfb6',
+    copyClr:       'rgba(94,184,154,0.4)',
+    muteOnBorder:  '2px solid rgba(180,80,70,0.5)', muteOnClr: '#c47a70', muteOnBg: 'rgba(180,80,70,0.08)',
+    muteOffBorder: '2px solid rgba(94,184,154,0.5)', muteOffClr: '#7dcfb6', muteOffBg: 'transparent',
+    titleGrad:     'linear-gradient(90deg, #a0c4b8, #7dcfb6, #5eb89a)',
     titleFont:     "'Cinzel Decorative', serif",
     titleAnim:     'none',
-    ppGrad:        'linear-gradient(90deg, #8b5e3c, #4a8c6a, #2d6a4f)',
-    ppChaos:       { color: '#2d6a4f', fontFamily: "'Cinzel', serif", animation: 'arcadeShake 0.3s infinite' },
-    hintStyle:     { border: '1px solid #c2b49a', background: 'rgba(240,235,224,0.9)', color: '#5c7a60', fontFamily: "'Cinzel', serif", fontSize: '0.55rem', borderRadius: '0.5rem' },
-    chaosStyle:    { border: '2px solid #8b5e3c', background: 'rgba(240,235,224,0.97)', color: '#8b5e3c', boxShadow: '0 6px 24px rgba(139,94,60,0.25)', fontFamily: "'Cinzel', serif", borderRadius: '1rem', fontSize: '0.62rem' },
+    ppGrad:        'linear-gradient(90deg, #a0c4b8, #7dcfb6, #5eb89a)',
+    ppChaos:       { color: '#7dcfb6', fontFamily: "'Cinzel', serif", animation: 'arcadeShake 0.3s infinite' },
+    hintStyle:     { border: '1px solid #3a4a46', background: 'rgba(30,38,36,0.9)', color: '#6a9a8e', fontFamily: "'Cinzel', serif", fontSize: '0.55rem', borderRadius: '0.5rem' },
+    chaosStyle:    { border: '2px solid #5eb89a', background: 'rgba(30,38,36,0.97)', color: '#7dcfb6', boxShadow: '0 6px 24px rgba(94,184,154,0.2)', fontFamily: "'Cinzel', serif", borderRadius: '1rem', fontSize: '0.62rem' },
     chaosText:     '✦ NATURA CRESCIT ✦',
-    loaderBg:      '#ddd5c8',
-    loaderFill:    'linear-gradient(90deg, #2d6a4f, #7daa87, #2d6a4f)',
-    loaderChaos:   'linear-gradient(90deg, #8b5e3c, #c49a6c, #8b5e3c)',
-    loaderShadow:  'rgba(45,106,79,0.2)',
-    paddleL:       { bg: 'linear-gradient(135deg,#8b5e3c,#6b4423)', shadow: '0 4px 14px rgba(139,94,60,0.4)', inner: '#c49a6c' },
-    paddleR:       { bg: 'linear-gradient(135deg,#2d6a4f,#1a4a35)', shadow: '0 4px 14px rgba(45,106,79,0.4)', inner: '#7daa87' },
-    handleBg:      'linear-gradient(to bottom,#8b5e3c,#6b4423)',
-    ballClr:       '#2d6a4f', ballShadow: 'rgba(45,106,79,0.4)',
-    paddleClr:     '#8b5e3c', paddleShadow: 'rgba(139,94,60,0.4)',
-    sepBg:         'linear-gradient(to bottom,#ede8df,#f7f2e9)',
-    sepBorder:     '1px solid rgba(165,143,112,0.3)',
-    sepLine:       'linear-gradient(90deg,transparent,rgba(45,106,79,0.25) 50%,transparent)',
+    loaderBg:      '#1e2624',
+    loaderFill:    'linear-gradient(90deg, #5eb89a, #7dcfb6, #5eb89a)',
+    loaderChaos:   'linear-gradient(90deg, #4a8c7a, #a0c4b8, #4a8c7a)',
+    loaderShadow:  'rgba(125,207,182,0.2)',
+    paddleL:       { bg: 'linear-gradient(135deg,#4a6e65,#2a4f42)', shadow: '0 4px 14px rgba(74,110,101,0.5)', inner: '#7daa96' },
+    paddleR:       { bg: 'linear-gradient(135deg,#5eb89a,#3d7a65)', shadow: '0 4px 14px rgba(94,184,154,0.4)', inner: '#a0d4c2' },
+    handleBg:      'linear-gradient(to bottom,#3a4a46,#252d2a)',
+    ballClr:       '#7dcfb6', ballShadow: 'rgba(125,207,182,0.5)',
+    paddleClr:     '#5eb89a', paddleShadow: 'rgba(94,184,154,0.5)',
+    sepBg:         'linear-gradient(to bottom,#252d2a,#1e2624)',
+    sepBorder:     '1px solid rgba(68,85,80,0.4)',
+    sepLine:       'linear-gradient(90deg,transparent,rgba(94,184,154,0.2) 50%,transparent)',
     glowBlobs:     false,
     glowZen:       true,
-    statusOnClr:   '#2d6a4f', statusOnShadow: 'none',
-    statusOffClr:  '#b44632', statusOffShadow: 'none',
+    statusOnClr:   '#7dcfb6', statusOnShadow: '0 0 6px rgba(125,207,182,0.3)',
+    statusOffClr:  '#c47a70', statusOffShadow: 'none',
     statusFont:    "'Lato', sans-serif",
     statusFontSz:  '0.72rem',
     climateClr:    null,
@@ -281,15 +281,15 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           </>
         )}
 
-        {/* Zen nature light blobs */}
+        {/* Zen granit — stone depth blobs */}
         {C.glowZen && (
           <>
             <div className="absolute top-0 left-0 w-48 h-32 pointer-events-none"
-              style={{ background: 'radial-gradient(ellipse at 30% 40%, rgba(125,170,135,0.18) 0%, transparent 70%)', borderRadius: '0 0 100% 0' }} />
+              style={{ background: 'radial-gradient(ellipse at 30% 40%, rgba(94,184,154,0.07) 0%, transparent 70%)', borderRadius: '0 0 100% 0' }} />
             <div className="absolute top-0 right-0 w-40 h-28 pointer-events-none"
-              style={{ background: 'radial-gradient(ellipse at 70% 30%, rgba(139,94,60,0.12) 0%, transparent 65%)', borderRadius: '0 0 0 100%' }} />
+              style={{ background: 'radial-gradient(ellipse at 70% 30%, rgba(74,110,101,0.08) 0%, transparent 65%)', borderRadius: '0 0 0 100%' }} />
             <div className="absolute bottom-0 left-1/3 w-56 h-20 pointer-events-none"
-              style={{ background: 'radial-gradient(ellipse at 50% 80%, rgba(45,106,79,0.09) 0%, transparent 70%)' }} />
+              style={{ background: 'radial-gradient(ellipse at 50% 80%, rgba(42,79,66,0.1) 0%, transparent 70%)' }} />
           </>
         )}
 

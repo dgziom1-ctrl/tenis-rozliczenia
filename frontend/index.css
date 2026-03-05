@@ -1,0 +1,461 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&family=Lato:wght@300;400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ══ BASE ════════════════════════════════════════════════ */
+body {
+  background-color: #080c14;
+  color: #e2e8f0;
+  font-family: 'Roboto Mono', monospace;
+  overflow-x: hidden;
+  transition: background-color 0.3s;
+  /* Prevent rubber-band scroll from displacing fixed elements in iOS PWA */
+  overscroll-behavior-y: none;
+}
+
+/* Focus indicators for accessibility */
+*:focus-visible {
+  outline: 3px solid rgb(34,211,238);
+  outline-offset: 2px;
+}
+
+.theme-arcade *:focus-visible {
+  outline-color: #39ff14;
+}
+
+.theme-zen *:focus-visible {
+  outline-color: #2d6a4f;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgb(34,211,238);
+  outline-offset: 2px;
+}
+
+.theme-arcade button:focus-visible,
+.theme-arcade a:focus-visible,
+.theme-arcade input:focus-visible,
+.theme-arcade select:focus-visible,
+.theme-arcade textarea:focus-visible {
+  outline-color: #39ff14;
+}
+
+.theme-zen button:focus-visible,
+.theme-zen a:focus-visible,
+.theme-zen input:focus-visible,
+.theme-zen select:focus-visible,
+.theme-zen textarea:focus-visible {
+  outline-color: #2d6a4f;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,100,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,100,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  z-index: -1;
+  pointer-events: none;
+  transition: background-image 0.3s;
+}
+
+/* Arcade grid — applied via JS class on body when theme switches */
+body.theme-arcade-bg::before {
+  background-image:
+    linear-gradient(rgba(57,255,20,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px);
+}
+
+/* Zen Granit — subtelna kamienna tekstura */
+body.theme-zen-bg::before {
+  background-image:
+    radial-gradient(ellipse at 15% 25%, rgba(96,140,120,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 65%, rgba(70,110,95,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 85%, rgba(55,90,75,0.05) 0%, transparent 45%);
+  background-size: 100% 100%;
+}
+
+/* ══ ARCADE BODY OVERRIDES ═══════════════════════════════ */
+.theme-arcade body,
+.theme-arcade {
+  background-color: #010300;
+  color: #c8f0b8;
+  background-image:
+    linear-gradient(rgba(57,255,20,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57,255,20,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-attachment: fixed;
+}
+
+.theme-arcade body::before {
+  background-image:
+    linear-gradient(rgba(57,255,20,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px);
+}
+
+/* ══ ZEN GRANIT BODY OVERRIDES ════════════════════════════ */
+.theme-zen body,
+.theme-zen {
+  background-color: #252d2a;
+  color: #c8d8d2;
+  background-image: none;
+  font-family: 'Lato', sans-serif;
+}
+
+.theme-zen body::before {
+  background-image:
+    radial-gradient(ellipse at 15% 25%, rgba(96,140,120,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 65%, rgba(70,110,95,0.06) 0%, transparent 50%);
+  background-size: 100% 100%;
+}
+
+/* ══ PONG ANIMATION ══════════════════════════════════════ */
+.ascii-pong-field {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.paddle { color: #e91e8c; }
+
+.ball-court {
+  display: inline-block;
+  width: 250px;
+  position: relative;
+  height: 1.5rem;
+  border-bottom: 1px dashed #083344;
+}
+
+.ascii-ball {
+  position: absolute;
+  top: 0;
+  animation: ascii-bounce 1.2s infinite linear alternate;
+}
+
+@keyframes ascii-bounce {
+  0%   { left: 0; }
+  100% { left: calc(100% - 1ch); }
+}
+
+/* ══ UTILITIES ═══════════════════════════════════════════ */
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  
+  .cyber-box {
+    @apply bg-gray-900 border-2 border-cyan-800;
+  }
+  .theme-arcade .cyber-box {
+    background-color: #020500;
+    border-color: #1a4d00;
+    border-radius: 0 !important;
+  }
+
+  .cyber-input {
+    @apply bg-black border-2 border-cyan-800 text-cyan-300 focus:border-cyan-400 outline-none transition-all duration-200;
+  }
+  .theme-arcade .cyber-input {
+    background-color: #010300;
+    border-color: #1a4d00;
+    color: #39ff14;
+    border-radius: 0 !important;
+  }
+  .theme-arcade .cyber-input:focus {
+    border-color: #39ff14;
+  }
+
+  .cyber-button-blue {
+    @apply bg-cyan-950 border-2 border-cyan-500 text-cyan-300 hover:bg-cyan-500 hover:text-black transition-all duration-200 font-bold;
+  }
+  .theme-arcade .cyber-button-blue {
+    background-color: #0d2900;
+    border-color: #39ff14;
+    color: #39ff14;
+    border-radius: 0 !important;
+  }
+  .theme-arcade .cyber-button-blue:hover {
+    background-color: #39ff14;
+    color: #010300;
+  }
+
+  .text-neon-blue { text-shadow: 0 0 8px rgba(0,243,255,0.6); }
+  .text-neon-pink { text-shadow: 0 0 8px rgba(255,0,255,0.6); }
+  .neon-amount { @apply font-mono font-black text-cyan-400; text-shadow: 0 0 8px rgba(34,211,238,0.6); }
+
+  /* Magenta glow utilities — arcade-safe */
+  .glow-magenta    { text-shadow: 0 0 12px rgba(255,0,255,0.5); }
+  .glow-magenta-sm { text-shadow: 0 0 8px rgba(255,0,255,0.4); }
+  .glow-magenta-lg { text-shadow: 0 0 15px rgba(255,0,255,0.5); }
+  .theme-arcade .glow-magenta    { text-shadow: 0 0 12px rgba(255,107,0,0.6) !important; }
+  .theme-arcade .glow-magenta-sm { text-shadow: 0 0 8px rgba(255,107,0,0.5) !important; }
+  .theme-arcade .glow-magenta-lg { text-shadow: 0 0 15px rgba(255,107,0,0.7) !important; }
+
+  /* Magenta box-shadow utility — arcade-safe */
+  .shadow-magenta-glow { box-shadow: 0 0 40px rgba(255,0,255,0.2); }
+  .theme-arcade .shadow-magenta-glow { box-shadow: 0 0 40px rgba(255,107,0,0.2) !important; }
+  .hover\:shadow-magenta-glow:hover { box-shadow: 0 0 15px #ff00ff; }
+  .theme-arcade .hover\:shadow-magenta-glow:hover { box-shadow: 0 0 15px rgba(255,107,0,0.8) !important; }
+}
+
+/* ══ ARCADE COLOR OVERRIDES FOR JSX COMPONENTS ═══════════
+   Only swap colors — no font-size changes.
+   JSX components use Tailwind color classes, we remap them.
+════════════════════════════════════════════════════════ */
+
+/* Remove rounded corners globally in arcade */
+.theme-arcade [class*="rounded"] {
+  border-radius: 0 !important;
+}
+.theme-arcade [class*="rounded-full"] {
+  border-radius: 2px !important;
+}
+
+/* ── Cyan → Arcade Green ── */
+.theme-arcade [class*="text-cyan-3"],
+.theme-arcade [class*="text-cyan-4"] { color: #39ff14 !important; }
+.theme-arcade [class*="text-cyan-5"] { color: #28cc0e !important; }
+.theme-arcade [class*="text-cyan-6"],
+.theme-arcade [class*="text-cyan-7"] { color: #176604 !important; }
+.theme-arcade [class*="text-cyan-8"],
+.theme-arcade [class*="text-cyan-9"] { color: #0a2200 !important; }
+.theme-arcade [class*="text-cyan-1"],
+.theme-arcade [class*="text-cyan-2"] { color: #c8f0b8 !important; }
+
+/* ── Pink/Magenta → Orange ── */
+.theme-arcade [class*="text-pink-"],
+.theme-arcade [class*="text-magenta-"],
+.theme-arcade [class*="text-rose-4"],
+.theme-arcade [class*="text-rose-5"] { color: #ff6b00 !important; }
+
+/* ── Border Cyan → Green ── */
+.theme-arcade [class*="border-cyan-4"],
+.theme-arcade [class*="border-cyan-5"] { border-color: #39ff14 !important; }
+.theme-arcade [class*="border-cyan-6"],
+.theme-arcade [class*="border-cyan-7"] { border-color: #1a6600 !important; }
+.theme-arcade [class*="border-cyan-8"],
+.theme-arcade [class*="border-cyan-9"] { border-color: #0d2900 !important; }
+
+/* ── Border Pink → Orange ── */
+.theme-arcade [class*="border-pink-"],
+.theme-arcade [class*="border-magenta-"],
+.theme-arcade [class*="border-rose-6"],
+.theme-arcade [class*="border-rose-7"],
+.theme-arcade [class*="border-rose-8"] { border-color: #cc4400 !important; }
+
+/* ── Background Magenta → Dark Orange ── */
+.theme-arcade [class*="bg-magenta-9"],
+.theme-arcade [class*="bg-magenta-8"] { background-color: #1a0500 !important; }
+.theme-arcade [class*="bg-magenta-7"],
+.theme-arcade [class*="bg-magenta-6"] { background-color: #2a0a00 !important; }
+
+/* ── Hardcoded magenta glow swap ── */
+.theme-arcade [style*="rgba(255,0,255"] {
+  text-shadow: 0 0 12px rgba(255,107,0,0.6) !important;
+  box-shadow: none !important;
+}
+.theme-arcade [class*="shadow-"][class*="ff00ff"] {
+  box-shadow: 0 0 15px rgba(255,107,0,0.6) !important;
+}
+
+/* ── Background Cyan → Dark Green ── */
+.theme-arcade [class*="bg-cyan-9"],
+.theme-arcade [class*="bg-cyan-8"] { background-color: #020a00 !important; }
+
+/* ── Shadow glow swap ── */
+.theme-arcade [class*="shadow-"][class*="00f3ff"],
+.theme-arcade [class*="shadow-"][class*="00d4ff"] {
+  box-shadow: 0 0 15px rgba(57,255,20,0.5) !important;
+}
+
+/* ── Select options ── */
+.theme-arcade select option {
+  background-color: #010300;
+  color: #39ff14;
+}
+
+/* ══ ZEN GRANIT COLOR OVERRIDES FOR JSX COMPONENTS ═════
+   Dark theme: granitowe tło, lodowata mięta, chłodna szałwia.
+   Serif headings (Cinzel), sans-serif data (Lato).
+══════════════════════════════════════════════════════ */
+
+/* ── Core boxes & inputs ── */
+.theme-zen .cyber-box {
+  background-color: #2d3633 !important;
+  border-color: #445550 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.2) !important;
+}
+
+.theme-zen .cyber-input {
+  background-color: #1e2624 !important;
+  border-color: #445550 !important;
+  color: #c8d8d2 !important;
+  border-radius: 0.6rem !important;
+}
+.theme-zen .cyber-input:focus {
+  border-color: #7dcfb6 !important;
+  box-shadow: 0 0 0 3px rgba(125,207,182,0.15) !important;
+}
+
+.theme-zen .cyber-button-blue {
+  background-color: rgba(125,207,182,0.08) !important;
+  border-color: #5eb89a !important;
+  color: #7dcfb6 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 2px 10px rgba(94,184,154,0.15) !important;
+}
+.theme-zen .cyber-button-blue:hover {
+  background-color: #5eb89a !important;
+  color: #1e2624 !important;
+  box-shadow: 0 4px 18px rgba(94,184,154,0.3) !important;
+}
+
+/* ── Text: Cyan → Lodowata mięta ── */
+.theme-zen [class*="text-cyan-1"],
+.theme-zen [class*="text-cyan-2"] { color: #c8d8d2 !important; }
+.theme-zen [class*="text-cyan-3"],
+.theme-zen [class*="text-cyan-4"] { color: #7dcfb6 !important; }
+.theme-zen [class*="text-cyan-5"] { color: #5eb89a !important; }
+.theme-zen [class*="text-cyan-6"],
+.theme-zen [class*="text-cyan-7"] { color: #3d7a65 !important; }
+.theme-zen [class*="text-cyan-8"],
+.theme-zen [class*="text-cyan-9"] { color: #2a4f42 !important; }
+
+/* ── Text: Pink/Magenta/Rose → Chłodna szałwia/mech ── */
+.theme-zen [class*="text-pink-"],
+.theme-zen [class*="text-magenta-"],
+.theme-zen [class*="text-rose-4"],
+.theme-zen [class*="text-rose-5"] { color: #a0c4b8 !important; }
+
+/* ── Text: Slate/Gray → Chłodna szarozielona ── */
+.theme-zen [class*="text-slate-3"],
+.theme-zen [class*="text-slate-4"],
+.theme-zen [class*="text-gray-3"],
+.theme-zen [class*="text-gray-4"] { color: #8aada6 !important; }
+
+/* ── Borders: Cyan → Miętowa skala ── */
+.theme-zen [class*="border-cyan-4"],
+.theme-zen [class*="border-cyan-5"] { border-color: #5eb89a !important; }
+.theme-zen [class*="border-cyan-6"],
+.theme-zen [class*="border-cyan-7"] { border-color: #3d7a65 !important; }
+.theme-zen [class*="border-cyan-8"],
+.theme-zen [class*="border-cyan-9"] { border-color: #2a4f42 !important; }
+
+/* ── Borders: Pink/Magenta/Rose → Chłodna szałwia ── */
+.theme-zen [class*="border-pink-"],
+.theme-zen [class*="border-magenta-"],
+.theme-zen [class*="border-rose-6"],
+.theme-zen [class*="border-rose-7"],
+.theme-zen [class*="border-rose-8"] { border-color: #4a6e65 !important; }
+
+/* ── Backgrounds: dopasowane do granitu ── */
+.theme-zen [class*="bg-gray-9"],
+.theme-zen [class*="bg-gray-8"] { background-color: #2d3633 !important; }
+.theme-zen [class*="bg-gray-7"] { background-color: #323b38 !important; }
+.theme-zen [class*="bg-black"] { background-color: #1e2624 !important; }
+.theme-zen [class*="bg-cyan-9"],
+.theme-zen [class*="bg-cyan-8"] { background-color: rgba(94,184,154,0.08) !important; }
+.theme-zen [class*="bg-magenta-9"],
+.theme-zen [class*="bg-magenta-8"] { background-color: rgba(74,110,101,0.12) !important; }
+.theme-zen [class*="bg-magenta-7"],
+.theme-zen [class*="bg-magenta-6"] { background-color: rgba(74,110,101,0.18) !important; }
+
+/* ── Neon effects → subtelna mięta ── */
+.theme-zen .text-neon-blue  { color: #7dcfb6 !important; text-shadow: 0 0 8px rgba(125,207,182,0.3) !important; }
+.theme-zen .text-neon-pink  { color: #a0c4b8 !important; text-shadow: none !important; }
+.theme-zen .neon-amount {
+  color: #7dcfb6 !important;
+  text-shadow: 0 0 6px rgba(125,207,182,0.25) !important;
+  font-family: 'Lato', sans-serif !important;
+  font-weight: 900 !important;
+}
+.theme-zen .glow-magenta,
+.theme-zen .glow-magenta-sm,
+.theme-zen .glow-magenta-lg {
+  text-shadow: none !important;
+  color: #a0c4b8 !important;
+}
+.theme-zen .shadow-magenta-glow {
+  box-shadow: 0 4px 20px rgba(94,184,154,0.15) !important;
+}
+.theme-zen .hover\:shadow-magenta-glow:hover {
+  box-shadow: 0 6px 24px rgba(125,207,182,0.25) !important;
+}
+
+/* ── Rounded corners: zachowane i wzmocnione ── */
+.theme-zen [class*="rounded-xl"] { border-radius: 1.25rem !important; }
+.theme-zen [class*="rounded-2xl"] { border-radius: 1.5rem !important; }
+.theme-zen [class*="rounded-full"] { border-radius: 9999px !important; }
+
+/* ── Mini paddle ── */
+.theme-zen .mini-paddle { background-color: #5eb89a !important; border-radius: 50% 50% 45% 45% !important; }
+.theme-zen .mini-paddle::after { background: #445550 !important; }
+
+/* ── Select options ── */
+.theme-zen select option {
+  background-color: #2d3633;
+  color: #c8d8d2;
+}
+
+/* ── Shadow glow swap → kamienny cień ── */
+.theme-zen [class*="shadow-"][class*="00f3ff"],
+.theme-zen [class*="shadow-"][class*="00d4ff"] {
+  box-shadow: 0 4px 16px rgba(125,207,182,0.18) !important;
+}
+
+/* ══ MOBILE SAFE AREA (PWA / iPhone home indicator) ══════ */
+.main-content {
+  /* desktop: no extra padding */
+}
+
+@media (max-width: 639px) {
+  .main-content {
+    /* nav height ~64px + home indicator */
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 16px));
+  }
+}
+
+.mini-paddle {
+  display: inline-block;
+  width: 14px; height: 15px;
+  background-color: #e91e8c;
+  position: relative;
+  margin-right: 8px;
+  border-radius: 50% 50% 45% 45%;
+  animation: paddle-shake 3s infinite ease-in-out;
+}
+.mini-paddle::after {
+  content: "";
+  position: absolute;
+  top: 14px; left: 5px;
+  width: 4px; height: 9px;
+  background: #cbd5e1;
+  border-radius: 0 0 2px 2px;
+}
+@keyframes paddle-shake {
+  0%,100% { transform: rotate(-10deg); }
+  50%     { transform: rotate(10deg); }
+}
+.theme-arcade .mini-paddle { background-color: #ff6b00; border-radius: 0; }
