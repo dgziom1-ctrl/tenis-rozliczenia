@@ -67,7 +67,7 @@ function AppContent() {
 
   const [theme, persistTheme] = useTheme();
   const scrolled = useScrolled();
-  const { playSound } = useAudio(isMuted);
+  const { playSound } = useAudio(isMuted, theme);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoadTimeout(true), 8000);
