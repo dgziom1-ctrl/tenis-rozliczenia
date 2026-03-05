@@ -26,6 +26,10 @@ const SETTLE_STYLES = `
   .settle-flash {
     animation: settleFlash 0.8s ease-out forwards !important;
   }
+  @keyframes streakPulse {
+    0%,100% { box-shadow: 0 0 4px rgba(249,115,22,0.4); }
+    50%     { box-shadow: 0 0 10px rgba(239,68,68,0.8); }
+  }
   @keyframes confettiRain {
     0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
     100% { transform: translateY(100vh) rotate(720deg) scale(0.5); opacity: 0; }
@@ -47,8 +51,29 @@ function generateConfetti(count = 40) {
 }
 
 
+// ─── Streak badge ─────────────────────────────────────────────────────────────
+function StreakBadge({ streak }) {
+  if (streak < 2) return null;
+  const isFire = streak >= 10;
+  const isHot  = streak >= 5;
+  return (
+    <div
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-black text-xs"
+      style={{
+        border: isFire ? '1px solid #ef4444' : '1px solid #f97316',
+        background: isFire ? 'rgba(239,68,68,0.15)' : 'rgba(249,115,22,0.12)',
+        color: isFire ? '#fca5a5' : '#fb923c',
+        textShadow: isFire ? '0 0 8px rgba(239,68,68,0.8)' : isHot ? '0 0 6px rgba(249,115,22,0.6)' : 'none',
+        animation: isFire ? 'streakPulse 1.2s ease-in-out infinite' : 'none',
+      }}
+    >
+      🔥 <span>SERIA {streak}</span>
+    </div>
+  );
+}
+
 // ─── Player card ──────────────────────────────────────────────────────────────
-function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, openDetails, onToggleDetails, breakdown }) {
+function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, openDetails, onToggleDetails, breakdown, streak }) {
   const isOrganizer = player.name === ORGANIZER_NAME;
   const hasDebt     = player.currentDebt > SETTLED_THRESHOLD;
   const pct         = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
@@ -63,8 +88,9 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
     <div className={`cyber-box ${cardBorder} rounded-2xl overflow-hidden transition-all flex flex-col ${justSettled ? 'settle-flash' : ''}`}>
       {/* Header */}
       <div className={`${headerBg} p-4 border-b-2 ${headerBord}`}>
-        <h3 className={`font-black text-xl ${headerText} flex items-center gap-2`}>
+        <h3 className={`font-black text-xl ${headerText} flex items-center gap-2 flex-wrap`}>
           <span className="mini-paddle" /> {player.name}
+          {streak >= 2 && <StreakBadge streak={streak} />}
         </h3>
       </div>
 
@@ -275,6 +301,23 @@ export default function DashboardTab({ data, history, playSound }) {
     [history, data.paidUntilWeek],
   );
 
+  // Compute streak per player from history (history is ordered newest-first)
+  const streakByPlayer = useMemo(() => {
+    const map = {};
+    for (const player of (data.players || [])) {
+      let streak = 0;
+      for (const session of (history || [])) {
+        if (session.presentPlayers.includes(player.name)) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      map[player.name] = streak;
+    }
+    return map;
+  }, [data.players, history]);
+
   const sortedPlayers = useMemo(() => {
     if (!data.players) return [];
     const debtors   = data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) =>
@@ -363,6 +406,7 @@ export default function DashboardTab({ data, history, playSound }) {
                 openDetails={showBreakdown}
                 onToggleDetails={toggleDetails}
                 breakdown={breakdown}
+                streak={streakByPlayer[player.name] || 0}
               />
             );
           })}

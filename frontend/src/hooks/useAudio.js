@@ -245,9 +245,41 @@ export function useAudio(isMuted, theme = 'cyber') {
     }
   }, []);
 
+  // ─── HAPTIC FEEDBACK ───────────────────────────────────────────────────────
+  const vibrate = useCallback((type) => {
+    if (!navigator.vibrate) return;
+    switch (type) {
+      case SOUND_TYPES.COIN:
+        // Radosne podwójne uderzenie — "zapłacił!"
+        navigator.vibrate([60, 40, 120]);
+        break;
+      case SOUND_TYPES.SUCCESS:
+        // Trzy krótkie — "sukces"
+        navigator.vibrate([50, 30, 50, 30, 100]);
+        break;
+      case SOUND_TYPES.DELETE:
+        // Jedno długie — "ostrzeżenie"
+        navigator.vibrate([180]);
+        break;
+      case SOUND_TYPES.CLICK:
+        // Ledwo wyczuwalne — subtelny tap
+        navigator.vibrate([20]);
+        break;
+      case SOUND_TYPES.TAB:
+        // Bardzo krótki tick przy zmianie taba
+        navigator.vibrate([15]);
+        break;
+      default:
+        break;
+    }
+  }, []);
+
   // ─── DISPATCHER ────────────────────────────────────────────────────────────
   const playSound = useCallback(async (type) => {
     if (isMuted) return;
+
+    // Haptic feedback niezależny od wyciszenia dźwięku
+    vibrate(type);
 
     try {
       const ctx = await initAudioContext();
@@ -262,7 +294,7 @@ export function useAudio(isMuted, theme = 'cyber') {
     } catch (error) {
       console.error('Error playing sound:', error);
     }
-  }, [isMuted, theme, initAudioContext, playCyber, playArcade, playZen]);
+  }, [isMuted, theme, initAudioContext, playCyber, playArcade, playZen, vibrate]);
 
   return { playSound };
 }
