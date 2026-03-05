@@ -39,11 +39,11 @@ export default function Navigation({ activeTab, setActiveTab, theme }) {
           align-items: center;
           gap: 4px;
           padding: 6px;
-          background: ${a ? '#020500' : z ? '#2d3633' : 'rgb(17,24,39)'};
-          border: 2px solid ${a ? '#1a4d00' : z ? '#3a4a46' : 'rgb(22,78,99)'};
+          background: ${a ? '#020500' : z ? '#ede8df' : 'rgb(17,24,39)'};
+          border: 2px solid ${a ? '#1a4d00' : z ? '#c2b49a' : 'rgb(22,78,99)'};
           border-radius: ${a ? '0' : z ? '0 0 1.25rem 1.25rem' : '0 0 1rem 1rem'};
           margin-bottom: 2.5rem;
-          ${z ? 'box-shadow: 0 4px 20px rgba(0,0,0,0.3);' : ''}
+          ${z ? 'box-shadow: 0 4px 16px rgba(61,48,37,0.08);' : ''}
         }
 
         .desktop-tab {
@@ -67,9 +67,9 @@ export default function Navigation({ activeTab, setActiveTab, theme }) {
         }
 
         .desktop-tab.active {
-          background: ${a ? '#0a2200' : z ? 'rgba(94,184,154,0.1)' : 'rgb(8,47,73)'};
-          border-color: ${a ? '#39ff14' : z ? '#7dcfb6' : 'rgb(34,211,238)'};
-          color: ${a ? '#39ff14' : z ? '#7dcfb6' : 'rgb(103,232,249)'};
+          background: ${a ? '#0a2200' : z ? 'rgba(45,106,79,0.1)' : 'rgb(8,47,73)'};
+          border-color: ${a ? '#39ff14' : z ? '#2d6a4f' : 'rgb(34,211,238)'};
+          color: ${a ? '#39ff14' : z ? '#2d6a4f' : 'rgb(103,232,249)'};
           animation: ${a ? 'pixelPulse 1.8s ease-in-out infinite' : z ? 'zenPulse 2.5s ease-in-out infinite' : 'cyberPulse 2s ease-in-out infinite'};
         }
 
@@ -78,21 +78,21 @@ export default function Navigation({ activeTab, setActiveTab, theme }) {
           position: absolute;
           bottom: 0; left: 10%; right: 10%;
           height: 2px;
-          background: ${a ? '#39ff14' : z ? '#7dcfb6' : 'rgb(34,211,238)'};
-          box-shadow: 0 0 6px ${a ? 'rgba(57,255,20,0.8)' : z ? 'rgba(125,207,182,0.45)' : 'rgba(34,211,238,0.8)'};
+          background: ${a ? '#39ff14' : z ? '#2d6a4f' : 'rgb(34,211,238)'};
+          box-shadow: 0 0 6px ${a ? 'rgba(57,255,20,0.8)' : z ? 'rgba(45,106,79,0.5)' : 'rgba(34,211,238,0.8)'};
           border-radius: 2px 2px 0 0;
         }
 
         .desktop-tab:not(.active) {
           background: transparent;
           border-color: transparent;
-          color: ${a ? '#176604' : z ? '#4a6e65' : 'rgb(51,65,85)'};
+          color: ${a ? '#176604' : z ? '#9aaa9a' : 'rgb(51,65,85)'};
         }
 
         .desktop-tab:not(.active):hover {
-          background: ${a ? 'rgba(57,255,20,0.05)' : z ? 'rgba(94,184,154,0.07)' : 'rgba(6,182,212,0.07)'};
-          border-color: ${a ? '#1a4d00' : z ? 'rgba(94,184,154,0.3)' : 'rgba(22,78,99,0.5)'};
-          color: ${a ? '#28cc0e' : z ? '#7dcfb6' : 'rgb(103,232,249)'};
+          background: ${a ? 'rgba(57,255,20,0.05)' : z ? 'rgba(45,106,79,0.07)' : 'rgba(6,182,212,0.07)'};
+          border-color: ${a ? '#1a4d00' : z ? 'rgba(45,106,79,0.35)' : 'rgba(22,78,99,0.5)'};
+          color: ${a ? '#28cc0e' : z ? '#2d6a4f' : 'rgb(103,232,249)'};
         }
 
         /* ── Mobile bottom bar ── */
@@ -102,12 +102,12 @@ export default function Navigation({ activeTab, setActiveTab, theme }) {
           z-index: 40;
           display: flex;
           align-items: stretch;
-          border-top: 2px solid ${a ? '#1a4d00' : z ? 'rgba(94,184,154,0.25)' : 'rgb(22,78,99)'};
-          background: ${a ? 'rgba(1,3,0,0.97)' : z ? 'rgba(37,45,42,0.97)' : 'rgba(8,12,20,0.97)'};
+          border-top: 2px solid ${a ? '#1a4d00' : z ? 'rgba(45,106,79,0.3)' : 'rgb(22,78,99)'};
+          background: ${a ? 'rgba(1,3,0,0.97)' : z ? 'rgba(232,237,232,0.97)' : 'rgba(8,12,20,0.97)'};
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           padding-bottom: env(safe-area-inset-bottom, 0px);
-          ${z ? 'box-shadow: 0 -2px 16px rgba(0,0,0,0.35);' : ''}
+          ${z ? 'box-shadow: 0 -2px 12px rgba(61,48,37,0.1);' : ''}
         }
 
         .mobile-nav-btn {
@@ -138,21 +138,21 @@ export default function Navigation({ activeTab, setActiveTab, theme }) {
         }
 
         .mobile-nav-btn.active::before {
-          background: ${a ? '#39ff14' : z ? '#7dcfb6' : 'rgb(34,211,238)'};
-          box-shadow: 0 0 8px ${a ? 'rgba(57,255,20,0.9)' : z ? 'rgba(125,207,182,0.6)' : 'rgba(34,211,238,0.9)'};
+          background: ${a ? '#39ff14' : z ? '#2d6a4f' : 'rgb(34,211,238)'};
+          box-shadow: 0 0 8px ${a ? 'rgba(57,255,20,0.9)' : z ? 'rgba(45,106,79,0.6)' : 'rgba(34,211,238,0.9)'};
         }
 
         .mobile-nav-btn.active {
-          color: ${a ? '#39ff14' : z ? '#7dcfb6' : 'rgb(103,232,249)'};
-          background: ${a ? 'rgba(57,255,20,0.05)' : z ? 'rgba(94,184,154,0.08)' : 'rgba(6,182,212,0.07)'};
+          color: ${a ? '#39ff14' : z ? '#2d6a4f' : 'rgb(103,232,249)'};
+          background: ${a ? 'rgba(57,255,20,0.05)' : z ? 'rgba(45,106,79,0.08)' : 'rgba(6,182,212,0.07)'};
         }
 
         .mobile-nav-btn:not(.active) {
-          color: ${a ? '#176604' : z ? '#4a6e65' : 'rgb(51,65,85)'};
+          color: ${a ? '#176604' : z ? '#9aaa9a' : 'rgb(51,65,85)'};
         }
 
         .mobile-nav-btn:active {
-          background: ${a ? 'rgba(57,255,20,0.1)' : z ? 'rgba(94,184,154,0.12)' : 'rgba(6,182,212,0.1)'};
+          background: ${a ? 'rgba(57,255,20,0.1)' : z ? 'rgba(45,106,79,0.12)' : 'rgba(6,182,212,0.1)'};
         }
 
         .mobile-nav-label {

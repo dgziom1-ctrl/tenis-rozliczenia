@@ -106,7 +106,7 @@ body.theme-zen-bg::before {
 /* ══ ZEN NATURE BODY OVERRIDES ═══════════════════════════ */
 .theme-zen body,
 .theme-zen {
-  background-color: #f7f2e9;
+  background-color: #e8ede8;
   color: #3d3025;
   background-image: none;
   font-family: 'Lato', sans-serif;
@@ -302,15 +302,15 @@ body.theme-zen-bg::before {
 
 /* ── Core boxes & inputs ── */
 .theme-zen .cyber-box {
-  background-color: #ede8df !important;
-  border-color: #c2b49a !important;
+  background-color: #dde5dd !important;
+  border-color: #b8ccb8 !important;
   border-radius: 1rem !important;
   box-shadow: 0 2px 12px rgba(61,48,37,0.08), 0 1px 3px rgba(61,48,37,0.06) !important;
 }
 
 .theme-zen .cyber-input {
-  background-color: #f7f2e9 !important;
-  border-color: #c2b49a !important;
+  background-color: #e8ede8 !important;
+  border-color: #b8ccb8 !important;
   color: #3d3025 !important;
   border-radius: 0.6rem !important;
 }
@@ -328,7 +328,7 @@ body.theme-zen-bg::before {
 }
 .theme-zen .cyber-button-blue:hover {
   background-color: #2d6a4f !important;
-  color: #f7f2e9 !important;
+  color: #e8ede8 !important;
   box-shadow: 0 4px 16px rgba(45,106,79,0.3) !important;
 }
 
@@ -361,7 +361,7 @@ body.theme-zen-bg::before {
 .theme-zen [class*="border-cyan-6"],
 .theme-zen [class*="border-cyan-7"] { border-color: #7daa87 !important; }
 .theme-zen [class*="border-cyan-8"],
-.theme-zen [class*="border-cyan-9"] { border-color: #c2b49a !important; }
+.theme-zen [class*="border-cyan-9"] { border-color: #b8ccb8 !important; }
 
 /* ── Borders: Pink/Magenta/Rose → Wood Brown ── */
 .theme-zen [class*="border-pink-"],
@@ -370,11 +370,11 @@ body.theme-zen-bg::before {
 .theme-zen [class*="border-rose-7"],
 .theme-zen [class*="border-rose-8"] { border-color: #8b5e3c !important; }
 
-/* ── Backgrounds: Dark → Light Cream ── */
+/* ── Backgrounds: dopasowane do tła ── */
 .theme-zen [class*="bg-gray-9"],
-.theme-zen [class*="bg-gray-8"] { background-color: #ede8df !important; }
-.theme-zen [class*="bg-gray-7"] { background-color: #e4ddd2 !important; }
-.theme-zen [class*="bg-black"] { background-color: #f7f2e9 !important; }
+.theme-zen [class*="bg-gray-8"] { background-color: #dde5dd !important; }
+.theme-zen [class*="bg-gray-7"] { background-color: #d4dfd4 !important; }
+.theme-zen [class*="bg-black"] { background-color: #e8ede8 !important; }
 .theme-zen [class*="bg-cyan-9"],
 .theme-zen [class*="bg-cyan-8"] { background-color: rgba(45,106,79,0.10) !important; }
 .theme-zen [class*="bg-magenta-9"],
@@ -411,11 +411,11 @@ body.theme-zen-bg::before {
 
 /* ── Mini paddle ── */
 .theme-zen .mini-paddle { background-color: #2d6a4f !important; border-radius: 50% 50% 45% 45% !important; }
-.theme-zen .mini-paddle::after { background: #c2b49a !important; }
+.theme-zen .mini-paddle::after { background: #b8ccb8 !important; }
 
 /* ── Select options ── */
 .theme-zen select option {
-  background-color: #f7f2e9;
+  background-color: #e8ede8;
   color: #3d3025;
 }
 
