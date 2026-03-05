@@ -16,6 +16,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
   const arcadeTickTimer = useRef(null);
 
   const a          = theme === 'arcade';
+  const z          = theme === 'zen';
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
 
   // Compact header on scroll passed as prop from App
@@ -58,6 +59,8 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     setChaosMode(true);
     const pool = a
       ? ['👾','👾','🎮','💥','⬛','🟩','🏓','★']
+      : z
+      ? ['🌿','🍃','🌳','🌲','🍀','✨','🌸','🌾','🍂','🪨']
       : ['🏓','🏓','⚡','🎱','💥','🌀','🎉','✨'];
     setConfetti(Array.from({ length: 30 }, (_, i) => ({
       id: i,
@@ -107,6 +110,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     sepBorder:     '1px solid #0d2900',
     sepLine:       'linear-gradient(90deg,transparent,rgba(57,255,20,0.4) 50%,transparent)',
     glowBlobs:     false,
+    glowZen:       false,
     statusOnClr:   '#39ff14', statusOnShadow: '0 0 8px rgba(57,255,20,0.8)',
     statusOffClr:  '#ff3300', statusOffShadow: '0 0 8px rgba(255,51,0,0.8)',
     statusFont:    "'Press Start 2P',monospace",
@@ -114,6 +118,49 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     climateClr:    null, // see render
     climateFontSz: '0.44rem',
     climateFont:   "'Press Start 2P',monospace",
+  } : z ? {
+    // ── ZEN NATURE / DRUIDISM ─────────────────────────
+    headerBg:      'linear-gradient(to bottom, #f0ebe0, #ede8df)',
+    headerBorder:  '2px solid #c2b49a',
+    topBarBg:      'rgba(240,235,224,0.85)',
+    topBarBorder:  '1px solid rgba(165,143,112,0.35)',
+    blikBorder:    '1px solid rgba(45,106,79,0.45)',
+    blikLabelClr:  '#8b5e3c',
+    blikNumClr:    '#2d6a4f',
+    blikLabelBg:   'rgba(139,94,60,0.09)',
+    iconClr:       '#2d6a4f',
+    copyClr:       'rgba(45,106,79,0.45)',
+    muteOnBorder:  '2px solid rgba(180,70,50,0.5)', muteOnClr: '#b44632', muteOnBg: 'rgba(180,70,50,0.08)',
+    muteOffBorder: '2px solid rgba(45,106,79,0.5)', muteOffClr: '#2d6a4f', muteOffBg: 'transparent',
+    titleGrad:     'linear-gradient(90deg, #1a4a35, #2d6a4f, #4a8c6a)',
+    titleFont:     "'Cinzel Decorative', serif",
+    titleAnim:     'none',
+    ppGrad:        'linear-gradient(90deg, #8b5e3c, #4a8c6a, #2d6a4f)',
+    ppChaos:       { color: '#2d6a4f', fontFamily: "'Cinzel', serif", animation: 'arcadeShake 0.3s infinite' },
+    hintStyle:     { border: '1px solid #c2b49a', background: 'rgba(240,235,224,0.9)', color: '#5c7a60', fontFamily: "'Cinzel', serif", fontSize: '0.55rem', borderRadius: '0.5rem' },
+    chaosStyle:    { border: '2px solid #8b5e3c', background: 'rgba(240,235,224,0.97)', color: '#8b5e3c', boxShadow: '0 6px 24px rgba(139,94,60,0.25)', fontFamily: "'Cinzel', serif", borderRadius: '1rem', fontSize: '0.62rem' },
+    chaosText:     '✦ NATURA CRESCIT ✦',
+    loaderBg:      '#ddd5c8',
+    loaderFill:    'linear-gradient(90deg, #2d6a4f, #7daa87, #2d6a4f)',
+    loaderChaos:   'linear-gradient(90deg, #8b5e3c, #c49a6c, #8b5e3c)',
+    loaderShadow:  'rgba(45,106,79,0.2)',
+    paddleL:       { bg: 'linear-gradient(135deg,#8b5e3c,#6b4423)', shadow: '0 4px 14px rgba(139,94,60,0.4)', inner: '#c49a6c' },
+    paddleR:       { bg: 'linear-gradient(135deg,#2d6a4f,#1a4a35)', shadow: '0 4px 14px rgba(45,106,79,0.4)', inner: '#7daa87' },
+    handleBg:      'linear-gradient(to bottom,#8b5e3c,#6b4423)',
+    ballClr:       '#2d6a4f', ballShadow: 'rgba(45,106,79,0.4)',
+    paddleClr:     '#8b5e3c', paddleShadow: 'rgba(139,94,60,0.4)',
+    sepBg:         'linear-gradient(to bottom,#ede8df,#f7f2e9)',
+    sepBorder:     '1px solid rgba(165,143,112,0.3)',
+    sepLine:       'linear-gradient(90deg,transparent,rgba(45,106,79,0.25) 50%,transparent)',
+    glowBlobs:     false,
+    glowZen:       true,
+    statusOnClr:   '#2d6a4f', statusOnShadow: 'none',
+    statusOffClr:  '#b44632', statusOffShadow: 'none',
+    statusFont:    "'Lato', sans-serif",
+    statusFontSz:  '0.72rem',
+    climateClr:    null,
+    climateFontSz: '0.72rem',
+    climateFont:   "'Cinzel', serif",
   } : {
     headerBg:      'linear-gradient(to bottom, black, #030712, #111827)',
     headerBorder:  'none',
@@ -148,6 +195,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     sepBorder:     '1px solid rgba(22,78,99,0.3)',
     sepLine:       'linear-gradient(90deg,transparent,rgba(6,182,212,0.4) 50%,transparent)',
     glowBlobs:     true,
+    glowZen:       false,
     statusOnClr:   '#4ade80', statusOnShadow: '0 0 8px rgba(74,222,128,0.6)',
     statusOffClr:  '#f87171', statusOffShadow: '0 0 8px rgba(248,113,113,0.6)',
     statusFont:    'monospace',
@@ -204,7 +252,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
         position: 'relative', overflow: 'hidden',
         background: C.headerBg,
         border: C.headerBorder,
-        borderRadius: a ? 0 : '0.75rem 0.75rem 0 0',
+        borderRadius: a ? 0 : z ? '1.25rem 1.25rem 0 0' : '0.75rem 0.75rem 0 0',
       }}>
 
         {/* Arcade CRT effects */}
@@ -222,7 +270,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
         )}
 
         {/* Cyber glow blobs */}
-        {C.glowBlobs && (
+        {C.glowBlobs && !C.glowZen && (
           <>
             <div className="absolute top-0 left-1/4 w-32 h-32 rounded-full blur-3xl pointer-events-none"
               style={{ background: 'rgba(6,182,212,0.08)' }} />
@@ -230,6 +278,18 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
               style={{ background: 'rgba(236,72,153,0.08)' }} />
             <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
               style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,255,0.1) 2px,rgba(0,255,255,0.1) 4px)' }} />
+          </>
+        )}
+
+        {/* Zen nature light blobs */}
+        {C.glowZen && (
+          <>
+            <div className="absolute top-0 left-0 w-48 h-32 pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse at 30% 40%, rgba(125,170,135,0.18) 0%, transparent 70%)', borderRadius: '0 0 100% 0' }} />
+            <div className="absolute top-0 right-0 w-40 h-28 pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse at 70% 30%, rgba(139,94,60,0.12) 0%, transparent 65%)', borderRadius: '0 0 0 100%' }} />
+            <div className="absolute bottom-0 left-1/3 w-56 h-20 pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse at 50% 80%, rgba(45,106,79,0.09) 0%, transparent 70%)' }} />
           </>
         )}
 
@@ -245,17 +305,17 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           {/* BLIK */}
           <button onClick={handleCopy}
             className="group flex items-center gap-2 px-3 py-2 transition-all duration-200"
-            style={{ border: C.blikBorder, background: a ? 'transparent' : 'rgba(0,0,0,0.6)',
-              borderRadius: a ? 0 : '0.5rem' }}>
+            style={{ border: C.blikBorder, background: a ? 'transparent' : z ? 'rgba(237,232,223,0.7)' : 'rgba(0,0,0,0.6)',
+              borderRadius: a ? 0 : z ? '0.75rem' : '0.5rem' }}>
             <Smartphone size={18} style={{ color: C.iconClr }} />
             <span style={{ fontWeight: 900, color: C.blikLabelClr,
-              fontSize: a ? '0.5rem' : '0.75rem',
-              fontFamily: a ? "'Press Start 2P',monospace" : 'inherit',
+              fontSize: a ? '0.5rem' : z ? '0.72rem' : '0.75rem',
+              fontFamily: a ? "'Press Start 2P',monospace" : z ? "'Cinzel', serif" : 'inherit',
               letterSpacing: a ? '0.08em' : '0.2em',
               padding: '2px 6px', background: C.blikLabelBg,
-              borderRadius: a ? 0 : '0.25rem' }}>BLIK</span>
+              borderRadius: a ? 0 : z ? '0.4rem' : '0.25rem' }}>BLIK</span>
             <span style={{ color: C.blikNumClr,
-              fontFamily: a ? "'Press Start 2P',monospace" : 'monospace',
+              fontFamily: a ? "'Press Start 2P',monospace" : z ? "'Lato', sans-serif" : 'monospace',
               fontSize: a ? '0.52rem' : '0.875rem',
               fontWeight: 'bold', letterSpacing: '0.05em' }}>{blikNumber}</span>
             <div style={{ width: 1, height: 16, background: C.blikBorder, margin: '0 2px' }} />
@@ -272,7 +332,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
                 border: isMuted ? C.muteOnBorder : C.muteOffBorder,
                 color:  isMuted ? C.muteOnClr  : C.muteOffClr,
                 background: isMuted ? C.muteOnBg : C.muteOffBg,
-                borderRadius: a ? 0 : '0.5rem',
+                borderRadius: a ? 0 : z ? '0.6rem' : '0.5rem',
               }}>
               {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
             </button>
@@ -299,11 +359,11 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
 
             {/* CENTRUM DOWODZENIA */}
             <span className="block font-black uppercase" style={{
-              fontSize: a ? 'clamp(1.1rem, 4vw, 2rem)' : 'clamp(1.6rem, 5vw, 2.8rem)',
-              letterSpacing: a ? '0.05em' : '0.15em',
-              fontStyle: a ? 'normal' : 'italic',
+              fontSize: a ? 'clamp(1.1rem, 4vw, 2rem)' : z ? 'clamp(1.2rem, 3.5vw, 2.2rem)' : 'clamp(1.6rem, 5vw, 2.8rem)',
+              letterSpacing: a ? '0.05em' : z ? '0.12em' : '0.15em',
+              fontStyle: a ? 'normal' : z ? 'normal' : 'italic',
               fontFamily: C.titleFont,
-              lineHeight: a ? 1.6 : 1.2,
+              lineHeight: a ? 1.6 : z ? 1.3 : 1.2,
               backgroundImage: C.titleGrad,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
               animation: C.titleAnim,
@@ -334,14 +394,14 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
               <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <button
                   onClick={handlePingPongClick}
-                  aria-label={a ? 'Zmień motyw na Cyber Ponk' : 'Zmień motyw na Retro Arcade'}
+                  aria-label={a ? 'Zmień motyw na Cyber Ponk' : z ? 'Zmień motyw na Cyber Ponk' : 'Zmień motyw na Retro Arcade'}
                   style={{ background: 'transparent', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
                 >
                   <span className="block font-black whitespace-nowrap" style={{
-                    fontSize: a ? 'clamp(1.5rem, 5vw, 3rem)' : 'clamp(2rem, 7vw, 4rem)',
-                    letterSpacing: a ? '0.05em' : '0.1em',
-                    fontFamily: a ? "'Press Start 2P',monospace" : 'inherit',
-                    lineHeight: a ? 1.5 : 1.2,
+                    fontSize: a ? 'clamp(1.5rem, 5vw, 3rem)' : z ? 'clamp(1.6rem, 5.5vw, 3.2rem)' : 'clamp(2rem, 7vw, 4rem)',
+                    letterSpacing: a ? '0.05em' : z ? '0.08em' : '0.1em',
+                    fontFamily: a ? "'Press Start 2P',monospace" : z ? "'Cinzel Decorative', serif" : 'inherit',
+                    lineHeight: a ? 1.5 : z ? 1.3 : 1.2,
                     transition: 'all 0.3s',
                     ...(chaosMode ? C.ppChaos : {
                       backgroundImage: C.ppGrad,
@@ -356,21 +416,21 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
                 {!chaosMode && (
                   <div style={{
                     marginTop: '6px',
-                    fontSize: a ? '0.38rem' : '0.6rem',
-                    fontFamily: a ? "'Press Start 2P',monospace" : 'inherit',
-                    color: a ? '#1a4d00' : 'rgba(22,78,99,0.7)',
+                    fontSize: a ? '0.38rem' : z ? '0.58rem' : '0.6rem',
+                    fontFamily: a ? "'Press Start 2P',monospace" : z ? "'Cinzel', serif" : 'inherit',
+                    color: a ? '#1a4d00' : z ? 'rgba(92,122,96,0.6)' : 'rgba(22,78,99,0.7)',
                     letterSpacing: '0.12em',
                     userSelect: 'none',
                     pointerEvents: 'none',
                   }}>
-                    {a ? '[ TAP → CYBER ]' : '[ tap → arcade ]'}
+                    {a ? '[ TAP → ZEN ]' : z ? '[ tap → cyber ]' : '[ tap → arcade ]'}
                   </div>
                 )}
 
                 {chaosMode && (
                   <div style={{ position: 'absolute', bottom: '-32px', left: '50%', transform: 'translateX(-50%)',
                     whiteSpace: 'nowrap', fontWeight: 900, padding: '3px 12px',
-                    borderRadius: a ? 0 : '9999px', ...C.chaosStyle }}>{C.chaosText}</div>
+                    borderRadius: a ? 0 : z ? '1rem' : '9999px', ...C.chaosStyle }}>{C.chaosText}</div>
                 )}
               </div>
 
@@ -420,6 +480,19 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
               </>
             )}
 
+            {/* IN NATURA — zen only */}
+            {z && (
+              <>
+                <span style={{
+                  fontFamily: C.climateFont, fontSize: C.climateFontSz,
+                  color: '#5c7a60',
+                  letterSpacing: '0.15em',
+                  fontStyle: 'italic',
+                }}>✦ in natura veritas ✦</span>
+                <span style={{ color: 'rgba(92,122,96,0.4)', fontSize: '0.8rem' }}>│</span>
+              </>
+            )}
+
             {/* Status ONLINE / OFFLINE */}
             <span style={{
               fontFamily: C.statusFont, fontSize: C.statusFontSz,
@@ -455,8 +528,8 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
             padding-top: calc(8px + env(safe-area-inset-top, 0px));
             padding-bottom: 8px;
             transition: transform 0.25s ease, opacity 0.25s ease;
-            border-bottom: 2px solid ${a ? '#1a4d00' : 'rgba(22,78,99,0.8)'};
-            background: ${a ? 'rgba(1,3,0,0.96)' : 'rgba(8,12,20,0.96)'};
+            border-bottom: 2px solid ${a ? '#1a4d00' : z ? 'rgba(45,106,79,0.4)' : 'rgba(22,78,99,0.8)'};
+            background: ${a ? 'rgba(1,3,0,0.96)' : z ? 'rgba(247,242,233,0.96)' : 'rgba(8,12,20,0.96)'};
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
           }
@@ -482,21 +555,22 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
             fontWeight: 900,
             color: C.blikLabelClr,
             fontSize: a ? '0.55rem' : '0.6rem',
-            fontFamily: a ? "'Press Start 2P', monospace" : 'inherit',
+            fontFamily: a ? "'Press Start 2P', monospace" : z ? "'Cinzel', serif" : 'inherit',
             letterSpacing: '0.12em',
             padding: '2px 5px',
             background: C.blikLabelBg,
-            border: `1px solid ${a ? 'rgba(255,107,0,0.4)' : 'rgba(250,204,21,0.3)'}`,
-            borderRadius: a ? 0 : '3px',
+            border: `1px solid ${a ? 'rgba(255,107,0,0.4)' : z ? 'rgba(139,94,60,0.3)' : 'rgba(250,204,21,0.3)'}`,
+            borderRadius: a ? 0 : z ? '0.3rem' : '3px',
           }}>BLIK</span>
           <span style={{
             color: C.blikNumClr,
-            fontFamily: a ? "'Press Start 2P', monospace" : 'monospace',
+            fontFamily: a ? "'Press Start 2P', monospace" : z ? "'Lato', sans-serif" : 'monospace',
             fontSize: a ? '0.7rem' : '0.9rem',
             fontWeight: 'bold',
             letterSpacing: '0.06em',
             textShadow: a
               ? '0 0 10px rgba(57,255,20,0.8), 0 0 20px rgba(57,255,20,0.4)'
+              : z ? 'none'
               : '0 0 10px rgba(103,232,249,0.7), 0 0 20px rgba(103,232,249,0.3)',
           }}>{blikNumber}</span>
           {copied
@@ -518,7 +592,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
               border: isMuted ? C.muteOnBorder : C.muteOffBorder,
               color:  isMuted ? C.muteOnClr   : C.muteOffClr,
               background: 'transparent',
-              borderRadius: a ? 0 : '0.4rem',
+              borderRadius: a ? 0 : z ? '0.5rem' : '0.4rem',
               padding: '4px 6px',
               cursor: 'pointer',
               display: 'flex', alignItems: 'center',

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Press+Start+2P&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&family=Lato:wght@300;400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -26,6 +27,10 @@ body {
   outline-color: #39ff14;
 }
 
+.theme-zen *:focus-visible {
+  outline-color: #2d6a4f;
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -41,6 +46,14 @@ textarea:focus-visible {
 .theme-arcade select:focus-visible,
 .theme-arcade textarea:focus-visible {
   outline-color: #39ff14;
+}
+
+.theme-zen button:focus-visible,
+.theme-zen a:focus-visible,
+.theme-zen input:focus-visible,
+.theme-zen select:focus-visible,
+.theme-zen textarea:focus-visible {
+  outline-color: #2d6a4f;
 }
 
 body::before {
@@ -63,6 +76,15 @@ body.theme-arcade-bg::before {
     linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px);
 }
 
+/* Zen Nature — organic, no grid */
+body.theme-zen-bg::before {
+  background-image:
+    radial-gradient(ellipse at 20% 30%, rgba(45,106,79,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 70%, rgba(139,94,60,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse at 60% 20%, rgba(125,170,135,0.04) 0%, transparent 45%);
+  background-size: 100% 100%;
+}
+
 /* ══ ARCADE BODY OVERRIDES ═══════════════════════════════ */
 .theme-arcade body,
 .theme-arcade {
@@ -79,6 +101,22 @@ body.theme-arcade-bg::before {
   background-image:
     linear-gradient(rgba(57,255,20,0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px);
+}
+
+/* ══ ZEN NATURE BODY OVERRIDES ═══════════════════════════ */
+.theme-zen body,
+.theme-zen {
+  background-color: #f7f2e9;
+  color: #3d3025;
+  background-image: none;
+  font-family: 'Lato', sans-serif;
+}
+
+.theme-zen body::before {
+  background-image:
+    radial-gradient(ellipse at 20% 30%, rgba(45,106,79,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 70%, rgba(139,94,60,0.05) 0%, transparent 55%);
+  background-size: 100% 100%;
 }
 
 /* ══ PONG ANIMATION ══════════════════════════════════════ */
@@ -255,6 +293,136 @@ body.theme-arcade-bg::before {
 .theme-arcade select option {
   background-color: #010300;
   color: #39ff14;
+}
+
+/* ══ ZEN NATURE COLOR OVERRIDES FOR JSX COMPONENTS ═════
+   Light theme: cream bg, forest green + wood brown accents.
+   Serif headings (Cinzel), sans-serif data (Lato).
+══════════════════════════════════════════════════════ */
+
+/* ── Core boxes & inputs ── */
+.theme-zen .cyber-box {
+  background-color: #ede8df !important;
+  border-color: #c2b49a !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 2px 12px rgba(61,48,37,0.08), 0 1px 3px rgba(61,48,37,0.06) !important;
+}
+
+.theme-zen .cyber-input {
+  background-color: #f7f2e9 !important;
+  border-color: #c2b49a !important;
+  color: #3d3025 !important;
+  border-radius: 0.6rem !important;
+}
+.theme-zen .cyber-input:focus {
+  border-color: #2d6a4f !important;
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.15) !important;
+}
+
+.theme-zen .cyber-button-blue {
+  background-color: rgba(45,106,79,0.08) !important;
+  border-color: #2d6a4f !important;
+  color: #2d6a4f !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 2px 8px rgba(45,106,79,0.15) !important;
+}
+.theme-zen .cyber-button-blue:hover {
+  background-color: #2d6a4f !important;
+  color: #f7f2e9 !important;
+  box-shadow: 0 4px 16px rgba(45,106,79,0.3) !important;
+}
+
+/* ── Text: Cyan → Forest Green ── */
+.theme-zen [class*="text-cyan-1"],
+.theme-zen [class*="text-cyan-2"] { color: #3d3025 !important; }
+.theme-zen [class*="text-cyan-3"],
+.theme-zen [class*="text-cyan-4"] { color: #2d6a4f !important; }
+.theme-zen [class*="text-cyan-5"] { color: #4a8c6a !important; }
+.theme-zen [class*="text-cyan-6"],
+.theme-zen [class*="text-cyan-7"] { color: #7daa87 !important; }
+.theme-zen [class*="text-cyan-8"],
+.theme-zen [class*="text-cyan-9"] { color: #b0c8b4 !important; }
+
+/* ── Text: Pink/Magenta/Rose → Warm Wood Brown ── */
+.theme-zen [class*="text-pink-"],
+.theme-zen [class*="text-magenta-"],
+.theme-zen [class*="text-rose-4"],
+.theme-zen [class*="text-rose-5"] { color: #8b5e3c !important; }
+
+/* ── Text: Slate/Gray → Warm Dark Tones ── */
+.theme-zen [class*="text-slate-3"],
+.theme-zen [class*="text-slate-4"],
+.theme-zen [class*="text-gray-3"],
+.theme-zen [class*="text-gray-4"] { color: #5c4f3d !important; }
+
+/* ── Borders: Cyan → Forest Green scale ── */
+.theme-zen [class*="border-cyan-4"],
+.theme-zen [class*="border-cyan-5"] { border-color: #2d6a4f !important; }
+.theme-zen [class*="border-cyan-6"],
+.theme-zen [class*="border-cyan-7"] { border-color: #7daa87 !important; }
+.theme-zen [class*="border-cyan-8"],
+.theme-zen [class*="border-cyan-9"] { border-color: #c2b49a !important; }
+
+/* ── Borders: Pink/Magenta/Rose → Wood Brown ── */
+.theme-zen [class*="border-pink-"],
+.theme-zen [class*="border-magenta-"],
+.theme-zen [class*="border-rose-6"],
+.theme-zen [class*="border-rose-7"],
+.theme-zen [class*="border-rose-8"] { border-color: #8b5e3c !important; }
+
+/* ── Backgrounds: Dark → Light Cream ── */
+.theme-zen [class*="bg-gray-9"],
+.theme-zen [class*="bg-gray-8"] { background-color: #ede8df !important; }
+.theme-zen [class*="bg-gray-7"] { background-color: #e4ddd2 !important; }
+.theme-zen [class*="bg-black"] { background-color: #f7f2e9 !important; }
+.theme-zen [class*="bg-cyan-9"],
+.theme-zen [class*="bg-cyan-8"] { background-color: rgba(45,106,79,0.10) !important; }
+.theme-zen [class*="bg-magenta-9"],
+.theme-zen [class*="bg-magenta-8"] { background-color: rgba(139,94,60,0.10) !important; }
+.theme-zen [class*="bg-magenta-7"],
+.theme-zen [class*="bg-magenta-6"] { background-color: rgba(139,94,60,0.14) !important; }
+
+/* ── Neon effects → soft organic shadows ── */
+.theme-zen .text-neon-blue  { color: #2d6a4f !important; text-shadow: none !important; }
+.theme-zen .text-neon-pink  { color: #8b5e3c !important; text-shadow: none !important; }
+.theme-zen .neon-amount {
+  color: #2d6a4f !important;
+  text-shadow: none !important;
+  font-family: 'Lato', sans-serif !important;
+  font-weight: 900 !important;
+}
+.theme-zen .glow-magenta,
+.theme-zen .glow-magenta-sm,
+.theme-zen .glow-magenta-lg {
+  text-shadow: none !important;
+  color: #8b5e3c !important;
+}
+.theme-zen .shadow-magenta-glow {
+  box-shadow: 0 4px 20px rgba(139,94,60,0.18) !important;
+}
+.theme-zen .hover\:shadow-magenta-glow:hover {
+  box-shadow: 0 6px 24px rgba(45,106,79,0.25) !important;
+}
+
+/* ── Rounded corners: preserved & enhanced in zen ── */
+.theme-zen [class*="rounded-xl"] { border-radius: 1.25rem !important; }
+.theme-zen [class*="rounded-2xl"] { border-radius: 1.5rem !important; }
+.theme-zen [class*="rounded-full"] { border-radius: 9999px !important; }
+
+/* ── Mini paddle ── */
+.theme-zen .mini-paddle { background-color: #2d6a4f !important; border-radius: 50% 50% 45% 45% !important; }
+.theme-zen .mini-paddle::after { background: #c2b49a !important; }
+
+/* ── Select options ── */
+.theme-zen select option {
+  background-color: #f7f2e9;
+  color: #3d3025;
+}
+
+/* ── Shadow glow swap → soft drop shadows ── */
+.theme-zen [class*="shadow-"][class*="00f3ff"],
+.theme-zen [class*="shadow-"][class*="00d4ff"] {
+  box-shadow: 0 4px 16px rgba(45,106,79,0.2) !important;
 }
 
 /* ══ MOBILE SAFE AREA (PWA / iPhone home indicator) ══════ */

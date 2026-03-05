@@ -32,12 +32,14 @@ function useTheme() {
     setTheme(next);
     try { localStorage.setItem('ponk-theme', next); } catch {}
     document.body.classList.toggle('theme-arcade-bg', next === 'arcade');
+    document.body.classList.toggle('theme-zen-bg', next === 'zen');
   }, []);
 
   // Sync on initial load
   useEffect(() => {
     const stored = (() => { try { return localStorage.getItem('ponk-theme'); } catch { return null; } })();
     document.body.classList.toggle('theme-arcade-bg', stored === 'arcade');
+    document.body.classList.toggle('theme-zen-bg', stored === 'zen');
   }, []);
 
   return [theme, persistTheme];
@@ -85,7 +87,7 @@ function AppContent() {
   }, [playSound]);
 
   const toggleTheme = useCallback(() => {
-    const next = theme === 'cyber' ? 'arcade' : 'cyber';
+    const next = theme === 'cyber' ? 'arcade' : theme === 'arcade' ? 'zen' : 'cyber';
     persistTheme(next);
     playSound(SOUND_TYPES.COIN);
   }, [theme, persistTheme, playSound]);
@@ -114,7 +116,7 @@ function AppContent() {
 
   return (
     <div
-      className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : ''}`}
+      className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : theme === 'zen' ? 'theme-zen' : ''}`}
       style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
     >
       <div className="max-w-7xl mx-auto relative">
