@@ -58,29 +58,29 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     setHint('');
     setChaosMode(true);
 
-    // Generuj artefakty RGB — poziome pasy glitcha
-    const artifacts = Array.from({ length: 22 }, (_, i) => ({
-      id: i,
-      top:     Math.random() * 100,           // % ekranu
-      height:  2 + Math.random() * 18,        // px
-      delay:   Math.random() * 2.5,
-      dur:     0.08 + Math.random() * 0.18,
-      color:   ['rgba(255,0,80,0.7)','rgba(0,255,180,0.6)','rgba(80,0,255,0.65)','rgba(255,220,0,0.5)','rgba(255,255,255,0.4)'][Math.floor(Math.random()*5)],
-      offset:  (Math.random() - 0.5) * 40,    // px przesunięcie X (efekt rozszczepienia)
-      width:   40 + Math.random() * 60,        // % szerokości
-      left:    Math.random() * 60,             // % od lewej
-    }));
-    setConfetti(artifacts);
+    // Konfetti dopasowane do motywu
+    const pool = a
+      ? ['👾','🎮','💥','🟩','🏓','⭐','🔥','💚']
+      : z
+      ? ['🌿','🍃','🌳','🍀','✨','🌸','🌾','🍂']
+      : ['🏓','⚡','🎱','🌀','🎉','✨','🏆','💫'];
 
-    // Dodaj klasę glitch na body — shake + invert na całym UI
-    document.body.classList.add('glitch-meltdown');
+    setConfetti(Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      emoji: pool[Math.floor(Math.random() * pool.length)],
+      x:     Math.random() * 100,
+      delay: Math.random() * 1.2,
+      dur:   1.8 + Math.random() * 1.5,
+      size:  18 + Math.random() * 24,
+      rotate: Math.random() * 360,
+      drift: (Math.random() - 0.5) * 120,
+    })));
 
     clearTimeout(chaosTimer.current);
     chaosTimer.current = setTimeout(() => {
       setChaosMode(false);
       setConfetti([]);
-      document.body.classList.remove('glitch-meltdown');
-    }, 5000);
+    }, 4000);
   };
 
   // ── Colours & tokens ──────────────────────────────────
@@ -101,10 +101,10 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     titleFont:     "'Press Start 2P', monospace",
     titleAnim:     'arcadeGlow 3s ease-in-out infinite',
     ppGrad:        'linear-gradient(90deg, #ff6b00, #ffaa00, #39ff14)',
-    ppChaos:       { color: '#ff0050', animation: 'glitchTitle 0.15s infinite' },
+    ppChaos:       { color: '#39ff14', textShadow: '0 0 20px #39ff14', animation: 'headerBounce 0.4s ease-in-out 3' },
     hintStyle:     { border: '2px solid #176604', background: '#010300', color: '#39ff14', fontFamily: "'Press Start 2P',monospace", fontSize: '0.42rem' },
-    chaosStyle:    { border: '2px solid #ff0050', background: 'rgba(0,0,0,0.95)', color: '#ff0050', textShadow: '2px 0 #00ffb4, -2px 0 #ff0050', fontFamily: "'Press Start 2P',monospace", fontSize: '0.42rem', animation: 'glitchTitle 0.2s infinite' },
-    chaosText:     '!GL1TCH!',
+    chaosStyle:    { border: '2px solid #39ff14', background: 'rgba(0,20,0,0.95)', color: '#39ff14', textShadow: '0 0 10px #39ff14', fontFamily: "'Press Start 2P',monospace", fontSize: '0.42rem' },
+    chaosText:     '✦ COMBO x5! ✦',
     loaderBg:      '#0a2200',
     loaderFill:    'linear-gradient(90deg, #39ff14, #b8ffb0, #39ff14)',
     loaderChaos:   'linear-gradient(90deg, #ff6b00, #ffaa00, #ff6b00)',
@@ -144,10 +144,10 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     titleFont:     "'Cinzel Decorative', serif",
     titleAnim:     'none',
     ppGrad:        'linear-gradient(90deg, #8b5e3c, #4a8c6a, #2d6a4f)',
-    ppChaos:       { color: '#ff0050', animation: 'glitchTitle 0.15s infinite' },
+    ppChaos:       { color: '#2d6a4f', fontFamily: "'Cinzel', serif", animation: 'headerBounce 0.4s ease-in-out 3' },
     hintStyle:     { border: '1px solid #c2b49a', background: 'rgba(240,235,224,0.9)', color: '#5c7a60', fontFamily: "'Cinzel', serif", fontSize: '0.55rem', borderRadius: '0.5rem' },
-    chaosStyle:    { border: '2px solid #ff0050', background: 'rgba(240,235,224,0.97)', color: '#ff0050', textShadow: '2px 0 #00d4a0, -2px 0 #ff0050', fontFamily: "'Cinzel', serif", borderRadius: '1rem', fontSize: '0.62rem', animation: 'glitchTitle 0.2s infinite' },
-    chaosText:     '✦ GL1TCH ✦',
+    chaosStyle:    { border: '2px solid #2d6a4f', background: 'rgba(240,235,224,0.97)', color: '#2d6a4f', boxShadow: '0 6px 24px rgba(45,106,79,0.2)', fontFamily: "'Cinzel', serif", borderRadius: '1rem', fontSize: '0.62rem' },
+    chaosText:     '✦ Bonus x5 ✦',
     loaderBg:      '#ddd5c8',
     loaderFill:    'linear-gradient(90deg, #2d6a4f, #7daa87, #2d6a4f)',
     loaderChaos:   'linear-gradient(90deg, #8b5e3c, #c49a6c, #8b5e3c)',
@@ -186,10 +186,10 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     titleFont:     'inherit',
     titleAnim:     'none',
     ppGrad:        'linear-gradient(90deg, #ec4899, #a855f7, #22d3ee)',
-    ppChaos:       { color: '#ff0050', animation: 'glitchTitle 0.15s infinite, arcadeShake 0.3s infinite' },
+    ppChaos:       { color: '#fde047', textShadow: '0 0 20px #fde047', animation: 'headerBounce 0.4s ease-in-out 3, neonPulse 0.5s infinite' },
     hintStyle:     { border: '1px solid #155e75', background: 'rgba(0,0,0,0.8)', color: '#22d3ee' },
-    chaosStyle:    { border: '2px solid #ff0050', background: 'rgba(0,0,0,0.95)', color: '#ff0050', textShadow: '2px 0 #00d4ff, -2px 0 #ff0050', animation: 'glitchTitle 0.2s infinite' },
-    chaosText:     '!GL1TCH!',
+    chaosStyle:    { border: '2px solid #fbbf24', background: 'rgba(0,0,0,0.92)', color: '#fde047', boxShadow: '0 0 20px rgba(251,191,36,0.3)', textShadow: '0 0 12px #fde047' },
+    chaosText:     '🎉 COMBO x5!',
     loaderBg:      '#1f2937',
     loaderFill:    'linear-gradient(90deg, #06b6d4, #a855f7, #ec4899)',
     loaderChaos:   'linear-gradient(90deg, #fbbf24, #ef4444, #ec4899)',
@@ -218,67 +218,50 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
 
   return (
     <>
-      {/* GLITCH ARTIFACTS — poziome pasy RGB rozszczepienia */}
+      {/* CONFETTI BURST */}
       {chaosMode && confetti.map(c => (
-        <div key={c.id} className="fixed pointer-events-none"
+        <div key={c.id} className="fixed pointer-events-none z-50"
           style={{
-            top: `${c.top}vh`,
-            left: `${c.left}%`,
-            width: `${c.width}%`,
-            height: `${c.height}px`,
-            background: c.color,
-            transform: `translateX(${c.offset}px)`,
-            zIndex: 9998,
-            animation: `glitchBar ${c.dur}s ${c.delay}s ease-in-out infinite alternate`,
-            mixBlendMode: 'screen',
-          }}
-        />
+            left: `${c.x}%`,
+            top: 0,
+            fontSize: `${c.size}px`,
+            animation: `confettiBurst ${c.dur}s ${c.delay}s cubic-bezier(.2,.8,.4,1) forwards`,
+            '--drift': `${c.drift}px`,
+            transform: `rotate(${c.rotate}deg)`,
+          }}>
+          {c.emoji}
+        </div>
       ))}
 
-      {/* GLITCH OVERLAY — pełnoekranowy efekt topnienia */}
+      {/* CHAOS OVERLAY — delikatny błysk koloru, nie inwertuje całego UI */}
       {chaosMode && (
-        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 9997 }}>
-          {/* Skanujący pas inwersji */}
-          <div style={{
-            position: 'absolute', left: 0, right: 0, height: '6px',
-            background: 'rgba(255,255,255,0.15)',
-            animation: 'meltScan 0.4s linear infinite',
-          }} />
-          {/* RGB split duplikat ekranu */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,0,60,0.04) 2px, rgba(255,0,60,0.04) 4px)',
-            animation: 'glitchShakeH 0.12s infinite',
-          }} />
-          {/* "Topniejące" smugi w dół */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7) 100%)',
-            animation: 'meltDrip 5s linear forwards',
-          }} />
-        </div>
+        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 49,
+          animation: 'chaosFlash 0.6s ease-out forwards',
+          background: a
+            ? 'radial-gradient(ellipse at 50% 30%, rgba(57,255,20,0.12) 0%, transparent 70%)'
+            : z
+            ? 'radial-gradient(ellipse at 50% 30%, rgba(45,106,79,0.1) 0%, transparent 70%)'
+            : 'radial-gradient(ellipse at 50% 30%, rgba(168,85,247,0.12) 0%, transparent 70%)',
+        }} />
       )}
 
       <style>{`
-        @keyframes glitchBar {
-          0%   { opacity: 1; transform: translateX(var(--ox, 0px)) scaleX(1); }
-          30%  { opacity: 0.3; transform: translateX(calc(var(--ox, 0px) + 15px)) scaleX(0.8); }
-          60%  { opacity: 0.9; transform: translateX(calc(var(--ox, 0px) - 20px)) scaleX(1.1); }
-          100% { opacity: 0.6; transform: translateX(var(--ox, 0px)) scaleX(0.95); }
+        @keyframes confettiBurst {
+          0%   { transform: translateY(0) translateX(0) rotate(0deg) scale(1); opacity: 1; }
+          60%  { opacity: 1; }
+          100% { transform: translateY(85vh) translateX(var(--drift, 0px)) rotate(540deg) scale(0.3); opacity: 0; }
         }
-        @keyframes meltScan {
-          0%   { top: -10px; }
-          100% { top: 100vh; }
+        @keyframes chaosFlash {
+          0%   { opacity: 0; }
+          15%  { opacity: 1; }
+          100% { opacity: 0; }
         }
-        @keyframes glitchShakeH {
-          0%,100% { transform: translateX(0); }
-          25%     { transform: translateX(-3px); }
-          75%     { transform: translateX(3px); }
-        }
-        @keyframes meltDrip {
-          0%   { clip-path: inset(0 0 100% 0); opacity: 0; }
-          20%  { opacity: 1; }
-          100% { clip-path: inset(0 0 0% 0); opacity: 0.85; }
+        @keyframes headerBounce {
+          0%,100% { transform: translateY(0) rotate(0deg); }
+          20%     { transform: translateY(-6px) rotate(-1deg); }
+          40%     { transform: translateY(4px) rotate(1deg); }
+          60%     { transform: translateY(-3px) rotate(-0.5deg); }
+          80%     { transform: translateY(2px) rotate(0.5deg); }
         }
         @keyframes neonPulse {
           0%,100% { text-shadow: 0 0 10px #ff0080, 0 0 20px #ff0080; }
@@ -300,13 +283,6 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           10%  { opacity: 1; }
           90%  { opacity: 1; }
           100% { top: 110%; opacity: 0; }
-        }
-        @keyframes glitchTitle {
-          0%,100% { text-shadow: 2px 0 rgba(255,0,80,0.9), -2px 0 rgba(0,255,180,0.9); clip-path: inset(0 0 0 0); }
-          20%     { text-shadow: -3px 0 rgba(255,0,80,1), 3px 0 rgba(0,255,180,1); clip-path: inset(20% 0 30% 0); }
-          40%     { text-shadow: 4px 0 rgba(80,0,255,0.9), -4px 0 rgba(255,220,0,0.9); clip-path: inset(0 0 0 0); }
-          60%     { text-shadow: -2px 0 rgba(255,0,80,0.8), 2px 0 rgba(0,255,180,0.8); clip-path: inset(50% 0 10% 0); }
-          80%     { text-shadow: 3px 2px rgba(255,0,80,1), -3px -2px rgba(0,255,180,1); clip-path: inset(0 0 0 0); }
         }
       `}</style>
 
@@ -421,11 +397,11 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
 
             {/* CENTRUM DOWODZENIA */}
             <span className="block font-black uppercase" style={{
-              fontSize: a ? 'clamp(1.1rem, 4vw, 2rem)' : z ? 'clamp(1.2rem, 3.5vw, 2.2rem)' : 'clamp(1.6rem, 5vw, 2.8rem)',
-              letterSpacing: a ? '0.05em' : z ? '0.12em' : '0.15em',
-              fontStyle: a ? 'normal' : z ? 'normal' : 'italic',
+              fontSize: a ? 'clamp(1.1rem, 4vw, 2rem)' : z ? 'clamp(1.6rem, 5vw, 2.8rem)' : 'clamp(1.6rem, 5vw, 2.8rem)',
+              letterSpacing: a ? '0.05em' : z ? '0.1em' : '0.15em',
+              fontStyle: 'normal',
               fontFamily: C.titleFont,
-              lineHeight: a ? 1.6 : z ? 1.3 : 1.2,
+              lineHeight: a ? 1.6 : 1.2,
               backgroundImage: C.titleGrad,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
               animation: C.titleAnim,

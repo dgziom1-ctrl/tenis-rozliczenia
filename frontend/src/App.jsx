@@ -134,7 +134,7 @@ function AppContent() {
           theme={theme}
         />
         <main
-          className={`main-content${scrolled ? ' main-content--scrolled' : ''}`}
+          className="main-content"
         >
           {activeTab === TABS.DASHBOARD  && (
             <DashboardTab
