@@ -495,7 +495,7 @@ body.glitch-meltdown {
 .theme-arcade .mini-paddle { background-color: #ff6b00; border-radius: 0; }
 
 /* ══ ZEN — override dark modal/overlay backgrounds ══════════════
-   Dark bg-*/950, bg-black/* look wrong on the light zen theme.
+   Dark bg-X-950, bg-black-X look wrong on the light zen theme.
    Remap them to soft cream tones.
 ═══════════════════════════════════════════════════════════════ */
 .theme-zen [class*="bg-black"] {

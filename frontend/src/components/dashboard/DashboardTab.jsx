@@ -30,9 +30,8 @@ const SETTLE_STYLES = `
     50%     { box-shadow: 0 0 10px rgba(239,68,68,0.8); }
   }
   @keyframes confettiRain {
-    0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 0; }
-    8%   { opacity: 1; }
-    80%  { opacity: 1; }
+    0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+    85%  { opacity: 1; }
     100% { transform: translateY(110vh) rotate(720deg) scale(0.4); opacity: 0; }
   }
 `;
@@ -43,13 +42,13 @@ const CONFETTI_POOLS = {
   zen:    ['🌿', '🍃', '🌳', '🍀', '✨', '🌸', '🌾', '🎋', '🌱', '🏅'],
 };
 
-function generateConfetti(count = 40, pool = CONFETTI_POOLS.cyber) {
+function generateConfetti(count = 40, pool = CONFETTI_POOLS.cyber, mini = false) {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     emoji:  pool[Math.floor(Math.random() * pool.length)],
     x:      Math.random() * 100,
-    delay:  Math.random() * 1.2,
-    dur:    2 + Math.random() * 2,
+    delay:  mini ? Math.random() * 0.3 : Math.random() * 0.8,
+    dur:    mini ? 1.2 + Math.random() * 0.8 : 2 + Math.random() * 2,
     size:   14 + Math.random() * 22,
     rotate: Math.random() * 360,
   }));
@@ -263,14 +262,14 @@ export default function DashboardTab({ data, history, playSound }) {
 
     if (willAllBeSettled && nonOrg.length > 0) {
       clearTimeout(confettiTimer.current);
-      setConfetti(generateConfetti(50, pool));
-      confettiTimer.current = setTimeout(() => setConfetti([]), 5000);
+      setConfetti(generateConfetti(50, pool, false));
+      confettiTimer.current = setTimeout(() => setConfetti([]), 6000);
       playSound(SOUND_TYPES.COIN);
     } else {
       // Mini confetti burst on every single payment
       clearTimeout(confettiTimer.current);
-      setConfetti(generateConfetti(18, pool));
-      confettiTimer.current = setTimeout(() => setConfetti([]), 2500);
+      setConfetti(generateConfetti(18, pool, true));
+      confettiTimer.current = setTimeout(() => setConfetti([]), 3000);
     }
 
     startUndo(playerName, result.previousValue);
@@ -330,7 +329,8 @@ export default function DashboardTab({ data, history, playSound }) {
           style={{
             left: `${c.x}%`, top: '-60px',
             fontSize: `${c.size}px`,
-            animation: `confettiRain ${c.dur}s ${c.delay}s ease-in both`,
+            animation: `confettiRain ${c.dur}s ${c.delay}s ease-in forwards`,
+            opacity: 0,
             transform: `rotate(${c.rotate}deg)`,
           }}
         >
