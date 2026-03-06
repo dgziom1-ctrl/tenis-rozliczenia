@@ -12,81 +12,24 @@ import { useUndoTimer } from '../../hooks/useUndoTimer';
 import { useTheme, useThemeTokens } from '../../context/ThemeContext';
 
 
-// ─── Canvas confetti ──────────────────────────────────────────────────────────
+// ─── CSS Confetti ─────────────────────────────────────────────────────────────
 const CONFETTI_POOLS = {
   cyber:  ['🏓','🎉','⭐','✨','💰','🎊','🏆','🟢','🎯','💚'],
   arcade: ['👾','🏓','💥','🟩','⭐','🔥','🕹️','🏆','✨','💚'],
   zen:    ['🌿','🍃','🌳','🍀','✨','🌸','🌾','🎋','🌱','🏅'],
 };
 
-function useConfetti() {
-  const canvasRef = useRef(null);
-  const rafRef    = useRef(null);
-  const particles = useRef([]);
-
-  const launch = useCallback((count = 40, pool = CONFETTI_POOLS.cyber) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    for (let i = 0; i < count; i++) {
-      particles.current.push({
-        emoji:  pool[Math.floor(Math.random() * pool.length)],
-        x:      Math.random() * canvas.width,
-        y:      -20 - Math.random() * 80,
-        vy:     3 + Math.random() * 4,
-        vx:     (Math.random() - 0.5) * 3,
-        rot:    Math.random() * 360,
-        rotV:   (Math.random() - 0.5) * 8,
-        size:   16 + Math.random() * 20,
-        alpha:  1,
-      });
-    }
-
-    if (!rafRef.current) {
-      const ctx = canvas.getContext('2d');
-      const tick = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.current = particles.current.filter(p => p.alpha > 0.05);
-        for (const p of particles.current) {
-          p.y   += p.vy;
-          p.x   += p.vx;
-          p.rot += p.rotV;
-          if (p.y > canvas.height * 0.7) p.alpha -= 0.025;
-          ctx.save();
-          ctx.globalAlpha = p.alpha;
-          ctx.font        = `${p.size}px serif`;
-          ctx.translate(p.x, p.y);
-          ctx.rotate((p.rot * Math.PI) / 180);
-          ctx.fillText(p.emoji, -p.size / 2, p.size / 2);
-          ctx.restore();
-        }
-        if (particles.current.length > 0) {
-          rafRef.current = requestAnimationFrame(tick);
-        } else {
-          rafRef.current = null;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-      };
-      rafRef.current = requestAnimationFrame(tick);
-    }
-  }, []);
-
-  useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
-
-  const canvas = (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'fixed', inset: 0,
-        width: '100vw', height: '100vh',
-        pointerEvents: 'none', zIndex: 9999,
-      }}
-    />
-  );
-
-  return { launch, canvas };
+function generateConfetti(count, pool) {
+  return Array.from({ length: count }, (_, i) => ({
+    id:     i,
+    emoji:  pool[Math.floor(Math.random() * pool.length)],
+    x:      Math.random() * 100,
+    dur:    1.4 + Math.random() * 1.2,
+    delay:  Math.random() * 0.6,
+    size:   16 + Math.random() * 18,
+    drift:  (Math.random() - 0.5) * 80,
+    rotEnd: 180 + Math.floor(Math.random() * 3) * 180,
+  }));
 }
 
 // ─── CSS animations injected once ────────────────────────────────────────────
@@ -104,6 +47,19 @@ const SETTLE_STYLES = `
   }
   .settle-flash {
     animation: settleFlash 0.8s ease-out forwards !important;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-30px) rotate(0deg) translateX(0px); opacity: 0; }
+    4%   { opacity: 1; }
+    88%  { opacity: 1; }
+    100% { transform: translateY(105vh) rotate(var(--rot-end, 360deg)) translateX(var(--drift, 0px)); opacity: 0; }
+  }
+  .confetti-piece {
+    position: fixed;
+    top: 0;
+    pointer-events: none;
+    z-index: 9999;
+    animation: confettiFall var(--dur) var(--delay) ease-in backwards;
   }
 `;
 
@@ -270,7 +226,9 @@ export default function DashboardTab({ data, history, playSound }) {
   const totalWeeks = data.summary?.totalWeeks ?? 0;
   const theme = useTheme();
   const T = useThemeTokens();
-  const { launch: launchConfetti, canvas: confettiCanvas } = useConfetti();
+  const [confetti, setConfetti] = useState([]);
+  const confettiTimer = useRef(null);
+  useEffect(() => () => clearTimeout(confettiTimer.current), []);
 
 
   const handleSettleRequest = useCallback((playerName) => {
@@ -309,11 +267,14 @@ export default function DashboardTab({ data, history, playSound }) {
       .filter(p => p.name !== playerName)
       .every(p => p.currentDebt <= SETTLED_THRESHOLD);
 
+    clearTimeout(confettiTimer.current);
     if (willAllBeSettled && nonOrg.length > 0) {
-      launchConfetti(60, pool);
+      setConfetti(generateConfetti(55, pool));
+      confettiTimer.current = setTimeout(() => setConfetti([]), 5000);
       playSound(SOUND_TYPES.COIN);
     } else {
-      launchConfetti(22, pool);
+      setConfetti(generateConfetti(22, pool));
+      confettiTimer.current = setTimeout(() => setConfetti([]), 3500);
     }
 
     startUndo(playerName, result.previousValue);
@@ -356,7 +317,23 @@ export default function DashboardTab({ data, history, playSound }) {
   return (
     <>
       <style>{SETTLE_STYLES}</style>
-      {confettiCanvas}
+
+      {confetti.map(c => (
+        <div
+          key={c.id}
+          className="confetti-piece"
+          style={{
+            left: `${c.x}%`,
+            fontSize: `${c.size}px`,
+            '--dur':     `${c.dur}s`,
+            '--delay':   `${c.delay}s`,
+            '--drift':   `${c.drift}px`,
+            '--rot-end': `${c.rotEnd}deg`,
+          }}
+        >
+          {c.emoji}
+        </div>
+      ))}
 
       <SettleConfirmModal
         playerName={confirmSettle?.playerName}

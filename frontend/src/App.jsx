@@ -14,6 +14,41 @@ import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
 import { ThemeContext } from './context/ThemeContext';
 
+const ZEN_LEAVES = ['🍃','🌿','🍀','🌸','🌾','🍂','🌱','🎋'];
+const ZEN_LEAF_CONFIG = Array.from({ length: 12 }, (_, i) => ({
+  id:    i,
+  emoji: ZEN_LEAVES[i % ZEN_LEAVES.length],
+  left:  5 + (i * 8.2) % 90,
+  size:  14 + (i * 7) % 16,
+  dur:   10 + (i * 1.7) % 8,
+  delay: (i * 2.1) % 14,
+  drift: -40 + (i * 11) % 80,
+  rot:   120 + (i * 37) % 180,
+}));
+
+function ZenLeaves() {
+  return (
+    <>
+      {ZEN_LEAF_CONFIG.map(l => (
+        <div
+          key={l.id}
+          className="zen-leaf"
+          style={{
+            left:          `${l.left}%`,
+            fontSize:      `${l.size}px`,
+            '--leaf-dur':   `${l.dur}s`,
+            '--leaf-delay': `${l.delay}s`,
+            '--leaf-drift': `${l.drift}px`,
+            '--leaf-rot':   `${l.rot}deg`,
+          }}
+        >
+          {l.emoji}
+        </div>
+      ))}
+    </>
+  );
+}
+
 const INITIAL_APP_DATA = {
   summary: {},
   players: [],
@@ -117,6 +152,7 @@ function AppContent() {
 
   return (
     <ThemeContext.Provider value={theme}>
+      {theme === 'zen' && <ZenLeaves />}
       <div
         className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : theme === 'zen' ? 'theme-zen' : ''}`}
       style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}

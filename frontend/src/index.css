@@ -522,3 +522,20 @@ body.glitch-meltdown {
 /* ══ ARCADE — fix spinner colors ══════════════════════════════ */
 .theme-arcade [class*="border-cyan-8"] { border-color: #0d2900 !important; }
 .theme-arcade [class*="border-t-cyan-4"] { border-top-color: #39ff14 !important; }
+
+/* ══ ZEN — floating leaves background ═══════════════════════════════════════ */
+@keyframes zenLeafFloat {
+  0%   { transform: translateY(110vh) translateX(0px)   rotate(0deg);   opacity: 0; }
+  5%   { opacity: 0.55; }
+  90%  { opacity: 0.45; }
+  100% { transform: translateY(-12vh) translateX(var(--leaf-drift, 30px)) rotate(var(--leaf-rot, 180deg)); opacity: 0; }
+}
+
+.zen-leaf {
+  position: fixed;
+  bottom: -10px;
+  pointer-events: none;
+  z-index: 0;
+  animation: zenLeafFloat var(--leaf-dur, 12s) var(--leaf-delay, 0s) ease-in-out infinite backwards;
+  will-change: transform, opacity;
+}
