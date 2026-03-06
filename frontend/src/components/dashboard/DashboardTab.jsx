@@ -30,7 +30,8 @@ const SETTLE_STYLES = `
     50%     { box-shadow: 0 0 10px rgba(239,68,68,0.8); }
   }
   @keyframes confettiRain {
-    0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 1; }
+    0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 0; }
+    6%   { opacity: 1; }
     85%  { opacity: 1; }
     100% { transform: translateY(110vh) rotate(720deg) scale(0.4); opacity: 0; }
   }
@@ -329,8 +330,7 @@ export default function DashboardTab({ data, history, playSound }) {
           style={{
             left: `${c.x}%`, top: '-60px',
             fontSize: `${c.size}px`,
-            animation: `confettiRain ${c.dur}s ${c.delay}s ease-in forwards`,
-            opacity: 0,
+            animation: `confettiRain ${c.dur}s ${c.delay}s ease-in backwards`,
             transform: `rotate(${c.rotate}deg)`,
           }}
         >
