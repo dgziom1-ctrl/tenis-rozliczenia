@@ -59,7 +59,7 @@ const SETTLE_STYLES = `
     top: 0;
     pointer-events: none;
     z-index: 9999;
-    animation: confettiFall var(--dur) var(--delay) ease-in backwards;
+    animation: confettiFall var(--dur) var(--delay) ease-in both;
   }
 `;
 

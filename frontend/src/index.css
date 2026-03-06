@@ -76,13 +76,14 @@ body.theme-arcade-bg::before {
     linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px);
 }
 
-/* Zen Nature — organic, no grid */
+/* Zen Nature — bamboo stalks pattern */
 body.theme-zen-bg::before {
   background-image:
-    radial-gradient(ellipse at 20% 30%, rgba(45,106,79,0.06) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 70%, rgba(139,94,60,0.05) 0%, transparent 55%),
-    radial-gradient(ellipse at 60% 20%, rgba(125,170,135,0.04) 0%, transparent 45%);
-  background-size: 100% 100%;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='120'%3E%3Crect x='18' y='0' width='5' height='120' fill='none' stroke='rgba(45,106,79,0.09)' stroke-width='1.5'/%3E%3Crect x='18' y='30' width='5' height='1.5' fill='rgba(45,106,79,0.1)'/%3E%3Crect x='18' y='70' width='5' height='1.5' fill='rgba(45,106,79,0.1)'/%3E%3Crect x='18' y='100' width='5' height='1.5' fill='rgba(45,106,79,0.1)'/%3E%3Crect x='56' y='0' width='4' height='120' fill='none' stroke='rgba(139,94,60,0.07)' stroke-width='1.5'/%3E%3Crect x='56' y='20' width='4' height='1.5' fill='rgba(139,94,60,0.08)'/%3E%3Crect x='56' y='55' width='4' height='1.5' fill='rgba(139,94,60,0.08)'/%3E%3Crect x='56' y='90' width='4' height='1.5' fill='rgba(139,94,60,0.08)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 15% 25%, rgba(45,106,79,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 75%, rgba(139,94,60,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 10%, rgba(125,170,135,0.05) 0%, transparent 45%);
+  background-size: 80px 120px, 100% 100%, 100% 100%, 100% 100%;
 }
 
 /* ══ ARCADE BODY OVERRIDES ═══════════════════════════════ */
@@ -114,9 +115,10 @@ body.theme-zen-bg::before {
 
 .theme-zen body::before {
   background-image:
-    radial-gradient(ellipse at 20% 30%, rgba(45,106,79,0.06) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 70%, rgba(139,94,60,0.05) 0%, transparent 55%);
-  background-size: 100% 100%;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='120'%3E%3Crect x='18' y='0' width='5' height='120' fill='none' stroke='rgba(45,106,79,0.09)' stroke-width='1.5'/%3E%3Crect x='18' y='30' width='5' height='1.5' fill='rgba(45,106,79,0.1)'/%3E%3Crect x='18' y='70' width='5' height='1.5' fill='rgba(45,106,79,0.1)'/%3E%3Crect x='18' y='100' width='5' height='1.5' fill='rgba(45,106,79,0.1)'/%3E%3Crect x='56' y='0' width='4' height='120' fill='none' stroke='rgba(139,94,60,0.07)' stroke-width='1.5'/%3E%3Crect x='56' y='20' width='4' height='1.5' fill='rgba(139,94,60,0.08)'/%3E%3Crect x='56' y='55' width='4' height='1.5' fill='rgba(139,94,60,0.08)'/%3E%3Crect x='56' y='90' width='4' height='1.5' fill='rgba(139,94,60,0.08)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 15% 25%, rgba(45,106,79,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 75%, rgba(139,94,60,0.06) 0%, transparent 50%);
+  background-size: 80px 120px, 100% 100%, 100% 100%;
 }
 
 /* ══ PONG ANIMATION ══════════════════════════════════════ */
