@@ -106,7 +106,10 @@ body.theme-zen-bg::before {
 .theme-zen {
   background-color: #e8ede8;
   color: #3d3025;
-  background-image: none;
+  background-image:
+    radial-gradient(circle, rgba(45,106,79,0.2) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-attachment: fixed;
   font-family: 'Lato', sans-serif;
 }
 
