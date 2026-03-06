@@ -9,6 +9,7 @@ import { formatDate, formatAmountShort } from '../../utils/format';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { useUndoTimer } from '../../hooks/useUndoTimer';
+import { useTheme, useThemeTokens } from '../../context/ThemeContext';
 
 // ─── CSS animations injected once ────────────────────────────────────────────
 const SETTLE_STYLES = `
@@ -34,12 +35,16 @@ const SETTLE_STYLES = `
   }
 `;
 
-const CONFETTI_POOL = ['🏓', '🎉', '⭐', '✨', '💚', '🎊', '🏆', '💰', '🟢', '🎯'];
+const CONFETTI_POOLS = {
+  cyber:  ['🏓', '🎉', '⭐', '✨', '💚', '🎊', '🏆', '💰', '🟢', '🎯'],
+  arcade: ['👾', '🏓', '💥', '🟩', '⭐', '🔥', '💚', '🕹️', '🏆', '✨'],
+  zen:    ['🌿', '🍃', '🌳', '🍀', '✨', '🌸', '🌾', '🎋', '🌱', '🏅'],
+};
 
-function generateConfetti(count = 40) {
+function generateConfetti(count = 40, pool = CONFETTI_POOLS.cyber) {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
-    emoji:  CONFETTI_POOL[Math.floor(Math.random() * CONFETTI_POOL.length)],
+    emoji:  pool[Math.floor(Math.random() * pool.length)],
     x:      Math.random() * 100,
     delay:  Math.random() * 1.2,
     dur:    2 + Math.random() * 2,
@@ -155,33 +160,41 @@ function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, ope
 }
 
 // ─── Confirm modal ────────────────────────────────────────────────────────────
-function SettleConfirmModal({ playerName, debt, onConfirm, onCancel }) {
+function SettleConfirmModal({ playerName, debt, onConfirm, onCancel, T }) {
   if (!playerName) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="cyber-box border-emerald-600 rounded-2xl p-6 w-full max-w-sm shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+    <div style={{ background: T.overlayBg }} className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+      <div style={{
+        background: T.modalBg,
+        border: `2px solid ${T.accentBorder}`,
+        borderRadius: T.modalRadius,
+        boxShadow: T.modalShadow,
+      }} className="p-6 w-full max-w-sm">
         <div className="flex items-center gap-3 mb-4">
-          <HandCoins className="text-emerald-400 flex-shrink-0" size={24} />
-          <h3 className="font-black text-emerald-300 text-lg">Potwierdzenie</h3>
+          <HandCoins style={{ color: T.accentColor }} className="flex-shrink-0" size={24} />
+          <h3 style={{ color: T.accentColor, fontFamily: T.fontFamily, fontSize: T.fontSize }} className="font-black text-lg">Potwierdzenie</h3>
         </div>
-        <p className="text-cyan-400 text-sm mb-2">
-          <span className="text-white font-black">{playerName}</span> zapłacił?
+        <p style={{ color: T.bodyText }} className="text-sm mb-2">
+          <span className="font-black">{playerName}</span> zapłacił?
         </p>
-        <div className="bg-emerald-950/40 border border-emerald-800 rounded-xl p-3 mb-5 text-center">
-          <span className="text-3xl font-black text-emerald-300">
+        <div style={{ background: T.accentBg, border: `1px solid ${T.accentBorder}` }}
+          className="rounded-xl p-3 mb-5 text-center">
+          <span style={{ color: T.accentColor }} className="text-3xl font-black">
             {formatAmountShort(debt)} zł
           </span>
         </div>
         <div className="flex gap-3">
           <button
             onClick={onConfirm}
-            className="flex-1 py-3 rounded-xl border-2 border-emerald-500 text-emerald-300 bg-emerald-950/50 hover:bg-emerald-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2"
+            style={{ border: `2px solid ${T.accentBorder}`, color: T.accentColor, background: T.accentBg, borderRadius: T.modalRadius }}
+            className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80"
           >
             <CheckCircle2 size={15} /> Tak
           </button>
           <button
             onClick={onCancel}
-            className="flex-1 py-3 rounded-xl border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all flex items-center justify-center gap-2"
+            style={{ border: `2px solid ${T.cancelBorder}`, color: T.cancelText, borderRadius: T.modalRadius }}
+            className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80"
           >
             <X size={15} /> ANULUJ
           </button>
@@ -204,6 +217,8 @@ export default function DashboardTab({ data, history, playSound }) {
   const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer();
 
   const totalWeeks = data.summary?.totalWeeks ?? 0;
+  const theme = useTheme();
+  const T = useThemeTokens();
 
   // Cleanup confetti timer on unmount
   useEffect(() => () => clearTimeout(confettiTimer.current), []);
@@ -236,6 +251,8 @@ export default function DashboardTab({ data, history, playSound }) {
 
     setTimeout(() => setJustSettled(null), 1500);
 
+    const pool = CONFETTI_POOLS[theme] ?? CONFETTI_POOLS.cyber;
+
     // Confetti when everyone is settled
     const nonOrg = data.players?.filter(p => p.name !== ORGANIZER_NAME) ?? [];
     const willAllBeSettled = nonOrg
@@ -244,9 +261,14 @@ export default function DashboardTab({ data, history, playSound }) {
 
     if (willAllBeSettled && nonOrg.length > 0) {
       clearTimeout(confettiTimer.current);
-      setConfetti(generateConfetti(50));
+      setConfetti(generateConfetti(50, pool));
       confettiTimer.current = setTimeout(() => setConfetti([]), 5000);
       playSound(SOUND_TYPES.COIN);
+    } else {
+      // Mini confetti burst on every single payment
+      clearTimeout(confettiTimer.current);
+      setConfetti(generateConfetti(18, pool));
+      confettiTimer.current = setTimeout(() => setConfetti([]), 2500);
     }
 
     startUndo(playerName, result.previousValue);
@@ -295,6 +317,7 @@ export default function DashboardTab({ data, history, playSound }) {
         debt={confirmSettle?.debt}
         onConfirm={handleConfirmSettle}
         onCancel={() => setConfirmSettle(null)}
+        T={T}
       />
 
       {/* Confetti burst when everyone settled */}
@@ -317,18 +340,32 @@ export default function DashboardTab({ data, history, playSound }) {
 
         {/* Undo toast */}
         {undoToast && (
-          <div className="cyber-box border-emerald-600 rounded-2xl p-4 flex items-center justify-between gap-4 relative overflow-hidden bg-emerald-950/30">
-            <div className="absolute bottom-0 left-0 h-1 bg-emerald-500 transition-all duration-1000" style={{ width: `${progressPct}%` }} />
+          <div style={{
+            background: T.undoBg,
+            border: `2px solid ${T.undoBorder}`,
+            borderRadius: T.modalRadius,
+            boxShadow: T.modalShadow,
+          }}
+            className="p-4 flex items-center justify-between gap-4 relative overflow-hidden"
+          >
+            <div className="absolute bottom-0 left-0 h-1 transition-all duration-1000"
+              style={{ width: `${progressPct}%`, background: T.undoProgressBg }} />
             <div className="flex items-center gap-2 min-w-0 flex-wrap">
-              <CheckCircle2 className="text-emerald-400 flex-shrink-0" size={20} />
-              <span className="text-emerald-300 font-bold text-sm">
-                Opłacono: <span className="text-white">{undoToast.playerName}</span>
+              <CheckCircle2 style={{ color: T.undoText }} className="flex-shrink-0" size={20} />
+              <span style={{ color: T.undoText, fontFamily: T.fontFamily, fontSize: T.fontSize }} className="font-bold text-sm">
+                Opłacono: <span style={{ color: T.bodyText, fontFamily: 'inherit' }}>{undoToast.playerName}</span>
               </span>
-              <span className="text-emerald-700 font-mono text-xs flex-shrink-0">({undoToast.secondsLeft}s)</span>
+              <span style={{ color: T.mutedText }} className="font-mono text-xs flex-shrink-0">({undoToast.secondsLeft}s)</span>
             </div>
             <button
               onClick={handleUndo}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-emerald-500 text-emerald-300 hover:bg-emerald-500 hover:text-black font-bold text-sm transition-all flex-shrink-0"
+              style={{
+                border: `2px solid ${T.undoBorder}`,
+                color: T.undoText,
+                borderRadius: T.modalRadius,
+                background: 'transparent',
+              }}
+              className="flex items-center gap-2 px-4 py-2 font-bold text-sm transition-all flex-shrink-0 hover:opacity-80"
             >
               <RotateCcw size={14} /> COFNIJ
             </button>

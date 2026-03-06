@@ -12,6 +12,7 @@ import { SOUND_TYPES, TABS } from './constants';
 import { SpinnerOverlay } from './components/common/LoadingSkeleton';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
+import { ThemeContext } from './context/ThemeContext';
 
 const INITIAL_APP_DATA = {
   summary: {},
@@ -115,8 +116,9 @@ function AppContent() {
   }
 
   return (
-    <div
-      className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : theme === 'zen' ? 'theme-zen' : ''}`}
+    <ThemeContext.Provider value={theme}>
+      <div
+        className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : theme === 'zen' ? 'theme-zen' : ''}`}
       style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
     >
       <div className="max-w-7xl mx-auto relative">
@@ -177,6 +179,7 @@ function AppContent() {
       </div>
       <PWAInstallBanner />
     </div>
+    </ThemeContext.Provider>
   );
 }
 

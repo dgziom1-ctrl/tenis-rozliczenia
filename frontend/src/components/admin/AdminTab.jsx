@@ -5,6 +5,7 @@ import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { formatDate, formatAmountShort } from '../../utils/format';
+import { useTheme, useThemeTokens } from '../../context/ThemeContext';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -41,7 +42,7 @@ async function copyToClipboard(text) {
 }
 
 // ─── Session summary modal ────────────────────────────────────────────────────
-function SessionSummaryModal({ summary, onClose }) {
+function SessionSummaryModal({ summary, onClose, T }) {
   const [copied, setCopied] = useState(false);
   if (!summary) return null;
 
@@ -59,11 +60,11 @@ function SessionSummaryModal({ summary, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="cyber-box border-emerald-500 rounded-2xl p-6 w-full max-w-sm shadow-[0_0_40px_rgba(16,185,129,0.3)]">
+    <div style={{ background: T.overlayBg }} className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+      <div style={{ background: T.modalBg, border: `2px solid ${T.accentBorder}`, borderRadius: T.modalRadius, boxShadow: T.modalShadow }} className="p-6 w-full max-w-sm">
         <div className="flex items-center gap-3 mb-5">
-          <CheckCircle2 className="text-emerald-400" size={28} />
-          <h3 className="font-black text-emerald-300 text-xl tracking-wide">Sesja zapisana!</h3>
+          <CheckCircle2 style={{ color: T.accentColor }} size={28} />
+          <h3 style={{ color: T.accentColor, fontFamily: T.fontFamily }} className="font-black text-xl tracking-wide">Sesja zapisana!</h3>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
@@ -80,7 +81,7 @@ function SessionSummaryModal({ summary, onClose }) {
             <p className="text-cyan-200 font-black text-lg">{presentCount}</p>
           </div>
           {multisportCount > 0 && (
-            <div className="bg-black/60 border border-emerald-900 rounded-xl p-3 text-center">
+            <div style={{ background: T.cellBg, border: `1px solid ${T.cellBorder}`, borderRadius: T.modalRadius }} className="p-3 text-center">
               <p className="text-cyan-700 text-xs tracking-widest mb-1">MULTISPORT</p>
               <p className="text-emerald-300 font-black text-lg">⚡ {multisportCount}</p>
             </div>
@@ -88,9 +89,9 @@ function SessionSummaryModal({ summary, onClose }) {
         </div>
 
         {payingCount > 0 && (
-          <div className="bg-magenta-950/40 border-2 border-magenta-700 rounded-xl p-4 mb-4 text-center">
-            <p className="text-cyan-600 text-xs tracking-widest mb-1">KAŻDY PŁACI</p>
-            <p className="text-4xl font-black text-magenta-300 glow-magenta-lg">
+          <div style={{ background: T.accentBg, border: `2px solid ${T.accentBorder}`, borderRadius: T.modalRadius }} className="p-4 mb-4 text-center">
+            <p style={{ color: T.cellLabelText }} className="text-xs tracking-widest mb-1">KAŻDY PŁACI</p>
+            <p style={{ color: T.accentColor }} className="text-4xl font-black">
               {formatAmountShort(perPerson)}<span className="text-xl ml-1 opacity-70">zł</span>
             </p>
             {multisportCount > 0 && (
@@ -112,7 +113,7 @@ function SessionSummaryModal({ summary, onClose }) {
 
         <button
           onClick={onClose}
-          className="w-full py-3 rounded-xl border-2 border-emerald-500 text-emerald-300 bg-emerald-950/50 hover:bg-emerald-500 hover:text-black font-black text-sm transition-all flex items-center justify-center gap-2"
+          style={{ border: `2px solid ${T.accentBorder}`, color: T.accentColor, background: T.accentBg, borderRadius: T.modalRadius }} className="w-full py-3 font-black text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80"
         >
           <CheckCircle2 size={16} /> OK, GOTOWE
         </button>
@@ -154,6 +155,8 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
   const { showError } = useToast();
+  const theme = useTheme();
+  const T = useThemeTokens();
 
   const today = new Date().toISOString().split('T')[0];
   const [datePlayed,        setDatePlayed]        = useState(today);
@@ -231,7 +234,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
 
   return (
     <>
-      <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} />
+      <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} T={T} />
 
       <div className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-300">
         <div className="cyber-box rounded-2xl p-4 sm:p-8">

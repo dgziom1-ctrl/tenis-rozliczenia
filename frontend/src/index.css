@@ -493,3 +493,32 @@ body.glitch-meltdown {
   50%     { transform: rotate(10deg); }
 }
 .theme-arcade .mini-paddle { background-color: #ff6b00; border-radius: 0; }
+
+/* ══ ZEN — override dark modal/overlay backgrounds ══════════════
+   Dark bg-*/950, bg-black/* look wrong on the light zen theme.
+   Remap them to soft cream tones.
+═══════════════════════════════════════════════════════════════ */
+.theme-zen [class*="bg-black"] {
+  background-color: rgba(210,205,195,0.5) !important;
+}
+.theme-zen [class*="bg-gray-9"] {
+  background-color: #dde5dd !important;
+}
+.theme-zen [class*="bg-cyan-9"],
+.theme-zen [class*="bg-cyan-8"] {
+  background-color: rgba(180,200,184,0.25) !important;
+}
+.theme-zen [class*="bg-magenta-9"],
+.theme-zen [class*="bg-magenta-8"] {
+  background-color: rgba(200,175,155,0.25) !important;
+}
+.theme-zen [class*="bg-emerald-9"] {
+  background-color: rgba(45,106,79,0.08) !important;
+}
+.theme-zen [class*="bg-rose-9"] {
+  background-color: rgba(180,70,50,0.08) !important;
+}
+
+/* ══ ARCADE — fix spinner colors ══════════════════════════════ */
+.theme-arcade [class*="border-cyan-8"] { border-color: #0d2900 !important; }
+.theme-arcade [class*="border-t-cyan-4"] { border-top-color: #39ff14 !important; }

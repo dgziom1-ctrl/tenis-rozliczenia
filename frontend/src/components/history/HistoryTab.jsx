@@ -6,6 +6,7 @@ import { groupHistoryByMonth } from '../../utils/calculations';
 import { formatDate, formatAmount } from '../../utils/format';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
+import { useTheme, useThemeTokens } from '../../context/ThemeContext';
 
 function EditDateInput({ value, onChange }) {
   return (
@@ -39,7 +40,7 @@ function EditDateInput({ value, onChange }) {
   );
 }
 
-function PasswordModal({ action, onConfirm, onCancel }) {
+function PasswordModal({ action, onConfirm, onCancel, T }) {
   const [input, setInput] = useState('');
   const [error, setError] = useState(false);
 
@@ -55,13 +56,13 @@ function PasswordModal({ action, onConfirm, onCancel }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="cyber-box rounded-2xl p-6 w-full max-w-sm border-cyan-500">
+    <div style={{ background: T.overlayBg }} className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+      <div style={{ background: T.modalBg, border: `2px solid ${T.accentBorder}`, borderRadius: T.modalRadius, boxShadow: T.modalShadow }} className="p-6 w-full max-w-sm">
         <div className="flex items-center gap-3 mb-6">
-          <Lock className="text-cyan-400 flex-shrink-0" size={22}/>
-          <h3 className="font-black text-cyan-300 text-lg">Podaj hasło admina</h3>
+          <Lock style={{ color: T.accentColor }} className="flex-shrink-0" size={22}/>
+          <h3 style={{ color: T.accentColor, fontFamily: T.fontFamily }} className="font-black text-lg">Podaj hasło admina</h3>
         </div>
-        <p className="text-cyan-700 text-sm mb-4">{action}</p>
+        <p style={{ color: T.mutedText }} className="text-sm mb-4">{action}</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="password"
@@ -76,11 +77,13 @@ function PasswordModal({ action, onConfirm, onCancel }) {
           {error && <p className="text-rose-400 text-xs font-bold text-center">❌ Złe hasło</p>}
           <div className="flex gap-3">
             <button type="submit"
-              className="flex-1 py-3 rounded-xl border-2 border-cyan-500 text-cyan-300 bg-cyan-950/50 hover:bg-cyan-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2">
+              style={{ border: `2px solid ${T.accentBorder}`, color: T.accentColor, background: T.accentBg, borderRadius: T.modalRadius }}
+              className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80">
               <Check size={16}/> POTWIERDŹ
             </button>
             <button type="button" onClick={onCancel}
-              className="flex-1 py-3 rounded-xl border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all flex items-center justify-center gap-2">
+              style={{ border: `2px solid ${T.cancelBorder}`, color: T.cancelText, borderRadius: T.modalRadius }}
+              className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80">
               <X size={16}/> ANULUJ
             </button>
           </div>
@@ -98,6 +101,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const [isDeleting,  setIsDeleting]  = useState(null); // id sesji aktualnie usuwanej
 
   const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete', rowId, row? }
+  const T = useThemeTokens();
 
   const { showError } = useToast();
 
@@ -184,6 +188,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
     <>
       {pwModal && (
         <PasswordModal
+          T={T}
           action={pwModal.type === 'edit' ? 'Podaj hasło żeby edytować tę sesję.' : 'Podaj hasło żeby usunąć tę sesję.'}
           onConfirm={handlePasswordConfirm}
           onCancel={() => setPwModal(null)}
