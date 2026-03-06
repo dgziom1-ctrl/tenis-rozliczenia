@@ -11,6 +11,84 @@ import { InlineSpinner } from '../common/LoadingSkeleton';
 import { useUndoTimer } from '../../hooks/useUndoTimer';
 import { useTheme, useThemeTokens } from '../../context/ThemeContext';
 
+
+// ─── Canvas confetti ──────────────────────────────────────────────────────────
+const CONFETTI_POOLS = {
+  cyber:  ['🏓','🎉','⭐','✨','💰','🎊','🏆','🟢','🎯','💚'],
+  arcade: ['👾','🏓','💥','🟩','⭐','🔥','🕹️','🏆','✨','💚'],
+  zen:    ['🌿','🍃','🌳','🍀','✨','🌸','🌾','🎋','🌱','🏅'],
+};
+
+function useConfetti() {
+  const canvasRef = useRef(null);
+  const rafRef    = useRef(null);
+  const particles = useRef([]);
+
+  const launch = useCallback((count = 40, pool = CONFETTI_POOLS.cyber) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    for (let i = 0; i < count; i++) {
+      particles.current.push({
+        emoji:  pool[Math.floor(Math.random() * pool.length)],
+        x:      Math.random() * canvas.width,
+        y:      -20 - Math.random() * 80,
+        vy:     3 + Math.random() * 4,
+        vx:     (Math.random() - 0.5) * 3,
+        rot:    Math.random() * 360,
+        rotV:   (Math.random() - 0.5) * 8,
+        size:   16 + Math.random() * 20,
+        alpha:  1,
+      });
+    }
+
+    if (!rafRef.current) {
+      const ctx = canvas.getContext('2d');
+      const tick = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.current = particles.current.filter(p => p.alpha > 0.05);
+        for (const p of particles.current) {
+          p.y   += p.vy;
+          p.x   += p.vx;
+          p.rot += p.rotV;
+          if (p.y > canvas.height * 0.7) p.alpha -= 0.025;
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.font        = `${p.size}px serif`;
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillText(p.emoji, -p.size / 2, p.size / 2);
+          ctx.restore();
+        }
+        if (particles.current.length > 0) {
+          rafRef.current = requestAnimationFrame(tick);
+        } else {
+          rafRef.current = null;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      };
+      rafRef.current = requestAnimationFrame(tick);
+    }
+  }, []);
+
+  useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
+
+  const canvas = (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'fixed', inset: 0,
+        width: '100vw', height: '100vh',
+        pointerEvents: 'none', zIndex: 9999,
+      }}
+    />
+  );
+
+  return { launch, canvas };
+}
+
 // ─── CSS animations injected once ────────────────────────────────────────────
 const SETTLE_STYLES = `
   @keyframes settleFlash {
@@ -27,34 +105,7 @@ const SETTLE_STYLES = `
   .settle-flash {
     animation: settleFlash 0.8s ease-out forwards !important;
   }
-    50%     { box-shadow: 0 0 10px rgba(239,68,68,0.8); }
-  }
-  @keyframes confettiRain {
-    0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 0; }
-    6%   { opacity: 1; }
-    85%  { opacity: 1; }
-    100% { transform: translateY(110vh) rotate(720deg) scale(0.4); opacity: 0; }
-  }
 `;
-
-const CONFETTI_POOLS = {
-  cyber:  ['🏓', '🎉', '⭐', '✨', '💚', '🎊', '🏆', '💰', '🟢', '🎯'],
-  arcade: ['👾', '🏓', '💥', '🟩', '⭐', '🔥', '💚', '🕹️', '🏆', '✨'],
-  zen:    ['🌿', '🍃', '🌳', '🍀', '✨', '🌸', '🌾', '🎋', '🌱', '🏅'],
-};
-
-function generateConfetti(count = 40, pool = CONFETTI_POOLS.cyber, mini = false) {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    emoji:  pool[Math.floor(Math.random() * pool.length)],
-    x:      Math.random() * 100,
-    delay:  mini ? Math.random() * 0.3 : Math.random() * 0.8,
-    dur:    mini ? 1.2 + Math.random() * 0.8 : 2 + Math.random() * 2,
-    size:   14 + Math.random() * 22,
-    rotate: Math.random() * 360,
-  }));
-}
-
 
 // ─── Player card ──────────────────────────────────────────────────────────────
 function PlayerCard({ player, totalWeeks, onSettle, isSettling, justSettled, openDetails, onToggleDetails, breakdown }) {
@@ -211,19 +262,16 @@ export default function DashboardTab({ data, history, playSound }) {
   const [openDetails,    setOpenDetails]    = useState(null);
   const [settlingPlayer, setSettlingPlayer] = useState(null);
   const [justSettled,    setJustSettled]    = useState(null);
-  const [confetti,       setConfetti]       = useState([]);
   const [confirmSettle,  setConfirmSettle]  = useState(null); // { playerName, debt }
 
-  const confettiTimer = useRef(null);
   const { showSuccess, showError } = useToast();
   const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer();
 
   const totalWeeks = data.summary?.totalWeeks ?? 0;
   const theme = useTheme();
   const T = useThemeTokens();
+  const { launch: launchConfetti, canvas: confettiCanvas } = useConfetti();
 
-  // Cleanup confetti timer on unmount
-  useEffect(() => () => clearTimeout(confettiTimer.current), []);
 
   const handleSettleRequest = useCallback((playerName) => {
     const player = data.players?.find(p => p.name === playerName);
@@ -262,15 +310,10 @@ export default function DashboardTab({ data, history, playSound }) {
       .every(p => p.currentDebt <= SETTLED_THRESHOLD);
 
     if (willAllBeSettled && nonOrg.length > 0) {
-      clearTimeout(confettiTimer.current);
-      setConfetti(generateConfetti(50, pool, false));
-      confettiTimer.current = setTimeout(() => setConfetti([]), 6000);
+      launchConfetti(60, pool);
       playSound(SOUND_TYPES.COIN);
     } else {
-      // Mini confetti burst on every single payment
-      clearTimeout(confettiTimer.current);
-      setConfetti(generateConfetti(18, pool, true));
-      confettiTimer.current = setTimeout(() => setConfetti([]), 3000);
+      launchConfetti(22, pool);
     }
 
     startUndo(playerName, result.previousValue);
@@ -313,6 +356,7 @@ export default function DashboardTab({ data, history, playSound }) {
   return (
     <>
       <style>{SETTLE_STYLES}</style>
+      {confettiCanvas}
 
       <SettleConfirmModal
         playerName={confirmSettle?.playerName}
@@ -321,22 +365,6 @@ export default function DashboardTab({ data, history, playSound }) {
         onCancel={() => setConfirmSettle(null)}
         T={T}
       />
-
-      {/* Confetti burst when everyone settled */}
-      {confetti.map(c => (
-        <div
-          key={c.id}
-          className="fixed pointer-events-none z-50"
-          style={{
-            left: `${c.x}%`, top: '-60px',
-            fontSize: `${c.size}px`,
-            animation: `confettiRain ${c.dur}s ${c.delay}s ease-in backwards`,
-            transform: `rotate(${c.rotate}deg)`,
-          }}
-        >
-          {c.emoji}
-        </div>
-      ))}
 
       <div className="space-y-6 animate-in fade-in duration-300">
 
