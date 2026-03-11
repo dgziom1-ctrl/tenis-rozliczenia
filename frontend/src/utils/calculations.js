@@ -80,16 +80,20 @@ export function calculateDebtBreakdown(playerName, debtAmount, history) {
 // Assembles the full breakdown object used by the Dashboard UI.
 // Keeps the sessions/payments/totals/balance shape that PlayerCard expects.
 export function buildDebtDisplayData(player, history, payments) {
-  const sessions = calculateDebtBreakdown(player.name, player.currentDebt, history);
-
   const playerPayments = (payments?.[player.name] || []).map(p => ({
     date:   p.date,
     amount: p.amount,
     id:     p.id,
   }));
 
+  const totalPaid = roundToTwoDecimals(playerPayments.reduce((s, p) => s + (p.amount || 0), 0));
+
+  // Pass gross session cost (currentDebt + totalPaid) so ALL attended sessions are shown,
+  // not just sessions worth the net debt. Without this, partial payments hide earlier sessions.
+  const grossSessionCost = roundToTwoDecimals(player.currentDebt + totalPaid);
+  const sessions = calculateDebtBreakdown(player.name, grossSessionCost, history);
+
   const totalSessions = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
-  const totalPaid     = roundToTwoDecimals(playerPayments.reduce((s, p) => s + (p.amount || 0), 0));
   const balance       = roundToTwoDecimals(totalSessions - totalPaid);
 
   return { sessions, payments: playerPayments, totalSessions, totalPaid, balance };

@@ -2,7 +2,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useThemeTokens } from '../../context/ThemeContext';
 import { formatDate, formatAmountShort } from '../../utils/format';
 
-export default function BreakdownPanel({ playerName, open, onToggle, breakdown, onRemovePayment }) {
+export default function BreakdownPanel({ playerName, open, onToggle, breakdown, adminMode, onRemovePayment }) {
   const T = useThemeTokens();
 
   return (
@@ -52,14 +52,16 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
                     <span className="font-bold" style={{ color: T.accentText }}>
                       +{formatAmountShort(item.amount)} zł
                     </span>
-                    <button
-                      onClick={() => onRemovePayment(playerName, item.id)}
-                      className="opacity-40 hover:opacity-100 transition-opacity leading-none"
-                      style={{ color: '#f87171' }}
-                      title="Usuń wpłatę"
-                    >
-                      🗑
-                    </button>
+                    {adminMode && (
+                      <button
+                        onClick={() => onRemovePayment(playerName, item.id)}
+                        className="opacity-40 hover:opacity-100 transition-opacity leading-none"
+                        style={{ color: '#f87171' }}
+                        title="Usuń wpłatę"
+                      >
+                        🗑
+                      </button>
+                    )}
                   </span>
                 </Row>
               ))}

@@ -155,7 +155,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                 </button>
               ) : (
                 <span className="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-bold text-cyan-700 border border-cyan-900">
-                  skarbnik
+                  organizator
                 </span>
               )}
             </div>

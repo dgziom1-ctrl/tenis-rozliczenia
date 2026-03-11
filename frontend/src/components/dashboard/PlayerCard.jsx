@@ -25,8 +25,22 @@ export default function PlayerCard({
   const [isSaving,    setIsSaving]    = useState(false);
   const [lastPayment, setLastPayment] = useState(null);
   const [undoSecs,    setUndoSecs]    = useState(0);
+  const [adminMode,   setAdminMode]   = useState(false);
+  const clickCount   = useRef(0);
+  const clickTimer   = useRef(null);
   const undoInterval = useRef(null);
   const cardRef      = useRef(null);
+
+  const handleAmountClick = useCallback(() => {
+    clickCount.current += 1;
+    clearTimeout(clickTimer.current);
+    if (clickCount.current >= 5) {
+      clickCount.current = 0;
+      setAdminMode(prev => !prev);
+    } else {
+      clickTimer.current = setTimeout(() => { clickCount.current = 0; }, 1000);
+    }
+  }, []);
 
   const clearPayUndo = useCallback(() => {
     clearInterval(undoInterval.current);
@@ -94,11 +108,6 @@ export default function PlayerCard({
         <h3 className={`font-black text-xl ${headerText} flex items-center gap-2`}>
           <span className="mini-paddle" /> {player.name}
         </h3>
-        {isOrganizer && (
-          <p className="text-xs font-bold tracking-widest mt-1 text-cyan-500">
-            📋 ORGANIZATOR · ogarnia rezerwacje
-          </p>
-        )}
       </div>
 
       <div className="p-5 flex flex-col flex-1">
@@ -110,15 +119,18 @@ export default function PlayerCard({
 
         {isOrganizer ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-cyan-500 text-xs tracking-widest font-bold">ogarnia rezerwację 🏓</p>
+            <p className="text-cyan-400 text-sm font-bold tracking-wide">📋 ogarnia rezerwacje 🏓</p>
           </div>
         ) : (
           <>
             {/* Balance display */}
-            <div className={`p-4 rounded-xl border-2 shadow-inner mb-4 text-center
-              ${hasDebt   ? 'bg-magenta-950/30 border-magenta-800'
-              : hasCredit ? 'bg-yellow-950/30 border-yellow-800'
-              :             'bg-emerald-950/30 border-emerald-900'}`}>
+            <div
+              className={`p-4 rounded-xl border-2 shadow-inner mb-4 text-center cursor-default select-none
+                ${hasDebt   ? 'bg-magenta-950/30 border-magenta-800'
+                : hasCredit ? 'bg-yellow-950/30 border-yellow-800'
+                :             'bg-emerald-950/30 border-emerald-900'}`}
+              onClick={handleAmountClick}
+            >
               {justSettled ? (
                 <div style={{ animation: 'checkPop 0.4s ease-out forwards' }}>
                   <CheckCircle2 className="text-emerald-400 mx-auto" size={32} />
@@ -139,6 +151,9 @@ export default function PlayerCard({
                   </p>
                 </>
               )}
+              {adminMode && (
+                <p className="text-xs text-rose-500 font-bold tracking-widest mt-1">🔓 tryb edycji</p>
+              )}
             </div>
 
             {/* Breakdown */}
@@ -148,6 +163,7 @@ export default function PlayerCard({
                 open={openDetails}
                 onToggle={() => onToggleDetails(player.name)}
                 breakdown={breakdown}
+                adminMode={adminMode}
                 onRemovePayment={onRemovePayment}
               />
             )}
