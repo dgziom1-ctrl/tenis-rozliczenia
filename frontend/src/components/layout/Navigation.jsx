@@ -1,40 +1,52 @@
-import { LayoutDashboard, Settings, History, Users, Trophy } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, History, Users, Trophy } from 'lucide-react';
 
+const tabs = [
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Home',    shortLabel: 'Home'    },
+  { id: 'attendance', icon: Trophy,           label: 'Ranking', shortLabel: 'Ranking' },
+  { id: 'admin',      icon: PlusCircle,       label: 'Dodaj',   shortLabel: 'Dodaj'   },
+  { id: 'history',    icon: History,          label: 'Historia',shortLabel: 'Historia'},
+  { id: 'players',    icon: Users,            label: 'Gracze',  shortLabel: 'Gracze'  },
+];
+
+/**
+ * Tab navigation — all styles live in index.css, themed via [data-theme] attribute on <html>.
+ */
 export default function Navigation({ activeTab, setActiveTab }) {
-  const tabs = [
-    { id: 'dashboard',  icon: LayoutDashboard, label: 'Dashboard'    },
-    { id: 'attendance', icon: Trophy,           label: 'Frekwencja'   },
-    { id: 'admin',      icon: Settings,         label: 'Panel Admina' },
-    { id: 'history',    icon: History,          label: 'Historia'     },
-    { id: 'players',    icon: Users,            label: 'Gracze'       },
-  ];
-
-  const btnBase = 'flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-200 border-2';
-  const btnActive = 'bg-cyan-950 border-cyan-400 text-cyan-300 shadow-[0_0_15px_#00f3ff]';
-  const btnInactive = 'bg-black/40 border-transparent text-cyan-800 hover:border-cyan-700 hover:text-cyan-500 hover:bg-black/60';
-
   return (
-    <div className="cyber-box p-3 rounded-b-2xl mb-10">
-      {/* Dashboard — pełna szerokość */}
-      <button
-        onClick={() => setActiveTab('dashboard')}
-        className={`w-full mb-2 ${btnBase} ${activeTab === 'dashboard' ? btnActive : btnInactive}`}
-      >
-        <LayoutDashboard size={20} /> Dashboard
-      </button>
+    <>
+      {/* ── Desktop horizontal tab bar ─────────────────── */}
+      <nav className="desktop-nav" role="navigation" aria-label="Nawigacja główna">
+        <div className="desktop-nav-inner">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              aria-pressed={activeTab === tab.id}
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              className={`desktop-tab ${activeTab === tab.id ? 'active' : ''}`}
+            >
+              <tab.icon size={16} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
+              {tab.label.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </nav>
 
-      {/* Pozostałe 4 — siatka 2x2 */}
-      <div className="grid grid-cols-2 gap-2">
-        {tabs.slice(1).map(tab => (
+      {/* ── Mobile bottom bar ──────────────────────────── */}
+      <nav className="mobile-nav" role="navigation" aria-label="Nawigacja główna">
+        {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`${btnBase} ${activeTab === tab.id ? btnActive : btnInactive}`}
+            aria-label={tab.label}
+            aria-current={activeTab === tab.id ? 'page' : undefined}
+            className={`mobile-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
           >
-            <tab.icon size={18} /> {tab.label}
+            <tab.icon size={21} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
+            <span className="mobile-nav-label">{tab.shortLabel.toUpperCase()}</span>
           </button>
         ))}
-      </div>
-    </div>
+      </nav>
+    </>
   );
 }

@@ -1,0 +1,91 @@
+name: Automatyczny Backup Realtime Database
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'   # every Sunday at midnight UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install firebase-admin
+        run: |
+          mkdir -p /tmp/backup-runner
+          cd /tmp/backup-runner
+          npm init -y
+          npm install firebase-admin
+
+      - name: Run Backup Script
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          KEEP_BACKUPS: '4'
+        run: |
+          cat << 'EOF' > /tmp/backup-runner/backup.js
+          const admin = require('firebase-admin');
+          const fs    = require('fs');
+          const path  = require('path');
+
+          const KEEP_BACKUPS = parseInt(process.env.KEEP_BACKUPS || '4', 10);
+          const BACKUP_DIR   = path.join(process.env.GITHUB_WORKSPACE, 'backups');
+          const DB_URL       = 'https://tenis-rozliczenia-default-rtdb.europe-west1.firebasedatabase.app';
+
+          async function run() {
+            try {
+              const sa = JSON.parse(process.env.SERVICE_ACCOUNT);
+              admin.initializeApp({ credential: admin.credential.cert(sa), databaseURL: DB_URL });
+
+              console.log('--- Start backup RTDB ---');
+
+              const snapshot = await admin.database().ref('/').once('value');
+              const data     = snapshot.val();
+
+              if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
+
+              // Write new backup
+              const date     = new Date().toISOString().split('T')[0];
+              const fileName = path.join(BACKUP_DIR, `backup_rtdb_${date}.json`);
+              fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
+              console.log(`Sukces! Plik zapisany: ${fileName}`);
+
+              // Keep only the KEEP_BACKUPS newest files
+              const files = fs
+                .readdirSync(BACKUP_DIR)
+                .filter(f => f.startsWith('backup_rtdb_') && f.endsWith('.json'))
+                .sort()     // lexicographic == chronological for YYYY-MM-DD
+                .reverse(); // newest first
+
+              files.slice(KEEP_BACKUPS).forEach(f => {
+                fs.unlinkSync(path.join(BACKUP_DIR, f));
+                console.log(`Usunięto stary backup: ${f}`);
+              });
+
+              process.exit(0);
+            } catch (err) {
+              console.error('BLAD:', err.message);
+              process.exit(1);
+            }
+          }
+
+          run();
+          EOF
+          node /tmp/backup-runner/backup.js
+
+      - name: Zapisz do repozytorium
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add backups/
+          git commit -m "Automatyczny backup RTDB: $(date +'%Y-%m-%d') (ostatnie 4)" || echo "Brak zmian do zacommitowania"
+          git push

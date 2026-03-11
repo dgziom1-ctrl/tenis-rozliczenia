@@ -1,192 +1,214 @@
-import { useState, useEffect, useRef } from 'react';
-import { CheckCircle2, Receipt, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
-import { settlePlayer, undoSettle } from '../../firebase';
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import { CheckCircle2, RotateCcw } from 'lucide-react';
+import { settlePlayer, undoSettle, addPayment, removePayment } from '../../firebase/index';
+import { SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants';
+import { buildDebtDisplayData } from '../../utils/calculations';
+import { useToast } from '../common/Toast';
+import { useUndoTimer } from '../../hooks/useUndoTimer';
+import { useTheme, useThemeTokens } from '../../context/ThemeContext';
+import ConfettiOverlay, { CONFETTI_POOLS, generateConfetti } from './ConfettiOverlay';
+import PlayerCard from './PlayerCard';
+import SettleConfirmModal from './SettleConfirmModal';
 
-const UNDO_SECONDS = 10;
+export default function DashboardTab({ data, history, playSound }) {
+  const [openDetails,   setOpenDetails]   = useState(null);
+  const [justSettled,   setJustSettled]   = useState(null);
+  const [confirmSettle, setConfirmSettle] = useState(null); // { playerName, debt }
+  const [pinnedPlayer,  setPinnedPlayer]  = useState(null);
+  const [confetti,      setConfetti]      = useState([]);
 
-const RANKS = [
-  { min: 90, emoji: '🏆', name: 'LEGENDA',  color: 'text-yellow-400' },
-  { min: 75, emoji: '⭐',  name: 'MISTRZ',   color: 'text-orange-400' },
-  { min: 60, emoji: '🎖️', name: 'WETERAN',  color: 'text-violet-400' },
-  { min: 45, emoji: '🔥', name: 'STAŁY',    color: 'text-rose-400'   },
-  { min: 20, emoji: '👀', name: 'GOŚĆ',     color: 'text-cyan-400'   },
-  { min:  0, emoji: '👻', name: 'DUCH',     color: 'text-slate-500'  },
-];
+  const { showSuccess, showError }                             = useToast();
+  const { undoToast, progressPct, startUndo, dismissUndo }    = useUndoTimer();
+  const theme = useTheme();
+  const T     = useThemeTokens();
 
-const getRank = (pct) => RANKS.find(r => pct >= r.min) || RANKS[RANKS.length - 1];
+  const totalWeeks    = data.summary?.totalWeeks ?? 0;
+  const confettiTimer = useRef(null);
+  useEffect(() => () => clearTimeout(confettiTimer.current), []);
 
-export default function DashboardTab({ data, history, refreshData, playSound }) {
-  const [openDetails, setOpenDetails] = useState(null);
-  const [undoToast,   setUndoToast]   = useState(null);
-
-  const timerRef    = useRef(null);
-  const intervalRef = useRef(null);
-
-  const totalWeeks = data.summary?.total_weeks || 0;
-
-  useEffect(() => () => {
-    clearTimeout(timerRef.current);
-    clearInterval(intervalRef.current);
-  }, []);
-
-  const handleSettleDebt = async (playerName) => {
-    clearTimeout(timerRef.current);
-    clearInterval(intervalRef.current);
-    playSound('success');
-    const previousValue = await settlePlayer(playerName);
-    setUndoToast({ playerName, previousValue, secondsLeft: UNDO_SECONDS });
+  // ── Settle flow ──────────────────────────────────────────────────────────
+  const handleSettleRequest = useCallback((playerName) => {
+    const player = data.players?.find(p => p.name === playerName);
+    if (!player) return;
+    playSound(SOUND_TYPES.CLICK);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => setConfirmSettle({ playerName, debt: player.currentDebt }), 150);
+  }, [data.players, playSound]);
 
-    intervalRef.current = setInterval(() => {
-      setUndoToast(prev => {
-        if (!prev) return null;
-        if (prev.secondsLeft <= 1) { clearInterval(intervalRef.current); return null; }
-        return { ...prev, secondsLeft: prev.secondsLeft - 1 };
-      });
-    }, 1000);
+  const handleConfirmSettle = useCallback(async () => {
+    if (!confirmSettle) return;
+    const { playerName } = confirmSettle;
+    setConfirmSettle(null);
+    setJustSettled(playerName);
+    playSound(SOUND_TYPES.SUCCESS);
 
-    timerRef.current = setTimeout(() => setUndoToast(null), UNDO_SECONDS * 1000);
-  };
-
-  const handleUndo = async () => {
-    if (!undoToast) return;
-    clearTimeout(timerRef.current);
-    clearInterval(intervalRef.current);
-    playSound('click');
-    await undoSettle(undoToast.playerName, undoToast.previousValue);
-    setUndoToast(null);
-  };
-
-  const getDebtBreakdown = (playerName, currentDebt) => {
-    if (currentDebt <= 0 || !history) return [];
-    let accumulated = 0;
-    const breakdown = [];
-    for (const session of history) {
-      if (session.present_players.includes(playerName) && !session.multisport_players.includes(playerName)) {
-        accumulated += session.cost_per_person;
-        breakdown.push({ date: session.date_played, amount: session.cost_per_person });
-        if (accumulated >= currentDebt - 0.05) break;
-      }
+    const result = await settlePlayer(playerName);
+    if (!result.success) {
+      setJustSettled(null);
+      showError(result.error || 'Nie udało się rozliczyć gracza');
+      return;
     }
-    return breakdown;
-  };
 
-  const toggleDetails = (playerName) => {
-    playSound('click');
-    setOpenDetails(prev => prev === playerName ? null : playerName);
-  };
+    setTimeout(() => setJustSettled(null), 1500);
 
-  const progressPct = undoToast ? (undoToast.secondsLeft / UNDO_SECONDS) * 100 : 0;
+    const pool       = CONFETTI_POOLS[theme] ?? CONFETTI_POOLS.cyber;
+    const nonOrg     = data.players?.filter(p => p.name !== ORGANIZER_NAME) ?? [];
+    const allSettled = nonOrg.filter(p => p.name !== playerName).every(p => p.currentDebt <= SETTLED_THRESHOLD);
 
-  // Organizer na koniec
-  const sorted = data.players
-    ? [
-        ...data.players.filter(p => p.name !== 'Kamil'),
-        ...data.players.filter(p => p.name === 'Kamil'),
-      ]
-    : [];
+    clearTimeout(confettiTimer.current);
+    if (allSettled && nonOrg.length > 0) {
+      setConfetti(generateConfetti(55, pool));
+      confettiTimer.current = setTimeout(() => setConfetti([]), 5000);
+      playSound(SOUND_TYPES.COIN);
+    } else {
+      setConfetti(generateConfetti(22, pool));
+      confettiTimer.current = setTimeout(() => setConfetti([]), 3500);
+    }
+
+    startUndo(playerName, result.previousValue, result.previousPayments);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [confirmSettle, data.players, playSound, showError, startUndo, theme]);
+
+  const handleUndo = useCallback(async () => {
+    if (!undoToast) return;
+    playSound(SOUND_TYPES.CLICK);
+    const result = await undoSettle(undoToast.playerName, undoToast.previousValue, undoToast.previousPayments);
+    if (!result.success) {
+      showError(result.error || 'Nie udało się cofnąć rozliczenia');
+      return;
+    }
+    dismissUndo();
+    showSuccess('Rozliczenie cofnięte');
+  }, [undoToast, playSound, showError, showSuccess, dismissUndo]);
+
+  // ── Payment handlers ─────────────────────────────────────────────────────
+  const handleAddPayment = useCallback(async (playerName, amount) => {
+    playSound(SOUND_TYPES.COIN);
+    const result = await addPayment(playerName, amount);
+    if (!result.success) showError(result.error || 'Nie udało się zapisać wpłaty');
+    return result;
+  }, [playSound, showError]);
+
+  const handleRemovePayment = useCallback(async (playerName, paymentId) => {
+    playSound(SOUND_TYPES.CLICK);
+    const result = await removePayment(playerName, paymentId);
+    if (!result.success) showError(result.error || 'Nie udało się cofnąć wpłaty');
+  }, [playSound, showError]);
+
+  const toggleDetails = useCallback((playerName) => {
+    playSound(SOUND_TYPES.CLICK);
+    setOpenDetails(prev => (prev === playerName ? null : playerName));
+  }, [playSound]);
+
+  // Uses new unified buildDebtDisplayData — consistent with calculateDebt
+  const getBreakdown = useCallback(
+    (player) => buildDebtDisplayData(player, history, data.payments),
+    [history, data.payments],
+  );
+
+  // ── Sorted players ───────────────────────────────────────────────────────
+  const sortedPlayers = useMemo(() => {
+    if (!data.players) return [];
+    const debtors  = data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) => {
+      if (a.name === pinnedPlayer) return -1;
+      if (b.name === pinnedPlayer) return  1;
+      return b.currentDebt - a.currentDebt || a.name.localeCompare(b.name, 'pl');
+    });
+    const organizer = data.players.filter(p => p.name === ORGANIZER_NAME);
+    return [...debtors, ...organizer];
+  }, [data.players, pinnedPlayer]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <>
+      <ConfettiOverlay pieces={confetti} />
 
-      {/* UNDO TOAST */}
-      {undoToast && (
-        <div className="cyber-box border-emerald-600 rounded-2xl p-4 flex items-center justify-between gap-4 relative overflow-hidden bg-emerald-950/30">
-          <div className="absolute bottom-0 left-0 h-1 bg-emerald-500 transition-all duration-1000"
-               style={{ width: `${progressPct}%` }} />
-          <div className="flex items-center gap-2 min-w-0 flex-wrap">
-            <CheckCircle2 className="text-emerald-400 flex-shrink-0" size={20} />
-            <span className="text-emerald-300 font-bold text-sm">
-              Opłacono: <span className="text-white">{undoToast.playerName}</span>
-            </span>
-            <span className="text-emerald-700 font-mono text-xs flex-shrink-0">({undoToast.secondsLeft}s)</span>
-          </div>
-          <button onClick={handleUndo}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-emerald-500 text-emerald-300 hover:bg-emerald-500 hover:text-black font-bold text-sm transition-all flex-shrink-0">
-            <RotateCcw size={14} /> COFNIJ
-          </button>
-        </div>
-      )}
+      <SettleConfirmModal
+        playerName={confirmSettle?.playerName}
+        debt={confirmSettle?.debt}
+        onConfirm={handleConfirmSettle}
+        onCancel={() => setConfirmSettle(null)}
+        T={T}
+      />
 
-      {/* PLAYER CARDS — organizer na końcu, bez korony, bez złotego koloru */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {sorted.map((player) => {
-          const isOrganizer   = player.name === 'Kamil';
-          const hasDebt       = player.current_debt > 0.01;
-          const showBreakdown = openDetails === player.name;
-          const breakdownList = hasDebt ? getDebtBreakdown(player.name, player.current_debt) : [];
-          const pct           = totalWeeks > 0 ? Math.round((player.attendance_count / totalWeeks) * 100) : 0;
-          const rank          = getRank(pct);
+      <div className="space-y-6 animate-in fade-in duration-300">
 
-          const cardBorder = hasDebt ? 'border-magenta-800 hover:border-magenta-500' : 'border-cyan-800 hover:border-cyan-500';
-          const headerBg   = hasDebt ? 'bg-magenta-950/50' : 'bg-cyan-950/50';
-          const headerText = hasDebt ? 'text-magenta-300 text-neon-pink' : 'text-cyan-300 text-neon-blue';
-          const debtBox    = hasDebt ? 'bg-magenta-950/30 border-magenta-800 text-magenta-300' : 'bg-cyan-950/30 border-cyan-800 text-cyan-300';
-          const btnStyle   = hasDebt
-            ? 'bg-magenta-950 border-magenta-500 text-magenta-300 hover:bg-magenta-500 hover:text-black hover:shadow-[0_0_15px_#ff00ff]'
-            : 'bg-black border-cyan-900 text-cyan-700 opacity-50 cursor-not-allowed';
-
-          return (
-            <div key={player.name} className={`cyber-box ${cardBorder} rounded-2xl overflow-hidden transition-all`}>
-              <div className={`${headerBg} p-4 border-b-2 ${hasDebt ? 'border-magenta-600' : 'border-cyan-600'}`}>
-                <h3 className={`font-black text-xl ${headerText} flex items-center gap-2`}>
-                  <span className="mini-paddle"></span> {player.name}
-                </h3>
-              </div>
-              <div className="p-6 text-center">
-                <div className="text-sm text-cyan-700 mb-4 flex flex-col gap-1 items-center">
-                  <span>Obecność: <span className="text-cyan-300 text-lg">{player.attendance_count}</span> / {totalWeeks} ({pct}%)</span>
-                  <span className={`font-bold ${rank.color}`}>{rank.emoji} {rank.name}</span>
-                </div>
-
-                {isOrganizer ? (
-                  <div className="bg-cyan-950/30 border-cyan-800 text-cyan-600 p-4 rounded-xl border-2 shadow-inner mb-4 mt-10">
-                    <p className="text-sm font-bold tracking-widest">SKARBNIK</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className={`${debtBox} p-4 rounded-xl border-2 shadow-inner mb-4`}>
-                      <p className="text-3xl neon-amount">{player.current_debt.toFixed(2)} <span className="text-sm">PLN</span></p>
-                    </div>
-
-                    {hasDebt && (
-                      <div className="mb-6">
-                        <button onClick={() => toggleDetails(player.name)}
-                          className="text-xs font-bold text-cyan-500 hover:text-cyan-300 flex items-center justify-center gap-1 mx-auto py-1 px-2 rounded hover:bg-cyan-900/30 transition-colors">
-                          {showBreakdown ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}
-                          SZCZEGÓŁY ZALEGŁOŚCI
-                        </button>
-                        {showBreakdown && (
-                          <div className="mt-2 bg-black/60 p-3 rounded-lg text-xs border border-cyan-900/50 text-left space-y-1 shadow-inner">
-                            {breakdownList.length > 0 ? breakdownList.map((item, idx) => (
-                              <div key={idx} className="flex justify-between border-b border-cyan-900/30 pb-1 last:border-0 pt-1 first:pt-0">
-                                <span className="text-cyan-600 tracking-wider">{item.date}</span>
-                                <span className="text-rose-400 font-bold">{item.amount.toFixed(2)} PLN</span>
-                              </div>
-                            )) : <div className="text-center text-cyan-800">Przeliczam dane...</div>}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {hasDebt ? (
-                      <button onClick={() => handleSettleDebt(player.name)}
-                        className={`w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 ${btnStyle}`}>
-                        <Receipt size={18} /> OZNACZ OPŁACONE
-                      </button>
-                    ) : (
-                      <button disabled
-                        className={`w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 mt-10 ${btnStyle}`}>
-                        <CheckCircle2 size={18} /> ROZLICZONY
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
+        {/* Undo toast */}
+        {undoToast && (
+          <div
+            className="p-4 flex items-center justify-between gap-4 relative overflow-hidden"
+            style={{
+              background:   T.undoBg,
+              border:       `2px solid ${T.undoBorder}`,
+              borderRadius: T.modalRadius,
+              boxShadow:    T.modalShadow,
+            }}
+          >
+            <div
+              className="absolute bottom-0 left-0 h-1 transition-all duration-1000"
+              style={{ width: `${progressPct}%`, background: T.undoProgressBg }}
+            />
+            <div className="flex items-center gap-2 min-w-0 flex-wrap">
+              <CheckCircle2 style={{ color: T.undoText }} className="flex-shrink-0" size={20} />
+              <span
+                className="font-bold text-sm"
+                style={{ color: T.undoText, fontFamily: T.fontFamily, fontSize: T.fontSize }}
+              >
+                Opłacono: <span style={{ color: T.bodyText, fontFamily: 'inherit' }}>{undoToast.playerName}</span>
+              </span>
+              <span className="font-mono text-xs flex-shrink-0" style={{ color: T.mutedText }}>
+                ({undoToast.secondsLeft}s)
+              </span>
             </div>
-          );
-        })}
+            <button
+              onClick={handleUndo}
+              className="flex items-center gap-2 px-4 py-2 font-bold text-sm flex-shrink-0 hover:opacity-80 transition-all"
+              style={{
+                border:       `2px solid ${T.undoBorder}`,
+                color:        T.undoText,
+                borderRadius: T.modalRadius,
+                background:   'transparent',
+              }}
+            >
+              <RotateCcw size={14} /> COFNIJ
+            </button>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {totalWeeks === 0 && (
+          <div className="cyber-box rounded-2xl p-10 text-center border-cyan-900">
+            <div className="text-5xl mb-4">🏓</div>
+            <p className="text-cyan-300 font-black text-lg mb-2">Brak rozgrywek</p>
+            <p className="text-cyan-700 text-sm">
+              Dodaj pierwszą sesję w zakładce{' '}
+              <span className="text-cyan-400 font-bold">Dodaj sesję</span>
+            </p>
+          </div>
+        )}
+
+        {/* Player cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {sortedPlayers.map((player) => {
+            const showBreakdown = openDetails === player.name;
+            return (
+              <PlayerCard
+                key={player.name}
+                player={player}
+                totalWeeks={totalWeeks}
+                onSettle={handleSettleRequest}
+                justSettled={justSettled === player.name}
+                openDetails={showBreakdown}
+                onToggleDetails={toggleDetails}
+                breakdown={showBreakdown ? getBreakdown(player) : null}
+                onAddPayment={handleAddPayment}
+                onRemovePayment={handleRemovePayment}
+                onPin={setPinnedPlayer}
+                onUnpin={() => setPinnedPlayer(null)}
+              />
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

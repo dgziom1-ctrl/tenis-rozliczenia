@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { ToastProvider } from './components/common/Toast';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
 import DashboardTab from './components/dashboard/DashboardTab';
@@ -6,117 +7,224 @@ import AttendanceTab from './components/attendance/AttendanceTab';
 import AdminTab from './components/admin/AdminTab';
 import HistoryTab from './components/history/HistoryTab';
 import PlayersTab from './components/players/PlayersTab';
-import { subscribeToData } from './firebase';
+import { subscribeToData } from './firebase/index';
+import { SOUND_TYPES, TABS } from './constants';
+import { SpinnerOverlay } from './components/common/LoadingSkeleton';
+import PWAInstallBanner from './components/common/PWAInstallBanner';
+import { useAudio } from './hooks/useAudio';
+import { ThemeContext } from './context/ThemeContext';
 
-const synth = {
-  ctx: null,
-  init: () => { if (!synth.ctx) synth.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-  play: (type, isMuted) => {
-    if (isMuted) return;
-    synth.init();
-    const ctx = synth.ctx;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    const now = ctx.currentTime;
-    if (type === 'tab') {
-      osc.type = 'square'; osc.frequency.setValueAtTime(800, now);
-      gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-      osc.start(now); osc.stop(now + 0.05);
-    } else if (type === 'click') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now);
-      gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-      osc.start(now); osc.stop(now + 0.03);
-    } else if (type === 'success') {
-      osc.type = 'square'; osc.frequency.setValueAtTime(440, now);
-      osc.frequency.setValueAtTime(554.37, now + 0.1);
-      osc.frequency.setValueAtTime(659.25, now + 0.2);
-      osc.frequency.setValueAtTime(880, now + 0.3);
-      gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.4);
-      osc.start(now); osc.stop(now + 0.4);
-    } else if (type === 'delete') {
-      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now);
-      osc.frequency.exponentialRampToValueAtTime(50, now + 0.3);
-      gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.3);
-      osc.start(now); osc.stop(now + 0.3);
-    }
-  }
+const ZEN_LEAVES = ['🍃','🌿','🍀','🌸','🌾','🍂','🌱','🎋'];
+const ZEN_LEAF_CONFIG = Array.from({ length: 12 }, (_, i) => ({
+  id:    i,
+  emoji: ZEN_LEAVES[i % ZEN_LEAVES.length],
+  left:  5 + (i * 8.2) % 90,
+  size:  14 + (i * 7) % 16,
+  dur:   10 + (i * 1.7) % 8,
+  delay: (i * 2.1) % 14,
+  drift: -40 + (i * 11) % 80,
+  rot:   120 + (i * 37) % 180,
+}));
+
+function ZenLeaves() {
+  return (
+    <>
+      {ZEN_LEAF_CONFIG.map(l => (
+        <div
+          key={l.id}
+          className="zen-leaf"
+          style={{
+            left:          `${l.left}%`,
+            fontSize:      `${l.size}px`,
+            '--leaf-dur':   `${l.dur}s`,
+            '--leaf-delay': `${l.delay}s`,
+            '--leaf-drift': `${l.drift}px`,
+            '--leaf-rot':   `${l.rot}deg`,
+          }}
+        >
+          {l.emoji}
+        </div>
+      ))}
+    </>
+  );
+}
+
+const INITIAL_APP_DATA = {
+  summary: {},
+  players: [],
+  playerNames: [],
+  defaultMultiPlayers: [],
+  deletedPlayers: [],
+  paidUntilWeek: {},
+  history: [],
 };
 
-function App() {
-  const [activeTab,    setActiveTab]    = useState('dashboard');
-  const [isMuted,      setIsMuted]      = useState(false);
-  const [appData,      setAppData]      = useState({
-    summary: {},
-    players: [],
-    playerNames: [],
-    defaultMultiPlayers: [],
-    deletedPlayers: [],
-    history: [],
+function useTheme() {
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem('ponk-theme') || 'cyber'; } catch { return 'cyber'; }
   });
-  const [isConnected, setIsConnected] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = subscribeToData((data) => {
-      setAppData(data);
-      setIsConnected(true);
-    });
-    return () => unsubscribe();
+  const persistTheme = useCallback((next) => {
+    setTheme(next);
+    try { localStorage.setItem('ponk-theme', next); } catch {}
+    document.body.classList.toggle('theme-arcade-bg', next === 'arcade');
+    document.body.classList.toggle('theme-zen-bg', next === 'zen');
+    // Drives CSS selectors in index.css (Navigation, etc.)
+    document.documentElement.dataset.theme = next === 'cyber' ? '' : next;
   }, []);
 
-  const playSound  = (type) => synth.play(type, isMuted);
-  const switchTab  = (tabId) => { playSound('tab'); setActiveTab(tabId); };
-  const refreshData = () => {};
+  // Sync on initial load
+  useEffect(() => {
+    const stored = (() => { try { return localStorage.getItem('ponk-theme'); } catch { return null; } })();
+    document.body.classList.toggle('theme-arcade-bg', stored === 'arcade');
+    document.body.classList.toggle('theme-zen-bg', stored === 'zen');
+    document.documentElement.dataset.theme = stored === 'arcade' || stored === 'zen' ? stored : '';
+  }, []);
+
+  return [theme, persistTheme];
+}
+
+function useScrolled(threshold = 80) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > threshold);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [threshold]);
+
+  return scrolled;
+}
+
+function AppContent() {
+  const [activeTab,   setActiveTab]   = useState(TABS.DASHBOARD);
+  const [isMuted,     setIsMuted]     = useState(false);
+  const [appData,     setAppData]     = useState(INITIAL_APP_DATA);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading,   setIsLoading]   = useState(true);
+  const [loadTimeout, setLoadTimeout] = useState(false);
+
+  const [theme, persistTheme] = useTheme();
+  const scrolled = useScrolled();
+  const { playSound } = useAudio(isMuted, theme);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoadTimeout(true), 8000);
+    const unsub = subscribeToData((data) => {
+      clearTimeout(timer);
+      setAppData(data);
+      setIsConnected(true);
+      setIsLoading(false);
+      setLoadTimeout(false);
+    });
+    return () => { clearTimeout(timer); if (typeof unsub === 'function') unsub(); };
+  }, []);
+
+  const switchTab = useCallback((id) => {
+    playSound(SOUND_TYPES.TAB);
+    setActiveTab(id);
+  }, [playSound]);
+
+  const toggleTheme = useCallback(() => {
+    const next = theme === 'cyber' ? 'arcade' : theme === 'arcade' ? 'zen' : 'cyber';
+    persistTheme(next);
+    playSound(SOUND_TYPES.COIN);
+  }, [theme, persistTheme, playSound]);
+
+
+  if (isLoading) {
+    if (loadTimeout) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-8 text-center">
+          <div>
+            <div className="text-5xl mb-4">😵</div>
+            <p className="text-cyan-300 font-black text-lg mb-2">Brak połączenia</p>
+            <p className="text-cyan-700 text-sm mb-6">Sprawdź internet lub konfigurację Firebase (.env)</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 rounded-xl border-2 border-cyan-500 text-cyan-300 hover:bg-cyan-500 hover:text-black font-bold transition-all"
+            >
+              Spróbuj ponownie
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return <SpinnerOverlay message="Ładowanie..." />;
+  }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 relative z-10">
+    <ThemeContext.Provider value={theme}>
+      {theme === 'zen' && <ZenLeaves />}
+      <div
+        className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : theme === 'zen' ? 'theme-zen' : ''}`}
+      style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
+    >
       <div className="max-w-7xl mx-auto relative">
-        <Header isMuted={isMuted} setIsMuted={setIsMuted} isConnected={isConnected} />
-        <Navigation activeTab={activeTab} setActiveTab={switchTab} />
-        <main>
-          {activeTab === 'dashboard' && (
+        <Header
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
+          isConnected={isConnected}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          scrolled={scrolled}
+        />
+        <Navigation
+          activeTab={activeTab}
+          setActiveTab={switchTab}
+        />
+        <main
+          className="main-content"
+        >
+          {activeTab === TABS.DASHBOARD  && (
             <DashboardTab
-              data={{ summary: appData.summary, players: appData.players }}
+              data={{ summary: appData.summary, players: appData.players, paidUntilWeek: appData.paidUntilWeek, payments: appData.payments }}
               history={appData.history}
-              refreshData={refreshData}
               playSound={playSound}
             />
           )}
-          {activeTab === 'attendance' && (
+          {activeTab === TABS.ATTENDANCE && (
             <AttendanceTab
               players={appData.players}
               history={appData.history}
               summary={appData.summary}
             />
           )}
-          {activeTab === 'admin' && (
+          {activeTab === TABS.ADMIN      && (
             <AdminTab
               playerNames={appData.playerNames}
               defaultMultiPlayers={appData.defaultMultiPlayers}
-              refreshData={refreshData}
               setActiveTab={switchTab}
               playSound={playSound}
             />
           )}
-          {activeTab === 'history' && (
+          {activeTab === TABS.HISTORY    && (
             <HistoryTab
               history={appData.history}
               playerNames={appData.playerNames}
               playSound={playSound}
             />
           )}
-          {activeTab === 'players' && (
+          {activeTab === TABS.PLAYERS    && (
             <PlayersTab
               players={appData.players}
               deletedPlayers={appData.deletedPlayers}
-              refreshData={refreshData}
+              defaultMultiPlayers={appData.defaultMultiPlayers}
               playSound={playSound}
             />
           )}
         </main>
       </div>
+      <PWAInstallBanner />
     </div>
+    </ThemeContext.Provider>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
+  );
+}
