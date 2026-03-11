@@ -94,6 +94,11 @@ export default function PlayerCard({
         <h3 className={`font-black text-xl ${headerText} flex items-center gap-2`}>
           <span className="mini-paddle" /> {player.name}
         </h3>
+        {isOrganizer && (
+          <p className="text-xs font-bold tracking-widest mt-1 text-cyan-500">
+            📋 ORGANIZATOR · ogarnia rezerwacje
+          </p>
+        )}
       </div>
 
       <div className="p-5 flex flex-col flex-1">
@@ -105,7 +110,7 @@ export default function PlayerCard({
 
         {isOrganizer ? (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-cyan-400 text-sm font-bold tracking-wide">📋 ogarnia rezerwacje 🏓</p>
+            <p className="text-cyan-500 text-xs tracking-widest font-bold">ogarnia rezerwację 🏓</p>
           </div>
         ) : (
           <>
