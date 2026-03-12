@@ -102,8 +102,8 @@ export default function DashboardTab({ data, history, playSound }) {
 
   // Uses new unified buildDebtDisplayData — consistent with calculateDebt
   const getBreakdown = useCallback(
-    (player) => buildDebtDisplayData(player, history, data.payments),
-    [history, data.payments],
+    (player) => buildDebtDisplayData(player, history, data.payments, data.paidUntilWeek),
+    [history, data.payments, data.paidUntilWeek],
   );
 
   // ── Sorted players ───────────────────────────────────────────────────────

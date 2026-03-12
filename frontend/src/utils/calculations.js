@@ -78,22 +78,39 @@ export function calculateDebtBreakdown(playerName, debtAmount, history) {
 
 // ─── buildDebtDisplayData ────────────────────────────────────────────────────
 // Assembles the full breakdown object used by the Dashboard UI.
-// Keeps the sessions/payments/totals/balance shape that PlayerCard expects.
-export function buildDebtDisplayData(player, history, payments) {
+// Uses paidUntilWeek directly (same logic as calculateDebt) so the session list
+// is always consistent — regardless of debt amount or payment history.
+export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
+  // history arrives newest-first; reverse to oldest-first for display order
+  const chronological = [...history].reverse();
+
+  // Respect the same paidUntilWeek cutoff that calculateDebt uses
+  const paidUntilId = paidUntilWeek?.[player.name];
+  const cutoffIdx   = paidUntilId
+    ? chronological.findIndex(s => s.id === paidUntilId)
+    : -1;
+
+  // Every session AFTER the cutoff that the player attended without multisport
+  const sessions = chronological
+    .slice(cutoffIdx + 1)
+    .filter(s =>
+      s.presentPlayers.includes(player.name) &&
+      !s.multisportPlayers.includes(player.name),
+    )
+    .map(s => ({
+      sessionId: s.id,
+      date:      s.datePlayed,
+      amount:    s.costPerPerson,
+    }));
+
   const playerPayments = (payments?.[player.name] || []).map(p => ({
     date:   p.date,
     amount: p.amount,
     id:     p.id,
   }));
 
-  const totalPaid = roundToTwoDecimals(playerPayments.reduce((s, p) => s + (p.amount || 0), 0));
-
-  // Pass gross session cost (currentDebt + totalPaid) so ALL attended sessions are shown,
-  // not just sessions worth the net debt. Without this, partial payments hide earlier sessions.
-  const grossSessionCost = roundToTwoDecimals(player.currentDebt + totalPaid);
-  const sessions = calculateDebtBreakdown(player.name, grossSessionCost, history);
-
   const totalSessions = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
+  const totalPaid     = roundToTwoDecimals(playerPayments.reduce((s, p) => s + (p.amount || 0), 0));
   const balance       = roundToTwoDecimals(totalSessions - totalPaid);
 
   return { sessions, payments: playerPayments, totalSessions, totalPaid, balance };
