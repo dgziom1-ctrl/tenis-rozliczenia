@@ -23,21 +23,32 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           {/* Sessions */}
           {breakdown.sessions.length > 0 && (
             <>
-              <SectionHeader label="Sesje" T={T} />
+              <SectionHeader
+                label={breakdown.settled ? 'Sesje (rozliczone)' : 'Sesje'}
+                T={T}
+              />
               {breakdown.sessions.map((item, idx) => (
                 <Row key={idx} T={T}>
                   <span style={{ color: T.mutedText }}>{formatDate(item.date)}</span>
-                  <span className="font-bold" style={{ color: '#f87171' }}>
-                    −{formatAmountShort(item.amount)} zł
-                  </span>
+                  {breakdown.settled ? (
+                    <span className="text-xs font-bold" style={{ color: T.mutedText }}>
+                      ✓ rozliczono
+                    </span>
+                  ) : (
+                    <span className="font-bold" style={{ color: '#f87171' }}>
+                      −{formatAmountShort(item.amount)} zł
+                    </span>
+                  )}
                 </Row>
               ))}
-              <Row T={T} highlight="rgba(248,113,113,0.06)">
-                <span style={{ color: T.mutedText }}>Razem sesje</span>
-                <span className="font-bold" style={{ color: '#f87171' }}>
-                  −{formatAmountShort(breakdown.totalSessions)} zł
-                </span>
-              </Row>
+              {!breakdown.settled && (
+                <Row T={T} highlight="rgba(248,113,113,0.06)">
+                  <span style={{ color: T.mutedText }}>Razem sesje</span>
+                  <span className="font-bold" style={{ color: '#f87171' }}>
+                    −{formatAmountShort(breakdown.totalSessions)} zł
+                  </span>
+                </Row>
+              )}
             </>
           )}
 

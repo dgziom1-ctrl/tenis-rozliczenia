@@ -78,30 +78,39 @@ export function calculateDebtBreakdown(playerName, debtAmount, history) {
 
 // ─── buildDebtDisplayData ────────────────────────────────────────────────────
 // Assembles the full breakdown object used by the Dashboard UI.
-// Uses paidUntilWeek directly (same logic as calculateDebt) so the session list
-// is always consistent — regardless of debt amount or payment history.
+//
+// Primary path (active debt period):
+//   Show sessions AFTER the paidUntilWeek cutoff + the player's payments.
+//
+// Fallback (player fully settled, no new sessions, no payments):
+//   When nothing would be shown after the cutoff we fall back to showing the
+//   sessions FROM the settled period (up to and including paidUntilWeek) so
+//   that a just-settled player still sees what they paid for.
+//   In this case `settled: true` is set so the panel can render differently.
 export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
   // history arrives newest-first; reverse to oldest-first for display order
   const chronological = [...history].reverse();
 
-  // Respect the same paidUntilWeek cutoff that calculateDebt uses
   const paidUntilId = paidUntilWeek?.[player.name];
   const cutoffIdx   = paidUntilId
     ? chronological.findIndex(s => s.id === paidUntilId)
     : -1;
 
-  // Every session AFTER the cutoff that the player attended without multisport
-  const sessions = chronological
+  const sessionFilter = s =>
+    s.presentPlayers.includes(player.name) &&
+    !s.multisportPlayers.includes(player.name);
+
+  const sessionMap = s => ({
+    sessionId: s.id,
+    date:      s.datePlayed,
+    amount:    s.costPerPerson,
+  });
+
+  // Sessions after cutoff = currently outstanding sessions
+  const outstandingSessions = chronological
     .slice(cutoffIdx + 1)
-    .filter(s =>
-      s.presentPlayers.includes(player.name) &&
-      !s.multisportPlayers.includes(player.name),
-    )
-    .map(s => ({
-      sessionId: s.id,
-      date:      s.datePlayed,
-      amount:    s.costPerPerson,
-    }));
+    .filter(sessionFilter)
+    .map(sessionMap);
 
   const playerPayments = (payments?.[player.name] || []).map(p => ({
     date:   p.date,
@@ -109,11 +118,30 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     id:     p.id,
   }));
 
+  // If there is nothing to show in the active period (fully settled, no new
+  // sessions after the cutoff and no partial payments), fall back to showing
+  // the sessions that were covered by the last settlement so the player still
+  // sees meaningful history instead of a blank panel.
+  const isFullySettledWithNoHistory =
+    outstandingSessions.length === 0 && playerPayments.length === 0 && cutoffIdx >= 0;
+
+  let sessions = outstandingSessions;
+  let settled  = false;
+
+  if (isFullySettledWithNoHistory) {
+    sessions = chronological
+      .slice(0, cutoffIdx + 1)
+      .filter(sessionFilter)
+      .map(sessionMap);
+    settled = true;
+  }
+
   const totalSessions = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
   const totalPaid     = roundToTwoDecimals(playerPayments.reduce((s, p) => s + (p.amount || 0), 0));
-  const balance       = roundToTwoDecimals(totalSessions - totalPaid);
+  // When showing settled history balance is always 0; otherwise derive it.
+  const balance       = settled ? 0 : roundToTwoDecimals(totalSessions - totalPaid);
 
-  return { sessions, payments: playerPayments, totalSessions, totalPaid, balance };
+  return { sessions, payments: playerPayments, totalSessions, totalPaid, balance, settled };
 }
 
 export function calculatePlayerStats(players, history, totalWeeks) {
