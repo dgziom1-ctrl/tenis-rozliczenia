@@ -23,32 +23,21 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           {/* Sessions */}
           {breakdown.sessions.length > 0 && (
             <>
-              <SectionHeader
-                label={breakdown.settled ? 'Sesje (rozliczone)' : 'Sesje'}
-                T={T}
-              />
+              <SectionHeader label="Sesje" T={T} />
               {breakdown.sessions.map((item, idx) => (
                 <Row key={idx} T={T}>
                   <span style={{ color: T.mutedText }}>{formatDate(item.date)}</span>
-                  {breakdown.settled ? (
-                    <span className="text-xs font-bold" style={{ color: T.mutedText }}>
-                      ✓ rozliczono
-                    </span>
-                  ) : (
-                    <span className="font-bold" style={{ color: '#f87171' }}>
-                      −{formatAmountShort(item.amount)} zł
-                    </span>
-                  )}
-                </Row>
-              ))}
-              {!breakdown.settled && (
-                <Row T={T} highlight="rgba(248,113,113,0.06)">
-                  <span style={{ color: T.mutedText }}>Razem sesje</span>
                   <span className="font-bold" style={{ color: '#f87171' }}>
-                    −{formatAmountShort(breakdown.totalSessions)} zł
+                    −{formatAmountShort(item.amount)} zł
                   </span>
                 </Row>
-              )}
+              ))}
+              <Row T={T} highlight="rgba(248,113,113,0.06)">
+                <span style={{ color: T.mutedText }}>Razem sesje</span>
+                <span className="font-bold" style={{ color: '#f87171' }}>
+                  −{formatAmountShort(breakdown.totalSessions)} zł
+                </span>
+              </Row>
             </>
           )}
 
@@ -58,12 +47,14 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
               <SectionHeader label="Wpłaty" T={T} />
               {breakdown.payments.map((item, idx) => (
                 <Row key={idx} T={T}>
-                  <span style={{ color: T.mutedText }}>{formatDate(item.date)}</span>
+                  <span style={{ color: T.mutedText }}>
+                    {item.synthetic ? 'Rozliczenie' : formatDate(item.date)}
+                  </span>
                   <span className="flex items-center gap-2">
                     <span className="font-bold" style={{ color: T.accentText }}>
                       +{formatAmountShort(item.amount)} zł
                     </span>
-                    {adminMode && (
+                    {adminMode && !item.synthetic && (
                       <button
                         onClick={() => onRemovePayment(playerName, item.id)}
                         className="opacity-40 hover:opacity-100 transition-opacity leading-none"

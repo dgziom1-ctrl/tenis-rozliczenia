@@ -79,14 +79,16 @@ export function calculateDebtBreakdown(playerName, debtAmount, history) {
 // ─── buildDebtDisplayData ────────────────────────────────────────────────────
 // Assembles the full breakdown object used by the Dashboard UI.
 //
-// Primary path (active debt period):
-//   Show sessions AFTER the paidUntilWeek cutoff + the player's payments.
+// Always shows a consistent view regardless of HOW the player settled
+// (BLIK payments vs "Rozlicz" button):
 //
-// Fallback (player fully settled, no new sessions, no payments):
-//   When nothing would be shown after the cutoff we fall back to showing the
-//   sessions FROM the settled period (up to and including paidUntilWeek) so
-//   that a just-settled player still sees what they paid for.
-//   In this case `settled: true` is set so the panel can render differently.
+//   • Sessions: all attended sessions from the current period
+//     (after the last paidUntilWeek cutoff, or all-time if no cutoff).
+//
+//   • Payments: the player's real payments, PLUS — when settled via the
+//     "Rozlicz" button (paidUntilWeek is set but payments are empty and
+//     there are no new sessions) — a synthetic "Rozliczenie" entry so the
+//     balance row always reads ✓ 0 zł and both paths look identical.
 export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
   // history arrives newest-first; reverse to oldest-first for display order
   const chronological = [...history].reverse();
@@ -106,42 +108,53 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     amount:    s.costPerPerson,
   });
 
-  // Sessions after cutoff = currently outstanding sessions
+  // Sessions outstanding in the current period (after last settlement cutoff)
   const outstandingSessions = chronological
     .slice(cutoffIdx + 1)
     .filter(sessionFilter)
     .map(sessionMap);
 
-  const playerPayments = (payments?.[player.name] || []).map(p => ({
+  const realPayments = (payments?.[player.name] || []).map(p => ({
     date:   p.date,
     amount: p.amount,
     id:     p.id,
   }));
 
-  // If there is nothing to show in the active period (fully settled, no new
-  // sessions after the cutoff and no partial payments), fall back to showing
-  // the sessions that were covered by the last settlement so the player still
-  // sees meaningful history instead of a blank panel.
-  const isFullySettledWithNoHistory =
-    outstandingSessions.length === 0 && playerPayments.length === 0 && cutoffIdx >= 0;
+  // Detect "settled via Rozlicz button": paidUntilWeek exists, no real payments,
+  // no outstanding sessions → show settled period sessions + synthetic entry.
+  const isSettledViaButton =
+    cutoffIdx >= 0 &&
+    outstandingSessions.length === 0 &&
+    realPayments.length === 0;
 
-  let sessions = outstandingSessions;
-  let settled  = false;
+  let sessions     = outstandingSessions;
+  let playerPayments = realPayments;
 
-  if (isFullySettledWithNoHistory) {
+  if (isSettledViaButton) {
+    // Show the sessions that were covered by the settlement
     sessions = chronological
       .slice(0, cutoffIdx + 1)
       .filter(sessionFilter)
       .map(sessionMap);
-    settled = true;
+
+    const settledTotal = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
+
+    // Synthetic payment that mirrors what the BLIK payers show
+    if (settledTotal > 0) {
+      playerPayments = [{
+        date:      null,        // rendered specially in BreakdownPanel
+        amount:    settledTotal,
+        id:        '__settled__',
+        synthetic: true,
+      }];
+    }
   }
 
   const totalSessions = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
   const totalPaid     = roundToTwoDecimals(playerPayments.reduce((s, p) => s + (p.amount || 0), 0));
-  // When showing settled history balance is always 0; otherwise derive it.
-  const balance       = settled ? 0 : roundToTwoDecimals(totalSessions - totalPaid);
+  const balance       = roundToTwoDecimals(totalSessions - totalPaid);
 
-  return { sessions, payments: playerPayments, totalSessions, totalPaid, balance, settled };
+  return { sessions, payments: playerPayments, totalSessions, totalPaid, balance };
 }
 
 export function calculatePlayerStats(players, history, totalWeeks) {
