@@ -1,10 +1,6 @@
 import { runTransaction } from 'firebase/database';
 import { dataRef } from './config';
-
-// Generates a collision-resistant ID even under concurrent writes
-function makeId() {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-}
+import { makeId } from '../utils/id';
 
 export async function addSession({ datePlayed, totalCost, presentPlayers, multisportPlayers }) {
   try {

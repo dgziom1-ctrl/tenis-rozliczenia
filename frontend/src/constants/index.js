@@ -2,7 +2,9 @@
 // CENTRALIZED CONSTANTS
 // ============================================================================
 
-export const ADMIN_PASSWORD = 'ponk2026';
+// Loaded from .env.local — never commit the actual value to the repo.
+// Add  VITE_ADMIN_PASSWORD=twoje_haslo  to frontend/.env.local
+export const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? '';
 
 // Tolerance for debt breakdown accumulation — detail sum may differ from total by this amount
 export const BREAKDOWN_EPSILON = 0.05;

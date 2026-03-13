@@ -1,9 +1,6 @@
 import { runTransaction } from 'firebase/database';
 import { dataRef } from './config';
-
-function makeId() {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-}
+import { makeId } from '../utils/id';
 
 export async function settlePlayer(playerName) {
   try {

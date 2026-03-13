@@ -1,4 +1,4 @@
-import { onValue, set } from 'firebase/database';
+import { onValue } from 'firebase/database';
 import { dataRef } from './config';
 import { setCurrentData } from './state';
 import { calculateDebt, roundToTwoDecimals } from '../utils/calculations';
@@ -92,8 +92,4 @@ export function subscribeToData(callback) {
   });
 }
 
-// ─── Save helper ─────────────────────────────────────────────────────────────
 
-export function saveData(data) {
-  return set(dataRef, data);
-}
