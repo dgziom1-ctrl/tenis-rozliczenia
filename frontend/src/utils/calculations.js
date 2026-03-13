@@ -79,10 +79,11 @@ export function calculateDebtBreakdown(playerName, debtAmount, history) {
 // ─── buildDebtDisplayData ────────────────────────────────────────────────────
 // Assembles the full breakdown object used by the Dashboard UI.
 //
-// Shows sessions from the current period (after paidUntilWeek cutoff, or
-// all-time if no cutoff) plus the player's real payments.
-// settlePlayer() now always writes a real payment entry with a date, so no
-// synthetic logic is needed here.
+// Normal path: shows sessions after paidUntilWeek cutoff + real payments.
+//
+// Legacy fallback: old data settled via "Rozlicz" button has paidUntilWeek set
+// but payments=[]. In this case we show the settled sessions and synthesise a
+// payment dated as the last settled session's date, so the panel is never empty.
 export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
   // history arrives newest-first; reverse to oldest-first for display order
   const chronological = [...history].reverse();
@@ -92,23 +93,55 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     ? chronological.findIndex(s => s.id === paidUntilId)
     : -1;
 
-  const sessions = chronological
-    .slice(cutoffIdx + 1)
-    .filter(s =>
-      s.presentPlayers.includes(player.name) &&
-      !s.multisportPlayers.includes(player.name),
-    )
-    .map(s => ({
-      sessionId: s.id,
-      date:      s.datePlayed,
-      amount:    s.costPerPerson,
-    }));
+  const sessionFilter = s =>
+    s.presentPlayers.includes(player.name) &&
+    !s.multisportPlayers.includes(player.name);
 
-  const playerPayments = (payments?.[player.name] || []).map(p => ({
+  const sessionMap = s => ({
+    sessionId: s.id,
+    date:      s.datePlayed,
+    amount:    s.costPerPerson,
+  });
+
+  // Sessions in the current (outstanding) period
+  const outstandingSessions = chronological
+    .slice(cutoffIdx + 1)
+    .filter(sessionFilter)
+    .map(sessionMap);
+
+  let playerPayments = (payments?.[player.name] || []).map(p => ({
     date:   p.date,
     amount: p.amount,
     id:     p.id,
   }));
+
+  let sessions = outstandingSessions;
+
+  // Legacy fallback: paidUntilWeek is set but no payments recorded and no new
+  // sessions → show the settled period so the panel is never blank.
+  const legacySettled =
+    cutoffIdx >= 0 &&
+    outstandingSessions.length === 0 &&
+    playerPayments.length === 0;
+
+  if (legacySettled) {
+    sessions = chronological
+      .slice(0, cutoffIdx + 1)
+      .filter(sessionFilter)
+      .map(sessionMap);
+
+    const settledTotal = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
+    // Use the date of the paidUntilWeek session as the settlement date
+    const settlementDate = chronological[cutoffIdx]?.datePlayed ?? null;
+
+    if (settledTotal > 0) {
+      playerPayments = [{
+        id:     '__legacy_settled__',
+        amount: settledTotal,
+        date:   settlementDate,
+      }];
+    }
+  }
 
   const totalSessions = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
   const totalPaid     = roundToTwoDecimals(playerPayments.reduce((s, p) => s + (p.amount || 0), 0));
