@@ -79,16 +79,10 @@ export function calculateDebtBreakdown(playerName, debtAmount, history) {
 // ─── buildDebtDisplayData ────────────────────────────────────────────────────
 // Assembles the full breakdown object used by the Dashboard UI.
 //
-// Always shows a consistent view regardless of HOW the player settled
-// (BLIK payments vs "Rozlicz" button):
-//
-//   • Sessions: all attended sessions from the current period
-//     (after the last paidUntilWeek cutoff, or all-time if no cutoff).
-//
-//   • Payments: the player's real payments, PLUS — when settled via the
-//     "Rozlicz" button (paidUntilWeek is set but payments are empty and
-//     there are no new sessions) — a synthetic "Rozliczenie" entry so the
-//     balance row always reads ✓ 0 zł and both paths look identical.
+// Shows sessions from the current period (after paidUntilWeek cutoff, or
+// all-time if no cutoff) plus the player's real payments.
+// settlePlayer() now always writes a real payment entry with a date, so no
+// synthetic logic is needed here.
 export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
   // history arrives newest-first; reverse to oldest-first for display order
   const chronological = [...history].reverse();
@@ -98,57 +92,23 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     ? chronological.findIndex(s => s.id === paidUntilId)
     : -1;
 
-  const sessionFilter = s =>
-    s.presentPlayers.includes(player.name) &&
-    !s.multisportPlayers.includes(player.name);
-
-  const sessionMap = s => ({
-    sessionId: s.id,
-    date:      s.datePlayed,
-    amount:    s.costPerPerson,
-  });
-
-  // Sessions outstanding in the current period (after last settlement cutoff)
-  const outstandingSessions = chronological
+  const sessions = chronological
     .slice(cutoffIdx + 1)
-    .filter(sessionFilter)
-    .map(sessionMap);
+    .filter(s =>
+      s.presentPlayers.includes(player.name) &&
+      !s.multisportPlayers.includes(player.name),
+    )
+    .map(s => ({
+      sessionId: s.id,
+      date:      s.datePlayed,
+      amount:    s.costPerPerson,
+    }));
 
-  const realPayments = (payments?.[player.name] || []).map(p => ({
+  const playerPayments = (payments?.[player.name] || []).map(p => ({
     date:   p.date,
     amount: p.amount,
     id:     p.id,
   }));
-
-  // Detect "settled via Rozlicz button": paidUntilWeek exists, no real payments,
-  // no outstanding sessions → show settled period sessions + synthetic entry.
-  const isSettledViaButton =
-    cutoffIdx >= 0 &&
-    outstandingSessions.length === 0 &&
-    realPayments.length === 0;
-
-  let sessions     = outstandingSessions;
-  let playerPayments = realPayments;
-
-  if (isSettledViaButton) {
-    // Show the sessions that were covered by the settlement
-    sessions = chronological
-      .slice(0, cutoffIdx + 1)
-      .filter(sessionFilter)
-      .map(sessionMap);
-
-    const settledTotal = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
-
-    // Synthetic payment that mirrors what the BLIK payers show
-    if (settledTotal > 0) {
-      playerPayments = [{
-        date:      null,        // rendered specially in BreakdownPanel
-        amount:    settledTotal,
-        id:        '__settled__',
-        synthetic: true,
-      }];
-    }
-  }
 
   const totalSessions = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
   const totalPaid     = roundToTwoDecimals(playerPayments.reduce((s, p) => s + (p.amount || 0), 0));

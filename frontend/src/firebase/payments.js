@@ -11,7 +11,7 @@ export async function settlePlayer(playerName) {
     let previousPayments = [];
 
     await runTransaction(dataRef, (current) => {
-      const data = current || {};
+      const data  = current || {};
       const weeks = data.weeks || [];
 
       if (weeks.length === 0) {
@@ -21,6 +21,32 @@ export async function settlePlayer(playerName) {
       previousValue    = data.paidUntilWeek?.[playerName] ?? null;
       previousPayments = data.payments?.[playerName] ?? [];
 
+      // Calculate outstanding debt: sessions after paidUntilWeek cutoff
+      const paidUntilId  = data.paidUntilWeek?.[playerName];
+      const cutoffIdx    = paidUntilId ? weeks.findIndex(w => w.id === paidUntilId) : -1;
+      const unpaidWeeks  = weeks.slice(cutoffIdx + 1);
+      const debtAmount   = unpaidWeeks.reduce((sum, w) => {
+        const isPresent    = (w.present     || []).includes(playerName);
+        const isMultisport = (w.multiPlayers || []).includes(playerName);
+        if (!isPresent || isMultisport) return sum;
+        const payers = (w.present || []).filter(p => !(w.multiPlayers || []).includes(p));
+        return sum + (payers.length > 0 ? w.cost / payers.length : 0);
+      }, 0);
+
+      // How much the player already paid (partial payments)
+      const alreadyPaid = (data.payments?.[playerName] || [])
+        .reduce((s, p) => s + (p.amount || 0), 0);
+
+      // Net amount being settled now (could be 0 if overpaid)
+      const settleAmount = Math.round((debtAmount - alreadyPaid) * 100) / 100;
+
+      // Keep existing payments; add a settlement entry only when there is a
+      // positive amount being settled (not for zero-debt or credit situations)
+      const existingPayments = data.payments?.[playerName] ?? [];
+      const settleEntry = settleAmount > 0
+        ? [{ id: makeId(), amount: settleAmount, date: new Date().toISOString().split('T')[0] }]
+        : [];
+
       return {
         ...data,
         paidUntilWeek: {
@@ -29,7 +55,7 @@ export async function settlePlayer(playerName) {
         },
         payments: {
           ...(data.payments || {}),
-          [playerName]: [], // Clear — debt fully settled
+          [playerName]: [...existingPayments, ...settleEntry],
         },
       };
     });

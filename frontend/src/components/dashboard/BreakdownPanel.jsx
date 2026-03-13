@@ -48,13 +48,13 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
               {breakdown.payments.map((item, idx) => (
                 <Row key={idx} T={T}>
                   <span style={{ color: T.mutedText }}>
-                    {item.synthetic ? 'Rozliczenie' : formatDate(item.date)}
+                    {formatDate(item.date)}
                   </span>
                   <span className="flex items-center gap-2">
                     <span className="font-bold" style={{ color: T.accentText }}>
                       +{formatAmountShort(item.amount)} zł
                     </span>
-                    {adminMode && !item.synthetic && (
+                    {adminMode && (
                       <button
                         onClick={() => onRemovePayment(playerName, item.id)}
                         className="opacity-40 hover:opacity-100 transition-opacity leading-none"
