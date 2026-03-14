@@ -29,7 +29,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
         >
           {breakdown.sessions.length > 0 ? (
             <>
-              <SectionHeader label="Niezapłacone sesje" tokens={tokens} />
+              <SectionHeader label="Sesje" tokens={tokens} />
               {breakdown.sessions.map((item, idx) => (
                 <Row key={idx} tokens={tokens}>
                   <span style={{ color: tokens.mutedText }}>{formatDate(item.date)}</span>

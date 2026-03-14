@@ -109,11 +109,9 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     amount:    s.costPerPerson,
   });
 
-  // Sessions in the current (outstanding) period
-  const outstandingSessions = chronological
-    .slice(cutoffIdx + 1)
-    .filter(sessionFilter)
-    .map(sessionMap);
+  // ALL sessions the player was charged for — before and after any cutoff.
+  // We always show the full picture so the breakdown is never incomplete.
+  const sessions = chronological.filter(sessionFilter).map(sessionMap);
 
   let playerPayments = (payments?.[player.name] || []).map(p => ({
     date:   p.date,
@@ -121,29 +119,20 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     id:     p.id,
   }));
 
-  let sessions = outstandingSessions;
-
-  // Legacy fallback: paidUntilWeek is set but no payments recorded and no new
-  // sessions → show the settled period so the panel is never blank.
-  const legacySettled =
-    cutoffIdx >= 0 &&
-    outstandingSessions.length === 0 &&
-    playerPayments.length === 0;
-
-  if (legacySettled) {
-    sessions = chronological
-      .slice(0, cutoffIdx + 1)
-      .filter(sessionFilter)
-      .map(sessionMap);
-
-    const settledTotal = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
-    // Use the date of the paidUntilWeek session as the settlement date
+  // Legacy fallback: paidUntilWeek is set (old "Rozlicz" button) but no payment
+  // was ever recorded. Synthesise a payment for all sessions up to the cutoff so
+  // the displayed balance is correct — regardless of whether new sessions exist.
+  if (cutoffIdx >= 0 && playerPayments.length === 0) {
+    const settledCost = roundToTwoDecimals(
+      chronological.slice(0, cutoffIdx + 1).filter(sessionFilter)
+        .reduce((s, x) => s + x.costPerPerson, 0),
+    );
     const settlementDate = chronological[cutoffIdx]?.datePlayed ?? null;
 
-    if (settledTotal > 0) {
+    if (settledCost > 0) {
       playerPayments = [{
         id:     '__legacy_settled__',
-        amount: settledTotal,
+        amount: settledCost,
         date:   settlementDate,
       }];
     }
