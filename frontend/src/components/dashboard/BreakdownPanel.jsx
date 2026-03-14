@@ -5,6 +5,13 @@ import { formatDate, formatAmountShort } from '../../utils/format';
 export default function BreakdownPanel({ playerName, open, onToggle, breakdown, adminMode, onRemovePayment }) {
   const tokens = useThemeTokens();
 
+  const sessionCount = breakdown?.sessions?.length ?? 0;
+  const toggleLabel  = open
+    ? 'Zwiń'
+    : sessionCount > 0
+      ? `Skąd ta kwota? (${sessionCount} ${sessionCount === 1 ? 'sesja' : sessionCount < 5 ? 'sesje' : 'sesji'})`
+      : 'Skąd ta kwota?';
+
   return (
     <div className="mb-3">
       <button
@@ -12,7 +19,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
         className="text-xs font-bold flex items-center justify-center gap-1 mx-auto py-1 px-2 rounded transition-colors"
         style={{ color: tokens.accentText }}
       >
-        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} Skąd ta kwota?
+        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {toggleLabel}
       </button>
 
       {open && breakdown && (
@@ -20,57 +27,46 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           className="mt-2 rounded-lg text-xs border text-left shadow-inner overflow-hidden"
           style={{ background: tokens.cellBg, borderColor: tokens.cellBorder }}
         >
-          {/* Legacy settlement banner — shown when player was settled via old
-              "Rozlicz" button (no payment entry) and new sessions have since
-              been added. Explains why older sessions aren't visible here.    */}
-          {breakdown.wasLegacySettled && (
-            <div
-              className="px-3 py-2 flex items-center gap-2 text-xs font-bold"
-              style={{
-                borderBottom: `1px solid ${tokens.cellBorder}`,
-                background:   'rgba(52,211,153,0.07)',
-                color:        '#4ade80',
-              }}
-            >
-              <span>✓</span>
-              <span>Poprzednie sesje zostały rozliczone</span>
-            </div>
-          )}
-          {/* Sessions */}
-          {breakdown.sessions.length > 0 && (
+          {breakdown.sessions.length > 0 ? (
             <>
-              <SectionHeader label="Sesje" tokens={tokens} />
+              <SectionHeader label="Niezapłacone sesje" tokens={tokens} />
               {breakdown.sessions.map((item, idx) => (
                 <Row key={idx} tokens={tokens}>
                   <span style={{ color: tokens.mutedText }}>{formatDate(item.date)}</span>
                   <span className="font-bold" style={{ color: '#f87171' }}>
-                    −{formatAmountShort(item.amount)} zł
+                    -{formatAmountShort(item.amount)} zł
                   </span>
                 </Row>
               ))}
-              <Row tokens={tokens} highlight="rgba(248,113,113,0.06)">
-                <span style={{ color: tokens.mutedText }}>Razem sesje</span>
-                <span className="font-bold" style={{ color: '#f87171' }}>
-                  −{formatAmountShort(breakdown.totalSessions)} zł
-                </span>
-              </Row>
+              {breakdown.sessions.length > 1 && (
+                <Row tokens={tokens} highlight="rgba(248,113,113,0.06)">
+                  <span style={{ color: tokens.mutedText }}>Razem do zapłaty</span>
+                  <span className="font-bold" style={{ color: '#f87171' }}>
+                    -{formatAmountShort(breakdown.totalSessions)} zł
+                  </span>
+                </Row>
+              )}
             </>
+          ) : (
+            <Row tokens={tokens}>
+              <span style={{ color: tokens.mutedText }}>Brak niezapłaconych sesji</span>
+              <span style={{ color: '#4ade80' }}>✓</span>
+            </Row>
           )}
 
-          {/* Payments */}
           {breakdown.payments.length > 0 && (
             <>
               <SectionHeader label="Wpłaty" tokens={tokens} />
               {breakdown.payments.map((item, idx) => (
                 <Row key={idx} tokens={tokens}>
                   <span style={{ color: tokens.mutedText }}>
-                    {formatDate(item.date)}
+                    {item.id === '__legacy_settled__' ? 'Rozliczono' : formatDate(item.date)}
                   </span>
                   <span className="flex items-center gap-2">
                     <span className="font-bold" style={{ color: tokens.accentText }}>
                       +{formatAmountShort(item.amount)} zł
                     </span>
-                    {adminMode && (
+                    {adminMode && item.id !== '__legacy_settled__' && (
                       <button
                         onClick={() => onRemovePayment(playerName, item.id)}
                         className="opacity-40 hover:opacity-100 transition-opacity leading-none"
@@ -83,18 +79,19 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
                   </span>
                 </Row>
               ))}
-              <Row tokens={tokens} highlight={tokens.accentBg}>
-                <span style={{ color: tokens.mutedText }}>Razem wpłaty</span>
-                <span className="font-bold" style={{ color: tokens.accentText }}>
-                  +{formatAmountShort(breakdown.totalPaid)} zł
-                </span>
-              </Row>
+              {breakdown.payments.length > 1 && (
+                <Row tokens={tokens} highlight={tokens.accentBg}>
+                  <span style={{ color: tokens.mutedText }}>Razem wpłacono</span>
+                  <span className="font-bold" style={{ color: tokens.accentText }}>
+                    +{formatAmountShort(breakdown.totalPaid)} zł
+                  </span>
+                </Row>
+              )}
             </>
           )}
 
-          {/* Balance */}
           <div
-            className="flex justify-between px-3 py-2 font-black text-sm"
+            className="flex justify-between items-center px-3 py-2 font-black text-sm"
             style={{ background: tokens.accentBg, borderTop: `2px solid ${tokens.accentBorder}` }}
           >
             <span style={{ color: tokens.bodyText }}>Saldo</span>
@@ -104,10 +101,10 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
                    : '#4ade80',
             }}>
               {breakdown.balance > 0.01
-                ? `−${formatAmountShort(breakdown.balance)} zł`
+                ? `DO ZAPŁATY: ${formatAmountShort(breakdown.balance)} zł`
                 : breakdown.balance < -0.01
-                  ? `+${formatAmountShort(Math.abs(breakdown.balance))} zł`
-                  : '✓ 0 zł'}
+                  ? `NADPŁATA: +${formatAmountShort(Math.abs(breakdown.balance))} zł`
+                  : '✓ Rozliczony'}
             </span>
           </div>
         </div>

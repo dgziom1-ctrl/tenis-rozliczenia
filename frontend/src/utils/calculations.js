@@ -149,21 +149,11 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     }
   }
 
-  // Legacy user with new sessions: paidUntilWeek set, no payments ever recorded,
-  // but new outstanding sessions exist. The normal path ran (legacySettled=false),
-  // so the panel would show only the new session with no settlement context.
-  // Flag this so BreakdownPanel can show an explanatory banner.
-  const wasLegacySettled =
-    !legacySettled &&
-    cutoffIdx >= 0 &&
-    playerPayments.length === 0 &&
-    outstandingSessions.length > 0;
-
   const totalSessions = roundToTwoDecimals(sessions.reduce((s, x) => s + x.amount, 0));
   const totalPaid     = roundToTwoDecimals(playerPayments.reduce((s, p) => s + (p.amount || 0), 0));
   const balance       = roundToTwoDecimals(totalSessions - totalPaid);
 
-  return { sessions, payments: playerPayments, totalSessions, totalPaid, balance, wasLegacySettled };
+  return { sessions, payments: playerPayments, totalSessions, totalPaid, balance };
 }
 
 export function calculatePlayerStats(players, history, totalWeeks) {
