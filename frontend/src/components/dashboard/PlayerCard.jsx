@@ -8,6 +8,41 @@ import BreakdownPanel from './BreakdownPanel';
 import PaymentModal from './PaymentModal';
 import UndoBar from '../common/UndoBar';
 
+// ─── Animated counter hook ────────────────────────────────────────────────────
+// Smoothly interpolates the displayed numeric value whenever `value` changes.
+// Returns a float — format it with formatAmountShort for display.
+function useAnimatedValue(value, duration = 550) {
+  const [display, setDisplay]  = useState(value);
+  const fromRef  = useRef(value);
+  const rafRef   = useRef(null);
+
+  useEffect(() => {
+    const from = fromRef.current;
+    const to   = value;
+    if (from === to) return;
+
+    cancelAnimationFrame(rafRef.current);
+    const start = performance.now();
+
+    const tick = (now) => {
+      const t      = Math.min((now - start) / duration, 1);
+      const eased  = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      setDisplay(from + (to - from) * eased);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        fromRef.current = to;
+        setDisplay(to);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [value, duration]);
+
+  return display;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getDebtStateStyles(debt) {
@@ -45,6 +80,7 @@ export default function PlayerCard({
   const debt        = player.currentDebt;
   const hasDebt     = debt > SETTLED_THRESHOLD;
   const hasCredit   = debt < -SETTLED_THRESHOLD;
+  const isSettled   = !hasDebt && !hasCredit;
   const pct         = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
   const rank        = getRank(pct);
   const tokens      = useThemeTokens();
@@ -54,9 +90,25 @@ export default function PlayerCard({
   const [customAmt, setCustomAmt] = useState('');
   const [isSaving,  setIsSaving]  = useState(false);
   const [adminMode, setAdminMode] = useState(false);
-  const clickCount = useRef(0);
-  const clickTimer = useRef(null);
-  const cardRef    = useRef(null);
+  const [flash,     setFlash]     = useState(false);
+
+  const clickCount  = useRef(0);
+  const clickTimer  = useRef(null);
+  const prevDebtRef = useRef(debt);
+  const cardRef     = useRef(null);
+
+  // Animated display value for the debt amount
+  const animatedAbs = useAnimatedValue(Math.abs(debt));
+
+  // Flash the balance box whenever Firebase pushes a new debt value
+  useEffect(() => {
+    if (prevDebtRef.current !== debt) {
+      setFlash(true);
+      const t = setTimeout(() => setFlash(false), 750);
+      prevDebtRef.current = debt;
+      return () => clearTimeout(t);
+    }
+  }, [debt]);
 
   const { lastPayment, secondsLeft, progressPct, startPaymentUndo, handleUndoPayment } =
     usePaymentUndo({ playerName: player.name, onPin, onUnpin, onRemovePayment });
@@ -116,9 +168,9 @@ export default function PlayerCard({
           </div>
         ) : (
           <>
-            {/* Balance display */}
+            {/* Balance display — flashes on Firebase update */}
             <div
-              className={`p-4 rounded-xl border-2 shadow-inner mb-4 text-center cursor-default select-none ${styles.balanceBg}`}
+              className={`p-4 rounded-xl border-2 shadow-inner mb-4 text-center cursor-default select-none ${styles.balanceBg} ${flash ? 'debt-flash' : ''}`}
               onClick={handleAmountClick}
             >
               {justSettled ? (
@@ -129,7 +181,7 @@ export default function PlayerCard({
                 <>
                   <p className="text-xs text-yellow-600 tracking-widest mb-1 font-bold">NADPŁATA — zaliczona na kolejne sesje</p>
                   <p className="text-3xl font-black text-yellow-300" style={{ textShadow: '0 0 10px rgba(253,224,71,0.4)' }}>
-                    +{formatAmountShort(Math.abs(debt))}<span className="text-sm ml-1">zł</span>
+                    +{formatAmountShort(animatedAbs)}<span className="text-sm ml-1">zł</span>
                   </p>
                 </>
               ) : (
@@ -137,7 +189,7 @@ export default function PlayerCard({
                   {hasDebt && <p className="text-xs text-cyan-700 tracking-widest mb-1">DO ZAPŁATY</p>}
                   <p className={`text-3xl neon-amount ${hasDebt ? '' : 'text-emerald-400'}`}
                     style={hasDebt ? {} : { textShadow: '0 0 8px rgba(52,211,153,0.5)' }}>
-                    {formatAmountShort(Math.abs(debt))}<span className="text-sm ml-1">zł</span>
+                    {formatAmountShort(animatedAbs)}<span className="text-sm ml-1">zł</span>
                   </p>
                 </>
               )}
@@ -172,7 +224,7 @@ export default function PlayerCard({
               </div>
             )}
 
-            {/* Payment modal (exact debt or custom amount) */}
+            {/* Custom amount modal */}
             <PaymentModal
               type={modal}
               debt={debt}
@@ -185,14 +237,17 @@ export default function PlayerCard({
               tokens={tokens}
             />
 
-            {/* Action buttons — hidden while a modal is open */}
+            {/* Action buttons — hidden while modal is open */}
             {!justSettled && modal === null && (
               <div className="mt-auto flex flex-col gap-2">
+
+                {/* ── Player has debt: one-click exact pay + custom ── */}
                 {hasDebt && (
                   <>
                     <button
-                      onClick={() => setModal(PAYMENT_MODAL.EXACT)}
-                      className="w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 transition-all"
+                      onClick={() => savePayment(debt)}
+                      disabled={isSaving}
+                      className="w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                       style={{ background: tokens.confirmBg, border: `2px solid ${tokens.confirmBorder}`, color: tokens.confirmText }}
                     >
                       <Coins size={18} /> Wysyłam {formatAmountShort(debt)} zł na BLIK 💸
@@ -206,6 +261,8 @@ export default function PlayerCard({
                     </button>
                   </>
                 )}
+
+                {/* ── Player has credit: offer to pay more ── */}
                 {hasCredit && (
                   <button
                     onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
@@ -215,23 +272,35 @@ export default function PlayerCard({
                     + wpłać więcej
                   </button>
                 )}
-                {!hasDebt && !hasCredit && (
-                  <>
+
+                {/* ── Player is fully settled: visual checkmark, no fake CTA ── */}
+                {isSettled && (
+                  <div className="flex flex-col items-center gap-3 py-3">
                     <div
-                      className="w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 opacity-60 select-none"
-                      style={{ border: `2px solid ${tokens.mutedBorder}`, color: tokens.mutedText }}
+                      className="w-14 h-14 rounded-full flex items-center justify-center"
+                      style={{
+                        background: 'rgba(52,211,153,0.10)',
+                        border:     '2px solid rgba(52,211,153,0.30)',
+                        boxShadow:  '0 0 16px rgba(52,211,153,0.15)',
+                      }}
                     >
-                      <CheckCircle2 size={18} /> wszystko zapłacone ✓
+                      <CheckCircle2
+                        size={28}
+                        className="text-emerald-400"
+                        style={{ filter: 'drop-shadow(0 0 5px rgba(52,211,153,0.5))' }}
+                      />
                     </div>
+                    <p className="text-xs text-emerald-600 font-bold tracking-widest uppercase">Rozliczony</p>
                     <button
                       onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
-                      className="w-full py-2 rounded-xl text-xs font-bold transition-all"
-                      style={{ border: `1px dashed ${tokens.accentBorder}`, color: tokens.accentText, opacity: 0.7 }}
+                      className="w-full py-1.5 rounded-xl text-xs font-bold transition-all"
+                      style={{ border: `1px dashed ${tokens.accentBorder}`, color: tokens.accentText, opacity: 0.45 }}
                     >
                       + wpłać na zapas
                     </button>
-                  </>
+                  </div>
                 )}
+
               </div>
             )}
           </>

@@ -123,6 +123,7 @@ function AppContent() {
               <AdminTab
                 playerNames={appData.playerNames}
                 defaultMultiPlayers={appData.defaultMultiPlayers}
+                history={appData.history}
                 setActiveTab={switchTab}
                 playSound={playSound}
               />

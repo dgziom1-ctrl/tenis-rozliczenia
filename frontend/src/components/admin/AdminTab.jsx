@@ -144,7 +144,7 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTab, playSound }) {
+export default function AdminTab({ playerNames, defaultMultiPlayers, history, setActiveTab, playSound }) {
   const { showError } = useToast();
   const theme = useTheme();
   const tokens = useThemeTokens();
@@ -156,6 +156,9 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
   const [multisportPlayers, setMultisportPlayers] = useState([]);
   const [isSaving,          setIsSaving]          = useState(false);
   const [savedSummary,      setSavedSummary]      = useState(null);
+
+  // Inline duplicate-date detection — no need to wait for Firebase
+  const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed);
 
   // Initialise player lists whenever roster changes
   useEffect(() => {
@@ -261,6 +264,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
                   }}
                 />
               </div>
+              {isDuplicateDate && (
+                <p className="mt-2 text-xs font-bold text-amber-400 flex items-center gap-1">
+                  ⚠ Sesja z datą {formatDate(datePlayed)} już istnieje
+                </p>
+              )}
             </div>
 
             {/* Cost */}
@@ -346,18 +354,29 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, setActiveTa
               multisportPlayers={multisportPlayers}
             />
 
-            <button
-              type="submit"
-              disabled={isSaving || presentPlayers.length === 0 || !totalCost}
-              className={`cyber-button-blue w-full py-4 rounded-xl text-lg font-black flex justify-center items-center gap-2 transition-opacity ${
-                isSaving || presentPlayers.length === 0 || !totalCost ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isSaving
-                ? <><InlineSpinner size="sm" /> Zapisuję...</>
-                : <><CheckCircle2 className="flex-shrink-0" /> ZAPISZ SESJĘ</>
-              }
-            </button>
+            <div className="space-y-2">
+              <button
+                type="submit"
+                disabled={isSaving || presentPlayers.length === 0 || !totalCost || isDuplicateDate}
+                className={`cyber-button-blue w-full py-4 rounded-xl text-lg font-black flex justify-center items-center gap-2 transition-opacity ${
+                  isSaving || presentPlayers.length === 0 || !totalCost || isDuplicateDate ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isSaving
+                  ? <><InlineSpinner size="sm" /> Zapisuję...</>
+                  : <><CheckCircle2 className="flex-shrink-0" /> ZAPISZ SESJĘ</>
+                }
+              </button>
+              {!isSaving && (presentPlayers.length === 0 || !totalCost || isDuplicateDate) && (
+                <p className="text-xs text-center font-bold tracking-wide" style={{ color: tokens.mutedText }}>
+                  {isDuplicateDate
+                    ? '⚠ Zmień datę — ta sesja już istnieje'
+                    : !totalCost
+                    ? 'Wpisz koszt sesji żeby kontynuować'
+                    : 'Zaznacz co najmniej jednego gracza'}
+                </p>
+              )}
+            </div>
           </form>
         </div>
       </div>
