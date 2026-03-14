@@ -1,15 +1,13 @@
-// Shared mutable reference to current data snapshot
-// Populated by subscriptions.js on every Firebase update
+// Shared mutable reference to current data snapshot.
+// Populated by subscriptions.js on every Firebase update.
+// Use getCurrentData() for reads — do not mutate _currentData directly.
 
-export let _currentData = null;
+let _currentData = null;
 
 export function setCurrentData(data) {
   _currentData = data;
 }
 
-export function requireData() {
-  if (!_currentData) {
-    throw new Error('Brak połączenia z bazą danych');
-  }
+export function getCurrentData() {
   return _currentData;
 }

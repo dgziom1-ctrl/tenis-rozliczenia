@@ -1,5 +1,4 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
-import { CheckCircle2, RotateCcw } from 'lucide-react';
 import { settlePlayer, undoSettle, addPayment, removePayment } from '../../firebase/index';
 import { SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants';
 import { buildDebtDisplayData } from '../../utils/calculations';
@@ -9,6 +8,7 @@ import { useTheme, useThemeTokens } from '../../context/ThemeContext';
 import ConfettiOverlay, { CONFETTI_POOLS, generateConfetti } from './ConfettiOverlay';
 import PlayerCard from './PlayerCard';
 import SettleConfirmModal from './SettleConfirmModal';
+import UndoBar from '../common/UndoBar';
 
 export default function DashboardTab({ data, history, playSound }) {
   const [openDetails,   setOpenDetails]   = useState(null);
@@ -17,10 +17,10 @@ export default function DashboardTab({ data, history, playSound }) {
   const [pinnedPlayer,  setPinnedPlayer]  = useState(null);
   const [confetti,      setConfetti]      = useState([]);
 
-  const { showSuccess, showError }                             = useToast();
-  const { undoToast, progressPct, startUndo, dismissUndo }    = useUndoTimer();
-  const theme = useTheme();
-  const T     = useThemeTokens();
+  const { showSuccess, showError }                           = useToast();
+  const { undoToast, progressPct, startUndo, dismissUndo }  = useUndoTimer(8);
+  const theme  = useTheme();
+  const tokens = useThemeTokens();
 
   const totalWeeks    = data.summary?.totalWeeks ?? 0;
   const confettiTimer = useRef(null);
@@ -65,14 +65,15 @@ export default function DashboardTab({ data, history, playSound }) {
       confettiTimer.current = setTimeout(() => setConfetti([]), 3500);
     }
 
-    startUndo(playerName, result.previousValue, result.previousPayments);
+    startUndo({ playerName, previousValue: result.previousValue, previousPayments: result.previousPayments });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [confirmSettle, data.players, playSound, showError, startUndo, theme]);
 
   const handleUndo = useCallback(async () => {
     if (!undoToast) return;
     playSound(SOUND_TYPES.CLICK);
-    const result = await undoSettle(undoToast.playerName, undoToast.previousValue, undoToast.previousPayments);
+    const { playerName, previousValue, previousPayments } = undoToast.payload;
+    const result = await undoSettle(playerName, previousValue, previousPayments);
     if (!result.success) {
       showError(result.error || 'Nie udało się cofnąć rozliczenia');
       return;
@@ -100,7 +101,6 @@ export default function DashboardTab({ data, history, playSound }) {
     setOpenDetails(prev => (prev === playerName ? null : playerName));
   }, [playSound]);
 
-  // Uses new unified buildDebtDisplayData — consistent with calculateDebt
   const getBreakdown = useCallback(
     (player) => buildDebtDisplayData(player, history, data.payments, data.paidUntilWeek),
     [history, data.payments, data.paidUntilWeek],
@@ -109,7 +109,7 @@ export default function DashboardTab({ data, history, playSound }) {
   // ── Sorted players ───────────────────────────────────────────────────────
   const sortedPlayers = useMemo(() => {
     if (!data.players) return [];
-    const debtors  = data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) => {
+    const debtors   = data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) => {
       if (a.name === pinnedPlayer) return -1;
       if (b.name === pinnedPlayer) return  1;
       return b.currentDebt - a.currentDebt || a.name.localeCompare(b.name, 'pl');
@@ -127,51 +127,19 @@ export default function DashboardTab({ data, history, playSound }) {
         debt={confirmSettle?.debt}
         onConfirm={handleConfirmSettle}
         onCancel={() => setConfirmSettle(null)}
-        T={T}
+        tokens={tokens}
       />
 
       <div className="space-y-6 animate-in fade-in duration-300">
 
         {/* Undo toast */}
         {undoToast && (
-          <div
-            className="p-4 flex items-center justify-between gap-4 relative overflow-hidden"
-            style={{
-              background:   T.undoBg,
-              border:       `2px solid ${T.undoBorder}`,
-              borderRadius: T.modalRadius,
-              boxShadow:    T.modalShadow,
-            }}
-          >
-            <div
-              className="absolute bottom-0 left-0 h-1 transition-all duration-1000"
-              style={{ width: `${progressPct}%`, background: T.undoProgressBg }}
-            />
-            <div className="flex items-center gap-2 min-w-0 flex-wrap">
-              <CheckCircle2 style={{ color: T.undoText }} className="flex-shrink-0" size={20} />
-              <span
-                className="font-bold text-sm"
-                style={{ color: T.undoText, fontFamily: T.fontFamily, fontSize: T.fontSize }}
-              >
-                Opłacono: <span style={{ color: T.bodyText, fontFamily: 'inherit' }}>{undoToast.playerName}</span>
-              </span>
-              <span className="font-mono text-xs flex-shrink-0" style={{ color: T.mutedText }}>
-                ({undoToast.secondsLeft}s)
-              </span>
-            </div>
-            <button
-              onClick={handleUndo}
-              className="flex items-center gap-2 px-4 py-2 font-bold text-sm flex-shrink-0 hover:opacity-80 transition-all"
-              style={{
-                border:       `2px solid ${T.undoBorder}`,
-                color:        T.undoText,
-                borderRadius: T.modalRadius,
-                background:   'transparent',
-              }}
-            >
-              <RotateCcw size={14} /> COFNIJ
-            </button>
-          </div>
+          <UndoBar
+            message={<>Opłacono: <span style={{ color: tokens.bodyText }}>{undoToast.payload.playerName}</span></>}
+            secondsLeft={undoToast.secondsLeft}
+            progressPct={progressPct}
+            onUndo={handleUndo}
+          />
         )}
 
         {/* Empty state */}

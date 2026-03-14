@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { CalendarDays, TrendingUp, Flame, Trophy } from 'lucide-react';
-import { RANKS, PODIUM, getRank } from '../../constants';
-import { calculatePlayerStats, assignRankingPlaces, groupSessionsByMonth, getSpecialTitle } from '../../utils/calculations';
+import { RANKS, PODIUM, PODIUM_ORDER, getRank } from '../../constants';
+import { calculatePlayerStats, assignRankingPlaces, groupSessionsByMonth, getPlayerBadge } from '../../utils/calculations';
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -58,8 +58,8 @@ function Podium({ podiumPlayers, totalWeeks }) {
   if (podiumPlayers.length === 0) return null;
   return (
     <div className="flex items-end justify-center gap-2 sm:gap-4 mb-8">
-      {/* Olimpijska kolejność: srebro | złoto | brąz */}
-      {[2, 1, 3].map((targetPlace) => {
+      {/* Olympic order: silver | gold | bronze */}
+      {PODIUM_ORDER.map((targetPlace) => {
         const entry = podiumPlayers.find(p => p.place === targetPlace);
         if (!entry) return <div key={targetPlace} className="flex-1 max-w-[180px]" />;
         return <PodiumCard key={targetPlace} podiumEntry={entry} totalWeeks={totalWeeks} />;
@@ -70,7 +70,7 @@ function Podium({ podiumPlayers, totalWeeks }) {
 
 function LeaderboardRow({ player, totalWeeks, stats }) {
   const rank = getRank(player.attendancePercentage);
-  const specialTitle = getSpecialTitle(player, stats);
+  const specialTitle = getPlayerBadge(player, stats);
   return (
     <div className={`rounded-xl border-2 px-4 py-3 flex items-center gap-3 ${rank.bg} ${rank.border} transition-all hover:scale-[1.005]`}>
       <span className="text-cyan-700 font-mono text-sm w-6 flex-shrink-0">#{player.place}</span>

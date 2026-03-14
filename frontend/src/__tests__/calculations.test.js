@@ -7,7 +7,7 @@ import {
   assignRankingPlaces,
   groupSessionsByMonth,
   groupHistoryByMonth,
-  getSpecialTitle,
+  getPlayerBadge,
 } from '../utils/calculations';
 
 // ─── roundToTwoDecimals ────────────────────────────────────────────────────────
@@ -216,9 +216,9 @@ describe('groupHistoryByMonth', () => {
   });
 });
 
-// ─── getSpecialTitle ──────────────────────────────────────────────────────────
+// ─── getPlayerBadge ───────────────────────────────────────────────────────────
 
-describe('getSpecialTitle', () => {
+describe('getPlayerBadge', () => {
   const base = [
     { name: 'A', currentStreak: 5, multisportCount: 2, attendanceCount: 20 },
     { name: 'B', currentStreak: 2, multisportCount: 5, attendanceCount: 15 },
@@ -226,23 +226,23 @@ describe('getSpecialTitle', () => {
   ];
 
   it('awards streak title to unique leader with streak >= 2', () => {
-    const title = getSpecialTitle(base[0], base);
+    const title = getPlayerBadge(base[0], base);
     expect(title?.icon).toBe('🔥');
   });
 
   it('awards Multi King to unique multisport leader', () => {
-    const title = getSpecialTitle(base[1], base);
+    const title = getPlayerBadge(base[1], base);
     expect(title?.label).toBe('Multi King');
   });
 
   it('awards attendance king', () => {
-    const title = getSpecialTitle(base[0], base);
+    const title = getPlayerBadge(base[0], base);
     // A has highest streak → streak takes priority
     expect(title).not.toBeNull();
   });
 
   it('returns null when allPlayers is empty', () => {
-    expect(getSpecialTitle(base[0], [])).toBeNull();
+    expect(getPlayerBadge(base[0], [])).toBeNull();
   });
 
   it('no title when streak is tied', () => {
@@ -251,7 +251,7 @@ describe('getSpecialTitle', () => {
       { name: 'B', currentStreak: 5, multisportCount: 1, attendanceCount: 10 },
     ];
     // Neither A nor B is unique streak leader → no streak title
-    const title = getSpecialTitle(tied[0], tied);
+    const title = getPlayerBadge(tied[0], tied);
     expect(title?.icon).not.toBe('🔥');
   });
 });

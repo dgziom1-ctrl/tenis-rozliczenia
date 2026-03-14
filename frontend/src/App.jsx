@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ToastProvider } from './components/common/Toast';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
+import ZenLeaves from './components/layout/ZenLeaves';
 import DashboardTab from './components/dashboard/DashboardTab';
 import AttendanceTab from './components/attendance/AttendanceTab';
 import AdminTab from './components/admin/AdminTab';
@@ -12,42 +13,9 @@ import { SOUND_TYPES, TABS } from './constants';
 import { SpinnerOverlay } from './components/common/LoadingSkeleton';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
+import { usePersistedTheme } from './hooks/usePersistedTheme';
+import { useScrolled } from './hooks/useScrolled';
 import { ThemeContext } from './context/ThemeContext';
-
-const ZEN_LEAVES = ['🍃','🌿','🍀','🌸','🌾','🍂','🌱','🎋'];
-const ZEN_LEAF_CONFIG = Array.from({ length: 12 }, (_, i) => ({
-  id:    i,
-  emoji: ZEN_LEAVES[i % ZEN_LEAVES.length],
-  left:  5 + (i * 8.2) % 90,
-  size:  14 + (i * 7) % 16,
-  dur:   10 + (i * 1.7) % 8,
-  delay: (i * 2.1) % 14,
-  drift: -40 + (i * 11) % 80,
-  rot:   120 + (i * 37) % 180,
-}));
-
-function ZenLeaves() {
-  return (
-    <>
-      {ZEN_LEAF_CONFIG.map(l => (
-        <div
-          key={l.id}
-          className="zen-leaf"
-          style={{
-            left:          `${l.left}%`,
-            fontSize:      `${l.size}px`,
-            '--leaf-dur':   `${l.dur}s`,
-            '--leaf-delay': `${l.delay}s`,
-            '--leaf-drift': `${l.drift}px`,
-            '--leaf-rot':   `${l.rot}deg`,
-          }}
-        >
-          {l.emoji}
-        </div>
-      ))}
-    </>
-  );
-}
 
 const INITIAL_APP_DATA = {
   summary: {},
@@ -59,52 +27,15 @@ const INITIAL_APP_DATA = {
   history: [],
 };
 
-function useTheme() {
-  const [theme, setTheme] = useState(() => {
-    try { return localStorage.getItem('ponk-theme') || 'cyber'; } catch { return 'cyber'; }
-  });
-
-  const persistTheme = useCallback((next) => {
-    setTheme(next);
-    try { localStorage.setItem('ponk-theme', next); } catch {}
-    document.body.classList.toggle('theme-arcade-bg', next === 'arcade');
-    document.body.classList.toggle('theme-zen-bg', next === 'zen');
-    // Drives CSS selectors in index.css (Navigation, etc.)
-    document.documentElement.dataset.theme = next === 'cyber' ? '' : next;
-  }, []);
-
-  // Sync on initial load
-  useEffect(() => {
-    const stored = (() => { try { return localStorage.getItem('ponk-theme'); } catch { return null; } })();
-    document.body.classList.toggle('theme-arcade-bg', stored === 'arcade');
-    document.body.classList.toggle('theme-zen-bg', stored === 'zen');
-    document.documentElement.dataset.theme = stored === 'arcade' || stored === 'zen' ? stored : '';
-  }, []);
-
-  return [theme, persistTheme];
-}
-
-function useScrolled(threshold = 80) {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > threshold);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [threshold]);
-
-  return scrolled;
-}
-
 function AppContent() {
-  const [activeTab,   setActiveTab]   = useState(TABS.DASHBOARD);
-  const [isMuted,     setIsMuted]     = useState(false);
-  const [appData,     setAppData]     = useState(INITIAL_APP_DATA);
+  const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
+  const [isMuted, setIsMuted] = useState(false);
+  const [appData, setAppData] = useState(INITIAL_APP_DATA);
   const [isConnected, setIsConnected] = useState(false);
-  const [isLoading,   setIsLoading]   = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [loadTimeout, setLoadTimeout] = useState(false);
 
-  const [theme, persistTheme] = useTheme();
+  const [theme, persistTheme] = usePersistedTheme();
   const scrolled = useScrolled();
   const { playSound } = useAudio(isMuted, theme);
 
@@ -158,65 +89,63 @@ function AppContent() {
       {theme === 'zen' && <ZenLeaves />}
       <div
         className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : theme === 'zen' ? 'theme-zen' : ''}`}
-      style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
-    >
-      <div className="max-w-7xl mx-auto relative">
-        <Header
-          isMuted={isMuted}
-          setIsMuted={setIsMuted}
-          isConnected={isConnected}
-          theme={theme}
-          onToggleTheme={toggleTheme}
-          scrolled={scrolled}
-        />
-        <Navigation
-          activeTab={activeTab}
-          setActiveTab={switchTab}
-        />
-        <main
-          className="main-content"
-        >
-          {activeTab === TABS.DASHBOARD  && (
-            <DashboardTab
-              data={{ summary: appData.summary, players: appData.players, paidUntilWeek: appData.paidUntilWeek, payments: appData.payments }}
-              history={appData.history}
-              playSound={playSound}
-            />
-          )}
-          {activeTab === TABS.ATTENDANCE && (
-            <AttendanceTab
-              players={appData.players}
-              history={appData.history}
-              summary={appData.summary}
-            />
-          )}
-          {activeTab === TABS.ADMIN      && (
-            <AdminTab
-              playerNames={appData.playerNames}
-              defaultMultiPlayers={appData.defaultMultiPlayers}
-              setActiveTab={switchTab}
-              playSound={playSound}
-            />
-          )}
-          {activeTab === TABS.HISTORY    && (
-            <HistoryTab
-              history={appData.history}
-              playerNames={appData.playerNames}
-              playSound={playSound}
-            />
-          )}
-          {activeTab === TABS.PLAYERS    && (
-            <PlayersTab
-              players={appData.players}
-              deletedPlayers={appData.deletedPlayers}
-              defaultMultiPlayers={appData.defaultMultiPlayers}
-              playSound={playSound}
-            />
-          )}
-        </main>
+        style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
+      >
+        <div className="max-w-7xl mx-auto relative">
+          <Header
+            isMuted={isMuted}
+            setIsMuted={setIsMuted}
+            isConnected={isConnected}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            scrolled={scrolled}
+          />
+          <Navigation
+            activeTab={activeTab}
+            setActiveTab={switchTab}
+          />
+          <main className="main-content">
+            {activeTab === TABS.DASHBOARD  && (
+              <DashboardTab
+                data={{ summary: appData.summary, players: appData.players, paidUntilWeek: appData.paidUntilWeek, payments: appData.payments }}
+                history={appData.history}
+                playSound={playSound}
+              />
+            )}
+            {activeTab === TABS.ATTENDANCE && (
+              <AttendanceTab
+                players={appData.players}
+                history={appData.history}
+                summary={appData.summary}
+              />
+            )}
+            {activeTab === TABS.ADMIN      && (
+              <AdminTab
+                playerNames={appData.playerNames}
+                defaultMultiPlayers={appData.defaultMultiPlayers}
+                setActiveTab={switchTab}
+                playSound={playSound}
+              />
+            )}
+            {activeTab === TABS.HISTORY    && (
+              <HistoryTab
+                history={appData.history}
+                playerNames={appData.playerNames}
+                playSound={playSound}
+              />
+            )}
+            {activeTab === TABS.PLAYERS    && (
+              <PlayersTab
+                players={appData.players}
+                deletedPlayers={appData.deletedPlayers}
+                defaultMultiPlayers={appData.defaultMultiPlayers}
+                playSound={playSound}
+              />
+            )}
+          </main>
+        </div>
+        <PWAInstallBanner />
       </div>
-      <PWAInstallBanner />
-    </div>
     </ThemeContext.Provider>
   );
 }

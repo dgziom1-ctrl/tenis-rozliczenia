@@ -1,77 +1,78 @@
 # 🕹️ Cyber Ponk
 
-> System rozliczeń dla rodzinnej grupy ping-pong. Kto był, ile płaci, kto zalega — wszystko w jednym miejscu.
+> A real-time debt tracker for a private ping-pong group. Who showed up, what they owe, and who's behind — all in one place.
 
 ---
 
-## ✨ Funkcje
+## ✨ Features
 
 ### 💰 Dashboard
-- Karty graczy z aktualnym długiem w czasie rzeczywistym
-- Oznaczanie płatności jednym kliknięciem
-- **Undo** — 10 sekund na cofnięcie oznaczenia płatności
-- Szczegółowy breakdown zaległości (które tygodnie, ile za każdy)
-- Numer BLIK do szybkiego kopiowania
+- Live player cards showing each person's current balance
+- One-click payment settlement with an **8-second undo** window
+- Detailed debt breakdown — which sessions, how much each cost
+- Quick BLIK payment button with exact amount pre-filled
+- Per-card partial payment entry with its own undo
 
-### 📊 Frekwencja
-- **Leaderboard** z podium olimpijskim (🥇🥈🥉) i ex aequo
-- Rangi graczy: LEGENDA / MISTRZ / WETERAN / STAŁY / GOŚĆ / DUCH
-- Tytuły specjalne: 👑 Król frekwencji, 🔥 Seria, ⚡ Multi King, 💀 Rzadki gość
-- Raport miesięczny z tabelą obecności
+### 📊 Attendance
+- **Leaderboard** with an Olympic podium (🥇🥈🥉) and ex aequo support
+- Player ranks: LEGENDA / MISTRZ / WETERAN / STAŁY / GOŚĆ / DUCH
+- Special titles: 👑 Król frekwencji · 🔥 Streak · ⚡ Multi King · 💀 Rzadki gość
+- Monthly attendance table
 
-### ⚙️ Panel Admina
-- Dodawanie tygodnia z wyborem daty (dzień/miesiąc/rok)
-- Szybkie przyciski kosztów: FREE / 15 / 30 / 45 / 60 PLN
-- Wszyscy gracze domyślnie zaznaczeni
-- Multisport — automatycznie preloadowany z ustawień
+### ⚙️ Add Session
+- Date picker with quick-cost buttons: FREE / 15 / 30 / 45 / 60 PLN
+- All players pre-selected; Multisport defaults loaded from settings
+- Live per-person cost preview before saving
+- Post-save summary with a one-tap "copy to group chat" message
 
-### 📅 Historia
-- Pełna lista rozgrywek z kosztami i składem
-- Edycja i usuwanie tygodnia **zabezpieczone hasłem**
+### 📅 History
+- Full session list grouped by month
+- Edit and delete — both **password-protected**
 
-### 👥 Gracze
-- Dodawanie nowych graczy
-- Soft delete (kosz) i przywracanie
-- Usuwanie **zabezpieczone hasłem**
+### 👥 Players
+- Add players; soft-delete to trash with restore option
+- Permanent deletion is **password-protected**
+- Set a default Multisport roster (auto-checked for every new session)
 
-### 🎮 Misc
-- Animacja pong w nagłówku z dźwiękami
-- Easter egg 🏓 (znajdź sam)
-- PWA — działa jak aplikacja na telefonie
-- Pełna synchronizacja w czasie rzeczywistym (Firebase)
+### 🎨 Themes
+Three themes switchable from the header: **Cyber** (default) · **Arcade** · **Zen** — each with its own colour palette, fonts, and sound effects.
+
+### 📱 PWA
+Installable as a home-screen app on mobile. Works offline for reading; writes sync when back online.
 
 ---
 
 ## 🛠️ Tech stack
 
-| Warstwa | Technologia |
-|---------|-------------|
+| Layer | Technology |
+|-------|------------|
 | Frontend | React 18 + Vite |
 | Styling | Tailwind CSS |
-| Baza danych | Firebase Realtime Database |
+| Database | Firebase Realtime Database |
 | Hosting | Firebase Hosting |
 | CI/CD | GitHub Actions |
-| Ikony | Lucide React |
+| Icons | Lucide React |
+| Component explorer | Storybook |
 
 ---
 
-## 🚀 Lokalne uruchomienie
+## 🚀 Local setup
 
-### Wymagania
+### Prerequisites
 - Node.js 20+
-- Konto Firebase z projektem Realtime Database
+- A Firebase project with Realtime Database enabled
 
-### Instalacja
+### Install
 
 ```bash
-git clone https://github.com/twoj-login/tenis-rozliczenia.git
+git clone https://github.com/your-username/tenis-rozliczenia.git
 cd tenis-rozliczenia/frontend
 npm install
 ```
 
-### Konfiguracja
+### Configure
 
-Utwórz plik `frontend/.env.local`:
+Create `frontend/.env.local`:
 
 ```env
 VITE_FIREBASE_API_KEY=...
@@ -81,79 +82,129 @@ VITE_FIREBASE_PROJECT_ID=...
 VITE_FIREBASE_STORAGE_BUCKET=...
 VITE_FIREBASE_MESSAGING_SENDER_ID=...
 VITE_FIREBASE_APP_ID=...
+VITE_ADMIN_PASSWORD=...
 VITE_BLIK_NUMBER=...
 ```
 
-> ⚠️ Plik `.env.local` jest w `.gitignore` — nigdy nie trafia do repozytorium.
+> ⚠️ `.env.local` is in `.gitignore` and never committed to the repository.
 
-### Uruchomienie
+### Run
 
 ```bash
-npm run dev
+npm run dev        # dev server at http://localhost:5173
+npm run storybook  # component explorer at http://localhost:6006
+npm test           # unit tests (Vitest)
 ```
 
-Aplikacja dostępna pod `http://localhost:5173`
-
 ---
 
-## 🔐 Bezpieczeństwo
+## 📦 Deployment
 
-- Klucze Firebase trzymane w **GitHub Secrets** — nie ma ich w kodzie
-- Hasło do edycji/usuwania danych chroni przed przypadkowymi zmianami
-- Firebase Rules ograniczają zapis do autoryzowanych klientów
-- Numer BLIK zakodowany przez zmienną środowiskową
-
----
-
-## 📦 Deploy
-
-Deploy odbywa się automatycznie po każdym pushu do `main`:
+Every push to `main` triggers an automatic deploy:
 
 ```
 git push origin main
 ```
 
-GitHub Actions: instaluje zależności → buduje React → deployuje na Firebase Hosting.
+GitHub Actions pipeline: install → build → deploy to Firebase Hosting.
+
+A nightly GitHub Action also backs up the Realtime Database to `backups/` in the repo.
 
 ---
 
-## 🏗️ Struktura projektu
+## 🏗️ Project structure
 
 ```
 tenis-rozliczenia/
 ├── frontend/
 │   ├── public/
-│   │   ├── manifest.json        # PWA config
+│   │   ├── manifest.json               # PWA config
 │   │   ├── icon-192v2.png
 │   │   └── icon-512v2.png
-│   ├── src/
-│   │   ├── firebase.js          # Cała logika bazy danych
-│   │   ├── App.jsx              # Root + routing między tabami
-│   │   └── components/
-│   │       ├── layout/
-│   │       │   ├── Header.jsx
-│   │       │   └── Navigation.jsx
-│   │       ├── dashboard/
-│   │       │   └── DashboardTab.jsx
-│   │       ├── attendance/
-│   │       │   └── AttendanceTab.jsx
-│   │       ├── admin/
-│   │       │   └── AdminTab.jsx
-│   │       ├── history/
-│   │       │   └── HistoryTab.jsx
-│   │       └── players/
-│   │           └── PlayersTab.jsx
-│   ├── index.html
-│   └── package.json
+│   └── src/
+│       ├── components/
+│       │   ├── admin/
+│       │   │   └── AdminTab.jsx        # Add session form
+│       │   ├── attendance/
+│       │   │   └── AttendanceTab.jsx   # Leaderboard, monthly report
+│       │   ├── common/
+│       │   │   ├── ErrorBoundary.jsx
+│       │   │   ├── LoadingSkeleton.jsx
+│       │   │   ├── PWAInstallBanner.jsx
+│       │   │   └── Toast.jsx
+│       │   ├── dashboard/
+│       │   │   ├── BreakdownPanel.jsx  # Session/payment detail accordion
+│       │   │   ├── ConfettiOverlay.jsx
+│       │   │   ├── DashboardTab.jsx    # Player cards, settle flow
+│       │   │   ├── PlayerCard.jsx      # Single player card
+│       │   │   └── SettleConfirmModal.jsx
+│       │   ├── history/
+│       │   │   └── HistoryTab.jsx      # Session list with edit/delete
+│       │   ├── layout/
+│       │   │   ├── Header.jsx
+│       │   │   └── Navigation.jsx
+│       │   └── players/
+│       │       └── PlayersTab.jsx      # Roster management
+│       ├── constants/
+│       │   └── index.js                # App-wide constants and theme data
+│       ├── context/
+│       │   └── ThemeContext.jsx        # Theme provider + token map
+│       ├── firebase/
+│       │   ├── config.js               # Firebase initialisation
+│       │   ├── index.js                # Public re-export barrel
+│       │   ├── payments.js             # Settle, undo, add/remove payments
+│       │   ├── players.js              # Add, delete, restore players
+│       │   ├── state.js                # Current data snapshot reference
+│       │   ├── subscriptions.js        # onValue listener + UI data builder
+│       │   ├── utils.js                # withTransaction helper
+│       │   └── weeks.js                # Add, update, delete sessions
+│       ├── hooks/
+│       │   ├── useAudio.js             # Web Audio API sound engine
+│       │   ├── useDebounce.js
+│       │   ├── usePaymentUndo.js       # Per-card payment undo countdown
+│       │   └── useUndoTimer.js         # Generic undo countdown timer
+│       ├── stories/                    # Storybook stories
+│       ├── utils/
+│       │   ├── calculations.js         # Debt, rankings, breakdowns
+│       │   ├── format.js               # Date and currency formatting
+│       │   └── id.js                   # Collision-resistant ID generator
+│       ├── App.jsx                     # Root component, theme, data subscription
+│       └── main.jsx
 ├── .github/
 │   └── workflows/
-│       └── firebase-hosting-merge.yml
+│       ├── firebase-hosting-merge.yml  # Deploy on push to main
+│       ├── firebase-hosting-pull-request.yml
+│       ├── firebase_backup.yml         # Nightly DB backup
+│       └── tests.yml                   # Run Vitest on every PR
 ├── firebase.json
 └── README.md
 ```
 
 ---
 
-## 👾 Credits
+## 🧮 How the debt calculation works
 
-Frontend design oparty na projekcie **cyber-pong-club** by [@k-michalek](https://github.com/k-michalek).
+Each session has a total cost split equally among players who **don't** have Multisport. Players with Multisport attend for free. The debt for a player is:
+
+```
+debt = sum(costPerSession for each session since last settlement)
+     - sum(all recorded payments)
+```
+
+A positive value means money is owed; a negative value is a credit carried forward to future sessions.
+
+Settlement records the current net debt as a payment and advances the player's `paidUntilWeek` cursor to the latest session.
+
+---
+
+## 🧪 Tests
+
+Unit tests live in `src/__tests__/` and cover:
+
+- `calculations.test.js` — debt calculation, breakdown logic, edge cases (Multisport-only sessions, zero-cost weeks)
+- `format.test.js` — date and currency formatting
+- `robustness.test.js` — null/undefined/empty data guards
+
+```bash
+npm test
+```

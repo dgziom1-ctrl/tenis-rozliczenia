@@ -36,7 +36,7 @@ export const MONTHS = [
   'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień',
 ];
 
-export const UNDO_TIMEOUT_SECONDS = 10;
+export const UNDO_TIMEOUT_SECONDS = 8;
 export const QUICK_COSTS = [0, 15, 30, 45, 60];
 
 export const SOUND_TYPES = {
@@ -57,3 +57,8 @@ export const TABS = {
 
 
 export const ORGANIZER_NAME = 'Kamil';
+
+export const PAYMENT_MODAL = {
+  EXACT:  'exact',
+  CUSTOM: 'custom',
+};

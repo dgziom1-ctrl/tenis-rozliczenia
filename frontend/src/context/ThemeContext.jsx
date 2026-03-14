@@ -15,8 +15,11 @@ export function useThemeTokens() {
   return useMemo(() => getThemeTokens(theme), [theme]);
 }
 
-export function getThemeTokens(theme) {
-  if (theme === 'arcade') return {
+// ─── Theme token maps ─────────────────────────────────────────────────────────
+// Each key is a theme name. Adding a new theme = adding one entry here, nothing else.
+
+const THEMES = {
+  arcade: {
     overlayBg:        'rgba(0,0,0,0.92)',
     modalBg:          '#010300',
     modalBorder:      '#39ff14',
@@ -54,9 +57,9 @@ export function getThemeTokens(theme) {
     undoBorder:       '#39ff14',
     undoText:         '#39ff14',
     undoProgressBg:   '#39ff14',
-  };
+  },
 
-  if (theme === 'zen') return {
+  zen: {
     overlayBg:        'rgba(61,48,37,0.65)',
     modalBg:          '#f0ebe0',
     modalBorder:      '#c2b49a',
@@ -94,10 +97,9 @@ export function getThemeTokens(theme) {
     undoBorder:       '#2d6a4f',
     undoText:         '#2d6a4f',
     undoProgressBg:   '#2d6a4f',
-  };
+  },
 
-  // cyber (default)
-  return {
+  cyber: {
     overlayBg:        'rgba(0,0,0,0.82)',
     modalBg:          'rgb(17,24,39)',
     modalBorder:      'rgb(8,145,178)',
@@ -135,5 +137,7 @@ export function getThemeTokens(theme) {
     undoBorder:       'rgb(16,185,129)',
     undoText:         'rgb(52,211,153)',
     undoProgressBg:   'rgb(16,185,129)',
-  };
-}
+  },
+};
+
+export const getThemeTokens = (theme) => THEMES[theme] ?? THEMES.cyber;

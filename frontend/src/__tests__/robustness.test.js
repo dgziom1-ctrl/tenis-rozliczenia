@@ -7,9 +7,9 @@ import {
   calculateDebt,
   calculateDebtBreakdown,
   assignRankingPlaces,
-  getSpecialTitle,
+  getPlayerBadge,
 } from '../utils/calculations';
-import { buildUIData } from '../firebase/subscriptions';
+import { buildUIData } from '../firebase/transforms';
 import { formatDate, formatAmount } from '../utils/format';
 import * as stateModule from '../firebase/state';
 
@@ -17,11 +17,11 @@ import * as stateModule from '../firebase/state';
 const { mockSaveData, runTransactionImpl } = vi.hoisted(() => {
   const mockSaveData = vi.fn().mockResolvedValue(undefined);
 
-  // runTransaction reads from stateModule._currentData, applies the update fn,
+  // runTransaction reads from stateModule.getCurrentData(), applies the update fn,
   // persists result into state and captures it via mockSaveData.
   const runTransactionImpl = vi.fn(async (_ref, updateFn) => {
-    const current = stateModule._currentData
-      ? JSON.parse(JSON.stringify(stateModule._currentData))
+    const current = stateModule.getCurrentData()
+      ? JSON.parse(JSON.stringify(stateModule.getCurrentData()))
       : null;
     const result = updateFn(current);
     if (result !== undefined) {
@@ -417,10 +417,10 @@ describe('settlePlayer / undoSettle — state machine', () => {
     seed({ weeks, paidUntilWeek: {} });
     const debtBefore = calculateDebt('Alice', { weeks, paidUntilWeek: {} });
     const { previousValue } = await settlePlayer('Alice');
-    const stateAfterSettle = stateModule._currentData;
+    const stateAfterSettle = stateModule.getCurrentData();
     expect(calculateDebt('Alice', { weeks, paidUntilWeek: stateAfterSettle.paidUntilWeek })).toBe(0);
     await undoSettle('Alice', previousValue);
-    const stateAfterUndo = stateModule._currentData;
+    const stateAfterUndo = stateModule.getCurrentData();
     expect(calculateDebt('Alice', { weeks, paidUntilWeek: stateAfterUndo.paidUntilWeek })).toBe(debtBefore);
   });
 });
@@ -527,13 +527,13 @@ describe('assignRankingPlaces — exploratory', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// getSpecialTitle — edge cases
+// getPlayerBadge — edge cases
 // ══════════════════════════════════════════════════════════════════════════════
 
-describe('getSpecialTitle — edge cases', () => {
+describe('getPlayerBadge — edge cases', () => {
   it('sole player gets attendance king', () => {
     const p = { name: 'A', currentStreak: 0, multisportCount: 0, attendanceCount: 5, attendancePercentage: 50 };
-    expect(getSpecialTitle(p, [p])?.icon).toBe('👑');
+    expect(getPlayerBadge(p, [p])?.icon).toBe('👑');
   });
 
   it('streak=1 does not award streak title', () => {
@@ -541,7 +541,7 @@ describe('getSpecialTitle — edge cases', () => {
       { name: 'A', currentStreak: 1, multisportCount: 0, attendanceCount: 10, attendancePercentage: 80 },
       { name: 'B', currentStreak: 0, multisportCount: 0, attendanceCount: 5,  attendancePercentage: 50 },
     ];
-    expect(getSpecialTitle(players[0], players)?.icon).not.toBe('🔥');
+    expect(getPlayerBadge(players[0], players)?.icon).not.toBe('🔥');
   });
 
   it('ghost title requires attendancePercentage < 40', () => {
@@ -549,7 +549,7 @@ describe('getSpecialTitle — edge cases', () => {
       { name: 'A', currentStreak: 3, multisportCount: 2, attendanceCount: 10, attendancePercentage: 70 },
       { name: 'B', currentStreak: 0, multisportCount: 0, attendanceCount: 1,  attendancePercentage: 10 },
     ];
-    expect(getSpecialTitle(players[1], players)?.icon).toBe('💀');
+    expect(getPlayerBadge(players[1], players)?.icon).toBe('💀');
   });
 
   it('no title when all metrics tied', () => {
@@ -557,6 +557,6 @@ describe('getSpecialTitle — edge cases', () => {
       { name: 'A', currentStreak: 3, multisportCount: 3, attendanceCount: 10, attendancePercentage: 70 },
       { name: 'B', currentStreak: 3, multisportCount: 3, attendanceCount: 10, attendancePercentage: 70 },
     ];
-    expect(getSpecialTitle(players[0], players)).toBeNull();
+    expect(getPlayerBadge(players[0], players)).toBeNull();
   });
 });

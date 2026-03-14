@@ -40,7 +40,7 @@ function EditDateInput({ value, onChange }) {
   );
 }
 
-function PasswordModal({ action, onConfirm, onCancel, T }) {
+function PasswordModal({ action, onConfirm, onCancel, tokens }) {
   const [input, setInput] = useState('');
   const [error, setError] = useState(false);
 
@@ -56,13 +56,13 @@ function PasswordModal({ action, onConfirm, onCancel, T }) {
   };
 
   return (
-    <div style={{ background: T.overlayBg }} className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4">
-      <div style={{ background: T.modalBg, border: `2px solid ${T.accentBorder}`, borderRadius: T.modalRadius, boxShadow: T.modalShadow }} className="p-6 w-full max-w-sm">
+    <div style={{ background: tokens.overlayBg }} className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+      <div style={{ background: tokens.modalBg, border: `2px solid ${tokens.accentBorder}`, borderRadius: tokens.modalRadius, boxShadow: tokens.modalShadow }} className="p-6 w-full max-w-sm">
         <div className="flex items-center gap-3 mb-6">
-          <Lock style={{ color: T.accentColor }} className="flex-shrink-0" size={22}/>
-          <h3 style={{ color: T.accentColor, fontFamily: T.fontFamily }} className="font-black text-lg">Podaj hasło admina</h3>
+          <Lock style={{ color: tokens.accentColor }} className="flex-shrink-0" size={22}/>
+          <h3 style={{ color: tokens.accentColor, fontFamily: tokens.fontFamily }} className="font-black text-lg">Podaj hasło admina</h3>
         </div>
-        <p style={{ color: T.mutedText }} className="text-sm mb-4">{action}</p>
+        <p style={{ color: tokens.mutedText }} className="text-sm mb-4">{action}</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="password"
@@ -77,12 +77,12 @@ function PasswordModal({ action, onConfirm, onCancel, T }) {
           {error && <p className="text-rose-400 text-xs font-bold text-center">❌ Złe hasło</p>}
           <div className="flex gap-3">
             <button type="submit"
-              style={{ border: `2px solid ${T.accentBorder}`, color: T.accentColor, background: T.accentBg, borderRadius: T.modalRadius }}
+              style={{ border: `2px solid ${tokens.accentBorder}`, color: tokens.accentColor, background: tokens.accentBg, borderRadius: tokens.modalRadius }}
               className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80">
               <Check size={16}/> POTWIERDŹ
             </button>
             <button type="button" onClick={onCancel}
-              style={{ border: `2px solid ${T.cancelBorder}`, color: T.cancelText, borderRadius: T.modalRadius }}
+              style={{ border: `2px solid ${tokens.cancelBorder}`, color: tokens.cancelText, borderRadius: tokens.modalRadius }}
               className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80">
               <X size={16}/> ANULUJ
             </button>
@@ -101,7 +101,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const [isDeleting,  setIsDeleting]  = useState(null); // id sesji aktualnie usuwanej
 
   const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete', rowId, row? }
-  const T = useThemeTokens();
+  const tokens = useThemeTokens();
 
   const { showError } = useToast();
 
@@ -188,7 +188,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
     <>
       {pwModal && (
         <PasswordModal
-          T={T}
+          tokens={tokens}
           action={pwModal.type === 'edit' ? 'Podaj hasło żeby edytować tę sesję.' : 'Podaj hasło żeby usunąć tę sesję.'}
           onConfirm={handlePasswordConfirm}
           onCancel={() => setPwModal(null)}

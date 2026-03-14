@@ -21,8 +21,8 @@ export function formatAmount(value, withSymbol = true) {
 }
 
 /**
- * Skrót dla kwoty na kartach — bez spacji
+ * Skrót dla kwoty na kartach — bez symbolu zł
  */
 export function formatAmountShort(value) {
-  return Number(value).toFixed(2).replace('.', ',');
+  return formatAmount(value, false);
 }

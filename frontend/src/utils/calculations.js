@@ -8,21 +8,27 @@ export function roundToTwoDecimals(value) {
   return Math.round(value * 100) / 100;
 }
 
+// ─── Core business rule: who pays for a session ───────────────────────────────
+// Present players who don't have Multisport are the paying players.
+export function getPayingPlayers(present = [], multisportPlayers = []) {
+  return present.filter(p => !multisportPlayers.includes(p));
+}
+
 // ─── Base helper: list of sessions a player owes for ─────────────────────────
 // Used by both calculateDebt (raw weeks) and calculateDebtBreakdown (UI history).
 // Returns [{id, costPerPerson}] oldest→newest for sessions after paidUntilWeekIdx.
-function _unaidSessionsFromWeeks(playerName, weeks, paidUntilWeekId) {
+function unpaidSessionsFromWeeks(playerName, weeks, paidUntilWeekId) {
   const lastPaidIndex = paidUntilWeekId
     ? weeks.findIndex(w => w.id === paidUntilWeekId)
     : -1;
 
   const result = [];
   for (let idx = lastPaidIndex + 1; idx < weeks.length; idx++) {
-    const week     = weeks[idx];
-    const isPresent    = (week.present     || []).includes(playerName);
-    const isMultisport = (week.multiPlayers || []).includes(playerName);
-    if (isPresent && !isMultisport) {
-      const paying = (week.present || []).filter(p => !(week.multiPlayers || []).includes(p));
+    const week       = weeks[idx];
+    const isPresent  = (week.present     || []).includes(playerName);
+    const isMulti    = (week.multiPlayers || []).includes(playerName);
+    if (isPresent && !isMulti) {
+      const paying = getPayingPlayers(week.present || [], week.multiPlayers || []);
       result.push({ id: week.id, costPerPerson: paying.length > 0 ? week.cost / paying.length : 0 });
     }
   }
@@ -35,7 +41,7 @@ function _unaidSessionsFromWeeks(playerName, weeks, paidUntilWeekId) {
 export function calculateDebt(playerName, data) {
   if (playerName === ORGANIZER_NAME) return 0;
 
-  const sessions   = _unaidSessionsFromWeeks(playerName, data.weeks || [], data.paidUntilWeek?.[playerName]);
+  const sessions    = unpaidSessionsFromWeeks(playerName, data.weeks || [], data.paidUntilWeek?.[playerName]);
   const sessionCost = roundToTwoDecimals(sessions.reduce((sum, s) => sum + s.costPerPerson, 0));
   const totalPaid   = roundToTwoDecimals(
     (data.payments?.[playerName] || []).reduce((sum, p) => sum + (p.amount || 0), 0),
@@ -154,7 +160,7 @@ export function calculatePlayerStats(players, history, totalWeeks) {
   if (!players || !history) return [];
 
   return players.map(player => {
-    const { name, attendanceCount, currentDebt } = player;
+    const { name, attendanceCount } = player;
     const attendancePercentage = totalWeeks > 0
       ? Math.round((attendanceCount / totalWeeks) * 100)
       : 0;
@@ -184,52 +190,32 @@ export function assignRankingPlaces(sortedPlayers) {
   });
 }
 
-export function groupSessionsByMonth(history) {
-  const months = {};
-  history.forEach(session => {
-    const monthKey = session.datePlayed.slice(0, 7);
-    if (!months[monthKey]) months[monthKey] = { total: 0, players: {} };
-    months[monthKey].total += 1;
-    session.presentPlayers.forEach(playerName => {
-      months[monthKey].players[playerName] = (months[monthKey].players[playerName] || 0) + 1;
-    });
-  });
-  return Object.entries(months).sort((a, b) => b[0].localeCompare(a[0]));
-}
-
-export function getSpecialTitle(player, allPlayers) {
-  if (!allPlayers || allPlayers.length === 0) return null;
-
-  const maxStreak     = Math.max(...allPlayers.map(p => p.currentStreak || 0));
-  const maxMulti      = Math.max(...allPlayers.map(p => p.multisportCount || 0));
-  const maxAttendance = Math.max(...allPlayers.map(p => p.attendanceCount || 0));
-  const minAttendance = Math.min(...allPlayers.map(p => p.attendanceCount || 0));
-
-  if (player.currentStreak === maxStreak && maxStreak >= 2) {
-    const isUnique = allPlayers.filter(p => p.currentStreak === maxStreak).length === 1;
-    if (isUnique) return { icon: '🔥', label: `Seria ${maxStreak}`, color: 'text-orange-400 border-orange-700 bg-orange-950/30' };
-  }
-  if (player.multisportCount === maxMulti && maxMulti > 0) {
-    const isUnique = allPlayers.filter(p => p.multisportCount === maxMulti).length === 1;
-    if (isUnique) return { icon: '⚡', label: 'Multi King', color: 'text-emerald-400 border-emerald-700 bg-emerald-950/30' };
-  }
-  if (player.attendanceCount === maxAttendance) {
-    const isUnique = allPlayers.filter(p => p.attendanceCount === maxAttendance).length === 1;
-    if (isUnique) return { icon: '👑', label: 'Król frekwencji', color: 'text-yellow-400 border-yellow-700 bg-yellow-950/30' };
-  }
-  if (player.attendanceCount === minAttendance && player.attendancePercentage < 40) {
-    const isUnique = allPlayers.filter(p => p.attendanceCount === minAttendance).length === 1;
-    if (isUnique) return { icon: '💀', label: 'Rzadki gość', color: 'text-slate-400 border-slate-700 bg-slate-900/30' };
-  }
-
-  return null;
-}
+// ─── Month grouping ───────────────────────────────────────────────────────────
 
 function getMonthLabel(dateStr) {
   const [y, m] = dateStr.split('-');
   return `${MONTHS[parseInt(m, 10) - 1]} ${y}`;
 }
 
+function getMonthKey(dateStr) {
+  return dateStr.slice(0, 7); // 'YYYY-MM'
+}
+
+// Used by AttendanceTab — accumulates per-player session counts per month.
+export function groupSessionsByMonth(history) {
+  const months = {};
+  history.forEach(session => {
+    const key = getMonthKey(session.datePlayed);
+    if (!months[key]) months[key] = { total: 0, players: {} };
+    months[key].total += 1;
+    session.presentPlayers.forEach(playerName => {
+      months[key].players[playerName] = (months[key].players[playerName] || 0) + 1;
+    });
+  });
+  return Object.entries(months).sort((a, b) => b[0].localeCompare(a[0]));
+}
+
+// Used by HistoryTab — groups raw session rows into labelled month buckets.
 export function groupHistoryByMonth(history) {
   const groups = [];
   let current = null;
@@ -242,4 +228,39 @@ export function groupHistoryByMonth(history) {
     current.rows.push(row);
   }
   return groups;
+}
+
+// ─── getPlayerBadge ───────────────────────────────────────────────────────────
+// Returns a badge descriptor { icon, label, color } for a notable player stat,
+// or null if the player has no standout achievement.
+export function getPlayerBadge(player, allPlayers) {
+  if (!allPlayers || allPlayers.length === 0) return null;
+
+  // Single pass: aggregate extremes AND count holders simultaneously
+  const agg = allPlayers.reduce((acc, p) => {
+    const streak = p.currentStreak   || 0;
+    const multi  = p.multisportCount || 0;
+    const att    = p.attendanceCount || 0;
+    return {
+      maxStreak:        Math.max(acc.maxStreak,     streak),
+      maxMulti:         Math.max(acc.maxMulti,      multi),
+      maxAttendance:    Math.max(acc.maxAttendance, att),
+      minAttendance:    Math.min(acc.minAttendance, p.attendanceCount ?? Infinity),
+      streakHolders:    streak === acc.maxStreak ? acc.streakHolders + 1 : streak > acc.maxStreak ? 1 : acc.streakHolders,
+      multiHolders:     multi  === acc.maxMulti  ? acc.multiHolders  + 1 : multi  > acc.maxMulti  ? 1 : acc.multiHolders,
+      attendHolders:    att    === acc.maxAttendance ? acc.attendHolders + 1 : att > acc.maxAttendance ? 1 : acc.attendHolders,
+      minAttHolders:    att    === acc.minAttendance ? acc.minAttHolders + 1 : att < acc.minAttendance ? 1 : acc.minAttHolders,
+    };
+  }, { maxStreak: 0, maxMulti: 0, maxAttendance: 0, minAttendance: Infinity, streakHolders: 0, multiHolders: 0, attendHolders: 0, minAttHolders: 0 });
+
+  if (player.currentStreak === agg.maxStreak && agg.maxStreak >= 2 && agg.streakHolders === 1)
+    return { icon: '🔥', label: `Seria ${agg.maxStreak}`, color: 'text-orange-400 border-orange-700 bg-orange-950/30' };
+  if (player.multisportCount === agg.maxMulti && agg.maxMulti > 0 && agg.multiHolders === 1)
+    return { icon: '⚡', label: 'Multi King', color: 'text-emerald-400 border-emerald-700 bg-emerald-950/30' };
+  if (player.attendanceCount === agg.maxAttendance && agg.attendHolders === 1)
+    return { icon: '👑', label: 'Król frekwencji', color: 'text-yellow-400 border-yellow-700 bg-yellow-950/30' };
+  if (player.attendanceCount === agg.minAttendance && player.attendancePercentage < 40 && agg.minAttHolders === 1)
+    return { icon: '💀', label: 'Rzadki gość', color: 'text-slate-400 border-slate-700 bg-slate-900/30' };
+
+  return null;
 }
