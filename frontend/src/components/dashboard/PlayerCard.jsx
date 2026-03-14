@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { CheckCircle2, Coins } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
 import { formatAmountShort } from '../../utils/format';
 import { useThemeTokens } from '../../context/ThemeContext';
@@ -247,10 +247,15 @@ export default function PlayerCard({
                     <button
                       onClick={() => savePayment(debt)}
                       disabled={isSaving}
-                      className="w-full py-3 rounded-xl font-bold border-2 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                      className="w-full py-3 rounded-xl border-2 flex flex-col items-center justify-center gap-0.5 transition-all disabled:opacity-50"
                       style={{ background: tokens.confirmBg, border: `2px solid ${tokens.confirmBorder}`, color: tokens.confirmText }}
                     >
-                      <Coins size={18} /> Wysyłam {formatAmountShort(debt)} zł na BLIK 💸
+                      <span className="text-2xl font-black leading-tight">
+                        {formatAmountShort(debt)} zł
+                      </span>
+                      <span className="text-xs font-bold tracking-widest opacity-70">
+                        WYŚLIJ BLIK 💸
+                      </span>
                     </button>
                     <button
                       onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
