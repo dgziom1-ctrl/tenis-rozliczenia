@@ -20,6 +20,22 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           className="mt-2 rounded-lg text-xs border text-left shadow-inner overflow-hidden"
           style={{ background: tokens.cellBg, borderColor: tokens.cellBorder }}
         >
+          {/* Legacy settlement banner — shown when player was settled via old
+              "Rozlicz" button (no payment entry) and new sessions have since
+              been added. Explains why older sessions aren't visible here.    */}
+          {breakdown.wasLegacySettled && (
+            <div
+              className="px-3 py-2 flex items-center gap-2 text-xs font-bold"
+              style={{
+                borderBottom: `1px solid ${tokens.cellBorder}`,
+                background:   'rgba(52,211,153,0.07)',
+                color:        '#4ade80',
+              }}
+            >
+              <span>✓</span>
+              <span>Poprzednie sesje zostały rozliczone</span>
+            </div>
+          )}
           {/* Sessions */}
           {breakdown.sessions.length > 0 && (
             <>
