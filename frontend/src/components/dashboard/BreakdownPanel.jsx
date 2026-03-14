@@ -40,7 +40,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
               ))}
               {breakdown.sessions.length > 1 && (
                 <Row tokens={tokens} highlight="rgba(248,113,113,0.06)">
-                  <span style={{ color: tokens.mutedText }}>Razem do zapłaty</span>
+                  <span style={{ color: tokens.mutedText }}>Razem sesje</span>
                   <span className="font-bold" style={{ color: '#f87171' }}>
                     -{formatAmountShort(breakdown.totalSessions)} zł
                   </span>
