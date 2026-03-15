@@ -196,15 +196,15 @@ export default function HistoryTab({ history, playerNames, playSound }) {
       )}
 
       <div className="cyber-box rounded-2xl p-4 sm:p-6 overflow-hidden animate-in slide-in-from-right-5 duration-300">
-        <h2 className="text-xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
+        <h2 className="text-xl font-black text-slate-200 mb-8 flex items-center gap-3 border-b border-slate-800/30 pb-4">
           <History className="text-magenta-500" /> Historia rozgrywek
         </h2>
 
         {history.length === 0 && (
           <div className="text-center py-16 space-y-3">
-            <CalendarDays className="mx-auto text-cyan-900" size={48} />
-            <p className="text-cyan-700 font-bold">Brak historii rozgrywek.</p>
-            <p className="text-cyan-800 text-sm">Dodaj pierwszą sesję w zakładce Dodaj sesję!</p>
+            <CalendarDays className="mx-auto text-slate-600" size={48} />
+            <p className="text-slate-500 font-bold">Brak historii rozgrywek.</p>
+            <p className="text-slate-600 text-sm">Dodaj pierwszą sesję w zakładce Dodaj sesję!</p>
           </div>
         )}
 
@@ -212,10 +212,10 @@ export default function HistoryTab({ history, playerNames, playSound }) {
           {grouped.map(({ label, rows }) => (
             <div key={label}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center gap-2 px-3 py-1 rounded-lg border border-cyan-800 bg-cyan-950/50">
-                  <CalendarDays size={13} className="text-cyan-600" />
-                  <span className="text-cyan-500 font-black text-xs tracking-widest uppercase">{label}</span>
-                  <span className="text-cyan-800 font-mono text-xs ml-1">{rows.length}×</span>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-lg border border-slate-700/30 bg-slate-900/40">
+                  <CalendarDays size={13} className="text-slate-500" />
+                  <span className="text-slate-400 font-black text-xs tracking-widest uppercase">{label}</span>
+                  <span className="text-slate-600 font-mono text-xs ml-1">{rows.length}×</span>
                 </div>
                 <div className="flex-1 h-px bg-gradient-to-r from-cyan-800 to-transparent" />
               </div>
@@ -226,28 +226,28 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                   const isDeletingRow = deletingId === row.id;
 
                   if (isEditingRow) return (
-                    <div key={row.id} className="cyber-box border-cyan-500 rounded-xl p-4 space-y-4 bg-cyan-950/10">
+                    <div key={row.id} className="cyber-box border-indigo-500/40 rounded-xl p-4 space-y-4 bg-indigo-950/10">
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-cyan-600 text-xs font-bold mb-1 tracking-wider">DATA</label>
+                          <label className="block text-slate-500 font-bold mb-1 tracking-wider">DATA</label>
                           <EditDateInput value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
                         </div>
                         <div>
-                          <label className="block text-cyan-600 text-xs font-bold mb-1 tracking-wider">KOSZT</label>
+                          <label className="block text-slate-500 font-bold mb-1 tracking-wider">KOSZT</label>
                           <input type="number" value={editForm.cost}
                             onChange={e => setEditForm(p => ({ ...p, cost: e.target.value }))}
                             className="cyber-input w-full p-3 rounded-xl text-sm"/>
                         </div>
                       </div>
                       <div>
-                        <p className="text-cyan-500 text-xs font-bold mb-2 tracking-wider flex items-center gap-1"><Users size={13}/> OBECNI</p>
+                        <p className="text-slate-400 text-xs font-bold mb-2 tracking-wider flex items-center gap-1"><Users size={13}/> OBECNI</p>
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                           {playerNames.map(name => (
                             <button type="button" key={name} onClick={() => togglePresent(name)}
                               className={`p-2 rounded-lg text-xs font-bold border-2 transition-all ${
                                 editForm.present?.includes(name)
-                                  ? 'border-cyan-500 bg-cyan-950 text-cyan-200'
-                                  : 'border-cyan-900 bg-black text-cyan-800 hover:border-cyan-700'
+                                  ? 'border-indigo-500/50 bg-indigo-950/20 text-indigo-200'
+                                  : 'border-slate-800/50 bg-black text-slate-600 hover:border-slate-600'
                               }`}>{name}</button>
                           ))}
                         </div>
@@ -260,8 +260,8 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                               <button type="button" key={name} onClick={() => toggleMulti(name)}
                                 className={`p-2 rounded-lg text-xs font-bold border-2 transition-all ${
                                   editForm.multiPlayers?.includes(name)
-                                    ? 'border-emerald-500 bg-emerald-950 text-emerald-200'
-                                    : 'border-emerald-900 bg-black text-emerald-800 hover:border-emerald-700'
+                                    ? 'border-emerald-500/50 bg-emerald-950/20 text-emerald-200'
+                                    : 'border-slate-800 bg-transparent text-slate-600 hover:border-emerald-700'
                                 }`}>{name}</button>
                             ))}
                           </div>
@@ -269,11 +269,11 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       )}
                       <div className="flex gap-3 pt-2">
                         <button onClick={saveEdit} disabled={isSaving}
-                          className="flex-1 py-2 rounded-xl border-2 border-cyan-500 text-cyan-300 bg-cyan-950/50 hover:bg-cyan-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait">
+                          className="flex-1 py-2 rounded-xl border-2 border-indigo-500/40 text-slate-200 bg-slate-900/40 hover:bg-indigo-500/20 hover:text-white font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait">
                           {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Check size={16}/> ZAPISZ</>}
                         </button>
                         <button onClick={cancelEdit} disabled={isSaving}
-                          className="flex-1 py-2 rounded-xl border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                          className="flex-1 py-2 rounded-xl border-2 border-slate-800/50 text-slate-500 hover:border-slate-600 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                           <X size={16}/> ANULUJ
                         </button>
                       </div>
@@ -290,7 +290,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                           {isDeleting === row.id ? <><InlineSpinner size="sm" /> Usuwam...</> : <><Trash2 size={16}/> USUŃ</>}
                         </button>
                         <button onClick={() => setDeletingId(null)} disabled={isDeleting === row.id}
-                          className="flex-1 py-2 rounded-xl border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                          className="flex-1 py-2 rounded-xl border-2 border-slate-800/50 text-slate-500 hover:border-slate-600 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                           <X size={16}/> ANULUJ
                         </button>
                       </div>
@@ -298,23 +298,23 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                   );
 
                   return (
-                    <div key={row.id} className="cyber-box rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:border-cyan-600 transition-all">
+                    <div key={row.id} className="cyber-box rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:border-slate-500 transition-all">
                       <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm min-w-0">
                         <div>
-                          <p className="text-cyan-700 text-xs tracking-wider">DATA</p>
-                          <p className="text-cyan-100 font-bold">{formatDate(row.datePlayed)}</p>
+                          <p className="text-slate-500 text-xs tracking-wider">DATA</p>
+                          <p className="text-slate-100 font-bold">{formatDate(row.datePlayed)}</p>
                         </div>
                         <div>
-                          <p className="text-cyan-700 text-xs tracking-wider">KOSZT</p>
+                          <p className="text-slate-500 text-xs tracking-wider">KOSZT</p>
                           <p className="text-magenta-400 font-black text-neon-pink">{formatAmount(row.totalCost)}</p>
                         </div>
                         <div>
-                          <p className="text-cyan-700 text-xs tracking-wider">NA OSOBĘ</p>
-                          <p className="text-cyan-400 font-bold">{formatAmount(row.costPerPerson)}</p>
+                          <p className="text-slate-500 text-xs tracking-wider">NA OSOBĘ</p>
+                          <p className="text-indigo-400 font-bold">{formatAmount(row.costPerPerson)}</p>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-cyan-700 text-xs tracking-wider">OBECNI ({row.presentPlayers.length})</p>
-                          <p className="text-cyan-600 text-xs truncate">{row.presentPlayers.join(', ')}</p>
+                          <p className="text-slate-500 text-xs tracking-wider">OBECNI ({row.presentPlayers.length})</p>
+                          <p className="text-slate-500 truncate">{row.presentPlayers.join(', ')}</p>
                           {row.multisportPlayers.length > 0 && (
                             <p className="text-emerald-600 text-xs truncate">⚡ {row.multisportPlayers.join(', ')}</p>
                           )}
@@ -322,7 +322,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <button onClick={() => requestEdit(row)}
-                          className="p-3 rounded-lg border-2 border-cyan-800 text-cyan-600 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/50 transition-all" title="Edytuj" aria-label="Edytuj sesję">
+                          className="p-3 rounded-lg border-2 border-slate-700/30 text-slate-500 hover:border-indigo-400/50 hover:text-slate-200 hover:bg-indigo-950/20 transition-all" title="Edytuj" aria-label="Edytuj sesję">
                           <Pencil size={16}/>
                         </button>
                         <button onClick={() => requestDelete(row.id)}

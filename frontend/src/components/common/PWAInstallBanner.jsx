@@ -60,7 +60,7 @@ export default function PWAInstallBanner() {
         <div style={{ display:'flex', alignItems:'center', gap:'12px', padding:'12px 14px' }}>
           <span style={{ fontSize:'22px', flexShrink:0 }}>🕹️</span>
           <div style={{ flex:1 }}>
-            <p style={{ color:'#22d3ee', fontWeight:900, fontSize:'0.78rem', margin:0, letterSpacing:'0.05em' }}>DODAJ DO EKRANU GŁÓWNEGO</p>
+            <p style={{ color:'#a5b4fc', fontWeight:900, fontSize:'0.78rem', margin:0, letterSpacing:'0.05em' }}>DODAJ DO EKRANU GŁÓWNEGO</p>
             <p style={{ color:'rgba(6,182,212,0.5)', fontSize:'0.65rem', margin:'2px 0 0' }}>Otwieraj jak natywna aplikacja</p>
           </div>
           <button onClick={handleInstall} style={{ flexShrink:0, display:'flex', alignItems:'center', gap:'5px', padding:'7px 12px', border:'2px solid rgba(6,182,212,0.7)', borderRadius:'9px', background:'rgba(8,47,73,0.8)', color:'#67e8f9', fontWeight:900, fontSize:'0.72rem', cursor:'pointer', whiteSpace:'nowrap' }}>
@@ -89,7 +89,7 @@ export default function PWAInstallBanner() {
       <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px 10px' }}>
         <span style={{ fontSize:'22px', flexShrink:0 }}>🕹️</span>
         <div style={{ flex:1 }}>
-          <p style={{ color:'#22d3ee', fontWeight:900, fontSize:'0.78rem', margin:0, letterSpacing:'0.05em' }}>DODAJ DO EKRANU GŁÓWNEGO</p>
+          <p style={{ color:'#a5b4fc', fontWeight:900, fontSize:'0.78rem', margin:0, letterSpacing:'0.05em' }}>DODAJ DO EKRANU GŁÓWNEGO</p>
           <p style={{ color:'rgba(6,182,212,0.5)', fontSize:'0.65rem', margin:'2px 0 0' }}>Działa jak natywna aplikacja</p>
         </div>
         <button onClick={dismiss} style={{ background:'transparent', border:'none', color:'rgba(6,182,212,0.35)', cursor:'pointer', padding:'4px', display:'flex', flexShrink:0 }}>
@@ -101,7 +101,7 @@ export default function PWAInstallBanner() {
       <div style={{ borderTop:'1px solid rgba(6,182,212,0.12)', padding:'10px 14px 14px', display:'flex', flexDirection:'column', gap:'8px' }}>
         {steps.map((step, i) => (
           <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-            <div style={{ width:'22px', height:'22px', borderRadius:'50%', border:'2px solid rgba(6,182,212,0.5)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#22d3ee', fontWeight:900, fontSize:'0.65rem' }}>
+            <div style={{ width:'22px', height:'22px', borderRadius:'50%', border:'1px solid rgba(129,140,248,0.35)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#a5b4fc', fontWeight:900, fontSize:'0.65rem' }}>
               {step.icon}
             </div>
             <p style={{ margin:0, color:'rgba(226,232,240,0.8)', fontSize:'0.72rem', lineHeight:1.4 }}>{step.content}</p>

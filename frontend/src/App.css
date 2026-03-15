@@ -9,33 +9,17 @@ input[type="date"].date-overlay {
   background: transparent !important;
 }
 
-/* Animated bar under the header */
+/* Subtle divider under the header — single indigo accent line */
 .header-divider {
-  height: 4px;
-  background: repeating-linear-gradient(
-    90deg,
-    #004e54,
-    #004e54 10px,
-    #00f3ff 10px,
-    #00f3ff 11px
-  );
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(129,140,248,0.25) 40%, rgba(129,140,248,0.25) 60%, transparent);
   position: relative;
-  overflow: hidden;
-  margin-top: 10px;
+  overflow: visible;
+  margin-top: 0;
 }
 
 .header-divider::after {
-  content: "●";
-  position: absolute;
-  color: #ff00ff;
-  font-size: 10px;
-  top: -6px;
-  animation: ball-travel 4s infinite linear;
-}
-
-@keyframes ball-travel {
-  0% { left: -5%; }
-  100% { left: 105%; }
+  content: none;
 }
 
 /* ── Debt amount flash — triggered when Firebase updates the player's balance ── */

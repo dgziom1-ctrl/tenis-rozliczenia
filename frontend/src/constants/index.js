@@ -17,7 +17,7 @@ export const RANKS = [
   { min: 75, emoji: '⭐',  name: 'MISTRZ',   color: 'text-orange-400', bg: 'bg-orange-950/40', border: 'border-orange-700' },
   { min: 60, emoji: '🎖️', name: 'WETERAN',  color: 'text-violet-400', bg: 'bg-violet-950/40', border: 'border-violet-700' },
   { min: 45, emoji: '🔥', name: 'STAŁY',    color: 'text-rose-400',   bg: 'bg-rose-950/40',   border: 'border-rose-800' },
-  { min: 20, emoji: '👀', name: 'GOŚĆ',     color: 'text-cyan-400',   bg: 'bg-cyan-950/40',   border: 'border-cyan-800' },
+  { min: 20, emoji: '👀', name: 'GOŚĆ',     color: 'text-slate-400',  bg: 'bg-slate-900/40',  border: 'border-slate-700' },
   { min:  0, emoji: '👻', name: 'DUCH',     color: 'text-slate-500',  bg: 'bg-slate-900/40',  border: 'border-slate-700' },
 ];
 
@@ -61,14 +61,4 @@ export const ORGANIZER_NAME = 'Kamil';
 export const PAYMENT_MODAL = {
   EXACT:  'exact',
   CUSTOM: 'custom',
-};
-
-// Rank bar colors for Obsidian Finance card design (left accent bar)
-export const RANK_BAR_COLOR = (pct) => {
-  if (pct >= 90) return '#f4b942';  // gold — LEGENDA
-  if (pct >= 75) return '#f97316';  // orange — MISTRZ
-  if (pct >= 60) return '#8b5cf6';  // violet — WETERAN
-  if (pct >= 45) return '#e63946';  // red — STAŁY
-  if (pct >= 20) return '#64748b';  // slate — GOŚĆ
-  return 'rgba(255,255,255,0.1)';   // ghost — DUCH
 };

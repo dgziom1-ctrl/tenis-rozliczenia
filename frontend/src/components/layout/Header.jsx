@@ -3,148 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 
 const CLICKS_NEEDED = 5;
 
-// ── Obsidian Finance minimal header ──────────────────────────────────────────
-function ObsidianHeader({ blikNumber, isConnected, isMuted, setIsMuted, scrolled }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(blikNumber.replace(/\s/g, ''));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <>
-      <header style={{
-        background:    '#0a0a0b',
-        borderBottom:  '1px solid rgba(255,255,255,0.06)',
-        borderRadius:  '14px 14px 0 0',
-        padding:       '14px 20px',
-        display:       'flex',
-        alignItems:    'center',
-        justifyContent:'space-between',
-        gap:           '16px',
-        position:      'relative',
-      }}>
-        {/* Left: theme name + BLIK */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
-          <button
-            style={{
-              background:    'transparent',
-              border:        'none',
-              cursor:        'default',
-              padding:       0,
-              fontFamily:    "'Inter', sans-serif",
-              fontSize:      '10px',
-              fontWeight:    600,
-              letterSpacing: '0.3em',
-              textTransform: 'uppercase',
-              color:         'rgba(255,255,255,0.18)',
-              flexShrink:    0,
-              transition:    'color 0.15s',
-              whiteSpace:    'nowrap',
-            }}
-            title="Zmień motyw"
-          >
-            PING·PONG
-          </button>
-
-          <div style={{ width: '1px', height: '16px', background: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
-
-          <button
-            onClick={handleCopy}
-            style={{
-              background:    'transparent',
-              border:        'none',
-              cursor:        'pointer',
-              padding:       0,
-              display:       'flex',
-              alignItems:    'center',
-              gap:           '8px',
-              minWidth:      0,
-            }}
-            title="Kopiuj numer BLIK"
-          >
-            <span style={{
-              fontFamily:    "'JetBrains Mono', monospace",
-              fontSize:      '16px',
-              fontWeight:    700,
-              letterSpacing: '0.06em',
-              color:         copied ? '#00c853' : 'rgba(255,255,255,0.88)',
-              transition:    'color 0.2s',
-              whiteSpace:    'nowrap',
-            }}>
-              {blikNumber}
-            </span>
-            {copied
-              ? <Check size={13} style={{ color: '#00c853', flexShrink: 0 }} />
-              : <Copy  size={13} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-            }
-          </button>
-        </div>
-
-        {/* Right: status + mute */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <div style={{
-              width:        '5px',
-              height:       '5px',
-              borderRadius: '50%',
-              background:   isConnected ? '#00c853' : '#e63946',
-              boxShadow:    isConnected ? '0 0 6px rgba(0,200,83,0.6)' : '0 0 6px rgba(230,57,70,0.6)',
-              flexShrink:   0,
-            }} />
-            <span style={{
-              fontSize:      '9px',
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              color:         'rgba(255,255,255,0.22)',
-            }}>
-              {isConnected ? 'live' : 'offline'}
-            </span>
-          </div>
-
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            style={{
-              background:   'rgba(255,255,255,0.04)',
-              border:       '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '8px',
-              cursor:       'pointer',
-              padding:      '6px',
-              display:      'flex',
-              alignItems:   'center',
-              justifyContent: 'center',
-              color:         isMuted ? '#e63946' : 'rgba(255,255,255,0.4)',
-              transition:   'all 0.15s',
-            }}
-          >
-            {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-          </button>
-        </div>
-      </header>
-
-      {/* Compact sticky header for mobile */}
-      <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
-        <button onClick={handleCopy} style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Smartphone size={14} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '14px', fontWeight: 700, color: copied ? '#00c853' : 'rgba(255,255,255,0.8)', letterSpacing: '0.04em' }}>
-            {blikNumber}
-          </span>
-          {copied ? <Check size={12} style={{ color: '#00c853' }} /> : <Copy size={12} style={{ color: 'rgba(255,255,255,0.2)' }} />}
-        </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isConnected ? '#00c853' : '#e63946' }} />
-          <button onClick={() => setIsMuted(!isMuted)} style={{ background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer', color: isMuted ? '#e63946' : 'rgba(255,255,255,0.4)' }}>
-            {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
-          </button>
-        </div>
-      </div>
-    </>
-  );
-}
-
-
 export default function Header({ isMuted, setIsMuted, isConnected, theme, onToggleTheme, scrolled }) {
   const [copied,     setCopied]     = useState(false);
   const [clickCount, setClickCount] = useState(0);
@@ -312,64 +170,52 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
     climateFontSz: '0.72rem',
     climateFont:   "'Cinzel', serif",
   } : {
-    headerBg:      'linear-gradient(to bottom, black, #030712, #111827)',
+    // ── SILENT LUXURY / INDIGO DARK ───────────────────────
+    headerBg:      'linear-gradient(to bottom, #080c18, #0d1220)',
     headerBorder:  'none',
-    topBarBg:      'rgba(0,0,0,0.4)',
-    topBarBorder:  '1px solid rgba(22,78,99,0.5)',
-    blikBorder:    '1px solid rgba(8,145,178,0.6)',
-    blikLabelClr:  '#facc15',
-    blikNumClr:    '#67e8f9',
-    blikLabelBg:   'rgba(250,204,21,0.1)',
-    iconClr:       '#06b6d4',
-    copyClr:       'rgba(6,182,212,0.5)',
-    muteOnBorder:  '2px solid rgba(239,68,68,0.6)', muteOnClr: '#f87171', muteOnBg: 'rgba(127,29,29,0.3)',
-    muteOffBorder: '2px solid rgba(8,145,178,0.6)', muteOffClr: '#22d3ee', muteOffBg: 'rgba(0,0,0,0.6)',
-    titleGrad:     'linear-gradient(90deg, white, #22d3ee, white)',
-    titleFont:     'inherit',
+    topBarBg:      'rgba(8,12,24,0.6)',
+    topBarBorder:  '1px solid rgba(148,163,184,0.08)',
+    blikBorder:    '1px solid rgba(148,163,184,0.12)',
+    blikLabelClr:  '#94a3b8',
+    blikNumClr:    '#e2e8f0',
+    blikLabelBg:   'rgba(148,163,184,0.06)',
+    iconClr:       '#64748b',
+    copyClr:       'rgba(100,116,139,0.6)',
+    muteOnBorder:  '1px solid rgba(248,113,113,0.35)', muteOnClr: '#f87171', muteOnBg: 'rgba(127,29,29,0.15)',
+    muteOffBorder: '1px solid rgba(148,163,184,0.15)', muteOffClr: '#64748b', muteOffBg: 'transparent',
+    titleGrad:     'linear-gradient(135deg, #e2e8f0 0%, #a5b4fc 50%, #e2e8f0 100%)',
+    titleFont:     "'Inter', system-ui, sans-serif",
     titleAnim:     'none',
-    ppGrad:        'linear-gradient(90deg, #ec4899, #a855f7, #22d3ee)',
-    ppChaos:       { color: '#fde047', textShadow: '0 0 20px #fde047', animation: 'headerBounce 0.4s ease-in-out 3, neonPulse 0.5s infinite' },
-    hintStyle:     { border: '1px solid #155e75', background: 'rgba(0,0,0,0.8)', color: '#22d3ee' },
-    chaosStyle:    { border: '2px solid #fbbf24', background: 'rgba(0,0,0,0.92)', color: '#fde047', boxShadow: '0 0 20px rgba(251,191,36,0.3)', textShadow: '0 0 12px #fde047' },
-    chaosText:     '🎉 COMBO x5!',
-    loaderBg:      '#1f2937',
-    loaderFill:    'linear-gradient(90deg, #06b6d4, #a855f7, #ec4899)',
-    loaderChaos:   'linear-gradient(90deg, #fbbf24, #ef4444, #ec4899)',
-    loaderShadow:  'rgba(6,182,212,0.4)',
-    paddleL:       { bg: 'linear-gradient(135deg,#ec4899,#be185d)', shadow: '0 0 15px rgba(236,72,153,0.8)', inner: '#f9a8d4' },
-    paddleR:       { bg: 'linear-gradient(135deg,#06b6d4,#0e7490)',  shadow: '0 0 15px rgba(34,211,238,0.8)',  inner: '#67e8f9' },
-    handleBg:      'linear-gradient(to bottom,#d97706,#92400e)',
-    ballClr:       '#22d3ee', ballShadow: 'rgba(34,211,238,1)',
-    paddleClr:     '#ec4899', paddleShadow: 'rgba(236,72,153,0.8)',
-    sepBg:         'linear-gradient(to bottom,#111827,#030712)',
-    sepBorder:     '1px solid rgba(22,78,99,0.3)',
-    sepLine:       'linear-gradient(90deg,transparent,rgba(6,182,212,0.4) 50%,transparent)',
+    ppGrad:        'linear-gradient(135deg, #c084fc, #818cf8, #a5b4fc)',
+    ppChaos:       { color: '#a5b4fc', animation: 'headerBounce 0.4s ease-in-out 3' },
+    hintStyle:     { border: '1px solid rgba(148,163,184,0.12)', background: 'rgba(13,18,32,0.9)', color: 'rgba(148,163,184,0.6)', borderRadius: '0.4rem' },
+    chaosStyle:    { border: '1px solid rgba(129,140,248,0.3)', background: 'rgba(13,18,32,0.96)', color: '#a5b4fc', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', borderRadius: '9999px' },
+    chaosText:     '✦ combo ×5',
+    loaderBg:      '#1e2436',
+    loaderFill:    'linear-gradient(90deg, #6366f1, #818cf8, #a5b4fc)',
+    loaderChaos:   'linear-gradient(90deg, #c084fc, #818cf8, #6366f1)',
+    loaderShadow:  'rgba(129,140,248,0.25)',
+    paddleL:       { bg: 'linear-gradient(135deg,#7c3aed,#4f46e5)', shadow: '0 4px 20px rgba(124,58,237,0.3)', inner: '#a78bfa' },
+    paddleR:       { bg: 'linear-gradient(135deg,#4f46e5,#6366f1)', shadow: '0 4px 20px rgba(99,102,241,0.3)', inner: '#818cf8' },
+    handleBg:      'linear-gradient(to bottom,#475569,#334155)',
+    ballClr:       '#a5b4fc', ballShadow: 'rgba(165,180,252,0.6)',
+    paddleClr:     '#818cf8', paddleShadow: 'rgba(129,140,248,0.4)',
+    sepBg:         'linear-gradient(to bottom,#0d1220,#080c18)',
+    sepBorder:     '1px solid rgba(148,163,184,0.06)',
+    sepLine:       'linear-gradient(90deg,transparent,rgba(129,140,248,0.2) 50%,transparent)',
     glowBlobs:     true,
     glowZen:       false,
-    statusOnClr:   '#4ade80', statusOnShadow: '0 0 8px rgba(74,222,128,0.6)',
-    statusOffClr:  '#f87171', statusOffShadow: '0 0 8px rgba(248,113,113,0.6)',
-    statusFont:    'monospace',
-    statusFontSz:  '0.7rem',
+    statusOnClr:   '#86efac', statusOnShadow: 'none',
+    statusOffClr:  '#f87171', statusOffShadow: 'none',
+    statusFont:    "'Inter', system-ui, sans-serif",
+    statusFontSz:  '0.72rem',
     climateClr:    null,
-    climateFontSz: '0.7rem',
-    climateFont:   'monospace',
+    climateFontSz: '0.72rem',
+    climateFont:   "'Inter', system-ui, sans-serif",
   };
 
   const pSize = 'clamp(24px,4vw,40px)';
   const pInner = 'clamp(12px,2.5vw,20px)';
-
-  // ── Obsidian Finance header (cyber theme only) ──────────────────────────
-  if (!a && !z) {
-    return (
-      <ObsidianHeader
-        blikNumber={blikNumber}
-        isConnected={isConnected}
-        isMuted={isMuted}
-        setIsMuted={setIsMuted}
-        scrolled={scrolled}
-      />
-    );
-  }
 
   return (
     <>
@@ -421,15 +267,13 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           </>
         )}
 
-        {/* Cyber glow blobs */}
+        {/* Cyber glow blobs — subtle indigo/violet */}
         {C.glowBlobs && !C.glowZen && (
           <>
-            <div className="absolute top-0 left-1/4 w-32 h-32 rounded-full blur-3xl pointer-events-none"
-              style={{ background: 'rgba(6,182,212,0.08)' }} />
-            <div className="absolute top-10 right-1/4 w-24 h-24 rounded-full blur-3xl pointer-events-none"
-              style={{ background: 'rgba(236,72,153,0.08)' }} />
-            <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
-              style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,255,0.1) 2px,rgba(0,255,255,0.1) 4px)' }} />
+            <div className="absolute top-0 left-1/4 w-48 h-48 rounded-full blur-3xl pointer-events-none"
+              style={{ background: 'rgba(99,102,241,0.06)' }} />
+            <div className="absolute top-8 right-1/4 w-32 h-32 rounded-full blur-3xl pointer-events-none"
+              style={{ background: 'rgba(124,58,237,0.05)' }} />
           </>
         )}
 
@@ -511,11 +355,12 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
 
             {/* CENTRUM DOWODZENIA */}
             <span className="block font-black uppercase" style={{
-              fontSize: a ? 'clamp(1.1rem, 4vw, 2rem)' : z ? 'clamp(1.6rem, 5vw, 2.8rem)' : 'clamp(1.6rem, 5vw, 2.8rem)',
-              letterSpacing: a ? '0.05em' : z ? '0.1em' : '0.15em',
+              fontSize: a ? 'clamp(1.1rem, 4vw, 2rem)' : z ? 'clamp(1.6rem, 5vw, 2.8rem)' : 'clamp(1.4rem, 4.5vw, 2.4rem)',
+              letterSpacing: a ? '0.05em' : z ? '0.1em' : '0.06em',
               fontStyle: 'normal',
               fontFamily: C.titleFont,
-              lineHeight: a ? 1.6 : 1.2,
+              lineHeight: a ? 1.6 : 1.15,
+              fontWeight: a ? 900 : z ? 700 : 800,
               backgroundImage: C.titleGrad,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
               animation: C.titleAnim,
@@ -618,20 +463,16 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'center' }}>
 
             {/* Hasło klimatyczne */}
-            {/* JACK IN — cyber punk only */}
+            {/* JACK IN — default theme, no blink */}
             {!a && !z && (
               <>
                 <span style={{
-                  fontFamily: 'monospace', fontSize: C.climateFontSz,
-                  color: arcadeTick ? '#22d3ee' : '#0e4a5a',
-                  textShadow: arcadeTick
-                    ? '0 0 10px rgba(34,211,238,1), 0 0 25px rgba(34,211,238,0.5), 0 0 50px rgba(34,211,238,0.2)'
-                    : 'none',
-                  transition: 'color 0.15s, text-shadow 0.15s',
-                  letterSpacing: '0.15em',
-                  fontWeight: 'bold',
-                }}>⚡ JACK IN ⚡</span>
-                <span style={{ color: 'rgba(22,78,99,0.6)', fontSize: '0.8rem' }}>│</span>
+                  fontFamily: C.climateFont, fontSize: C.climateFontSz,
+                  color: 'rgba(129,140,248,0.5)',
+                  letterSpacing: '0.12em',
+                  fontWeight: 500,
+                }}>PING · PONG</span>
+                <span style={{ color: 'rgba(148,163,184,0.2)', fontSize: '0.8rem' }}>│</span>
               </>
             )}
 

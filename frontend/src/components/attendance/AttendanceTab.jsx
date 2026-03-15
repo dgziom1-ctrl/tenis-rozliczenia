@@ -30,13 +30,13 @@ function PodiumCard({ podiumEntry, totalWeeks }) {
               <div className="text-xl mb-1">{rank.emoji}</div>
               <div className={`font-black text-sm sm:text-base truncate ${pod.textColor}`}>{player.name}</div>
               <div className={`font-mono text-xl font-black ${pod.textColor}`}>{player.attendancePercentage}%</div>
-              <div className="text-xs opacity-60 text-cyan-500 mb-1">{player.attendanceCount}/{totalWeeks}</div>
+              <div className="text-xs opacity-60 text-slate-500 mb-1">{player.attendanceCount}/{totalWeeks}</div>
               {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
             </div>
           );
         })}
         {exAequo && (
-          <div className="text-center text-xs text-cyan-600 font-bold tracking-widest">
+          <div className="text-center text-xs text-slate-400 font-bold tracking-widest">
             EX AEQUO ×{players.length}
           </div>
         )}
@@ -73,7 +73,7 @@ function LeaderboardRow({ player, totalWeeks, stats }) {
   const specialTitle = getPlayerBadge(player, stats);
   return (
     <div className={`rounded-xl border-2 px-4 py-3 flex items-center gap-3 ${rank.bg} ${rank.border} transition-all hover:scale-[1.005]`}>
-      <span className="text-cyan-700 font-mono text-sm w-6 flex-shrink-0">#{player.place}</span>
+      <span className="text-slate-500 font-mono text-sm w-6 flex-shrink-0">#{player.place}</span>
       <span className="text-xl flex-shrink-0">{rank.emoji}</span>
       <span className={`font-black text-base flex-1 min-w-0 truncate ${rank.color}`}>{player.name}</span>
       <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
@@ -86,7 +86,7 @@ function LeaderboardRow({ player, totalWeeks, stats }) {
         {player.multisportCount > 0 && (
           <span className="text-emerald-400 text-xs font-bold hidden sm:inline">⚡{player.multisportCount}</span>
         )}
-        <span className="text-cyan-600 text-xs">{player.attendanceCount}/{totalWeeks}</span>
+        <span className="text-slate-500 text-xs">{player.attendanceCount}/{totalWeeks}</span>
         <span className={`font-black text-lg w-12 text-right ${rank.color}`}>{player.attendancePercentage}%</span>
       </div>
     </div>
@@ -97,19 +97,19 @@ function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
   const theRest = ranked.filter(p => p.place > 3);
   return (
     <div className="cyber-box rounded-2xl p-6">
-      <h2 className="text-xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
+      <h2 className="text-xl font-black text-indigo-300 mb-8 flex items-center gap-3 border-b-2 border-slate-800/40 pb-3">
         <TrendingUp className="text-magenta-500" /> Leaderboard
       </h2>
       <Podium podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} />
       {theRest.length > 0 && (
-        <div className="border-t-2 border-cyan-900/50 pt-5 space-y-2">
+        <div className="border-t-2 border-slate-800/30 pt-5 space-y-2">
           {theRest.map(player => (
             <LeaderboardRow key={player.name} player={player} totalWeeks={totalWeeks} stats={stats} />
           ))}
         </div>
       )}
       {ranked.length === 0 && (
-        <p className="text-cyan-800 text-center py-10">Dodaj sesje żeby zobaczyć ranking!</p>
+        <p className="text-slate-600 text-center py-10">Dodaj sesje żeby zobaczyć ranking!</p>
       )}
     </div>
   );
@@ -119,16 +119,16 @@ function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
 function MonthlyReport({ monthlyStats, players }) {
   return (
     <div className="cyber-box rounded-2xl p-4 sm:p-6 overflow-hidden">
-      <h2 className="text-xl font-black text-cyan-300 mb-6 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
+      <h2 className="text-xl font-black text-indigo-300 mb-6 flex items-center gap-3 border-b-2 border-slate-800/40 pb-3">
         <CalendarDays className="text-magenta-500" /> Raport miesięczny
       </h2>
       {monthlyStats.length === 0 ? (
-        <p className="text-cyan-700 text-center py-10">Brak danych. Dodaj pierwszy tydzień!</p>
+        <p className="text-slate-500 text-center py-10">Brak danych. Dodaj pierwszy tydzień!</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[400px]">
             <thead>
-              <tr className="bg-cyan-950 text-cyan-300 tracking-wider">
+              <tr className="bg-slate-900/60 text-slate-300 tracking-wider">
                 <th className="p-3 rounded-tl-lg">Miesiąc</th>
                 <th className="p-3">Gier</th>
                 {players?.map(p => (
@@ -138,8 +138,8 @@ function MonthlyReport({ monthlyStats, players }) {
             </thead>
             <tbody className="divide-y-2 divide-cyan-900/50">
               {monthlyStats.map(([month, data]) => (
-                <tr key={month} className="hover:bg-cyan-900/20 transition-colors">
-                  <td className="p-3 font-bold text-cyan-100">{month}</td>
+                <tr key={month} className="hover:bg-slate-800/20 transition-colors">
+                  <td className="p-3 font-bold text-slate-100">{month}</td>
                   <td className="p-3 text-magenta-400 font-black">{data.total}</td>
                   {players?.map(p => {
                     const presence = data.players[p.name] || 0;
@@ -150,8 +150,8 @@ function MonthlyReport({ monthlyStats, players }) {
                           isMax
                             ? 'bg-emerald-900/50 text-emerald-400 border border-emerald-500'
                             : presence > 0
-                            ? 'text-cyan-400'
-                            : 'text-cyan-900'
+                            ? 'text-indigo-400'
+                            : 'text-slate-800'
                         }`}>
                           {presence}
                         </span>
@@ -171,7 +171,7 @@ function MonthlyReport({ monthlyStats, players }) {
 function RankGuide() {
   return (
     <div className="cyber-box rounded-2xl p-6">
-      <h2 className="text-xl font-black text-cyan-300 mb-4 flex items-center gap-3 border-b-2 border-cyan-800 pb-3">
+      <h2 className="text-xl font-black text-indigo-300 mb-4 flex items-center gap-3 border-b-2 border-slate-800/40 pb-3">
         <Trophy className="text-yellow-500" /> Rangi
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -179,7 +179,7 @@ function RankGuide() {
           <div key={i} className={`flex flex-col items-center p-3 rounded-xl border-2 bg-black/30 ${r.border}`}>
             <span className="text-2xl mb-1">{r.emoji}</span>
             <span className={`font-black text-sm ${r.color}`}>{r.name}</span>
-            <span className="text-cyan-700 font-mono text-xs mt-1">
+            <span className="text-slate-500 font-mono text-xs mt-1">
               {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
             </span>
           </div>

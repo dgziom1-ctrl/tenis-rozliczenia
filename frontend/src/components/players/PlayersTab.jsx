@@ -124,11 +124,11 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
       )}
 
       <div className="cyber-box rounded-2xl p-4 sm:p-8 max-w-3xl mx-auto animate-in slide-in-from-left-5 duration-300">
-        <h2 className="text-xl font-black text-cyan-300 mb-8 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
+        <h2 className="text-xl font-black text-slate-200 mb-8 flex items-center gap-3 border-b border-slate-800/30 pb-4">
           <Users className="text-magenta-500" /> Gracze
         </h2>
 
-        <form onSubmit={handleAddPlayer} className="flex flex-col sm:flex-row gap-3 mb-10 p-4 sm:p-6 bg-black/40 rounded-xl border-2 border-cyan-900">
+        <form onSubmit={handleAddPlayer} className="flex flex-col sm:flex-row gap-3 mb-10 p-4 sm:p-6 bg-black/40 rounded-xl border border-slate-800/50">
           <input type="text" value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)}
             placeholder="Imię nowego gracza..." className="cyber-input flex-1 p-4 rounded-xl text-lg w-full" required />
           <button type="submit" className="cyber-button-blue px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto">
@@ -139,12 +139,12 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {/* Wszyscy gracze — jednolity styl, bez wyróżnienia Kamila */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           {players?.map(p => (
-            <div key={p.name} className="flex items-center justify-between p-5 rounded-xl border-2 bg-cyan-950/30 border-cyan-800 hover:border-cyan-500 hover:bg-cyan-900/40 transition-all group">
-              <span className="font-bold text-xl flex items-center gap-2 truncate text-cyan-100">
-                <Cpu size={18} className="flex-shrink-0 text-cyan-600 group-hover:text-cyan-400" />
+            <div key={p.name} className="flex items-center justify-between p-5 rounded-xl border-2 bg-slate-900/30 border-slate-700/30 hover:border-indigo-500/30 hover:bg-indigo-950/10 transition-all group">
+              <span className="font-bold text-xl flex items-center gap-2 truncate text-slate-100">
+                <Cpu size={18} className="flex-shrink-0 text-slate-500 group-hover:text-indigo-400" />
                 {p.name}
                 {p.name === ORGANIZER_NAME && (
-                  <span className="text-xs font-bold text-cyan-600 tracking-widest">📋</span>
+                  <span className="text-xs font-bold text-slate-500 tracking-widest">📋</span>
                 )}
               </span>
               {p.name !== ORGANIZER_NAME ? (
@@ -154,7 +154,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                   <Trash2 size={20}/>
                 </button>
               ) : (
-                <span className="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-bold text-cyan-700 border border-cyan-900">
+                <span className="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-bold text-slate-500 border border-slate-800/40">
                   organizator
                 </span>
               )}
@@ -164,11 +164,11 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
 
         {/* Domyślny Multisport */}
         {players && players.length > 0 && (
-          <div className="border-t-2 border-cyan-900 pt-6 mb-8">
-            <h3 className="text-lg font-black text-cyan-300 mb-2 flex items-center gap-2">
+          <div className="border-t border-slate-800/30 pt-6 mb-8">
+            <h3 className="text-lg font-black text-slate-200 mb-2 flex items-center gap-2">
               <Zap size={18} className="text-emerald-400" /> Multisport na stałe
             </h3>
-            <p className="text-cyan-700 text-xs mb-4">Zaznaczeni gracze będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.</p>
+            <p className="text-slate-500 text-xs mb-4">Zaznaczeni gracze będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.</p>
             <div className="grid grid-cols-2 gap-3">
               {players.map(p => (
                 <button
@@ -178,10 +178,10 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                   className={`p-3 rounded-xl border-2 font-bold text-sm transition-all flex items-center gap-2 ${
                     currentMulti.includes(p.name)
                       ? 'border-emerald-400 bg-emerald-950 text-emerald-200 shadow-[0_0_8px_#10b981]'
-                      : 'border-cyan-900 bg-black text-cyan-700 hover:border-cyan-700'
+                      : 'border-slate-800 bg-transparent text-slate-500 hover:border-slate-600'
                   }`}
                 >
-                  <Zap size={14} className={currentMulti.includes(p.name) ? 'text-emerald-400' : 'text-cyan-800'} />
+                  <Zap size={14} className={currentMulti.includes(p.name) ? 'text-emerald-400' : 'text-slate-600'} />
                   {p.name}
                 </button>
               ))}
@@ -190,8 +190,8 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         )}
 
         {deletedPlayers?.length > 0 && (
-          <div className="border-t-2 border-cyan-900 pt-6">
-            <h3 className="text-lg font-black text-cyan-700 mb-4 flex items-center gap-2">
+          <div className="border-t border-slate-800/30 pt-6">
+            <h3 className="text-lg font-black text-slate-500 mb-4 flex items-center gap-2">
               <Trash2 size={18}/> Kosz
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -208,13 +208,13 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                           USUŃ NA ZAWSZE
                         </button>
                         <button onClick={() => setConfirmDelete(null)}
-                          className="flex-1 py-2 rounded-lg border-2 border-cyan-900 text-cyan-700 hover:border-cyan-700 font-bold text-sm transition-all">
+                          className="flex-1 py-2 rounded-lg border border-slate-800/50 text-slate-500 hover:border-slate-600 font-bold text-sm transition-all">
                           ANULUJ
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between p-4 rounded-xl border-2 border-cyan-900/50 bg-black/20 text-cyan-700">
+                    <div className="flex items-center justify-between p-4 rounded-xl border border-slate-800/50/50 bg-black/20 text-slate-500">
                       <span className="font-bold flex items-center gap-2 truncate">
                         <Cpu size={16} className="opacity-40 flex-shrink-0"/> {name}
                       </span>

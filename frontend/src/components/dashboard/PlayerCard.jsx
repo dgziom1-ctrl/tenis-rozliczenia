@@ -1,39 +1,76 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { getRank, RANK_BAR_COLOR, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
+import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
 import { formatAmountShort } from '../../utils/format';
-import { useTheme, useThemeTokens } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../context/ThemeContext';
 import { usePaymentUndo } from '../../hooks/usePaymentUndo';
 import BreakdownPanel from './BreakdownPanel';
 import PaymentModal from './PaymentModal';
 import UndoBar from '../common/UndoBar';
-import { InlineSpinner } from '../common/LoadingSkeleton';
 
-// ─── Animated counter ────────────────────────────────────────────────────────
+// ─── Animated counter hook ────────────────────────────────────────────────────
+// Smoothly interpolates the displayed numeric value whenever `value` changes.
+// Returns a float — format it with formatAmountShort for display.
 function useAnimatedValue(value, duration = 550) {
-  const [display, setDisplay] = useState(value);
-  const fromRef = useRef(value);
-  const rafRef  = useRef(null);
+  const [display, setDisplay]  = useState(value);
+  const fromRef  = useRef(value);
+  const rafRef   = useRef(null);
+
   useEffect(() => {
     const from = fromRef.current;
     const to   = value;
     if (from === to) return;
+
     cancelAnimationFrame(rafRef.current);
     const start = performance.now();
+
     const tick = (now) => {
-      const t     = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - t, 3);
+      const t      = Math.min((now - start) / duration, 1);
+      const eased  = 1 - Math.pow(1 - t, 3); // ease-out cubic
       setDisplay(from + (to - from) * eased);
-      if (t < 1) { rafRef.current = requestAnimationFrame(tick); }
-      else { fromRef.current = to; setDisplay(to); }
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        fromRef.current = to;
+        setDisplay(to);
+      }
     };
+
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
   }, [value, duration]);
+
   return display;
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getDebtStateStyles(debt) {
+  if (debt > SETTLED_THRESHOLD) return {
+    cardBorder: 'border-rose-900/40 hover:border-rose-700/50',
+    headerBg:   'bg-rose-950/20',
+    headerBord: 'border-rose-900/30',
+    headerText: 'text-rose-300/90',
+    balanceBg:  'bg-rose-950/20 border-rose-900/30',
+  };
+  if (debt < -SETTLED_THRESHOLD) return {
+    cardBorder: 'border-amber-900/40 hover:border-amber-700/50',
+    headerBg:   'bg-amber-950/20',
+    headerBord: 'border-amber-900/30',
+    headerText: 'text-amber-300/90',
+    balanceBg:  'bg-amber-950/20 border-amber-900/30',
+  };
+  return {
+    cardBorder: 'border-slate-800/50 hover:border-slate-600/50',
+    headerBg:   'bg-slate-900/30',
+    headerBord: 'border-slate-800/40',
+    headerText: 'text-slate-300',
+    balanceBg:  'bg-emerald-950/15 border-emerald-900/25',
+  };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
+
 export default function PlayerCard({
   player, totalWeeks, onSettle, justSettled,
   openDetails, onToggleDetails, breakdown,
@@ -46,10 +83,8 @@ export default function PlayerCard({
   const isSettled   = !hasDebt && !hasCredit;
   const pct         = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
   const rank        = getRank(pct);
-  const rankBarColor = RANK_BAR_COLOR(pct);
-  const theme       = useTheme();
   const tokens      = useThemeTokens();
-  const isCyber     = theme !== 'arcade' && theme !== 'zen';
+  const styles      = getDebtStateStyles(debt);
 
   const [modal,     setModal]     = useState(null);
   const [customAmt, setCustomAmt] = useState('');
@@ -62,8 +97,10 @@ export default function PlayerCard({
   const prevDebtRef = useRef(debt);
   const cardRef     = useRef(null);
 
+  // Animated display value for the debt amount
   const animatedAbs = useAnimatedValue(Math.abs(debt));
 
+  // Flash the balance box whenever Firebase pushes a new debt value
   useEffect(() => {
     if (prevDebtRef.current !== debt) {
       setFlash(true);
@@ -76,6 +113,7 @@ export default function PlayerCard({
   const { lastPayment, secondsLeft, progressPct, startPaymentUndo, handleUndoPayment } =
     usePaymentUndo({ playerName: player.name, onPin, onUnpin, onRemovePayment });
 
+  // 5-tap secret admin mode
   const handleAmountClick = useCallback(() => {
     clickCount.current += 1;
     clearTimeout(clickTimer.current);
@@ -99,251 +137,183 @@ export default function PlayerCard({
     if (result?.paymentId) {
       startPaymentUndo({ id: result.paymentId, amount });
       setTimeout(() => cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-    } else { onUnpin(); }
+    } else {
+      onUnpin();
+    }
     setIsSaving(false);
   }, [player.name, onAddPayment, onPin, onUnpin, startPaymentUndo, cancelModal]);
 
-  // ── Card class based on state ──────────────────────────────────────────────
-  const cardClass = isOrganizer
-    ? 'obs-card obs-card-organizer rounded-2xl'
-    : isSettled
-    ? `obs-card obs-card-settled rounded-2xl ${justSettled ? 'settle-flash' : ''}`
-    : `obs-card obs-card-debt rounded-2xl ${justSettled ? 'settle-flash' : ''}`;
-
   return (
-    <div ref={cardRef} className={cardClass}>
-      {/* Rank bar */}
-      {!isOrganizer && (
-        <div className="obs-rank-bar" style={{ background: rankBarColor }} />
-      )}
+    <div
+      ref={cardRef}
+      className={`cyber-box ${styles.cardBorder} rounded-2xl overflow-hidden transition-all flex flex-col ${justSettled ? 'settle-flash' : ''}`}
+    >
+      {/* Header */}
+      <div className={`${styles.headerBg} p-4 border-b ${styles.headerBord}`}>
+        <h3 className={`font-extrabold text-lg tracking-tight ${styles.headerText} flex items-center gap-2`}>
+          <span className="mini-paddle" /> {player.name}
+        </h3>
+      </div>
 
-      <div className="pl-5 pr-4 pt-4 pb-4 flex flex-col gap-3">
-
-        {/* ── Top row: name + attendance ── */}
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p style={{
-              fontSize: '10px',
-              fontWeight: 600,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: isOrganizer ? 'rgba(255,255,255,0.2)' : tokens.mutedText,
-              marginBottom: '2px',
-            }}>
-              {player.name}
-            </p>
-            {!isOrganizer && (
-              <p style={{ fontSize: '10px', color: tokens.mutedText, opacity: 0.65 }}>
-                {rank.name}
-              </p>
-            )}
-          </div>
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <p style={{
-              fontSize: '10px',
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: tokens.mutedText,
-              marginBottom: '2px',
-            }}>
-              {player.attendanceCount}/{totalWeeks}
-            </p>
-            <p style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '13px',
-              fontWeight: 700,
-              color: tokens.bodyText,
-              opacity: 0.5,
-            }}>{pct}%</p>
-          </div>
+      <div className="p-5 flex flex-col flex-1">
+        {/* Attendance */}
+        <div className="text-sm text-slate-500 mb-4 flex flex-col gap-1 items-center text-center leading-relaxed">
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+            Obecność: <span className="text-slate-300 font-semibold text-base">{player.attendanceCount}</span>
+            <span className="opacity-50"> / {totalWeeks}</span>
+            <span className="text-slate-400 ml-1 text-xs">({pct}%)</span>
+          </span>
+          <span className={`font-semibold text-xs ${rank.color}`}>{rank.emoji} {rank.name}</span>
         </div>
 
-        {/* ── Amount ── */}
         {isOrganizer ? (
-          <div style={{ color: tokens.mutedText, fontSize: '12px', paddingBottom: '4px' }}>
-            organizator · rezerwacje
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-slate-400 text-sm font-medium tracking-wide">📋 ogarnia rezerwacje 🏓</p>
           </div>
         ) : (
-          <div
-            className={`${flash ? 'debt-flash' : ''}`}
-            onClick={handleAmountClick}
-            style={{ cursor: 'default', userSelect: 'none', borderRadius: '8px', padding: '2px 0' }}
-          >
-            {justSettled ? (
-              <div style={{ animation: 'checkPop 0.4s ease-out forwards', padding: '4px 0' }}>
-                <CheckCircle2 style={{ color: '#00c853' }} size={28} />
+          <>
+            {/* Balance display — flashes on Firebase update */}
+            <div
+              className={`p-4 rounded-xl border shadow-inner mb-4 text-center cursor-default select-none ${styles.balanceBg} ${flash ? 'debt-flash' : ''}`}
+              onClick={handleAmountClick}
+            >
+              {justSettled ? (
+                <div style={{ animation: 'checkPop 0.4s ease-out forwards' }}>
+                  <CheckCircle2 className="text-emerald-400 mx-auto" size={32} />
+                </div>
+              ) : hasCredit ? (
+                <>
+                  <p className="text-xs text-amber-500/70 tracking-wide mb-1 font-medium uppercase">Nadpłata — na kolejne sesje</p>
+                  <p className="text-3xl font-black text-amber-300 tabular-nums" style={{ letterSpacing: '-0.02em' }}>
+                    +{formatAmountShort(animatedAbs)}<span className="text-sm ml-1 font-normal opacity-50">zł</span>
+                  </p>
+                </>
+              ) : (
+                <>
+                  {hasDebt && <p className="text-xs text-slate-500 tracking-wide mb-1 font-medium uppercase">Do zapłaty</p>}
+                  <p className={`text-3xl font-black tabular-nums ${hasDebt ? 'neon-amount' : 'text-emerald-400'}`}
+                    style={{ letterSpacing: '-0.02em', textShadow: hasDebt ? 'none' : '0 0 16px rgba(52,211,153,0.2)' }}>
+                    {formatAmountShort(animatedAbs)}<span className="text-sm ml-1 font-normal opacity-50">zł</span>
+                  </p>
+                </>
+              )}
+              {adminMode && (
+                <p className="text-xs text-rose-500 font-semibold tracking-wide mt-1">🔓 tryb edycji</p>
+              )}
+            </div>
+
+            {/* Breakdown */}
+            {!justSettled && (
+              <BreakdownPanel
+                playerName={player.name}
+                open={openDetails}
+                onToggle={() => onToggleDetails(player.name)}
+                breakdown={breakdown}
+                adminMode={adminMode}
+                onRemovePayment={onRemovePayment}
+              />
+            )}
+
+            {/* Payment undo bar */}
+            {lastPayment && (
+              <div className="mb-3">
+                <UndoBar
+                  message={<>{formatAmountShort(lastPayment.amount)} zł zapisane</>}
+                  secondsLeft={secondsLeft}
+                  progressPct={progressPct}
+                  onUndo={handleUndoPayment}
+                  buttonLabel="cofnij"
+                  compact
+                />
               </div>
-            ) : hasCredit ? (
-              <div>
-                <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#f4b942', opacity: 0.7, marginBottom: '2px' }}>
-                  Nadpłata
-                </p>
-                <p className="obs-amount" style={{ fontSize: isCyber ? '36px' : '28px', color: '#f4b942' }}>
-                  +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '14px', marginLeft: '4px', fontWeight: 400, opacity: 0.5 }}>zł</span>
-                </p>
-              </div>
-            ) : isSettled ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
-                <CheckCircle2 style={{ color: '#00c853', flexShrink: 0 }} size={20} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#00c853', letterSpacing: '0.06em' }}>
-                  Rozliczony
-                </span>
-              </div>
-            ) : (
-              <div>
+            )}
+
+            {/* Custom amount modal */}
+            <PaymentModal
+              type={modal}
+              debt={debt}
+              hasCredit={hasCredit}
+              customAmt={customAmt}
+              onAmtChange={setCustomAmt}
+              onSave={savePayment}
+              onCancel={cancelModal}
+              isSaving={isSaving}
+              tokens={tokens}
+            />
+
+            {/* Action buttons — hidden while modal is open */}
+            {!justSettled && modal === null && (
+              <div className="mt-auto flex flex-col gap-2">
+
+                {/* ── Player has debt: one-click exact pay + custom ── */}
                 {hasDebt && (
-                  <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: tokens.mutedText, marginBottom: '2px' }}>
-                    Do zapłaty
-                  </p>
+                  <>
+                    <button
+                      onClick={() => savePayment(debt)}
+                      disabled={isSaving}
+                      className="w-full py-3 rounded-xl border-2 flex flex-col items-center justify-center gap-0.5 transition-all disabled:opacity-50"
+                      style={{ background: tokens.confirmBg, border: `2px solid ${tokens.confirmBorder}`, color: tokens.confirmText }}
+                    >
+                      <span className="text-2xl font-black leading-tight">
+                        {formatAmountShort(debt)} zł
+                      </span>
+                      <span className="text-xs font-bold tracking-widest opacity-70">
+                        WYŚLIJ BLIK 💸
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
+                      className="w-full py-2 rounded-xl text-sm font-bold transition-all"
+                      style={{ border: `1px dashed ${tokens.accentBorder}`, color: tokens.accentText, opacity: 0.7 }}
+                    >
+                      + inna kwota
+                    </button>
+                  </>
                 )}
-                <p className="obs-amount" style={{
-                  fontSize: isCyber ? '36px' : '28px',
-                  color: hasDebt ? tokens.headingText : '#00c853',
-                }}>
-                  {formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '14px', marginLeft: '4px', fontWeight: 400, opacity: 0.45 }}>zł</span>
-                </p>
-                {hasDebt && breakdown === null && (
-                  <p style={{ fontSize: '10px', color: tokens.mutedText, opacity: 0.6, marginTop: '2px' }}>
-                    {player.attendanceCount > 0 ? `${player.attendanceCount} sesji łącznie` : ''}
-                  </p>
+
+                {/* ── Player has credit: offer to pay more ── */}
+                {hasCredit && (
+                  <button
+                    onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
+                    className="w-full py-2 rounded-xl text-sm font-bold transition-all"
+                    style={{ border: `1px dashed ${tokens.accentBorder}`, color: tokens.accentText, opacity: 0.7 }}
+                  >
+                    + wpłać więcej
+                  </button>
                 )}
+
+                {/* ── Player is fully settled: visual checkmark, no fake CTA ── */}
+                {isSettled && (
+                  <div className="flex flex-col items-center gap-3 py-3">
+                    <div
+                      className="w-14 h-14 rounded-full flex items-center justify-center"
+                      style={{
+                        background: 'rgba(52,211,153,0.10)',
+                        border:     '2px solid rgba(52,211,153,0.30)',
+                        boxShadow:  '0 0 16px rgba(52,211,153,0.15)',
+                      }}
+                    >
+                      <CheckCircle2
+                        size={28}
+                        className="text-emerald-400"
+                        style={{ filter: 'drop-shadow(0 0 5px rgba(52,211,153,0.5))' }}
+                      />
+                    </div>
+                    <p className="text-xs text-emerald-600 font-bold tracking-widest uppercase">Rozliczony</p>
+                    <button
+                      onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
+                      className="w-full py-1.5 rounded-xl text-xs font-bold transition-all"
+                      style={{ border: `1px dashed ${tokens.accentBorder}`, color: tokens.accentText, opacity: 0.45 }}
+                    >
+                      + wpłać na zapas
+                    </button>
+                  </div>
+                )}
+
               </div>
             )}
-            {adminMode && (
-              <p style={{ fontSize: '10px', color: '#f87171', fontWeight: 600, letterSpacing: '0.1em', marginTop: '4px' }}>🔓 tryb edycji</p>
-            )}
-          </div>
+          </>
         )}
-
-        {/* ── Breakdown ── */}
-        {!isOrganizer && !justSettled && (
-          <BreakdownPanel
-            playerName={player.name}
-            open={openDetails}
-            onToggle={() => onToggleDetails(player.name)}
-            breakdown={breakdown}
-            adminMode={adminMode}
-            onRemovePayment={onRemovePayment}
-          />
-        )}
-
-        {/* ── Payment undo bar ── */}
-        {lastPayment && (
-          <UndoBar
-            message={<>{formatAmountShort(lastPayment.amount)} zł zapisane</>}
-            secondsLeft={secondsLeft}
-            progressPct={progressPct}
-            onUndo={handleUndoPayment}
-            buttonLabel="cofnij"
-            compact
-          />
-        )}
-
-        {/* ── Custom amount modal ── */}
-        {!isOrganizer && (
-          <PaymentModal
-            type={modal}
-            debt={debt}
-            hasCredit={hasCredit}
-            customAmt={customAmt}
-            onAmtChange={setCustomAmt}
-            onSave={savePayment}
-            onCancel={cancelModal}
-            isSaving={isSaving}
-            tokens={tokens}
-          />
-        )}
-
-        {/* ── Actions ── */}
-        {!isOrganizer && !justSettled && modal === null && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {hasDebt && (
-              <>
-                <button
-                  onClick={() => savePayment(debt)}
-                  disabled={isSaving}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: '10px',
-                    border: `1px solid ${tokens.confirmBorder}`,
-                    background: tokens.confirmBg,
-                    color: tokens.confirmText,
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '1px',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    opacity: isSaving ? 0.5 : 1,
-                  }}
-                >
-                  {isSaving
-                    ? <InlineSpinner size="sm" />
-                    : <>
-                        <span style={{ fontSize: '17px', letterSpacing: '-0.02em', lineHeight: 1 }}>
-                          {formatAmountShort(debt)} zł
-                        </span>
-                        <span style={{ fontSize: '9px', letterSpacing: '0.2em', opacity: 0.6, fontWeight: 600 }}>
-                          WYŚLIJ BLIK
-                        </span>
-                      </>
-                  }
-                </button>
-                <button
-                  onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
-                  style={{
-                    width: '100%',
-                    padding: '6px',
-                    borderRadius: '8px',
-                    border: `1px dashed ${tokens.mutedBorder}`,
-                    background: 'transparent',
-                    color: tokens.mutedText,
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
-                    letterSpacing: '0.06em',
-                  }}
-                >
-                  + inna kwota
-                </button>
-              </>
-            )}
-            {hasCredit && (
-              <button
-                onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
-                style={{
-                  width: '100%', padding: '6px', borderRadius: '8px',
-                  border: `1px dashed ${tokens.mutedBorder}`, background: 'transparent',
-                  color: tokens.mutedText, fontSize: '11px', fontWeight: 500,
-                  cursor: 'pointer', letterSpacing: '0.06em',
-                }}
-              >
-                + wpłać więcej
-              </button>
-            )}
-            {isSettled && (
-              <button
-                onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
-                style={{
-                  width: '100%', padding: '5px', borderRadius: '8px',
-                  border: `1px dashed rgba(255,255,255,0.07)`, background: 'transparent',
-                  color: 'rgba(255,255,255,0.15)', fontSize: '10px', fontWeight: 500,
-                  cursor: 'pointer', letterSpacing: '0.08em',
-                }}
-              >
-                + wpłać na zapas
-              </button>
-            )}
-          </div>
-        )}
-
       </div>
     </div>
   );

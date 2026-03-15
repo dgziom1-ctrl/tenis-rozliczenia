@@ -294,7 +294,7 @@ export function useAudio(isMuted, theme = 'cyber') {
     } catch (error) {
       console.error('Error playing sound:', error);
     }
-  }, [isMuted, initAudioContext, playCyber, vibrate]);
+  }, [isMuted, theme, initAudioContext, playCyber, playArcade, playZen, vibrate]);
 
   return { playSound };
 }

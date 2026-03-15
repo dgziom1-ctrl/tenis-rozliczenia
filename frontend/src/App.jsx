@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ToastProvider } from './components/common/Toast';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
+import ZenLeaves from './components/layout/ZenLeaves';
 import DashboardTab from './components/dashboard/DashboardTab';
 import AttendanceTab from './components/attendance/AttendanceTab';
 import AdminTab from './components/admin/AdminTab';
@@ -12,10 +13,9 @@ import { SOUND_TYPES, TABS } from './constants';
 import { SpinnerOverlay } from './components/common/LoadingSkeleton';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
+import { usePersistedTheme } from './hooks/usePersistedTheme';
 import { useScrolled } from './hooks/useScrolled';
 import { ThemeContext } from './context/ThemeContext';
-
-const THEME = 'cyber';
 
 const INITIAL_APP_DATA = {
   summary: {},
@@ -29,14 +29,15 @@ const INITIAL_APP_DATA = {
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
-  const [isMuted, setIsMuted]     = useState(false);
-  const [appData, setAppData]     = useState(INITIAL_APP_DATA);
+  const [isMuted, setIsMuted] = useState(false);
+  const [appData, setAppData] = useState(INITIAL_APP_DATA);
   const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading]     = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [loadTimeout, setLoadTimeout] = useState(false);
 
+  const [theme, persistTheme] = usePersistedTheme();
   const scrolled = useScrolled();
-  const { playSound } = useAudio(isMuted, THEME);
+  const { playSound } = useAudio(isMuted, theme);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoadTimeout(true), 8000);
@@ -55,23 +56,24 @@ function AppContent() {
     setActiveTab(id);
   }, [playSound]);
 
+  const toggleTheme = useCallback(() => {
+    const next = theme === 'cyber' ? 'arcade' : theme === 'arcade' ? 'zen' : 'cyber';
+    persistTheme(next);
+    playSound(SOUND_TYPES.COIN);
+  }, [theme, persistTheme, playSound]);
+
+
   if (isLoading) {
     if (loadTimeout) {
       return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px', textAlign: 'center' }}>
+        <div className="min-h-screen flex items-center justify-center p-8 text-center">
           <div>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚡</div>
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700, fontSize: '16px', marginBottom: '8px' }}>Brak połączenia</p>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', marginBottom: '24px' }}>Sprawdź internet lub konfigurację Firebase (.env)</p>
+            <div className="text-5xl mb-4">😵</div>
+            <p className="text-slate-200 font-black text-lg mb-2">Brak połączenia</p>
+            <p className="text-slate-500 text-sm mb-6">Sprawdź internet lub konfigurację Firebase (.env)</p>
             <button
               onClick={() => window.location.reload()}
-              style={{
-                padding: '10px 24px', borderRadius: '10px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                background: 'rgba(255,255,255,0.06)',
-                color: 'rgba(255,255,255,0.8)',
-                fontWeight: 600, cursor: 'pointer', fontSize: '14px',
-              }}
+              className="px-6 py-3 rounded-xl border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/20 font-semibold transition-all"
             >
               Spróbuj ponownie
             </button>
@@ -83,9 +85,10 @@ function AppContent() {
   }
 
   return (
-    <ThemeContext.Provider value={THEME}>
+    <ThemeContext.Provider value={theme}>
+      {theme === 'zen' && <ZenLeaves />}
       <div
-        className="min-h-screen p-4 md:p-8 relative z-10"
+        className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : theme === 'zen' ? 'theme-zen' : ''}`}
         style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
       >
         <div className="max-w-7xl mx-auto relative">
@@ -93,7 +96,8 @@ function AppContent() {
             isMuted={isMuted}
             setIsMuted={setIsMuted}
             isConnected={isConnected}
-            theme={THEME}
+            theme={theme}
+            onToggleTheme={toggleTheme}
             scrolled={scrolled}
           />
           <Navigation

@@ -72,12 +72,12 @@ function Toast({ toast, onClose, theme }) {
       close:  a ? '#cc2200'             : z ? '#c49a6c'             : 'rgb(248,113,113)',
     },
     info: {
-      bg:     a ? '#010300'             : z ? '#f0ebe0'             : 'rgb(8,47,73)',
-      border: a ? '#39ff14'             : z ? '#2d6a4f'             : 'rgb(8,145,178)',
-      shadow: a ? '0 0 12px rgba(57,255,20,0.2)' : z ? '0 4px 16px rgba(45,106,79,0.12)' : '0 0 12px rgba(6,182,212,0.2)',
-      icon:   <Info style={{ color: a ? '#39ff14' : z ? '#2d6a4f' : 'rgb(34,211,238)' }} size={20} />,
-      text:   a ? '#39ff14'             : z ? '#2d6a4f'             : 'rgb(103,232,249)',
-      close:  a ? '#176604'             : z ? '#9aaa9a'             : 'rgb(8,145,178)',
+      bg:     a ? '#010300'             : z ? '#f0ebe0'             : '#0d1220',
+      border: a ? '#39ff14'             : z ? '#2d6a4f'             : 'rgba(129,140,248,0.35)',
+      shadow: a ? '0 0 12px rgba(57,255,20,0.2)' : z ? '0 4px 16px rgba(45,106,79,0.12)' : '0 8px 32px rgba(0,0,0,0.4)',
+      icon:   <Info style={{ color: a ? '#39ff14' : z ? '#2d6a4f' : '#a5b4fc' }} size={20} />,
+      text:   a ? '#39ff14'             : z ? '#2d6a4f'             : '#a5b4fc',
+      close:  a ? '#176604'             : z ? '#9aaa9a'             : 'rgba(129,140,248,0.5)',
     },
   };
 

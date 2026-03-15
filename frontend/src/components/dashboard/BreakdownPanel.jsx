@@ -140,7 +140,7 @@ function Row({ children, tokens, highlight }) {
         cursor: 'default',
         ...(highlight ? { background: highlight } : {}),
       }}
-      onMouseEnter={e => { if (!highlight) e.currentTarget.style.background = 'rgba(56,189,248,0.04)'; }}
+      onMouseEnter={e => { if (!highlight) e.currentTarget.style.background = 'rgba(148,163,184,0.04)'; }}
       onMouseLeave={e => { if (!highlight) e.currentTarget.style.background = ''; }}
     >
       {children}

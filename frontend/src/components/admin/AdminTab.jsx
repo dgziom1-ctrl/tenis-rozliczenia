@@ -59,21 +59,21 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-black/60 border border-cyan-900 rounded-xl p-3 text-center">
-            <p className="text-cyan-700 text-xs tracking-widest mb-1">DATA</p>
-            <p className="text-cyan-200 font-bold text-sm">{formatDate(date)}</p>
+          <div className="bg-black/60 border border-slate-800/40 rounded-xl p-3 text-center">
+            <p className="text-slate-500 text-xs tracking-widest mb-1">DATA</p>
+            <p className="text-slate-200 font-bold text-sm">{formatDate(date)}</p>
           </div>
           <div className="bg-black/60 border border-magenta-900 rounded-xl p-3 text-center">
-            <p className="text-cyan-700 text-xs tracking-widest mb-1">KOSZT</p>
+            <p className="text-slate-500 text-xs tracking-widest mb-1">KOSZT</p>
             <p className="text-magenta-300 font-black text-lg">{formatAmountShort(totalCost)} zł</p>
           </div>
-          <div className="bg-black/60 border border-cyan-900 rounded-xl p-3 text-center">
-            <p className="text-cyan-700 text-xs tracking-widest mb-1">OBECNYCH</p>
-            <p className="text-cyan-200 font-black text-lg">{presentCount}</p>
+          <div className="bg-black/60 border border-slate-800/40 rounded-xl p-3 text-center">
+            <p className="text-slate-500 text-xs tracking-widest mb-1">OBECNYCH</p>
+            <p className="text-slate-200 font-black text-lg">{presentCount}</p>
           </div>
           {multisportCount > 0 && (
             <div style={{ background: tokens.cellBg, border: `1px solid ${tokens.cellBorder}`, borderRadius: tokens.modalRadius }} className="p-3 text-center">
-              <p className="text-cyan-700 text-xs tracking-widest mb-1">MULTISPORT</p>
+              <p className="text-slate-500 text-xs tracking-widest mb-1">MULTISPORT</p>
               <p className="text-emerald-300 font-black text-lg">⚡ {multisportCount}</p>
             </div>
           )}
@@ -96,7 +96,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
           className={`w-full py-3 rounded-xl border-2 font-bold text-sm transition-all flex items-center justify-center gap-2 mb-3 ${
             copied
               ? 'border-emerald-400 bg-emerald-950/50 text-emerald-300'
-              : 'border-cyan-700 bg-cyan-950/30 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-950/50'
+              : 'border-indigo-600/40 bg-indigo-950/10 text-indigo-300 hover:border-indigo-400/50 hover:bg-indigo-950/20'
           }`}
         >
           {copied ? <><CheckCircle2 size={15} /> SKOPIOWANO!</> : <><Copy size={15} /> KOPIUJ NA GRUPKĘ</>}
@@ -122,9 +122,9 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
   const perPerson     = payingPlayers.length > 0 ? cost / payingPlayers.length : 0;
 
   return (
-    <div className="flex items-center justify-between bg-cyan-950/30 border border-cyan-800 rounded-xl px-4 py-3">
-      <div className="flex items-center gap-2 text-cyan-600 text-sm font-bold">
-        <Calculator size={15} className="text-cyan-500" />
+    <div className="flex items-center justify-between bg-slate-900/30 border border-slate-700/30 rounded-xl px-4 py-3">
+      <div className="flex items-center gap-2 text-slate-500 text-sm font-bold">
+        <Calculator size={15} className="text-slate-400" />
         <span>Podgląd podziału</span>
       </div>
       <div className="text-right">
@@ -133,7 +133,7 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
             <span className="text-magenta-300 font-black text-xl glow-magenta-sm">
               {formatAmountShort(perPerson)} zł
             </span>
-            <span className="text-cyan-700 text-xs ml-2">/ os. ({payingPlayers.length} płaci)</span>
+            <span className="text-slate-500 text-xs ml-2">/ os. ({payingPlayers.length} płaci)</span>
           </>
         ) : (
           <span className="text-emerald-400 font-bold text-sm">Wszyscy mają Multisport 🎉</span>
@@ -232,7 +232,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
       <div className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-300">
         <div className="cyber-box rounded-2xl p-4 sm:p-8">
-          <h2 className="text-xl font-black text-cyan-300 mb-6 flex items-center gap-3 border-b-2 border-cyan-800 pb-4">
+          <h2 className="text-xl font-black text-slate-200 mb-6 flex items-center gap-3 border-b border-slate-800/30 pb-4">
             <CalendarPlus className="text-magenta-500 flex-shrink-0" />
             Dodaj nową sesję
           </h2>
@@ -240,7 +240,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
           <form onSubmit={handleSaveSession} className="space-y-5">
             {/* Date */}
             <div>
-              <label className="block font-bold text-cyan-600 mb-2 tracking-wider text-sm">Data gry:</label>
+              <label className="block font-bold text-slate-500 mb-2 tracking-wider text-sm">Data gry:</label>
               <div style={{ position: 'relative' }}>
                 <div
                   className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
@@ -273,7 +273,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Cost */}
             <div>
-              <label className="block font-bold text-cyan-600 mb-2 tracking-wider text-sm">Koszt całkowity:</label>
+              <label className="block font-bold text-slate-500 mb-2 tracking-wider text-sm">Koszt całkowity:</label>
               <div className="flex gap-2 mb-2">
                 {QUICK_COSTS.map(cost => (
                   <button
@@ -282,8 +282,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                     onClick={() => { setTotalCost(String(cost)); playSound(SOUND_TYPES.CLICK); }}
                     className={`flex-1 py-2 rounded-lg border-2 font-bold text-sm transition-all ${
                       totalCost === String(cost)
-                        ? 'border-cyan-400 bg-cyan-950 text-cyan-200 shadow-[0_0_8px_#00f3ff]'
-                        : 'border-cyan-900 bg-black text-cyan-700 hover:border-cyan-600 hover:text-cyan-400'
+                        ? 'border-indigo-400/50 bg-indigo-950/15 text-indigo-200'
+                        : 'border-slate-800 bg-transparent text-slate-500 hover:border-slate-600 hover:text-slate-300'
                     }`}
                   >
                     {cost === 0 ? 'FREE' : cost}
@@ -302,7 +302,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Who was present */}
             <div className="cyber-box bg-black/50 p-4 rounded-xl">
-              <p className="font-bold text-cyan-400 mb-4 flex items-center gap-2 text-sm">
+              <p className="font-bold text-indigo-300 mb-4 flex items-center gap-2 text-sm">
                 <Users size={18} className="text-magenta-500 flex-shrink-0" /> Kto był obecny?
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -313,8 +313,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                     onClick={() => togglePresent(name)}
                     className={`p-3 rounded-lg border-2 font-bold text-sm transition-all text-center ${
                       presentPlayers.includes(name)
-                        ? 'border-cyan-400 bg-cyan-950 text-cyan-200 shadow-[0_0_8px_#00f3ff]'
-                        : 'border-cyan-900 bg-black hover:border-cyan-700 text-cyan-800'
+                        ? 'border-indigo-400/50 bg-indigo-950/15 text-indigo-200'
+                        : 'border-slate-800 bg-transparent hover:border-slate-600 text-slate-600'
                     }`}
                   >
                     {name}
