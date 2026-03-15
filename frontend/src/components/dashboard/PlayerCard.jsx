@@ -149,17 +149,21 @@ export default function PlayerCard({
       className={`cyber-box ${styles.cardBorder} rounded-2xl overflow-hidden transition-all flex flex-col ${justSettled ? 'settle-flash' : ''}`}
     >
       {/* Header */}
-      <div className={`${styles.headerBg} p-4 border-b-2 ${styles.headerBord}`}>
-        <h3 className={`font-black text-xl ${styles.headerText} flex items-center gap-2`}>
+      <div className={`${styles.headerBg} p-4 border-b ${styles.headerBord}`}>
+        <h3 className={`font-extrabold text-lg tracking-tight ${styles.headerText} flex items-center gap-2`}>
           <span className="mini-paddle" /> {player.name}
         </h3>
       </div>
 
       <div className="p-5 flex flex-col flex-1">
         {/* Attendance */}
-        <div className="text-sm text-cyan-700 mb-4 flex flex-col gap-1 items-center text-center">
-          <span>Obecność: <span className="text-cyan-300 text-lg">{player.attendanceCount}</span> / {totalWeeks} ({pct}%)</span>
-          <span className={`font-bold ${rank.color}`}>{rank.emoji} {rank.name}</span>
+        <div className="text-sm text-cyan-700 mb-4 flex flex-col gap-1 items-center text-center leading-relaxed">
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+            Obecność: <span className="text-cyan-300 font-bold text-base">{player.attendanceCount}</span>
+            <span className="opacity-60"> / {totalWeeks}</span>
+            <span className="text-cyan-500 ml-1 text-xs">({pct}%)</span>
+          </span>
+          <span className={`font-semibold text-xs ${rank.color}`}>{rank.emoji} {rank.name}</span>
         </div>
 
         {isOrganizer ? (
@@ -170,7 +174,7 @@ export default function PlayerCard({
           <>
             {/* Balance display — flashes on Firebase update */}
             <div
-              className={`p-4 rounded-xl border-2 shadow-inner mb-4 text-center cursor-default select-none ${styles.balanceBg} ${flash ? 'debt-flash' : ''}`}
+              className={`p-4 rounded-xl border shadow-inner mb-4 text-center cursor-default select-none ${styles.balanceBg} ${flash ? 'debt-flash' : ''}`}
               onClick={handleAmountClick}
             >
               {justSettled ? (
@@ -179,22 +183,22 @@ export default function PlayerCard({
                 </div>
               ) : hasCredit ? (
                 <>
-                  <p className="text-xs text-yellow-600 tracking-widest mb-1 font-bold">NADPŁATA — zaliczona na kolejne sesje</p>
-                  <p className="text-3xl font-black text-yellow-300" style={{ textShadow: '0 0 10px rgba(253,224,71,0.4)' }}>
-                    +{formatAmountShort(animatedAbs)}<span className="text-sm ml-1">zł</span>
+                  <p className="text-xs text-yellow-600 tracking-wide mb-1 font-semibold uppercase">Nadpłata — na kolejne sesje</p>
+                  <p className="text-3xl font-black text-yellow-300 font-mono" style={{ textShadow: '0 0 10px rgba(253,224,71,0.3)' }}>
+                    +{formatAmountShort(animatedAbs)}<span className="text-sm ml-1 font-normal opacity-70">zł</span>
                   </p>
                 </>
               ) : (
                 <>
-                  {hasDebt && <p className="text-xs text-cyan-700 tracking-widest mb-1">DO ZAPŁATY</p>}
+                  {hasDebt && <p className="text-xs text-cyan-700 tracking-wide mb-1 font-semibold uppercase opacity-70">Do zapłaty</p>}
                   <p className={`text-3xl neon-amount ${hasDebt ? '' : 'text-emerald-400'}`}
-                    style={hasDebt ? {} : { textShadow: '0 0 8px rgba(52,211,153,0.5)' }}>
-                    {formatAmountShort(animatedAbs)}<span className="text-sm ml-1">zł</span>
+                    style={hasDebt ? {} : { textShadow: '0 0 8px rgba(52,211,153,0.4)' }}>
+                    {formatAmountShort(animatedAbs)}<span className="text-sm ml-1 font-normal opacity-70">zł</span>
                   </p>
                 </>
               )}
               {adminMode && (
-                <p className="text-xs text-rose-500 font-bold tracking-widest mt-1">🔓 tryb edycji</p>
+                <p className="text-xs text-rose-500 font-semibold tracking-wide mt-1">🔓 tryb edycji</p>
               )}
             </div>
 

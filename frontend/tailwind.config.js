@@ -7,29 +7,33 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // nerdy fonts
         cyber: ['"Orbitron"', 'sans-serif'],
-        mono: ['"Roboto Mono"', 'monospace'],
+        mono:  ['"Roboto Mono"', 'monospace'],
+        sans:  ['"Inter"', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // cyberpunk color palette
+        // Slightly cooler, more "metallic" cyan — less terminal, more premium
         cyan: {
-          DEFAULT: '#00f3ff',
-          300: '#6efaff',
-          500: '#00f3ff',
-          700: '#00bbcc',
-          900: '#004e54',
+          DEFAULT: '#38bdf8',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+          950: '#082f49',
         },
+        // Softer fuchsia — same vibe, less aggressive
         magenta: {
-          DEFAULT: '#ff00ff',
-          300: '#ff80ff',
-          400: '#ff40ff',
-          500: '#ff00ff',
-          600: '#e000e0',
-          700: '#bd00bd',
-          800: '#800080',
-          900: '#4d004d',
-          950: '#2a002a',
+          DEFAULT: '#e879f9',
+          300: '#f0abfc',
+          400: '#e879f9',
+          500: '#d946ef',
+          600: '#c026d3',
+          700: '#a21caf',
+          800: '#86198f',
+          900: '#701a75',
+          950: '#4a044e',
         },
       },
       animation: {

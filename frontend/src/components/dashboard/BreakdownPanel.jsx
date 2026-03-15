@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useThemeTokens } from '../../context/ThemeContext';
 import { formatDate, formatAmountShort } from '../../utils/format';
 
@@ -19,12 +19,19 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
         className="text-xs font-bold flex items-center justify-center gap-1 mx-auto py-1 px-2 rounded transition-colors"
         style={{ color: tokens.accentText }}
       >
-        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {toggleLabel}
+        <span style={{
+          display: 'inline-flex',
+          transition: 'transform 0.25s ease',
+          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+        }}>
+          <ChevronDown size={14} />
+        </span>
+        {' '}{toggleLabel}
       </button>
 
       {open && breakdown && (
         <div
-          className="mt-2 rounded-lg text-xs border text-left shadow-inner overflow-hidden"
+          className="mt-2 rounded-xl text-xs border text-left overflow-hidden"
           style={{ background: tokens.cellBg, borderColor: tokens.cellBorder }}
         >
           {breakdown.sessions.length > 0 ? (
@@ -91,8 +98,8 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           )}
 
           <div
-            className="flex justify-between items-center px-3 py-2 font-black text-sm"
-            style={{ background: tokens.accentBg, borderTop: `2px solid ${tokens.accentBorder}` }}
+            className="flex justify-between items-center px-3 py-2.5 font-black text-sm"
+            style={{ background: tokens.accentBg, borderTop: `1px solid ${tokens.accentBorder}` }}
           >
             <span style={{ color: tokens.bodyText }}>Saldo</span>
             <span style={{
@@ -116,7 +123,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
 function SectionHeader({ label, tokens }) {
   return (
     <div
-      className="px-3 py-1.5 text-xs font-bold tracking-widest uppercase"
+      className="px-3 py-2 text-xs font-semibold tracking-wider uppercase"
       style={{ color: tokens.cellLabelText, borderBottom: `1px solid ${tokens.cellBorder}` }}
     >
       {label}
@@ -127,11 +134,14 @@ function SectionHeader({ label, tokens }) {
 function Row({ children, tokens, highlight }) {
   return (
     <div
-      className="flex justify-between items-center px-3 py-1.5"
+      className="flex justify-between items-center px-3 py-2 transition-colors"
       style={{
         borderBottom: `1px solid ${tokens.cellBorder}`,
+        cursor: 'default',
         ...(highlight ? { background: highlight } : {}),
       }}
+      onMouseEnter={e => { if (!highlight) e.currentTarget.style.background = 'rgba(56,189,248,0.04)'; }}
+      onMouseLeave={e => { if (!highlight) e.currentTarget.style.background = ''; }}
     >
       {children}
     </div>
