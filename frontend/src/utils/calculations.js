@@ -119,10 +119,12 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     id:     p.id,
   }));
 
-  // Legacy fallback: paidUntilWeek is set (old "Rozlicz" button) but no payment
-  // was ever recorded. Synthesise a payment for all sessions up to the cutoff so
-  // the displayed balance is correct — regardless of whether new sessions exist.
-  if (cutoffIdx >= 0 && playerPayments.length === 0) {
+  // Legacy fallback: paidUntilWeek is set (old "Rozlicz" button) but no
+  // __legacy_settled__ synthetic entry exists yet. Add it even when the player
+  // has real cash payments — otherwise those payments are shown but the settled
+  // amount is invisible, making the balance look wrong (e.g. shows 40 zł owed
+  // instead of 0 after player paid the remaining 9 zł on top of a prior settlement).
+  if (cutoffIdx >= 0 && !playerPayments.some(p => p.id === '__legacy_settled__')) {
     const settledCost = roundToTwoDecimals(
       chronological.slice(0, cutoffIdx + 1).filter(sessionFilter)
         .reduce((s, x) => s + x.costPerPerson, 0),
@@ -130,11 +132,15 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     const settlementDate = chronological[cutoffIdx]?.datePlayed ?? null;
 
     if (settledCost > 0) {
-      playerPayments = [{
-        id:     '__legacy_settled__',
-        amount: settledCost,
-        date:   settlementDate,
-      }];
+      // Prepend the synthetic settlement — real cash payments come after it chronologically
+      playerPayments = [
+        {
+          id:     '__legacy_settled__',
+          amount: settledCost,
+          date:   settlementDate,
+        },
+        ...playerPayments,
+      ];
     }
   }
 
