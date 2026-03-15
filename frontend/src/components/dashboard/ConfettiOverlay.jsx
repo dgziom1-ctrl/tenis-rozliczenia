@@ -27,7 +27,6 @@ export const CONFETTI_POOL = ['🏓','🎉','⭐','✨','💰','🎊','🏆','�
 
 // Keep CONFETTI_POOLS as alias for backwards compat with DashboardTab
 export const CONFETTI_POOLS = { cyber: CONFETTI_POOL };
-};
 
 export function generateConfetti(count, pool) {
   return Array.from({ length: count }, (_, i) => ({
