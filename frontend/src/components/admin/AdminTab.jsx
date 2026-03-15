@@ -295,6 +295,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 onChange={e => setTotalCost(e.target.value)}
                 placeholder="lub wpisz ręcznie..."
                 className="cyber-input p-3 rounded-xl text-sm w-full"
+                style={{
+                  background: '#080c18',
+                  color: '#e2e8f0',
+                  border: '1px solid rgba(148,163,184,0.12)',
+                }}
                 required
               />
             </div>

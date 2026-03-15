@@ -32,6 +32,7 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
           <input type="password" value={input} onChange={e => setInput(e.target.value)}
             placeholder="Hasło..." autoFocus
             className={`cyber-input w-full p-3 rounded-xl text-sm transition-all ${error ? 'border-rose-500 shadow-[0_0_10px_#f4333360]' : ''}`}
+            style={{ background: '#080c18', color: '#e2e8f0', border: `1px solid ${error ? 'rgb(244,51,51,0.6)' : 'rgba(148,163,184,0.12)'}` }}
           />
           {error && <p className="text-rose-400 text-xs font-bold text-center">❌ Złe hasło</p>}
           <div className="flex gap-3">
@@ -130,7 +131,8 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
 
         <form onSubmit={handleAddPlayer} className="flex flex-col sm:flex-row gap-3 mb-10 p-4 sm:p-6 bg-black/40 rounded-xl border border-slate-800/50">
           <input type="text" value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)}
-            placeholder="Imię nowego gracza..." className="cyber-input flex-1 p-4 rounded-xl text-lg w-full" required />
+            placeholder="Imię nowego gracza..." className="cyber-input flex-1 p-4 rounded-xl text-lg w-full" required
+            style={{ background: '#080c18', color: '#e2e8f0', border: '1px solid rgba(148,163,184,0.12)' }} />
           <button type="submit" className="cyber-button-blue px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto">
             <UserPlus size={20}/> DODAJ
           </button>
