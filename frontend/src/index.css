@@ -45,36 +45,6 @@ body::before {
 /* Arcade grid — applied via JS class on body when theme switches */
 body
 
-/* ══ PONG ANIMATION ══════════════════════════════════════ */
-.ascii-pong-field {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
-
-.paddle { color: #e91e8c; }
-
-.ball-court {
-  display: inline-block;
-  width: 250px;
-  position: relative;
-  height: 1.5rem;
-  border-bottom: 1px dashed #083344;
-}
-
-.ascii-ball {
-  position: absolute;
-  top: 0;
-  animation: ascii-bounce 1.2s infinite linear alternate;
-}
-
-@keyframes ascii-bounce {
-  0%   { left: 0; }
-  100% { left: calc(100% - 1ch); }
-}
 
 /* ══ UTILITIES ═══════════════════════════════════════════ */
 @layer utilities {

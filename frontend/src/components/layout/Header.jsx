@@ -146,33 +146,22 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
         {/* ══ MAIN SECTION ═══════════════════════════════ */}
         <div className="relative z-10 px-4 py-5 flex flex-col items-center">
 
-          {/* ASCII Pong */}
-          <div className="ascii-pong-field mb-2">
-            <span style={{ color: '#818cf8', fontSize: '1.5rem', fontWeight: 'bold' }}>「</span>
-            <div className="ball-court mx-4">
-              <span className="ascii-ball"
-                style={{ fontSize: '1.25rem', color: '#a5b4fc' }}>●</span>
-            </div>
-            <span style={{ color: '#818cf8', fontSize: '1.5rem', fontWeight: 'bold' }}>」</span>
-          </div>
-
           {/* Title */}
           <h1 className="text-center mb-4 w-full">
             <span className="block uppercase" style={{
-              fontSize: 'clamp(1.4rem, 4.5vw, 2.4rem)',
-              letterSpacing: '0.06em',
-              fontWeight: 800,
+              fontSize: 'clamp(1.1rem, 3.5vw, 1.8rem)',
+              letterSpacing: '0.18em',
+              fontWeight: 700,
               lineHeight: 1.15,
-              backgroundImage: 'linear-gradient(135deg, #e2e8f0 0%, #a5b4fc 50%, #e2e8f0 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-              marginBottom: '0.75rem',
+              color: 'rgba(148,163,184,0.55)',
+              marginBottom: '0.5rem',
             }}>
               CENTRUM DOWODZENIA
             </span>
 
             {/* PING-PONG + paddles */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 'clamp(8px,2vw,16px)', marginTop: '0.5rem', flexWrap: 'nowrap' }}>
+              gap: 'clamp(8px,2vw,16px)', flexWrap: 'nowrap' }}>
 
               {/* Left paddle */}
               <div style={{
@@ -213,20 +202,6 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
                   </span>
                 </button>
 
-                {/* Subtle hint */}
-                {!chaosMode && (
-                  <div style={{
-                    marginTop: '6px',
-                    fontSize: '0.6rem',
-                    color: 'rgba(129,140,248,0.4)',
-                    letterSpacing: '0.12em',
-                    userSelect: 'none',
-                    pointerEvents: 'none',
-                  }}>
-                    ✦ ponk ponk ponk ✦
-                  </div>
-                )}
-
                 {chaosMode && (
                   <div style={{
                     position: 'absolute', bottom: '-32px', left: '50%',
@@ -266,28 +241,15 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
 
           {/* Thin indigo loader bar */}
           <div style={{
-            width: '100%', maxWidth: '28rem', height: '2px',
-            background: '#1e2436', borderRadius: '9999px',
-            overflow: 'hidden', marginTop: '1.25rem', marginBottom: '0.75rem',
-          }}>
-            <div style={{
-              height: '100%', width: '100%',
-              background: chaosMode
-                ? 'linear-gradient(90deg,#c084fc,#818cf8,#6366f1)'
-                : 'linear-gradient(90deg,#6366f1,#818cf8,#a5b4fc)',
-              borderRadius: '9999px',
-            }} />
-          </div>
+            width: '100%', maxWidth: '20rem', height: '1px',
+            background: 'linear-gradient(90deg,transparent,rgba(129,140,248,0.3) 50%,transparent)',
+            marginTop: '1rem', marginBottom: '0.75rem',
+          }} />
 
-          {/* Status bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'center' }}>
+          {/* Status bar — only ONLINE/OFFLINE */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
             <span style={{
-              fontSize: '0.72rem', color: 'rgba(129,140,248,0.45)',
-              letterSpacing: '0.12em', fontWeight: 500,
-            }}>PING · PONG</span>
-            <span style={{ color: 'rgba(148,163,184,0.2)', fontSize: '0.8rem' }}>│</span>
-            <span style={{
-              fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.05em',
+              fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.06em',
               color: isConnected ? '#86efac' : '#f87171',
             }}>{isConnected ? '● ONLINE' : '○ OFFLINE'}</span>
           </div>
