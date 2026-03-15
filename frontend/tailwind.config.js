@@ -7,9 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        cyber: ['"Orbitron"', 'sans-serif'],
-        mono:  ['"Roboto Mono"', 'monospace'],
-        sans:  ['"Inter"', 'system-ui', 'sans-serif'],
+        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"Roboto Mono"', 'monospace'],
       },
       colors: {
         // Slightly cooler, more "metallic" cyan — less terminal, more premium

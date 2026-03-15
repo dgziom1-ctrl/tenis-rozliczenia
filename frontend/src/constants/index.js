@@ -62,3 +62,13 @@ export const PAYMENT_MODAL = {
   EXACT:  'exact',
   CUSTOM: 'custom',
 };
+
+// Rank bar colors for Obsidian Finance card design (left accent bar)
+export const RANK_BAR_COLOR = (pct) => {
+  if (pct >= 90) return '#f4b942';  // gold — LEGENDA
+  if (pct >= 75) return '#f97316';  // orange — MISTRZ
+  if (pct >= 60) return '#8b5cf6';  // violet — WETERAN
+  if (pct >= 45) return '#e63946';  // red — STAŁY
+  if (pct >= 20) return '#64748b';  // slate — GOŚĆ
+  return 'rgba(255,255,255,0.1)';   // ghost — DUCH
+};

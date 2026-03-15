@@ -1,36 +1,26 @@
 import { LayoutDashboard, PlusCircle, History, Users, Trophy } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
 
 const tabs = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Home',    shortLabel: 'Home'    },
-  { id: 'attendance', icon: Trophy,           label: 'Ranking', shortLabel: 'Ranking' },
-  { id: 'admin',      icon: PlusCircle,       label: 'Dodaj',   shortLabel: 'Dodaj'   },
-  { id: 'history',    icon: History,          label: 'Historia',shortLabel: 'Historia'},
-  { id: 'players',    icon: Users,            label: 'Gracze',  shortLabel: 'Gracze'  },
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Home'    },
+  { id: 'attendance', icon: Trophy,           label: 'Ranking' },
+  { id: 'admin',      icon: PlusCircle,       label: 'Dodaj'   },
+  { id: 'history',    icon: History,          label: 'Historia'},
+  { id: 'players',    icon: Users,            label: 'Gracze'  },
 ];
 
-/**
- * Tab navigation — all styles live in index.css, themed via [data-theme] attribute on <html>.
- */
-export default function Navigation({ activeTab, setActiveTab }) {
-  const theme = useTheme();
-  const accentDot = theme === 'arcade' ? '#39ff14' : theme === 'zen' ? '#2d6a4f' : '#22d3ee';
-  const accentGlow = theme === 'arcade'
-    ? '0 0 6px rgba(57,255,20,0.9)'
-    : theme === 'zen'
-    ? 'none'
-    : '0 0 6px rgba(34,211,238,0.8)';
+const ACCENT = 'rgba(255,255,255,0.7)';
+const DOT_COLOR = 'rgba(0,200,83,0.9)';
 
+export default function Navigation({ activeTab, setActiveTab }) {
   return (
     <>
-      {/* ── Desktop horizontal tab bar ─────────────────── */}
+      {/* ── Desktop ── */}
       <nav className="desktop-nav" role="navigation" aria-label="Nawigacja główna">
         <div className="desktop-nav-inner">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              aria-pressed={activeTab === tab.id}
               aria-current={activeTab === tab.id ? 'page' : undefined}
               className={`desktop-tab ${activeTab === tab.id ? 'active' : ''}`}
             >
@@ -40,8 +30,8 @@ export default function Navigation({ activeTab, setActiveTab }) {
                   <span style={{
                     position: 'absolute', top: -3, right: -4,
                     width: 7, height: 7, borderRadius: '50%',
-                    background: accentDot,
-                    boxShadow: accentGlow,
+                    background: DOT_COLOR,
+                    boxShadow: '0 0 5px rgba(0,200,83,0.8)',
                   }} />
                 )}
               </span>
@@ -51,7 +41,7 @@ export default function Navigation({ activeTab, setActiveTab }) {
         </div>
       </nav>
 
-      {/* ── Mobile bottom bar ──────────────────────────── */}
+      {/* ── Mobile ── */}
       <nav className="mobile-nav" role="navigation" aria-label="Nawigacja główna">
         {tabs.map(tab => (
           <button
@@ -67,12 +57,12 @@ export default function Navigation({ activeTab, setActiveTab }) {
                 <span style={{
                   position: 'absolute', top: -3, right: -4,
                   width: 7, height: 7, borderRadius: '50%',
-                  background: accentDot,
-                  boxShadow: accentGlow,
+                  background: DOT_COLOR,
+                  boxShadow: '0 0 5px rgba(0,200,83,0.8)',
                 }} />
               )}
             </span>
-            <span className="mobile-nav-label">{tab.shortLabel.toUpperCase()}</span>
+            <span className="mobile-nav-label">{tab.label.toUpperCase()}</span>
           </button>
         ))}
       </nav>

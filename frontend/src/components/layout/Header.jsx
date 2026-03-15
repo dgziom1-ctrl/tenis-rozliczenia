@@ -3,6 +3,148 @@ import { useState, useEffect, useRef } from 'react';
 
 const CLICKS_NEEDED = 5;
 
+// ── Obsidian Finance minimal header ──────────────────────────────────────────
+function ObsidianHeader({ blikNumber, isConnected, isMuted, setIsMuted, scrolled }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(blikNumber.replace(/\s/g, ''));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <>
+      <header style={{
+        background:    '#0a0a0b',
+        borderBottom:  '1px solid rgba(255,255,255,0.06)',
+        borderRadius:  '14px 14px 0 0',
+        padding:       '14px 20px',
+        display:       'flex',
+        alignItems:    'center',
+        justifyContent:'space-between',
+        gap:           '16px',
+        position:      'relative',
+      }}>
+        {/* Left: theme name + BLIK */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
+          <button
+            style={{
+              background:    'transparent',
+              border:        'none',
+              cursor:        'default',
+              padding:       0,
+              fontFamily:    "'Inter', sans-serif",
+              fontSize:      '10px',
+              fontWeight:    600,
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              color:         'rgba(255,255,255,0.18)',
+              flexShrink:    0,
+              transition:    'color 0.15s',
+              whiteSpace:    'nowrap',
+            }}
+            title="Zmień motyw"
+          >
+            PING·PONG
+          </button>
+
+          <div style={{ width: '1px', height: '16px', background: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
+
+          <button
+            onClick={handleCopy}
+            style={{
+              background:    'transparent',
+              border:        'none',
+              cursor:        'pointer',
+              padding:       0,
+              display:       'flex',
+              alignItems:    'center',
+              gap:           '8px',
+              minWidth:      0,
+            }}
+            title="Kopiuj numer BLIK"
+          >
+            <span style={{
+              fontFamily:    "'JetBrains Mono', monospace",
+              fontSize:      '16px',
+              fontWeight:    700,
+              letterSpacing: '0.06em',
+              color:         copied ? '#00c853' : 'rgba(255,255,255,0.88)',
+              transition:    'color 0.2s',
+              whiteSpace:    'nowrap',
+            }}>
+              {blikNumber}
+            </span>
+            {copied
+              ? <Check size={13} style={{ color: '#00c853', flexShrink: 0 }} />
+              : <Copy  size={13} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
+            }
+          </button>
+        </div>
+
+        {/* Right: status + mute */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div style={{
+              width:        '5px',
+              height:       '5px',
+              borderRadius: '50%',
+              background:   isConnected ? '#00c853' : '#e63946',
+              boxShadow:    isConnected ? '0 0 6px rgba(0,200,83,0.6)' : '0 0 6px rgba(230,57,70,0.6)',
+              flexShrink:   0,
+            }} />
+            <span style={{
+              fontSize:      '9px',
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color:         'rgba(255,255,255,0.22)',
+            }}>
+              {isConnected ? 'live' : 'offline'}
+            </span>
+          </div>
+
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            style={{
+              background:   'rgba(255,255,255,0.04)',
+              border:       '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '8px',
+              cursor:       'pointer',
+              padding:      '6px',
+              display:      'flex',
+              alignItems:   'center',
+              justifyContent: 'center',
+              color:         isMuted ? '#e63946' : 'rgba(255,255,255,0.4)',
+              transition:   'all 0.15s',
+            }}
+          >
+            {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+          </button>
+        </div>
+      </header>
+
+      {/* Compact sticky header for mobile */}
+      <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
+        <button onClick={handleCopy} style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Smartphone size={14} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '14px', fontWeight: 700, color: copied ? '#00c853' : 'rgba(255,255,255,0.8)', letterSpacing: '0.04em' }}>
+            {blikNumber}
+          </span>
+          {copied ? <Check size={12} style={{ color: '#00c853' }} /> : <Copy size={12} style={{ color: 'rgba(255,255,255,0.2)' }} />}
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: isConnected ? '#00c853' : '#e63946' }} />
+          <button onClick={() => setIsMuted(!isMuted)} style={{ background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer', color: isMuted ? '#e63946' : 'rgba(255,255,255,0.4)' }}>
+            {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+
 export default function Header({ isMuted, setIsMuted, isConnected, theme, onToggleTheme, scrolled }) {
   const [copied,     setCopied]     = useState(false);
   const [clickCount, setClickCount] = useState(0);
@@ -215,6 +357,19 @@ export default function Header({ isMuted, setIsMuted, isConnected, theme, onTogg
 
   const pSize = 'clamp(24px,4vw,40px)';
   const pInner = 'clamp(12px,2.5vw,20px)';
+
+  // ── Obsidian Finance header (cyber theme only) ──────────────────────────
+  if (!a && !z) {
+    return (
+      <ObsidianHeader
+        blikNumber={blikNumber}
+        isConnected={isConnected}
+        isMuted={isMuted}
+        setIsMuted={setIsMuted}
+        scrolled={scrolled}
+      />
+    );
+  }
 
   return (
     <>
