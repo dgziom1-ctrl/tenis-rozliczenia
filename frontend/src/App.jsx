@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { ToastProvider } from './components/common/Toast';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
-import ZenLeaves from './components/layout/ZenLeaves';
 import DashboardTab from './components/dashboard/DashboardTab';
 import AttendanceTab from './components/attendance/AttendanceTab';
 import AdminTab from './components/admin/AdminTab';
@@ -13,7 +12,6 @@ import { SOUND_TYPES, TABS } from './constants';
 import { SpinnerOverlay } from './components/common/LoadingSkeleton';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
-import { usePersistedTheme } from './hooks/usePersistedTheme';
 import { useScrolled } from './hooks/useScrolled';
 import { ThemeContext } from './context/ThemeContext';
 
@@ -29,15 +27,14 @@ const INITIAL_APP_DATA = {
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
-  const [isMuted, setIsMuted] = useState(false);
-  const [appData, setAppData] = useState(INITIAL_APP_DATA);
+  const [isMuted, setIsMuted]     = useState(false);
+  const [appData, setAppData]     = useState(INITIAL_APP_DATA);
   const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading]     = useState(true);
   const [loadTimeout, setLoadTimeout] = useState(false);
 
-  const [theme, persistTheme] = usePersistedTheme();
   const scrolled = useScrolled();
-  const { playSound } = useAudio(isMuted, theme);
+  const { playSound } = useAudio(isMuted);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoadTimeout(true), 8000);
@@ -55,13 +52,6 @@ function AppContent() {
     playSound(SOUND_TYPES.TAB);
     setActiveTab(id);
   }, [playSound]);
-
-  const toggleTheme = useCallback(() => {
-    const next = theme === 'cyber' ? 'arcade' : theme === 'arcade' ? 'zen' : 'cyber';
-    persistTheme(next);
-    playSound(SOUND_TYPES.COIN);
-  }, [theme, persistTheme, playSound]);
-
 
   if (isLoading) {
     if (loadTimeout) {
@@ -85,10 +75,9 @@ function AppContent() {
   }
 
   return (
-    <ThemeContext.Provider value={theme}>
-      {theme === 'zen' && <ZenLeaves />}
+    <ThemeContext.Provider value="cyber">
       <div
-        className={`min-h-screen p-4 md:p-8 relative z-10 transition-colors duration-300 ${theme === 'arcade' ? 'theme-arcade' : theme === 'zen' ? 'theme-zen' : ''}`}
+        className="min-h-screen p-4 md:p-8 relative z-10"
         style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
       >
         <div className="max-w-7xl mx-auto relative">
@@ -96,14 +85,9 @@ function AppContent() {
             isMuted={isMuted}
             setIsMuted={setIsMuted}
             isConnected={isConnected}
-            theme={theme}
-            onToggleTheme={toggleTheme}
             scrolled={scrolled}
           />
-          <Navigation
-            activeTab={activeTab}
-            setActiveTab={switchTab}
-          />
+          <Navigation activeTab={activeTab} setActiveTab={switchTab} />
           <main className="main-content">
             {activeTab === TABS.DASHBOARD  && (
               <DashboardTab
@@ -119,7 +103,7 @@ function AppContent() {
                 summary={appData.summary}
               />
             )}
-            {activeTab === TABS.ADMIN      && (
+            {activeTab === TABS.ADMIN && (
               <AdminTab
                 playerNames={appData.playerNames}
                 defaultMultiPlayers={appData.defaultMultiPlayers}
@@ -128,14 +112,14 @@ function AppContent() {
                 playSound={playSound}
               />
             )}
-            {activeTab === TABS.HISTORY    && (
+            {activeTab === TABS.HISTORY && (
               <HistoryTab
                 history={appData.history}
                 playerNames={appData.playerNames}
                 playSound={playSound}
               />
             )}
-            {activeTab === TABS.PLAYERS    && (
+            {activeTab === TABS.PLAYERS && (
               <PlayersTab
                 players={appData.players}
                 deletedPlayers={appData.deletedPlayers}

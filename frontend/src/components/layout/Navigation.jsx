@@ -1,26 +1,16 @@
 import { LayoutDashboard, PlusCircle, History, Users, Trophy } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
 
 const tabs = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Home',    shortLabel: 'Home'    },
-  { id: 'attendance', icon: Trophy,           label: 'Ranking', shortLabel: 'Ranking' },
-  { id: 'admin',      icon: PlusCircle,       label: 'Dodaj',   shortLabel: 'Dodaj'   },
-  { id: 'history',    icon: History,          label: 'Historia',shortLabel: 'Historia'},
-  { id: 'players',    icon: Users,            label: 'Gracze',  shortLabel: 'Gracze'  },
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Home',     shortLabel: 'Home'    },
+  { id: 'attendance', icon: Trophy,           label: 'Ranking',  shortLabel: 'Ranking' },
+  { id: 'admin',      icon: PlusCircle,       label: 'Dodaj',    shortLabel: 'Dodaj'   },
+  { id: 'history',    icon: History,          label: 'Historia', shortLabel: 'Historia'},
+  { id: 'players',    icon: Users,            label: 'Gracze',   shortLabel: 'Gracze'  },
 ];
 
-/**
- * Tab navigation — all styles live in index.css, themed via [data-theme] attribute on <html>.
- */
-export default function Navigation({ activeTab, setActiveTab }) {
-  const theme = useTheme();
-  const accentDot = theme === 'arcade' ? '#39ff14' : theme === 'zen' ? '#2d6a4f' : '#22d3ee';
-  const accentGlow = theme === 'arcade'
-    ? '0 0 6px rgba(57,255,20,0.9)'
-    : theme === 'zen'
-    ? 'none'
-    : '0 0 6px rgba(34,211,238,0.8)';
+const ACCENT_DOT  = '#818cf8';
 
+export default function Navigation({ activeTab, setActiveTab }) {
   return (
     <>
       {/* ── Desktop horizontal tab bar ─────────────────── */}
@@ -40,8 +30,7 @@ export default function Navigation({ activeTab, setActiveTab }) {
                   <span style={{
                     position: 'absolute', top: -3, right: -4,
                     width: 7, height: 7, borderRadius: '50%',
-                    background: accentDot,
-                    boxShadow: accentGlow,
+                    background: ACCENT_DOT,
                   }} />
                 )}
               </span>
@@ -67,8 +56,7 @@ export default function Navigation({ activeTab, setActiveTab }) {
                 <span style={{
                   position: 'absolute', top: -3, right: -4,
                   width: 7, height: 7, borderRadius: '50%',
-                  background: accentDot,
-                  boxShadow: accentGlow,
+                  background: ACCENT_DOT,
                 }} />
               )}
             </span>

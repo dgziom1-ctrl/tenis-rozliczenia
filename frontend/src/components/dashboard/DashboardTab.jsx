@@ -4,7 +4,7 @@ import { SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants'
 import { buildDebtDisplayData } from '../../utils/calculations';
 import { useToast } from '../common/Toast';
 import { useUndoTimer } from '../../hooks/useUndoTimer';
-import { useTheme, useThemeTokens } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../context/ThemeContext';
 import ConfettiOverlay, { CONFETTI_POOLS, generateConfetti } from './ConfettiOverlay';
 import PlayerCard from './PlayerCard';
 import SettleConfirmModal from './SettleConfirmModal';
@@ -19,7 +19,6 @@ export default function DashboardTab({ data, history, playSound }) {
 
   const { showSuccess, showError }                           = useToast();
   const { undoToast, progressPct, startUndo, dismissUndo }  = useUndoTimer(8);
-  const theme  = useTheme();
   const tokens = useThemeTokens();
 
   const totalWeeks    = data.summary?.totalWeeks ?? 0;
@@ -51,7 +50,7 @@ export default function DashboardTab({ data, history, playSound }) {
 
     setTimeout(() => setJustSettled(null), 1500);
 
-    const pool       = CONFETTI_POOLS[theme] ?? CONFETTI_POOLS.cyber;
+    const pool       = CONFETTI_POOLS.cyber;
     const nonOrg     = data.players?.filter(p => p.name !== ORGANIZER_NAME) ?? [];
     const allSettled = nonOrg.filter(p => p.name !== playerName).every(p => p.currentDebt <= SETTLED_THRESHOLD);
 
@@ -67,7 +66,7 @@ export default function DashboardTab({ data, history, playSound }) {
 
     startUndo({ playerName, previousValue: result.previousValue, previousPayments: result.previousPayments });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [confirmSettle, data.players, playSound, showError, startUndo, theme]);
+  }, [confirmSettle, data.players, playSound, showError, startUndo]);
 
   const handleUndo = useCallback(async () => {
     if (!undoToast) return;

@@ -6,7 +6,7 @@ import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { formatDate, formatAmountShort } from '../../utils/format';
 import { getPayingPlayers } from '../../utils/calculations';
-import { useTheme, useThemeTokens } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../context/ThemeContext';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -146,7 +146,6 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function AdminTab({ playerNames, defaultMultiPlayers, history, setActiveTab, playSound }) {
   const { showError } = useToast();
-  const theme = useTheme();
   const tokens = useThemeTokens();
 
   const today = new Date().toISOString().split('T')[0];

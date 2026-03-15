@@ -6,7 +6,7 @@ import { groupHistoryByMonth } from '../../utils/calculations';
 import { formatDate, formatAmount } from '../../utils/format';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
-import { useTheme, useThemeTokens } from '../../context/ThemeContext';
+import { useThemeTokens } from '../../context/ThemeContext';
 
 function EditDateInput({ value, onChange }) {
   return (
