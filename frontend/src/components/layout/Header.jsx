@@ -5,16 +5,22 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   const [copied, setCopied] = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti, setConfetti] = useState([]);
+  const [arcadeTick, setArcadeTick] = useState(true);
 
   const chaosTimer   = useRef(null);
   const clickCount   = useRef(0);
   const clickTimer   = useRef(null);
+  const tickTimer    = useRef(null);
 
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
 
-  useEffect(() => () => {
-    clearTimeout(chaosTimer.current);
-    clearTimeout(clickTimer.current);
+  useEffect(() => {
+    tickTimer.current = setInterval(() => setArcadeTick(p => !p), 700);
+    return () => {
+      clearInterval(tickTimer.current);
+      clearTimeout(chaosTimer.current);
+      clearTimeout(clickTimer.current);
+    };
   }, []);
 
   const handleCopy = () => {
@@ -246,8 +252,19 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             marginTop: '1rem', marginBottom: '0.75rem',
           }} />
 
-          {/* Status bar — only ONLINE/OFFLINE */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+          {/* Status bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'center' }}>
+            <span style={{
+              fontSize: '0.72rem',
+              color: arcadeTick ? '#a5b4fc' : '#1e2a4a',
+              textShadow: arcadeTick
+                ? '0 0 10px rgba(165,180,252,1), 0 0 25px rgba(165,180,252,0.5), 0 0 50px rgba(165,180,252,0.2)'
+                : 'none',
+              transition: 'color 0.15s, text-shadow 0.15s',
+              letterSpacing: '0.15em',
+              fontWeight: 700,
+            }}>⚡ JACK IN ⚡</span>
+            <span style={{ color: 'rgba(148,163,184,0.2)', fontSize: '0.8rem' }}>│</span>
             <span style={{
               fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.06em',
               color: isConnected ? '#86efac' : '#f87171',
