@@ -11,27 +11,27 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
     >
       <div style={{
         background: '#0a0a0a',
-        border: '1px solid rgba(252,227,0,0.4)',
+        border: '1px solid rgba(129,140,248,0.4)',
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
-        boxShadow: '0 0 50px rgba(252,227,0,0.15), 0 4px 60px rgba(0,0,0,0.95)',
+        boxShadow: '0 0 50px rgba(129,140,248,0.15), 0 4px 60px rgba(0,0,0,0.95)',
         padding: '26px 22px', width: '100%', maxWidth: 380,
       }}>
         {/* Yellow corner accent */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, var(--cyber-yellow), transparent)', opacity: 0.6 }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, var(--cyber-accent), transparent)', opacity: 0.6 }} />
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
           <div style={{
             width: 40, height: 40,
-            background: 'rgba(252,227,0,0.07)',
-            border: '1px solid rgba(252,227,0,0.35)',
+            background: 'rgba(129,140,248,0.07)',
+            border: '1px solid rgba(129,140,248,0.35)',
             clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <HandCoins size={18} style={{ color: 'var(--cyber-yellow)' }} />
+            <HandCoins size={18} style={{ color: 'var(--cyber-accent)' }} />
           </div>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.22em', color: 'var(--cyber-yellow)', opacity: 0.7, marginBottom: 3, textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.22em', color: 'var(--cyber-accent)', opacity: 0.7, marginBottom: 3, textTransform: 'uppercase' }}>
               POTWIERDZENIE WPŁATY
             </p>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.06em', color: '#e8e8e8', margin: 0 }}>
@@ -47,8 +47,8 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
           </p>
           <div style={{
             padding: '16px', textAlign: 'center',
-            background: 'rgba(252,227,0,0.04)',
-            border: '1px solid rgba(252,227,0,0.25)',
+            background: 'rgba(129,140,248,0.04)',
+            border: '1px solid rgba(129,140,248,0.25)',
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
           }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.2em', color: 'var(--cyber-text-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
@@ -56,8 +56,8 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
             </p>
             <span style={{
               fontFamily: 'var(--font-mono)', fontSize: '2.2rem',
-              color: 'var(--cyber-yellow)',
-              textShadow: '0 0 20px rgba(252,227,0,0.4)',
+              color: 'var(--cyber-accent)',
+              textShadow: '0 0 20px rgba(129,140,248,0.4)',
             }}>
               {formatAmountShort(debt)}<span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 4 }}>ZŁ</span>
             </span>

@@ -33,7 +33,7 @@ function useAnimatedValue(value, duration = 550) {
 
 // ── Avatar initials ───────────────────────────────────────
 const AVATAR_COLORS = [
-  { bg: '#1a0a00', border: 'var(--cyber-yellow)', text: 'var(--cyber-yellow)' },
+  { bg: '#1a0a00', border: 'var(--cyber-accent)', text: 'var(--cyber-accent)' },
   { bg: '#0a0010', border: '#a855f7', text: '#a855f7' },
   { bg: '#001000', border: 'var(--cyber-green)',  text: 'var(--cyber-green)' },
   { bg: '#000a10', border: 'var(--cyber-cyan)',   text: 'var(--cyber-cyan)' },
@@ -191,14 +191,14 @@ export default function PlayerCard({
         clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
         animation: cardAnimation,
         display: 'flex', flexDirection: 'column',
-        background: hasDebt ? 'linear-gradient(160deg, #0d0d0d, #140505)' : '#0d0d0d',
+        background: hasDebt ? 'linear-gradient(160deg, #0d0d0d, #110407)' : '#0d0d0d',
       }}
     >
       {/* ── Card Header ── */}
       <div style={{
         padding: '12px 14px 10px',
         borderBottom: `1px solid ${hasDebt ? 'rgba(255,0,51,0.2)' : '#161616'}`,
-        background: hasDebt ? 'rgba(255,0,51,0.04)' : 'rgba(252,227,0,0.02)',
+        background: hasDebt ? 'rgba(255,0,51,0.04)' : 'rgba(129,140,248,0.02)',
         display: 'flex', alignItems: 'center', gap: '10px',
       }}>
         <PlayerAvatar
@@ -215,7 +215,7 @@ export default function PlayerCard({
             color: isOrganizer ? 'var(--cyber-cyan)' : hasDebt ? 'var(--cyber-red)' : hasCredit ? '#f59e0b' : 'var(--cyber-green)',
             opacity: 0.85,
           }}>
-            {isOrganizer ? '🏓 ORGANIZATOR' : hasDebt ? '⚠ MA DŁUG' : hasCredit ? '💛 NADPŁATA' : '✓ ROZLICZONY'}
+            {isOrganizer ? '🏓 ORGANIZATOR' : hasDebt ? 'Do zapłaty' : hasCredit ? '✦ Nadpłata' : '✓ ROZLICZONY'}
           </div>
           <h3 style={{
             fontFamily: 'var(--font-display)', fontWeight: 800,
@@ -258,9 +258,9 @@ export default function PlayerCard({
               background: pct >= 75
                 ? 'linear-gradient(90deg, #00FF41, #86efac)'
                 : pct >= 45
-                ? 'linear-gradient(90deg, var(--cyber-yellow), #fbbf24)'
+                ? 'linear-gradient(90deg, var(--cyber-accent), #fbbf24)'
                 : 'linear-gradient(90deg, var(--cyber-red), #f87171)',
-              boxShadow: pct >= 75 ? '0 0 6px var(--cyber-green)' : '0 0 6px var(--cyber-yellow)',
+              boxShadow: pct >= 75 ? '0 0 6px var(--cyber-green)' : '0 0 6px var(--cyber-accent)',
               transition: 'width 0.8s ease',
             }} />
           </div>
@@ -305,7 +305,7 @@ export default function PlayerCard({
               ) : hasCredit ? (
                 <>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.12em', color: '#f59e0b', marginBottom: 4, opacity: 0.85 }}>
-                    💛 NADPŁATA — NA KOLEJNE SESJE
+                    ✦ Nadpłata — NA KOLEJNE SESJE
                   </p>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1.8rem', fontWeight: 400, color: '#fbbf24', letterSpacing: '-0.02em' }}>
                     +{formatAmountShort(animatedAbs)}<span style={{ fontSize: '0.75rem', opacity: 0.5, marginLeft: 3 }}>ZŁ</span>
@@ -314,8 +314,8 @@ export default function PlayerCard({
               ) : (
                 <>
               {hasDebt && (
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', marginBottom: 4, opacity: 0.85 }}>
-                    ⚠ DO ZAPŁATY
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', marginBottom: 4, opacity: 0.7 }}>
+                    Do zapłaty
                   </p>
                 )}
                   <p style={{

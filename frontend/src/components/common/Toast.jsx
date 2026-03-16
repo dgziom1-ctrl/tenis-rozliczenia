@@ -71,10 +71,10 @@ const STYLES = {
   },
   info: {
     bg:       '#080808',
-    border:   'rgba(252,227,0,0.25)',
-    shadow:   '0 0 16px rgba(252,227,0,0.06)',
-    accent:   'var(--cyber-yellow)',
-    icon:     <Terminal size={16} style={{ color: 'var(--cyber-yellow)', flexShrink: 0 }} />,
+    border:   'rgba(129,140,248,0.25)',
+    shadow:   '0 0 16px rgba(129,140,248,0.06)',
+    accent:   'var(--cyber-accent)',
+    icon:     <Terminal size={16} style={{ color: 'var(--cyber-accent)', flexShrink: 0 }} />,
     prefix:   'SYS',
   },
 };

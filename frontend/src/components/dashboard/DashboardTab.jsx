@@ -138,7 +138,7 @@ export default function DashboardTab({ data, history, playSound }) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: '1rem' }}>🏓</span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--cyber-yellow)', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--cyber-accent)', textTransform: 'uppercase' }}>
               Rozliczenia graczy
             </span>
           </div>
@@ -146,17 +146,17 @@ export default function DashboardTab({ data, history, playSound }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--cyber-red)', boxShadow: '0 0 6px var(--cyber-red)' }} />
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#aaa' }}>
-                Dług: {debtCount} os.
+                Do wpłaty: {debtCount}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--cyber-green)', boxShadow: '0 0 6px var(--cyber-green)' }} />
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#aaa' }}>
-                Czyste: {settledCount} os.
+                Rozliczeni: {settledCount}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Zap size={11} style={{ color: 'var(--cyber-yellow)' }} />
+              <Zap size={11} style={{ color: 'var(--cyber-accent)' }} />
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#aaa' }}>
                 Sesji: {totalWeeks}
               </span>
@@ -182,12 +182,12 @@ export default function DashboardTab({ data, history, playSound }) {
             padding: 40, textAlign: 'center',
           }}>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', marginBottom: 12 }}>🏓</div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.1em', color: 'var(--cyber-yellow)', marginBottom: 8 }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.1em', color: 'var(--cyber-accent)', marginBottom: 8 }}>
               BRAK ROZGRYWEK
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--cyber-text-dim)' }}>
               {'>'} Dodaj pierwszą sesję w zakładce{' '}
-              <span style={{ color: 'var(--cyber-yellow)' }}>LOG</span>
+              <span style={{ color: 'var(--cyber-accent)' }}>LOG</span>
             </p>
           </div>
         )}

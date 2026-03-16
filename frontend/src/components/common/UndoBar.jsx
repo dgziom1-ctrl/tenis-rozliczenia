@@ -11,7 +11,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
       padding: compact ? '8px 12px' : '12px 16px',
       background: tokens.undoBg,
       border: `1px solid ${tokens.undoBorder}`,
-      boxShadow: compact ? 'none' : '0 0 16px rgba(252,227,0,0.08)',
+      boxShadow: compact ? 'none' : '0 0 16px rgba(129,140,248,0.08)',
       clipPath: compact
         ? 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)'
         : 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
@@ -21,8 +21,8 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         position: 'absolute', bottom: 0, left: 0,
         height: compact ? 2 : 2,
         width: `${progressPct}%`,
-        background: 'var(--cyber-yellow)',
-        boxShadow: '0 0 6px var(--cyber-yellow)',
+        background: 'var(--cyber-accent)',
+        boxShadow: '0 0 6px var(--cyber-accent)',
         transition: 'width 1s linear',
       }} />
 
@@ -51,7 +51,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         padding: compact ? '4px 8px' : '6px 12px',
         background: 'transparent',
         border: `1px solid ${tokens.undoBorder}`,
-        color: 'var(--cyber-yellow)',
+        color: 'var(--cyber-accent)',
         cursor: 'pointer', transition: 'all 0.15s',
         fontFamily: 'var(--font-display)', fontWeight: 700,
         fontSize: compact ? '0.45rem' : '0.52rem', letterSpacing: '0.12em',
@@ -60,7 +60,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
           ? 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)'
           : 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
       }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(252,227,0,0.08)'; e.currentTarget.style.borderColor = 'var(--cyber-yellow)'; }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(129,140,248,0.08)'; e.currentTarget.style.borderColor = 'var(--cyber-accent)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = tokens.undoBorder; }}
       >
         <RotateCcw size={compact ? 10 : 12} /> {buttonLabel}

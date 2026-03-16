@@ -33,17 +33,17 @@ function CyberLoadingScreen() {
       background: 'var(--cyber-black)', flexDirection: 'column', gap: 24,
     }}>
       {/* Top yellow bar */}
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 2, background: 'var(--cyber-yellow)', boxShadow: '0 0 12px var(--cyber-yellow)' }} />
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 2, background: 'var(--cyber-accent)', boxShadow: '0 0 12px var(--cyber-accent)' }} />
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
         {/* Logo mark */}
         <div style={{
           width: 60, height: 60,
-          border: '2px solid var(--cyber-yellow)',
+          border: '2px solid var(--cyber-accent)',
           clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(252,227,0,0.05)',
-          boxShadow: '0 0 20px rgba(252,227,0,0.3)',
+          background: 'rgba(129,140,248,0.05)',
+          boxShadow: '0 0 20px rgba(129,140,248,0.3)',
           animation: 'neon-pulse-yellow 1.5s ease-in-out infinite',
         }}>
           <span style={{ fontSize: '1.6rem' }}>🏓</span>
@@ -52,7 +52,7 @@ function CyberLoadingScreen() {
         <div>
           <p style={{
             fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.25em',
-            color: 'var(--cyber-yellow)', textTransform: 'uppercase', textAlign: 'center',
+            color: 'var(--cyber-accent)', textTransform: 'uppercase', textAlign: 'center',
             animation: 'flicker 2s infinite',
           }}>
             ŁADOWANIE SYSTEMU...
@@ -67,8 +67,8 @@ function CyberLoadingScreen() {
         }}>
           <div style={{
             height: '100%', width: '40%',
-            background: 'var(--cyber-yellow)',
-            boxShadow: '0 0 8px var(--cyber-yellow)',
+            background: 'var(--cyber-accent)',
+            boxShadow: '0 0 8px var(--cyber-accent)',
             animation: 'loading-bar 1.2s ease-in-out infinite',
           }} />
         </div>

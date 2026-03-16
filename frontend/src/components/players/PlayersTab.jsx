@@ -6,7 +6,7 @@ import { useToast } from '../common/Toast';
 import { useThemeTokens } from '../../context/ThemeContext';
 
 const AVATAR_COLORS = [
-  { bg: '#1a0a00', border: '#FCE300', text: '#FCE300' },
+  { bg: '#1a0a00', border: '#818cf8', text: '#818cf8' },
   { bg: '#0a0010', border: '#a855f7', text: '#a855f7' },
   { bg: '#001000', border: '#00FF41', text: '#00FF41' },
   { bg: '#000a10', border: '#00E5FF', text: '#00E5FF' },
@@ -14,7 +14,7 @@ const AVATAR_COLORS = [
   { bg: '#080808', border: '#888', text: '#888' },
 ];
 
-function SectionHeader({ icon: Icon, title, accent = 'var(--cyber-yellow)' }) {
+function SectionHeader({ icon: Icon, title, accent = 'var(--cyber-accent)' }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #1a1a1a' }}>
       <div style={{ padding: '6px 8px', background: `rgba(0,0,0,0.6)`, border: `1px solid ${accent}25`, clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
@@ -42,15 +42,15 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
     <div style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(4px)' }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
         background: '#0a0a0a',
-        border: `1px solid ${error ? 'var(--cyber-red)' : 'rgba(252,227,0,0.35)'}`,
+        border: `1px solid ${error ? 'var(--cyber-red)' : 'rgba(129,140,248,0.35)'}`,
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
-        boxShadow: error ? '0 0 30px rgba(255,0,51,0.25)' : '0 0 30px rgba(252,227,0,0.12)',
+        boxShadow: error ? '0 0 30px rgba(255,0,51,0.25)' : '0 0 30px rgba(129,140,248,0.12)',
         transition: 'all 0.2s',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-          <Lock size={16} style={{ color: 'var(--cyber-yellow)', flexShrink: 0 }} />
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
+          <Lock size={16} style={{ color: 'var(--cyber-accent)', flexShrink: 0 }} />
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--cyber-accent)', margin: 0, textTransform: 'uppercase' }}>
             Podaj hasło admina
           </h3>
         </div>
@@ -212,11 +212,11 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
       }}>
         {/* Main header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid #1a1a1a' }}>
-          <div style={{ padding: '7px 9px', background: 'rgba(252,227,0,0.06)', border: '1px solid rgba(252,227,0,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
-            <Users size={16} style={{ color: 'var(--cyber-yellow)', display: 'block' }} />
+          <div style={{ padding: '7px 9px', background: 'rgba(129,140,248,0.06)', border: '1px solid rgba(129,140,248,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+            <Users size={16} style={{ color: 'var(--cyber-accent)', display: 'block' }} />
           </div>
           <div>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cyber-yellow)' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cyber-accent)' }}>
               Gracze
             </span>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', margin: '2px 0 0' }}>

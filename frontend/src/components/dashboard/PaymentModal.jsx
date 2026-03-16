@@ -13,14 +13,14 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
     <div style={{
       marginBottom: 12, padding: '16px 14px',
       background: '#080808',
-      border: '1px solid rgba(252,227,0,0.25)',
+      border: '1px solid rgba(129,140,248,0.25)',
       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))',
-      boxShadow: '0 0 20px rgba(252,227,0,0.08)',
+      boxShadow: '0 0 20px rgba(129,140,248,0.08)',
     }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <Zap size={12} style={{ color: 'var(--cyber-yellow)', flexShrink: 0 }} />
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', textTransform: 'uppercase', margin: 0 }}>
+        <Zap size={12} style={{ color: 'var(--cyber-accent)', flexShrink: 0 }} />
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.18em', color: 'var(--cyber-accent)', textTransform: 'uppercase', margin: 0 }}>
           {hasCredit ? 'Ile chcesz dopłacić?' : 'Kwota przelewu BLIK'}
         </p>
       </div>

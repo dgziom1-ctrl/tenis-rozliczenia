@@ -109,7 +109,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
       {chaosMode && (
         <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 49,
           animation: 'chaosFlash 0.6s ease-out forwards',
-          background: 'radial-gradient(ellipse at 50% 30%, rgba(252,227,0,0.08) 0%, transparent 70%)' }} />
+          background: 'radial-gradient(ellipse at 50% 30%, rgba(129,140,248,0.08) 0%, transparent 70%)' }} />
       )}
 
       {/* ════════════════ MAIN HEADER ════════════════ */}
@@ -119,10 +119,10 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
         borderBottom: '1px solid #1a1a1a',
       }}>
         {/* Yellow corner accent lines */}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: 80, height: 2, background: 'var(--cyber-yellow)', boxShadow: '0 0 12px var(--cyber-yellow)', zIndex: 2 }} />
-        <div style={{ position: 'absolute', top: 0, right: 0, width: 80, height: 2, background: 'var(--cyber-yellow)', boxShadow: '0 0 12px var(--cyber-yellow)', zIndex: 2 }} />
-        <div style={{ position: 'absolute', top: 0, left: 0, width: 2, height: 50, background: 'linear-gradient(to bottom, var(--cyber-yellow), transparent)', zIndex: 2 }} />
-        <div style={{ position: 'absolute', top: 0, right: 0, width: 2, height: 50, background: 'linear-gradient(to bottom, var(--cyber-yellow), transparent)', zIndex: 2 }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, width: 80, height: 2, background: '#818cf8', boxShadow: '0 0 10px rgba(129,140,248,0.6)', zIndex: 2 }} />
+        <div style={{ position: 'absolute', top: 0, right: 0, width: 80, height: 2, background: '#818cf8', boxShadow: '0 0 10px rgba(129,140,248,0.6)', zIndex: 2 }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, width: 2, height: 50, background: 'linear-gradient(to bottom, #818cf8, transparent)', zIndex: 2 }} />
+        <div style={{ position: 'absolute', top: 0, right: 0, width: 2, height: 50, background: 'linear-gradient(to bottom, #818cf8, transparent)', zIndex: 2 }} />
 
         {/* ══ TOP BAR: BLIK + MUTE ══ */}
         <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center',
@@ -138,9 +138,9 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             <Smartphone size={14} style={{ color: 'var(--cyber-text-dim)' }} />
             <span style={{
               fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700,
-              letterSpacing: '0.18em', color: 'var(--cyber-yellow)',
-              padding: '2px 6px', background: 'rgba(252,227,0,0.08)',
-              border: '1px solid rgba(252,227,0,0.2)',
+              letterSpacing: '0.18em', color: 'var(--cyber-accent)',
+              padding: '2px 6px', background: 'rgba(129,140,248,0.1)',
+border: '1px solid rgba(129,140,248,0.25)',
             }}>BLIK</span>
             <span style={{
               fontFamily: 'var(--font-mono)', fontSize: '0.9rem',
@@ -170,12 +170,12 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
 
           {/* Subtitle */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-            <div style={{ height: 1, width: 40, background: 'linear-gradient(to right, transparent, var(--cyber-yellow))' }} />
+            <div style={{ height: 1, width: 40, background: 'linear-gradient(to right, transparent, var(--cyber-accent))' }} />
             <span style={{
               fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 600,
-              letterSpacing: '0.25em', color: 'rgba(252,227,0,0.7)', textTransform: 'uppercase',
-            }}>CENTRUM DOWODZENIA</span>
-            <div style={{ height: 1, width: 40, background: 'linear-gradient(to left, transparent, var(--cyber-yellow))' }} />
+              letterSpacing: '0.25em', color: 'rgba(129,140,248,0.7)', textTransform: 'uppercase',
+            }}>PING-PONG // KASA</span>
+            <div style={{ height: 1, width: 40, background: 'linear-gradient(to left, transparent, var(--cyber-accent))' }} />
           </div>
 
           {/* ──────────── PADDLES + BALL + TITLE ──────────── */}
@@ -197,17 +197,17 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               <div style={{
                 width: pSize, height: pSize, borderRadius: '50%',
                 background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
-                border: '2px solid var(--cyber-yellow)',
-                boxShadow: '0 0 14px rgba(252,227,0,0.4), 0 0 30px rgba(252,227,0,0.15)',
+                border: '2px solid #818cf8',
+boxShadow: '0 0 14px rgba(129,140,248,0.45), 0 0 30px rgba(129,140,248,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 position: 'relative',
               }}>
                 {/* Rubber surface texture lines */}
-                <div style={{ width: '55%', height: '55%', borderRadius: '50%', background: 'var(--cyber-yellow)', opacity: 0.9 }} />
+                <div style={{ width: '55%', height: '55%', borderRadius: '50%', background: '#a5b4fc', opacity: 0.9 }} />
                 {/* Horizontal grip lines */}
-                <div style={{ position: 'absolute', top: '30%', left: '15%', right: '15%', height: '1px', background: 'rgba(252,227,0,0.3)' }} />
-                <div style={{ position: 'absolute', top: '45%', left: '10%', right: '10%', height: '1px', background: 'rgba(252,227,0,0.2)' }} />
-                <div style={{ position: 'absolute', top: '60%', left: '15%', right: '15%', height: '1px', background: 'rgba(252,227,0,0.3)' }} />
+                <div style={{ position: 'absolute', top: '30%', left: '15%', right: '15%', height: '1px', background: 'rgba(165,180,252,0.35)' }} />
+                <div style={{ position: 'absolute', top: '45%', left: '10%', right: '10%', height: '1px', background: 'rgba(165,180,252,0.2)' }} />
+                <div style={{ position: 'absolute', top: '60%', left: '15%', right: '15%', height: '1px', background: 'rgba(165,180,252,0.35)' }} />
               </div>
               {/* Handle */}
               <div style={{
@@ -227,13 +227,13 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               <div style={{
                 position: 'absolute', left: 0, right: 0,
                 top: '50%', height: '1px',
-                background: 'rgba(252,227,0,0.08)',
+                background: 'rgba(129,140,248,0.1)',
               }} />
               {/* Net */}
               <div style={{
                 position: 'absolute', left: '50%', top: '30%', bottom: '-4px',
                 width: '2px', transform: 'translateX(-50%)',
-                background: 'repeating-linear-gradient(to bottom, rgba(252,227,0,0.25) 0px, rgba(252,227,0,0.25) 4px, transparent 4px, transparent 8px)',
+                background: 'repeating-linear-gradient(to bottom, rgba(129,140,248,0.3) 0px, rgba(129,140,248,0.25) 4px, transparent 4px, transparent 8px)',
               }} />
 
               {/* ⚪ THE BOUNCING BALL */}
@@ -275,12 +275,12 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
                   lineHeight: 1.15,
                   textAlign: 'center',
                   ...(chaosMode ? {
-                    color: 'var(--cyber-yellow)',
+                    color: 'var(--cyber-accent)',
                     animation: 'headerBounce 0.4s ease-in-out 3',
-                    textShadow: '0 0 30px var(--cyber-yellow), 2px 2px 0 rgba(0,0,0,0.8)',
+                    textShadow: '0 0 30px var(--cyber-accent), 2px 2px 0 rgba(0,0,0,0.8)',
                   } : {
-                    color: 'var(--cyber-yellow)',
-                    textShadow: '0 0 20px rgba(252,227,0,0.25), 2px 2px 0px rgba(0,0,0,0.9)',
+                    color: 'var(--cyber-accent)',
+                    textShadow: '0 0 20px rgba(129,140,248,0.25), 2px 2px 0px rgba(0,0,0,0.9)',
                   }),
                 }}>
                   PING-PONG
@@ -292,12 +292,12 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.65rem',
                 letterSpacing: '0.12em',
-                color: 'rgba(252,227,0,0.35)',
+                color: 'rgba(129,140,248,0.35)',
                 textAlign: 'center',
                 margin: '4px 0 0',
                 textTransform: 'uppercase',
               }}>
-                rozliczenia 🏓 family edition
+                kto ile płaci 🏓
               </p>
             </div>
 
@@ -310,15 +310,15 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               <div style={{
                 width: pSize, height: pSize, borderRadius: '50%',
                 background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
-                border: '2px solid var(--cyber-yellow)',
-                boxShadow: '0 0 14px rgba(252,227,0,0.4), 0 0 30px rgba(252,227,0,0.15)',
+                border: '2px solid #818cf8',
+boxShadow: '0 0 14px rgba(129,140,248,0.45), 0 0 30px rgba(129,140,248,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 position: 'relative',
               }}>
-                <div style={{ width: '55%', height: '55%', borderRadius: '50%', background: 'var(--cyber-yellow)', opacity: 0.9 }} />
-                <div style={{ position: 'absolute', top: '30%', left: '15%', right: '15%', height: '1px', background: 'rgba(252,227,0,0.3)' }} />
-                <div style={{ position: 'absolute', top: '45%', left: '10%', right: '10%', height: '1px', background: 'rgba(252,227,0,0.2)' }} />
-                <div style={{ position: 'absolute', top: '60%', left: '15%', right: '15%', height: '1px', background: 'rgba(252,227,0,0.3)' }} />
+                <div style={{ width: '55%', height: '55%', borderRadius: '50%', background: '#a5b4fc', opacity: 0.9 }} />
+                <div style={{ position: 'absolute', top: '30%', left: '15%', right: '15%', height: '1px', background: 'rgba(165,180,252,0.35)' }} />
+                <div style={{ position: 'absolute', top: '45%', left: '10%', right: '10%', height: '1px', background: 'rgba(165,180,252,0.2)' }} />
+                <div style={{ position: 'absolute', top: '60%', left: '15%', right: '15%', height: '1px', background: 'rgba(165,180,252,0.35)' }} />
               </div>
               <div style={{
                 position: 'absolute',
@@ -335,15 +335,15 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
           {/* ── Status / divider ── */}
           <div style={{
             width: '100%', maxWidth: '22rem', height: '1px', margin: '18px 0 12px',
-            background: 'linear-gradient(90deg, transparent, rgba(252,227,0,0.35) 50%, transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(129,140,248,0.4) 50%, transparent)',
           }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <span style={{
               fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 600,
               letterSpacing: '0.2em', textTransform: 'uppercase',
-              color: tick ? 'var(--cyber-yellow)' : 'rgba(252,227,0,0.12)',
-              textShadow: tick ? '0 0 10px var(--cyber-yellow)' : 'none',
+              color: tick ? 'var(--cyber-accent)' : 'rgba(129,140,248,0.12)',
+              textShadow: tick ? '0 0 10px var(--cyber-accent)' : 'none',
               transition: 'color 0.15s, text-shadow 0.15s',
             }}>⚡ JACK IN ⚡</span>
             <span style={{ color: '#1e1e1e' }}>│</span>
@@ -365,7 +365,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
       </header>
 
       {/* Bottom accent bar */}
-      <div style={{ height: 3, background: 'linear-gradient(90deg, transparent, var(--cyber-yellow) 30%, var(--cyber-yellow) 70%, transparent)', opacity: 0.55 }} />
+      <div style={{ height: 3, background: 'linear-gradient(90deg, transparent, #818cf8 30%, #818cf8 70%, transparent)', opacity: 0.4 }} />
 
       {/* ── Compact sticky header (mobile) ── */}
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
@@ -376,9 +376,9 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
           <span style={{ fontSize: '1rem' }}>🏓</span>
           <span style={{
             fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700,
-            letterSpacing: '0.15em', color: 'var(--cyber-yellow)',
-            padding: '2px 5px', background: 'rgba(252,227,0,0.08)',
-            border: '1px solid rgba(252,227,0,0.2)',
+            letterSpacing: '0.15em', color: 'var(--cyber-accent)',
+            padding: '2px 5px', background: 'rgba(129,140,248,0.1)',
+            border: '1px solid rgba(129,140,248,0.2)',
           }}>BLIK</span>
           <span style={{ fontFamily: 'var(--font-mono)', color: '#e0e0e0', fontSize: '0.85rem', letterSpacing: '0.06em' }}>
             {blikNumber}

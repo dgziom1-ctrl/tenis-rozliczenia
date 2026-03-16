@@ -51,17 +51,17 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
       className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
         background: '#0d0d0d',
-        border: `1px solid ${error ? 'var(--cyber-red)' : 'rgba(252,227,0,0.3)'}`,
+        border: `1px solid ${error ? 'var(--cyber-red)' : 'rgba(129,140,248,0.3)'}`,
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
         boxShadow: error
           ? '0 0 30px rgba(255,0,51,0.3)'
-          : '0 0 30px rgba(252,227,0,0.15)',
+          : '0 0 30px rgba(129,140,248,0.15)',
         transition: 'all 0.2s',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <Lock size={16} style={{ color: 'var(--cyber-yellow)', flexShrink: 0 }} />
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
+          <Lock size={16} style={{ color: 'var(--cyber-accent)', flexShrink: 0 }} />
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--cyber-accent)', margin: 0, textTransform: 'uppercase' }}>
             Podaj hasło admina
           </h3>
         </div>
@@ -135,7 +135,7 @@ function LogEntry({ row, onEdit, onDelete }) {
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
               transition: 'all 0.15s',
             }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(252,227,0,0.4)'; e.currentTarget.style.color = 'var(--cyber-yellow)'; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(129,140,248,0.4)'; e.currentTarget.style.color = 'var(--cyber-accent)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--cyber-text-dim)'; }}
             >
               <Pencil size={13} />
@@ -159,7 +159,7 @@ function LogEntry({ row, onEdit, onDelete }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, paddingLeft: 16 }}>
           <div>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>KOSZT</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cyber-yellow)', textShadow: '0 0 8px rgba(252,227,0,0.3)' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cyber-accent)', textShadow: '0 0 8px rgba(129,140,248,0.3)' }}>
               {formatAmount(row.totalCost)}
             </p>
           </div>
@@ -308,10 +308,10 @@ export default function HistoryTab({ history, playerNames, playSound }) {
               {/* Month header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: '#080808', border: '1px solid #1e1e1e', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.66rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cyber-yellow)' }}>{label}</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.66rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cyber-accent)' }}>{label}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#3a3a3a' }}>[{rows.length}x]</span>
                 </div>
-                <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(252,227,0,0.15), transparent)' }} />
+                <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(129,140,248,0.15), transparent)' }} />
               </div>
 
               {/* Log entries */}
@@ -322,17 +322,17 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
                   if (isEditingRow) return (
                     <div key={row.id} style={{
-                      background: '#080808', border: '1px solid rgba(252,227,0,0.25)',
+                      background: '#080808', border: '1px solid rgba(129,140,248,0.25)',
                       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
                       padding: 16, marginBottom: 4, display: 'flex', flexDirection: 'column', gap: 14,
                     }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                         <div>
-                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</label>
+                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.18em', color: 'var(--cyber-accent)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</label>
                           <EditDateInput value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
                         </div>
                         <div>
-                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
+                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.18em', color: 'var(--cyber-accent)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
                           <input type="number" value={editForm.cost}
                             onChange={e => setEditForm(p => ({ ...p, cost: e.target.value }))}
                             className="cyber-input"
@@ -353,7 +353,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                                 clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                                 transition: 'all 0.15s',
                                 ...(editForm.present?.includes(name) ? {
-                                  borderColor: 'rgba(252,227,0,0.5)', background: 'rgba(252,227,0,0.08)', color: 'var(--cyber-yellow)',
+                                  borderColor: 'rgba(129,140,248,0.5)', background: 'rgba(129,140,248,0.08)', color: 'var(--cyber-accent)',
                                 } : {
                                   borderColor: '#1a1a1a', background: 'transparent', color: '#444',
                                 }),

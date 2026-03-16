@@ -4,7 +4,7 @@ import { RANKS, PODIUM, PODIUM_ORDER, getRank } from '../../constants';
 import { calculatePlayerStats, assignRankingPlaces, groupSessionsByMonth, getPlayerBadge } from '../../utils/calculations';
 
 // ─── Section Header ─────────────────────────────────────
-function SectionHeader({ icon: Icon, title, accent = 'var(--cyber-yellow)' }) {
+function SectionHeader({ icon: Icon, title, accent = 'var(--cyber-accent)' }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20,
@@ -53,7 +53,7 @@ function PodiumCard({ podiumEntry, totalWeeks }) {
   const exAequo = players.length > 1;
 
   const PLACE_STYLES = {
-    1: { border: 'var(--cyber-yellow)', glow: 'rgba(252,227,0,0.4)', bg: 'rgba(252,227,0,0.04)', height: 120, label: '#1ST' },
+    1: { border: 'var(--cyber-accent)', glow: 'rgba(129,140,248,0.4)', bg: 'rgba(129,140,248,0.04)', height: 120, label: '#1ST' },
     2: { border: '#888', glow: 'rgba(136,136,136,0.3)', bg: 'rgba(136,136,136,0.03)', height: 80, label: '#2ND' },
     3: { border: '#b87333', glow: 'rgba(184,115,51,0.3)', bg: 'rgba(184,115,51,0.03)', height: 55, label: '#3RD' },
   };
@@ -137,15 +137,15 @@ function LeaderboardRow({ player, totalWeeks, stats, place }) {
     <div style={{
       display: 'flex', alignItems: 'center', gap: 10,
       padding: '10px 14px',
-      background: isTop3 ? 'rgba(252,227,0,0.02)' : '#080808',
-      border: `1px solid ${isTop3 ? 'rgba(252,227,0,0.15)' : '#161616'}`,
+      background: isTop3 ? 'rgba(129,140,248,0.02)' : '#080808',
+      border: `1px solid ${isTop3 ? 'rgba(129,140,248,0.15)' : '#161616'}`,
       marginBottom: 4,
       clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
       transition: 'border-color 0.2s',
     }}>
       {/* Place */}
       <span style={{
-        fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: isTop3 ? 'var(--cyber-yellow)' : 'var(--cyber-text-dim)',
+        fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: isTop3 ? 'var(--cyber-accent)' : 'var(--cyber-text-dim)',
         width: 24, flexShrink: 0, fontWeight: 400,
       }}>
         #{place}
@@ -184,9 +184,9 @@ function LeaderboardRow({ player, totalWeeks, stats, place }) {
         </span>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: 400,
-          color: isTop3 ? 'var(--cyber-yellow)' : '#666',
+          color: isTop3 ? 'var(--cyber-accent)' : '#666',
           width: 48, textAlign: 'right',
-          textShadow: isTop3 ? '0 0 8px rgba(252,227,0,0.3)' : 'none',
+          textShadow: isTop3 ? '0 0 8px rgba(129,140,248,0.3)' : 'none',
         }}>
           {player.attendancePercentage}%
         </span>
@@ -232,10 +232,10 @@ function MonthlyReport({ monthlyStats, players }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400, fontFamily: 'var(--font-mono)' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #2a2a2a' }}>
-                <th style={{ padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', fontWeight: 600, textTransform: 'uppercase' }}>
+                <th style={{ padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.15em', color: 'var(--cyber-accent)', fontWeight: 600, textTransform: 'uppercase' }}>
                   Miesiąc
                 </th>
-                <th style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', fontWeight: 600, textTransform: 'uppercase' }}>
+                <th style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.15em', color: 'var(--cyber-accent)', fontWeight: 600, textTransform: 'uppercase' }}>
                   Gier
                 </th>
                 {players?.map(p => (
@@ -249,7 +249,7 @@ function MonthlyReport({ monthlyStats, players }) {
               {monthlyStats.map(([month, rowData]) => (
                 <tr key={month} style={{ borderBottom: '1px solid #111' }}>
                   <td style={{ padding: '8px 12px', fontSize: '0.75rem', color: '#c8c8c8', fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.08em' }}>{month}</td>
-                  <td style={{ padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--cyber-yellow)', textAlign: 'center' }}>{rowData.total}</td>
+                  <td style={{ padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--cyber-accent)', textAlign: 'center' }}>{rowData.total}</td>
                   {players?.map(p => {
                     const presence = rowData.players[p.name] || 0;
                     const isMax = presence === rowData.total;
@@ -263,7 +263,7 @@ function MonthlyReport({ monthlyStats, players }) {
                             border: '1px solid rgba(0,255,65,0.3)',
                             color: 'var(--cyber-green)',
                           } : presence > 0 ? {
-                            color: 'var(--cyber-yellow)',
+                            color: 'var(--cyber-accent)',
                           } : {
                             color: '#2a2a2a',
                           }),
@@ -287,7 +287,7 @@ function MonthlyReport({ monthlyStats, players }) {
 function RankGuide() {
   return (
     <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%)', padding: 24 }}>
-      <SectionHeader icon={Trophy} title="Rangi gracza" accent="var(--cyber-yellow)" />
+      <SectionHeader icon={Trophy} title="Rangi gracza" accent="var(--cyber-accent)" />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 8 }}>
         {RANKS.map((r, i) => (
           <div key={i} style={{

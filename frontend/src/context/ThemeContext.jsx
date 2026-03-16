@@ -4,14 +4,14 @@ export const ThemeContext = createContext('cyber');
 
 const CYBER_TOKENS = {
   // Primary confirm action (BLIK pay button)
-  confirmBg:        'var(--cyber-yellow)',
-  confirmBorder:    'var(--cyber-yellow)',
-  confirmText:      '#000000',
+  confirmBg:        'var(--cyber-accent)',
+  confirmBorder:    'var(--cyber-accent)',
+  confirmText:      '#ffffff',
   // Accent / secondary
-  accentBorder:     'rgba(252,227,0,0.4)',
-  accentText:       'var(--cyber-yellow)',
-  accentBg:         'rgba(252,227,0,0.06)',
-  accentColor:      'var(--cyber-yellow)',
+  accentBorder:     'rgba(129,140,248,0.4)',
+  accentText:       'var(--cyber-accent)',
+  accentBg:         'rgba(129,140,248,0.06)',
+  accentColor:      'var(--cyber-accent)',
   // Cancel / neutral
   cancelBorder:     '#2a2a2a',
   cancelText:       '#666666',
@@ -19,7 +19,7 @@ const CYBER_TOKENS = {
   overlayBg:        'rgba(0,0,0,0.94)',
   modalBg:          '#0a0a0a',
   modalRadius:      '0px',
-  modalShadow:      '0 0 50px rgba(252,227,0,0.18), 0 2px 40px rgba(0,0,0,0.9)',
+  modalShadow:      '0 0 50px rgba(129,140,248,0.18), 0 2px 40px rgba(0,0,0,0.9)',
   // Input fields
   inputBg:          '#060606',
   inputBorder:      '#2a2a2a',
@@ -33,9 +33,9 @@ const CYBER_TOKENS = {
   mutedText:        '#555555',
   // Undo bar
   undoBg:           '#080808',
-  undoBorder:       'rgba(252,227,0,0.25)',
+  undoBorder:       'rgba(129,140,248,0.25)',
   undoText:         '#c8c8c8',
-  undoProgressBg:   'var(--cyber-yellow)',
+  undoProgressBg:   'var(--cyber-accent)',
   // Font
   fontFamily:       "'Orbitron', monospace",
   fontSize:         '0.85rem',
