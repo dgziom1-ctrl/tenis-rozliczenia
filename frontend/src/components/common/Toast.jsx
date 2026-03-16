@@ -103,7 +103,7 @@ function Toast({ toast, onClose }) {
           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
         }}>
           {s.icon}
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.18em', color: s.accent, textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.18em', color: s.accent, textTransform: 'uppercase' }}>
             {s.prefix}
           </span>
         </div>

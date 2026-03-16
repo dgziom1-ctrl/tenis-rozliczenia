@@ -62,7 +62,7 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <Lock size={16} style={{ color: 'var(--cyber-yellow)', flexShrink: 0 }} />
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
-            AUTORYZACJA WYMAGANA
+            Podaj hasło admina
           </h3>
         </div>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--cyber-text-dim)', marginBottom: 16 }}>
@@ -82,8 +82,8 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
             }}
           />
           {error && (
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', letterSpacing: '0.15em', color: 'var(--cyber-red)', textAlign: 'center' }}>
-              ⚠ DOSTĘP ZABRONIONY
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.66rem', letterSpacing: '0.15em', color: 'var(--cyber-red)', textAlign: 'center' }}>
+              ⚠ ❌ Złe hasło
             </p>
           )}
           <div style={{ display: 'flex', gap: 10 }}>
@@ -122,7 +122,7 @@ function LogEntry({ row, onEdit, onDelete }) {
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--cyber-green)' }}>
               SESSION_{String(row.id).slice(-4).toUpperCase()}
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--cyber-text-dim)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--cyber-text-dim)' }}>
               {formatDate(row.datePlayed)}
             </span>
           </div>
@@ -158,26 +158,26 @@ function LogEntry({ row, onEdit, onDelete }) {
         {/* Data row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, paddingLeft: 16 }}>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>KOSZT</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>KOSZT</p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cyber-yellow)', textShadow: '0 0 8px rgba(252,227,0,0.3)' }}>
               {formatAmount(row.totalCost)}
             </p>
           </div>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>NA OSOBĘ</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>NA OSOBĘ</p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cyber-cyan)' }}>
               {formatAmount(row.costPerPerson)}
             </p>
           </div>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>
               OBECNI ({row.presentPlayers.length})
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {row.presentPlayers.join(', ')}
             </p>
             {row.multisportPlayers.length > 0 && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--cyber-green)', opacity: 0.7 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--cyber-green)', opacity: 0.7 }}>
                 ⚡ {row.multisportPlayers.join(', ')}
               </p>
             )}
@@ -272,7 +272,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             <Terminal size={14} style={{ color: 'var(--cyber-green)', display: 'block' }} />
           </div>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cyber-green)' }}>
-            SESSION LOG // ARCHIWUM
+            Historia sesji ping-ponga
           </span>
           <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,255,65,0.2), transparent)' }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)' }}>
@@ -283,10 +283,10 @@ export default function HistoryTab({ history, playerNames, playSound }) {
         {/* Boot text */}
         <div style={{ marginBottom: 20, padding: '10px 14px', background: '#050505', border: '1px solid #0f0f0f' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--cyber-green)', lineHeight: 1.6, opacity: 0.7 }}>
-            {'>'} SYSTEM BOOT OK<br/>
-            {'>'} LOADING SESSION ARCHIVE...<br/>
-            {'>'} {history.length} RECORDS FOUND<br/>
-            {'>'} ACCESS GRANTED<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--cyber-green)' }}>▮</span>
+            {'>'} System OK<br/>
+            {'>'} Ładowanie historii...<br/>
+            {'>'} {history.length} rekordów znaleziono<br/>
+            {'>'} Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--cyber-green)' }}>▮</span>
           </p>
         </div>
 
@@ -308,8 +308,8 @@ export default function HistoryTab({ history, playerNames, playSound }) {
               {/* Month header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: '#080808', border: '1px solid #1e1e1e', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cyber-yellow)' }}>{label}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: '#3a3a3a' }}>[{rows.length}x]</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.66rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cyber-yellow)' }}>{label}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#3a3a3a' }}>[{rows.length}x]</span>
                 </div>
                 <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(252,227,0,0.15), transparent)' }} />
               </div>
@@ -328,11 +328,11 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                     }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                         <div>
-                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.46rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</label>
+                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</label>
                           <EditDateInput value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
                         </div>
                         <div>
-                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.46rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
+                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
                           <input type="number" value={editForm.cost}
                             onChange={e => setEditForm(p => ({ ...p, cost: e.target.value }))}
                             className="cyber-input"
@@ -341,7 +341,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                         </div>
                       </div>
                       <div>
-                        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.46rem', letterSpacing: '0.15em', color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+                        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.15em', color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
                           <Users size={11} /> OBECNI
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
@@ -365,7 +365,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       </div>
                       {editForm.present?.length > 0 && (
                         <div>
-                          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.46rem', letterSpacing: '0.15em', color: 'var(--cyber-green)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+                          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.15em', color: 'var(--cyber-green)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
                             <Zap size={11} /> MULTISPORT
                           </p>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
@@ -391,7 +391,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       <div style={{ display: 'flex', gap: 10 }}>
                         <button onClick={saveEdit} disabled={isSaving}
                           className="cyber-button-yellow" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                          {isSaving ? <><InlineSpinner size="sm" /> ZAPISUJĘ...</> : <><Check size={14} /> ZAPISZ</>}
+                          {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Check size={14} /> Zapisz</>}
                         </button>
                         <button onClick={cancelEdit} disabled={isSaving}
                           className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
@@ -409,7 +409,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       boxShadow: '0 0 20px rgba(255,0,51,0.1)',
                     }}>
                       <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', marginBottom: 4, textTransform: 'uppercase' }}>
-                        ⚠ USUNĄĆ SESJĘ // {formatDate(row.datePlayed)}?
+                        ⚠ Usunąć sesję z dnia {formatDate(row.datePlayed)}?
                       </p>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#444', marginBottom: 14 }}>
                         Ta operacja jest nieodwracalna.

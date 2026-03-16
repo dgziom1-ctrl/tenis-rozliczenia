@@ -31,8 +31,8 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
             <HandCoins size={18} style={{ color: 'var(--cyber-yellow)' }} />
           </div>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.22em', color: 'var(--cyber-yellow)', opacity: 0.7, marginBottom: 3, textTransform: 'uppercase' }}>
-              BOUNTY CLEAR // POTWIERDZENIE
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.22em', color: 'var(--cyber-yellow)', opacity: 0.7, marginBottom: 3, textTransform: 'uppercase' }}>
+              POTWIERDZENIE WPŁATY
             </p>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.06em', color: '#e8e8e8', margin: 0 }}>
               ROZLICZ GRACZA
@@ -51,8 +51,8 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
             border: '1px solid rgba(252,227,0,0.25)',
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
           }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.2em', color: 'var(--cyber-text-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
-              KWOTA DO ROZLICZENIA
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.2em', color: 'var(--cyber-text-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+              Kwota do rozliczenia
             </p>
             <span style={{
               fontFamily: 'var(--font-mono)', fontSize: '2.2rem',
@@ -71,7 +71,7 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             fontSize: '0.65rem',
           }}>
-            <CheckCircle2 size={15} /> TAK, ROZLICZ
+            <CheckCircle2 size={15} /> Tak, rozlicz
           </button>
           <button onClick={onCancel} className="cyber-button-outline" style={{
             flex: 1, padding: '12px',

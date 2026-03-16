@@ -61,7 +61,7 @@ export default function PWAInstallBanner() {
             <span style={{ fontSize: '1.2rem' }}>🕹️</span>
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.58rem', letterSpacing: '0.16em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.16em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
               DODAJ DO EKRANU GŁÓWNEGO
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', margin: '2px 0 0' }}>
@@ -73,7 +73,7 @@ export default function PWAInstallBanner() {
             padding: '7px 12px',
             background: 'var(--cyber-yellow)', color: '#000',
             border: 'none', cursor: 'pointer',
-            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.55rem', letterSpacing: '0.12em',
+            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.12em',
             clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
             whiteSpace: 'nowrap',
           }}>
@@ -105,7 +105,7 @@ export default function PWAInstallBanner() {
           <span style={{ fontSize: '1rem' }}>🕹️</span>
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.58rem', letterSpacing: '0.16em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.16em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
             DODAJ DO EKRANU GŁÓWNEGO
           </p>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', margin: '2px 0 0' }}>
@@ -129,7 +129,7 @@ export default function PWAInstallBanner() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'rgba(252,227,0,0.04)',
             }}>
-              <span style={{ fontFamily: 'var(--font-display)', color: 'var(--cyber-yellow)', fontWeight: 700, fontSize: '0.45rem', letterSpacing: '0.05em' }}>{step.n}</span>
+              <span style={{ fontFamily: 'var(--font-display)', color: 'var(--cyber-yellow)', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.05em' }}>{step.n}</span>
             </div>
             <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#888', lineHeight: 1.4 }}>{step.content}</p>
           </div>

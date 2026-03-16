@@ -130,34 +130,35 @@ export default function DashboardTab({ data, history, playSound }) {
         {/* ── Status header bar ── */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 14px',
+          padding: '10px 16px',
           background: '#080808',
           border: '1px solid #1a1a1a',
           clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
+          flexWrap: 'wrap', gap: 8,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Terminal size={14} style={{ color: 'var(--cyber-yellow)' }} />
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.55rem', letterSpacing: '0.2em', color: 'var(--cyber-yellow)', textTransform: 'uppercase' }}>
-              AGENT STATUS BOARD
+            <span style={{ fontSize: '1rem' }}>🏓</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--cyber-yellow)', textTransform: 'uppercase' }}>
+              Rozliczenia graczy
             </span>
           </div>
-          <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--cyber-red)', boxShadow: '0 0 6px var(--cyber-red)' }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#888' }}>
-                BOUNTY: {debtCount}
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--cyber-red)', boxShadow: '0 0 6px var(--cyber-red)' }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#aaa' }}>
+                Dług: {debtCount} os.
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--cyber-green)', boxShadow: '0 0 6px var(--cyber-green)' }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#888' }}>
-                CLEAR: {settledCount}
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--cyber-green)', boxShadow: '0 0 6px var(--cyber-green)' }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#aaa' }}>
+                Czyste: {settledCount} os.
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Zap size={10} style={{ color: 'var(--cyber-yellow)' }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#888' }}>
-                SESSIONS: {totalWeeks}
+              <Zap size={11} style={{ color: 'var(--cyber-yellow)' }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#aaa' }}>
+                Sesji: {totalWeeks}
               </span>
             </div>
           </div>

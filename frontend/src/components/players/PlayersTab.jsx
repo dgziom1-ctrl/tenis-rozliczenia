@@ -51,7 +51,7 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
           <Lock size={16} style={{ color: 'var(--cyber-yellow)', flexShrink: 0 }} />
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
-            AUTORYZACJA WYMAGANA
+            Podaj hasło admina
           </h3>
         </div>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--cyber-text-dim)', marginBottom: 16 }}>
@@ -69,7 +69,7 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
               boxShadow: error ? '0 0 10px rgba(255,0,51,0.3)' : 'none',
             }}
           />
-          {error && <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.48rem', letterSpacing: '0.15em', color: 'var(--cyber-red)', textAlign: 'center' }}>⚠ DOSTĘP ZABRONIONY</p>}
+          {error && <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.15em', color: 'var(--cyber-red)', textAlign: 'center' }}>⚠ ❌ Złe hasło</p>}
           <div style={{ display: 'flex', gap: 8 }}>
             <button type="submit" className="cyber-button-yellow" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               <Check size={14} /> POTWIERDŹ
@@ -117,8 +117,8 @@ function AgentCard({ player, index, onDelete, isOrganizer }) {
         <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#d0d0d0', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {player.name}
         </p>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.15em', color: isOrganizer ? 'var(--cyber-cyan)' : c.border, opacity: 0.7, margin: '2px 0 0', textTransform: 'uppercase' }}>
-          {isOrganizer ? '// ORGANIZATOR' : '// AGENT'}
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.15em', color: isOrganizer ? 'var(--cyber-cyan)' : c.border, opacity: 0.7, margin: '2px 0 0', textTransform: 'uppercase' }}>
+          {isOrganizer ? '🏓 Organizator' : '🏓 Gracz'}
         </p>
       </div>
 
@@ -139,7 +139,7 @@ function AgentCard({ player, index, onDelete, isOrganizer }) {
           <Trash2 size={14} />
         </button>
       ) : (
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.12em', color: 'var(--cyber-text-dim)', padding: '4px 8px', border: '1px solid #1a1a1a', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.12em', color: 'var(--cyber-text-dim)', padding: '4px 8px', border: '1px solid #1a1a1a', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
           HQ
         </span>
       )}
@@ -217,20 +217,20 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
           </div>
           <div>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cyber-yellow)' }}>
-              AGENT ROSTER
+              Gracze
             </span>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', margin: '2px 0 0' }}>
-              {'>'} zarządzaj składem_
+              {'>'} zarządzaj składem
             </p>
           </div>
           <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#3a3a3a' }}>
-            [{players?.length || 0} AGENTS]
+            [{players?.length || 0} graczy]
           </span>
         </div>
 
         {/* Add agent form */}
         <div style={{ marginBottom: 28 }}>
-          <SectionHeader icon={UserPlus} title="// RECRUIT NEW AGENT" />
+          <SectionHeader icon={UserPlus} title="Dodaj nowego gracza" />
           <form onSubmit={handleAddPlayer} style={{ display: 'flex', gap: 8 }}>
             <input type="text" value={newPlayerName} onChange={e => setNewPlayerName(e.target.value)}
               placeholder="// Imię agenta..."
@@ -247,7 +247,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {/* Agent list */}
         {players && players.length > 0 && (
           <div style={{ marginBottom: 28 }}>
-            <SectionHeader icon={Cpu} title="// ACTIVE AGENTS" />
+            <SectionHeader icon={Cpu} title="Aktywni gracze" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 8 }}>
               {players.map((p, i) => (
                 <AgentCard key={p.name} player={p} index={i} onDelete={setPwModal} isOrganizer={p.name === ORGANIZER_NAME} />
@@ -259,7 +259,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {/* Multisport defaults */}
         {players && players.length > 0 && (
           <div style={{ marginBottom: 28 }}>
-            <SectionHeader icon={Zap} title="// DEFAULT MULTISPORT" accent="var(--cyber-green)" />
+            <SectionHeader icon={Zap} title="Multisport domyślny" accent="var(--cyber-green)" />
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--cyber-text-dim)', marginBottom: 12 }}>
               {'>'} Zaznaczeni będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.
             </p>
@@ -292,7 +292,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {/* Trash / deleted */}
         {deletedPlayers?.length > 0 && (
           <div>
-            <SectionHeader icon={Trash2} title="// TERMINATED AGENTS" accent="var(--cyber-red)" />
+            <SectionHeader icon={Trash2} title="Kosz" accent="var(--cyber-red)" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 8 }}>
               {deletedPlayers.map(name => (
                 <div key={name}>
@@ -301,14 +301,14 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                       padding: '14px', background: 'rgba(255,0,51,0.04)', border: '1px solid rgba(255,0,51,0.3)',
                       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
                     }}>
-                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5, textTransform: 'uppercase' }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5, textTransform: 'uppercase' }}>
                         <AlertTriangle size={12} /> USUNĄĆ NA ZAWSZE?
                       </p>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#888', marginBottom: 12 }}>{name}</p>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button onClick={() => handlePermanentDelete(name)} style={{
                           flex: 1, padding: '8px', background: 'var(--cyber-red)', color: '#000', border: 'none', cursor: 'pointer',
-                          fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.1em', fontWeight: 700,
+                          fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.1em', fontWeight: 700,
                           clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                         }}>
                           POTWIERDŹ

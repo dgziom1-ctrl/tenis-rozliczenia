@@ -39,7 +39,7 @@ function StreakBadge({ streak }) {
       clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
     }}>
       <Flame size={9} style={{ color: '#ff6400' }} />
-      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.12em', color: '#ff6400', fontWeight: 700 }}>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.12em', color: '#ff6400', fontWeight: 700 }}>
         SERIA {streak}
       </span>
     </div>
@@ -80,7 +80,7 @@ function PodiumCard({ podiumEntry, totalWeeks }) {
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.2rem', color: s.border, fontWeight: 400, textShadow: `0 0 10px ${s.glow}` }}>
                 {player.attendancePercentage}%
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--cyber-text-dim)', marginBottom: 4 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--cyber-text-dim)', marginBottom: 4 }}>
                 {player.attendanceCount}/{totalWeeks}
               </div>
               {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
@@ -88,7 +88,7 @@ function PodiumCard({ podiumEntry, totalWeeks }) {
           );
         })}
         {exAequo && (
-          <div style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.2em', color: 'var(--cyber-text-dim)' }}>
+          <div style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.2em', color: 'var(--cyber-text-dim)' }}>
             EX AEQUO ×{players.length}
           </div>
         )}
@@ -165,7 +165,7 @@ function LeaderboardRow({ player, totalWeeks, stats, place }) {
         {specialTitle && (
           <span style={{
             display: 'none',
-            fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.1em',
+            fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.1em',
             padding: '2px 6px', border: `1px solid ${specialTitle.color || '#333'}`,
             color: '#888',
           }}
@@ -175,7 +175,7 @@ function LeaderboardRow({ player, totalWeeks, stats, place }) {
           </span>
         )}
         {player.multisportCount > 0 && (
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.48rem', color: 'var(--cyber-cyan)', display: 'flex', alignItems: 'center', gap: 2 }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', color: 'var(--cyber-cyan)', display: 'flex', alignItems: 'center', gap: 2 }}>
             <Zap size={8} />⚡{player.multisportCount}
           </span>
         )}
@@ -200,7 +200,7 @@ function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
   const theRest = ranked.filter(p => p.place > 3);
   return (
     <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%)', padding: 24 }}>
-      <SectionHeader icon={TrendingUp} title="STREET CRED // LEADERBOARD" />
+      <SectionHeader icon={TrendingUp} title="Ranking frekwencji" />
       <Podium podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} />
       {theRest.length > 0 && (
         <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: 16 }}>
@@ -211,7 +211,7 @@ function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
       )}
       {ranked.length === 0 && (
         <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--cyber-text-dim)', textAlign: 'center', padding: '40px 0', fontSize: '0.8rem' }}>
-          {'>'} Dodaj sesje żeby zobaczyć ranking_
+          {'>'} Dodaj sesje żeby zobaczyć ranking...
         </p>
       )}
     </div>
@@ -222,7 +222,7 @@ function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
 function MonthlyReport({ monthlyStats, players }) {
   return (
     <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%)', padding: 24, overflowX: 'auto' }}>
-      <SectionHeader icon={CalendarDays} title="RAPORT // MIESIĘCZNY" />
+      <SectionHeader icon={CalendarDays} title="Raport miesięczny" />
       {monthlyStats.length === 0 ? (
         <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--cyber-text-dim)', textAlign: 'center', padding: '40px 0', fontSize: '0.8rem' }}>
           {'>'} Brak danych. Dodaj pierwszy tydzień_
@@ -232,14 +232,14 @@ function MonthlyReport({ monthlyStats, players }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400, fontFamily: 'var(--font-mono)' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #2a2a2a' }}>
-                <th style={{ padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', fontWeight: 600, textTransform: 'uppercase' }}>
+                <th style={{ padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', fontWeight: 600, textTransform: 'uppercase' }}>
                   Miesiąc
                 </th>
-                <th style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', fontWeight: 600, textTransform: 'uppercase' }}>
+                <th style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', fontWeight: 600, textTransform: 'uppercase' }}>
                   Gier
                 </th>
                 {players?.map(p => (
-                  <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.52rem', color: '#888', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>
+                  <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.68rem', color: '#888', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>
                     {p.name.length > 5 ? p.name.slice(0, 5) + '.' : p.name}
                   </th>
                 ))}
@@ -287,7 +287,7 @@ function MonthlyReport({ monthlyStats, players }) {
 function RankGuide() {
   return (
     <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%)', padding: 24 }}>
-      <SectionHeader icon={Trophy} title="RANGI // STREET CRED TIER" accent="var(--cyber-yellow)" />
+      <SectionHeader icon={Trophy} title="Rangi gracza" accent="var(--cyber-yellow)" />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 8 }}>
         {RANKS.map((r, i) => (
           <div key={i} style={{
@@ -297,7 +297,7 @@ function RankGuide() {
             transition: 'border-color 0.2s',
           }}>
             <span style={{ fontSize: '1.4rem', marginBottom: 6 }}>{r.emoji}</span>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.55rem', letterSpacing: '0.12em', color: '#999', marginBottom: 4, textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.12em', color: '#999', marginBottom: 4, textTransform: 'uppercase' }}>
               {r.name}
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--cyber-text-dim)' }}>

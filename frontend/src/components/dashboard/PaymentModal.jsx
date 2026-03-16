@@ -20,8 +20,8 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <Zap size={12} style={{ color: 'var(--cyber-yellow)', flexShrink: 0 }} />
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', textTransform: 'uppercase', margin: 0 }}>
-          {hasCredit ? 'DOPŁAĆ KWOTĘ' : 'KWOTA PRZELEWU BLIK'}
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', textTransform: 'uppercase', margin: 0 }}>
+          {hasCredit ? 'Ile chcesz dopłacić?' : 'Kwota przelewu BLIK'}
         </p>
       </div>
 
@@ -46,7 +46,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
       />
 
       {showError && (
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', textAlign: 'center', marginBottom: 8 }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ KWOTA MUSI BYĆ WIĘKSZA OD 0
         </p>
       )}
@@ -69,7 +69,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
             } : {}),
           }}
         >
-          {isSaving ? <InlineSpinner size="sm" /> : <><CheckCircle2 size={13} /> POTWIERDZAM</>}
+          {isSaving ? <InlineSpinner size="sm" /> : <><CheckCircle2 size={13} /> Potwierdzam</>}
         </button>
         <button onClick={onCancel} className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           <X size={13} /> ANULUJ

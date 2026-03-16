@@ -1,17 +1,18 @@
 import { LayoutDashboard, PlusCircle, History, Users, Trophy } from 'lucide-react';
 
+// Readable Polish labels — people need to know what each tab does
 const tabs = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Command', shortLabel: 'CMD'     },
-  { id: 'attendance', icon: Trophy,           label: 'Ranking',  shortLabel: 'RANK'   },
-  { id: 'admin',      icon: PlusCircle,       label: 'Log',      shortLabel: 'LOG'    },
-  { id: 'history',    icon: History,          label: 'Archive',  shortLabel: 'ARCH'   },
-  { id: 'players',    icon: Users,            label: 'Agents',   shortLabel: 'AGT'    },
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Baza',     shortLabel: 'BAZA'    },
+  { id: 'attendance', icon: Trophy,           label: 'Ranking',  shortLabel: 'RANKING' },
+  { id: 'admin',      icon: PlusCircle,       label: 'Dodaj',    shortLabel: 'DODAJ'   },
+  { id: 'history',    icon: History,          label: 'Historia', shortLabel: 'HIST'    },
+  { id: 'players',    icon: Users,            label: 'Gracze',   shortLabel: 'GRACZE'  },
 ];
 
 export default function Navigation({ activeTab, setActiveTab }) {
   return (
     <>
-      {/* ── Desktop ── */}
+      {/* ── Desktop horizontal tab bar ── */}
       <nav className="desktop-nav" role="navigation" aria-label="Nawigacja główna">
         <div className="desktop-nav-inner">
           {tabs.map(tab => (
@@ -39,7 +40,7 @@ export default function Navigation({ activeTab, setActiveTab }) {
         </div>
       </nav>
 
-      {/* ── Mobile ── */}
+      {/* ── Mobile bottom bar ── */}
       <nav className="mobile-nav" role="navigation" aria-label="Nawigacja główna">
         {tabs.map(tab => (
           <button

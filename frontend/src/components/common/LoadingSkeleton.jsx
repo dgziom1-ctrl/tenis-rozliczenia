@@ -56,7 +56,7 @@ export function SpinnerOverlay({ message = 'Ładowanie...' }) {
         animation: 'cyber-spin 0.8s linear infinite',
         boxShadow: '0 0 16px rgba(252,227,0,0.2)',
       }} />
-      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.58rem', letterSpacing: '0.2em', color: 'var(--cyber-yellow)', textTransform: 'uppercase', animation: 'flicker 2s infinite' }}>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', letterSpacing: '0.2em', color: 'var(--cyber-yellow)', textTransform: 'uppercase', animation: 'flicker 2s infinite' }}>
         {message}
       </p>
       <style>{`

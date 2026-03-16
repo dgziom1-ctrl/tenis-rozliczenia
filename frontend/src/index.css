@@ -364,7 +364,7 @@ body::after {
 .mobile-nav-btn.active { color: var(--cyber-yellow); background: rgba(252,227,0,0.04); }
 .mobile-nav-btn.active::before { background: var(--cyber-yellow); box-shadow: 0 0 8px var(--cyber-yellow); }
 .mobile-nav-btn:active { background: rgba(252,227,0,0.07); }
-.mobile-nav-label { font-size: 0.5rem; font-weight: 700; letter-spacing: 0.1em; line-height: 1; margin-top: 1px; font-family: var(--font-display); text-transform: uppercase; }
+.mobile-nav-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; line-height: 1; margin-top: 1px; font-family: var(--font-display); text-transform: uppercase; }
 
 @keyframes tabBounce { 0% { transform: translateY(0); } 35% { transform: translateY(-3px); } 65% { transform: translateY(-1px); } 100% { transform: translateY(0); } }
 .mobile-nav-btn.active { animation: tabBounce 0.28s ease-out; }
@@ -418,4 +418,23 @@ select option { background: #0d0d0d; color: var(--cyber-text); }
   [class*="border-cyan-8"] { border-color: rgba(30,30,30,0.8) !important; }
   [class*="border-t-cyan-4"] { border-top-color: var(--cyber-yellow) !important; }
   [class*="bg-cyan-800/"] { background-color: rgba(30,30,30,0.4) !important; }
+}
+
+/* ══ HEADER BALL ANIMATION (also defined inline in Header.jsx) ══════════ */
+/* CSS mobile-nav label min-size fix */
+.mobile-nav-label {
+  font-size: 0.6rem !important;
+}
+
+/* Ensure desktop nav tabs have legible text */
+.desktop-tab {
+  font-size: 0.72rem !important;
+}
+
+/* Readable button labels across the app — Orbitron min 0.65rem */
+.cyber-button-yellow,
+.cyber-button-outline,
+.cyber-button-blue {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
 }

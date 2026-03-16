@@ -28,7 +28,7 @@ function FieldLabel({ children }) {
   return (
     <label style={{
       display: 'block',
-      fontFamily: 'var(--font-display)', fontSize: '0.5rem',
+      fontFamily: 'var(--font-display)', fontSize: '0.66rem',
       fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase',
       color: 'var(--cyber-text-dim)', marginBottom: 8,
     }}>
@@ -70,11 +70,11 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
             <CheckCircle2 size={20} style={{ color: 'var(--cyber-green)' }} />
           </div>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', letterSpacing: '0.2em', color: 'var(--cyber-green)', marginBottom: 3, textTransform: 'uppercase' }}>
-              SYSTEM // ZAPIS OK
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.66rem', letterSpacing: '0.2em', color: 'var(--cyber-green)', marginBottom: 3, textTransform: 'uppercase' }}>
+              Zapisano!
             </p>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.06em', color: '#e8e8e8', margin: 0 }}>
-              SESJA ZAPISANA
+              Sesja zapisana!
             </h3>
           </div>
         </div>
@@ -94,7 +94,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
               border: '1px solid #1a1a1a',
               clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
             }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 4, textTransform: 'uppercase' }}>{label}</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 4, textTransform: 'uppercase' }}>{label}</p>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color, margin: 0 }}>{value}</p>
             </div>
           ))}
@@ -108,7 +108,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
             border: '1px solid rgba(252,227,0,0.3)',
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
           }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.22em', color: 'var(--cyber-text-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.22em', color: 'var(--cyber-text-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
               KAŻDY PŁACI
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4rem', color: 'var(--cyber-yellow)', textShadow: '0 0 20px rgba(252,227,0,0.5)', margin: 0 }}>
@@ -136,10 +136,10 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
             }),
             clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
           }}>
-            {copied ? <><CheckCircle2 size={14} /> SKOPIOWANO!</> : <><Copy size={14} /> KOPIUJ NA GRUPKĘ</>}
+            {copied ? <><CheckCircle2 size={14} /> Skopiowano!</> : <><Copy size={14} /> Kopiuj na grupkę</>}
           </button>
           <button onClick={onClose} className="cyber-button-yellow" style={{ width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: '0.65rem' }}>
-            <CheckCircle2 size={14} /> OK — POWRÓT DO BAZY
+            <CheckCircle2 size={14} /> OK — Powrót do bazy
           </button>
         </div>
       </div>
@@ -164,8 +164,8 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Calculator size={14} style={{ color: 'var(--cyber-text-dim)' }} />
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', letterSpacing: '0.15em', color: 'var(--cyber-text-dim)', textTransform: 'uppercase' }}>
-          PODGLĄD PODZIAŁU
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.66rem', letterSpacing: '0.15em', color: 'var(--cyber-text-dim)', textTransform: 'uppercase' }}>
+          Podział kosztów
         </span>
       </div>
       <div style={{ textAlign: 'right' }}>
@@ -174,12 +174,12 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.4rem', color: 'var(--cyber-yellow)', textShadow: '0 0 10px rgba(252,227,0,0.3)' }}>
               {formatAmountShort(perPerson)} ZŁ
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', color: 'var(--cyber-text-dim)', marginLeft: 8, letterSpacing: '0.12em' }}>
-              / OS. ({paying.length} PŁACI)
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', color: 'var(--cyber-text-dim)', marginLeft: 8, letterSpacing: '0.12em' }}>
+              / os. ({paying.length} PŁACI)
             </span>
           </>
         ) : (
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--cyber-green)' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--cyber-green)' }}>
             ⚡ WSZYSCY MAJĄ MULTISPORT
           </span>
         )}
@@ -314,10 +314,10 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             </div>
             <div>
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.22em', color: 'var(--cyber-yellow)', textTransform: 'uppercase' }}>
-                LOG NEW SESSION
+                Dodaj nową sesję
               </span>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', margin: '2px 0 0' }}>
-                {'>'} dodaj nową sesję do archiwum_
+                zapisz dzisiejszą grę ping-ponga
               </p>
             </div>
           </div>
@@ -326,10 +326,10 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Date */}
             <div>
-              <FieldLabel>// DATA GRY</FieldLabel>
+              <FieldLabel>Data gry</FieldLabel>
               <CyberDateInput value={datePlayed} onChange={setDatePlayed} />
               {isDuplicateDate && (
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.48rem', letterSpacing: '0.15em', color: '#f59e0b', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.15em', color: '#f59e0b', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                   ⚠ SESJA Z TĄ DATĄ JUŻ ISTNIEJE
                 </p>
               )}
@@ -337,7 +337,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Cost */}
             <div>
-              <FieldLabel>// KOSZT CAŁKOWITY</FieldLabel>
+              <FieldLabel>Koszt całkowity (zł)</FieldLabel>
               {/* Quick-cost buttons */}
               <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
                 {QUICK_COSTS.map(cost => {
@@ -362,7 +362,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 })}
               </div>
               <input type="number" value={totalCost} onChange={e => setTotalCost(e.target.value)}
-                placeholder="// lub wpisz ręcznie..."
+                placeholder="lub wpisz ręcznie..."
                 className="cyber-input"
                 style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
                 required
@@ -371,9 +371,9 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Present players */}
             <div style={{ padding: '16px', background: '#070707', border: '1px solid #1a1a1a', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
-              <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
                 <Users size={13} style={{ color: 'var(--cyber-yellow)' }} />
-                KTO BYŁ OBECNY?
+                Kto grał?
                 <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-yellow)' }}>
                   [{presentPlayers.length}/{playerNames?.length || 0}]
                 </span>
@@ -384,9 +384,9 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             {/* Multisport */}
             {presentPlayers.length > 0 && (
               <div style={{ padding: '16px', background: '#070707', border: '1px solid #141414', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
-                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
                   <Zap size={13} style={{ color: 'var(--cyber-green)' }} />
-                  KTO MIAŁ MULTISPORT? (0 ZŁ)
+                  Kto miał Multisport? (płaci 0 zł)
                   {multisportPlayers.length > 0 && (
                     <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-green)' }}>
                       ⚡{multisportPlayers.length}

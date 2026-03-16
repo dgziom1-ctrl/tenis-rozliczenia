@@ -6,10 +6,10 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
   const tokens = useThemeTokens();
   const sessionCount = breakdown?.sessions?.length ?? 0;
   const toggleLabel  = open
-    ? 'ZWIŃ SZCZEGÓŁY'
+    ? 'Zwiń szczegóły'
     : sessionCount > 0
-      ? `SKĄD TA KWOTA? (${sessionCount}×)`
-      : 'SKĄD TA KWOTA?';
+      ? `Skąd ta kwota? (${sessionCount} sesje)`
+      : 'Skąd ta kwota?';
 
   return (
     <div style={{ marginBottom: 12 }}>
@@ -19,7 +19,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
         background: 'transparent', border: '1px solid #1a1a1a',
         cursor: 'pointer', transition: 'all 0.15s',
         clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-        fontFamily: 'var(--font-display)', fontSize: '0.45rem', fontWeight: 700,
+        fontFamily: 'var(--font-display)', fontSize: '0.65rem', fontWeight: 700,
         letterSpacing: '0.14em', color: 'rgba(252,227,0,0.5)', textTransform: 'uppercase',
       }}
         onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(252,227,0,0.25)'; e.currentTarget.style.color = 'var(--cyber-yellow)'; }}
@@ -42,7 +42,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           {/* Sessions */}
           {breakdown.sessions.length > 0 ? (
             <>
-              <TerminalSectionHeader label="SESJE" />
+              <TerminalSectionHeader label="Sesje" />
               {breakdown.sessions.map((item, idx) => (
                 <TerminalRow key={idx}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#555' }}>{formatDate(item.date)}</span>
@@ -53,7 +53,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
               ))}
               {breakdown.sessions.length > 1 && (
                 <TerminalRow highlight="rgba(255,0,51,0.04)">
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.12em', color: '#444', textTransform: 'uppercase' }}>RAZEM SESJE</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.12em', color: '#444', textTransform: 'uppercase' }}>RAZEM SESJE</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--cyber-red)' }}>
                     -{formatAmountShort(breakdown.totalSessions)} ZŁ
                   </span>
@@ -70,7 +70,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           {/* Payments */}
           {breakdown.payments.length > 0 && (
             <>
-              <TerminalSectionHeader label="WPŁATY" />
+              <TerminalSectionHeader label="Wpłaty" />
               {breakdown.payments.map((item, idx) => (
                 <TerminalRow key={idx}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#555' }}>
@@ -98,7 +98,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
               ))}
               {breakdown.payments.length > 1 && (
                 <TerminalRow highlight="rgba(252,227,0,0.03)">
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.12em', color: '#444', textTransform: 'uppercase' }}>RAZEM WPŁACONO</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.12em', color: '#444', textTransform: 'uppercase' }}>RAZEM WPŁACONO</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--cyber-yellow)' }}>
                     +{formatAmountShort(breakdown.totalPaid)} ZŁ
                   </span>
@@ -114,7 +114,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
             background: 'rgba(252,227,0,0.04)',
             borderTop: '1px solid rgba(252,227,0,0.1)',
           }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.48rem', letterSpacing: '0.15em', color: '#666', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.15em', color: '#666', textTransform: 'uppercase' }}>
               ◈ SALDO
             </span>
             <span style={{
@@ -141,11 +141,11 @@ function TerminalSectionHeader({ label }) {
     <div style={{
       padding: '5px 12px',
       borderBottom: '1px solid #141414',
-      fontFamily: 'var(--font-display)', fontSize: '0.4rem', fontWeight: 700,
+      fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700,
       letterSpacing: '0.2em', textTransform: 'uppercase', color: '#333',
       display: 'flex', alignItems: 'center', gap: 6,
     }}>
-      <span style={{ color: 'var(--cyber-green)', fontSize: '0.5rem' }}>{'>'}</span>
+      <span style={{ color: 'var(--cyber-green)', fontSize: '0.66rem' }}>{'>'}</span>
       {label}
     </div>
   );

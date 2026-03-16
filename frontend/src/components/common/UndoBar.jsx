@@ -38,7 +38,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         {message}
         <span style={{
           fontFamily: 'var(--font-mono)',
-          fontSize: '0.58rem',
+          fontSize: '0.72rem',
           color: tokens.mutedText, opacity: 0.7, flexShrink: 0,
         }}>
           ({secondsLeft}s)

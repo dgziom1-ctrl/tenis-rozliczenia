@@ -98,7 +98,7 @@ function RankBadge({ rank, pct }) {
     }}>
       <span style={{ fontSize: '0.7rem' }}>{rank.emoji}</span>
       <span style={{
-        fontFamily: 'var(--font-display)', fontSize: '0.5rem',
+        fontFamily: 'var(--font-display)', fontSize: '0.66rem',
         fontWeight: 700, letterSpacing: '0.12em', color: '#888',
         textTransform: 'uppercase',
       }}>{rank.name}</span>
@@ -210,12 +210,12 @@ export default function PlayerCard({
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Class label */}
           <div style={{
-            fontFamily: 'var(--font-display)', fontSize: '0.48rem', fontWeight: 600,
-            letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 2,
-            color: isOrganizer ? 'var(--cyber-cyan)' : hasDebt ? 'var(--cyber-red)' : 'var(--cyber-yellow)',
-            opacity: 0.7,
+            fontFamily: 'var(--font-display)', fontSize: '0.65rem', fontWeight: 600,
+            letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 2,
+            color: isOrganizer ? 'var(--cyber-cyan)' : hasDebt ? 'var(--cyber-red)' : hasCredit ? '#f59e0b' : 'var(--cyber-green)',
+            opacity: 0.85,
           }}>
-            {isOrganizer ? '// ORGANIZER' : hasDebt ? '// BOUNTY TARGET' : hasCredit ? '// CREDIT SURPLUS' : '// AGENT CLEAR'}
+            {isOrganizer ? '🏓 ORGANIZATOR' : hasDebt ? '⚠ MA DŁUG' : hasCredit ? '💛 NADPŁATA' : '✓ ROZLICZONY'}
           </div>
           <h3 style={{
             fontFamily: 'var(--font-display)', fontWeight: 800,
@@ -243,7 +243,7 @@ export default function PlayerCard({
         {/* Attendance bar */}
         <div style={{ marginBottom: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.48rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.1em', color: 'var(--cyber-text-dim)', textTransform: 'uppercase' }}>
               OBECNOŚĆ
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#888' }}>
@@ -273,7 +273,7 @@ export default function PlayerCard({
           }}>
             <Shield size={28} style={{ color: 'var(--cyber-cyan)', opacity: 0.6 }} />
             <p style={{
-              fontFamily: 'var(--font-display)', fontSize: '0.55rem',
+              fontFamily: 'var(--font-display)', fontSize: '0.7rem',
               letterSpacing: '0.15em', textTransform: 'uppercase',
               color: 'var(--cyber-cyan)', opacity: 0.7,
             }}>ZARZĄDZA REZERWACJĄ</p>
@@ -304,8 +304,8 @@ export default function PlayerCard({
                 </div>
               ) : hasCredit ? (
                 <>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.18em', color: '#f59e0b', marginBottom: 4, opacity: 0.8 }}>
-                    NADPŁATA — CREDIT SURPLUS
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.12em', color: '#f59e0b', marginBottom: 4, opacity: 0.85 }}>
+                    💛 NADPŁATA — NA KOLEJNE SESJE
                   </p>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1.8rem', fontWeight: 400, color: '#fbbf24', letterSpacing: '-0.02em' }}>
                     +{formatAmountShort(animatedAbs)}<span style={{ fontSize: '0.75rem', opacity: 0.5, marginLeft: 3 }}>ZŁ</span>
@@ -313,11 +313,11 @@ export default function PlayerCard({
                 </>
               ) : (
                 <>
-                  {hasDebt && (
-                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.18em', color: 'var(--cyber-red)', marginBottom: 4, opacity: 0.8 }}>
-                      ◈ BOUNTY // DO ZAPŁATY
-                    </p>
-                  )}
+              {hasDebt && (
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', marginBottom: 4, opacity: 0.85 }}>
+                    ⚠ DO ZAPŁATY
+                  </p>
+                )}
                   <p style={{
                     fontFamily: 'var(--font-mono)', fontSize: '1.8rem', fontWeight: 400,
                     color: hasDebt ? '#ff4d6d' : 'var(--cyber-green)',
@@ -330,7 +330,7 @@ export default function PlayerCard({
                 </>
               )}
               {adminMode && (
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', color: 'var(--cyber-red)', letterSpacing: '0.1em', marginTop: 4 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', color: 'var(--cyber-red)', letterSpacing: '0.1em', marginTop: 4 }}>
                   ⚠ TRYB EDYCJI
                 </p>
               )}
@@ -390,8 +390,8 @@ export default function PlayerCard({
                         <span style={{ fontSize: '1.1rem', fontFamily: 'var(--font-mono)', letterSpacing: '-0.02em' }}>
                           {formatAmountShort(debt)} ZŁ
                         </span>
-                        <span style={{ fontSize: '0.5rem', letterSpacing: '0.2em', opacity: 0.7 }}>
-                          ◈ WYŚLIJ BLIK
+                        <span style={{ fontSize: '0.66rem', letterSpacing: '0.2em', opacity: 0.7 }}>
+                          💸 WYŚLIJ BLIK
                         </span>
                       </span>
                     </button>
@@ -400,7 +400,7 @@ export default function PlayerCard({
                       className="cyber-button-outline"
                       style={{ padding: '8px 12px', width: '100%' }}
                     >
-                      + INNA KWOTA
+                      + Inna kwota
                     </button>
                   </>
                 )}
@@ -411,7 +411,7 @@ export default function PlayerCard({
                     className="cyber-button-outline"
                     style={{ padding: '8px 12px', width: '100%' }}
                   >
-                    + WPŁAĆ WIĘCEJ
+                    + Wpłać więcej
                   </button>
                 )}
 
@@ -427,15 +427,15 @@ export default function PlayerCard({
                     }}>
                       <CheckCircle2 size={26} style={{ color: 'var(--cyber-green)', filter: 'drop-shadow(0 0 5px rgba(0,255,65,0.5))' }} />
                     </div>
-                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', letterSpacing: '0.2em', color: 'rgba(0,255,65,0.7)', textTransform: 'uppercase' }}>
-                      ◈ ROZLICZONY
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.66rem', letterSpacing: '0.2em', color: 'rgba(0,255,65,0.7)', textTransform: 'uppercase' }}>
+                      ✓ Rozliczony
                     </p>
                     <button
                       onClick={() => setModal(PAYMENT_MODAL.CUSTOM)}
                       className="cyber-button-outline"
-                      style={{ padding: '6px 12px', width: '100%', opacity: 0.5, fontSize: '0.55rem' }}
+                      style={{ padding: '6px 12px', width: '100%', opacity: 0.5, fontSize: '0.7rem' }}
                     >
-                      + WPŁAĆ NA ZAPAS
+                      + Wpłać na zapas
                     </button>
                   </div>
                 )}
