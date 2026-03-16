@@ -11,28 +11,28 @@ import { useState, useRef, useEffect } from 'react';
 */
 const BALL_CSS = `
   @keyframes ball-flight {
-    /* LEFT PADDLE IMPACT */
-    0%   { left: 8%;  top: 55%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.55); }
-    2%   { left: 8%;  top: 55%; transform: translate(-50%,-50%) scale(1); }
+    /* LEFT PADDLE IMPACT — table near edge at ~66% */
+    0%   { left: 8%;  top: 66%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.55); }
+    2%   { left: 8%;  top: 66%; transform: translate(-50%,-50%) scale(1); }
     /* arc up and over net → right */
-    12%  { left: 23%; top: 34%; transform: translate(-50%,-50%) scale(1); }
-    23%  { left: 37%; top: 12%; transform: translate(-50%,-50%) scale(1); }
-    34%  { left: 50%; top: 5%;  transform: translate(-50%,-50%) scale(1); }
-    45%  { left: 63%; top: 12%; transform: translate(-50%,-50%) scale(1); }
-    48%  { left: 78%; top: 34%; transform: translate(-50%,-50%) scale(1); }
+    12%  { left: 23%; top: 44%; transform: translate(-50%,-50%) scale(1); }
+    23%  { left: 37%; top: 16%; transform: translate(-50%,-50%) scale(1); }
+    34%  { left: 50%; top: 6%;  transform: translate(-50%,-50%) scale(1); }
+    45%  { left: 63%; top: 16%; transform: translate(-50%,-50%) scale(1); }
+    48%  { left: 78%; top: 44%; transform: translate(-50%,-50%) scale(1); }
     /* RIGHT PADDLE IMPACT */
-    50%  { left: 92%; top: 55%; transform: translate(-50%,-50%) scale(1); }
-    51%  { left: 92%; top: 55%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.55); }
-    53%  { left: 92%; top: 55%; transform: translate(-50%,-50%) scale(1); }
+    50%  { left: 92%; top: 66%; transform: translate(-50%,-50%) scale(1); }
+    51%  { left: 92%; top: 66%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.55); }
+    53%  { left: 92%; top: 66%; transform: translate(-50%,-50%) scale(1); }
     /* arc up and over net → left */
-    62%  { left: 78%; top: 34%; transform: translate(-50%,-50%) scale(1); }
-    66%  { left: 63%; top: 12%; transform: translate(-50%,-50%) scale(1); }
-    75%  { left: 50%; top: 5%;  transform: translate(-50%,-50%) scale(1); }
-    84%  { left: 37%; top: 12%; transform: translate(-50%,-50%) scale(1); }
-    88%  { left: 23%; top: 34%; transform: translate(-50%,-50%) scale(1); }
+    62%  { left: 78%; top: 44%; transform: translate(-50%,-50%) scale(1); }
+    66%  { left: 63%; top: 16%; transform: translate(-50%,-50%) scale(1); }
+    75%  { left: 50%; top: 6%;  transform: translate(-50%,-50%) scale(1); }
+    84%  { left: 37%; top: 16%; transform: translate(-50%,-50%) scale(1); }
+    88%  { left: 23%; top: 44%; transform: translate(-50%,-50%) scale(1); }
     /* LEFT PADDLE IMPACT again */
-    98%  { left: 8%;  top: 55%; transform: translate(-50%,-50%) scale(1); }
-    100% { left: 8%;  top: 55%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.55); }
+    98%  { left: 8%;  top: 66%; transform: translate(-50%,-50%) scale(1); }
+    100% { left: 8%;  top: 66%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.55); }
   }
   /* Left paddle: kicks at 0/100% */
   @keyframes left-paddle-hit {
@@ -185,68 +185,101 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             </div>
 
             {/* CENTER STRIP */}
-            <div style={{ flex: 1, height: 90, position: 'relative', margin: '0 6px' }}>
+            <div style={{ flex: 1, height: 100, position: 'relative', margin: '0 6px' }}>
 
-              {/* ── 3D TABLE ── */}
-              {/* Shadow/depth below table */}
+              {/* ════ 3D TABLE ════
+                  Viewed from slight elevation — near edge wider, far edge narrower.
+                  Trapezoid top + vertical front face + drop shadow = depth.
+              */}
+
+              {/* Drop shadow beneath table */}
               <div style={{
-                position: 'absolute', left: '2%', right: '2%', top: '60%',
-                height: 6,
-                background: 'rgba(129,140,248,0.04)',
+                position: 'absolute', left: '4%', right: '4%', top: '74%',
+                height: 8, borderRadius: '50%',
+                background: 'rgba(129,140,248,0.08)',
+                filter: 'blur(6px)',
+              }} />
+
+              {/* Table TOP FACE — trapezoid: near edge full-width, far edge inset */}
+              <div style={{
+                position: 'absolute', left: 0, right: 0,
+                top: '52%', height: 14,
+                background: 'linear-gradient(180deg, rgba(30,35,80,0.9) 0%, rgba(20,24,60,0.95) 100%)',
+                clipPath: 'polygon(3% 100%, 97% 100%, 87% 0%, 13% 0%)',
+                border: 'none',
+              }} />
+              {/* Top face near-edge line (bright) */}
+              <div style={{
+                position: 'absolute', left: '3%', right: '3%', top: 'calc(52% + 14px)',
+                height: 2,
+                background: 'linear-gradient(90deg, transparent, rgba(165,180,252,0.7) 10%, rgba(165,180,252,0.7) 90%, transparent)',
+                boxShadow: '0 0 6px rgba(129,140,248,0.4)',
+              }} />
+              {/* Top face far-edge line (dimmer — perspective) */}
+              <div style={{
+                position: 'absolute', left: '13%', right: '13%', top: '52%',
+                height: 1,
+                background: 'rgba(129,140,248,0.25)',
+              }} />
+
+              {/* Table FRONT FACE — thin strip below near edge */}
+              <div style={{
+                position: 'absolute', left: '3%', right: '3%', top: 'calc(52% + 16px)',
+                height: 5,
+                background: 'linear-gradient(180deg, rgba(129,140,248,0.15), rgba(129,140,248,0.04))',
+                borderBottom: '1px solid rgba(129,140,248,0.15)',
+              }} />
+
+              {/* White centre line on table surface */}
+              <div style={{
+                position: 'absolute', left: '50%', top: '52%', height: 14,
+                width: 1.5, transform: 'translateX(-50%)',
+                background: 'rgba(200,210,255,0.2)',
+                clipPath: 'polygon(0 100%, 100% 100%, 120% 0%, -20% 0%)',
+              }} />
+
+              {/* ════ NET ════ */}
+              {/* Net shadow on table */}
+              <div style={{
+                position: 'absolute', left: 'calc(50% - 4px)', top: 'calc(52% + 4px)',
+                width: 8, height: 8,
+                background: 'rgba(0,0,0,0.3)',
                 filter: 'blur(3px)',
               }} />
-              {/* Table top surface — slightly perspective-skewed using box */}
-              <div style={{
-                position: 'absolute', left: 0, right: 0, top: '55%',
-                height: 2,
-                background: 'linear-gradient(90deg, transparent 0%, rgba(129,140,248,0.4) 8%, rgba(129,140,248,0.35) 92%, transparent 100%)',
-                boxShadow: '0 1px 4px rgba(129,140,248,0.12)',
-              }} />
-              {/* Table far edge (perspective — thinner, higher, slightly inset) */}
-              <div style={{
-                position: 'absolute', left: '12%', right: '12%', top: 'calc(55% - 3px)',
-                height: 1,
-                background: 'rgba(129,140,248,0.12)',
-              }} />
-              {/* Centre line on table */}
-              <div style={{
-                position: 'absolute', left: '50%', top: '55%', bottom: 0,
-                width: 1, transform: 'translateX(-50%)',
-                background: 'rgba(129,140,248,0.1)',
-              }} />
-
-              {/* ── NET ── proper ping-pong net shape */}
-              {/* Net body — white mesh lines in a rectangle */}
+              {/* Net body — slightly trapezoidal, wider at bottom */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% - 18px)', top: 'calc(55% - 18px)',
-                width: 36, height: 18,
-                border: '1.5px solid rgba(200,210,255,0.55)',
+                left: 'calc(50% - 20px)', top: 'calc(52% - 18px)',
+                width: 40, height: 18,
+                background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(165,180,252,0.22) 2px, rgba(165,180,252,0.22) 3px)',
+                border: '1.5px solid rgba(200,214,255,0.6)',
                 borderBottom: 'none',
-                background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(165,180,252,0.18) 3px, rgba(165,180,252,0.18) 4px)',
-                boxShadow: '0 0 6px rgba(129,140,248,0.15)',
+                clipPath: 'polygon(0% 100%, 100% 100%, 96% 0%, 4% 0%)',
+                boxShadow: '0 -2px 8px rgba(129,140,248,0.2)',
               }} />
-              {/* Net bottom edge (sits on table) */}
+              {/* Net top bar (brightest) */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% - 18px)', top: '55%',
-                width: 36, height: 2,
-                background: 'rgba(165,180,252,0.3)',
+                left: 'calc(50% - 21px)', top: 'calc(52% - 19px)',
+                width: 42, height: 2.5,
+                background: 'rgba(200,214,255,0.75)',
+                boxShadow: '0 0 6px rgba(165,180,252,0.5)',
+                borderRadius: '1px',
               }} />
               {/* Left post */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% - 20px)', top: 'calc(55% - 20px)',
-                width: 3, height: 22,
-                background: 'rgba(165,180,252,0.6)',
+                left: 'calc(50% - 22px)', top: 'calc(52% - 21px)',
+                width: 3, height: 24,
+                background: 'linear-gradient(180deg, rgba(200,214,255,0.8), rgba(165,180,252,0.4))',
                 borderRadius: '1px 1px 0 0',
               }} />
               {/* Right post */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% + 17px)', top: 'calc(55% - 20px)',
-                width: 3, height: 22,
-                background: 'rgba(165,180,252,0.6)',
+                left: 'calc(50% + 19px)', top: 'calc(52% - 21px)',
+                width: 3, height: 24,
+                background: 'linear-gradient(180deg, rgba(200,214,255,0.8), rgba(165,180,252,0.4))',
                 borderRadius: '1px 1px 0 0',
               }} />
 
