@@ -257,7 +257,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
                   <div style={{
                     position: 'absolute', width: 8, height: 8, borderRadius: '50%',
                     background: 'rgba(200,210,255,0.15)',
-                    animation: `ball-flight ${BALL_DUR} ease-in-out infinite`,
+                    animation: `ball-flight ${BALL_DUR} linear infinite`,
                     animationDelay: '-0.09s',
                     zIndex: 5, pointerEvents: 'none',
                   }} />
@@ -266,7 +266,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
                     position: 'absolute', width: 13, height: 13, borderRadius: '50%',
                     background: 'radial-gradient(circle at 35% 32%, #ffffff 0%, #d8dcf8 60%, #b0b8e8 100%)',
                     boxShadow: '0 0 8px rgba(255,255,255,0.8), 0 0 3px rgba(129,140,248,0.6), 0 2px 5px rgba(0,0,0,0.7)',
-                    animation: `ball-flight ${BALL_DUR} ease-in-out infinite`,
+                    animation: `ball-flight ${BALL_DUR} linear infinite`,
                     zIndex: 6, pointerEvents: 'none',
                   }} />
                 </>
