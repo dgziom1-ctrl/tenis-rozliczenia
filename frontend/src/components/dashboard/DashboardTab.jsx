@@ -101,14 +101,12 @@ export default function DashboardTab({ data, history, playSound }) {
 
   const sortedPlayers = useMemo(() => {
     if (!data.players) return [];
-    const debtors  = data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) => {
-      if (a.name === pinnedPlayer) return -1;
-      if (b.name === pinnedPlayer) return  1;
-      return b.currentDebt - a.currentDebt || a.name.localeCompare(b.name, 'pl');
-    });
+    const nonOrg   = data.players
+      .filter(p => p.name !== ORGANIZER_NAME)
+      .sort((a, b) => a.name.localeCompare(b.name, 'pl'));
     const organizer = data.players.filter(p => p.name === ORGANIZER_NAME);
-    return [...debtors, ...organizer];
-  }, [data.players, pinnedPlayer]);
+    return [...nonOrg, ...organizer];
+  }, [data.players]);
 
   // Count debtor status
   const debtCount   = sortedPlayers.filter(p => p.currentDebt > SETTLED_THRESHOLD && p.name !== ORGANIZER_NAME).length;
