@@ -2,33 +2,34 @@ import { Volume2, VolumeX, Smartphone, Copy, Check, Zap } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 /* ── Ball animation ────────────────────────────────────────────────────────
-   Ball bounces LEFT→PEAK→RIGHT in its own dedicated strip ABOVE the title.
-   Paddles align with that strip so the ball hits them cleanly.
+   Multi-keyframe arc so ball traces a real parabola OVER the net.
+   Container is 80px tall. Table at 50% = 40px. Net top ≈ 20px from top.
+   Ball arc peak = 4% (≈3px) — well above net. Many mid-points = smooth arc.
 ─────────────────────────────────────────────────────────────────────────── */
 const BALL_CSS = `
   @keyframes ball-flight {
-    0%    { left: 8%;  top: 50%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.5); }
-    3%    { left: 8%;  top: 50%; transform: translate(-50%,-50%) scale(1); }
-    47%   { left: 50%; top: 12%; transform: translate(-50%,-50%) scale(1); }
-    94%   { left: 92%; top: 50%; transform: translate(-50%,-50%) scale(1); }
-    97%   { left: 92%; top: 50%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.5); }
-    100%  { left: 8%;  top: 50%; transform: translate(-50%,-50%) scale(1); }
-  }
-  @keyframes ball-trail {
-    0%    { left: 8%;  top: 50%; }
-    47%   { left: 50%; top: 12%; }
-    94%   { left: 92%; top: 50%; }
-    100%  { left: 8%;  top: 50%; }
+    0%   { left: 8%;  top: 50%; transform: translate(-50%,-50%) scaleX(1.5) scaleY(0.6); }
+    2%   { left: 8%;  top: 50%; transform: translate(-50%,-50%) scale(1); }
+    10%  { left: 20%; top: 32%; transform: translate(-50%,-50%) scale(1); }
+    20%  { left: 32%; top: 14%; transform: translate(-50%,-50%) scale(1); }
+    30%  { left: 42%; top: 5%;  transform: translate(-50%,-50%) scale(1); }
+    47%  { left: 50%; top: 4%;  transform: translate(-50%,-50%) scale(1); }
+    64%  { left: 58%; top: 5%;  transform: translate(-50%,-50%) scale(1); }
+    74%  { left: 68%; top: 14%; transform: translate(-50%,-50%) scale(1); }
+    84%  { left: 80%; top: 32%; transform: translate(-50%,-50%) scale(1); }
+    92%  { left: 92%; top: 50%; transform: translate(-50%,-50%) scale(1); }
+    95%  { left: 92%; top: 50%; transform: translate(-50%,-50%) scaleX(1.5) scaleY(0.6); }
+    100% { left: 8%;  top: 50%; transform: translate(-50%,-50%) scale(1); }
   }
   @keyframes left-paddle-hit {
     0%   { transform: rotate(-45deg) scale(1); }
-    3%   { transform: rotate(-32deg) scale(1.1); }
+    3%   { transform: rotate(-32deg) scale(1.12); }
     9%   { transform: rotate(-45deg) scale(1); }
     100% { transform: rotate(-45deg) scale(1); }
   }
   @keyframes right-paddle-hit {
-    0%,93%  { transform: rotate(45deg) scale(1); }
-    96%     { transform: rotate(32deg) scale(1.1); }
+    0%,91%  { transform: rotate(45deg) scale(1); }
+    94%     { transform: rotate(32deg) scale(1.12); }
     100%    { transform: rotate(45deg) scale(1); }
   }
 `;
@@ -211,45 +212,34 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
 
             {/* CENTER STRIP — ball bounces here, pure empty space */}
             <div style={{
-              flex: 1, height: 64, position: 'relative', margin: '0 8px',
+              flex: 1, height: 80, position: 'relative', margin: '0 8px',
             }}>
-              {/* Table surface — visible horizontal line */}
+              {/* Table surface */}
               <div style={{
                 position: 'absolute', left: 0, right: 0, top: '50%',
                 height: 2,
-                background: 'linear-gradient(90deg, transparent, rgba(129,140,248,0.25) 15%, rgba(129,140,248,0.25) 85%, transparent)',
-              }} />
-              {/* Left half of table */}
-              <div style={{
-                position: 'absolute', left: '5%', right: '52%', top: '50%',
-                height: 1,
-                background: 'rgba(129,140,248,0.1)',
-                marginTop: 1,
-              }} />
-              {/* Right half of table */}
-              <div style={{
-                position: 'absolute', left: '52%', right: '5%', top: '50%',
-                height: 1,
-                background: 'rgba(129,140,248,0.1)',
-                marginTop: 1,
+                background: 'linear-gradient(90deg, transparent, rgba(129,140,248,0.3) 10%, rgba(129,140,248,0.3) 90%, transparent)',
               }} />
 
-              {/* Net — short, sits ON the table line, extends only upward */}
-              {/* Net posts */}
+              {/* Net — vertical post + top crossbar only, clean ping-pong style */}
+              {/* Post */}
               <div style={{
-                position: 'absolute', left: 'calc(50% - 1px)', top: 'calc(50% - 16px)',
-                width: 2, height: 16,
-                background: 'rgba(129,140,248,0.5)',
+                position: 'absolute',
+                left: 'calc(50% - 1px)', top: 'calc(50% - 20px)',
+                width: 2, height: 20,
+                background: 'rgba(165,180,252,0.6)',
               }} />
-              {/* Net mesh — tight horizontal lines */}
+              {/* Top crossbar */}
               <div style={{
-                position: 'absolute', left: 'calc(50% - 10px)', top: 'calc(50% - 14px)',
-                width: 20, height: 14,
-                background: 'repeating-linear-gradient(to bottom, rgba(129,140,248,0.35) 0, rgba(129,140,248,0.35) 1px, transparent 1px, transparent 3px)',
-                borderLeft: '1px solid rgba(129,140,248,0.4)',
-                borderRight: '1px solid rgba(129,140,248,0.4)',
-                borderTop: '1px solid rgba(129,140,248,0.5)',
+                position: 'absolute',
+                left: 'calc(50% - 16px)', top: 'calc(50% - 21px)',
+                width: 32, height: 2,
+                background: 'rgba(165,180,252,0.7)',
+                boxShadow: '0 0 4px rgba(129,140,248,0.4)',
               }} />
+              {/* Net side posts (tiny dots at table edge) */}
+              <div style={{ position: 'absolute', left: 'calc(50% - 16px)', top: 'calc(50% - 1px)', width: 3, height: 4, background: 'rgba(165,180,252,0.5)' }} />
+              <div style={{ position: 'absolute', left: 'calc(50% + 13px)', top: 'calc(50% - 1px)', width: 3, height: 4, background: 'rgba(165,180,252,0.5)' }} />
 
               {!chaosMode && (
                 <>
