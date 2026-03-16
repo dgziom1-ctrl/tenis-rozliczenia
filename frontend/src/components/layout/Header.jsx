@@ -386,7 +386,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
                     textShadow:'0 0 30px rgba(129,140,248,.8),2px 2px 0 rgba(0,0,0,.9)' }
                 : { color:'#c7d2fe',
                     textShadow:'0 0 30px rgba(129,140,248,.2),2px 2px 0 rgba(0,0,0,.95)' }),
-            }}>PING-PONG</span>
+            }}>CYBER-PONG</span>
           </button>
 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
