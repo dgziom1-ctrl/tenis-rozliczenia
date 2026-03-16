@@ -1,5 +1,3 @@
-javascript
-
 import { Volume2, VolumeX, Smartphone, Check } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 
@@ -74,9 +72,22 @@ function Arena({ chaosMode, onHit }) {
       g.restore();
     };
 
+    /* Shared hit detection threshold — same as used inside drawPaddle */
+    const HIT_T = 0.09;
+    let lastHitState = false;
+
     /* ── DRAW FRAME ── */
     const draw = (progress) => {
       g.clearRect(0, 0, W, H);
+
+      /* ── Compute hit state and notify parent ── */
+      const leftHitT  = Math.min(progress, 1 - progress) * 2;
+      const rightHitT = Math.abs(progress - 0.5) * 2;
+      const isHitting = leftHitT < HIT_T || rightHitT < HIT_T;
+      if (isHitting !== lastHitState) {
+        lastHitState = isHitting;
+        onHit?.(isHitting);
+      }
 
       /* Table */
       const FL=proj(-TX,0,-TZ), FR=proj(TX,0,-TZ);
@@ -163,17 +174,16 @@ function Arena({ chaosMode, onHit }) {
       g.fillStyle = bg; g.fill();
       g.restore();
 
-      /* Paddles — collect hit state and report it */
-      const leftHit  = drawPaddle(-PX, progress, true,  g, proj, ellipse, seg);
-      const rightHit = drawPaddle( PX, progress, false, g, proj, ellipse, seg);
-      if (onHit) onHit(leftHit || rightHit);
+      /* Paddles */
+      drawPaddle(-PX, progress, true);
+      drawPaddle( PX, progress, false);
     };
 
-    /* ── PADDLE: returns true when ball is hitting this paddle ── */
+    /* ── PADDLE: single clean projected ellipse, no double-ring ── */
     const drawPaddle = (px, progress, isLeft) => {
       const hitT   = isLeft ? Math.min(progress,1-progress)*2 : Math.abs(progress-0.5)*2;
-      const hitting = hitT < 0.09;
-      const bump   = hitting ? 1 + (1-hitT/0.09)*0.13 : 1;
+      const hitting = hitT < HIT_T;
+      const bump   = hitting ? 1 + (1-hitT/HIT_T)*0.13 : 1;
       const R      = PR * bump;
 
       /* Project 4 cardinal pts to measure ellipse in screen space */
@@ -220,8 +230,6 @@ function Arena({ chaosMode, onHit }) {
       g.strokeStyle = 'rgba(88,104,165,0.70)'; g.lineWidth = 2.1*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
       g.lineCap = 'butt'; g.restore();
-
-      return hitting;
     };
 
     /* RAF */
@@ -247,18 +255,12 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti,  setConfetti]  = useState([]);
-  // isHitting replaces the old tick timer — driven directly by Arena's onHit callback
-  const [isHitting, setIsHitting] = useState(false);
-  const chaosTimer  = useRef(null);
-  const clickCount  = useRef(0);
-  const clickTimer  = useRef(null);
+  const [hitting,   setHitting]   = useState(false);   // ← driven by ball/paddle collision
+  const chaosTimer = useRef(null);
+  const clickCount = useRef(0);
+  const clickTimer = useRef(null);
 
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
-
-  // Stable callback so Arena's useEffect doesn't re-run on every render
-  const handleHit = useCallback((hit) => {
-    setIsHitting(hit);
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -266,6 +268,9 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
       clearTimeout(clickTimer.current);
     };
   }, []);
+
+  /* Stable callback passed to Arena — avoids re-mounting canvas on every render */
+  const handleHit = useCallback((state) => setHitting(state), []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(blikNumber.replace(/\s/g, ''));
@@ -369,7 +374,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             <Arena chaosMode={chaosMode} onHit={handleHit}/>
           </div>
 
-          <button onClick={handleTitleClick} aria-label="Cyber Ponk — kliknij 5x dla niespodzianki"
+          <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer' }}>
             <span style={{
               display:'block',fontFamily:'var(--font-display)',fontWeight:900,
@@ -379,20 +384,20 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
                     textShadow:'0 0 30px rgba(129,140,248,.8),2px 2px 0 rgba(0,0,0,.9)' }
                 : { color:'#c7d2fe',
                     textShadow:'0 0 30px rgba(129,140,248,.2),2px 2px 0 rgba(0,0,0,.95)' }),
-            }}>CYBER PONK</span>
+            }}>PING-PONG</span>
           </button>
 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
             background:'linear-gradient(90deg,transparent,rgba(129,140,248,.3) 50%,transparent)' }}/>
 
-          {/* JACK IN — świeci tylko gdy piłka dotyka rakietki */}
+          {/* ── JACK IN — podświetla się dokładnie przy uderzeniu piłki w rakietkę ── */}
           <div style={{ display:'flex',alignItems:'center',gap:'14px' }}>
             <span style={{
               fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:600,
               letterSpacing:'.2em',textTransform:'uppercase',
               transition:'color .06s,text-shadow .06s',
-              color: isHitting ? '#818cf8' : 'rgba(129,140,248,.1)',
-              textShadow: isHitting ? '0 0 10px rgba(129,140,248,.7)' : 'none',
+              color:    hitting ? '#818cf8' : 'rgba(129,140,248,.1)',
+              textShadow: hitting ? '0 0 10px rgba(129,140,248,.7)' : 'none',
             }}>⚡ JACK IN ⚡</span>
             <span style={{ color:'#1a1a2e' }}>│</span>
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:700,
