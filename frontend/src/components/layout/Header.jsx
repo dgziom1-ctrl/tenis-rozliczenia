@@ -22,8 +22,8 @@ function Arena({ chaosMode, onHit }) {
     const g = canvas.getContext('2d');
     const W = 560, H = 155, CX = 265, CY = 78;
 
-    // Camera: 27° tilt (pitch) + 20° yaw — KEY for net/table depth
-    const RX = 0.471, RY = 0.349; // radians
+    // Camera: 27° tilt (pitch) + 20° yaw — ujemny RY = widok z lewej strony
+    const RX = 0.471, RY = -0.349; // radians
     const cX = Math.cos(RX), sX = Math.sin(RX);
     const cY = Math.cos(RY), sY = Math.sin(RY);
     const FOV = 370, DIST = 290;
@@ -148,7 +148,13 @@ function Arena({ chaosMode, onHit }) {
       seg(nTN, nTF, 'rgba(236,246,255,0.96)', 2.5);
       g.restore();
 
-      /* Ball */
+      /* ── KOLEJNOŚĆ RYSOWANIA: najpierw rakietki, potem piłka na wierzchu ── */
+
+      /* Paddles — rysowane PRZED piłką żeby piłka była zawsze na wierzchu */
+      drawPaddle(-PX, progress, true);
+      drawPaddle( PX, progress, false);
+
+      /* Ball — rysowana PO rakietkach, zawsze widoczna na wierzchu */
       const bv = ballAt(progress);
       const bq = proj(bv[0], bv[1], 0);
       const bR = 6.4 * bq[2];
@@ -173,10 +179,6 @@ function Arena({ chaosMode, onHit }) {
       g.beginPath(); g.arc(bq[0], bq[1], bR, 0, Math.PI*2);
       g.fillStyle = bg; g.fill();
       g.restore();
-
-      /* Paddles */
-      drawPaddle(-PX, progress, true);
-      drawPaddle( PX, progress, false);
     };
 
     /* ── PADDLE: single clean projected ellipse, no double-ring ── */
