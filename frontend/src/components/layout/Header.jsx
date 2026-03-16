@@ -1,7 +1,5 @@
-javascript
-
 import { Volume2, VolumeX, Smartphone, Check } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const CSS = `
 @keyframes confettiBurst{0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) translateX(var(--drift)) rotate(720deg);opacity:0}}
@@ -12,7 +10,7 @@ const CSS = `
 /* ═══════════════════════════════════════════════════
    3D Arena — canvas, real perspective, yaw+pitch cam
 ═══════════════════════════════════════════════════ */
-function Arena({ chaosMode, onHit }) {
+function Arena({ chaosMode }) {
   const ref = useRef(null);
   const raf = useRef(null);
   const t0  = useRef(null);
@@ -163,13 +161,12 @@ function Arena({ chaosMode, onHit }) {
       g.fillStyle = bg; g.fill();
       g.restore();
 
-      /* Paddles — collect hit state and report it */
-      const leftHit  = drawPaddle(-PX, progress, true,  g, proj, ellipse, seg);
-      const rightHit = drawPaddle( PX, progress, false, g, proj, ellipse, seg);
-      if (onHit) onHit(leftHit || rightHit);
+      /* Paddles */
+      drawPaddle(-PX, progress, true);
+      drawPaddle( PX, progress, false);
     };
 
-    /* ── PADDLE: returns true when ball is hitting this paddle ── */
+    /* ── PADDLE: single clean projected ellipse, no double-ring ── */
     const drawPaddle = (px, progress, isLeft) => {
       const hitT   = isLeft ? Math.min(progress,1-progress)*2 : Math.abs(progress-0.5)*2;
       const hitting = hitT < 0.09;
@@ -220,8 +217,6 @@ function Arena({ chaosMode, onHit }) {
       g.strokeStyle = 'rgba(88,104,165,0.70)'; g.lineWidth = 2.1*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
       g.lineCap = 'butt'; g.restore();
-
-      return hitting;
     };
 
     /* RAF */
@@ -232,7 +227,7 @@ function Arena({ chaosMode, onHit }) {
     };
     raf.current = requestAnimationFrame(loop);
     return () => { cancelAnimationFrame(raf.current); t0.current = null; };
-  }, [chaosMode, onHit]);
+  }, [chaosMode]);
 
   return (
     <canvas ref={ref} width={560} height={155}
@@ -247,21 +242,18 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti,  setConfetti]  = useState([]);
-  // isHitting replaces the old tick timer — driven directly by Arena's onHit callback
-  const [isHitting, setIsHitting] = useState(false);
-  const chaosTimer  = useRef(null);
-  const clickCount  = useRef(0);
-  const clickTimer  = useRef(null);
+  const [tick,      setTick]      = useState(true);
+  const chaosTimer = useRef(null);
+  const clickCount = useRef(0);
+  const clickTimer = useRef(null);
+  const tickTimer  = useRef(null);
 
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
 
-  // Stable callback so Arena's useEffect doesn't re-run on every render
-  const handleHit = useCallback((hit) => {
-    setIsHitting(hit);
-  }, []);
-
   useEffect(() => {
+    tickTimer.current = setInterval(() => setTick(p => !p), 800);
     return () => {
+      clearInterval(tickTimer.current);
       clearTimeout(chaosTimer.current);
       clearTimeout(clickTimer.current);
     };
@@ -366,10 +358,10 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
 
           <div style={{ width:'100%',maxWidth:560,marginBottom:14,
             filter:chaosMode?'none':'drop-shadow(0 0 20px rgba(75,100,255,.16))' }}>
-            <Arena chaosMode={chaosMode} onHit={handleHit}/>
+            <Arena chaosMode={chaosMode}/>
           </div>
 
-          <button onClick={handleTitleClick} aria-label="Cyber Ponk — kliknij 5x dla niespodzianki"
+          <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer' }}>
             <span style={{
               display:'block',fontFamily:'var(--font-display)',fontWeight:900,
@@ -379,21 +371,16 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
                     textShadow:'0 0 30px rgba(129,140,248,.8),2px 2px 0 rgba(0,0,0,.9)' }
                 : { color:'#c7d2fe',
                     textShadow:'0 0 30px rgba(129,140,248,.2),2px 2px 0 rgba(0,0,0,.95)' }),
-            }}>CYBER PONK</span>
+            }}>CYBER-PONG</span>
           </button>
 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
             background:'linear-gradient(90deg,transparent,rgba(129,140,248,.3) 50%,transparent)' }}/>
-
-          {/* JACK IN — świeci tylko gdy piłka dotyka rakietki */}
           <div style={{ display:'flex',alignItems:'center',gap:'14px' }}>
-            <span style={{
-              fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:600,
-              letterSpacing:'.2em',textTransform:'uppercase',
-              transition:'color .06s,text-shadow .06s',
-              color: isHitting ? '#818cf8' : 'rgba(129,140,248,.1)',
-              textShadow: isHitting ? '0 0 10px rgba(129,140,248,.7)' : 'none',
-            }}>⚡ JACK IN ⚡</span>
+            <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:600,
+              letterSpacing:'.2em',textTransform:'uppercase',transition:'color .15s,text-shadow .15s',
+              color:tick?'#818cf8':'rgba(129,140,248,.1)',
+              textShadow:tick?'0 0 10px rgba(129,140,248,.7)':'none' }}>⚡ JACK IN ⚡</span>
             <span style={{ color:'#1a1a2e' }}>│</span>
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:700,
               letterSpacing:'.1em',
