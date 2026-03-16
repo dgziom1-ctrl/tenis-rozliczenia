@@ -3,20 +3,20 @@
 export function PlayerCardSkeleton() {
   return (
     <div style={{
-      background: '#0d0d0d', border: '1px solid #1a1a1a',
+      background: '#0d0d12', border: '1px solid #1a1a2e',
       clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
       overflow: 'hidden', animation: 'skeleton-pulse 1.5s ease-in-out infinite',
     }}>
-      <div style={{ padding: '12px 14px', borderBottom: '1px solid #141414', background: 'rgba(129,140,248,0.02)', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ padding: '12px 14px', borderBottom: '1px solid #14142a', background: 'rgba(129,140,248,0.02)', display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{ width: 56, height: 56, background: '#111', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }} />
         <div style={{ flex: 1 }}>
           <div style={{ height: 8, background: '#111', marginBottom: 8, width: '60%' }} />
-          <div style={{ height: 6, background: '#0d0d0d', width: '40%' }} />
+          <div style={{ height: 6, background: '#0d0d12', width: '40%' }} />
         </div>
       </div>
       <div style={{ padding: '14px' }}>
         <div style={{ height: 3, background: '#111', marginBottom: 14 }} />
-        <div style={{ height: 60, background: '#0a0a0a', marginBottom: 12, clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }} />
+        <div style={{ height: 60, background: '#0a0a0f', marginBottom: 12, clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }} />
         <div style={{ height: 40, background: '#111', clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)' }} />
       </div>
       <style>{`@keyframes skeleton-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
@@ -27,7 +27,7 @@ export function PlayerCardSkeleton() {
 export function SessionCardSkeleton() {
   return (
     <div style={{
-      background: '#070707', border: '1px solid #141414',
+      background: '#07070b', border: '1px solid #14142a',
       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
       padding: '12px 14px', animation: 'skeleton-pulse 1.5s ease-in-out infinite',
     }}>
@@ -35,8 +35,8 @@ export function SessionCardSkeleton() {
         <div style={{ height: 8, background: '#111', width: 120 }} />
         <div style={{ height: 8, background: '#111', width: 60 }} />
       </div>
-      <div style={{ height: 6, background: '#0d0d0d', width: '80%', marginBottom: 6 }} />
-      <div style={{ height: 6, background: '#0d0d0d', width: '60%' }} />
+      <div style={{ height: 6, background: '#0d0d12', width: '80%', marginBottom: 6 }} />
+      <div style={{ height: 6, background: '#0d0d12', width: '60%' }} />
     </div>
   );
 }

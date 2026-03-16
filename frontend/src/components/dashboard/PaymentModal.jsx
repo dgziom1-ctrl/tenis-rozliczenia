@@ -12,7 +12,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
   return (
     <div style={{
       marginBottom: 12, padding: '16px 14px',
-      background: '#080808',
+      background: '#08080d',
       border: '1px solid rgba(129,140,248,0.25)',
       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))',
       boxShadow: '0 0 20px rgba(129,140,248,0.08)',
@@ -64,7 +64,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             fontSize: '0.62rem', letterSpacing: '0.1em',
             ...(!isValid || isSaving ? {
-              background: '#0d0d0d', border: '1px solid #1a1a1a', color: '#333',
+              background: '#0d0d12', border: '1px solid #1a1a2e', color: '#333',
               cursor: 'not-allowed', fontFamily: 'var(--font-display)', fontWeight: 700,
             } : {}),
           }}

@@ -10,10 +10,10 @@
 ═══════════════════════════════════════════════════════════ */
 
 :root {
-  --cyber-black:    #050505;
-  --cyber-dark:     #0a0a0a;
-  --cyber-panel:    #0d0d0d;
-  --cyber-border:   #1a1a1a;
+  --cyber-black:    #060609;
+  --cyber-dark:     #0a0a0f;
+  --cyber-panel:    #0d0d12;
+  --cyber-border:   #1a1a2e;
   --cyber-accent:   #818cf8;
   --cyber-accent2:  #6366f1;
   --cyber-red:      #FF0033;
@@ -33,7 +33,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
-  background-color: var(--cyber-black);
+  background-color: #060609;
   color: var(--cyber-text);
   font-family: var(--font-body);
   font-weight: 500;
@@ -42,6 +42,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.03em;
+  /* Cyberpunk dot-grid background */
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.12) 0%, transparent 70%),
+    radial-gradient(circle at 1px 1px, rgba(129,140,248,0.07) 1px, transparent 0);
+  background-size: 100% 100%, 28px 28px;
+  background-attachment: fixed;
 }
 
 /* Noise/grain overlay */
@@ -192,8 +198,8 @@ body::after {
   .scan-hover:hover::before { animation: scan-sweep 0.6s ease-out forwards; }
 
   .cyber-box {
-    background: var(--cyber-panel);
-    border: 1px solid #1e1e1e;
+    background: #0b0b10;
+    border: 1px solid #1a1a2e;
     position: relative;
     overflow: hidden;
     transition: border-color 0.2s ease;
@@ -207,7 +213,7 @@ body::after {
   .cyber-box > * { position: relative; z-index: 1; }
 
   .cyber-input {
-    background: #070707;
+    background: #07070b;
     border: 1px solid #2a2a2a;
     color: var(--cyber-text);
     font-family: var(--font-mono);
@@ -347,7 +353,7 @@ body::after {
   display: flex; align-items: stretch;
   border-top: 1px solid #1e1e1e;
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  background: rgba(5,5,5,0.97);
+  background: rgba(6,6,9,0.97);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-shadow: 0 -4px 20px rgba(0,0,0,0.9);
 }
@@ -381,7 +387,7 @@ body::after {
     padding-left: 16px; padding-right: 16px;
     padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px;
     border-bottom: 1px solid #1a1a1a;
-    background: rgba(5,5,5,0.97);
+    background: rgba(6,6,9,0.97);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 2px 20px rgba(0,0,0,0.9);
     transition: transform 0.25s ease, opacity 0.25s ease;

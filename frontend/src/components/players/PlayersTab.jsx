@@ -16,7 +16,7 @@ const AVATAR_COLORS = [
 
 function SectionHeader({ icon: Icon, title, accent = 'var(--cyber-accent)' }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #1a1a1a' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #1a1a2e' }}>
       <div style={{ padding: '6px 8px', background: `rgba(0,0,0,0.6)`, border: `1px solid ${accent}25`, clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
         <Icon size={13} style={{ color: accent, display: 'block' }} />
       </div>
@@ -41,7 +41,7 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
   return (
     <div style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(4px)' }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
-        background: '#0a0a0a',
+        background: '#0a0a0f',
         border: `1px solid ${error ? 'var(--cyber-red)' : 'rgba(129,140,248,0.35)'}`,
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
@@ -92,7 +92,7 @@ function AgentCard({ player, index, onDelete, isOrganizer }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-      background: '#070707', border: '1px solid #1a1a1a',
+      background: '#07070b', border: '1px solid #1a1a2e',
       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
       transition: 'border-color 0.2s',
     }}
@@ -139,7 +139,7 @@ function AgentCard({ player, index, onDelete, isOrganizer }) {
           <Trash2 size={14} />
         </button>
       ) : (
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.12em', color: 'var(--cyber-text-dim)', padding: '4px 8px', border: '1px solid #1a1a1a', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.12em', color: 'var(--cyber-text-dim)', padding: '4px 8px', border: '1px solid #1a1a2e', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
           HQ
         </span>
       )}
@@ -211,7 +211,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         animation: 'slide-in-up 0.3s ease-out',
       }}>
         {/* Main header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid #1a1a1a' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid #1a1a2e' }}>
           <div style={{ padding: '7px 9px', background: 'rgba(129,140,248,0.06)', border: '1px solid rgba(129,140,248,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
             <Users size={16} style={{ color: 'var(--cyber-accent)', display: 'block' }} />
           </div>
@@ -277,7 +277,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                         background: 'rgba(0,255,65,0.07)', border: '1px solid rgba(0,255,65,0.4)', color: 'var(--cyber-green)',
                         boxShadow: '0 0 8px rgba(0,255,65,0.1)',
                       } : {
-                        background: '#070707', border: '1px solid #1a1a1a', color: '#444',
+                        background: '#07070b', border: '1px solid #1a1a2e', color: '#444',
                       }),
                     }}>
                     <Zap size={12} style={{ color: active ? 'var(--cyber-green)' : '#333', flexShrink: 0 }} />
@@ -321,7 +321,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                   ) : (
                     <div style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '10px 12px', background: '#070707', border: '1px solid #141414',
+                      padding: '10px 12px', background: '#07070b', border: '1px solid #14142a',
                       clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)',
                     }}>
                       <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', color: '#3a3a3a', display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -329,7 +329,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                       </span>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button onClick={() => handleRestore(name)} style={{
-                          padding: '6px 8px', background: 'transparent', border: '1px solid #1e1e1e', cursor: 'pointer',
+                          padding: '6px 8px', background: 'transparent', border: '1px solid #1a1a2e', cursor: 'pointer',
                           color: '#3a3a3a', transition: 'all 0.15s',
                           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                         }}
@@ -339,7 +339,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                           <RotateCcw size={13} />
                         </button>
                         <button onClick={() => setConfirmDelete(name)} style={{
-                          padding: '6px 8px', background: 'transparent', border: '1px solid #1e1e1e', cursor: 'pointer',
+                          padding: '6px 8px', background: 'transparent', border: '1px solid #1a1a2e', cursor: 'pointer',
                           color: '#3a3a3a', transition: 'all 0.15s',
                           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                         }}

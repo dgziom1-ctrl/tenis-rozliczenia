@@ -131,8 +131,8 @@ export default function DashboardTab({ data, history, playSound }) {
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '10px 16px',
-          background: '#080808',
-          border: '1px solid #1a1a1a',
+          background: '#08080d',
+          border: '1px solid #1a1a2e',
           clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
           flexWrap: 'wrap', gap: 8,
         }}>
@@ -177,7 +177,7 @@ export default function DashboardTab({ data, history, playSound }) {
         {/* Empty state */}
         {totalWeeks === 0 && (
           <div style={{
-            background: '#0d0d0d', border: '1px solid #1a1a1a',
+            background: '#0d0d12', border: '1px solid #1a1a2e',
             clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
             padding: 40, textAlign: 'center',
           }}>

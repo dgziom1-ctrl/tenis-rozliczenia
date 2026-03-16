@@ -52,7 +52,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
     <div style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(6px)' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
-        background: '#0a0a0a',
+        background: '#0a0a0f',
         border: '1px solid rgba(129,140,248,0.4)',
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
         boxShadow: '0 0 60px rgba(129,140,248,0.15), 0 4px 60px rgba(0,0,0,0.95)',
@@ -90,8 +90,8 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
               : { label: 'PŁACĄ', value: payingCount, color: '#c8c8c8' },
           ].map(({ label, value, color }) => (
             <div key={label} style={{
-              padding: '10px 12px', background: '#070707',
-              border: '1px solid #1a1a1a',
+              padding: '10px 12px', background: '#07070b',
+              border: '1px solid #1a1a2e',
               clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
             }}>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 4, textTransform: 'uppercase' }}>{label}</p>
@@ -208,7 +208,7 @@ function PlayerToggleGrid({ names, selected, onToggle, accent = 'yellow' }) {
               background: accentAlpha, border: `1px solid ${accentBorder}`, color: accentColor,
               boxShadow: `0 0 10px ${accent === 'green' ? 'rgba(0,255,65,0.1)' : 'rgba(129,140,248,0.1)'}`,
             } : {
-              background: '#070707', border: '1px solid #1a1a1a', color: '#444',
+              background: '#07070b', border: '1px solid #1a1a2e', color: '#444',
             }),
           }}>
             {name}
@@ -308,7 +308,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)', padding: '20px 20px' }}>
 
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid #1a1a1a' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid #1a1a2e' }}>
             <div style={{ padding: '7px 9px', background: 'rgba(129,140,248,0.07)', border: '1px solid rgba(129,140,248,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
               <CalendarPlus size={16} style={{ color: 'var(--cyber-accent)', display: 'block' }} />
             </div>
@@ -353,7 +353,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                           background: 'rgba(129,140,248,0.1)', border: '1px solid rgba(129,140,248,0.5)',
                           color: 'var(--cyber-accent)', boxShadow: '0 0 8px rgba(129,140,248,0.15)',
                         } : {
-                          background: '#070707', border: '1px solid #1a1a1a', color: '#555',
+                          background: '#07070b', border: '1px solid #1a1a2e', color: '#555',
                         }),
                       }}>
                       {cost === 0 ? 'FREE' : cost}
@@ -370,7 +370,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             </div>
 
             {/* Present players */}
-            <div style={{ padding: '16px', background: '#070707', border: '1px solid #1a1a1a', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+            <div style={{ padding: '16px', background: '#07070b', border: '1px solid #1a1a2e', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
               <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
                 <Users size={13} style={{ color: 'var(--cyber-accent)' }} />
                 Kto grał?
@@ -383,7 +383,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Multisport */}
             {presentPlayers.length > 0 && (
-              <div style={{ padding: '16px', background: '#070707', border: '1px solid #141414', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+              <div style={{ padding: '16px', background: '#07070b', border: '1px solid #14142a', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.68rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
                   <Zap size={13} style={{ color: 'var(--cyber-green)' }} />
                   Kto miał Multisport? (płaci 0 zł)
@@ -411,7 +411,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                   cursor: isDisabled ? 'not-allowed' : 'pointer',
                   fontFamily: 'var(--font-display)', fontWeight: 700,
                   ...(isDisabled ? {
-                    background: '#0d0d0d', border: '1px solid #1a1a1a', color: '#333',
+                    background: '#0d0d12', border: '1px solid #1a1a2e', color: '#333',
                   } : {}),
                 }}>
                 {isSaving

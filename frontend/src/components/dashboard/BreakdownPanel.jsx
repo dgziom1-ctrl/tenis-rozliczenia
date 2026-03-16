@@ -16,7 +16,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
       <button onClick={onToggle} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
         width: '100%', padding: '6px 10px',
-        background: 'transparent', border: '1px solid #1a1a1a',
+        background: 'transparent', border: '1px solid #1a1a2e',
         cursor: 'pointer', transition: 'all 0.15s',
         clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
         fontFamily: 'var(--font-display)', fontSize: '0.65rem', fontWeight: 700,
@@ -34,8 +34,8 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
       {open && breakdown && (
         <div style={{
           marginTop: 4,
-          background: '#060606',
-          border: '1px solid #141414',
+          background: '#06060a',
+          border: '1px solid #14142a',
           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
           overflow: 'hidden',
         }}>
@@ -140,7 +140,7 @@ function TerminalSectionHeader({ label }) {
   return (
     <div style={{
       padding: '5px 12px',
-      borderBottom: '1px solid #141414',
+      borderBottom: '1px solid #14142a',
       fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700,
       letterSpacing: '0.2em', textTransform: 'uppercase', color: '#333',
       display: 'flex', alignItems: 'center', gap: 6,
@@ -156,7 +156,7 @@ function TerminalRow({ children, highlight }) {
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       padding: '6px 12px',
-      borderBottom: '1px solid #0f0f0f',
+      borderBottom: '1px solid #0f0f1a',
       background: highlight || 'transparent',
       transition: 'background 0.15s',
     }}

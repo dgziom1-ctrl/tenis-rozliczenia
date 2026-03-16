@@ -50,7 +50,7 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
     <div style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(4px)' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
-        background: '#0d0d0d',
+        background: '#0d0d12',
         border: `1px solid ${error ? 'var(--cyber-red)' : 'rgba(129,140,248,0.3)'}`,
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
@@ -105,7 +105,7 @@ function LogEntry({ row, onEdit, onDelete }) {
   const time = new Date(row.datePlayed).getTime();
   return (
     <div className="scan-hover" style={{
-      background: '#070707', border: '1px solid #141414',
+      background: '#07070b', border: '1px solid #14142a',
       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
       padding: '12px 14px', marginBottom: 4,
       transition: 'border-color 0.2s',
@@ -267,7 +267,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
         animation: 'slide-in-up 0.3s ease-out',
       }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, paddingBottom: 14, borderBottom: '1px solid #1a1a1a' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, paddingBottom: 14, borderBottom: '1px solid #1a1a2e' }}>
           <div style={{ padding: '6px 8px', background: 'rgba(0,255,65,0.08)', border: '1px solid rgba(0,255,65,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
             <Terminal size={14} style={{ color: 'var(--cyber-green)', display: 'block' }} />
           </div>
@@ -281,7 +281,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
         </div>
 
         {/* Boot text */}
-        <div style={{ marginBottom: 20, padding: '10px 14px', background: '#050505', border: '1px solid #0f0f0f' }}>
+        <div style={{ marginBottom: 20, padding: '10px 14px', background: '#060609', border: '1px solid #0f0f0f' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--cyber-green)', lineHeight: 1.6, opacity: 0.7 }}>
             {'>'} System OK<br/>
             {'>'} Ładowanie historii...<br/>
@@ -307,7 +307,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             <div key={label}>
               {/* Month header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: '#080808', border: '1px solid #1e1e1e', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: '#08080d', border: '1px solid #1a1a2e', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.66rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cyber-accent)' }}>{label}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#3a3a3a' }}>[{rows.length}x]</span>
                 </div>
@@ -322,7 +322,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
                   if (isEditingRow) return (
                     <div key={row.id} style={{
-                      background: '#080808', border: '1px solid rgba(129,140,248,0.25)',
+                      background: '#08080d', border: '1px solid rgba(129,140,248,0.25)',
                       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
                       padding: 16, marginBottom: 4, display: 'flex', flexDirection: 'column', gap: 14,
                     }}>

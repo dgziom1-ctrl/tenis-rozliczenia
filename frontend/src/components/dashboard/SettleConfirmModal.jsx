@@ -10,7 +10,7 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
       style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(6px)' }}
     >
       <div style={{
-        background: '#0a0a0a',
+        background: '#0a0a0f',
         border: '1px solid rgba(129,140,248,0.4)',
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
         boxShadow: '0 0 50px rgba(129,140,248,0.15), 0 4px 60px rgba(0,0,0,0.95)',

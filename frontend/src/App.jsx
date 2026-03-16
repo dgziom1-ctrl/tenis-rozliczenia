@@ -98,7 +98,7 @@ function CyberErrorScreen() {
 
       <div style={{
         padding: 32, textAlign: 'center', maxWidth: 360,
-        background: '#0d0d0d', border: '1px solid rgba(255,0,51,0.3)',
+        background: '#0d0d12', border: '1px solid rgba(255,0,51,0.3)',
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         boxShadow: '0 0 30px rgba(255,0,51,0.15)',
       }}>
@@ -158,8 +158,45 @@ function AppContent() {
     <ThemeContext.Provider value="cyber">
       <div
         className="min-h-screen p-4 md:p-8 relative z-10"
-        style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}
+        style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', position: 'relative' }}
       >
+        {/* ── Cyberpunk background ── */}
+        <div aria-hidden="true" style={{
+          position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden', pointerEvents: 'none',
+        }}>
+          {/* Deep radial glow — top center */}
+          <div style={{
+            position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)',
+            width: '80vw', height: '60vh',
+            background: 'radial-gradient(ellipse at center top, rgba(99,102,241,0.09) 0%, rgba(67,56,202,0.04) 40%, transparent 70%)',
+          }} />
+          {/* Secondary glow — bottom right */}
+          <div style={{
+            position: 'absolute', bottom: '-5%', right: '-10%',
+            width: '50vw', height: '50vh',
+            background: 'radial-gradient(ellipse at bottom right, rgba(139,92,246,0.06) 0%, transparent 65%)',
+          }} />
+          {/* Subtle grid */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `
+              linear-gradient(rgba(129,140,248,0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(129,140,248,0.03) 1px, transparent 1px)
+            `,
+            backgroundSize: '48px 48px',
+          }} />
+          {/* Perspective grid floor — bottom third */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '40vh',
+            backgroundImage: `
+              linear-gradient(rgba(129,140,248,0.04) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(129,140,248,0.04) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px',
+            maskImage: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 100%)',
+          }} />
+        </div>
         <div className="max-w-7xl mx-auto relative">
           <Header
             isMuted={isMuted}

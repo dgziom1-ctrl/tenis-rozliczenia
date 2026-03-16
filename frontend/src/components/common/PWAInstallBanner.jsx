@@ -39,7 +39,7 @@ export default function PWAInstallBanner() {
     bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
     left: 10, right: 10,
     zIndex: 45,
-    background: '#0a0a0a',
+    background: '#0a0a0f',
     border: '1px solid rgba(129,140,248,0.35)',
     clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
     boxShadow: '0 0 24px rgba(129,140,248,0.12), 0 4px 30px rgba(0,0,0,0.9)',

@@ -8,7 +8,7 @@ function SectionHeader({ icon: Icon, title, accent = 'var(--cyber-accent)' }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20,
-      paddingBottom: 12, borderBottom: '1px solid #1a1a1a',
+      paddingBottom: 12, borderBottom: '1px solid #1a1a2e',
     }}>
       <div style={{
         padding: '6px 8px',
@@ -203,7 +203,7 @@ function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
       <SectionHeader icon={TrendingUp} title="Ranking frekwencji" />
       <Podium podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} />
       {theRest.length > 0 && (
-        <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: 16 }}>
+        <div style={{ borderTop: '1px solid #1a1a2e', paddingTop: 16 }}>
           {theRest.map(player => (
             <LeaderboardRow key={player.name} player={player} totalWeeks={totalWeeks} stats={stats} place={player.place} />
           ))}
@@ -247,7 +247,7 @@ function MonthlyReport({ monthlyStats, players }) {
             </thead>
             <tbody>
               {monthlyStats.map(([month, rowData]) => (
-                <tr key={month} style={{ borderBottom: '1px solid #111' }}>
+                <tr key={month} style={{ borderBottom: '1px solid #11112a' }}>
                   <td style={{ padding: '8px 12px', fontSize: '0.75rem', color: '#c8c8c8', fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.08em' }}>{month}</td>
                   <td style={{ padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--cyber-accent)', textAlign: 'center' }}>{rowData.total}</td>
                   {players?.map(p => {
@@ -292,7 +292,7 @@ function RankGuide() {
         {RANKS.map((r, i) => (
           <div key={i} style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 8px',
-            background: '#080808', border: '1px solid #1a1a1a',
+            background: '#08080d', border: '1px solid #1a1a2e',
             clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
             transition: 'border-color 0.2s',
           }}>
