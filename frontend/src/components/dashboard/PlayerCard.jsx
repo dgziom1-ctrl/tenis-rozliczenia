@@ -9,7 +9,7 @@ import PaymentModal from './PaymentModal';
 import UndoBar from '../common/UndoBar';
 
 // ── Animated counter ──────────────────────────────────────
-function useAnimatedValue(value, duration = 550) {
+function useAnimatedValue(value, duration = 1000) {
   const [display, setDisplay] = useState(value);
   const fromRef = useRef(value);
   const rafRef  = useRef(null);
