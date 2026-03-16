@@ -241,7 +241,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               {/* ════ NET ════ */}
               {/* Net shadow on table */}
               <div style={{
-                position: 'absolute', left: 'calc(50% - 4px)', top: 'calc(50% + 4px)',
+                position: 'absolute', left: 'calc(50% - 4px)', top: 'calc(50% + 11px)',
                 width: 8, height: 8,
                 background: 'rgba(0,0,0,0.3)',
                 filter: 'blur(3px)',
@@ -249,7 +249,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               {/* Net body — slightly trapezoidal, wider at bottom */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% - 20px)', top: 'calc(50% - 18px)',
+                left: 'calc(50% - 20px)', top: 'calc(50% - 11px)',
                 width: 40, height: 18,
                 background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(165,180,252,0.22) 2px, rgba(165,180,252,0.22) 3px)',
                 border: '1.5px solid rgba(200,214,255,0.6)',
@@ -260,7 +260,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               {/* Net top bar (brightest) */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% - 21px)', top: 'calc(50% - 19px)',
+                left: 'calc(50% - 21px)', top: 'calc(50% - 12px)',
                 width: 42, height: 2.5,
                 background: 'rgba(200,214,255,0.75)',
                 boxShadow: '0 0 6px rgba(165,180,252,0.5)',
@@ -269,7 +269,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               {/* Left post */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% - 22px)', top: 'calc(50% - 21px)',
+                left: 'calc(50% - 22px)', top: 'calc(50% - 14px)',
                 width: 3, height: 24,
                 background: 'linear-gradient(180deg, rgba(200,214,255,0.8), rgba(165,180,252,0.4))',
                 borderRadius: '1px 1px 0 0',
@@ -277,7 +277,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               {/* Right post */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% + 19px)', top: 'calc(50% - 21px)',
+                left: 'calc(50% + 19px)', top: 'calc(50% - 14px)',
                 width: 3, height: 24,
                 background: 'linear-gradient(180deg, rgba(200,214,255,0.8), rgba(165,180,252,0.4))',
                 borderRadius: '1px 1px 0 0',
