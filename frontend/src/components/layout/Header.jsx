@@ -241,16 +241,16 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               {/* ════ NET ════ */}
               {/* Net shadow on table */}
               <div style={{
-                position: 'absolute', left: 'calc(50% - 4px)', top: 'calc(50% + 11px)',
-                width: 8, height: 8,
+                position: 'absolute', left: '20%', right: '20%', top: 'calc(50% + 9px)',
+                height: 6,
                 background: 'rgba(0,0,0,0.3)',
                 filter: 'blur(3px)',
               }} />
               {/* Net body — slightly trapezoidal, wider at bottom */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% - 20px)', top: 'calc(50% - 31px)',
-                width: 40, height: 38,
+                left: '8%', right: '8%', top: 'calc(50% - 11px)',
+                width: 'auto', height: 18,
                 background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(165,180,252,0.22) 2px, rgba(165,180,252,0.22) 3px)',
                 border: '1.5px solid rgba(200,214,255,0.6)',
                 borderBottom: 'none',
@@ -260,8 +260,8 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               {/* Net top bar (brightest) */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% - 21px)', top: 'calc(50% - 32px)',
-                width: 42, height: 2.5,
+                left: '8%', right: '8%', top: 'calc(50% - 12px)',
+                width: 'auto', height: 2.5,
                 background: 'rgba(200,214,255,0.75)',
                 boxShadow: '0 0 6px rgba(165,180,252,0.5)',
                 borderRadius: '1px',
@@ -269,16 +269,16 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               {/* Left post */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% - 22px)', top: 'calc(50% - 33px)',
-                width: 3, height: 40,
+                left: '8%', top: 'calc(50% - 13px)',
+                width: 3, height: 25,
                 background: 'linear-gradient(180deg, rgba(200,214,255,0.8), rgba(165,180,252,0.4))',
                 borderRadius: '1px 1px 0 0',
               }} />
               {/* Right post */}
               <div style={{
                 position: 'absolute',
-                left: 'calc(50% + 19px)', top: 'calc(50% - 33px)',
-                width: 3, height: 40,
+                right: '8%', top: 'calc(50% - 13px)',
+                width: 3, height: 25,
                 background: 'linear-gradient(180deg, rgba(200,214,255,0.8), rgba(165,180,252,0.4))',
                 borderRadius: '1px 1px 0 0',
               }} />
