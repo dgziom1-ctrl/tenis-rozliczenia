@@ -1,298 +1,51 @@
 import { Volume2, VolumeX, Smartphone, Copy, Check } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
-/* ═══════════════════════════════════════════════════════════════
-   3D Canvas Ping-Pong Arena
-   Internal resolution: 1040 × 220 (2× retina), displays at 520 × 110.
-   Perspective camera: slightly above and behind near side of table.
-   Scene units: table is 7.6 wide × 2.4 deep × 3 tall (net height ≈ 0.6).
-═══════════════════════════════════════════════════════════════ */
-
-const CW = 1040, CH = 220;      // canvas internal size
-const TL = 3.8;                  // table half-length (x)
-const TW = 1.2;                  // table half-depth (z)
-const NET_H = 0.60;              // net height in scene units
-const ARC_H = 2.1;               // ball arc peak height
-const DUR = 1800;                // animation cycle ms
-
-// ── Perspective projection ────────────────────────────────────
-// Maps 3D (x, y, z) to canvas 2D using bilinear table-corner interpolation.
-// x ∈ [-TL, TL], y ∈ [0, ∞] (0=table surface), z ∈ [-TW, TW] (-=far, +=near)
-function proj(x3, y3, z3) {
-  const nx = x3 / TL;
-  const t  = (z3 / TW + 1) * 0.5; // 0=far, 1=near
-
-  // Screen position of table corners (tuned for good 3D look)
-  const farX  = CW * 0.5 + nx * CW * 0.27;
-  const farY  = CH * 0.26;
-  const nearX = CW * 0.5 + nx * CW * 0.45;
-  const nearY = CH * 0.86;
-
-  const bx    = farX  + (nearX  - farX)  * t;
-  const by    = farY  + (nearY  - farY)  * t;
-  const scale = 0.65 + t * 0.70;           // objects larger when near
-
-  return { x: bx, y: by - y3 * CH * 0.54 * scale, scale };
-}
-
-// ── Table ─────────────────────────────────────────────────────
-function drawTable(ctx) {
-  const c = [
-    proj(-TL, 0, -TW), proj(TL, 0, -TW),
-    proj( TL, 0,  TW), proj(-TL, 0,  TW),
-  ];
-
-  // Fill — dark indigo blue
-  const grad = ctx.createLinearGradient(0, c[0].y, 0, c[3].y);
-  grad.addColorStop(0,   'rgba(12, 16, 62, 0.95)');
-  grad.addColorStop(0.5, 'rgba(16, 22, 75, 0.97)');
-  grad.addColorStop(1,   'rgba(20, 28, 85, 0.98)');
-  ctx.beginPath();
-  ctx.moveTo(c[0].x, c[0].y);
-  c.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Far edge (dim)
-  ctx.beginPath();
-  ctx.moveTo(c[0].x, c[0].y); ctx.lineTo(c[1].x, c[1].y);
-  ctx.strokeStyle = 'rgba(129,140,248,0.30)'; ctx.lineWidth = 2; ctx.stroke();
-
-  // Near edge (bright, glow)
-  ctx.beginPath();
-  ctx.moveTo(c[3].x, c[3].y); ctx.lineTo(c[2].x, c[2].y);
-  ctx.strokeStyle = 'rgba(165,180,252,0.85)';
-  ctx.lineWidth = 3;
-  ctx.shadowColor = 'rgba(129,140,248,0.6)'; ctx.shadowBlur = 10; ctx.stroke(); ctx.shadowBlur = 0;
-
-  // Side edges
-  [[c[0],c[3]], [c[1],c[2]]].forEach(([a,b]) => {
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
-    ctx.strokeStyle = 'rgba(129,140,248,0.45)'; ctx.lineWidth = 1.5; ctx.stroke();
-  });
-
-  // Centre line (dashed)
-  const cf = proj(0, 0, -TW), cn = proj(0, 0, TW);
-  ctx.beginPath(); ctx.moveTo(cf.x, cf.y); ctx.lineTo(cn.x, cn.y);
-  ctx.setLineDash([8,10]); ctx.strokeStyle = 'rgba(165,180,252,0.18)'; ctx.lineWidth = 1.5; ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Front face (3D depth strip below near edge)
-  ctx.beginPath();
-  ctx.moveTo(c[3].x, c[3].y);
-  ctx.lineTo(c[2].x, c[2].y);
-  ctx.lineTo(c[2].x + 4, c[2].y + 16);
-  ctx.lineTo(c[3].x - 4, c[3].y + 16);
-  ctx.closePath();
-  const faceGrad = ctx.createLinearGradient(0, c[3].y, 0, c[3].y + 16);
-  faceGrad.addColorStop(0, 'rgba(129,140,248,0.22)');
-  faceGrad.addColorStop(1, 'rgba(129,140,248,0.03)');
-  ctx.fillStyle = faceGrad;
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(129,140,248,0.15)'; ctx.lineWidth = 1; ctx.stroke();
-}
-
-// ── Net ───────────────────────────────────────────────────────
-function drawNet(ctx) {
-  const steps = 7; // vertical mesh lines
-
-  // Net shadow on table
-  const sl = proj(-0.3, 0.01, -TW * 0.6), sr = proj(0.3, 0.01, TW * 0.6);
-  const gsh = ctx.createLinearGradient(sl.x, sl.y, sr.x, sr.y);
-  gsh.addColorStop(0, 'rgba(0,0,0,0)');
-  gsh.addColorStop(0.5, 'rgba(0,0,0,0.25)');
-  gsh.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = gsh;
-  ctx.beginPath();
-  ctx.ellipse((sl.x+sr.x)/2, (sl.y+sr.y)/2 + 4, (sr.x-sl.x)/2, 6, 0, 0, Math.PI*2);
-  ctx.fill();
-
-  // Draw horizontal mesh lines
-  const ROWS = 6;
-  for (let r = 0; r <= ROWS; r++) {
-    const y3 = (r / ROWS) * NET_H;
-    const l = proj(0, y3, -TW), ri = proj(0, y3, TW);
-    ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.lineTo(ri.x, ri.y);
-    const alpha = 0.12 + (r / ROWS) * 0.12;
-    ctx.strokeStyle = `rgba(165,180,252,${alpha})`; ctx.lineWidth = 1; ctx.stroke();
+/*
+  Ball animation: TWO full symmetric arcs, each going OVER the net.
+  - Forward  L→R : 0%  → 50%
+  - Return   R→L : 50% → 100%
+  Both squish on impact at 0%/50%/100%.
+  Container height: 90px. Table at top=55%. Net top ≈ 28% from top.
+  Peak of arc ≈ top=5% — well clear of the net.
+*/
+const BALL_CSS = `
+  @keyframes ball-flight {
+    /* LEFT PADDLE IMPACT — 50% = vertical center of container = paddle face */
+    0%   { left: 8%;  top: 50%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.55); }
+    2%   { left: 8%;  top: 50%; transform: translate(-50%,-50%) scale(1); }
+    12%  { left: 23%; top: 34%; transform: translate(-50%,-50%) scale(1); }
+    23%  { left: 37%; top: 12%; transform: translate(-50%,-50%) scale(1); }
+    34%  { left: 50%; top: 4%;  transform: translate(-50%,-50%) scale(1); }
+    45%  { left: 63%; top: 12%; transform: translate(-50%,-50%) scale(1); }
+    48%  { left: 78%; top: 34%; transform: translate(-50%,-50%) scale(1); }
+    /* RIGHT PADDLE IMPACT */
+    50%  { left: 92%; top: 50%; transform: translate(-50%,-50%) scale(1); }
+    51%  { left: 92%; top: 50%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.55); }
+    53%  { left: 92%; top: 50%; transform: translate(-50%,-50%) scale(1); }
+    62%  { left: 78%; top: 34%; transform: translate(-50%,-50%) scale(1); }
+    66%  { left: 63%; top: 12%; transform: translate(-50%,-50%) scale(1); }
+    75%  { left: 50%; top: 4%;  transform: translate(-50%,-50%) scale(1); }
+    84%  { left: 37%; top: 12%; transform: translate(-50%,-50%) scale(1); }
+    88%  { left: 23%; top: 34%; transform: translate(-50%,-50%) scale(1); }
+    98%  { left: 8%;  top: 50%; transform: translate(-50%,-50%) scale(1); }
+    100% { left: 8%;  top: 50%; transform: translate(-50%,-50%) scaleX(1.6) scaleY(0.55); }
   }
-
-  // Draw vertical mesh lines (perspective-correct)
-  for (let s = 0; s <= steps; s++) {
-    const z3 = -TW + (s / steps) * TW * 2;
-    const bot = proj(0, 0, z3), top = proj(0, NET_H, z3);
-    ctx.beginPath(); ctx.moveTo(bot.x, bot.y); ctx.lineTo(top.x, top.y);
-    ctx.strokeStyle = 'rgba(165,180,252,0.09)'; ctx.lineWidth = 0.8; ctx.stroke();
+  @keyframes left-paddle-hit {
+    0%   { transform: rotate(-45deg) scale(1.1); }
+    6%   { transform: rotate(-45deg) scale(1); }
+    94%  { transform: rotate(-45deg) scale(1); }
+    100% { transform: rotate(-45deg) scale(1.1); }
   }
+  @keyframes right-paddle-hit {
+    0%,48%  { transform: rotate(45deg) scale(1); }
+    50%     { transform: rotate(45deg) scale(1.1); }
+    56%     { transform: rotate(45deg) scale(1); }
+    100%    { transform: rotate(45deg) scale(1); }
+  }
+`;
+const BALL_DUR = '1.8s';
 
-  // Side posts
-  [[-TW], [TW]].forEach(([z]) => {
-    const bot = proj(0, 0, z), top = proj(0, NET_H, z);
-    const pg = ctx.createLinearGradient(0, top.y, 0, bot.y);
-    pg.addColorStop(0, 'rgba(210,220,255,0.9)');
-    pg.addColorStop(1, 'rgba(165,180,252,0.4)');
-    ctx.beginPath(); ctx.moveTo(bot.x, bot.y); ctx.lineTo(top.x, top.y);
-    ctx.strokeStyle = pg; ctx.lineWidth = 3 * ((z > 0 ? 1.3 : 0.9)); ctx.stroke();
-  });
-
-  // Top bar (brightest element)
-  const tl = proj(0, NET_H, -TW), tr = proj(0, NET_H, TW);
-  ctx.beginPath(); ctx.moveTo(tl.x, tl.y); ctx.lineTo(tr.x, tr.y);
-  ctx.strokeStyle = 'rgba(215,225,255,0.92)'; ctx.lineWidth = 3;
-  ctx.shadowColor = 'rgba(165,180,252,0.7)'; ctx.shadowBlur = 8; ctx.stroke(); ctx.shadowBlur = 0;
-}
-
-// ── Ball ──────────────────────────────────────────────────────
-function drawBall(ctx, t) {
-  const fwd = t < 0.5;
-  const p   = fwd ? t * 2 : (t - 0.5) * 2;
-  const x3  = fwd ? -TL + p * TL * 2 : TL - p * TL * 2;
-  const y3  = Math.sin(p * Math.PI) * ARC_H;
-  const z3  = 0; // travels along centre line
-
-  // Shadow on table
-  const sh = proj(x3, 0.02, z3);
-  const shadowAlpha = 0.45 * Math.max(0, 1 - y3 / (ARC_H * 1.2));
-  ctx.save();
-  ctx.globalAlpha = shadowAlpha;
-  ctx.beginPath();
-  ctx.ellipse(sh.x, sh.y, 14 * sh.scale, 5 * sh.scale, 0, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0,0,30,0.85)'; ctx.fill();
-  ctx.restore();
-
-  // Ball sphere
-  const bp = proj(x3, y3, z3);
-  const r  = 9 * bp.scale;
-  const g  = ctx.createRadialGradient(
-    bp.x - r * 0.32, bp.y - r * 0.35, r * 0.04,
-    bp.x, bp.y, r
-  );
-  g.addColorStop(0,    '#ffffff');
-  g.addColorStop(0.35, '#edf0ff');
-  g.addColorStop(0.75, '#bcc8f0');
-  g.addColorStop(1,    '#8898d8');
-
-  ctx.save();
-  ctx.shadowColor = 'rgba(200,210,255,0.95)'; ctx.shadowBlur = 12 * bp.scale;
-  ctx.beginPath(); ctx.arc(bp.x, bp.y, r, 0, Math.PI * 2);
-  ctx.fillStyle = g; ctx.fill();
-  ctx.restore();
-}
-
-// ── Paddle ────────────────────────────────────────────────────
-function drawPaddle(ctx, side, t) {
-  const hitL = t < 0.06 || t > 0.94;
-  const hitR = t > 0.47 && t < 0.57;
-  const hit  = side < 0 ? hitL : hitR;
-
-  const x3  = side * (TL + 0.55);
-  const bp  = proj(x3, 0.18, 0);
-  const r   = 22 * bp.scale * (hit ? 1.12 : 1.0);
-  const rx  = r;
-  const ry  = r * 0.88; // slight ellipse = 3D tilt
-
-  // Outer glow
-  ctx.save();
-  ctx.shadowColor = hit ? 'rgba(165,180,252,0.9)' : 'rgba(129,140,248,0.45)';
-  ctx.shadowBlur  = hit ? 28 : 16;
-
-  // Paddle body gradient (dark indigo with edge highlight)
-  const g = ctx.createRadialGradient(
-    bp.x - rx * 0.28, bp.y - ry * 0.3, rx * 0.05,
-    bp.x, bp.y, rx
-  );
-  g.addColorStop(0,    'rgba(160,175,255,0.92)');
-  g.addColorStop(0.45, 'rgba(90,110,220,0.88)');
-  g.addColorStop(0.80, 'rgba(45,60,180,0.85)');
-  g.addColorStop(1,    'rgba(25,38,150,0.70)');
-
-  ctx.beginPath(); ctx.ellipse(bp.x, bp.y, rx, ry, 0, 0, Math.PI * 2);
-  ctx.fillStyle = g; ctx.fill();
-
-  // Rim highlight
-  ctx.beginPath(); ctx.ellipse(bp.x, bp.y, rx, ry, 0, 0, Math.PI * 2);
-  ctx.strokeStyle = hit ? 'rgba(200,215,255,0.95)' : 'rgba(165,180,252,0.70)';
-  ctx.lineWidth = hit ? 3 : 2; ctx.stroke();
-
-  // Inner rubber face
-  ctx.beginPath(); ctx.ellipse(bp.x, bp.y, rx * 0.52, ry * 0.52, 0, 0, Math.PI * 2);
-  ctx.fillStyle = hit ? 'rgba(190,205,255,0.88)' : 'rgba(165,185,255,0.72)';
-  ctx.fill();
-
-  // Specular highlight (top-left arc)
-  const hl = ctx.createRadialGradient(
-    bp.x - rx * 0.35, bp.y - ry * 0.38, 0,
-    bp.x - rx * 0.35, bp.y - ry * 0.38, rx * 0.55
-  );
-  hl.addColorStop(0,   'rgba(255,255,255,0.35)');
-  hl.addColorStop(0.6, 'rgba(255,255,255,0.06)');
-  hl.addColorStop(1,   'rgba(255,255,255,0)');
-  ctx.beginPath(); ctx.ellipse(bp.x, bp.y, rx, ry, 0, 0, Math.PI * 2);
-  ctx.fillStyle = hl; ctx.fill();
-  ctx.restore();
-
-  // Handle — projected in 3D downward
-  const hp = proj(x3, -0.25, side * 0.1);
-  ctx.save();
-  ctx.strokeStyle = 'rgba(100,118,210,0.75)';
-  ctx.lineWidth = 7 * bp.scale; ctx.lineCap = 'round';
-  ctx.shadowColor = 'rgba(80,100,200,0.4)'; ctx.shadowBlur = 4;
-  ctx.beginPath();
-  ctx.moveTo(bp.x + side * rx * 0.18, bp.y + ry * 0.72);
-  ctx.lineTo(hp.x + side * 4,          hp.y + 12 * bp.scale);
-  ctx.stroke();
-  ctx.restore();
-}
-
-// ── Canvas component ──────────────────────────────────────────
-function PingPongArena({ chaosMode }) {
-  const canvasRef = useRef(null);
-  const rafRef    = useRef(null);
-  const tRef      = useRef(0);
-  const prevTsRef = useRef(null);
-  const chaosRef  = useRef(chaosMode);
-  useEffect(() => { chaosRef.current = chaosMode; }, [chaosMode]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.width  = CW;
-    canvas.height = CH;
-    const ctx = canvas.getContext('2d');
-
-    function render(ts) {
-      if (prevTsRef.current === null) prevTsRef.current = ts;
-      const dt = Math.min(ts - prevTsRef.current, 50); // cap at 50ms
-      prevTsRef.current = ts;
-      tRef.current = (tRef.current + dt / DUR) % 1;
-
-      ctx.clearRect(0, 0, CW, CH);
-
-      if (!chaosRef.current) {
-        drawTable(ctx);
-        drawNet(ctx);
-        drawBall(ctx, tRef.current);
-      }
-      drawPaddle(ctx, -1, tRef.current);
-      drawPaddle(ctx, +1, tRef.current);
-
-      rafRef.current = requestAnimationFrame(render);
-    }
-
-    rafRef.current = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{ width: '100%', maxWidth: 520, height: 110, display: 'block' }}
-    />
-  );
-}
-
-// ── Header ────────────────────────────────────────────────────
 export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
@@ -336,7 +89,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
     setChaosMode(true);
     const pool = ['🏓','⚡','💀','🎮','💥','⚠️','🔥','🎯','💣','🌪️'];
     setConfetti(Array.from({ length: 40 }, (_, i) => ({
-      id: i, emoji: pool[i % pool.length],
+      id: i, emoji: pool[Math.floor(Math.random() * pool.length)],
       x: Math.random() * 100, delay: Math.random() * 1.2,
       dur: 1.8 + Math.random() * 1.5, size: 18 + Math.random() * 24,
       rotate: Math.random() * 360, drift: (Math.random() - 0.5) * 120,
@@ -345,9 +98,12 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
     chaosTimer.current = setTimeout(() => { setChaosMode(false); setConfetti([]); }, 4000);
   };
 
+  const pSize = 'clamp(26px, 4.2vw, 42px)';
+
   return (
     <>
-      {/* Chaos */}
+      <style>{BALL_CSS}</style>
+
       {chaosMode && confetti.map(c => (
         <div key={c.id} className="fixed pointer-events-none z-50"
           style={{ left: `${c.x}%`, top: 0, fontSize: `${c.size}px`,
@@ -359,7 +115,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
       {chaosMode && (
         <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 49,
           animation: 'chaosFlash 0.6s ease-out forwards',
-          background: 'radial-gradient(ellipse at 50% 30%, rgba(129,140,248,0.12) 0%, transparent 70%)' }} />
+          background: 'radial-gradient(ellipse at 50% 30%, rgba(129,140,248,0.1) 0%, transparent 70%)' }} />
       )}
 
       <header style={{
@@ -382,11 +138,11 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             padding: '7px 12px', cursor: 'pointer', transition: 'all 0.18s',
             clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
           }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--cyber-text-dim)' }}><rect width="7" height="14" x="3" y="5" rx="1"/><path d="M7 5V3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M11 5v14"/><path d="M21 15V9a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1Z"/></svg>
+            <Smartphone size={14} style={{ color: 'var(--cyber-text-dim)' }} />
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.18em', color: '#818cf8', padding: '2px 6px', background: 'rgba(129,140,248,0.1)', border: '1px solid rgba(129,140,248,0.25)' }}>BLIK</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', letterSpacing: '0.06em', color: '#e0e0e0' }}>{blikNumber}</span>
             <div style={{ width: 1, height: 14, background: '#252535', margin: '0 2px' }} />
-            {copied ? <Check size={13} style={{ color: 'var(--cyber-green)' }} /> : <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--cyber-text-dim)' }}><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>}
+            {copied ? <Check size={13} style={{ color: 'var(--cyber-green)' }} /> : <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--cyber-text-dim)' }}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>}
           </button>
           <button onClick={() => setIsMuted(!isMuted)} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36,
@@ -401,34 +157,165 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
         </div>
 
         {/* HERO */}
-        <div style={{ position: 'relative', zIndex: 10, padding: '16px 16px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 10, padding: '18px 16px 22px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
           {/* Eyebrow */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
             <div style={{ height: 1, width: 36, background: 'linear-gradient(to right, transparent, rgba(129,140,248,0.5))' }} />
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.28em', color: 'rgba(129,140,248,0.55)', textTransform: 'uppercase' }}>CENTRUM DOWODZENIA</span>
             <div style={{ height: 1, width: 36, background: 'linear-gradient(to left, transparent, rgba(129,140,248,0.5))' }} />
           </div>
 
-          {/* 3D Canvas Arena */}
-          <PingPongArena chaosMode={chaosMode} />
+          {/* ════════ BALL ARENA ════════
+              Layout: [LEFT PADDLE] [CENTER STRIP] [RIGHT PADDLE]
+              The center strip contains the 3D table + net + ball.
+          */}
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            width: '100%', maxWidth: 520, marginBottom: 14,
+          }}>
+            {/* LEFT PADDLE */}
+            <div style={{ flexShrink: 0, zIndex: 2, animation: chaosMode ? 'none' : `left-paddle-hit ${BALL_DUR} ease-in-out infinite`, transform: 'rotate(-45deg)' }}>
+              <Paddle size={pSize} />
+            </div>
 
-          {/* Title */}
-          <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x"
-            style={{ background: 'transparent', border: 'none', padding: '8px 0 0', cursor: 'pointer' }}>
+            {/* CENTER STRIP */}
+            <div style={{ flex: 1, height: 100, position: 'relative', margin: '0 6px' }}>
+
+              {/* ════ 3D TABLE ════
+                  Ball impacts at top:50% = paddle center.
+                  Table surface at 50%, near edge at bottom of trapezoid.
+              */}
+
+              {/* Drop shadow beneath table */}
+              <div style={{
+                position: 'absolute', left: '6%', right: '6%', top: '68%',
+                height: 10, borderRadius: '50%',
+                background: 'rgba(129,140,248,0.07)',
+                filter: 'blur(8px)',
+              }} />
+
+              {/* Table TOP FACE — trapezoid, far edge narrower (perspective) */}
+              <div style={{
+                position: 'absolute', left: '1%', right: '1%',
+                top: '50%', height: 18,
+                background: 'linear-gradient(180deg, rgba(18,22,70,0.92) 0%, rgba(12,16,55,0.97) 100%)',
+                clipPath: 'polygon(2% 0%, 98% 0%, 94% 100%, 6% 100%)',
+              }} />
+              {/* Far edge line (top of trapezoid — dimmer) */}
+              <div style={{
+                position: 'absolute', left: '8%', right: '8%', top: '50%',
+                height: 1.5,
+                background: 'rgba(129,140,248,0.3)',
+              }} />
+              {/* Near edge line (bottom of trapezoid — brightest) */}
+              <div style={{
+                position: 'absolute', left: '6%', right: '6%', top: 'calc(50% + 18px)',
+                height: 2,
+                background: 'linear-gradient(90deg, transparent, rgba(165,180,252,0.8) 8%, rgba(165,180,252,0.8) 92%, transparent)',
+                boxShadow: '0 0 8px rgba(129,140,248,0.5)',
+              }} />
+              {/* Table front face */}
+              <div style={{
+                position: 'absolute', left: '6%', right: '6%', top: 'calc(50% + 20px)',
+                height: 6,
+                background: 'linear-gradient(180deg, rgba(129,140,248,0.2), rgba(129,140,248,0.03))',
+                clipPath: 'polygon(0% 0%, 100% 0%, 97% 100%, 3% 100%)',
+              }} />
+
+              {/* ════ NET ════
+                  Sits at 50% (ball impact level). Posts rise upward.
+              */}
+              {/* Net shadow cast on table surface */}
+              <div style={{
+                position: 'absolute', left: 'calc(50% - 3px)', top: 'calc(50% + 6px)',
+                width: 6, height: 10,
+                background: 'rgba(0,0,0,0.4)',
+                filter: 'blur(3px)',
+              }} />
+              {/* Net mesh */}
+              <div style={{
+                position: 'absolute',
+                left: 'calc(50% - 18px)', top: 'calc(50% - 14px)',
+                width: 36, height: 14,
+                background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 2.5px, rgba(165,180,252,0.22) 2.5px, rgba(165,180,252,0.22) 3px)',
+                borderLeft: '1.5px solid rgba(200,214,255,0.5)',
+                borderRight: '1.5px solid rgba(200,214,255,0.5)',
+              }} />
+              {/* Net top bar */}
+              <div style={{
+                position: 'absolute',
+                left: 'calc(50% - 20px)', top: 'calc(50% - 15px)',
+                width: 40, height: 2,
+                background: 'rgba(210,220,255,0.85)',
+                boxShadow: '0 0 6px rgba(165,180,252,0.55)',
+                borderRadius: '1px',
+              }} />
+              {/* Left post */}
+              <div style={{
+                position: 'absolute',
+                left: 'calc(50% - 20px)', top: 'calc(50% - 15px)',
+                width: 2.5, height: 17,
+                background: 'linear-gradient(180deg, rgba(210,220,255,0.9), rgba(165,180,252,0.35))',
+                borderRadius: '1px 1px 0 0',
+              }} />
+              {/* Right post */}
+              <div style={{
+                position: 'absolute',
+                left: 'calc(50% + 17.5px)', top: 'calc(50% - 15px)',
+                width: 2.5, height: 17,
+                background: 'linear-gradient(180deg, rgba(210,220,255,0.9), rgba(165,180,252,0.35))',
+                borderRadius: '1px 1px 0 0',
+              }} />
+
+              {/* ── BALL ── floats above table layer */}
+              {!chaosMode && (
+                <>
+                  {/* Ghost trail */}
+                  <div style={{
+                    position: 'absolute', width: 8, height: 8, borderRadius: '50%',
+                    background: 'rgba(200,210,255,0.15)',
+                    animation: `ball-flight ${BALL_DUR} linear infinite`,
+                    animationDelay: '-0.09s',
+                    zIndex: 5, pointerEvents: 'none',
+                  }} />
+                  {/* Main ball */}
+                  <div style={{
+                    position: 'absolute', width: 13, height: 13, borderRadius: '50%',
+                    background: 'radial-gradient(circle at 35% 32%, #ffffff 0%, #d8dcf8 60%, #b0b8e8 100%)',
+                    boxShadow: '0 0 8px rgba(255,255,255,0.8), 0 0 3px rgba(129,140,248,0.6), 0 2px 5px rgba(0,0,0,0.7)',
+                    animation: `ball-flight ${BALL_DUR} linear infinite`,
+                    zIndex: 6, pointerEvents: 'none',
+                  }} />
+                </>
+              )}
+            </div>
+
+            {/* RIGHT PADDLE */}
+            <div style={{ flexShrink: 0, zIndex: 2, animation: chaosMode ? 'none' : `right-paddle-hit ${BALL_DUR} ease-in-out infinite`, transform: 'rotate(45deg)' }}>
+              <Paddle size={pSize} />
+            </div>
+          </div>
+
+          {/* TITLE */}
+          <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
+            style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}>
             <span style={{
               display: 'block', fontFamily: 'var(--font-display)', fontWeight: 900,
               fontSize: 'clamp(2rem, 8vw, 4rem)', letterSpacing: '0.06em', lineHeight: 1, textAlign: 'center',
-              color: '#c7d2fe',
-              textShadow: chaosMode
-                ? '0 0 30px rgba(129,140,248,0.9), 2px 2px 0 rgba(0,0,0,0.9)'
-                : '0 0 30px rgba(129,140,248,0.18), 2px 2px 0 rgba(0,0,0,0.95)',
-              animation: chaosMode ? 'headerBounce 0.4s ease-in-out 3' : 'none',
+              ...(chaosMode ? {
+                color: '#a5b4fc',
+                animation: 'headerBounce 0.4s ease-in-out 3',
+                textShadow: '0 0 30px rgba(129,140,248,0.8), 2px 2px 0 rgba(0,0,0,0.9)',
+              } : {
+                color: '#c7d2fe',
+                textShadow: '0 0 30px rgba(129,140,248,0.2), 2px 2px 0 rgba(0,0,0,0.95)',
+              }),
             }}>PING-PONG</span>
           </button>
 
           {/* Status */}
-          <div style={{ width: '100%', maxWidth: '22rem', height: 1, margin: '12px 0 10px', background: 'linear-gradient(90deg, transparent, rgba(129,140,248,0.3) 50%, transparent)' }} />
+          <div style={{ width: '100%', maxWidth: '22rem', height: 1, margin: '14px 0 10px', background: 'linear-gradient(90deg, transparent, rgba(129,140,248,0.3) 50%, transparent)' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: tick ? '#818cf8' : 'rgba(129,140,248,0.1)', textShadow: tick ? '0 0 10px rgba(129,140,248,0.7)' : 'none', transition: 'color 0.15s, text-shadow 0.15s' }}>⚡ JACK IN ⚡</span>
             <span style={{ color: '#1a1a2e' }}>│</span>
@@ -446,10 +333,10 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
       {/* Compact sticky (mobile) */}
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
         <button onClick={handleCopy} style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span>🏓</span>
+          <span style={{ fontSize: '0.9rem' }}>🏓</span>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.15em', color: '#818cf8', padding: '2px 5px', background: 'rgba(129,140,248,0.1)', border: '1px solid rgba(129,140,248,0.2)' }}>BLIK</span>
           <span style={{ fontFamily: 'var(--font-mono)', color: '#e0e0e0', fontSize: '0.85rem', letterSpacing: '0.06em' }}>{blikNumber}</span>
-          {copied ? <Check size={12} style={{ color: 'var(--cyber-green)' }} /> : <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--cyber-text-dim)' }}><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>}
+          {copied ? <Check size={12} style={{ color: 'var(--cyber-green)' }} /> : <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--cyber-text-dim)' }}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', color: isConnected ? 'var(--cyber-green)' : 'var(--cyber-red)' }}>{isConnected ? '● ONLINE' : '○ OFFLINE'}</span>
@@ -459,5 +346,36 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
         </div>
       </div>
     </>
+  );
+}
+
+/* Reusable paddle component */
+function Paddle({ size }) {
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{
+        width: size, height: size, borderRadius: '50%',
+        background: 'linear-gradient(135deg, #1a1a2e, #252540)',
+        border: '2px solid #818cf8',
+        boxShadow: '0 0 12px rgba(129,140,248,0.45), 0 0 24px rgba(129,140,248,0.15)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Rubber face */}
+        <div style={{ width: '52%', height: '52%', borderRadius: '50%', background: '#a5b4fc', opacity: 0.9, position: 'relative', zIndex: 1 }} />
+        {/* Grip lines */}
+        <div style={{ position: 'absolute', top: '30%', left: '12%', right: '12%', height: '1px', background: 'rgba(165,180,252,0.4)' }} />
+        <div style={{ position: 'absolute', top: '50%', left: '8%', right: '8%', height: '1px', background: 'rgba(165,180,252,0.25)' }} />
+        <div style={{ position: 'absolute', top: '68%', left: '12%', right: '12%', height: '1px', background: 'rgba(165,180,252,0.4)' }} />
+      </div>
+      {/* Handle */}
+      <div style={{
+        position: 'absolute', bottom: 'clamp(-13px,-2vw,-17px)', left: '50%',
+        transform: 'translateX(-50%)',
+        width: 'clamp(5px,0.9vw,7px)', height: 'clamp(14px,2.2vw,20px)',
+        background: 'linear-gradient(to bottom, #555, #1a1a1a)',
+        borderRadius: '0 0 3px 3px',
+      }} />
+    </div>
   );
 }
