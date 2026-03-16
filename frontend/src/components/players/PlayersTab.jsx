@@ -1,9 +1,32 @@
 import { useState, useCallback } from 'react';
-import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Lock, Check, X, Zap } from 'lucide-react';
+import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Lock, Check, X, Zap, Shield } from 'lucide-react';
 import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } from '../../firebase/index';
 import { ADMIN_PASSWORD, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { useToast } from '../common/Toast';
 import { useThemeTokens } from '../../context/ThemeContext';
+
+const AVATAR_COLORS = [
+  { bg: '#1a0a00', border: '#FCE300', text: '#FCE300' },
+  { bg: '#0a0010', border: '#a855f7', text: '#a855f7' },
+  { bg: '#001000', border: '#00FF41', text: '#00FF41' },
+  { bg: '#000a10', border: '#00E5FF', text: '#00E5FF' },
+  { bg: '#100000', border: '#FF0033', text: '#FF0033' },
+  { bg: '#080808', border: '#888', text: '#888' },
+];
+
+function SectionHeader({ icon: Icon, title, accent = 'var(--cyber-yellow)' }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #1a1a1a' }}>
+      <div style={{ padding: '6px 8px', background: `rgba(0,0,0,0.6)`, border: `1px solid ${accent}25`, clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+        <Icon size={13} style={{ color: accent, display: 'block' }} />
+      </div>
+      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: accent }}>
+        {title}
+      </span>
+      <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${accent}20, transparent)` }} />
+    </div>
+  );
+}
 
 function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
   const [input, setInput] = useState('');
@@ -11,36 +34,48 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (input === ADMIN_PASSWORD) {
-      onConfirm();
-    } else {
-      setError(true);
-      setInput('');
-      setTimeout(() => setError(false), 1500);
-    }
+    if (input === ADMIN_PASSWORD) { onConfirm(); }
+    else { setError(true); setInput(''); setTimeout(() => setError(false), 1500); }
   };
 
   return (
-    <div style={{ background: tokens.overlayBg }} className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4">
-      <div style={{ background: tokens.modalBg, border: `2px solid ${tokens.accentBorder}`, borderRadius: tokens.modalRadius, boxShadow: tokens.modalShadow }} className="p-6 w-full max-w-sm">
-        <div className="flex items-center gap-3 mb-4">
-          <Lock style={{ color: tokens.accentColor }} className="flex-shrink-0" size={22}/>
-          <h3 style={{ color: tokens.accentColor, fontFamily: tokens.fontFamily }} className="font-black text-lg">Podaj hasło admina</h3>
+    <div style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(4px)' }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div style={{
+        background: '#0a0a0a',
+        border: `1px solid ${error ? 'var(--cyber-red)' : 'rgba(252,227,0,0.35)'}`,
+        clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
+        padding: 24, width: '100%', maxWidth: 360,
+        boxShadow: error ? '0 0 30px rgba(255,0,51,0.25)' : '0 0 30px rgba(252,227,0,0.12)',
+        transition: 'all 0.2s',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+          <Lock size={16} style={{ color: 'var(--cyber-yellow)', flexShrink: 0 }} />
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
+            AUTORYZACJA WYMAGANA
+          </h3>
         </div>
-        <p style={{ color: tokens.mutedText }} className="text-sm mb-4">Podaj hasło żeby usunąć gracza: <span style={{ color: tokens.accentColor }} className="font-bold">{playerName}</span></p>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--cyber-text-dim)', marginBottom: 16 }}>
+          {'>'} Usuń agenta: <span style={{ color: '#e8e8e8' }}>{playerName}</span>
+        </p>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <input type="password" value={input} onChange={e => setInput(e.target.value)}
-            placeholder="Hasło..." autoFocus
-            className={`cyber-input w-full p-3 rounded-xl text-sm transition-all ${error ? 'border-rose-500 shadow-[0_0_10px_#f4333360]' : ''}`}
-            style={{ background: '#080c18', color: '#e2e8f0', border: `1px solid ${error ? 'rgb(244,51,51,0.6)' : 'rgba(148,163,184,0.12)'}` }}
+            placeholder="// ACCESS CODE..."
+            autoFocus
+            className="cyber-input"
+            style={{
+              width: '100%', padding: '10px 12px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
+              border: `1px solid ${error ? 'var(--cyber-red)' : '#2a2a2a'}`,
+              clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+              boxShadow: error ? '0 0 10px rgba(255,0,51,0.3)' : 'none',
+            }}
           />
-          {error && <p className="text-rose-400 text-xs font-bold text-center">❌ Złe hasło</p>}
-          <div className="flex gap-3">
-            <button type="submit" style={{ border: `2px solid ${tokens.accentBorder}`, color: tokens.accentColor, background: tokens.accentBg, borderRadius: tokens.modalRadius }} className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80">
-              <Check size={16}/> POTWIERDŹ
+          {error && <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.48rem', letterSpacing: '0.15em', color: 'var(--cyber-red)', textAlign: 'center' }}>⚠ DOSTĘP ZABRONIONY</p>}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="submit" className="cyber-button-yellow" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <Check size={14} /> POTWIERDŹ
             </button>
-            <button type="button" onClick={onCancel} style={{ border: `2px solid ${tokens.cancelBorder}`, color: tokens.cancelText, borderRadius: tokens.modalRadius }} className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80">
-              <X size={16}/> ANULUJ
+            <button type="button" onClick={onCancel} className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <X size={14} /> ANULUJ
             </button>
           </div>
         </form>
@@ -49,10 +84,73 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
   );
 }
 
+// ── Agent card ────────────────────────────────────────────
+function AgentCard({ player, index, onDelete, isOrganizer }) {
+  const c = AVATAR_COLORS[index % AVATAR_COLORS.length];
+  const initials = player.name.slice(0, 2).toUpperCase();
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+      background: '#070707', border: '1px solid #1a1a1a',
+      clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
+      transition: 'border-color 0.2s',
+    }}
+      onMouseEnter={e => e.currentTarget.style.borderColor = '#2a2a2a'}
+      onMouseLeave={e => e.currentTarget.style.borderColor = '#1a1a1a'}
+    >
+      {/* Avatar */}
+      <div style={{
+        width: 38, height: 38, flexShrink: 0,
+        background: c.bg, border: `1px solid ${c.border}40`,
+        borderRadius: isOrganizer ? '50%' : '4px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        clipPath: isOrganizer ? 'none' : 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+      }}>
+        {isOrganizer
+          ? <Shield size={16} style={{ color: 'var(--cyber-cyan)' }} />
+          : <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', fontWeight: 700, color: c.text }}>{initials}</span>}
+      </div>
+
+      {/* Name + class */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#d0d0d0', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {player.name}
+        </p>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.15em', color: isOrganizer ? 'var(--cyber-cyan)' : c.border, opacity: 0.7, margin: '2px 0 0', textTransform: 'uppercase' }}>
+          {isOrganizer ? '// ORGANIZATOR' : '// AGENT'}
+        </p>
+      </div>
+
+      {/* Action */}
+      {!isOrganizer ? (
+        <button onClick={() => onDelete(player.name)} style={{
+          padding: '7px 10px', background: 'transparent',
+          border: '1px solid #2a2a2a', cursor: 'pointer',
+          color: 'var(--cyber-text-dim)',
+          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+          transition: 'all 0.15s',
+          flexShrink: 0,
+        }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,0,51,0.5)'; e.currentTarget.style.color = 'var(--cyber-red)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--cyber-text-dim)'; }}
+          title="Usuń agenta"
+        >
+          <Trash2 size={14} />
+        </button>
+      ) : (
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.12em', color: 'var(--cyber-text-dim)', padding: '4px 8px', border: '1px solid #1a1a1a', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+          HQ
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayers, playSound }) {
   const [newPlayerName, setNewPlayerName] = useState('');
-  const [savingMulti, setSavingMulti] = useState(false);
-  const [localMulti, setLocalMulti] = useState(null); // null = use prop
+  const [savingMulti,   setSavingMulti]   = useState(false);
+  const [localMulti,    setLocalMulti]    = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [pwModal,       setPwModal]       = useState(null);
   const { showSuccess, showError } = useToast();
@@ -61,38 +159,27 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
   const currentMulti = localMulti ?? (defaultMultiPlayers || []);
 
   const toggleDefaultMulti = async (name) => {
-    const next = currentMulti.includes(name)
-      ? currentMulti.filter(p => p !== name)
-      : [...currentMulti, name];
+    const next = currentMulti.includes(name) ? currentMulti.filter(p => p !== name) : [...currentMulti, name];
     setLocalMulti(next);
     setSavingMulti(true);
     const result = await saveDefaultMulti(next);
     setSavingMulti(false);
-    if (!result.success) {
-      showError('Nie udało się zapisać');
-      setLocalMulti(currentMulti); // rollback
-    }
+    if (!result.success) { showError('Nie udało się zapisać'); setLocalMulti(currentMulti); }
   };
 
   const handleAddPlayer = async (e) => {
     e.preventDefault();
     if (!newPlayerName.trim()) return;
     const result = await addPlayer(newPlayerName.trim());
-    if (!result.success) {
-      showError(result.error || 'Nie udało się dodać gracza');
-      return;
-    }
+    if (!result.success) { showError(result.error || 'Nie udało się dodać gracza'); return; }
     playSound(SOUND_TYPES.SUCCESS);
-    showSuccess(`✓ Dodano gracza: ${newPlayerName.trim()}`);
+    showSuccess(`✓ Dodano: ${newPlayerName.trim()}`);
     setNewPlayerName('');
   };
 
   const handleSoftDelete = async (playerName) => {
     const result = await softDeletePlayer(playerName);
-    if (!result.success) {
-      showError(result.error || 'Nie udało się usunąć gracza');
-      return;
-    }
+    if (!result.success) { showError(result.error || 'Nie udało się usunąć gracza'); return; }
     playSound(SOUND_TYPES.DELETE);
     showSuccess(`Gracz ${playerName} przeniesiony do kosza`);
     setPwModal(null);
@@ -100,20 +187,14 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
 
   const handleRestore = async (playerName) => {
     const result = await restorePlayer(playerName);
-    if (!result.success) {
-      showError(result.error || 'Nie udało się przywrócić gracza');
-      return;
-    }
+    if (!result.success) { showError(result.error || 'Nie udało się przywrócić gracza'); return; }
     playSound(SOUND_TYPES.SUCCESS);
     showSuccess(`✓ Przywrócono: ${playerName}`);
   };
 
   const handlePermanentDelete = async (playerName) => {
     const result = await permanentDeletePlayer(playerName);
-    if (!result.success) {
-      showError(result.error || 'Nie udało się trwale usunąć gracza');
-      return;
-    }
+    if (!result.success) { showError(result.error || 'Nie udało się trwale usunąć'); return; }
     playSound(SOUND_TYPES.DELETE);
     setConfirmDelete(null);
   };
@@ -124,110 +205,148 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         <PasswordModal playerName={pwModal} onConfirm={() => handleSoftDelete(pwModal)} onCancel={() => setPwModal(null)} tokens={tokens} />
       )}
 
-      <div className="cyber-box rounded-2xl p-4 sm:p-8 max-w-3xl mx-auto animate-in slide-in-from-left-5 duration-300">
-        <h2 className="text-xl font-black text-slate-200 mb-8 flex items-center gap-3 border-b border-slate-800/30 pb-4">
-          <Users className="text-magenta-500" /> Gracze
-        </h2>
-
-        <form onSubmit={handleAddPlayer} className="flex flex-col sm:flex-row gap-3 mb-10 p-4 sm:p-6 bg-black/40 rounded-xl border border-slate-800/50">
-          <input type="text" value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)}
-            placeholder="Imię nowego gracza..." className="cyber-input flex-1 p-4 rounded-xl text-lg w-full" required
-            style={{ background: '#080c18', color: '#e2e8f0', border: '1px solid rgba(148,163,184,0.12)' }} />
-          <button type="submit" className="cyber-button-blue px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto">
-            <UserPlus size={20}/> DODAJ
-          </button>
-        </form>
-
-        {/* Wszyscy gracze — jednolity styl, bez wyróżnienia Kamila */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          {players?.map(p => (
-            <div key={p.name} className="flex items-center justify-between p-5 rounded-xl border-2 bg-slate-900/30 border-slate-700/30 hover:border-indigo-500/30 hover:bg-indigo-950/10 transition-all group">
-              <span className="font-bold text-xl flex items-center gap-2 truncate text-slate-100">
-                <Cpu size={18} className="flex-shrink-0 text-slate-500 group-hover:text-indigo-400" />
-                {p.name}
-                {p.name === ORGANIZER_NAME && (
-                  <span className="text-xs font-bold text-slate-500 tracking-widest">📋</span>
-                )}
-              </span>
-              {p.name !== ORGANIZER_NAME ? (
-                <button onClick={() => setPwModal(p.name)}
-                  className="flex-shrink-0 bg-magenta-950 p-3 rounded-lg text-magenta-500 hover:bg-magenta-600 hover:text-black border-2 border-magenta-800 transition-all hover:shadow-magenta-glow"
-                  title="Usuń gracza">
-                  <Trash2 size={20}/>
-                </button>
-              ) : (
-                <span className="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-bold text-slate-500 border border-slate-800/40">
-                  organizator
-                </span>
-              )}
-            </div>
-          ))}
+      <div className="cyber-box" style={{
+        clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)',
+        padding: '20px', maxWidth: 680, margin: '0 auto',
+        animation: 'slide-in-up 0.3s ease-out',
+      }}>
+        {/* Main header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid #1a1a1a' }}>
+          <div style={{ padding: '7px 9px', background: 'rgba(252,227,0,0.06)', border: '1px solid rgba(252,227,0,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+            <Users size={16} style={{ color: 'var(--cyber-yellow)', display: 'block' }} />
+          </div>
+          <div>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cyber-yellow)' }}>
+              AGENT ROSTER
+            </span>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', margin: '2px 0 0' }}>
+              {'>'} zarządzaj składem_
+            </p>
+          </div>
+          <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#3a3a3a' }}>
+            [{players?.length || 0} AGENTS]
+          </span>
         </div>
 
-        {/* Domyślny Multisport */}
+        {/* Add agent form */}
+        <div style={{ marginBottom: 28 }}>
+          <SectionHeader icon={UserPlus} title="// RECRUIT NEW AGENT" />
+          <form onSubmit={handleAddPlayer} style={{ display: 'flex', gap: 8 }}>
+            <input type="text" value={newPlayerName} onChange={e => setNewPlayerName(e.target.value)}
+              placeholder="// Imię agenta..."
+              className="cyber-input"
+              style={{ flex: 1, padding: '10px 14px', fontSize: '0.85rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
+              required
+            />
+            <button type="submit" className="cyber-button-yellow" style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.62rem', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              <UserPlus size={14} /> DODAJ
+            </button>
+          </form>
+        </div>
+
+        {/* Agent list */}
         {players && players.length > 0 && (
-          <div className="border-t border-slate-800/30 pt-6 mb-8">
-            <h3 className="text-lg font-black text-slate-200 mb-2 flex items-center gap-2">
-              <Zap size={18} className="text-emerald-400" /> Multisport na stałe
-            </h3>
-            <p className="text-slate-500 text-xs mb-4">Zaznaczeni gracze będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.</p>
-            <div className="grid grid-cols-2 gap-3">
-              {players.map(p => (
-                <button
-                  key={p.name}
-                  onClick={() => toggleDefaultMulti(p.name)}
-                  disabled={savingMulti}
-                  className={`p-3 rounded-xl border-2 font-bold text-sm transition-all flex items-center gap-2 ${
-                    currentMulti.includes(p.name)
-                      ? 'border-emerald-400 bg-emerald-950 text-emerald-200 shadow-[0_0_8px_#10b981]'
-                      : 'border-slate-800 bg-transparent text-slate-500 hover:border-slate-600'
-                  }`}
-                >
-                  <Zap size={14} className={currentMulti.includes(p.name) ? 'text-emerald-400' : 'text-slate-600'} />
-                  {p.name}
-                </button>
+          <div style={{ marginBottom: 28 }}>
+            <SectionHeader icon={Cpu} title="// ACTIVE AGENTS" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 8 }}>
+              {players.map((p, i) => (
+                <AgentCard key={p.name} player={p} index={i} onDelete={setPwModal} isOrganizer={p.name === ORGANIZER_NAME} />
               ))}
             </div>
           </div>
         )}
 
+        {/* Multisport defaults */}
+        {players && players.length > 0 && (
+          <div style={{ marginBottom: 28 }}>
+            <SectionHeader icon={Zap} title="// DEFAULT MULTISPORT" accent="var(--cyber-green)" />
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--cyber-text-dim)', marginBottom: 12 }}>
+              {'>'} Zaznaczeni będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+              {players.map(p => {
+                const active = currentMulti.includes(p.name);
+                return (
+                  <button key={p.name} onClick={() => toggleDefaultMulti(p.name)} disabled={savingMulti}
+                    style={{
+                      padding: '10px 14px', cursor: 'pointer', transition: 'all 0.15s',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                      clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
+                      ...(active ? {
+                        background: 'rgba(0,255,65,0.07)', border: '1px solid rgba(0,255,65,0.4)', color: 'var(--cyber-green)',
+                        boxShadow: '0 0 8px rgba(0,255,65,0.1)',
+                      } : {
+                        background: '#070707', border: '1px solid #1a1a1a', color: '#444',
+                      }),
+                    }}>
+                    <Zap size={12} style={{ color: active ? 'var(--cyber-green)' : '#333', flexShrink: 0 }} />
+                    {p.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Trash / deleted */}
         {deletedPlayers?.length > 0 && (
-          <div className="border-t border-slate-800/30 pt-6">
-            <h3 className="text-lg font-black text-slate-500 mb-4 flex items-center gap-2">
-              <Trash2 size={18}/> Kosz
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <SectionHeader icon={Trash2} title="// TERMINATED AGENTS" accent="var(--cyber-red)" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 8 }}>
               {deletedPlayers.map(name => (
                 <div key={name}>
                   {confirmDelete === name ? (
-                    <div className="p-4 rounded-xl border-2 border-rose-600 bg-rose-950/20">
-                      <p className="text-rose-300 text-sm font-bold mb-3 flex items-center gap-2">
-                        <AlertTriangle size={14}/> Usunąć {name} na zawsze?
+                    <div style={{
+                      padding: '14px', background: 'rgba(255,0,51,0.04)', border: '1px solid rgba(255,0,51,0.3)',
+                      clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
+                    }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5, textTransform: 'uppercase' }}>
+                        <AlertTriangle size={12} /> USUNĄĆ NA ZAWSZE?
                       </p>
-                      <div className="flex gap-2">
-                        <button onClick={() => handlePermanentDelete(name)}
-                          className="flex-1 py-2 rounded-lg border-2 border-rose-500 text-rose-300 hover:bg-rose-500 hover:text-black font-bold text-sm transition-all">
-                          USUŃ NA ZAWSZE
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#888', marginBottom: 12 }}>{name}</p>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={() => handlePermanentDelete(name)} style={{
+                          flex: 1, padding: '8px', background: 'var(--cyber-red)', color: '#000', border: 'none', cursor: 'pointer',
+                          fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.1em', fontWeight: 700,
+                          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                        }}>
+                          POTWIERDŹ
                         </button>
-                        <button onClick={() => setConfirmDelete(null)}
-                          className="flex-1 py-2 rounded-lg border border-slate-800/50 text-slate-500 hover:border-slate-600 font-bold text-sm transition-all">
+                        <button onClick={() => setConfirmDelete(null)} className="cyber-button-outline" style={{ flex: 1, padding: '8px' }}>
                           ANULUJ
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between p-4 rounded-xl border border-slate-800/50/50 bg-black/20 text-slate-500">
-                      <span className="font-bold flex items-center gap-2 truncate">
-                        <Cpu size={16} className="opacity-40 flex-shrink-0"/> {name}
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '10px 12px', background: '#070707', border: '1px solid #141414',
+                      clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)',
+                    }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.62rem', color: '#3a3a3a', display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        <Cpu size={13} style={{ opacity: 0.3 }} /> {name}
                       </span>
-                      <div className="flex gap-2 flex-shrink-0">
-                        <button onClick={() => handleRestore(name)}
-                          className="p-3 rounded-lg border-2 border-emerald-800 text-emerald-600 hover:border-emerald-500 hover:text-emerald-300 hover:bg-emerald-950/50 transition-all" title="Przywróć">
-                          <RotateCcw size={16}/>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={() => handleRestore(name)} style={{
+                          padding: '6px 8px', background: 'transparent', border: '1px solid #1e1e1e', cursor: 'pointer',
+                          color: '#3a3a3a', transition: 'all 0.15s',
+                          clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+                        }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,255,65,0.4)'; e.currentTarget.style.color = 'var(--cyber-green)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#3a3a3a'; }}
+                          title="Przywróć">
+                          <RotateCcw size={13} />
                         </button>
-                        <button onClick={() => setConfirmDelete(name)}
-                          className="p-3 rounded-lg border-2 border-rose-900 text-rose-700 hover:border-rose-500 hover:text-rose-300 hover:bg-rose-950/50 transition-all" title="Usuń na zawsze">
-                          <Trash2 size={16}/>
+                        <button onClick={() => setConfirmDelete(name)} style={{
+                          padding: '6px 8px', background: 'transparent', border: '1px solid #1e1e1e', cursor: 'pointer',
+                          color: '#3a3a3a', transition: 'all 0.15s',
+                          clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+                        }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,0,51,0.4)'; e.currentTarget.style.color = 'var(--cyber-red)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#3a3a3a'; }}
+                          title="Usuń na zawsze">
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </div>

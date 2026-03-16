@@ -1,21 +1,21 @@
-import { Volume2, VolumeX, Smartphone, Copy, Check } from 'lucide-react';
+import { Volume2, VolumeX, Smartphone, Copy, Check, Zap } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   const [copied, setCopied] = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti, setConfetti] = useState([]);
-  const [arcadeTick, setArcadeTick] = useState(true);
+  const [tick, setTick] = useState(true);
 
-  const chaosTimer   = useRef(null);
-  const clickCount   = useRef(0);
-  const clickTimer   = useRef(null);
-  const tickTimer    = useRef(null);
+  const chaosTimer = useRef(null);
+  const clickCount  = useRef(0);
+  const clickTimer  = useRef(null);
+  const tickTimer   = useRef(null);
 
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
 
   useEffect(() => {
-    tickTimer.current = setInterval(() => setArcadeTick(p => !p), 700);
+    tickTimer.current = setInterval(() => setTick(p => !p), 800);
     return () => {
       clearInterval(tickTimer.current);
       clearTimeout(chaosTimer.current);
@@ -29,7 +29,6 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // 5-tap easter egg on PING-PONG label
   const handlePingPongClick = () => {
     clickCount.current += 1;
     clearTimeout(clickTimer.current);
@@ -43,282 +42,271 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
 
   const activateChaos = () => {
     setChaosMode(true);
-    const pool = ['🏓','⚡','🎱','🌀','🎉','✨','🏆','💫','🎮','🌟'];
+    const pool = ['🏓','⚡','💀','🎮','💥','⚠️','🔥','🎯','💣','🌪️'];
     setConfetti(Array.from({ length: 40 }, (_, i) => ({
       id: i,
       emoji: pool[Math.floor(Math.random() * pool.length)],
-      x:     Math.random() * 100,
+      x: Math.random() * 100,
       delay: Math.random() * 1.2,
-      dur:   1.8 + Math.random() * 1.5,
-      size:  18 + Math.random() * 24,
+      dur: 1.8 + Math.random() * 1.5,
+      size: 18 + Math.random() * 24,
       rotate: Math.random() * 360,
       drift: (Math.random() - 0.5) * 120,
     })));
     clearTimeout(chaosTimer.current);
-    chaosTimer.current = setTimeout(() => {
-      setChaosMode(false);
-      setConfetti([]);
-    }, 4000);
+    chaosTimer.current = setTimeout(() => { setChaosMode(false); setConfetti([]); }, 4000);
   };
-
-  const pSize  = 'clamp(24px,4vw,40px)';
-  const pInner = 'clamp(12px,2.5vw,20px)';
 
   return (
     <>
-      {/* CONFETTI BURST */}
+      {/* CONFETTI */}
       {chaosMode && confetti.map(c => (
         <div key={c.id} className="fixed pointer-events-none z-50"
-          style={{
-            left: `${c.x}%`, top: 0,
-            fontSize: `${c.size}px`,
+          style={{ left: `${c.x}%`, top: 0, fontSize: `${c.size}px`,
             animation: `confettiBurst ${c.dur}s ${c.delay}s cubic-bezier(.2,.8,.4,1) forwards`,
-            '--drift': `${c.drift}px`,
-            transform: `rotate(${c.rotate}deg)`,
-          }}>
+            '--drift': `${c.drift}px`, transform: `rotate(${c.rotate}deg)` }}>
           {c.emoji}
         </div>
       ))}
-
-      {/* CHAOS OVERLAY */}
       {chaosMode && (
-        <div className="fixed inset-0 pointer-events-none" style={{
-          zIndex: 49,
+        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 49,
           animation: 'chaosFlash 0.6s ease-out forwards',
-          background: 'radial-gradient(ellipse at 50% 30%, rgba(129,140,248,0.1) 0%, transparent 70%)',
-        }} />
+          background: 'radial-gradient(ellipse at 50% 30%, rgba(252,227,0,0.06) 0%, transparent 70%)' }} />
       )}
 
+      {/* ── MAIN HEADER ── */}
       <header style={{
         position: 'relative', overflow: 'hidden',
-        background: 'linear-gradient(to bottom, #080c18, #0d1220)',
-        borderRadius: '0.75rem 0.75rem 0 0',
+        background: 'linear-gradient(180deg, #080808 0%, #0d0d0d 100%)',
+        borderBottom: '1px solid #1a1a1a',
       }}>
+        {/* Yellow corner accent lines */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: 60, height: 2, background: 'var(--cyber-yellow)', boxShadow: '0 0 10px var(--cyber-yellow)' }} />
+        <div style={{ position: 'absolute', top: 0, right: 0, width: 60, height: 2, background: 'var(--cyber-yellow)', boxShadow: '0 0 10px var(--cyber-yellow)' }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, width: 2, height: 40, background: 'linear-gradient(to bottom, var(--cyber-yellow), transparent)' }} />
+        <div style={{ position: 'absolute', top: 0, right: 0, width: 2, height: 40, background: 'linear-gradient(to bottom, var(--cyber-yellow), transparent)' }} />
 
-        {/* Subtle indigo glow blobs */}
-        <div className="absolute top-0 left-1/4 w-48 h-48 rounded-full blur-3xl pointer-events-none"
-          style={{ background: 'rgba(99,102,241,0.06)' }} />
-        <div className="absolute top-8 right-1/4 w-32 h-32 rounded-full blur-3xl pointer-events-none"
-          style={{ background: 'rgba(124,58,237,0.05)' }} />
+        {/* Diagonal slash decoration */}
+        <div style={{
+          position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+          width: '100%', height: '100%', overflow: 'hidden', pointerEvents: 'none',
+        }}>
+          <div style={{
+            position: 'absolute', top: 0, left: '48%', width: '2px', height: '100%',
+            background: 'linear-gradient(to bottom, rgba(252,227,0,0.08), transparent)',
+            transform: 'skewX(-20deg)',
+          }} />
+          <div style={{
+            position: 'absolute', top: 0, left: '52%', width: '1px', height: '100%',
+            background: 'linear-gradient(to bottom, rgba(252,227,0,0.04), transparent)',
+            transform: 'skewX(-20deg)',
+          }} />
+        </div>
 
-        {/* ══ TOP BAR: BLIK + MUTE ════════════════════════ */}
-        <div className="relative z-10 flex items-center justify-between px-4 py-3"
-          style={{ borderBottom: '1px solid rgba(148,163,184,0.08)' }}>
+        {/* ══ TOP BAR: BLIK + MUTE ══ */}
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', padding: '10px 16px',
+          borderBottom: '1px solid #141414' }}>
 
-          {/* BLIK */}
-          <button onClick={handleCopy}
-            className="group flex items-center gap-2 px-3 py-2 transition-all duration-200"
-            style={{
-              border: '1px solid rgba(148,163,184,0.12)',
-              background: 'rgba(8,12,24,0.6)',
-              borderRadius: '0.5rem',
-            }}>
-            <Smartphone size={16} style={{ color: '#64748b' }} />
+          {/* BLIK number */}
+          <button onClick={handleCopy} style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            background: '#080808', border: '1px solid #2a2a2a',
+            padding: '7px 12px', cursor: 'pointer',
+            transition: 'all 0.18s',
+            clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+          }}>
+            <Smartphone size={14} style={{ color: 'var(--cyber-text-dim)' }} />
             <span style={{
-              fontWeight: 700, color: '#94a3b8',
-              fontSize: '0.7rem', letterSpacing: '0.18em',
-              padding: '2px 6px',
-              background: 'rgba(148,163,184,0.06)',
-              border: '1px solid rgba(148,163,184,0.1)',
-              borderRadius: '0.3rem',
+              fontFamily: 'var(--font-display)', fontSize: '0.55rem', fontWeight: 700,
+              letterSpacing: '0.18em', color: 'var(--cyber-yellow)',
+              padding: '2px 6px', background: 'rgba(252,227,0,0.08)',
+              border: '1px solid rgba(252,227,0,0.2)',
             }}>BLIK</span>
             <span style={{
-              color: '#e2e8f0',
-              fontFamily: "'Inter', system-ui, sans-serif",
-              fontSize: '0.9rem', fontWeight: 600,
-              letterSpacing: '0.04em',
+              fontFamily: 'var(--font-mono)', fontSize: '0.88rem', fontWeight: 400,
+              letterSpacing: '0.06em', color: '#e0e0e0',
             }}>{blikNumber}</span>
-            <div style={{ width: 1, height: 14, background: 'rgba(148,163,184,0.15)', margin: '0 2px' }} />
+            <div style={{ width: 1, height: 14, background: '#2a2a2a', margin: '0 2px' }} />
             {copied
-              ? <Check size={14} style={{ color: '#86efac' }} />
-              : <Copy  size={14} style={{ color: 'rgba(100,116,139,0.6)' }} />}
+              ? <Check size={13} style={{ color: 'var(--cyber-green)' }} />
+              : <Copy  size={13} style={{ color: 'var(--cyber-text-dim)' }} />}
           </button>
 
           {/* Mute */}
-          <button onClick={() => setIsMuted(!isMuted)}
-            className="flex items-center justify-center w-9 h-9 transition-all duration-200"
-            style={{
-              border: isMuted
-                ? '1px solid rgba(248,113,113,0.35)'
-                : '1px solid rgba(148,163,184,0.15)',
-              color:  isMuted ? '#f87171' : '#64748b',
-              background: isMuted ? 'rgba(127,29,29,0.15)' : 'transparent',
-              borderRadius: '0.5rem',
-            }}>
-            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          <button onClick={() => setIsMuted(!isMuted)} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 36, height: 36,
+            border: isMuted ? '1px solid rgba(255,0,51,0.5)' : '1px solid #2a2a2a',
+            color: isMuted ? 'var(--cyber-red)' : 'var(--cyber-text-dim)',
+            background: isMuted ? 'rgba(255,0,51,0.08)' : 'transparent',
+            cursor: 'pointer', transition: 'all 0.18s',
+            clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+          }}>
+            {isMuted ? <VolumeX size={17} /> : <Volume2 size={17} />}
           </button>
         </div>
 
-        {/* ══ MAIN SECTION ═══════════════════════════════ */}
-        <div className="relative z-10 px-4 py-5 flex flex-col items-center">
+        {/* ══ MAIN SECTION ══ */}
+        <div style={{ position: 'relative', zIndex: 10, padding: '20px 16px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-          {/* Title */}
-          <h1 className="text-center mb-4 w-full">
-            <span className="block uppercase" style={{
-              fontSize: 'clamp(1.1rem, 3.5vw, 1.8rem)',
-              letterSpacing: '0.18em',
-              fontWeight: 700,
-              lineHeight: 1.15,
-              color: 'rgba(148,163,184,0.55)',
-              marginBottom: '0.5rem',
+          {/* Subtitle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <div style={{ height: 1, width: 40, background: 'linear-gradient(to right, transparent, var(--cyber-yellow))' }} />
+            <span style={{
+              fontFamily: 'var(--font-display)', fontSize: '0.6rem', fontWeight: 600,
+              letterSpacing: '0.25em', color: 'var(--cyber-yellow)', textTransform: 'uppercase',
+            }}>CENTRUM DOWODZENIA</span>
+            <div style={{ height: 1, width: 40, background: 'linear-gradient(to left, transparent, var(--cyber-yellow))' }} />
+          </div>
+
+          {/* PING-PONG title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px, 3vw, 24px)' }}>
+            {/* Left paddle */}
+            <div style={{
+              position: 'relative', flexShrink: 0,
+              transform: chaosMode ? 'rotate(720deg) scale(1.5)' : 'rotate(-45deg)',
+              transition: 'transform 0.5s',
             }}>
-              CENTRUM DOWODZENIA
-            </span>
-
-            {/* PING-PONG + paddles */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 'clamp(8px,2vw,16px)', flexWrap: 'nowrap' }}>
-
-              {/* Left paddle */}
               <div style={{
-                position: 'relative', flexShrink: 0,
-                transform: chaosMode ? 'rotate(720deg) scale(1.5)' : 'rotate(-45deg)',
-                transition: 'transform 0.5s',
+                width: 'clamp(28px, 4.5vw, 44px)', height: 'clamp(28px, 4.5vw, 44px)',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #1a1a1a, #2a2a2a)',
+                border: '2px solid var(--cyber-yellow)',
+                boxShadow: '0 0 12px rgba(252,227,0,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <div style={{ width: pSize, height: pSize, borderRadius: '50%',
-                  background: 'linear-gradient(135deg,#7c3aed,#4f46e5)',
-                  boxShadow: '0 4px 20px rgba(124,58,237,0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: pInner, height: pInner, borderRadius: '50%', background: '#a78bfa' }} />
-                </div>
-                <div style={{ position: 'absolute', bottom: 'clamp(-10px,-1.8vw,-14px)', left: '50%',
-                  transform: 'translateX(-50%)', width: 'clamp(6px,1vw,8px)', height: 'clamp(12px,2vw,20px)',
-                  background: 'linear-gradient(to bottom,#475569,#334155)',
-                  borderRadius: '0 0 4px 4px' }} />
+                <div style={{ width: '55%', height: '55%', borderRadius: '50%', background: 'var(--cyber-yellow)', opacity: 0.9 }} />
               </div>
-
-              {/* PING-PONG label — 5-tap easter egg */}
-              <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <button
-                  onClick={handlePingPongClick}
-                  aria-label="Ping Pong"
-                  style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
-                >
-                  <span className="block font-black whitespace-nowrap" style={{
-                    fontSize: 'clamp(2rem, 7vw, 4rem)',
-                    letterSpacing: '0.1em',
-                    lineHeight: 1.2,
-                    transition: 'all 0.3s',
-                    ...(chaosMode ? { color: '#a5b4fc', animation: 'headerBounce 0.4s ease-in-out 3' } : {
-                      backgroundImage: 'linear-gradient(135deg, #c084fc, #818cf8, #a5b4fc)',
-                      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-                    }),
-                  }}>
-                    PING-PONG
-                  </span>
-                </button>
-
-                {chaosMode && (
-                  <div style={{
-                    position: 'absolute', bottom: '-32px', left: '50%',
-                    transform: 'translateX(-50%)',
-                    whiteSpace: 'nowrap', fontWeight: 900,
-                    padding: '3px 16px',
-                    border: '1px solid rgba(129,140,248,0.3)',
-                    background: 'rgba(13,18,32,0.96)',
-                    color: '#a5b4fc',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                    borderRadius: '9999px',
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.08em',
-                  }}>✦ combo ×5</div>
-                )}
-              </div>
-
-              {/* Right paddle */}
               <div style={{
-                position: 'relative', flexShrink: 0,
-                transform: chaosMode ? 'rotate(-720deg) scale(1.5)' : 'rotate(45deg)',
-                transition: 'transform 0.5s',
-              }}>
-                <div style={{ width: pSize, height: pSize, borderRadius: '50%',
-                  background: 'linear-gradient(135deg,#4f46e5,#6366f1)',
-                  boxShadow: '0 4px 20px rgba(99,102,241,0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: pInner, height: pInner, borderRadius: '50%', background: '#818cf8' }} />
-                </div>
-                <div style={{ position: 'absolute', bottom: 'clamp(-10px,-1.8vw,-14px)', left: '50%',
-                  transform: 'translateX(-50%)', width: 'clamp(6px,1vw,8px)', height: 'clamp(12px,2vw,20px)',
-                  background: 'linear-gradient(to bottom,#475569,#334155)',
-                  borderRadius: '0 0 4px 4px' }} />
-              </div>
+                position: 'absolute', bottom: 'clamp(-12px,-2vw,-16px)', left: '50%',
+                transform: 'translateX(-50%)',
+                width: 'clamp(5px,1vw,7px)', height: 'clamp(14px,2.2vw,22px)',
+                background: 'linear-gradient(to bottom, #555, #222)',
+                borderRadius: '0 0 3px 3px',
+              }} />
             </div>
-          </h1>
 
-          {/* Thin indigo loader bar */}
+            {/* PING-PONG label */}
+            <button onClick={handlePingPongClick} aria-label="Ping Pong"
+              style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}>
+              <span style={{
+                display: 'block',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 900,
+                fontSize: 'clamp(1.8rem, 7vw, 3.8rem)',
+                letterSpacing: '0.06em',
+                lineHeight: 1.1,
+                ...(chaosMode ? {
+                  color: 'var(--cyber-yellow)',
+                  animation: 'headerBounce 0.4s ease-in-out 3',
+                  textShadow: '0 0 30px var(--cyber-yellow)',
+                } : {
+                  color: 'var(--cyber-yellow)',
+                  textShadow: '0 0 20px rgba(252,227,0,0.3), 2px 2px 0px rgba(0,0,0,0.8)',
+                }),
+              }}>
+                PING-PONG
+              </span>
+            </button>
+
+            {/* Right paddle */}
+            <div style={{
+              position: 'relative', flexShrink: 0,
+              transform: chaosMode ? 'rotate(-720deg) scale(1.5)' : 'rotate(45deg)',
+              transition: 'transform 0.5s',
+            }}>
+              <div style={{
+                width: 'clamp(28px, 4.5vw, 44px)', height: 'clamp(28px, 4.5vw, 44px)',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #1a1a1a, #2a2a2a)',
+                border: '2px solid var(--cyber-yellow)',
+                boxShadow: '0 0 12px rgba(252,227,0,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <div style={{ width: '55%', height: '55%', borderRadius: '50%', background: 'var(--cyber-yellow)', opacity: 0.9 }} />
+              </div>
+              <div style={{
+                position: 'absolute', bottom: 'clamp(-12px,-2vw,-16px)', left: '50%',
+                transform: 'translateX(-50%)',
+                width: 'clamp(5px,1vw,7px)', height: 'clamp(14px,2.2vw,22px)',
+                background: 'linear-gradient(to bottom, #555, #222)',
+                borderRadius: '0 0 3px 3px',
+              }} />
+            </div>
+          </div>
+
+          {/* Divider line */}
           <div style={{
-            width: '100%', maxWidth: '20rem', height: '1px',
-            background: 'linear-gradient(90deg,transparent,rgba(129,140,248,0.3) 50%,transparent)',
-            marginTop: '1rem', marginBottom: '0.75rem',
+            width: '100%', maxWidth: '20rem', height: '1px', margin: '16px 0 12px',
+            background: 'linear-gradient(90deg, transparent, var(--cyber-yellow) 50%, transparent)',
+            opacity: 0.4,
           }} />
 
           {/* Status bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{
-              fontSize: '0.72rem',
-              color: arcadeTick ? '#a5b4fc' : '#1e2a4a',
-              textShadow: arcadeTick
-                ? '0 0 10px rgba(165,180,252,1), 0 0 25px rgba(165,180,252,0.5), 0 0 50px rgba(165,180,252,0.2)'
-                : 'none',
+              fontFamily: 'var(--font-display)', fontSize: '0.55rem', fontWeight: 600,
+              letterSpacing: '0.2em', textTransform: 'uppercase',
+              color: tick ? 'var(--cyber-yellow)' : 'rgba(252,227,0,0.15)',
+              textShadow: tick ? '0 0 10px var(--cyber-yellow)' : 'none',
               transition: 'color 0.15s, text-shadow 0.15s',
-              letterSpacing: '0.15em',
-              fontWeight: 700,
-            }}>⚡ JACK IN ⚡</span>
-            <span style={{ color: 'rgba(148,163,184,0.2)', fontSize: '0.8rem' }}>│</span>
+            }}>
+              ⚡ JACK IN ⚡
+            </span>
+            <span style={{ color: '#1e1e1e', fontSize: '0.7rem' }}>│</span>
             <span style={{
-              fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.06em',
-              color: isConnected ? '#86efac' : '#f87171',
-            }}>{isConnected ? '● ONLINE' : '○ OFFLINE'}</span>
+              fontFamily: 'var(--font-display)', fontSize: '0.55rem', fontWeight: 700,
+              letterSpacing: '0.1em',
+              color: isConnected ? 'var(--cyber-green)' : 'var(--cyber-red)',
+              textShadow: isConnected ? '0 0 8px var(--cyber-green)' : '0 0 8px var(--cyber-red)',
+            }}>
+              {isConnected ? '● ONLINE' : '○ OFFLINE'}
+            </span>
+            <Zap size={10} style={{ color: 'var(--cyber-yellow)', opacity: 0.5 }} />
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: '0.6rem',
+              color: 'var(--cyber-text-dim)', letterSpacing: '0.05em',
+            }}>
+              v2.0.77
+            </span>
           </div>
         </div>
       </header>
 
       {/* Separator */}
-      <div style={{
-        height: '1rem',
-        background: 'linear-gradient(to bottom,#0d1220,#080c18)',
-        borderBottom: '1px solid rgba(148,163,184,0.06)',
-      }}>
-        <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,rgba(129,140,248,0.2) 50%,transparent)' }} />
-      </div>
+      <div style={{ height: 4, background: 'linear-gradient(90deg, transparent, var(--cyber-yellow) 30%, var(--cyber-yellow) 70%, transparent)', opacity: 0.6 }} />
 
       {/* Compact sticky header (mobile) */}
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
-        <button onClick={handleCopy}
-          style={{ background: 'transparent', border: 'none', padding: 0,
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Smartphone size={15} style={{ color: '#64748b', flexShrink: 0 }} />
+        <button onClick={handleCopy} style={{
+          background: 'transparent', border: 'none', padding: 0,
+          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+        }}>
+          <Smartphone size={14} style={{ color: 'var(--cyber-text-dim)' }} />
           <span style={{
-            fontWeight: 700, color: '#94a3b8', fontSize: '0.6rem',
-            letterSpacing: '0.12em', padding: '2px 5px',
-            background: 'rgba(148,163,184,0.06)',
-            border: '1px solid rgba(148,163,184,0.1)',
-            borderRadius: '3px',
+            fontFamily: 'var(--font-display)', fontSize: '0.5rem', fontWeight: 700,
+            letterSpacing: '0.15em', color: 'var(--cyber-yellow)',
+            padding: '2px 5px', background: 'rgba(252,227,0,0.08)',
+            border: '1px solid rgba(252,227,0,0.2)',
           }}>BLIK</span>
-          <span style={{
-            color: '#e2e8f0', fontWeight: 600,
-            fontSize: '0.9rem', letterSpacing: '0.06em',
-          }}>{blikNumber}</span>
-          {copied
-            ? <Check size={13} style={{ color: '#86efac' }} />
-            : <Copy  size={13} style={{ color: 'rgba(100,116,139,0.5)', opacity: 0.7 }} />}
+          <span style={{ fontFamily: 'var(--font-mono)', color: '#e0e0e0', fontSize: '0.85rem', letterSpacing: '0.06em' }}>
+            {blikNumber}
+          </span>
+          {copied ? <Check size={12} style={{ color: 'var(--cyber-green)' }} /> : <Copy size={12} style={{ color: 'var(--cyber-text-dim)' }} />}
         </button>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{
-            fontSize: '0.6rem', fontWeight: 600,
-            color: isConnected ? '#86efac' : '#f87171',
-          }}>
-            {isConnected ? '● ONLINE' : '○ OFFLINE'}
-          </span>
+            fontFamily: 'var(--font-display)', fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.08em',
+            color: isConnected ? 'var(--cyber-green)' : 'var(--cyber-red)',
+          }}>{isConnected ? '● ONLINE' : '○ OFFLINE'}</span>
           <button onClick={() => setIsMuted(!isMuted)} style={{
-            border: isMuted ? '1px solid rgba(248,113,113,0.35)' : '1px solid rgba(148,163,184,0.15)',
-            color: isMuted ? '#f87171' : '#64748b',
-            background: 'transparent',
-            borderRadius: '0.4rem', padding: '4px 6px',
-            cursor: 'pointer', display: 'flex', alignItems: 'center',
+            border: isMuted ? '1px solid rgba(255,0,51,0.4)' : '1px solid #2a2a2a',
+            color: isMuted ? 'var(--cyber-red)' : 'var(--cyber-text-dim)',
+            background: 'transparent', padding: '4px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center',
+            clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
           }}>
-            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
           </button>
         </div>
       </div>

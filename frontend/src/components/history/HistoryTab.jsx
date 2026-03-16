@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { History, Pencil, Trash2, Check, X, Zap, Users, Lock, CalendarDays } from 'lucide-react';
+import { Terminal, Pencil, Trash2, Check, X, Zap, Users, Lock, CalendarDays } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase/index';
 import { ADMIN_PASSWORD } from '../../constants';
 import { groupHistoryByMonth } from '../../utils/calculations';
@@ -11,29 +11,22 @@ import { useThemeTokens } from '../../context/ThemeContext';
 function EditDateInput({ value, onChange }) {
   return (
     <div style={{ position: 'relative' }}>
-      <div
-        className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
-        style={{ pointerEvents: 'none' }}
-      >
-        <span>{formatDate(value)}</span>
-        <CalendarDays size={16} style={{ opacity: 0.6, flexShrink: 0 }} />
+      <div className="cyber-input" style={{
+        width: '100%', padding: '10px 12px', display: 'flex',
+        alignItems: 'center', justifyContent: 'space-between', gap: 10,
+        fontSize: '0.8rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+        pointerEvents: 'none',
+      }}>
+        <span style={{ fontFamily: 'var(--font-mono)' }}>{formatDate(value)}</span>
+        <CalendarDays size={14} style={{ opacity: 0.4, flexShrink: 0 }} />
       </div>
       <input
-        type="date"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="date-overlay"
+        type="date" value={value} onChange={e => onChange(e.target.value)}
         onClick={e => e.currentTarget.showPicker?.()}
         style={{
-          position: 'absolute',
-          top: 0, left: 0,
-          width: '100%',
-          height: '100%',
-          opacity: 0,
-          cursor: 'pointer',
-          zIndex: 2,
-          padding: 0, border: 'none', boxSizing: 'border-box',
-          fontSize: '16px',
+          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+          opacity: 0, cursor: 'pointer', zIndex: 2, padding: 0, border: 'none',
+          boxSizing: 'border-box', fontSize: '16px',
         }}
       />
     </div>
@@ -46,45 +39,59 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (input === ADMIN_PASSWORD) {
-      onConfirm();
-    } else {
-      setError(true);
-      setInput('');
+    if (input === ADMIN_PASSWORD) { onConfirm(); }
+    else {
+      setError(true); setInput('');
       setTimeout(() => setError(false), 1500);
     }
   };
 
   return (
-    <div style={{ background: tokens.overlayBg }} className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4">
-      <div style={{ background: tokens.modalBg, border: `2px solid ${tokens.accentBorder}`, borderRadius: tokens.modalRadius, boxShadow: tokens.modalShadow }} className="p-6 w-full max-w-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <Lock style={{ color: tokens.accentColor }} className="flex-shrink-0" size={22}/>
-          <h3 style={{ color: tokens.accentColor, fontFamily: tokens.fontFamily }} className="font-black text-lg">Podaj hasło admina</h3>
+    <div style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(4px)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div style={{
+        background: '#0d0d0d',
+        border: `1px solid ${error ? 'var(--cyber-red)' : 'rgba(252,227,0,0.3)'}`,
+        clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
+        padding: 24, width: '100%', maxWidth: 360,
+        boxShadow: error
+          ? '0 0 30px rgba(255,0,51,0.3)'
+          : '0 0 30px rgba(252,227,0,0.15)',
+        transition: 'all 0.2s',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <Lock size={16} style={{ color: 'var(--cyber-yellow)', flexShrink: 0 }} />
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
+            AUTORYZACJA WYMAGANA
+          </h3>
         </div>
-        <p style={{ color: tokens.mutedText }} className="text-sm mb-4">{action}</p>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--cyber-text-dim)', marginBottom: 16 }}>
+          {'>'} {action}
+        </p>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <input
-            type="password"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Hasło..."
-            autoFocus
-            className={`cyber-input w-full p-3 rounded-xl text-sm transition-all ${
-              error ? 'border-rose-500 shadow-[0_0_10px_#f4333360]' : ''
-            }`}
+            type="password" value={input} onChange={e => setInput(e.target.value)}
+            placeholder="// ACCESS CODE..." autoFocus
+            className="cyber-input"
+            style={{
+              width: '100%', padding: '10px 12px',
+              fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
+              border: `1px solid ${error ? 'var(--cyber-red)' : '#2a2a2a'}`,
+              clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+              boxShadow: error ? '0 0 12px rgba(255,0,51,0.3)' : 'none',
+            }}
           />
-          {error && <p className="text-rose-400 text-xs font-bold text-center">❌ Złe hasło</p>}
-          <div className="flex gap-3">
-            <button type="submit"
-              style={{ border: `2px solid ${tokens.accentBorder}`, color: tokens.accentColor, background: tokens.accentBg, borderRadius: tokens.modalRadius }}
-              className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80">
-              <Check size={16}/> POTWIERDŹ
+          {error && (
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', letterSpacing: '0.15em', color: 'var(--cyber-red)', textAlign: 'center' }}>
+              ⚠ DOSTĘP ZABRONIONY
+            </p>
+          )}
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button type="submit" className="cyber-button-yellow" style={{ flex: 1, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <Check size={14} /> POTWIERDŹ
             </button>
-            <button type="button" onClick={onCancel}
-              style={{ border: `2px solid ${tokens.cancelBorder}`, color: tokens.cancelText, borderRadius: tokens.modalRadius }}
-              className="flex-1 py-3 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80">
-              <X size={16}/> ANULUJ
+            <button type="button" onClick={onCancel} className="cyber-button-outline" style={{ flex: 1, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <X size={14} /> ANULUJ
             </button>
           </div>
         </form>
@@ -93,70 +100,134 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
   );
 }
 
+// Terminal log entry
+function LogEntry({ row, onEdit, onDelete }) {
+  const time = new Date(row.datePlayed).getTime();
+  return (
+    <div className="scan-hover" style={{
+      background: '#070707', border: '1px solid #141414',
+      clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
+      padding: '12px 14px', marginBottom: 4,
+      transition: 'border-color 0.2s',
+    }}
+      onMouseEnter={e => e.currentTarget.style.borderColor = '#2a2a2a'}
+      onMouseLeave={e => e.currentTarget.style.borderColor = '#141414'}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {/* Top row: date + actions */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* Terminal prompt */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-green)', opacity: 0.6 }}>{'>'}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--cyber-green)' }}>
+              SESSION_{String(row.id).slice(-4).toUpperCase()}
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--cyber-text-dim)' }}>
+              {formatDate(row.datePlayed)}
+            </span>
+          </div>
+          {/* Actions */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button onClick={() => onEdit(row)} style={{
+              padding: '5px 8px', background: 'transparent',
+              border: '1px solid #2a2a2a', cursor: 'pointer',
+              color: 'var(--cyber-text-dim)',
+              clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+              transition: 'all 0.15s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(252,227,0,0.4)'; e.currentTarget.style.color = 'var(--cyber-yellow)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--cyber-text-dim)'; }}
+            >
+              <Pencil size={13} />
+            </button>
+            <button onClick={() => onDelete(row.id)} style={{
+              padding: '5px 8px', background: 'transparent',
+              border: '1px solid #2a2a2a', cursor: 'pointer',
+              color: 'var(--cyber-text-dim)',
+              clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+              transition: 'all 0.15s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,0,51,0.4)'; e.currentTarget.style.color = 'var(--cyber-red)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--cyber-text-dim)'; }}
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
+        </div>
+
+        {/* Data row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, paddingLeft: 16 }}>
+          <div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>KOSZT</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cyber-yellow)', textShadow: '0 0 8px rgba(252,227,0,0.3)' }}>
+              {formatAmount(row.totalCost)}
+            </p>
+          </div>
+          <div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>NA OSOBĘ</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cyber-cyan)' }}>
+              {formatAmount(row.costPerPerson)}
+            </p>
+          </div>
+          <div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 2, textTransform: 'uppercase' }}>
+              OBECNI ({row.presentPlayers.length})
+            </p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {row.presentPlayers.join(', ')}
+            </p>
+            {row.multisportPlayers.length > 0 && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--cyber-green)', opacity: 0.7 }}>
+                ⚡ {row.multisportPlayers.join(', ')}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HistoryTab({ history, playerNames, playSound }) {
-  const [editingId,   setEditingId]   = useState(null);
-  const [editForm,    setEditForm]    = useState({});
-  const [deletingId,  setDeletingId]  = useState(null);
-  const [isSaving,    setIsSaving]    = useState(false);
-  const [isDeleting,  setIsDeleting]  = useState(null); // id sesji aktualnie usuwanej
-
-  const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete', rowId, row? }
+  const [editingId,  setEditingId]  = useState(null);
+  const [editForm,   setEditForm]   = useState({});
+  const [deletingId, setDeletingId] = useState(null);
+  const [isSaving,   setIsSaving]   = useState(false);
+  const [isDeleting, setIsDeleting] = useState(null);
+  const [pwModal,    setPwModal]    = useState(null);
   const tokens = useThemeTokens();
-
   const { showError } = useToast();
 
-  // ── Akcje po podaniu hasła ─────────────────────────
-  const requestEdit = (row) => setPwModal({ type: 'edit', row });
-  const requestDelete = (id) => setPwModal({ type: 'delete', rowId: id });
+  const requestEdit   = (row) => setPwModal({ type: 'edit', row });
+  const requestDelete = (id)  => setPwModal({ type: 'delete', rowId: id });
 
   const handlePasswordConfirm = () => {
     if (pwModal.type === 'edit') {
       const row = pwModal.row;
       setEditingId(row.id);
-      setEditForm({
-        date:         row.datePlayed,
-        cost:         row.totalCost,
-        present:      [...row.presentPlayers],
-        multiPlayers: [...row.multisportPlayers],
-      });
+      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers] });
     } else if (pwModal.type === 'delete') {
       setDeletingId(pwModal.rowId);
     }
     setPwModal(null);
   };
 
-  // ── Edit handlers ──────────────────────────────────
   const cancelEdit = () => { setEditingId(null); setEditForm({}); };
 
   const saveEdit = async () => {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      const result = await updateWeek(editingId, {
-        date:         editForm.date,
-        cost:         parseFloat(editForm.cost),
-        present:      editForm.present,
-        multiPlayers: editForm.multiPlayers,
-      });
-      if (!result.success) {
-        showError(result.error || 'Nie udało się zapisać sesji');
-        return;
-      }
-      setEditingId(null);
-      setEditForm({});
-    } finally {
-      setIsSaving(false);
-    }
+      const result = await updateWeek(editingId, { date: editForm.date, cost: parseFloat(editForm.cost), present: editForm.present, multiPlayers: editForm.multiPlayers });
+      if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
+      setEditingId(null); setEditForm({});
+    } finally { setIsSaving(false); }
   };
 
   const togglePresent = (name) => {
     setEditForm(prev => {
       const inList = (prev.present || []).includes(name);
-      return {
-        ...prev,
-        present:      inList ? prev.present.filter(p => p !== name) : [...prev.present, name],
-        multiPlayers: inList ? (prev.multiPlayers || []).filter(p => p !== name) : prev.multiPlayers,
-      };
+      return { ...prev, present: inList ? prev.present.filter(p => p !== name) : [...prev.present, name], multiPlayers: inList ? (prev.multiPlayers || []).filter(p => p !== name) : prev.multiPlayers };
     });
   };
 
@@ -172,14 +243,9 @@ export default function HistoryTab({ history, playerNames, playSound }) {
     setIsDeleting(id);
     try {
       const result = await deleteWeek(id);
-      if (!result.success) {
-        showError(result.error || 'Nie udało się usunąć sesji');
-        return;
-      }
+      if (!result.success) { showError(result.error || 'Nie udało się usunąć sesji'); return; }
       setDeletingId(null);
-    } finally {
-      setIsDeleting(null);
-    }
+    } finally { setIsDeleting(null); }
   };
 
   const grouped = groupHistoryByMonth(history);
@@ -189,148 +255,187 @@ export default function HistoryTab({ history, playerNames, playSound }) {
       {pwModal && (
         <PasswordModal
           tokens={tokens}
-          action={pwModal.type === 'edit' ? 'Podaj hasło żeby edytować tę sesję.' : 'Podaj hasło żeby usunąć tę sesję.'}
+          action={pwModal.type === 'edit' ? 'Podaj kod dostępu aby edytować sesję.' : 'Podaj kod dostępu aby usunąć sesję.'}
           onConfirm={handlePasswordConfirm}
           onCancel={() => setPwModal(null)}
         />
       )}
 
-      <div className="cyber-box rounded-2xl p-4 sm:p-6 overflow-hidden animate-in slide-in-from-right-5 duration-300">
-        <h2 className="text-xl font-black text-slate-200 mb-8 flex items-center gap-3 border-b border-slate-800/30 pb-4">
-          <History className="text-magenta-500" /> Historia rozgrywek
-        </h2>
+      <div className="cyber-box" style={{
+        clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%)',
+        padding: '20px 18px',
+        animation: 'slide-in-up 0.3s ease-out',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, paddingBottom: 14, borderBottom: '1px solid #1a1a1a' }}>
+          <div style={{ padding: '6px 8px', background: 'rgba(0,255,65,0.08)', border: '1px solid rgba(0,255,65,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+            <Terminal size={14} style={{ color: 'var(--cyber-green)', display: 'block' }} />
+          </div>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cyber-green)' }}>
+            SESSION LOG // ARCHIWUM
+          </span>
+          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,255,65,0.2), transparent)' }} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)' }}>
+            {history.length} REKORDÓW
+          </span>
+        </div>
+
+        {/* Boot text */}
+        <div style={{ marginBottom: 20, padding: '10px 14px', background: '#050505', border: '1px solid #0f0f0f' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--cyber-green)', lineHeight: 1.6, opacity: 0.7 }}>
+            {'>'} SYSTEM BOOT OK<br/>
+            {'>'} LOADING SESSION ARCHIVE...<br/>
+            {'>'} {history.length} RECORDS FOUND<br/>
+            {'>'} ACCESS GRANTED<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--cyber-green)' }}>▮</span>
+          </p>
+        </div>
 
         {history.length === 0 && (
-          <div className="text-center py-16 space-y-3">
-            <CalendarDays className="mx-auto text-slate-600" size={48} />
-            <p className="text-slate-500 font-bold">Brak historii rozgrywek.</p>
-            <p className="text-slate-600 text-sm">Dodaj pierwszą sesję w zakładce Dodaj sesję!</p>
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <CalendarDays style={{ margin: '0 auto 16px', color: 'var(--cyber-text-dim)' }} size={40} />
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--cyber-text-dim)', textTransform: 'uppercase' }}>
+              BRAK DANYCH
+            </p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#333', marginTop: 8 }}>
+              {'>'} Dodaj pierwszą sesję w zakładce LOG_
+            </p>
           </div>
         )}
 
-        <div className="space-y-8">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {grouped.map(({ label, rows }) => (
             <div key={label}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center gap-2 px-3 py-1 rounded-lg border border-slate-700/30 bg-slate-900/40">
-                  <CalendarDays size={13} className="text-slate-500" />
-                  <span className="text-slate-400 font-black text-xs tracking-widest uppercase">{label}</span>
-                  <span className="text-slate-600 font-mono text-xs ml-1">{rows.length}×</span>
+              {/* Month header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: '#080808', border: '1px solid #1e1e1e', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cyber-yellow)' }}>{label}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: '#3a3a3a' }}>[{rows.length}x]</span>
                 </div>
-                <div className="flex-1 h-px bg-gradient-to-r from-cyan-800 to-transparent" />
+                <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(252,227,0,0.15), transparent)' }} />
               </div>
 
-              <div className="space-y-3">
+              {/* Log entries */}
+              <div>
                 {rows.map((row) => {
                   const isEditingRow  = editingId  === row.id;
                   const isDeletingRow = deletingId === row.id;
 
                   if (isEditingRow) return (
-                    <div key={row.id} className="cyber-box border-indigo-500/40 rounded-xl p-4 space-y-4 bg-indigo-950/10">
-                      <div className="space-y-4">
+                    <div key={row.id} style={{
+                      background: '#080808', border: '1px solid rgba(252,227,0,0.25)',
+                      clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
+                      padding: 16, marginBottom: 4, display: 'flex', flexDirection: 'column', gap: 14,
+                    }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                         <div>
-                          <label className="block text-slate-500 font-bold mb-1 tracking-wider">DATA</label>
+                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.46rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</label>
                           <EditDateInput value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
                         </div>
                         <div>
-                          <label className="block text-slate-500 font-bold mb-1 tracking-wider">KOSZT</label>
+                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.46rem', letterSpacing: '0.18em', color: 'var(--cyber-yellow)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
                           <input type="number" value={editForm.cost}
                             onChange={e => setEditForm(p => ({ ...p, cost: e.target.value }))}
-                            className="cyber-input w-full p-3 rounded-xl text-sm"/>
+                            className="cyber-input"
+                            style={{ width: '100%', padding: '10px 12px', fontSize: '0.8rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
+                          />
                         </div>
                       </div>
                       <div>
-                        <p className="text-slate-400 text-xs font-bold mb-2 tracking-wider flex items-center gap-1"><Users size={13}/> OBECNI</p>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.46rem', letterSpacing: '0.15em', color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+                          <Users size={11} /> OBECNI
+                        </p>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                           {playerNames.map(name => (
                             <button type="button" key={name} onClick={() => togglePresent(name)}
-                              className={`p-2 rounded-lg text-xs font-bold border-2 transition-all ${
-                                editForm.present?.includes(name)
-                                  ? 'border-indigo-500/50 bg-indigo-950/20 text-indigo-200'
-                                  : 'border-slate-800/50 bg-black text-slate-600 hover:border-slate-600'
-                              }`}>{name}</button>
+                              style={{
+                                padding: '7px 8px', fontSize: '0.65rem', fontFamily: 'var(--font-display)', fontWeight: 600,
+                                letterSpacing: '0.06em', cursor: 'pointer', border: '1px solid',
+                                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                                transition: 'all 0.15s',
+                                ...(editForm.present?.includes(name) ? {
+                                  borderColor: 'rgba(252,227,0,0.5)', background: 'rgba(252,227,0,0.08)', color: 'var(--cyber-yellow)',
+                                } : {
+                                  borderColor: '#1a1a1a', background: 'transparent', color: '#444',
+                                }),
+                              }}>
+                              {name}
+                            </button>
                           ))}
                         </div>
                       </div>
                       {editForm.present?.length > 0 && (
                         <div>
-                          <p className="text-emerald-500 text-xs font-bold mb-2 tracking-wider flex items-center gap-1"><Zap size={13}/> MULTISPORT</p>
-                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.46rem', letterSpacing: '0.15em', color: 'var(--cyber-green)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+                            <Zap size={11} /> MULTISPORT
+                          </p>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                             {editForm.present.map(name => (
                               <button type="button" key={name} onClick={() => toggleMulti(name)}
-                                className={`p-2 rounded-lg text-xs font-bold border-2 transition-all ${
-                                  editForm.multiPlayers?.includes(name)
-                                    ? 'border-emerald-500/50 bg-emerald-950/20 text-emerald-200'
-                                    : 'border-slate-800 bg-transparent text-slate-600 hover:border-emerald-700'
-                                }`}>{name}</button>
+                                style={{
+                                  padding: '7px 8px', fontSize: '0.65rem', fontFamily: 'var(--font-display)', fontWeight: 600,
+                                  letterSpacing: '0.06em', cursor: 'pointer', border: '1px solid',
+                                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                                  transition: 'all 0.15s',
+                                  ...(editForm.multiPlayers?.includes(name) ? {
+                                    borderColor: 'rgba(0,255,65,0.5)', background: 'rgba(0,255,65,0.07)', color: 'var(--cyber-green)',
+                                  } : {
+                                    borderColor: '#1a1a1a', background: 'transparent', color: '#444',
+                                  }),
+                                }}>
+                                {name}
+                              </button>
                             ))}
                           </div>
                         </div>
                       )}
-                      <div className="flex gap-3 pt-2">
+                      <div style={{ display: 'flex', gap: 10 }}>
                         <button onClick={saveEdit} disabled={isSaving}
-                          className="flex-1 py-2 rounded-xl border-2 border-indigo-500/40 text-slate-200 bg-slate-900/40 hover:bg-indigo-500/20 hover:text-white font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait">
-                          {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Check size={16}/> ZAPISZ</>}
+                          className="cyber-button-yellow" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                          {isSaving ? <><InlineSpinner size="sm" /> ZAPISUJĘ...</> : <><Check size={14} /> ZAPISZ</>}
                         </button>
                         <button onClick={cancelEdit} disabled={isSaving}
-                          className="flex-1 py-2 rounded-xl border-2 border-slate-800/50 text-slate-500 hover:border-slate-600 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                          <X size={16}/> ANULUJ
+                          className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                          <X size={14} /> ANULUJ
                         </button>
                       </div>
                     </div>
                   );
 
                   if (isDeletingRow) return (
-                    <div key={row.id} className="cyber-box border-rose-600 rounded-xl p-5 bg-rose-950/20">
-                      <p className="text-rose-300 font-bold mb-1">Usunąć sesję z dnia <span className="text-white">{formatDate(row.datePlayed)}</span>?</p>
-                      <p className="text-rose-700 text-sm mb-4">Ta operacja jest nieodwracalna.</p>
-                      <div className="flex gap-3">
+                    <div key={row.id} style={{
+                      background: 'rgba(255,0,51,0.04)', border: '1px solid rgba(255,0,51,0.35)',
+                      clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
+                      padding: 16, marginBottom: 4,
+                      boxShadow: '0 0 20px rgba(255,0,51,0.1)',
+                    }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--cyber-red)', marginBottom: 4, textTransform: 'uppercase' }}>
+                        ⚠ USUNĄĆ SESJĘ // {formatDate(row.datePlayed)}?
+                      </p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#444', marginBottom: 14 }}>
+                        Ta operacja jest nieodwracalna.
+                      </p>
+                      <div style={{ display: 'flex', gap: 10 }}>
                         <button onClick={() => handleDelete(row.id)} disabled={isDeleting === row.id}
-                          className="flex-1 py-2 rounded-xl border-2 border-rose-500 text-rose-300 bg-rose-950/50 hover:bg-rose-500 hover:text-black font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-wait">
-                          {isDeleting === row.id ? <><InlineSpinner size="sm" /> Usuwam...</> : <><Trash2 size={16}/> USUŃ</>}
+                          style={{
+                            flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                            background: 'var(--cyber-red)', color: '#000',
+                            fontFamily: 'var(--font-display)', fontSize: '0.62rem', letterSpacing: '0.12em',
+                            border: 'none', cursor: 'pointer',
+                            clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
+                            opacity: isDeleting === row.id ? 0.5 : 1,
+                          }}>
+                          {isDeleting === row.id ? <><InlineSpinner size="sm" /> USUWAM...</> : <><Trash2 size={14} /> POTWIERDŹ USUNIĘCIE</>}
                         </button>
                         <button onClick={() => setDeletingId(null)} disabled={isDeleting === row.id}
-                          className="flex-1 py-2 rounded-xl border-2 border-slate-800/50 text-slate-500 hover:border-slate-600 font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                          <X size={16}/> ANULUJ
+                          className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                          <X size={14} /> ANULUJ
                         </button>
                       </div>
                     </div>
                   );
 
                   return (
-                    <div key={row.id} className="cyber-box rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:border-slate-500 transition-all">
-                      <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm min-w-0">
-                        <div>
-                          <p className="text-slate-500 text-xs tracking-wider">DATA</p>
-                          <p className="text-slate-100 font-bold">{formatDate(row.datePlayed)}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500 text-xs tracking-wider">KOSZT</p>
-                          <p className="text-magenta-400 font-black text-neon-pink">{formatAmount(row.totalCost)}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500 text-xs tracking-wider">NA OSOBĘ</p>
-                          <p className="text-indigo-400 font-bold">{formatAmount(row.costPerPerson)}</p>
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-slate-500 text-xs tracking-wider">OBECNI ({row.presentPlayers.length})</p>
-                          <p className="text-slate-500 truncate">{row.presentPlayers.join(', ')}</p>
-                          {row.multisportPlayers.length > 0 && (
-                            <p className="text-emerald-600 text-xs truncate">⚡ {row.multisportPlayers.join(', ')}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-2 flex-shrink-0">
-                        <button onClick={() => requestEdit(row)}
-                          className="p-3 rounded-lg border-2 border-slate-700/30 text-slate-500 hover:border-indigo-400/50 hover:text-slate-200 hover:bg-indigo-950/20 transition-all" title="Edytuj" aria-label="Edytuj sesję">
-                          <Pencil size={16}/>
-                        </button>
-                        <button onClick={() => requestDelete(row.id)}
-                          className="p-3 rounded-lg border-2 border-magenta-900 text-magenta-700 hover:border-magenta-500 hover:text-magenta-300 hover:bg-magenta-950/50 transition-all" title="Usuń" aria-label="Usuń sesję">
-                          <Trash2 size={16}/>
-                        </button>
-                      </div>
-                    </div>
+                    <LogEntry key={row.id} row={row} onEdit={requestEdit} onDelete={requestDelete} />
                   );
                 })}
               </div>

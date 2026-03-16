@@ -1,56 +1,69 @@
 import { RotateCcw } from 'lucide-react';
 import { useThemeTokens } from '../../context/ThemeContext';
 
-/**
- * Generic undo toast bar with progress indicator.
- *
- * Props:
- *   message      — main label text (node/string)
- *   secondsLeft  — countdown integer
- *   progressPct  — 0–100, width of the progress bar
- *   onUndo       — called when user clicks the undo button
- *   buttonLabel  — optional override (default: 'COFNIJ')
- *   compact      — smaller variant for in-card use (default: false)
- */
 export default function UndoBar({ message, secondsLeft, progressPct, onUndo, buttonLabel = 'COFNIJ', compact = false }) {
   const tokens = useThemeTokens();
 
   return (
-    <div
-      className={`flex items-center justify-between gap-2 relative overflow-hidden ${compact ? 'rounded-xl px-3 py-2' : 'p-4 gap-4'}`}
-      style={{
-        background:   tokens.undoBg,
-        border:       `${compact ? 1 : 2}px solid ${tokens.undoBorder}`,
-        borderRadius: compact ? tokens.modalRadius : tokens.modalRadius,
-        boxShadow:    compact ? undefined : tokens.modalShadow,
-      }}
-    >
-      <div
-        className={`absolute bottom-0 left-0 transition-all duration-1000 ${compact ? 'h-0.5' : 'h-1'}`}
-        style={{ width: `${progressPct}%`, background: tokens.undoProgressBg }}
-      />
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+      position: 'relative', overflow: 'hidden',
+      padding: compact ? '8px 12px' : '12px 16px',
+      background: tokens.undoBg,
+      border: `1px solid ${tokens.undoBorder}`,
+      boxShadow: compact ? 'none' : '0 0 16px rgba(252,227,0,0.08)',
+      clipPath: compact
+        ? 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)'
+        : 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+    }}>
+      {/* Progress bar */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0,
+        height: compact ? 2 : 2,
+        width: `${progressPct}%`,
+        background: 'var(--cyber-yellow)',
+        boxShadow: '0 0 6px var(--cyber-yellow)',
+        transition: 'width 1s linear',
+      }} />
 
-      <span
-        className={`font-bold flex items-center gap-1 min-w-0 ${compact ? 'text-xs' : 'text-sm flex-wrap'}`}
-        style={{ color: tokens.undoText, fontFamily: compact ? undefined : tokens.fontFamily }}
-      >
+      {/* Message */}
+      <span style={{
+        fontFamily: compact ? 'var(--font-mono)' : 'var(--font-display)',
+        fontSize: compact ? '0.65rem' : '0.7rem',
+        fontWeight: 600,
+        letterSpacing: compact ? '0.02em' : '0.08em',
+        color: tokens.undoText,
+        display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flexWrap: 'wrap',
+      }}>
         {message}
-        <span className="font-mono opacity-60 flex-shrink-0" style={{ fontSize: compact ? '0.7rem' : '0.75rem', color: tokens.mutedText }}>
+        <span style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.58rem',
+          color: tokens.mutedText, opacity: 0.7, flexShrink: 0,
+        }}>
           ({secondsLeft}s)
         </span>
       </span>
 
-      <button
-        onClick={onUndo}
-        className={`flex items-center gap-1 font-bold flex-shrink-0 transition-all hover:opacity-80 ${compact ? 'text-xs px-2 py-1 rounded-lg' : 'text-sm px-4 py-2'}`}
-        style={{
-          border:       `${compact ? 1 : 2}px solid ${tokens.undoBorder}`,
-          color:        compact ? tokens.accentText : tokens.undoText,
-          borderRadius: tokens.modalRadius,
-          background:   'transparent',
-        }}
+      {/* Undo button */}
+      <button onClick={onUndo} style={{
+        display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
+        padding: compact ? '4px 8px' : '6px 12px',
+        background: 'transparent',
+        border: `1px solid ${tokens.undoBorder}`,
+        color: 'var(--cyber-yellow)',
+        cursor: 'pointer', transition: 'all 0.15s',
+        fontFamily: 'var(--font-display)', fontWeight: 700,
+        fontSize: compact ? '0.45rem' : '0.52rem', letterSpacing: '0.12em',
+        textTransform: 'uppercase',
+        clipPath: compact
+          ? 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)'
+          : 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+      }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(252,227,0,0.08)'; e.currentTarget.style.borderColor = 'var(--cyber-yellow)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = tokens.undoBorder; }}
       >
-        <RotateCcw size={compact ? 11 : 14} /> {buttonLabel}
+        <RotateCcw size={compact ? 10 : 12} /> {buttonLabel}
       </button>
     </div>
   );

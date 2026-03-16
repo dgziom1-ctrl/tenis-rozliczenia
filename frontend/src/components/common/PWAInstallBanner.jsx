@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, X, Share } from 'lucide-react';
+import { Download, X, Share, Zap } from 'lucide-react';
 
 export default function PWAInstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -12,11 +12,7 @@ export default function PWAInstallBanner() {
 
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(ios);
-
-    if (ios) {
-      setTimeout(() => setShow(true), 2000);
-      return;
-    }
+    if (ios) { setTimeout(() => setShow(true), 2000); return; }
 
     const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); setShow(true); };
     window.addEventListener('beforeinstallprompt', handler);
@@ -38,80 +34,109 @@ export default function PWAInstallBanner() {
 
   if (!show) return null;
 
-  const base = {
+  const bannerStyle = {
     position: 'fixed',
     bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
-    left: '12px', right: '12px',
+    left: 10, right: 10,
     zIndex: 45,
-    background: 'rgba(8,12,20,0.97)',
-    border: '2px solid rgba(6,182,212,0.5)',
-    borderRadius: '14px',
-    boxShadow: '0 0 20px rgba(6,182,212,0.12), 0 4px 24px rgba(0,0,0,0.7)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
+    background: '#0a0a0a',
+    border: '1px solid rgba(252,227,0,0.35)',
+    clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
+    boxShadow: '0 0 24px rgba(252,227,0,0.12), 0 4px 30px rgba(0,0,0,0.9)',
     animation: 'pwaSlideUp 0.3s ease-out',
+    overflow: 'hidden',
   };
 
-  // ── Android / Chrome — jeden przycisk ─────────────────────────────────────
   if (!isIOS) {
     return (
-      <div style={base}>
-        
-        <div style={{ display:'flex', alignItems:'center', gap:'12px', padding:'12px 14px' }}>
-          <span style={{ fontSize:'22px', flexShrink:0 }}>🕹️</span>
-          <div style={{ flex:1 }}>
-            <p style={{ color:'#a5b4fc', fontWeight:900, fontSize:'0.78rem', margin:0, letterSpacing:'0.05em' }}>DODAJ DO EKRANU GŁÓWNEGO</p>
-            <p style={{ color:'rgba(6,182,212,0.5)', fontSize:'0.65rem', margin:'2px 0 0' }}>Otwieraj jak natywna aplikacja</p>
+      <div style={bannerStyle}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, var(--cyber-yellow), transparent)', opacity: 0.6 }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
+          <div style={{
+            width: 36, height: 36, flexShrink: 0,
+            background: 'rgba(252,227,0,0.08)', border: '1px solid rgba(252,227,0,0.3)',
+            clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <span style={{ fontSize: '1.2rem' }}>🕹️</span>
           </div>
-          <button onClick={handleInstall} style={{ flexShrink:0, display:'flex', alignItems:'center', gap:'5px', padding:'7px 12px', border:'2px solid rgba(6,182,212,0.7)', borderRadius:'9px', background:'rgba(8,47,73,0.8)', color:'#67e8f9', fontWeight:900, fontSize:'0.72rem', cursor:'pointer', whiteSpace:'nowrap' }}>
-            <Download size={14} /> DODAJ
+          <div style={{ flex: 1 }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.58rem', letterSpacing: '0.16em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
+              DODAJ DO EKRANU GŁÓWNEGO
+            </p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', margin: '2px 0 0' }}>
+              Otwieraj jak natywna aplikacja
+            </p>
+          </div>
+          <button onClick={handleInstall} style={{
+            flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5,
+            padding: '7px 12px',
+            background: 'var(--cyber-yellow)', color: '#000',
+            border: 'none', cursor: 'pointer',
+            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.55rem', letterSpacing: '0.12em',
+            clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
+            whiteSpace: 'nowrap',
+          }}>
+            <Download size={12} /> DODAJ
           </button>
-          <button onClick={dismiss} style={{ background:'transparent', border:'none', color:'rgba(6,182,212,0.35)', cursor:'pointer', padding:'4px', display:'flex', flexShrink:0 }}>
-            <X size={16} />
+          <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: '#3a3a3a', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0, transition: 'color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--cyber-yellow)'}
+            onMouseLeave={e => e.currentTarget.style.color = '#3a3a3a'}
+          >
+            <X size={15} />
           </button>
         </div>
       </div>
     );
   }
 
-  // ── iOS — tutorial krok po kroku ──────────────────────────────────────────
+  // iOS steps
   const steps = [
-    { icon: '1', content: <span>Stuknij ikonę <strong style={{color:'#67e8f9'}}>Udostępnij</strong> na dole Safari <Share size={13} style={{display:'inline',verticalAlign:'middle',marginLeft:'3px'}}/></span> },
-    { icon: '2', content: <span>Wybierz <strong style={{color:'#67e8f9'}}>"Dodaj do ekranu głównego"</strong></span> },
-    { icon: '3', content: <span>Stuknij <strong style={{color:'#67e8f9'}}>"Dodaj"</strong> w prawym górnym rogu</span> },
+    { n: '01', content: <span>Stuknij ikonę <span style={{ color: 'var(--cyber-yellow)' }}>Udostępnij</span> na dole Safari <Share size={11} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 2 }} /></span> },
+    { n: '02', content: <span>Wybierz <span style={{ color: 'var(--cyber-yellow)' }}>"Dodaj do ekranu głównego"</span></span> },
+    { n: '03', content: <span>Stuknij <span style={{ color: 'var(--cyber-yellow)' }}>"Dodaj"</span> w prawym górnym rogu</span> },
   ];
 
   return (
-    <div style={base}>
-      
-
-      {/* Header */}
-      <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px 10px' }}>
-        <span style={{ fontSize:'22px', flexShrink:0 }}>🕹️</span>
-        <div style={{ flex:1 }}>
-          <p style={{ color:'#a5b4fc', fontWeight:900, fontSize:'0.78rem', margin:0, letterSpacing:'0.05em' }}>DODAJ DO EKRANU GŁÓWNEGO</p>
-          <p style={{ color:'rgba(6,182,212,0.5)', fontSize:'0.65rem', margin:'2px 0 0' }}>Działa jak natywna aplikacja</p>
+    <div style={bannerStyle}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, var(--cyber-yellow), transparent)', opacity: 0.6 }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px 10px' }}>
+        <div style={{ width: 32, height: 32, flexShrink: 0, background: 'rgba(252,227,0,0.08)', border: '1px solid rgba(252,227,0,0.25)', clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: '1rem' }}>🕹️</span>
         </div>
-        <button onClick={dismiss} style={{ background:'transparent', border:'none', color:'rgba(6,182,212,0.35)', cursor:'pointer', padding:'4px', display:'flex', flexShrink:0 }}>
-          <X size={16} />
+        <div style={{ flex: 1 }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.58rem', letterSpacing: '0.16em', color: 'var(--cyber-yellow)', margin: 0, textTransform: 'uppercase' }}>
+            DODAJ DO EKRANU GŁÓWNEGO
+          </p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', margin: '2px 0 0' }}>
+            Działa jak natywna aplikacja
+          </p>
+        </div>
+        <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: '#3a3a3a', cursor: 'pointer', padding: 4, flexShrink: 0, transition: 'color 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--cyber-yellow)'}
+          onMouseLeave={e => e.currentTarget.style.color = '#3a3a3a'}
+        >
+          <X size={15} />
         </button>
       </div>
-
-      {/* Steps */}
-      <div style={{ borderTop:'1px solid rgba(6,182,212,0.12)', padding:'10px 14px 14px', display:'flex', flexDirection:'column', gap:'8px' }}>
+      <div style={{ borderTop: '1px solid #141414', padding: '10px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {steps.map((step, i) => (
-          <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-            <div style={{ width:'22px', height:'22px', borderRadius:'50%', border:'1px solid rgba(129,140,248,0.35)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#a5b4fc', fontWeight:900, fontSize:'0.65rem' }}>
-              {step.icon}
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 22, height: 22, flexShrink: 0,
+              border: '1px solid rgba(252,227,0,0.25)',
+              clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(252,227,0,0.04)',
+            }}>
+              <span style={{ fontFamily: 'var(--font-display)', color: 'var(--cyber-yellow)', fontWeight: 700, fontSize: '0.45rem', letterSpacing: '0.05em' }}>{step.n}</span>
             </div>
-            <p style={{ margin:0, color:'rgba(226,232,240,0.8)', fontSize:'0.72rem', lineHeight:1.4 }}>{step.content}</p>
+            <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#888', lineHeight: 1.4 }}>{step.content}</p>
           </div>
         ))}
       </div>
-
-      {/* Arrow pointing down toward Safari toolbar */}
-      <div style={{ textAlign:'center', paddingBottom:'8px', marginTop:'-4px' }}>
-        <span style={{ color:'rgba(6,182,212,0.35)', fontSize:'1rem' }}>↓</span>
+      <div style={{ textAlign: 'center', paddingBottom: 8, marginTop: -4 }}>
+        <span style={{ color: 'rgba(252,227,0,0.25)', fontSize: '0.8rem' }}>↓</span>
       </div>
     </div>
   );

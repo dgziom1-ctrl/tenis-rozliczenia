@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CalendarPlus, Users, Zap, CalendarDays, CheckCircle2, Calculator, Copy } from 'lucide-react';
+import { CalendarPlus, Users, Zap, CalendarDays, CheckCircle2, Calculator, Copy, Terminal } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
@@ -8,142 +8,243 @@ import { formatDate, formatAmountShort } from '../../utils/format';
 import { getPayingPlayers } from '../../utils/calculations';
 import { useThemeTokens } from '../../context/ThemeContext';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson }) {
   const paying = getPayingPlayers(presentPlayers, multisportPlayers);
   const multi  = multisportPlayers.filter(p => presentPlayers.includes(p));
-
   let msg = `🏓 Graliśmy! (${formatDate(date)})\n`;
   msg += `💰 Koszt: ${formatAmountShort(totalCost)} zł\n`;
   msg += `👥 Obecni (${presentPlayers.length}): ${presentPlayers.join(', ')}\n`;
-
   if (paying.length > 0) {
     msg += `💳 Każdy płaci: ${formatAmountShort(perPerson)} zł`;
     if (paying.length !== presentPlayers.length) msg += ` (${paying.length} os.)`;
     msg += '\n';
   }
   if (multi.length > 0) msg += `⚡ Multisport (gratis): ${multi.join(', ')}\n`;
-
   return msg.trim();
 }
 
-async function copyToClipboard(text) {
-  await navigator.clipboard.writeText(text);
+// ── Section label ─────────────────────────────────────────
+function FieldLabel({ children }) {
+  return (
+    <label style={{
+      display: 'block',
+      fontFamily: 'var(--font-display)', fontSize: '0.5rem',
+      fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase',
+      color: 'var(--cyber-text-dim)', marginBottom: 8,
+    }}>
+      {children}
+    </label>
+  );
 }
 
-// ─── Session summary modal ────────────────────────────────────────────────────
+// ── Session summary modal ─────────────────────────────────
 function SessionSummaryModal({ summary, onClose, tokens }) {
   const [copied, setCopied] = useState(false);
   if (!summary) return null;
-
   const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers } = summary;
 
   const handleCopy = async () => {
     const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson });
-    try {
-      await copyToClipboard(msg);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    } catch {
-      // silently ignore
-    }
+    try { await navigator.clipboard.writeText(msg); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch {}
   };
 
   return (
-    <div style={{ background: tokens.overlayBg }} className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4">
-      <div style={{ background: tokens.modalBg, border: `2px solid ${tokens.accentBorder}`, borderRadius: tokens.modalRadius, boxShadow: tokens.modalShadow }} className="p-6 w-full max-w-sm">
-        <div className="flex items-center gap-3 mb-5">
-          <CheckCircle2 style={{ color: tokens.accentColor }} size={28} />
-          <h3 style={{ color: tokens.accentColor, fontFamily: tokens.fontFamily }} className="font-black text-xl tracking-wide">Sesja zapisana!</h3>
+    <div style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(6px)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div style={{
+        background: '#0a0a0a',
+        border: '1px solid rgba(252,227,0,0.4)',
+        clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
+        boxShadow: '0 0 60px rgba(252,227,0,0.15), 0 4px 60px rgba(0,0,0,0.95)',
+        padding: '28px 24px', width: '100%', maxWidth: 400,
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+          <div style={{
+            width: 40, height: 40,
+            background: 'rgba(0,255,65,0.08)',
+            border: '1px solid rgba(0,255,65,0.35)',
+            clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CheckCircle2 size={20} style={{ color: 'var(--cyber-green)' }} />
+          </div>
+          <div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', letterSpacing: '0.2em', color: 'var(--cyber-green)', marginBottom: 3, textTransform: 'uppercase' }}>
+              SYSTEM // ZAPIS OK
+            </p>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.06em', color: '#e8e8e8', margin: 0 }}>
+              SESJA ZAPISANA
+            </h3>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-black/60 border border-slate-800/40 rounded-xl p-3 text-center">
-            <p className="text-slate-500 text-xs tracking-widest mb-1">DATA</p>
-            <p className="text-slate-200 font-bold text-sm">{formatDate(date)}</p>
-          </div>
-          <div className="bg-black/60 border border-magenta-900 rounded-xl p-3 text-center">
-            <p className="text-slate-500 text-xs tracking-widest mb-1">KOSZT</p>
-            <p className="text-magenta-300 font-black text-lg">{formatAmountShort(totalCost)} zł</p>
-          </div>
-          <div className="bg-black/60 border border-slate-800/40 rounded-xl p-3 text-center">
-            <p className="text-slate-500 text-xs tracking-widest mb-1">OBECNYCH</p>
-            <p className="text-slate-200 font-black text-lg">{presentCount}</p>
-          </div>
-          {multisportCount > 0 && (
-            <div style={{ background: tokens.cellBg, border: `1px solid ${tokens.cellBorder}`, borderRadius: tokens.modalRadius }} className="p-3 text-center">
-              <p className="text-slate-500 text-xs tracking-widest mb-1">MULTISPORT</p>
-              <p className="text-emerald-300 font-black text-lg">⚡ {multisportCount}</p>
+        {/* Stats grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+          {[
+            { label: 'DATA', value: formatDate(date), color: '#c8c8c8' },
+            { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--cyber-yellow)' },
+            { label: 'OBECNI', value: presentCount, color: '#c8c8c8' },
+            multisportCount > 0
+              ? { label: 'MULTISPORT', value: `⚡ ${multisportCount}`, color: 'var(--cyber-green)' }
+              : { label: 'PŁACĄ', value: payingCount, color: '#c8c8c8' },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{
+              padding: '10px 12px', background: '#070707',
+              border: '1px solid #1a1a1a',
+              clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+            }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.42rem', letterSpacing: '0.18em', color: 'var(--cyber-text-dim)', marginBottom: 4, textTransform: 'uppercase' }}>{label}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color, margin: 0 }}>{value}</p>
             </div>
-          )}
+          ))}
         </div>
 
+        {/* Per-person */}
         {payingCount > 0 && (
-          <div style={{ background: tokens.accentBg, border: `2px solid ${tokens.accentBorder}`, borderRadius: tokens.modalRadius }} className="p-4 mb-4 text-center">
-            <p style={{ color: tokens.cellLabelText }} className="text-xs tracking-widest mb-1">KAŻDY PŁACI</p>
-            <p style={{ color: tokens.accentColor }} className="text-4xl font-black">
-              {formatAmountShort(perPerson)}<span className="text-xl ml-1 opacity-70">zł</span>
+          <div style={{
+            padding: '16px', marginBottom: 16, textAlign: 'center',
+            background: 'rgba(252,227,0,0.04)',
+            border: '1px solid rgba(252,227,0,0.3)',
+            clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
+          }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.22em', color: 'var(--cyber-text-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+              KAŻDY PŁACI
+            </p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4rem', color: 'var(--cyber-yellow)', textShadow: '0 0 20px rgba(252,227,0,0.5)', margin: 0 }}>
+              {formatAmountShort(perPerson)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ</span>
             </p>
             {multisportCount > 0 && (
-              <p className="text-emerald-600 text-xs mt-1">({payingCount} os. płaci · {multisportCount} os. gratis)</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', marginTop: 4 }}>
+                {payingCount} os. płaci · {multisportCount} os. gratis
+              </p>
             )}
           </div>
         )}
 
-        <button
-          onClick={handleCopy}
-          className={`w-full py-3 rounded-xl border-2 font-bold text-sm transition-all flex items-center justify-center gap-2 mb-3 ${
-            copied
-              ? 'border-emerald-400 bg-emerald-950/50 text-emerald-300'
-              : 'border-indigo-600/40 bg-indigo-950/10 text-indigo-300 hover:border-indigo-400/50 hover:bg-indigo-950/20'
-          }`}
-        >
-          {copied ? <><CheckCircle2 size={15} /> SKOPIOWANO!</> : <><Copy size={15} /> KOPIUJ NA GRUPKĘ</>}
-        </button>
-
-        <button
-          onClick={onClose}
-          style={{ border: `2px solid ${tokens.accentBorder}`, color: tokens.accentColor, background: tokens.accentBg, borderRadius: tokens.modalRadius }} className="w-full py-3 font-black text-sm transition-all flex items-center justify-center gap-2 hover:opacity-80"
-        >
-          <CheckCircle2 size={16} /> OK, GOTOWE
-        </button>
+        {/* Copy & close */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <button onClick={handleCopy} style={{
+            width: '100%', padding: '12px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em',
+            cursor: 'pointer', transition: 'all 0.18s',
+            ...(copied ? {
+              background: 'rgba(0,255,65,0.08)', border: '1px solid rgba(0,255,65,0.4)', color: 'var(--cyber-green)',
+            } : {
+              background: 'transparent', border: '1px solid #2a2a2a', color: '#888',
+            }),
+            clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+          }}>
+            {copied ? <><CheckCircle2 size={14} /> SKOPIOWANO!</> : <><Copy size={14} /> KOPIUJ NA GRUPKĘ</>}
+          </button>
+          <button onClick={onClose} className="cyber-button-yellow" style={{ width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: '0.65rem' }}>
+            <CheckCircle2 size={14} /> OK — POWRÓT DO BAZY
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-// ─── Live cost preview ────────────────────────────────────────────────────────
+// ── Live cost preview ─────────────────────────────────────
 function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
   const cost = parseFloat(totalCost);
   if (!totalCost || isNaN(cost) || cost <= 0 || presentPlayers.length === 0) return null;
-
-  const payingPlayers = presentPlayers.filter(p => !multisportPlayers.includes(p));
-  const perPerson     = payingPlayers.length > 0 ? cost / payingPlayers.length : 0;
+  const paying    = presentPlayers.filter(p => !multisportPlayers.includes(p));
+  const perPerson = paying.length > 0 ? cost / paying.length : 0;
 
   return (
-    <div className="flex items-center justify-between bg-slate-900/30 border border-slate-700/30 rounded-xl px-4 py-3">
-      <div className="flex items-center gap-2 text-slate-500 text-sm font-bold">
-        <Calculator size={15} className="text-slate-400" />
-        <span>Podgląd podziału</span>
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '12px 16px',
+      background: 'rgba(252,227,0,0.03)',
+      border: '1px solid rgba(252,227,0,0.2)',
+      clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Calculator size={14} style={{ color: 'var(--cyber-text-dim)' }} />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', letterSpacing: '0.15em', color: 'var(--cyber-text-dim)', textTransform: 'uppercase' }}>
+          PODGLĄD PODZIAŁU
+        </span>
       </div>
-      <div className="text-right">
-        {payingPlayers.length > 0 ? (
+      <div style={{ textAlign: 'right' }}>
+        {paying.length > 0 ? (
           <>
-            <span className="text-magenta-300 font-black text-xl glow-magenta-sm">
-              {formatAmountShort(perPerson)} zł
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.4rem', color: 'var(--cyber-yellow)', textShadow: '0 0 10px rgba(252,227,0,0.3)' }}>
+              {formatAmountShort(perPerson)} ZŁ
             </span>
-            <span className="text-slate-500 text-xs ml-2">/ os. ({payingPlayers.length} płaci)</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', color: 'var(--cyber-text-dim)', marginLeft: 8, letterSpacing: '0.12em' }}>
+              / OS. ({paying.length} PŁACI)
+            </span>
           </>
         ) : (
-          <span className="text-emerald-400 font-bold text-sm">Wszyscy mają Multisport 🎉</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--cyber-green)' }}>
+            ⚡ WSZYSCY MAJĄ MULTISPORT
+          </span>
         )}
       </div>
     </div>
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ── Player toggle grid ────────────────────────────────────
+function PlayerToggleGrid({ names, selected, onToggle, accent = 'yellow' }) {
+  const accentColor = accent === 'green' ? 'var(--cyber-green)' : 'var(--cyber-yellow)';
+  const accentAlpha = accent === 'green' ? 'rgba(0,255,65,0.08)' : 'rgba(252,227,0,0.08)';
+  const accentBorder = accent === 'green' ? 'rgba(0,255,65,0.4)' : 'rgba(252,227,0,0.4)';
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+      {names.map(name => {
+        const active = selected.includes(name);
+        return (
+          <button type="button" key={name} onClick={() => onToggle(name)} style={{
+            padding: '10px 12px', cursor: 'pointer', transition: 'all 0.15s',
+            fontFamily: 'var(--font-display)', fontSize: '0.62rem', fontWeight: 700,
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+            clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
+            ...(active ? {
+              background: accentAlpha, border: `1px solid ${accentBorder}`, color: accentColor,
+              boxShadow: `0 0 10px ${accent === 'green' ? 'rgba(0,255,65,0.1)' : 'rgba(252,227,0,0.1)'}`,
+            } : {
+              background: '#070707', border: '1px solid #1a1a1a', color: '#444',
+            }),
+          }}>
+            {name}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Date input overlay ────────────────────────────────────
+function CyberDateInput({ value, onChange }) {
+  return (
+    <div style={{ position: 'relative' }}>
+      <div className="cyber-input" style={{
+        width: '100%', padding: '10px 14px', display: 'flex',
+        alignItems: 'center', justifyContent: 'space-between', gap: 10,
+        clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+        pointerEvents: 'none', fontSize: '0.85rem', fontFamily: 'var(--font-mono)',
+      }}>
+        <span>{formatDate(value)}</span>
+        <CalendarDays size={14} style={{ opacity: 0.4, flexShrink: 0 }} />
+      </div>
+      <input type="date" value={value} onChange={e => onChange(e.target.value)}
+        onClick={e => e.currentTarget.showPicker?.()}
+        style={{
+          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+          opacity: 0, cursor: 'pointer', zIndex: 2, padding: 0, border: 'none',
+          boxSizing: 'border-box', fontSize: '16px',
+        }}
+      />
+    </div>
+  );
+}
+
+// ── Main ─────────────────────────────────────────────────
 export default function AdminTab({ playerNames, defaultMultiPlayers, history, setActiveTab, playSound }) {
   const { showError } = useToast();
   const tokens = useThemeTokens();
@@ -156,10 +257,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const [isSaving,          setIsSaving]          = useState(false);
   const [savedSummary,      setSavedSummary]      = useState(null);
 
-  // Inline duplicate-date detection — no need to wait for Firebase
   const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed);
 
-  // Initialise player lists whenever roster changes
   useEffect(() => {
     if (!playerNames?.length) return;
     setPresentPlayers([...playerNames]);
@@ -169,215 +268,159 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const togglePresent = useCallback((name) => {
     playSound(SOUND_TYPES.CLICK);
     setPresentPlayers(prev => {
-      if (prev.includes(name)) {
-        setMultisportPlayers(m => m.filter(p => p !== name));
-        return prev.filter(p => p !== name);
-      }
+      if (prev.includes(name)) { setMultisportPlayers(m => m.filter(p => p !== name)); return prev.filter(p => p !== name); }
       return [...prev, name];
     });
   }, [playSound]);
 
   const toggleMulti = useCallback((name) => {
     playSound(SOUND_TYPES.CLICK);
-    setMultisportPlayers(prev =>
-      prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name],
-    );
+    setMultisportPlayers(prev => prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name]);
   }, [playSound]);
 
   const handleSaveSession = useCallback(async (e) => {
     e.preventDefault();
     if (isSaving) return;
-
     setIsSaving(true);
-    const cost          = parseFloat(totalCost);
-    const payingPlayers = presentPlayers.filter(p => !multisportPlayers.includes(p));
-    const perPerson     = payingPlayers.length > 0 ? cost / payingPlayers.length : 0;
-
+    const cost     = parseFloat(totalCost);
+    const paying   = presentPlayers.filter(p => !multisportPlayers.includes(p));
+    const perPerson = paying.length > 0 ? cost / paying.length : 0;
     try {
       const result = await addSession({ datePlayed, totalCost: cost, presentPlayers, multisportPlayers });
-      if (!result.success) {
-        showError(result.error || 'Nie udało się zapisać sesji');
-        return;
-      }
-
+      if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       playSound(SOUND_TYPES.SUCCESS);
-      setSavedSummary({
-        date: datePlayed, totalCost: cost,
-        presentCount:    presentPlayers.length,
-        payingCount:     payingPlayers.length,
-        multisportCount: multisportPlayers.length,
-        perPerson,
-        presentPlayers:    [...presentPlayers],
-        multisportPlayers: [...multisportPlayers],
-      });
-
-      // Reset form
+      setSavedSummary({ date: datePlayed, totalCost: cost, presentCount: presentPlayers.length, payingCount: paying.length, multisportCount: multisportPlayers.length, perPerson, presentPlayers: [...presentPlayers], multisportPlayers: [...multisportPlayers] });
       setTotalCost('');
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
-    } finally {
-      setIsSaving(false);
-    }
+    } finally { setIsSaving(false); }
   }, [isSaving, datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError]);
 
-  const handleSummaryClose = useCallback(() => {
-    setSavedSummary(null);
-    setActiveTab(TABS.DASHBOARD);
-  }, [setActiveTab]);
+  const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
+
+  const isDisabled = isSaving || presentPlayers.length === 0 || !totalCost || isDuplicateDate;
 
   return (
     <>
       <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} tokens={tokens} />
 
-      <div className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-5 duration-300">
-        <div className="cyber-box rounded-2xl p-4 sm:p-8">
-          <h2 className="text-xl font-black text-slate-200 mb-6 flex items-center gap-3 border-b border-slate-800/30 pb-4">
-            <CalendarPlus className="text-magenta-500 flex-shrink-0" />
-            Dodaj nową sesję
-          </h2>
+      <div style={{ width: '100%', maxWidth: 680, margin: '0 auto', animation: 'slide-in-up 0.3s ease-out' }}>
+        <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)', padding: '20px 20px' }}>
 
-          <form onSubmit={handleSaveSession} className="space-y-5">
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid #1a1a1a' }}>
+            <div style={{ padding: '7px 9px', background: 'rgba(252,227,0,0.07)', border: '1px solid rgba(252,227,0,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+              <CalendarPlus size={16} style={{ color: 'var(--cyber-yellow)', display: 'block' }} />
+            </div>
+            <div>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.22em', color: 'var(--cyber-yellow)', textTransform: 'uppercase' }}>
+                LOG NEW SESSION
+              </span>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', margin: '2px 0 0' }}>
+                {'>'} dodaj nową sesję do archiwum_
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSaveSession} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
             {/* Date */}
             <div>
-              <label className="block font-bold text-slate-500 mb-2 tracking-wider text-sm">Data gry:</label>
-              <div style={{ position: 'relative' }}>
-                <div
-                  className="cyber-input w-full p-3 rounded-xl text-sm flex items-center justify-between gap-3"
-                  style={{ pointerEvents: 'none' }}
-                >
-                  <span>{formatDate(datePlayed)}</span>
-                  <CalendarDays size={18} style={{ opacity: 0.6, flexShrink: 0 }} />
-                </div>
-                <input
-                  type="date"
-                  value={datePlayed}
-                  onChange={e => setDatePlayed(e.target.value)}
-                  onClick={e => e.currentTarget.showPicker?.()}
-                  className="date-overlay"
-                  style={{
-                    position: 'absolute', top: 0, left: 0,
-                    width: '100%', height: '100%',
-                    opacity: 0, cursor: 'pointer', zIndex: 2,
-                    padding: 0, border: 'none', boxSizing: 'border-box',
-                    fontSize: '16px',
-                  }}
-                />
-              </div>
+              <FieldLabel>// DATA GRY</FieldLabel>
+              <CyberDateInput value={datePlayed} onChange={setDatePlayed} />
               {isDuplicateDate && (
-                <p className="mt-2 text-xs font-bold text-amber-400 flex items-center gap-1">
-                  ⚠ Sesja z datą {formatDate(datePlayed)} już istnieje
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.48rem', letterSpacing: '0.15em', color: '#f59e0b', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  ⚠ SESJA Z TĄ DATĄ JUŻ ISTNIEJE
                 </p>
               )}
             </div>
 
             {/* Cost */}
             <div>
-              <label className="block font-bold text-slate-500 mb-2 tracking-wider text-sm">Koszt całkowity:</label>
-              <div className="flex gap-2 mb-2">
-                {QUICK_COSTS.map(cost => (
-                  <button
-                    type="button"
-                    key={cost}
-                    onClick={() => { setTotalCost(String(cost)); playSound(SOUND_TYPES.CLICK); }}
-                    className={`flex-1 py-2 rounded-lg border-2 font-bold text-sm transition-all ${
-                      totalCost === String(cost)
-                        ? 'border-indigo-400/50 bg-indigo-950/15 text-indigo-200'
-                        : 'border-slate-800 bg-transparent text-slate-500 hover:border-slate-600 hover:text-slate-300'
-                    }`}
-                  >
-                    {cost === 0 ? 'FREE' : cost}
-                  </button>
-                ))}
+              <FieldLabel>// KOSZT CAŁKOWITY</FieldLabel>
+              {/* Quick-cost buttons */}
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                {QUICK_COSTS.map(cost => {
+                  const active = totalCost === String(cost);
+                  return (
+                    <button type="button" key={cost}
+                      onClick={() => { setTotalCost(String(cost)); playSound(SOUND_TYPES.CLICK); }}
+                      style={{
+                        flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
+                        fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                        clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                        ...(active ? {
+                          background: 'rgba(252,227,0,0.1)', border: '1px solid rgba(252,227,0,0.5)',
+                          color: 'var(--cyber-yellow)', boxShadow: '0 0 8px rgba(252,227,0,0.15)',
+                        } : {
+                          background: '#070707', border: '1px solid #1a1a1a', color: '#555',
+                        }),
+                      }}>
+                      {cost === 0 ? 'FREE' : cost}
+                    </button>
+                  );
+                })}
               </div>
-              <input
-                type="number"
-                value={totalCost}
-                onChange={e => setTotalCost(e.target.value)}
-                placeholder="lub wpisz ręcznie..."
-                className="cyber-input p-3 rounded-xl text-sm w-full"
-                style={{
-                  background: '#080c18',
-                  color: '#e2e8f0',
-                  border: '1px solid rgba(148,163,184,0.12)',
-                }}
+              <input type="number" value={totalCost} onChange={e => setTotalCost(e.target.value)}
+                placeholder="// lub wpisz ręcznie..."
+                className="cyber-input"
+                style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
                 required
               />
             </div>
 
-            {/* Who was present */}
-            <div className="cyber-box bg-black/50 p-4 rounded-xl">
-              <p className="font-bold text-indigo-300 mb-4 flex items-center gap-2 text-sm">
-                <Users size={18} className="text-magenta-500 flex-shrink-0" /> Kto był obecny?
+            {/* Present players */}
+            <div style={{ padding: '16px', background: '#070707', border: '1px solid #1a1a1a', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
+                <Users size={13} style={{ color: 'var(--cyber-yellow)' }} />
+                KTO BYŁ OBECNY?
+                <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-yellow)' }}>
+                  [{presentPlayers.length}/{playerNames?.length || 0}]
+                </span>
               </p>
-              <div className="grid grid-cols-2 gap-2">
-                {playerNames.map(name => (
-                  <button
-                    type="button"
-                    key={name}
-                    onClick={() => togglePresent(name)}
-                    className={`p-3 rounded-lg border-2 font-bold text-sm transition-all text-center ${
-                      presentPlayers.includes(name)
-                        ? 'border-indigo-400/50 bg-indigo-950/15 text-indigo-200'
-                        : 'border-slate-800 bg-transparent hover:border-slate-600 text-slate-600'
-                    }`}
-                  >
-                    {name}
-                  </button>
-                ))}
-              </div>
+              <PlayerToggleGrid names={playerNames || []} selected={presentPlayers} onToggle={togglePresent} accent="yellow" />
             </div>
 
             {/* Multisport */}
             {presentPlayers.length > 0 && (
-              <div className="cyber-box bg-black/50 p-4 rounded-xl border-emerald-900">
-                <p className="font-bold text-emerald-400 mb-4 flex items-center gap-2 text-sm">
-                  <Zap size={18} className="text-emerald-500 flex-shrink-0" /> Kto miał Multisport (0 zł)?
+              <div style={{ padding: '16px', background: '#070707', border: '1px solid #141414', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.52rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
+                  <Zap size={13} style={{ color: 'var(--cyber-green)' }} />
+                  KTO MIAŁ MULTISPORT? (0 ZŁ)
+                  {multisportPlayers.length > 0 && (
+                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-green)' }}>
+                      ⚡{multisportPlayers.length}
+                    </span>
+                  )}
                 </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {presentPlayers.map(name => (
-                    <button
-                      type="button"
-                      key={name}
-                      onClick={() => toggleMulti(name)}
-                      className={`p-3 rounded-lg border-2 font-bold text-sm transition-all text-center ${
-                        multisportPlayers.includes(name)
-                          ? 'border-emerald-400 bg-emerald-950 text-emerald-200 shadow-[0_0_8px_#10b981]'
-                          : 'border-emerald-900 bg-black hover:border-emerald-700 text-emerald-800'
-                      }`}
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
+                <PlayerToggleGrid names={presentPlayers} selected={multisportPlayers} onToggle={toggleMulti} accent="green" />
               </div>
             )}
 
-            <LiveCostPreview
-              totalCost={totalCost}
-              presentPlayers={presentPlayers}
-              multisportPlayers={multisportPlayers}
-            />
+            {/* Live preview */}
+            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} />
 
-            <div className="space-y-2">
-              <button
-                type="submit"
-                disabled={isSaving || presentPlayers.length === 0 || !totalCost || isDuplicateDate}
-                className={`cyber-button-blue w-full py-4 rounded-xl text-lg font-black flex justify-center items-center gap-2 transition-opacity ${
-                  isSaving || presentPlayers.length === 0 || !totalCost || isDuplicateDate ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
+            {/* Submit */}
+            <div>
+              <button type="submit" disabled={isDisabled}
+                className={isDisabled ? '' : 'cyber-button-yellow'}
+                style={{
+                  width: '100%', padding: '14px 20px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  fontSize: '0.72rem', letterSpacing: '0.12em',
+                  cursor: isDisabled ? 'not-allowed' : 'pointer',
+                  fontFamily: 'var(--font-display)', fontWeight: 700,
+                  ...(isDisabled ? {
+                    background: '#0d0d0d', border: '1px solid #1a1a1a', color: '#333',
+                  } : {}),
+                }}>
                 {isSaving
-                  ? <><InlineSpinner size="sm" /> Zapisuję...</>
-                  : <><CheckCircle2 className="flex-shrink-0" /> ZAPISZ SESJĘ</>
-                }
+                  ? <><InlineSpinner size="sm" /> ZAPISUJĘ...</>
+                  : <><CheckCircle2 size={16} /> ZAPISZ SESJĘ</>}
               </button>
-              {!isSaving && (presentPlayers.length === 0 || !totalCost || isDuplicateDate) && (
-                <p className="text-xs text-center font-bold tracking-wide" style={{ color: tokens.mutedText }}>
-                  {isDuplicateDate
-                    ? '⚠ Zmień datę — ta sesja już istnieje'
-                    : !totalCost
-                    ? 'Wpisz koszt sesji żeby kontynuować'
-                    : 'Zaznacz co najmniej jednego gracza'}
+              {!isSaving && isDisabled && (
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cyber-text-dim)', textAlign: 'center', marginTop: 8 }}>
+                  {'>'} {isDuplicateDate ? '⚠ Zmień datę — sesja już istnieje' : !totalCost ? 'Wpisz koszt sesji żeby kontynuować' : 'Zaznacz co najmniej jednego gracza'}
                 </p>
               )}
             </div>

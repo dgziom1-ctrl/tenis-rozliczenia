@@ -1,4 +1,4 @@
-import { HandCoins, CheckCircle2, X } from 'lucide-react';
+import { HandCoins, CheckCircle2, X, Crosshair } from 'lucide-react';
 import { formatAmountShort } from '../../utils/format';
 
 export default function SettleConfirmModal({ playerName, debt, onConfirm, onCancel, tokens }) {
@@ -6,63 +6,77 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4"
-      style={{ background: tokens.overlayBg }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(6px)' }}
     >
-      <div
-        className="p-6 w-full max-w-sm"
-        style={{
-          background:   tokens.modalBg,
-          border:       `2px solid ${tokens.accentBorder}`,
-          borderRadius: tokens.modalRadius,
-          boxShadow:    tokens.modalShadow,
-        }}
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <HandCoins style={{ color: tokens.accentColor }} className="flex-shrink-0" size={24} />
-          <h3
-            className="font-black text-lg"
-            style={{ color: tokens.accentColor, fontFamily: tokens.fontFamily, fontSize: tokens.fontSize }}
-          >
-            Potwierdzenie
-          </h3>
+      <div style={{
+        background: '#0a0a0a',
+        border: '1px solid rgba(252,227,0,0.4)',
+        clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
+        boxShadow: '0 0 50px rgba(252,227,0,0.15), 0 4px 60px rgba(0,0,0,0.95)',
+        padding: '26px 22px', width: '100%', maxWidth: 380,
+      }}>
+        {/* Yellow corner accent */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, var(--cyber-yellow), transparent)', opacity: 0.6 }} />
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{
+            width: 40, height: 40,
+            background: 'rgba(252,227,0,0.07)',
+            border: '1px solid rgba(252,227,0,0.35)',
+            clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <HandCoins size={18} style={{ color: 'var(--cyber-yellow)' }} />
+          </div>
+          <div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.22em', color: 'var(--cyber-yellow)', opacity: 0.7, marginBottom: 3, textTransform: 'uppercase' }}>
+              BOUNTY CLEAR // POTWIERDZENIE
+            </p>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.06em', color: '#e8e8e8', margin: 0 }}>
+              ROZLICZ GRACZA
+            </h3>
+          </div>
         </div>
 
-        <p className="text-sm mb-2" style={{ color: tokens.bodyText }}>
-          <span className="font-black">{playerName}</span> zapłacił?
-        </p>
-
-        <div
-          className="rounded-xl p-3 mb-5 text-center"
-          style={{ background: tokens.accentBg, border: `1px solid ${tokens.accentBorder}` }}
-        >
-          <span className="text-3xl font-black" style={{ color: tokens.accentColor }}>
-            {formatAmountShort(debt)} zł
-          </span>
+        {/* Player name + amount */}
+        <div style={{ marginBottom: 20 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: '#888', marginBottom: 12 }}>
+            {'>'} <span style={{ color: '#e8e8e8', fontWeight: 600 }}>{playerName}</span> zapłacił?
+          </p>
+          <div style={{
+            padding: '16px', textAlign: 'center',
+            background: 'rgba(252,227,0,0.04)',
+            border: '1px solid rgba(252,227,0,0.25)',
+            clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
+          }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.2em', color: 'var(--cyber-text-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+              KWOTA DO ROZLICZENIA
+            </p>
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: '2.2rem',
+              color: 'var(--cyber-yellow)',
+              textShadow: '0 0 20px rgba(252,227,0,0.4)',
+            }}>
+              {formatAmountShort(debt)}<span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 4 }}>ZŁ</span>
+            </span>
+          </div>
         </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={onConfirm}
-            className="flex-1 py-3 font-bold text-sm flex items-center justify-center gap-2 hover:opacity-80 transition-all"
-            style={{
-              border:       `2px solid ${tokens.accentBorder}`,
-              color:        tokens.accentColor,
-              background:   tokens.accentBg,
-              borderRadius: tokens.modalRadius,
-            }}
-          >
-            <CheckCircle2 size={15} /> Tak
+        {/* Buttons */}
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={onConfirm} className="cyber-button-yellow" style={{
+            flex: 1, padding: '12px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            fontSize: '0.65rem',
+          }}>
+            <CheckCircle2 size={15} /> TAK, ROZLICZ
           </button>
-          <button
-            onClick={onCancel}
-            className="flex-1 py-3 font-bold text-sm flex items-center justify-center gap-2 hover:opacity-80 transition-all"
-            style={{
-              border:       `2px solid ${tokens.cancelBorder}`,
-              color:        tokens.cancelText,
-              borderRadius: tokens.modalRadius,
-            }}
-          >
+          <button onClick={onCancel} className="cyber-button-outline" style={{
+            flex: 1, padding: '12px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}>
             <X size={15} /> ANULUJ
           </button>
         </div>

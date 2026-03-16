@@ -1,115 +1,84 @@
-// Loading skeleton and spinner components
+// Loading skeleton and spinner components — Cyberpunk theme
 
 export function PlayerCardSkeleton() {
   return (
-    <div className="cyber-box rounded-2xl overflow-hidden animate-pulse">
-      <div className="bg-slate-800/30 p-4 border-b border-slate-700/30">
-        <div className="h-6 bg-slate-700/30 rounded w-24" />
-      </div>
-      <div className="p-6">
-        <div className="space-y-2 mb-4">
-          <div className="h-4 bg-slate-700/20 rounded w-32 mx-auto" />
-          <div className="h-4 bg-slate-700/20 rounded w-24 mx-auto" />
+    <div style={{
+      background: '#0d0d0d', border: '1px solid #1a1a1a',
+      clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
+      overflow: 'hidden', animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+    }}>
+      <div style={{ padding: '12px 14px', borderBottom: '1px solid #141414', background: 'rgba(252,227,0,0.02)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 56, height: 56, background: '#111', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }} />
+        <div style={{ flex: 1 }}>
+          <div style={{ height: 8, background: '#111', marginBottom: 8, width: '60%' }} />
+          <div style={{ height: 6, background: '#0d0d0d', width: '40%' }} />
         </div>
-        <div className="h-20 bg-slate-700/20 rounded mb-4" />
-        <div className="h-10 bg-slate-700/20 rounded" />
       </div>
+      <div style={{ padding: '14px' }}>
+        <div style={{ height: 3, background: '#111', marginBottom: 14 }} />
+        <div style={{ height: 60, background: '#0a0a0a', marginBottom: 12, clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }} />
+        <div style={{ height: 40, background: '#111', clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)' }} />
+      </div>
+      <style>{`@keyframes skeleton-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
     </div>
   );
 }
 
 export function SessionCardSkeleton() {
   return (
-    <div className="cyber-box rounded-xl p-4 animate-pulse">
-      <div className="flex justify-between items-start mb-3">
-        <div className="h-5 bg-slate-700/20 rounded w-24" />
-        <div className="h-5 bg-slate-700/20 rounded w-16" />
+    <div style={{
+      background: '#070707', border: '1px solid #141414',
+      clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
+      padding: '12px 14px', animation: 'skeleton-pulse 1.5s ease-in-out infinite',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ height: 8, background: '#111', width: 120 }} />
+        <div style={{ height: 8, background: '#111', width: 60 }} />
       </div>
-      <div className="space-y-2">
-        <div className="h-4 bg-slate-700/20 rounded w-full" />
-        <div className="h-4 bg-slate-700/20 rounded w-3/4" />
-      </div>
+      <div style={{ height: 6, background: '#0d0d0d', width: '80%', marginBottom: 6 }} />
+      <div style={{ height: 6, background: '#0d0d0d', width: '60%' }} />
     </div>
-  );
-}
-
-export function HistoryRowSkeleton() {
-  return (
-    <div className="cyber-box rounded-xl p-4 animate-pulse">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-12 bg-slate-800/30 rounded" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function LeaderboardSkeleton() {
-  return (
-    <div className="cyber-box rounded-2xl p-6 animate-pulse">
-      <div className="h-8 bg-slate-700/20 rounded w-48 mb-8" />
-      <div className="flex items-end justify-center gap-4 mb-8">
-        {[
-          'h-32 bg-slate-900/50',
-          'h-32 bg-yellow-950/50',
-          'h-32 bg-amber-950/50',
-        ].map((cls, i) => (
-          <div key={i} className="flex-1 max-w-[180px]">
-            <div className={`w-full ${cls} rounded-xl mb-2`} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function TableSkeleton({ rows = 5, cols = 4 }) {
-  return (
-    <div className="cyber-box rounded-2xl p-6 animate-pulse">
-      <div className="h-8 bg-slate-700/20 rounded w-48 mb-6" />
-      <div className="space-y-3">
-        <div className="flex gap-4 bg-slate-800/30 p-3 rounded">
-          {Array.from({ length: cols }).map((_, i) => (
-            <div key={i} className="h-4 bg-slate-700/30 rounded flex-1" />
-          ))}
-        </div>
-        {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="flex gap-4 p-3">
-            {Array.from({ length: cols }).map((_, j) => (
-              <div key={j} className="h-4 bg-slate-700/20 rounded flex-1" />
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function ButtonSkeleton({ fullWidth = false }) {
-  return (
-    <div className={`h-12 bg-slate-700/20 rounded-xl animate-pulse ${fullWidth ? 'w-full' : 'w-32'}`} />
   );
 }
 
 export function SpinnerOverlay({ message = 'Ładowanie...' }) {
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="cyber-box rounded-2xl p-8 text-center">
-        <div className="inline-block w-14 h-14 border-2 border-slate-700 border-t-indigo-400 rounded-full animate-spin mb-4" />
-        <p className="text-slate-300 font-semibold tracking-wide">{message}</p>
-      </div>
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'var(--cyber-black)', flexDirection: 'column', gap: 20,
+    }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 2, background: 'var(--cyber-yellow)', boxShadow: '0 0 12px var(--cyber-yellow)' }} />
+      <div style={{
+        width: 50, height: 50,
+        border: '2px solid #1a1a1a',
+        borderTop: '2px solid var(--cyber-yellow)',
+        borderRadius: '50%',
+        animation: 'cyber-spin 0.8s linear infinite',
+        boxShadow: '0 0 16px rgba(252,227,0,0.2)',
+      }} />
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.58rem', letterSpacing: '0.2em', color: 'var(--cyber-yellow)', textTransform: 'uppercase', animation: 'flicker 2s infinite' }}>
+        {message}
+      </p>
+      <style>{`
+        @keyframes cyber-spin { to { transform: rotate(360deg); } }
+        @keyframes flicker { 0%,19%,21%,23%,25%,54%,56%,100% { opacity: 1; } 20%,24%,55% { opacity: 0.3; } }
+      `}</style>
     </div>
   );
 }
 
+// Inline spinner — used inside buttons
 export function InlineSpinner({ size = 'md' }) {
-  const sizeClasses = {
-    sm: 'w-4 h-4 border-2',
-    md: 'w-8 h-8 border-2',
-    lg: 'w-12 h-12 border-4',
-  };
+  const px = size === 'sm' ? 12 : size === 'lg' ? 20 : 16;
   return (
-    <div className={`inline-block ${sizeClasses[size]} border-slate-700 border-t-indigo-400 rounded-full animate-spin`} />
+    <span style={{
+      display: 'inline-block',
+      width: px, height: px,
+      border: '2px solid rgba(0,0,0,0.2)',
+      borderTop: '2px solid currentColor',
+      borderRadius: '50%',
+      animation: 'cyber-spin 0.7s linear infinite',
+      flexShrink: 0,
+    }} />
   );
 }

@@ -9,23 +9,23 @@ import ConfettiOverlay, { CONFETTI_POOLS, generateConfetti } from './ConfettiOve
 import PlayerCard from './PlayerCard';
 import SettleConfirmModal from './SettleConfirmModal';
 import UndoBar from '../common/UndoBar';
+import { Terminal, Zap } from 'lucide-react';
 
 export default function DashboardTab({ data, history, playSound }) {
   const [openDetails,   setOpenDetails]   = useState(null);
   const [justSettled,   setJustSettled]   = useState(null);
-  const [confirmSettle, setConfirmSettle] = useState(null); // { playerName, debt }
+  const [confirmSettle, setConfirmSettle] = useState(null);
   const [pinnedPlayer,  setPinnedPlayer]  = useState(null);
   const [confetti,      setConfetti]      = useState([]);
 
-  const { showSuccess, showError }                           = useToast();
-  const { undoToast, progressPct, startUndo, dismissUndo }  = useUndoTimer(8);
+  const { showSuccess, showError }                          = useToast();
+  const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer(8);
   const tokens = useThemeTokens();
 
   const totalWeeks    = data.summary?.totalWeeks ?? 0;
   const confettiTimer = useRef(null);
   useEffect(() => () => clearTimeout(confettiTimer.current), []);
 
-  // ── Settle flow ──────────────────────────────────────────────────────────
   const handleSettleRequest = useCallback((playerName) => {
     const player = data.players?.find(p => p.name === playerName);
     if (!player) return;
@@ -47,7 +47,6 @@ export default function DashboardTab({ data, history, playSound }) {
       showError(result.error || 'Nie udało się rozliczyć gracza');
       return;
     }
-
     setTimeout(() => setJustSettled(null), 1500);
 
     const pool       = CONFETTI_POOLS.cyber;
@@ -63,7 +62,6 @@ export default function DashboardTab({ data, history, playSound }) {
       setConfetti(generateConfetti(22, pool));
       confettiTimer.current = setTimeout(() => setConfetti([]), 3500);
     }
-
     startUndo({ playerName, previousValue: result.previousValue, previousPayments: result.previousPayments });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [confirmSettle, data.players, playSound, showError, startUndo]);
@@ -73,15 +71,11 @@ export default function DashboardTab({ data, history, playSound }) {
     playSound(SOUND_TYPES.CLICK);
     const { playerName, previousValue, previousPayments } = undoToast.payload;
     const result = await undoSettle(playerName, previousValue, previousPayments);
-    if (!result.success) {
-      showError(result.error || 'Nie udało się cofnąć rozliczenia');
-      return;
-    }
+    if (!result.success) { showError(result.error || 'Nie udało się cofnąć'); return; }
     dismissUndo();
     showSuccess('Rozliczenie cofnięte');
   }, [undoToast, playSound, showError, showSuccess, dismissUndo]);
 
-  // ── Payment handlers ─────────────────────────────────────────────────────
   const handleAddPayment = useCallback(async (playerName, amount) => {
     playSound(SOUND_TYPES.COIN);
     const result = await addPayment(playerName, amount);
@@ -105,10 +99,9 @@ export default function DashboardTab({ data, history, playSound }) {
     [history, data.payments, data.paidUntilWeek],
   );
 
-  // ── Sorted players ───────────────────────────────────────────────────────
   const sortedPlayers = useMemo(() => {
     if (!data.players) return [];
-    const debtors   = data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) => {
+    const debtors  = data.players.filter(p => p.name !== ORGANIZER_NAME).sort((a, b) => {
       if (a.name === pinnedPlayer) return -1;
       if (b.name === pinnedPlayer) return  1;
       return b.currentDebt - a.currentDebt || a.name.localeCompare(b.name, 'pl');
@@ -117,10 +110,13 @@ export default function DashboardTab({ data, history, playSound }) {
     return [...debtors, ...organizer];
   }, [data.players, pinnedPlayer]);
 
+  // Count debtor status
+  const debtCount   = sortedPlayers.filter(p => p.currentDebt > SETTLED_THRESHOLD && p.name !== ORGANIZER_NAME).length;
+  const settledCount = sortedPlayers.filter(p => p.currentDebt <= SETTLED_THRESHOLD && p.name !== ORGANIZER_NAME).length;
+
   return (
     <>
       <ConfettiOverlay pieces={confetti} />
-
       <SettleConfirmModal
         playerName={confirmSettle?.playerName}
         debt={confirmSettle?.debt}
@@ -129,7 +125,43 @@ export default function DashboardTab({ data, history, playSound }) {
         tokens={tokens}
       />
 
-      <div className="space-y-6 animate-in fade-in duration-300">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+        {/* ── Status header bar ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 14px',
+          background: '#080808',
+          border: '1px solid #1a1a1a',
+          clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Terminal size={14} style={{ color: 'var(--cyber-yellow)' }} />
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.55rem', letterSpacing: '0.2em', color: 'var(--cyber-yellow)', textTransform: 'uppercase' }}>
+              AGENT STATUS BOARD
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--cyber-red)', boxShadow: '0 0 6px var(--cyber-red)' }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#888' }}>
+                BOUNTY: {debtCount}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--cyber-green)', boxShadow: '0 0 6px var(--cyber-green)' }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#888' }}>
+                CLEAR: {settledCount}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Zap size={10} style={{ color: 'var(--cyber-yellow)' }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#888' }}>
+                SESSIONS: {totalWeeks}
+              </span>
+            </div>
+          </div>
+        </div>
 
         {/* Undo toast */}
         {undoToast && (
@@ -143,19 +175,29 @@ export default function DashboardTab({ data, history, playSound }) {
 
         {/* Empty state */}
         {totalWeeks === 0 && (
-          <div className="cyber-box rounded-2xl p-10 text-center border-slate-800/40">
-            <div className="text-5xl mb-4">🏓</div>
-            <p className="text-slate-200 font-black text-lg mb-2">Brak rozgrywek</p>
-            <p className="text-slate-500 text-sm">
-              Dodaj pierwszą sesję w zakładce{' '}
-              <span className="text-indigo-400 font-bold">Dodaj sesję</span>
+          <div style={{
+            background: '#0d0d0d', border: '1px solid #1a1a1a',
+            clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
+            padding: 40, textAlign: 'center',
+          }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', marginBottom: 12 }}>🏓</div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.1em', color: 'var(--cyber-yellow)', marginBottom: 8 }}>
+              BRAK ROZGRYWEK
+            </p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--cyber-text-dim)' }}>
+              {'>'} Dodaj pierwszą sesję w zakładce{' '}
+              <span style={{ color: 'var(--cyber-yellow)' }}>LOG</span>
             </p>
           </div>
         )}
 
-        {/* Player cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {sortedPlayers.map((player) => {
+        {/* Player cards grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+          gap: 16,
+        }}>
+          {sortedPlayers.map((player, idx) => {
             const showBreakdown = openDetails === player.name;
             return (
               <PlayerCard
@@ -171,6 +213,7 @@ export default function DashboardTab({ data, history, playSound }) {
                 onRemovePayment={handleRemovePayment}
                 onPin={setPinnedPlayer}
                 onUnpin={() => setPinnedPlayer(null)}
+                playerIndex={idx}
               />
             );
           })}

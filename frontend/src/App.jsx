@@ -14,6 +14,7 @@ import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
 import { useScrolled } from './hooks/useScrolled';
 import { ThemeContext } from './context/ThemeContext';
+import { Zap } from 'lucide-react';
 
 const INITIAL_APP_DATA = {
   summary: {},
@@ -25,15 +26,110 @@ const INITIAL_APP_DATA = {
   history: [],
 };
 
-function AppContent() {
-  const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
-  const [isMuted, setIsMuted]     = useState(false);
-  const [appData, setAppData]     = useState(INITIAL_APP_DATA);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading]     = useState(true);
-  const [loadTimeout, setLoadTimeout] = useState(false);
+function CyberLoadingScreen() {
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'var(--cyber-black)', flexDirection: 'column', gap: 24,
+    }}>
+      {/* Top yellow bar */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 2, background: 'var(--cyber-yellow)', boxShadow: '0 0 12px var(--cyber-yellow)' }} />
 
-  const scrolled = useScrolled();
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        {/* Logo mark */}
+        <div style={{
+          width: 60, height: 60,
+          border: '2px solid var(--cyber-yellow)',
+          clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(252,227,0,0.05)',
+          boxShadow: '0 0 20px rgba(252,227,0,0.3)',
+          animation: 'neon-pulse-yellow 1.5s ease-in-out infinite',
+        }}>
+          <span style={{ fontSize: '1.6rem' }}>🏓</span>
+        </div>
+
+        <div>
+          <p style={{
+            fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.25em',
+            color: 'var(--cyber-yellow)', textTransform: 'uppercase', textAlign: 'center',
+            animation: 'flicker 2s infinite',
+          }}>
+            ŁADOWANIE SYSTEMU...
+          </p>
+        </div>
+
+        {/* Loading bar */}
+        <div style={{
+          width: 200, height: 2,
+          background: '#1a1a1a',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            height: '100%', width: '40%',
+            background: 'var(--cyber-yellow)',
+            boxShadow: '0 0 8px var(--cyber-yellow)',
+            animation: 'loading-bar 1.2s ease-in-out infinite',
+          }} />
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes loading-bar {
+          0%   { transform: translateX(-150%); }
+          100% { transform: translateX(550%); }
+        }
+        @keyframes flicker {
+          0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+          20%, 24%, 55% { opacity: 0.3; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function CyberErrorScreen() {
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'var(--cyber-black)', padding: 24, flexDirection: 'column', gap: 20,
+    }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 2, background: 'var(--cyber-red)', boxShadow: '0 0 12px var(--cyber-red)' }} />
+
+      <div style={{
+        padding: 32, textAlign: 'center', maxWidth: 360,
+        background: '#0d0d0d', border: '1px solid rgba(255,0,51,0.3)',
+        clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
+        boxShadow: '0 0 30px rgba(255,0,51,0.15)',
+      }}>
+        <div style={{ fontSize: '2.5rem', marginBottom: 16 }}>💀</div>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.15em', color: 'var(--cyber-red)', marginBottom: 8, textTransform: 'uppercase' }}>
+          CONNECTION FAILURE
+        </p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--cyber-text-dim)', marginBottom: 20 }}>
+          Sprawdź internet lub konfigurację Firebase (.env)
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="cyber-button-yellow"
+          style={{ padding: '12px 24px', width: '100%', fontSize: '0.7rem' }}
+        >
+          ⚡ RESTART SYSTEMU
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AppContent() {
+  const [activeTab,    setActiveTab]    = useState(TABS.DASHBOARD);
+  const [isMuted,      setIsMuted]      = useState(false);
+  const [appData,      setAppData]      = useState(INITIAL_APP_DATA);
+  const [isConnected,  setIsConnected]  = useState(false);
+  const [isLoading,    setIsLoading]    = useState(true);
+  const [loadTimeout,  setLoadTimeout]  = useState(false);
+
+  const scrolled     = useScrolled();
   const { playSound } = useAudio(isMuted);
 
   useEffect(() => {
@@ -54,24 +150,8 @@ function AppContent() {
   }, [playSound]);
 
   if (isLoading) {
-    if (loadTimeout) {
-      return (
-        <div className="min-h-screen flex items-center justify-center p-8 text-center">
-          <div>
-            <div className="text-5xl mb-4">😵</div>
-            <p className="text-slate-200 font-black text-lg mb-2">Brak połączenia</p>
-            <p className="text-slate-500 text-sm mb-6">Sprawdź internet lub konfigurację Firebase (.env)</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 rounded-xl border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/20 font-semibold transition-all"
-            >
-              Spróbuj ponownie
-            </button>
-          </div>
-        </div>
-      );
-    }
-    return <SpinnerOverlay message="Ładowanie..." />;
+    if (loadTimeout) return <CyberErrorScreen />;
+    return <CyberLoadingScreen />;
   }
 
   return (
