@@ -213,16 +213,42 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             <div style={{
               flex: 1, height: 64, position: 'relative', margin: '0 8px',
             }}>
-              {/* Table centre line */}
+              {/* Table surface — visible horizontal line */}
               <div style={{
                 position: 'absolute', left: 0, right: 0, top: '50%',
-                height: 1, background: 'rgba(129,140,248,0.07)',
+                height: 2,
+                background: 'linear-gradient(90deg, transparent, rgba(129,140,248,0.25) 15%, rgba(129,140,248,0.25) 85%, transparent)',
               }} />
-              {/* Net */}
+              {/* Left half of table */}
               <div style={{
-                position: 'absolute', left: '50%', top: '18%', bottom: 0,
-                width: 2, transform: 'translateX(-50%)',
-                background: 'repeating-linear-gradient(to bottom, rgba(129,140,248,0.28) 0, rgba(129,140,248,0.28) 4px, transparent 4px, transparent 8px)',
+                position: 'absolute', left: '5%', right: '52%', top: '50%',
+                height: 1,
+                background: 'rgba(129,140,248,0.1)',
+                marginTop: 1,
+              }} />
+              {/* Right half of table */}
+              <div style={{
+                position: 'absolute', left: '52%', right: '5%', top: '50%',
+                height: 1,
+                background: 'rgba(129,140,248,0.1)',
+                marginTop: 1,
+              }} />
+
+              {/* Net — short, sits ON the table line, extends only upward */}
+              {/* Net posts */}
+              <div style={{
+                position: 'absolute', left: 'calc(50% - 1px)', top: 'calc(50% - 16px)',
+                width: 2, height: 16,
+                background: 'rgba(129,140,248,0.5)',
+              }} />
+              {/* Net mesh — tight horizontal lines */}
+              <div style={{
+                position: 'absolute', left: 'calc(50% - 10px)', top: 'calc(50% - 14px)',
+                width: 20, height: 14,
+                background: 'repeating-linear-gradient(to bottom, rgba(129,140,248,0.35) 0, rgba(129,140,248,0.35) 1px, transparent 1px, transparent 3px)',
+                borderLeft: '1px solid rgba(129,140,248,0.4)',
+                borderRight: '1px solid rgba(129,140,248,0.4)',
+                borderTop: '1px solid rgba(129,140,248,0.5)',
               }} />
 
               {!chaosMode && (
