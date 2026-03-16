@@ -18,38 +18,51 @@ function Arena({ chaosMode }) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    const W = 560, H = 150;
-    const CX = W / 2, CY = 72;
-    const RX  = 34 * Math.PI / 180;
-    const cos = Math.cos(RX), sin = Math.sin(RX);
-    const FOV = 390, DIST = 285;
+    const W = 560, H = 150, CX = W / 2, CY = 70;
+    const FOV = 390, DIST = 290;
 
-    const TX = 108, TZ = 42;
-    const NH = 21, THICK = 5;
-    const PR = 19, PX = 132;
-    const PY = -21;
-    const CYCLE = 2300;
+    // Camera: tilt down (RX) + slight yaw right (RY)
+    // The yaw is critical — makes net posts offset on screen → real 3D look
+    const RX = 32 * Math.PI / 180;
+    const RY =  9 * Math.PI / 180;
+    const cX = Math.cos(RX), sX = Math.sin(RX);
+    const cY = Math.cos(RY), sY = Math.sin(RY);
 
-    const KF = [
-      { t: 0.00, x: -PX, y: PY   },
-      { t: 0.20, x: -46, y: 0    },
-      { t: 0.50, x:  PX, y: PY   },
-      { t: 0.70, x:  46, y: 0    },
-      { t: 1.00, x: -PX, y: PY   },
-    ];
-    const CP = [
-      { x: -84, y: -28 },
-      { x:   0, y: -78 },
-      { x:  84, y: -28 },
-      { x:   0, y: -78 },
-    ];
+    const TX = 112, TZ = 40;       // table half-extents
+    const NH = 20, THICK = 5;      // net height, table front-face thickness
+    const PR = 18, PX = 130;       // paddle radius, paddle X
+    const PY = -20;                 // paddle height above table
+    const CYCLE = 2400;
 
+    // Projection with yaw + tilt
     const proj = (x, y, z) => {
-      const y2 = y * cos - z * sin;
-      const z2 = y * sin + z * cos;
+      // Y-axis rotation (yaw)
+      const x1 =  x * cY + z * sY;
+      const z1 = -x * sY + z * cY;
+      // X-axis rotation (tilt down)
+      const y2 = y * cX - z1 * sX;
+      const z2 = y * sX + z1 * cX;
       const s  = FOV / (z2 + DIST);
-      return { sx: CX + x * s, sy: CY + y2 * s, s };
+      return { sx: CX + x1 * s, sy: CY + y2 * s, s };
     };
+
+    // Ball physics — CORRECT sequence:
+    // left paddle → arc OVER net → bounce on RIGHT side → right paddle
+    // right paddle → arc OVER net → bounce on LEFT side → left paddle
+    const KF = [
+      { t: 0.00, x: -PX, y: PY  },  // left paddle hit
+      { t: 0.36, x:  52, y: 0   },  // bounce: RIGHT half of table
+      { t: 0.50, x:  PX, y: PY  },  // right paddle hit
+      { t: 0.86, x: -52, y: 0   },  // bounce: LEFT half of table
+      { t: 1.00, x: -PX, y: PY  },  // back to left paddle
+    ];
+    // Bezier control points: arc must peak over the net (x≈0, high y)
+    const CP = [
+      { x:  8, y: -75 },   // left hit → right bounce: peak over net
+      { x: 92, y: -26 },   // right bounce → right paddle: short rise
+      { x: -8, y: -75 },   // right hit → left bounce: peak over net
+      { x:-92, y: -26 },   // left bounce → left paddle: short rise
+    ];
 
     const ballAt = (p) => {
       let i = KF.length - 2;
@@ -58,12 +71,9 @@ function Arena({ chaosMode }) {
       }
       const tl = (p - KF[i].t) / (KF[i+1].t - KF[i].t);
       const mt = 1 - tl;
-      const { x: x0, y: y0 } = KF[i];
-      const { x: x2, y: y2 } = KF[i+1];
-      const { x: x1, y: y1 } = CP[i];
       return {
-        x: x0*mt*mt + x1*2*mt*tl + x2*tl*tl,
-        y: y0*mt*mt + y1*2*mt*tl + y2*tl*tl,
+        x: KF[i].x*mt*mt + CP[i].x*2*mt*tl + KF[i+1].x*tl*tl,
+        y: KF[i].y*mt*mt + CP[i].y*2*mt*tl + KF[i+1].y*tl*tl,
       };
     };
 
@@ -71,185 +81,186 @@ function Arena({ chaosMode }) {
       ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy);
       ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke();
     };
-    const quad = (pts, fill) => {
+    const poly = (pts, fill, stroke, sw) => {
       ctx.beginPath();
       ctx.moveTo(pts[0].sx, pts[0].sy);
       pts.slice(1).forEach(p => ctx.lineTo(p.sx, p.sy));
       ctx.closePath();
-      ctx.fillStyle = fill; ctx.fill();
+      if (fill)   { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = sw; ctx.stroke(); }
     };
 
     const draw = (progress) => {
       ctx.clearRect(0, 0, W, H);
 
+      // ── TABLE ──
       const tFL = proj(-TX, 0, -TZ), tFR = proj( TX, 0, -TZ);
       const tBR = proj( TX, 0,  TZ), tBL = proj(-TX, 0,  TZ);
 
       const topG = ctx.createLinearGradient(tBL.sx, tBL.sy, tFL.sx, tFL.sy);
-      topG.addColorStop(0, '#06091f');
-      topG.addColorStop(1, '#121e58');
-      quad([tFL, tFR, tBR, tBL], topG);
+      topG.addColorStop(0, '#05081c'); topG.addColorStop(1, '#111c52');
+      poly([tFL, tFR, tBR, tBL], topG);
 
+      // Subtle depth grid on surface
       for (let i = 1; i <= 3; i++) {
-        const fz = i / 4;
-        const wz = -TZ + fz * TZ * 2;
-        ln(proj(-TX, 0, wz), proj(TX, 0, wz), `rgba(100,130,255,${0.06 + i*0.01})`, 0.8);
+        const wz = -TZ + (i / 4) * TZ * 2;
+        ln(proj(-TX, 0, wz), proj(TX, 0, wz), `rgba(95,125,255,${0.055+i*0.008})`, 0.8);
       }
-
+      // Centre line (length)
+      ln(proj(0, 0, -TZ), proj(0, 0, TZ), 'rgba(165,195,255,0.12)', 1);
+      // Side edges
       ctx.save(); ctx.shadowBlur = 0;
-      ln(tBL, tFL, 'rgba(100,135,255,0.65)', 1.5);
-      ln(tBR, tFR, 'rgba(100,135,255,0.65)', 1.5);
-      ln(tBL, tBR, 'rgba(100,135,255,0.22)', 1);
+      ln(tBL, tFL, 'rgba(95,130,255,0.62)', 1.4);
+      ln(tBR, tFR, 'rgba(95,130,255,0.62)', 1.4);
+      ln(tBL, tBR, 'rgba(95,130,255,0.18)', 1);
       ctx.restore();
 
-      ln(proj(0, 0, -TZ), proj(0, 0, TZ), 'rgba(175,200,255,0.13)', 1);
-
+      // Front face
       const tFL2 = proj(-TX, THICK, -TZ), tFR2 = proj(TX, THICK, -TZ);
-      const faceG = ctx.createLinearGradient(0, tFL.sy, 0, tFL2.sy);
-      faceG.addColorStop(0, 'rgba(75,110,230,0.55)');
-      faceG.addColorStop(1, 'rgba(30,55,165,0.08)');
-      quad([tFL, tFR, tFR2, tFL2], faceG);
-
-      ctx.save();
-      ctx.shadowBlur = 6; ctx.shadowColor = 'rgba(110,150,255,0.6)';
-      ln(tFL, tFR, 'rgba(155,185,255,0.92)', 1.8);
+      const fG = ctx.createLinearGradient(0, tFL.sy, 0, tFL2.sy);
+      fG.addColorStop(0, 'rgba(70,105,225,0.52)'); fG.addColorStop(1, 'rgba(28,52,155,0.07)');
+      poly([tFL, tFR, tFR2, tFL2], fG);
+      ctx.save(); ctx.shadowBlur = 5; ctx.shadowColor = 'rgba(105,145,255,0.55)';
+      ln(tFL, tFR, 'rgba(145,180,255,0.88)', 1.7);
       ctx.restore();
 
-      const nBN = proj(0, 0,    -TZ), nBF = proj(0, 0,    TZ);
-      const nTN = proj(0, -NH,  -TZ), nTF = proj(0, -NH,  TZ);
+      // ── NET ──
+      // Posts: near (z=-TZ) and far (z=+TZ)
+      // With yaw, near post is offset left on screen, far post offset right → looks 3D
+      const nBN = proj(0, 0,   -TZ), nBF = proj(0, 0,    TZ);
+      const nTN = proj(0, -NH, -TZ), nTF = proj(0, -NH,  TZ);
 
-      const netG = ctx.createLinearGradient(nTN.sx, nTN.sy, nBN.sx, nBN.sy);
-      netG.addColorStop(0, 'rgba(158,178,255,0.30)');
-      netG.addColorStop(1, 'rgba(65,95,200,0.05)');
-      quad([nBN, nBF, nTF, nTN], netG);
+      // Net panel fill
+      const nG = ctx.createLinearGradient(nTN.sx, nTN.sy, nBN.sx, nBN.sy);
+      nG.addColorStop(0, 'rgba(150,172,255,0.28)'); nG.addColorStop(1, 'rgba(60,90,195,0.04)');
+      poly([nBN, nBF, nTF, nTN], nG);
 
+      // Horizontal mesh lines
       for (let r = 0; r <= 5; r++) {
-        const fy  = r / 5;
-        const nY  = -NH * (1 - fy);
-        const alp = 0.10 + r * 0.015;
-        ln(proj(0, nY, -TZ), proj(0, nY, TZ), `rgba(148,168,252,${alp})`, 0.9);
+        const nY = -NH * (1 - r / 5);
+        ln(proj(0, nY, -TZ), proj(0, nY, TZ), `rgba(142,162,248,${0.08+r*0.014})`, 0.8);
       }
-      for (let c = 0; c <= 10; c++) {
-        const wz = -TZ + c * (TZ * 2 / 10);
-        ln(proj(0, 0, wz), proj(0, -NH, wz), 'rgba(125,148,238,0.13)', 0.9);
+      // Vertical mesh lines — converge in perspective (key 3D cue)
+      for (let c = 0; c <= 8; c++) {
+        const wz = -TZ + c * (TZ * 2 / 8);
+        ln(proj(0, 0, wz), proj(0, -NH, wz), 'rgba(118,142,235,0.11)', 0.9);
       }
 
+      // Posts (near = brighter/bigger, far = dimmer = depth)
       ctx.save(); ctx.shadowBlur = 0;
-      ln(nBN, nTN, 'rgba(205,222,255,0.82)', 2.2);
-      ln(nBF, nTF, 'rgba(205,222,255,0.52)', 1.6);
+      ln(nBN, nTN, 'rgba(200,218,255,0.80)', 2.2);
+      ln(nBF, nTF, 'rgba(200,218,255,0.48)', 1.5);
       ctx.restore();
 
-      ctx.save();
-      ctx.shadowBlur = 8; ctx.shadowColor = 'rgba(185,215,255,0.95)';
-      ln(nTN, nTF, 'rgba(238,248,255,0.97)', 2.6);
+      // Top bar — glowing
+      ctx.save(); ctx.shadowBlur = 7; ctx.shadowColor = 'rgba(180,212,255,0.92)';
+      ln(nTN, nTF, 'rgba(235,246,255,0.96)', 2.5);
       ctx.restore();
 
+      // ── BALL ──
       const bp   = ballAt(progress);
       const bPos = proj(bp.x, bp.y, 0);
-      const bR   = 6.8 * bPos.s;
+      const bR   = 6.5 * bPos.s;
 
+      // Ground shadow
       const bSh = proj(bp.x, 0, 0);
-      const sA  = 0.25 * (1 - Math.abs(bp.y) / 78 * 0.82);
+      const sA  = 0.22 * (1 - Math.abs(bp.y) / 75 * 0.80);
       ctx.beginPath();
-      ctx.ellipse(bSh.sx, bSh.sy, bR * 1.75, bR * 0.38 * bSh.s, 0, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(45, 75, 200, ${sA})`; ctx.fill();
+      ctx.ellipse(bSh.sx, bSh.sy, bR * 1.7, bR * 0.37 * bSh.s, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(40, 70, 200, ${sA})`; ctx.fill();
 
-      const tP = (progress - 0.025 + 1) % 1;
-      const tb = ballAt(tP);
+      // Ghost trail
+      const tP = (progress - 0.024 + 1) % 1;
+      const tb  = ballAt(tP);
       const tPos = proj(tb.x, tb.y, 0);
-      ctx.beginPath(); ctx.arc(tPos.sx, tPos.sy, 4.5 * tPos.s, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(180,200,255,0.09)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(tPos.sx, tPos.sy, 4.2 * tPos.s, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(175,198,255,0.08)'; ctx.fill();
 
+      // Main ball
       ctx.save();
-      ctx.shadowBlur = 15 * bPos.s; ctx.shadowColor = 'rgba(255,255,255,0.9)';
-      const ballG = ctx.createRadialGradient(
-        bPos.sx - bR*.32, bPos.sy - bR*.32, 0, bPos.sx, bPos.sy, bR
-      );
-      ballG.addColorStop(0,  '#ffffff');
-      ballG.addColorStop(.5, '#d5d9f8');
-      ballG.addColorStop(1,  '#9aa0dc');
+      ctx.shadowBlur = 14 * bPos.s; ctx.shadowColor = 'rgba(255,255,255,0.88)';
+      const bG = ctx.createRadialGradient(bPos.sx-bR*.30, bPos.sy-bR*.30, 0, bPos.sx, bPos.sy, bR);
+      bG.addColorStop(0, '#ffffff'); bG.addColorStop(.48, '#d4d9f7'); bG.addColorStop(1, '#98a0db');
       ctx.beginPath(); ctx.arc(bPos.sx, bPos.sy, bR, 0, Math.PI * 2);
-      ctx.fillStyle = ballG; ctx.fill();
+      ctx.fillStyle = bG; ctx.fill();
       ctx.restore();
 
+      // ── PADDLES ──
       drawPaddle(-PX, progress, true);
       drawPaddle( PX, progress, false);
     };
 
+    // Paddle: single clean 3D disc projected via canvas transform
+    // No separate glow ring in screen-space → no double circle
     const drawPaddle = (px, progress, isLeft) => {
       const hitT    = isLeft
         ? Math.min(progress, 1 - progress) * 2
         : Math.abs(progress - 0.5) * 2;
-      const hitting = hitT < 0.08;
-      const bump    = hitting ? 1 + (1 - hitT / 0.08) * 0.11 : 1;
+      const hitting = hitT < 0.07;
+      const bump    = hitting ? 1 + (1 - hitT / 0.07) * 0.10 : 1;
       const rb      = PR * bump;
 
-      const pc  = proj(px, PY, 0);
-      const pty = proj(px, PY - rb, 0);
-      const pfz = proj(px, PY, -rb);
+      // Project the disc centre + two axis endpoints to get screen-space axes
+      const pc   = proj(px, PY, 0);
+      // Y-axis of disc (pointing up in world)
+      const pTop = proj(px, PY - rb, 0);
+      // Z-axis of disc (pointing toward camera in world)
+      const pFwd = proj(px, PY, -rb);
 
-      const ax1x = pty.sx - pc.sx, ax1y = pty.sy - pc.sy;
-      const ax2x = pfz.sx - pc.sx, ax2y = pfz.sy - pc.sy;
-      const sR   = Math.hypot(ax1x, ax1y);
-
-      ctx.save();
-      ctx.shadowBlur  = hitting ? 26 : 12;
-      ctx.shadowColor = hitting ? 'rgba(165,180,252,0.92)' : 'rgba(129,140,248,0.52)';
-      ctx.strokeStyle = hitting ? 'rgba(165,180,252,0.68)' : 'rgba(129,140,248,0.38)';
-      ctx.lineWidth   = 2;
-      ctx.beginPath(); ctx.arc(pc.sx, pc.sy, sR * 1.06, 0, Math.PI * 2); ctx.stroke();
-      ctx.restore();
+      const ax1x = pTop.sx - pc.sx, ax1y = pTop.sy - pc.sy;  // up
+      const ax2x = pFwd.sx - pc.sx, ax2y = pFwd.sy - pc.sy;  // depth (foreshortened)
 
       ctx.save();
       ctx.translate(pc.sx, pc.sy);
+      // Map unit circle → projected 3D ellipse
       ctx.transform(ax1x, ax1y, ax2x, ax2y, 0, 0);
 
-      ctx.beginPath(); ctx.arc(0, 0, 1.06, 0, Math.PI * 2);
-      ctx.fillStyle = hitting ? 'rgba(129,140,248,0.38)' : 'rgba(129,140,248,0.16)';
-      ctx.fill();
+      // Outer glow halo (1.08 → single ring, part of disc)
+      const glowAlpha = hitting ? 0.55 : 0.22;
+      const glowColor = hitting ? `rgba(165,182,252,${glowAlpha})` : `rgba(120,142,248,${glowAlpha})`;
+      ctx.beginPath(); ctx.arc(0, 0, 1.08, 0, Math.PI * 2);
+      ctx.fillStyle = glowColor; ctx.fill();
 
-      const bodyG = ctx.createRadialGradient(-0.18, -0.22, 0, 0, 0, 1);
-      bodyG.addColorStop(0,   '#2c2c54');
-      bodyG.addColorStop(.78, '#161630');
-      bodyG.addColorStop(1,   '#0d0d24');
+      // Dark paddle body
+      const bodyG = ctx.createRadialGradient(-0.15, -0.20, 0, 0, 0, 1);
+      bodyG.addColorStop(0,   '#28284e');
+      bodyG.addColorStop(0.75,'#141428');
+      bodyG.addColorStop(1,   '#0b0b1e');
       ctx.beginPath(); ctx.arc(0, 0, 1, 0, Math.PI * 2);
       ctx.fillStyle = bodyG; ctx.fill();
 
-      ctx.strokeStyle = hitting ? 'rgba(170,185,252,0.95)' : 'rgba(129,140,248,0.68)';
-      ctx.lineWidth   = 0.055;
-      ctx.beginPath(); ctx.arc(0, 0, 0.962, 0, Math.PI * 2); ctx.stroke();
+      // Rim
+      ctx.strokeStyle = hitting ? 'rgba(175,192,252,0.95)' : 'rgba(125,145,248,0.62)';
+      ctx.lineWidth   = 0.06;
+      ctx.beginPath(); ctx.arc(0, 0, 0.96, 0, Math.PI * 2); ctx.stroke();
 
-      const rubG = ctx.createRadialGradient(-0.14, -0.18, 0, 0, 0, 0.54);
-      rubG.addColorStop(0,   hitting ? 'rgba(218,228,255,1)' : 'rgba(195,208,255,0.97)');
-      rubG.addColorStop(.68, hitting ? 'rgba(160,178,252,0.95)' : 'rgba(148,165,250,0.9)');
-      rubG.addColorStop(1,   'rgba(100,120,222,0.8)');
-      ctx.beginPath(); ctx.arc(0, 0, 0.54, 0, Math.PI * 2);
+      // Rubber face — inner disc
+      const rubG = ctx.createRadialGradient(-0.12, -0.16, 0, 0, 0, 0.52);
+      rubG.addColorStop(0,   hitting ? '#dce8ff' : '#c0d0ff');
+      rubG.addColorStop(0.65, hitting ? 'rgba(155,175,252,0.95)' : 'rgba(140,162,250,0.88)');
+      rubG.addColorStop(1,    'rgba(95,118,218,0.78)');
+      ctx.beginPath(); ctx.arc(0, 0, 0.52, 0, Math.PI * 2);
       ctx.fillStyle = rubG; ctx.fill();
 
-      ctx.beginPath(); ctx.arc(0, 0, 0.17, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(78,98,195,0.38)'; ctx.fill();
-
-      ctx.lineWidth = 0.038;
-      for (const ly of [-0.93, -0.76, -0.63,  0.63, 0.76, 0.91]) {
-        const hw = Math.sqrt(Math.max(0, 1 - ly * ly)) * 0.94;
-        ctx.strokeStyle = 'rgba(70,90,182,0.38)';
+      // Subtle horizontal grip lines on rubber
+      ctx.lineWidth = 0.04;
+      ctx.strokeStyle = 'rgba(65,88,188,0.35)';
+      for (const ly of [-0.30, 0, 0.30]) {
+        const hw = Math.sqrt(Math.max(0, 0.52*0.52 - ly*ly)) * 0.9;
         ctx.beginPath(); ctx.moveTo(-hw, ly); ctx.lineTo(hw, ly); ctx.stroke();
       }
 
       ctx.restore();
 
-      const hS = proj(px, PY + rb * 0.94 + 1,  0);
-      const hE = proj(px, PY + rb * 0.94 + 18, 2);
-      ctx.save();
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = 'rgba(50,60,105,0.65)';
-      ctx.lineWidth   = 5.5 * pc.s;
-      ctx.beginPath(); ctx.moveTo(hS.sx, hS.sy); ctx.lineTo(hE.sx, hE.sy); ctx.stroke();
-      ctx.strokeStyle = 'rgba(82,96,158,0.82)';
-      ctx.lineWidth   = 3 * pc.s;
-      ctx.beginPath(); ctx.moveTo(hS.sx, hS.sy); ctx.lineTo(hE.sx, hE.sy); ctx.stroke();
-      ctx.lineCap = 'butt';
-      ctx.restore();
+      // Handle — below the disc, slight angle for depth
+      const hTop = proj(px, PY + rb * 0.88, 0);
+      const hBot = proj(px, PY + rb * 0.88 + 16, 1.5);
+      ctx.save(); ctx.lineCap = 'round';
+      ctx.strokeStyle = 'rgba(42,52,98,0.70)'; ctx.lineWidth = 5.2 * pc.s;
+      ctx.beginPath(); ctx.moveTo(hTop.sx, hTop.sy); ctx.lineTo(hBot.sx, hBot.sy); ctx.stroke();
+      ctx.strokeStyle = 'rgba(75,90,150,0.78)'; ctx.lineWidth = 2.8 * pc.s;
+      ctx.beginPath(); ctx.moveTo(hTop.sx, hTop.sy); ctx.lineTo(hBot.sx, hBot.sy); ctx.stroke();
+      ctx.lineCap = 'butt'; ctx.restore();
     };
 
     const loop = (ts) => {
@@ -258,17 +269,12 @@ function Arena({ chaosMode }) {
       raf.current = requestAnimationFrame(loop);
     };
     raf.current = requestAnimationFrame(loop);
-
     return () => { cancelAnimationFrame(raf.current); t0.current = null; };
   }, [chaosMode]);
 
   return (
-    <canvas
-      ref={ref}
-      width={560}
-      height={150}
-      style={{ display: 'block', width: '100%', maxWidth: 560, height: 'auto' }}
-    />
+    <canvas ref={ref} width={560} height={150}
+      style={{ display: 'block', width: '100%', maxWidth: 560, height: 'auto' }} />
   );
 }
 
@@ -281,38 +287,29 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   const clickCount = useRef(0);
   const clickTimer = useRef(null);
   const tickTimer  = useRef(null);
-
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
 
   useEffect(() => {
     tickTimer.current = setInterval(() => setTick(p => !p), 800);
-    return () => {
-      clearInterval(tickTimer.current);
-      clearTimeout(chaosTimer.current);
-      clearTimeout(clickTimer.current);
-    };
+    return () => { clearInterval(tickTimer.current); clearTimeout(chaosTimer.current); clearTimeout(clickTimer.current); };
   }, []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(blikNumber.replace(/\s/g, ''));
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
-
   const handleTitleClick = () => {
-    clickCount.current += 1;
-    clearTimeout(clickTimer.current);
+    clickCount.current += 1; clearTimeout(clickTimer.current);
     if (clickCount.current >= 5) { clickCount.current = 0; activateChaos(); }
     else clickTimer.current = setTimeout(() => { clickCount.current = 0; }, 2000);
   };
-
   const activateChaos = () => {
     setChaosMode(true);
     const pool = ['🏓','⚡','💀','🎮','💥','⚠️','🔥','🎯','💣','🌪️'];
     setConfetti(Array.from({ length: 40 }, (_, i) => ({
       id: i, emoji: pool[Math.floor(Math.random() * pool.length)],
-      x: Math.random() * 100, delay: Math.random() * 1.2,
-      dur: 1.8 + Math.random() * 1.5, size: 18 + Math.random() * 24,
-      rotate: Math.random() * 360, drift: (Math.random() - .5) * 120,
+      x: Math.random()*100, delay: Math.random()*1.2, dur: 1.8+Math.random()*1.5,
+      size: 18+Math.random()*24, rotate: Math.random()*360, drift: (Math.random()-.5)*120,
     })));
     clearTimeout(chaosTimer.current);
     chaosTimer.current = setTimeout(() => { setChaosMode(false); setConfetti([]); }, 4000);
@@ -330,25 +327,20 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   return (
     <>
       <style>{CSS}</style>
-
       {chaosMode && confetti.map(c => (
         <div key={c.id} className="fixed pointer-events-none z-50"
-          style={{ left:`${c.x}%`, top:0, fontSize:`${c.size}px`,
+          style={{ left:`${c.x}%`,top:0,fontSize:`${c.size}px`,
             animation:`confettiBurst ${c.dur}s ${c.delay}s cubic-bezier(.2,.8,.4,1) forwards`,
-            '--drift':`${c.drift}px`, transform:`rotate(${c.rotate}deg)` }}>
+            '--drift':`${c.drift}px`,transform:`rotate(${c.rotate}deg)` }}>
           {c.emoji}
         </div>
       ))}
-      {chaosMode && (
-        <div className="fixed inset-0 pointer-events-none" style={{ zIndex:49,
-          animation:'chaosFlash 0.6s ease-out forwards',
-          background:'radial-gradient(ellipse at 50% 30%,rgba(129,140,248,.1) 0%,transparent 70%)' }}/>
-      )}
+      {chaosMode && <div className="fixed inset-0 pointer-events-none" style={{ zIndex:49,
+        animation:'chaosFlash 0.6s ease-out forwards',
+        background:'radial-gradient(ellipse at 50% 30%,rgba(129,140,248,.1) 0%,transparent 70%)' }}/>}
 
-      <header style={{ position:'relative', overflow:'hidden',
-        background:'linear-gradient(180deg,#060609 0%,#0a0a0f 100%)',
-        borderBottom:'1px solid #1a1a2e' }}>
-
+      <header style={{ position:'relative',overflow:'hidden',
+        background:'linear-gradient(180deg,#060609 0%,#0a0a0f 100%)',borderBottom:'1px solid #1a1a2e' }}>
         <div style={{ position:'absolute',top:0,left:0,width:70,height:2,background:'#818cf8',boxShadow:'0 0 10px rgba(129,140,248,.7)',zIndex:2 }}/>
         <div style={{ position:'absolute',top:0,right:0,width:70,height:2,background:'#818cf8',boxShadow:'0 0 10px rgba(129,140,248,.7)',zIndex:2 }}/>
         <div style={{ position:'absolute',top:0,left:0,width:2,height:44,background:'linear-gradient(to bottom,#818cf8,transparent)',zIndex:2 }}/>
@@ -363,9 +355,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:700,
               letterSpacing:'.18em',color:'#818cf8',padding:'2px 6px',
               background:'rgba(129,140,248,.1)',border:'1px solid rgba(129,140,248,.25)' }}>BLIK</span>
-            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.9rem',letterSpacing:'.06em',color:'#e0e0e0' }}>
-              {blikNumber}
-            </span>
+            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.9rem',letterSpacing:'.06em',color:'#e0e0e0' }}>{blikNumber}</span>
             <div style={{ width:1,height:14,background:'#252535',margin:'0 2px' }}/>
             {copied ? <Check size={13} style={{ color:'var(--cyber-green)' }}/> : <CopyIcon/>}
           </button>
@@ -381,32 +371,27 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
 
         <div style={{ position:'relative',zIndex:10,padding:'18px 16px 22px',
           display:'flex',flexDirection:'column',alignItems:'center' }}>
-
           <div style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
             <div style={{ height:1,width:36,background:'linear-gradient(to right,transparent,rgba(129,140,248,.5))' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:600,
-              letterSpacing:'.28em',color:'rgba(129,140,248,.55)',textTransform:'uppercase' }}>
-              CENTRUM DOWODZENIA
-            </span>
+              letterSpacing:'.28em',color:'rgba(129,140,248,.55)',textTransform:'uppercase' }}>CENTRUM DOWODZENIA</span>
             <div style={{ height:1,width:36,background:'linear-gradient(to left,transparent,rgba(129,140,248,.5))' }}/>
           </div>
 
           <div style={{ width:'100%',maxWidth:560,marginBottom:14,
-            filter:chaosMode?'none':'drop-shadow(0 0 20px rgba(75,100,255,.16))' }}>
+            filter:chaosMode?'none':'drop-shadow(0 0 20px rgba(70,98,255,.15))' }}>
             <Arena chaosMode={chaosMode}/>
           </div>
 
           <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer' }}>
-            <span style={{
-              display:'block',fontFamily:'var(--font-display)',fontWeight:900,
+            <span style={{ display:'block',fontFamily:'var(--font-display)',fontWeight:900,
               fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:'.06em',lineHeight:1,textAlign:'center',
               ...(chaosMode
-                ? { color:'#a5b4fc', animation:'headerBounce .4s ease-in-out 3',
-                    textShadow:'0 0 30px rgba(129,140,248,.8),2px 2px 0 rgba(0,0,0,.9)' }
-                : { color:'#c7d2fe',
-                    textShadow:'0 0 30px rgba(129,140,248,.2),2px 2px 0 rgba(0,0,0,.95)' }),
-            }}>PING-PONG</span>
+                ? {color:'#a5b4fc',animation:'headerBounce .4s ease-in-out 3',textShadow:'0 0 30px rgba(129,140,248,.8),2px 2px 0 rgba(0,0,0,.9)'}
+                : {color:'#c7d2fe',textShadow:'0 0 30px rgba(129,140,248,.2),2px 2px 0 rgba(0,0,0,.95)'}) }}>
+              PING-PONG
+            </span>
           </button>
 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
@@ -414,19 +399,15 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
           <div style={{ display:'flex',alignItems:'center',gap:'14px' }}>
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:600,
               letterSpacing:'.2em',textTransform:'uppercase',transition:'color .15s,text-shadow .15s',
-              color:tick?'#818cf8':'rgba(129,140,248,.1)',
-              textShadow:tick?'0 0 10px rgba(129,140,248,.7)':'none' }}>⚡ JACK IN ⚡</span>
+              color:tick?'#818cf8':'rgba(129,140,248,.1)',textShadow:tick?'0 0 10px rgba(129,140,248,.7)':'none' }}>⚡ JACK IN ⚡</span>
             <span style={{ color:'#1a1a2e' }}>│</span>
-            <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:700,
-              letterSpacing:'.1em',
+            <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:700,letterSpacing:'.1em',
               color:isConnected?'var(--cyber-green)':'var(--cyber-red)',
               textShadow:isConnected?'0 0 8px var(--cyber-green)':'0 0 8px var(--cyber-red)' }}>
               {isConnected ? '● ONLINE' : '○ OFFLINE'}
             </span>
             <span style={{ color:'#1a1a2e' }}>│</span>
-            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.68rem',color:'var(--cyber-text-dim)' }}>
-              v2.0.77
-            </span>
+            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.68rem',color:'var(--cyber-text-dim)' }}>v2.0.77</span>
           </div>
         </div>
       </header>
@@ -434,34 +415,15 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
       <div style={{ height:2,background:'linear-gradient(90deg,transparent,#818cf8 30%,#818cf8 70%,transparent)',opacity:.5 }}/>
 
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
-        <button onClick={handleCopy} style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',
-          display:'flex',alignItems:'center',gap:'6px' }}>
+        <button onClick={handleCopy} style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',display:'flex',alignItems:'center',gap:'6px' }}>
           <span style={{ fontSize:'.9rem' }}>🏓</span>
-          <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:700,
-            letterSpacing:'.15em',color:'#818cf8',padding:'2px 5px',
-            background:'rgba(129,140,248,.1)',border:'1px solid rgba(129,140,248,.2)' }}>BLIK</span>
-          <span style={{ fontFamily:'var(--font-mono)',color:'#e0e0e0',fontSize:'.85rem',letterSpacing:'.06em' }}>
-            {blikNumber}
-          </span>
-          {copied
-            ? <Check size={12} style={{ color:'var(--cyber-green)' }}/>
-            : <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                style={{ color:'var(--cyber-text-dim)' }}>
-                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-              </svg>}
+          <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:700,letterSpacing:'.15em',color:'#818cf8',padding:'2px 5px',background:'rgba(129,140,248,.1)',border:'1px solid rgba(129,140,248,.2)' }}>BLIK</span>
+          <span style={{ fontFamily:'var(--font-mono)',color:'#e0e0e0',fontSize:'.85rem',letterSpacing:'.06em' }}>{blikNumber}</span>
+          {copied ? <Check size={12} style={{ color:'var(--cyber-green)' }}/> : <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color:'var(--cyber-text-dim)' }}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>}
         </button>
         <div style={{ display:'flex',alignItems:'center',gap:'10px' }}>
-          <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:700,
-            letterSpacing:'.08em',color:isConnected?'var(--cyber-green)':'var(--cyber-red)' }}>
-            {isConnected ? '● ONLINE' : '○ OFFLINE'}
-          </span>
-          <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
-            border:isMuted?'1px solid rgba(255,0,51,.4)':'1px solid #252535',
-            color:isMuted?'var(--cyber-red)':'var(--cyber-text-dim)',
-            background:'transparent',padding:'4px 6px',cursor:'pointer',
-            clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
+          <span style={{ fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:700,letterSpacing:'.08em',color:isConnected?'var(--cyber-green)':'var(--cyber-red)' }}>{isConnected ? '● ONLINE' : '○ OFFLINE'}</span>
+          <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',border:isMuted?'1px solid rgba(255,0,51,.4)':'1px solid #252535',color:isMuted?'var(--cyber-red)':'var(--cyber-text-dim)',background:'transparent',padding:'4px 6px',cursor:'pointer',clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
             {isMuted ? <VolumeX size={15}/> : <Volume2 size={15}/>}
           </button>
         </div>
