@@ -71,50 +71,35 @@ function CornerBrackets({ color, size = 12, thickness = 1 }) {
 function PlayerAvatar({ name, index, isPending, isOrganizer }) {
   const c = getPlayerColor(name, index);
   const initials = name.slice(0, 2).toUpperCase();
-  // Pending: soft lavender, never aggressive red
-  const borderColor = isPending
-    ? '#FF9B00'
-: c.border;  // organizer uses own palette color
-  const bg = isPending ? '#0C1420' : c.bg;
+  // Avatar always uses player's own color — never changes based on debt status
 
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>
       <div style={{
         width: 60, height: 60,
-        background: bg,
-        border: `1px solid ${borderColor}`,
+        background: c.bg,
+        border: `1px solid ${c.border}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
-        boxShadow: isPending
-          ? `0 0 5px rgba(255,155,0,0.25), inset 0 0 4px rgba(255,155,0,0.03)`
-          : `0 0 12px ${borderColor}40, inset 0 0 6px ${borderColor}08`,
-        animation: isPending ? 'neon-yellow 3s ease-in-out infinite' : 'none',
+        boxShadow: `0 0 12px ${c.border}40, inset 0 0 6px ${c.border}08`,
         overflow: 'hidden', position: 'relative',
       }}>
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
           background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px)',
         }} />
-        {/* initials for everyone including organizer */}
-        {<>
-              <span style={{
-                fontFamily: 'var(--font-display)', fontSize: '1.3rem',
-                color: isPending ? 'var(--co-yellow)' : c.text,
-                lineHeight: 1,
-                textShadow: `0 0 10px ${isPending ? 'rgba(255,155,0,0.5)' : borderColor + '55'}`,
-              }}>{initials}</span>
-              <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.4rem',
-                color: borderColor, opacity: 0.6, letterSpacing: '0.15em', marginTop: 1,
-              }}>{c.tag}</span>
-            </>
-        }
+        <span style={{
+          fontFamily: 'var(--font-display)', fontSize: '1.3rem',
+          color: c.text,
+          lineHeight: 1,
+          textShadow: `0 0 10px ${c.border}55`,
+        }}>{initials}</span>
       </div>
-      {/* Status dot */}
+      {/* Status dot — only this element carries semantic color */}
       <div style={{
         position: 'absolute', bottom: -2, right: -2,
         width: 10, height: 10,
-        background: isPending ? c.border : 'var(--co-green)',
+        background: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
         border: '2px solid var(--co-void)',
-        boxShadow: isPending ? `0 0 5px ${c.border}99` : '0 0 5px rgba(0,255,102,0.5)',
+        boxShadow: isPending ? '0 0 4px rgba(255,155,0,0.5)' : '0 0 4px rgba(0,255,102,0.5)',
         borderRadius: '50%',
       }} />
     </div>
