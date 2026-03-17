@@ -4,14 +4,13 @@ const tabs = [
   { id: 'dashboard',  icon: LayoutDashboard, label: 'Baza',     shortLabel: 'BAZA'    },
   { id: 'attendance', icon: Trophy,           label: 'Ranking',  shortLabel: 'RANKING' },
   { id: 'admin',      icon: PlusCircle,       label: 'Log',      shortLabel: 'LOG'     },
-  { id: 'history',    icon: History,          label: 'Historia', shortLabel: 'DATA'    },
-  { id: 'players',    icon: Users,            label: 'Gracze',   shortLabel: 'AGENCI'  },
+  { id: 'history',    icon: History,          label: 'Historia', shortLabel: 'HISTORIA'},
+  { id: 'players',    icon: Users,            label: 'Gracze',   shortLabel: 'GRACZE'  },
 ];
 
 export default function Navigation({ activeTab, setActiveTab }) {
   return (
     <>
-      {/* ── Desktop horizontal tab bar ── */}
       <nav className="desktop-nav" role="navigation" aria-label="Nawigacja główna">
         <div className="desktop-nav-inner">
           {tabs.map(tab => (
@@ -28,8 +27,8 @@ export default function Navigation({ activeTab, setActiveTab }) {
                   <span style={{
                     position: 'absolute', top: -3, right: -4,
                     width: 5, height: 5,
-                    background: 'var(--cz-orange)',
-                    boxShadow: '0 0 5px var(--cz-orange)',
+                    background: 'var(--sw-pink)',
+                    boxShadow: '0 0 5px var(--sw-pink)',
                     borderRadius: '50%',
                   }} />
                 )}
@@ -40,7 +39,6 @@ export default function Navigation({ activeTab, setActiveTab }) {
         </div>
       </nav>
 
-      {/* ── Mobile bottom bar ── */}
       <nav className="mobile-nav" role="navigation" aria-label="Nawigacja główna">
         {tabs.map(tab => (
           <button
@@ -56,8 +54,8 @@ export default function Navigation({ activeTab, setActiveTab }) {
                 <span style={{
                   position: 'absolute', top: -3, right: -4,
                   width: 5, height: 5, borderRadius: '50%',
-                  background: 'var(--cz-orange)',
-                  boxShadow: '0 0 5px var(--cz-orange)',
+                  background: 'var(--sw-pink)',
+                  boxShadow: '0 0 5px var(--sw-pink)',
                 }} />
               )}
             </span>

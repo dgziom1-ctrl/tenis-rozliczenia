@@ -13,14 +13,14 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
     <div style={{
       marginBottom: 12, padding: '16px 14px',
       background: '#08080d',
-      border: '1px solid rgba(232,89,10,0.25)',
+      border: '1px solid rgba(255,0,255,0.25)',
       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))',
-      boxShadow: '0 0 20px rgba(232,89,10,0.08)',
+      boxShadow: '0 0 20px rgba(255,0,255,0.08)',
     }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <Zap size={12} style={{ color: 'var(--cz-orange)', flexShrink: 0 }} />
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--cz-orange)', textTransform: 'uppercase', margin: 0 }}>
+        <Zap size={12} style={{ color: 'var(--sw-pink)', flexShrink: 0 }} />
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--sw-pink)', textTransform: 'uppercase', margin: 0 }}>
           {hasCredit ? 'Ile chcesz dopłacić?' : 'Kwota przelewu BLIK'}
         </p>
       </div>
@@ -39,14 +39,14 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
           fontSize: '1.3rem', textAlign: 'center',
           fontFamily: 'var(--font-mono)',
           marginBottom: showError ? 4 : 12,
-          border: `1px solid ${showError ? 'var(--cz-blood)' : '#2a2a2a'}`,
-          boxShadow: showError ? '0 0 10px rgba(255,0,51,0.2)' : 'none',
+          border: `1px solid ${showError ? 'var(--sw-pending)' : '#2a2a2a'}`,
+          boxShadow: showError ? '0 0 10px rgba(139,130,204,0.2)' : 'none',
           clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
         }}
       />
 
       {showError && (
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--cz-blood)', textAlign: 'center', marginBottom: 8 }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--sw-pending)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ KWOTA MUSI BYĆ WIĘKSZA OD 0
         </p>
       )}
@@ -64,7 +64,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             fontSize: '0.62rem', letterSpacing: '0.1em',
             ...(!isValid || isSaving ? {
-              background: 'var(--cz-panel)', border: '1px solid #1a1a2e', color: '#333',
+              background: 'var(--sw-panel)', border: '1px solid #1a1a2e', color: '#333',
               cursor: 'not-allowed', fontFamily: 'var(--font-display)', fontWeight: 700,
             } : {}),
           }}

@@ -50,22 +50,22 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
     <div style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(4px)' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
-        background: 'var(--cz-panel)',
-        border: `1px solid ${error ? 'var(--cz-blood)' : 'rgba(232,89,10,0.3)'}`,
+        background: 'var(--sw-panel)',
+        border: `1px solid ${error ? 'var(--sw-pending)' : 'rgba(255,0,255,0.3)'}`,
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
         boxShadow: error
-          ? '0 0 30px rgba(255,0,51,0.3)'
-          : '0 0 30px rgba(232,89,10,0.15)',
+          ? '0 0 30px rgba(139,130,204,0.3)'
+          : '0 0 30px rgba(255,0,255,0.15)',
         transition: 'all 0.2s',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <Lock size={16} style={{ color: 'var(--cz-orange)', flexShrink: 0 }} />
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.15em', color: 'var(--cz-orange)', margin: 0, textTransform: 'uppercase' }}>
+          <Lock size={16} style={{ color: 'var(--sw-pink)', flexShrink: 0 }} />
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.15em', color: 'var(--sw-pink)', margin: 0, textTransform: 'uppercase' }}>
             Podaj hasło admina
           </h3>
         </div>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--cz-dim)', marginBottom: 16 }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--sw-dim)', marginBottom: 16 }}>
           {'>'} {action}
         </p>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -76,13 +76,13 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
             style={{
               width: '100%', padding: '10px 12px',
               fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
-              border: `1px solid ${error ? 'var(--cz-blood)' : '#2a2a2a'}`,
+              border: `1px solid ${error ? 'var(--sw-pending)' : '#2a2a2a'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-              boxShadow: error ? '0 0 12px rgba(255,0,51,0.3)' : 'none',
+              boxShadow: error ? '0 0 12px rgba(139,130,204,0.3)' : 'none',
             }}
           />
           {error && (
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--cz-blood)', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--sw-pending)', textAlign: 'center' }}>
               ⚠ ❌ Złe hasło
             </p>
           )}
@@ -105,7 +105,7 @@ function LogEntry({ row, onEdit, onDelete }) {
   const time = new Date(row.datePlayed).getTime();
   return (
     <div className="scan-hover" style={{
-      background: 'var(--cz-dark)', border: '1px solid var(--cz-border)',
+      background: 'var(--sw-dark)', border: '1px solid var(--sw-border)',
       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
       padding: '12px 14px', marginBottom: 4,
       transition: 'border-color 0.2s',
@@ -118,11 +118,11 @@ function LogEntry({ row, onEdit, onDelete }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* Terminal prompt */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cz-orange)', opacity: 0.5 }}>{'>'}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--cz-acid)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-pink)', opacity: 0.5 }}>{'>'}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--sw-settled)' }}>
               SESSION_{String(row.id).slice(-4).toUpperCase()}
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--cz-dim)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--sw-dim)' }}>
               {formatDate(row.datePlayed)}
             </span>
           </div>
@@ -131,24 +131,24 @@ function LogEntry({ row, onEdit, onDelete }) {
             <button onClick={() => onEdit(row)} style={{
               padding: '5px 8px', background: 'transparent',
               border: '1px solid #2a2a2a', cursor: 'pointer',
-              color: 'var(--cz-dim)',
+              color: 'var(--sw-dim)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
               transition: 'all 0.15s',
             }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,89,10,0.4)'; e.currentTarget.style.color = 'var(--cz-orange)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--cz-dim)'; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,0,255,0.4)'; e.currentTarget.style.color = 'var(--sw-pink)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--sw-dim)'; }}
             >
               <Pencil size={13} />
             </button>
             <button onClick={() => onDelete(row.id)} style={{
               padding: '5px 8px', background: 'transparent',
               border: '1px solid #2a2a2a', cursor: 'pointer',
-              color: 'var(--cz-dim)',
+              color: 'var(--sw-dim)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
               transition: 'all 0.15s',
             }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(204,0,28,0.5)'; e.currentTarget.style.color = 'var(--cz-blood)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--cz-dim)'; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(139,130,204,0.5)'; e.currentTarget.style.color = 'var(--sw-pending)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--sw-dim)'; }}
             >
               <Trash2 size={13} />
             </button>
@@ -158,26 +158,26 @@ function LogEntry({ row, onEdit, onDelete }) {
         {/* Data row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, paddingLeft: 16 }}>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--cz-dim)', marginBottom: 2, textTransform: 'uppercase' }}>KOSZT</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cz-orange)', textShadow: '0 0 8px rgba(232,89,10,0.3)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--sw-dim)', marginBottom: 2, textTransform: 'uppercase' }}>KOSZT</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--sw-pink)', textShadow: '0 0 8px rgba(255,0,255,0.3)' }}>
               {formatAmount(row.totalCost)}
             </p>
           </div>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--cz-dim)', marginBottom: 2, textTransform: 'uppercase' }}>NA OSOBĘ</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--cz-teal)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--sw-dim)', marginBottom: 2, textTransform: 'uppercase' }}>NA OSOBĘ</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--sw-cyan)' }}>
               {formatAmount(row.costPerPerson)}
             </p>
           </div>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--cz-dim)', marginBottom: 2, textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--sw-dim)', marginBottom: 2, textTransform: 'uppercase' }}>
               OBECNI ({row.presentPlayers.length})
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {row.presentPlayers.join(', ')}
             </p>
             {row.multisportPlayers.length > 0 && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--cz-acid)', opacity: 0.7 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--sw-settled)', opacity: 0.7 }}>
                 ⚡ {row.multisportPlayers.join(', ')}
               </p>
             )}
@@ -267,33 +267,33 @@ export default function HistoryTab({ history, playerNames, playSound }) {
         animation: 'slide-in-up 0.3s ease-out',
       }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, paddingBottom: 14, borderBottom: '1px solid var(--cz-border)' }}>
-          <div style={{ padding: '6px 8px', background: 'rgba(0,255,65,0.08)', border: '1px solid rgba(0,255,65,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
-            <Terminal size={14} style={{ color: 'var(--cz-acid)', display: 'block' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, paddingBottom: 14, borderBottom: '1px solid var(--sw-border)' }}>
+          <div style={{ padding: '6px 8px', background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+            <Terminal size={14} style={{ color: 'var(--sw-settled)', display: 'block' }} />
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.2rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--cz-acid)' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.2rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--sw-settled)' }}>
             Historia sesji ping-ponga
           </span>
-          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,255,65,0.2), transparent)' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--cz-dim)' }}>
+          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,255,255,0.2), transparent)' }} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-dim)' }}>
             {history.length} REKORDÓW
           </span>
         </div>
 
         {/* Boot text */}
         <div style={{ marginBottom: 20, padding: '10px 14px', background: '#060609', border: '1px solid #0f0f0f' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--cz-acid)', lineHeight: 1.6, opacity: 0.7 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--sw-settled)', lineHeight: 1.6, opacity: 0.7 }}>
             {'>'} System OK<br/>
             {'>'} Ładowanie historii...<br/>
             {'>'} {history.length} rekordów znaleziono<br/>
-            {'>'} Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--cz-acid)' }}>▮</span>
+            {'>'} Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--sw-settled)' }}>▮</span>
           </p>
         </div>
 
         {history.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
-            <CalendarDays style={{ margin: '0 auto 16px', color: 'var(--cz-dim)' }} size={40} />
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--cz-dim)', textTransform: 'uppercase' }}>
+            <CalendarDays style={{ margin: '0 auto 16px', color: 'var(--sw-dim)' }} size={40} />
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--sw-dim)', textTransform: 'uppercase' }}>
               BRAK DANYCH
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#333', marginTop: 8 }}>
@@ -307,11 +307,11 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             <div key={label}>
               {/* Month header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: '#08080A', border: '1px solid var(--cz-border)', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--cz-orange)' }}>{label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: '#0B0015', border: '1px solid var(--sw-border)', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--sw-pink)' }}>{label}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#3a3a3a' }}>[{rows.length}x]</span>
                 </div>
-                <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(232,89,10,0.25), transparent)' }} />
+                <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(255,0,255,0.25), transparent)' }} />
               </div>
 
               {/* Log entries */}
@@ -322,17 +322,17 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
                   if (isEditingRow) return (
                     <div key={row.id} style={{
-                      background: '#08080A', border: '1px solid rgba(232,89,10,0.25)',
+                      background: '#0B0015', border: '1px solid rgba(255,0,255,0.25)',
                       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
                       padding: 16, marginBottom: 4, display: 'flex', flexDirection: 'column', gap: 14,
                     }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                         <div>
-                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--cz-orange)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</label>
+                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--sw-pink)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</label>
                           <EditDateInput value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
                         </div>
                         <div>
-                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--cz-orange)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
+                          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--sw-pink)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
                           <input type="number" value={editForm.cost}
                             onChange={e => setEditForm(p => ({ ...p, cost: e.target.value }))}
                             className="cyber-input"
@@ -353,7 +353,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                                 clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                                 transition: 'all 0.15s',
                                 ...(editForm.present?.includes(name) ? {
-                                  borderColor: 'rgba(232,89,10,0.5)', background: 'rgba(232,89,10,0.08)', color: 'var(--cz-orange)',
+                                  borderColor: 'rgba(255,0,255,0.5)', background: 'rgba(255,0,255,0.08)', color: 'var(--sw-pink)',
                                 } : {
                                   borderColor: '#1a1a1a', background: 'transparent', color: '#444',
                                 }),
@@ -365,7 +365,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       </div>
                       {editForm.present?.length > 0 && (
                         <div>
-                          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--cz-acid)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+                          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--sw-settled)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
                             <Zap size={11} /> MULTISPORT
                           </p>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
@@ -377,7 +377,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                                   clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                                   transition: 'all 0.15s',
                                   ...(editForm.multiPlayers?.includes(name) ? {
-                                    borderColor: 'rgba(0,255,65,0.5)', background: 'rgba(0,255,65,0.07)', color: 'var(--cz-acid)',
+                                    borderColor: 'rgba(0,255,255,0.5)', background: 'rgba(0,255,255,0.07)', color: 'var(--sw-settled)',
                                   } : {
                                     borderColor: '#1a1a1a', background: 'transparent', color: '#444',
                                   }),
@@ -403,12 +403,12 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
                   if (isDeletingRow) return (
                     <div key={row.id} style={{
-                      background: 'rgba(255,0,51,0.04)', border: '1px solid rgba(255,0,51,0.35)',
+                      background: 'rgba(139,130,204,0.04)', border: '1px solid rgba(139,130,204,0.35)',
                       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
                       padding: 16, marginBottom: 4,
-                      boxShadow: '0 0 20px rgba(255,0,51,0.1)',
+                      boxShadow: '0 0 20px rgba(139,130,204,0.1)',
                     }}>
-                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--cz-blood)', marginBottom: 4, textTransform: 'uppercase' }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--sw-pending)', marginBottom: 4, textTransform: 'uppercase' }}>
                         ⚠ Usunąć sesję z dnia {formatDate(row.datePlayed)}?
                       </p>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#444', marginBottom: 14 }}>
@@ -418,7 +418,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                         <button onClick={() => handleDelete(row.id)} disabled={isDeleting === row.id}
                           style={{
                             flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                            background: 'var(--cz-blood)', color: '#000',
+                            background: 'var(--sw-pending)', color: '#000',
                             fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.12em',
                             border: 'none', cursor: 'pointer',
                             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
