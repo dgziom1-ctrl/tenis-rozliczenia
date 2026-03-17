@@ -158,6 +158,7 @@ export default function DashboardTab({ data, history, playSound }) {
 
   const sortedPlayers = useMemo(() => {
     if (!data.players) return [];
+    // Sort: alphabetical A→Z, organizer always last
     const nonOrg   = data.players
       .filter(p => p.name !== ORGANIZER_NAME)
       .sort((a, b) => a.name.localeCompare(b.name, 'pl'));

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { getPlayerColor } from '../../constants/playerColors';
-import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Lock, Check, X, Zap, Shield } from 'lucide-react';
+import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Lock, Check, X, Zap } from 'lucide-react';
 import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } from '../../firebase/index';
 import { ADMIN_PASSWORD, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { useToast } from '../common/Toast';
@@ -103,9 +103,7 @@ function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         clipPath: isOrganizer ? 'none' : 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
       }}>
-        {isOrganizer
-          ? <Shield size={16} style={{ color: 'var(--co-cyan)' }} />
-          : <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, color: c.text }}>{initials}</span>}
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, color: c.text }}>{initials}</span>
       </div>
 
       {/* Name + class */}
@@ -114,7 +112,7 @@ function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
           {player.name}
         </p>
         <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.15em', color: isOrganizer ? 'var(--co-cyan)' : c.border, opacity: 0.7, margin: '2px 0 0', textTransform: 'uppercase' }}>
-          {isOrganizer ? '🏓 Organizator' : '🏓 Gracz'}
+          {isOrganizer ? '🏓 Ogarnia rez.' : '🏓 Gracz'}
         </p>
       </div>
 
@@ -245,9 +243,15 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
           <div style={{ marginBottom: 28 }}>
             <SectionHeader icon={Cpu} title="Aktywni gracze" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 8 }}>
-              {players.map((p, i) => (
-                <PlayerProfileCard key={p.name} player={p} index={i} onDelete={setPwModal} isOrganizer={p.name === ORGANIZER_NAME} />
-              ))}
+              {[...players]
+                .sort((a, b) => {
+                  if (a.name === ORGANIZER_NAME) return 1;
+                  if (b.name === ORGANIZER_NAME) return -1;
+                  return a.name.localeCompare(b.name, 'pl');
+                })
+                .map((p, i) => (
+                  <PlayerProfileCard key={p.name} player={p} index={i} onDelete={setPwModal} isOrganizer={p.name === ORGANIZER_NAME} />
+                ))}
             </div>
           </div>
         )}

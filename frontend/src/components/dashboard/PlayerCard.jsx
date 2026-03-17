@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { CheckCircle2, Shield, TrendingUp, ChevronDown } from 'lucide-react';
+import { CheckCircle2, TrendingUp, ChevronDown } from 'lucide-react';
 import { getPlayerColor } from '../../constants/playerColors';
 import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
 import { formatAmountShort } from '../../utils/format';
@@ -93,9 +93,8 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
           background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px)',
         }} />
-        {isOrganizer
-          ? <Shield size={22} style={{ color: 'var(--co-cyan)' }} />
-          : <>
+        {/* initials for everyone including organizer */}
+        {<>
               <span style={{
                 fontFamily: 'var(--font-display)', fontSize: '1.3rem',
                 color: isPending ? 'var(--co-yellow)' : c.text,
@@ -502,7 +501,7 @@ export default function PlayerCard({
             background: 'rgba(0,229,255,0.03)', textAlign: 'center',
           }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.15em', color: 'var(--co-cyan)', margin: 0 }}>
-              Zarządza rezerwacją
+              Ogarnia rezerwację
             </p>
           </div>
           <div style={{ marginTop: 8, width: '100%', borderTop: '1px solid var(--co-border)', paddingTop: 8 }}>

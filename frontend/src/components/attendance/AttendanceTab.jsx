@@ -308,7 +308,7 @@ function MonthlyReport({ monthlyStats, players }) {
 
 // ─── Rank guide ──────────────────────────────────────────────────
 function RankGuide() {
-  const rankColors = ['#FFE500', '#00E5FF', '#7B9FFF', '#00FF88', '#4FC3F7', '#00D4CC'];
+  const rankColors = ['#FFE500', '#00FFFF', '#CC00FF', '#00FF66', '#0080FF', '#FF0080'];
   return (
     <div style={{
       background: 'var(--co-panel)',
