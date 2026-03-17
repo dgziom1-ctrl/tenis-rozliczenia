@@ -22,8 +22,8 @@ function Arena({ chaosMode, onHit }) {
     const g = canvas.getContext('2d');
     const W = 560, H = 155, CX = 265, CY = 78;
 
-    // Camera: 27° tilt (pitch) + 20° yaw — ujemny RY = widok z lewej strony
-    const RX = 0.471, RY = -0.349; // radians
+    // Camera: 27° tilt (pitch) + 20° yaw
+    const RX = 0.471, RY = -0.349;
     const cX = Math.cos(RX), sX = Math.sin(RX);
     const cY = Math.cos(RY), sY = Math.sin(RY);
     const FOV = 370, DIST = 290;
@@ -39,13 +39,43 @@ function Arena({ chaosMode, onHit }) {
       return [CX + x1*s, CY + y2*s, s];
     };
 
-    /* Ball: KF with table bounce (quadratic bezier per segment) */
-    const KF = [[-PX,PY,0],[-42,0,.22],[PX,PY,.5],[42,0,.72],[-PX,PY,1]];
-    const CP = [[-74,-21],[0,-65],[74,-21],[0,-65]];
+    /*
+     * FIXED BALL TRAJECTORY
+     * ──────────────────────
+     * Ping pong rule: ball bounces on the OPPONENT's side of the table.
+     *
+     * KF: [ x, y, t ]
+     *   t=0.00 → left  paddle hits  (x = -PX)
+     *   t=0.28 → ball bounces RIGHT side (+65) — opponent's half when hit from left
+     *   t=0.50 → right paddle hits  (x = +PX)
+     *   t=0.78 → ball bounces LEFT  side (-65) — opponent's half when hit from right
+     *   t=1.00 → left  paddle hits  (x = -PX, same as t=0)
+     *
+     * CP: quadratic bezier control points per segment.
+     *   Segments 0 & 2: high arc over the net   → CP at x≈0, y=-68
+     *   Segments 1 & 3: short rise into paddle  → CP nudged toward paddle
+     */
+    const KF = [
+      [-PX, PY,  0.00],   // left  paddle
+      [ 65,  0,  0.28],   // bounce — RIGHT half (opponent of left player)
+      [ PX, PY,  0.50],   // right paddle
+      [-65,  0,  0.78],   // bounce — LEFT  half (opponent of right player)
+      [-PX, PY,  1.00],   // left  paddle (loop)
+    ];
+    const CP = [
+      [  0, -68],   // seg 0: left paddle → right bounce  (high arc over net)
+      [ 85, -28],   // seg 1: right bounce → right paddle (low approach)
+      [  0, -68],   // seg 2: right paddle → left bounce  (high arc over net)
+      [-85, -28],   // seg 3: left bounce  → left paddle  (low approach)
+    ];
+
     const ballAt = (t) => {
       let i = 3;
-      for (let j = 0; j < 4; j++) if (t >= KF[j][2] && t <= KF[j+1][2]) { i = j; break; }
-      const tl = (t - KF[i][2]) / (KF[i+1][2] - KF[i][2]), mt = 1 - tl;
+      for (let j = 0; j < 4; j++) {
+        if (t >= KF[j][2] && t <= KF[j+1][2]) { i = j; break; }
+      }
+      const tl = (t - KF[i][2]) / (KF[i+1][2] - KF[i][2]);
+      const mt = 1 - tl;
       return [
         KF[i][0]*mt*mt + CP[i][0]*2*mt*tl + KF[i+1][0]*tl*tl,
         KF[i][1]*mt*mt + CP[i][1]*2*mt*tl + KF[i+1][1]*tl*tl,
@@ -62,7 +92,6 @@ function Arena({ chaosMode, onHit }) {
       g.beginPath(); g.moveTo(ax,ay); g.lineTo(bx,by);
       g.strokeStyle = col; g.lineWidth = w; g.stroke();
     };
-    /* Draw ellipse via save/translate/scale/arc (avoids ctx.ellipse browser issues) */
     const ellipse = (cx, cy, rx, ry, rot) => {
       g.save();
       g.translate(cx, cy);
@@ -72,7 +101,6 @@ function Arena({ chaosMode, onHit }) {
       g.restore();
     };
 
-    /* Shared hit detection threshold — same as used inside drawPaddle */
     const HIT_T = 0.09;
     let lastHitState = false;
 
@@ -80,9 +108,9 @@ function Arena({ chaosMode, onHit }) {
     const draw = (progress) => {
       g.clearRect(0, 0, W, H);
 
-      /* ── Compute hit state and notify parent ── */
-      const leftHitT  = Math.min(progress, 1 - progress) * 2;
-      const rightHitT = Math.abs(progress - 0.5) * 2;
+      /* Hit detection — driven by distance to each paddle's hit time */
+      const leftHitT  = Math.min(progress, 1 - progress) * 2;   // 0 at t=0 & t=1
+      const rightHitT = Math.abs(progress - 0.5) * 2;           // 0 at t=0.5
       const isHitting = leftHitT < HIT_T || rightHitT < HIT_T;
       if (isHitting !== lastHitState) {
         lastHitState = isHitting;
@@ -121,40 +149,31 @@ function Arena({ chaosMode, onHit }) {
       seg(FL, FR, 'rgba(138,172,255,0.86)', 1.8);
       g.restore();
 
-      /* Net — RY rotation makes near+far posts offset horizontally = real 3D */
+      /* Net */
       const nBN=proj(0,0,-TZ), nBF=proj(0,0,TZ);
       const nTN=proj(0,-NH,-TZ), nTF=proj(0,-NH,TZ);
       const ng = g.createLinearGradient(nTN[0],nTN[1],nBN[0],nBN[1]);
       ng.addColorStop(0,'rgba(145,165,255,0.22)'); ng.addColorStop(1,'rgba(52,82,192,0.04)');
       quad([nBN,nBF,nTF,nTN], ng);
-
-      /* Net mesh: horizontal lines */
       for (let r = 0; r <= 4; r++) {
         const ny = -NH*(1-r/4);
         seg(proj(0,ny,-TZ), proj(0,ny,TZ), `rgba(132,155,245,${0.06+r*0.02})`, 0.85);
       }
-      /* Net mesh: vertical lines — converge to vanishing point */
       for (let c = 0; c <= 8; c++) {
         const wz = -TZ + (c/8)*TZ*2;
         seg(proj(0,0,wz), proj(0,-NH,wz), 'rgba(112,138,228,0.08)', 0.8);
       }
-
-      /* Net posts — near post is LOWER-LEFT, far post UPPER-RIGHT (thanks to RY) */
-      seg(nBN, nTN, 'rgba(202,220,255,0.80)', 2.2);  // near: bright
-      seg(nBF, nTF, 'rgba(198,215,255,0.44)', 1.4);  // far: dim
-
-      /* Net top bar — brightest element */
+      seg(nBN, nTN, 'rgba(202,220,255,0.80)', 2.2);
+      seg(nBF, nTF, 'rgba(198,215,255,0.44)', 1.4);
       g.save(); g.shadowBlur=7; g.shadowColor='rgba(185,212,255,0.90)';
       seg(nTN, nTF, 'rgba(236,246,255,0.96)', 2.5);
       g.restore();
 
-      /* ── KOLEJNOŚĆ RYSOWANIA: najpierw rakietki, potem piłka na wierzchu ── */
-
-      /* Paddles — rysowane PRZED piłką żeby piłka była zawsze na wierzchu */
+      /* Paddles drawn BEFORE ball (ball always on top) */
       drawPaddle(-PX, progress, true);
       drawPaddle( PX, progress, false);
 
-      /* Ball — rysowana PO rakietkach, zawsze widoczna na wierzchu */
+      /* Ball */
       const bv = ballAt(progress);
       const bq = proj(bv[0], bv[1], 0);
       const bR = 6.4 * bq[2];
@@ -172,7 +191,7 @@ function Arena({ chaosMode, onHit }) {
       g.beginPath(); g.arc(tq[0], tq[1], 3.6*tq[2], 0, Math.PI*2);
       g.fillStyle = 'rgba(168,190,255,0.07)'; g.fill();
 
-      /* Ball */
+      /* Ball sphere */
       g.save(); g.shadowBlur=13*bq[2]; g.shadowColor='rgba(255,255,255,0.86)';
       const bg = g.createRadialGradient(bq[0]-bR*.3,bq[1]-bR*.3,0, bq[0],bq[1],bR);
       bg.addColorStop(0,'#fff'); bg.addColorStop(.46,'#dadff8'); bg.addColorStop(1,'#9aa0dc');
@@ -181,14 +200,13 @@ function Arena({ chaosMode, onHit }) {
       g.restore();
     };
 
-    /* ── PADDLE: single clean projected ellipse, no double-ring ── */
+    /* ── PADDLE ── */
     const drawPaddle = (px, progress, isLeft) => {
       const hitT   = isLeft ? Math.min(progress,1-progress)*2 : Math.abs(progress-0.5)*2;
       const hitting = hitT < HIT_T;
       const bump   = hitting ? 1 + (1-hitT/HIT_T)*0.13 : 1;
       const R      = PR * bump;
 
-      /* Project 4 cardinal pts to measure ellipse in screen space */
       const pc = proj(px, PY, 0);
       const pr = proj(px+R, PY, 0), pl = proj(px-R, PY, 0);
       const pt = proj(px, PY-R, 0), pb = proj(px, PY+R, 0);
@@ -212,7 +230,7 @@ function Arena({ chaosMode, onHit }) {
       bdg.addColorStop(0,'#252456'); bdg.addColorStop(.76,'#12122c'); bdg.addColorStop(1,'#09091e');
       ellipse(cx, cy, rx, ry, ang); g.fillStyle = bdg; g.fill();
 
-      /* Layer 3: rim stroke (clean, no shadow) */
+      /* Layer 3: rim stroke */
       g.strokeStyle = hitting ? 'rgba(185,208,255,0.88)' : 'rgba(135,155,250,0.62)';
       g.lineWidth   = 1.9;
       ellipse(cx, cy, rx*.95, ry*.95, ang); g.stroke();
@@ -234,7 +252,7 @@ function Arena({ chaosMode, onHit }) {
       g.lineCap = 'butt'; g.restore();
     };
 
-    /* RAF */
+    /* RAF loop */
     const loop = (ts) => {
       if (!t0.current) t0.current = ts;
       draw(((ts - t0.current) % CYCLE) / CYCLE);
@@ -257,7 +275,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti,  setConfetti]  = useState([]);
-  const [hitting,   setHitting]   = useState(false);   // ← driven by ball/paddle collision
+  const [hitting,   setHitting]   = useState(false);
   const chaosTimer = useRef(null);
   const clickCount = useRef(0);
   const clickTimer = useRef(null);
@@ -271,7 +289,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
     };
   }, []);
 
-  /* Stable callback passed to Arena — avoids re-mounting canvas on every render */
+  /* Stable callback — avoids re-mounting canvas on every render */
   const handleHit = useCallback((state) => setHitting(state), []);
 
   const handleCopy = () => {
@@ -392,7 +410,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
             background:'linear-gradient(90deg,transparent,rgba(129,140,248,.3) 50%,transparent)' }}/>
 
-          {/* ── JACK IN — podświetla się dokładnie przy uderzeniu piłki w rakietkę ── */}
+          {/* JACK IN — lights up exactly when ball hits paddle */}
           <div style={{ display:'flex',alignItems:'center',gap:'14px' }}>
             <span style={{
               fontFamily:'var(--font-display)',fontSize:'.62rem',fontWeight:600,
