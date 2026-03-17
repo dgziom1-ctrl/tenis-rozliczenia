@@ -35,11 +35,11 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
   return (
     <div style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(4px)' }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
-        background: '#0a0a0f',
+        background: 'var(--co-dark)',
         border: `1px solid ${error ? 'var(--co-yellow)' : 'rgba(0,229,255,0.35)'}`,
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
-        boxShadow: error ? '0 0 30px rgba(255,229,0,0.25)' : '0 0 30px rgba(0,229,255,0.12)',
+        boxShadow: error ? '0 0 30px rgba(255,155,0,0.25)' : '0 0 30px rgba(0,229,255,0.12)',
         transition: 'all 0.2s',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
@@ -60,7 +60,7 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
               width: '100%', padding: '10px 12px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
               border: `1px solid ${error ? 'var(--co-yellow)' : '#2a2a2a'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-              boxShadow: error ? '0 0 10px rgba(255,229,0,0.3)' : 'none',
+              boxShadow: error ? '0 0 10px rgba(255,155,0,0.3)' : 'none',
             }}
           />
           {error && <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--co-yellow)', textAlign: 'center' }}>⚠ ❌ Złe hasło</p>}
@@ -120,13 +120,13 @@ function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
       {!isOrganizer ? (
         <button onClick={() => onDelete(player.name)} style={{
           padding: '7px 10px', background: 'transparent',
-          border: '1px solid #2a2a2a', cursor: 'pointer',
+          border: '1px solid var(--co-border)', cursor: 'pointer',
           color: 'var(--co-dim)',
           clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
           transition: 'all 0.15s',
           flexShrink: 0,
         }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,229,0,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,155,0,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--co-dim)'; }}
           title="Usuń gracza"
         >
@@ -260,7 +260,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {players && players.length > 0 && (
           <div style={{ marginBottom: 28 }}>
             <SectionHeader icon={Zap} title="Multisport domyślny" accent="var(--co-green)" />
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', marginBottom: 12 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-text)', marginBottom: 12 }}>
               {'>'} Zaznaczeni będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
@@ -277,7 +277,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                         background: 'rgba(0,229,255,0.07)', border: '1px solid rgba(0,229,255,0.4)', color: 'var(--co-green)',
                         boxShadow: '0 0 8px rgba(0,229,255,0.1)',
                       } : {
-                        background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: '#444',
+                        background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
                       }),
                     }}>
                     <Zap size={12} style={{ color: active ? 'var(--co-green)' : '#333', flexShrink: 0 }} />
@@ -298,13 +298,13 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                 <div key={name}>
                   {confirmDelete === name ? (
                     <div style={{
-                      padding: '14px', background: 'rgba(255,229,0,0.04)', border: '1px solid rgba(255,229,0,0.3)',
+                      padding: '14px', background: 'rgba(255,155,0,0.04)', border: '1px solid rgba(255,155,0,0.3)',
                       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
                     }}>
                       <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5, textTransform: 'uppercase' }}>
                         <AlertTriangle size={12} /> USUNĄĆ NA ZAWSZE?
                       </p>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)', marginBottom: 12 }}>{name}</p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-text)', marginBottom: 12 }}>{name}</p>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button onClick={() => handlePermanentDelete(name)} style={{
                           flex: 1, padding: '8px', background: 'var(--co-yellow)', color: '#000', border: 'none', cursor: 'pointer',
@@ -343,7 +343,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                           color: '#3a3a3a', transition: 'all 0.15s',
                           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                         }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,229,0,0.4)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,155,0,0.4)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#3a3a3a'; }}
                           title="Usuń na zawsze">
                           <Trash2 size={13} />

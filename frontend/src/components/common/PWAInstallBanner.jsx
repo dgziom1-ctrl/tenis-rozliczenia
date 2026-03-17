@@ -39,7 +39,7 @@ export default function PWAInstallBanner() {
     bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
     left: 10, right: 10,
     zIndex: 45,
-    background: '#0a0a0f',
+    background: 'var(--co-dark)',
     border: '1px solid rgba(0,229,255,0.35)',
     clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
     boxShadow: '0 0 24px rgba(0,229,255,0.12), 0 4px 30px rgba(0,0,0,0.9)',
@@ -131,7 +131,7 @@ export default function PWAInstallBanner() {
             }}>
               <span style={{ fontFamily: 'var(--font-display)', color: 'var(--co-cyan)', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.05em' }}>{step.n}</span>
             </div>
-            <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#888', lineHeight: 1.4 }}>{step.content}</p>
+            <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--co-dim)', lineHeight: 1.4 }}>{step.content}</p>
           </div>
         ))}
       </div>

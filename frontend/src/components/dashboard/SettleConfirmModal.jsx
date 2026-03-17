@@ -10,7 +10,7 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
       style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(6px)' }}
     >
       <div style={{
-        background: '#0a0a0f',
+        background: 'var(--co-dark)',
         border: '1px solid rgba(0,229,255,0.4)',
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
         boxShadow: '0 0 50px rgba(0,229,255,0.15), 0 4px 60px rgba(0,0,0,0.95)',
@@ -42,7 +42,7 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
 
         {/* Player name + amount */}
         <div style={{ marginBottom: 20 }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: '#888', marginBottom: 12 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--co-text)', marginBottom: 12 }}>
             {'>'} <span style={{ color: '#e8e8e8', fontWeight: 600 }}>{playerName}</span> zapłacił?
           </p>
           <div style={{

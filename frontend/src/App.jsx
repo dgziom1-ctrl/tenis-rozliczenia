@@ -132,15 +132,15 @@ function CyberErrorScreen() {
       {/* Blood-red hazard stripe */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3,
         background: 'repeating-linear-gradient(-45deg, var(--co-yellow) 0px, var(--co-yellow) 8px, rgba(0,0,0,0.6) 8px, rgba(0,0,0,0.6) 16px)',
-        boxShadow: '0 0 16px rgba(255,229,0,0.8)', zIndex: 1000,
+        boxShadow: '0 0 16px rgba(255,155,0,0.8)', zIndex: 1000,
       }} />
 
       <div style={{
         padding: '28px 24px', textAlign: 'center', maxWidth: 380, width: '100%',
         background: '#0D0008',
-        border: '1px solid rgba(255,229,0,0.45)',
+        border: '1px solid rgba(255,155,0,0.45)',
         clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px))',
-        boxShadow: '0 0 40px rgba(255,229,0,0.2), inset 0 0 30px rgba(255,229,0,0.04)',
+        boxShadow: '0 0 40px rgba(255,155,0,0.2), inset 0 0 30px rgba(255,155,0,0.04)',
         position: 'relative', overflow: 'hidden',
         animation: 'neon-yellow 2s ease-in-out infinite',
       }}>
@@ -151,15 +151,15 @@ function CyberErrorScreen() {
         }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: '2.8rem', marginBottom: 14, filter: 'drop-shadow(0 0 8px rgba(255,229,0,0.6))' }}>☠</div>
+          <div style={{ fontSize: '2.8rem', marginBottom: 14, filter: 'drop-shadow(0 0 8px rgba(255,155,0,0.6))' }}>☠</div>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', marginBottom: 6, textTransform: 'uppercase',
-            textShadow: '0 0 16px rgba(255,229,0,0.6)',
+            textShadow: '0 0 16px rgba(255,155,0,0.6)',
           }}>
             CONNECTION FAILURE
           </p>
           <div style={{
-            padding: '10px 12px', background: 'rgba(255,229,0,0.06)',
-            border: '1px solid rgba(255,229,0,0.2)', marginBottom: 20,
+            padding: '10px 12px', background: 'rgba(255,155,0,0.06)',
+            border: '1px solid rgba(255,155,0,0.2)', marginBottom: 20,
             clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
           }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.06em', lineHeight: 1.7 }}>
@@ -235,7 +235,7 @@ function AppContent() {
           <div style={{
             position: 'absolute', bottom: '-10%', left: '-5%',
             width: '55vw', height: '55vh',
-            background: 'radial-gradient(ellipse at bottom left, rgba(255,229,0,0.04) 0%, transparent 65%)',
+            background: 'radial-gradient(ellipse at bottom left, rgba(255,155,0,0.04) 0%, transparent 65%)',
           }} />
           {/* Acid accent — mid right */}
           <div style={{

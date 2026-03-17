@@ -54,17 +54,17 @@ function ToastContainer({ toasts, removeToast }) {
 
 const STYLES = {
   success: {
-    bg:       '#060e06',
-    border:   'rgba(0,229,255,0.35)',
-    shadow:   '0 0 20px rgba(0,229,255,0.1)',
+    bg:       '#031208',
+    border:   'rgba(0,255,102,0.3)',
+    shadow:   '0 0 18px rgba(0,255,102,0.08)',
     accent:   'var(--co-green)',
     icon:     <CheckCircle2 size={16} style={{ color: 'var(--co-green)', flexShrink: 0 }} />,
     prefix:   'OK',
   },
   error: {
     bg:       '#0e0606',
-    border:   'rgba(255,229,0,0.4)',
-    shadow:   '0 0 20px rgba(255,229,0,0.12)',
+    border:   'rgba(255,155,0,0.4)',
+    shadow:   '0 0 20px rgba(255,155,0,0.12)',
     accent:   'var(--co-yellow)',
     icon:     <AlertCircle size={16} style={{ color: 'var(--co-yellow)', flexShrink: 0 }} />,
     prefix:   'ERR',

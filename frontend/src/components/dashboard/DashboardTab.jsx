@@ -162,7 +162,7 @@ export default function DashboardTab({ data, history, playSound }) {
             fontFamily: 'var(--font-mono)', fontSize: '0.58rem',
             color: 'var(--co-dim)', letterSpacing: '0.12em',
           }}>
-            sesji: <span style={{ color: 'var(--co-ice, #4FC3F7)' }}>{totalWeeks}</span>
+            sesji: <span style={{ color: 'rgba(0,180,255,0.8)' }}>{totalWeeks}</span>
           </span>
         </div>
 

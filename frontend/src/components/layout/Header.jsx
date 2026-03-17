@@ -448,9 +448,9 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
           </button>
           <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
             justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
-            border:isMuted?'1px solid rgba(255,229,0,.5)':'1px solid var(--co-border)',
+            border:isMuted?'1px solid rgba(255,155,0,.5)':'1px solid var(--co-border)',
             color:isMuted?'var(--co-yellow)':'var(--co-dim)',
-            background:isMuted?'rgba(255,229,0,.08)':'transparent',
+            background:isMuted?'rgba(255,155,0,.08)':'transparent',
             clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
             {isMuted ? <VolumeX size={17}/> : <Volume2 size={17}/>}
           </button>
@@ -534,7 +534,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             {isConnected ? '● ONLINE' : '○ OFFLINE'}
           </span>
           <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
-            border:isMuted?'1px solid rgba(255,229,0,.4)':'1px solid #252535',
+            border:isMuted?'1px solid rgba(255,155,0,.4)':'1px solid #252535',
             color:isMuted?'var(--co-yellow)':'var(--co-dim)',
             background:'transparent',padding:'4px 6px',cursor:'pointer',
             clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>

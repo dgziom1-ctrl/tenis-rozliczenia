@@ -8,16 +8,16 @@ export function PlayerCardSkeleton() {
       overflow: 'hidden', animation: 'skeleton-pulse 1.5s ease-in-out infinite',
     }}>
       <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--co-border)', background: 'rgba(0,229,255,0.02)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 56, height: 56, background: '#111', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }} />
+        <div style={{ width: 56, height: 56, background: 'var(--co-raised)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }} />
         <div style={{ flex: 1 }}>
-          <div style={{ height: 8, background: '#111', marginBottom: 8, width: '60%' }} />
+          <div style={{ height: 8, background: 'var(--co-raised)', marginBottom: 8, width: '60%' }} />
           <div style={{ height: 6, background: 'var(--co-panel)', width: '40%' }} />
         </div>
       </div>
       <div style={{ padding: '14px' }}>
-        <div style={{ height: 3, background: '#111', marginBottom: 14 }} />
-        <div style={{ height: 60, background: '#0a0a0f', marginBottom: 12, clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }} />
-        <div style={{ height: 40, background: '#111', clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)' }} />
+        <div style={{ height: 3, background: 'var(--co-raised)', marginBottom: 14 }} />
+        <div style={{ height: 60, background: 'var(--co-dark)', marginBottom: 12, clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }} />
+        <div style={{ height: 40, background: 'var(--co-raised)', clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)' }} />
       </div>
       <style>{`@keyframes skeleton-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
     </div>
@@ -32,8 +32,8 @@ export function SessionCardSkeleton() {
       padding: '12px 14px', animation: 'skeleton-pulse 1.5s ease-in-out infinite',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ height: 8, background: '#111', width: 120 }} />
-        <div style={{ height: 8, background: '#111', width: 60 }} />
+        <div style={{ height: 8, background: 'var(--co-raised)', width: 120 }} />
+        <div style={{ height: 8, background: 'var(--co-raised)', width: 60 }} />
       </div>
       <div style={{ height: 6, background: 'var(--co-panel)', width: '80%', marginBottom: 6 }} />
       <div style={{ height: 6, background: 'var(--co-panel)', width: '60%' }} />

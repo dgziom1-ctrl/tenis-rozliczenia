@@ -52,7 +52,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
     <div style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(6px)' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
-        background: '#0a0a0f',
+        background: 'var(--co-dark)',
         border: '1px solid rgba(0,229,255,0.4)',
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
         boxShadow: '0 0 60px rgba(0,229,255,0.15), 0 4px 60px rgba(0,0,0,0.95)',
@@ -132,7 +132,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
             ...(copied ? {
               background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.4)', color: 'var(--co-green)',
             } : {
-              background: 'transparent', border: '1px solid #2a2a2a', color: '#888',
+              background: 'transparent', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
             }),
             clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
           }}>
@@ -208,7 +208,7 @@ function PlayerToggleGrid({ names, selected, onToggle, accent = 'yellow' }) {
               background: accentAlpha, border: `1px solid ${accentBorder}`, color: accentColor,
               boxShadow: `0 0 10px ${accent === 'green' ? 'rgba(0,229,255,0.1)' : 'rgba(0,229,255,0.1)'}`,
             } : {
-              background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: '#444',
+              background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
             }),
           }}>
             {name}
@@ -353,7 +353,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                           background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.5)',
                           color: 'var(--co-cyan)', boxShadow: '0 0 8px rgba(0,229,255,0.15)',
                         } : {
-                          background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: '#555',
+                          background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
                         }),
                       }}>
                       {cost === 0 ? 'FREE' : cost}
@@ -371,7 +371,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Present players */}
             <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
-              <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
                 <Users size={13} style={{ color: 'var(--co-cyan)' }} />
                 Kto grał?
                 <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)' }}>
@@ -384,7 +384,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             {/* Multisport */}
             {presentPlayers.length > 0 && (
               <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
-                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
                   <Zap size={13} style={{ color: 'var(--co-green)' }} />
                   Kto miał Multisport? (płaci 0 zł)
                   {multisportPlayers.length > 0 && (
@@ -411,7 +411,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                   cursor: isDisabled ? 'not-allowed' : 'pointer',
                   fontFamily: 'var(--font-display)', fontWeight: 700,
                   ...(isDisabled ? {
-                    background: 'var(--co-panel)', border: '1px solid var(--co-border)', color: '#333',
+                    background: 'var(--co-panel)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
                   } : {}),
                 }}>
                 {isSaving

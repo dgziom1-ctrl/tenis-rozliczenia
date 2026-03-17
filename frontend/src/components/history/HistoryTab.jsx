@@ -55,7 +55,7 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
         boxShadow: error
-          ? '0 0 30px rgba(255,229,0,0.3)'
+          ? '0 0 30px rgba(255,155,0,0.3)'
           : '0 0 30px rgba(0,229,255,0.15)',
         transition: 'all 0.2s',
       }}>
@@ -78,7 +78,7 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
               fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
               border: `1px solid ${error ? 'var(--co-yellow)' : '#2a2a2a'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-              boxShadow: error ? '0 0 12px rgba(255,229,0,0.3)' : 'none',
+              boxShadow: error ? '0 0 12px rgba(255,155,0,0.3)' : 'none',
             }}
           />
           {error && (
@@ -130,7 +130,7 @@ function LogEntry({ row, onEdit, onDelete }) {
           <div style={{ display: 'flex', gap: 6 }}>
             <button onClick={() => onEdit(row)} style={{
               padding: '5px 8px', background: 'transparent',
-              border: '1px solid #2a2a2a', cursor: 'pointer',
+              border: '1px solid var(--co-border)', cursor: 'pointer',
               color: 'var(--co-dim)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
               transition: 'all 0.15s',
@@ -142,12 +142,12 @@ function LogEntry({ row, onEdit, onDelete }) {
             </button>
             <button onClick={() => onDelete(row.id)} style={{
               padding: '5px 8px', background: 'transparent',
-              border: '1px solid #2a2a2a', cursor: 'pointer',
+              border: '1px solid var(--co-border)', cursor: 'pointer',
               color: 'var(--co-dim)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
               transition: 'all 0.15s',
             }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,229,0,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,155,0,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--co-dim)'; }}
             >
               <Trash2 size={13} />
@@ -173,7 +173,7 @@ function LogEntry({ row, onEdit, onDelete }) {
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 2, textTransform: 'uppercase' }}>
               OBECNI ({row.presentPlayers.length})
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {row.presentPlayers.join(', ')}
             </p>
             {row.multisportPlayers.length > 0 && (
@@ -296,7 +296,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
               BRAK DANYCH
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#333', marginTop: 8 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)', marginTop: 8 }}>
               {'>'} Dodaj pierwszą sesję w zakładce LOG_
             </p>
           </div>
@@ -341,7 +341,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                         </div>
                       </div>
                       <div>
-                        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: '#888', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+                        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--co-dim)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
                           <Users size={11} /> OBECNI
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
@@ -355,7 +355,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                                 ...(editForm.present?.includes(name) ? {
                                   borderColor: 'rgba(0,229,255,0.5)', background: 'rgba(0,229,255,0.08)', color: 'var(--co-cyan)',
                                 } : {
-                                  borderColor: '#1a1a1a', background: 'transparent', color: '#444',
+                                  borderColor: 'var(--co-border)', background: 'transparent', color: 'var(--co-dim)',
                                 }),
                               }}>
                               {name}
@@ -379,7 +379,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                                   ...(editForm.multiPlayers?.includes(name) ? {
                                     borderColor: 'rgba(0,229,255,0.5)', background: 'rgba(0,229,255,0.07)', color: 'var(--co-green)',
                                   } : {
-                                    borderColor: '#1a1a1a', background: 'transparent', color: '#444',
+                                    borderColor: 'var(--co-border)', background: 'transparent', color: 'var(--co-dim)',
                                   }),
                                 }}>
                                 {name}
@@ -403,15 +403,15 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
                   if (isDeletingRow) return (
                     <div key={row.id} style={{
-                      background: 'rgba(255,229,0,0.04)', border: '1px solid rgba(255,229,0,0.35)',
+                      background: 'rgba(255,155,0,0.04)', border: '1px solid rgba(255,155,0,0.35)',
                       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
                       padding: 16, marginBottom: 4,
-                      boxShadow: '0 0 20px rgba(255,229,0,0.1)',
+                      boxShadow: '0 0 20px rgba(255,155,0,0.1)',
                     }}>
                       <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', marginBottom: 4, textTransform: 'uppercase' }}>
                         ⚠ Usunąć sesję z dnia {formatDate(row.datePlayed)}?
                       </p>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#444', marginBottom: 14 }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', marginBottom: 14 }}>
                         Ta operacja jest nieodwracalna.
                       </p>
                       <div style={{ display: 'flex', gap: 10 }}>

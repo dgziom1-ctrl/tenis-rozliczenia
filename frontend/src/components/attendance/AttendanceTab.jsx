@@ -164,7 +164,7 @@ function LeaderboardRow({ player, totalWeeks, stats, place }) {
     }}>
       <span style={{
         fontFamily: 'var(--font-mono)', fontSize: '0.68rem',
-        color: isTop3 ? 'var(--co-cyan)' : 'var(--co-dim)',
+        color: isTop3 ? 'var(--co-cyan)' : 'var(--co-text)',
         width: 28, flexShrink: 0,
       }}>
         {String(place).padStart(2, '0')}.
@@ -308,7 +308,7 @@ function MonthlyReport({ monthlyStats, players }) {
 
 // ─── Rank guide ──────────────────────────────────────────────────
 function RankGuide() {
-  const rankColors = ['#FFE500', '#00FFFF', '#CC00FF', '#00FF66', '#0080FF', '#FF0080'];
+  const rankColors = ['#FF9B00', '#00FFFF', '#CC00FF', '#00FF66', '#0080FF', '#FF0080'];
   return (
     <div style={{
       background: 'var(--co-panel)',

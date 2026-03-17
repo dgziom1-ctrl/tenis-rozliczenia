@@ -73,7 +73,7 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
   const initials = name.slice(0, 2).toUpperCase();
   // Pending: soft lavender, never aggressive red
   const borderColor = isPending
-    ? '#FFE500'
+    ? '#FF9B00'
 : c.border;  // organizer uses own palette color
   const bg = isPending ? '#0C1420' : c.bg;
 
@@ -85,7 +85,7 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
         border: `1px solid ${borderColor}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
         boxShadow: isPending
-          ? `0 0 5px rgba(255,229,0,0.25), inset 0 0 4px rgba(255,229,0,0.03)`
+          ? `0 0 5px rgba(255,155,0,0.25), inset 0 0 4px rgba(255,155,0,0.03)`
           : `0 0 12px ${borderColor}40, inset 0 0 6px ${borderColor}08`,
         animation: isPending ? 'neon-yellow 3s ease-in-out infinite' : 'none',
         overflow: 'hidden', position: 'relative',
@@ -99,7 +99,7 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
                 fontFamily: 'var(--font-display)', fontSize: '1.3rem',
                 color: isPending ? 'var(--co-yellow)' : c.text,
                 lineHeight: 1,
-                textShadow: `0 0 10px ${isPending ? 'rgba(255,229,0,0.5)' : borderColor + '55'}`,
+                textShadow: `0 0 10px ${isPending ? 'rgba(255,155,0,0.5)' : borderColor + '55'}`,
               }}>{initials}</span>
               <span style={{
                 fontFamily: 'var(--font-mono)', fontSize: '0.4rem',
@@ -112,9 +112,9 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
       <div style={{
         position: 'absolute', bottom: -2, right: -2,
         width: 10, height: 10,
-        background: isPending ? '#FFE500' : 'var(--co-green)',
+        background: isPending ? '#FF9B00' : 'var(--co-green)',
         border: '2px solid var(--co-void)',
-        boxShadow: isPending ? '0 0 5px rgba(255,229,0,0.6)' : '0 0 5px rgba(0,255,102,0.5)',
+        boxShadow: isPending ? '0 0 5px rgba(255,155,0,0.6)' : '0 0 5px rgba(0,255,102,0.5)',
         borderRadius: '50%',
       }} />
     </div>
@@ -124,7 +124,7 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
 // ── Rank badge ───────────────────────────────────────────────────
 function RankBadge({ rank, pct }) {
   const rankColors = {
-    'LEGENDA': 'var(--co-yellow)', 'MISTRZ': '#FF8C00', 'WETERAN': 'var(--co-ice)',
+    'LEGENDA': 'var(--co-yellow)', 'MISTRZ': '#FF9B00', 'WETERAN': 'rgba(0,128,255,0.9)',
     'STAŁY': 'var(--co-cyan)', 'GOŚĆ': 'var(--co-dim)', 'DUCH': 'var(--co-dim2)',
   };
   const col = rankColors[rank.name] || 'var(--co-dim)';
@@ -209,13 +209,13 @@ export default function PlayerCard({
   }, [player.name, onAddPayment, onPin, onUnpin, startPaymentUndo, cancelModal]);
 
   // Card color logic — neutralny dla pending
-  const accentColor = isPending ? '#FFE500'
-    : hasCredit ? '#FFE500'
+  const accentColor = isPending ? '#FF9B00'
+    : hasCredit ? '#FF9B00'
     : c.border;  // organizer also uses own color
 
   const cardBorder = isPending
-    ? 'rgba(255,229,0,0.28)'
-    : hasCredit ? 'rgba(255,229,0,0.3)'
+    ? 'rgba(255,155,0,0.28)'
+    : hasCredit ? 'rgba(255,155,0,0.3)'
     : 'var(--co-border)';
 
   const playerId = `P${String((player.name.charCodeAt(0) * 31 + playerIndex * 17) % 9000 + 1000)}`;
@@ -241,14 +241,14 @@ export default function PlayerCard({
       <div style={{
         padding: '4px 12px',
         background: isPending
-          ? 'rgba(255,229,0,0.04)'
+          ? 'rgba(255,155,0,0.04)'
           : 'rgba(0,229,255,0.03)',
-        borderBottom: `1px solid ${isPending ? 'rgba(255,229,0,0.18)' : 'rgba(0,229,255,0.08)'}`,
+        borderBottom: `1px solid ${isPending ? 'rgba(255,155,0,0.18)' : 'rgba(0,229,255,0.08)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.52rem',
-          color: isPending ? 'rgba(255,229,0,0.55)' : 'var(--co-dim)',
+          color: isPending ? 'rgba(255,155,0,0.55)' : 'var(--co-dim)',
           letterSpacing: '0.15em', textTransform: 'uppercase',
         }}>
           {/* Neutralne etykiety – żadnych wykrzykników, żadnego "dłużnik" */}
@@ -301,7 +301,7 @@ export default function PlayerCard({
                 background: pct >= 75
                   ? 'linear-gradient(90deg, var(--co-cyan), var(--co-green))'
                   : pct >= 45
-                  ? 'linear-gradient(90deg, var(--co-cyan), var(--co-ice))'
+                  ? 'linear-gradient(90deg, var(--co-green), var(--co-cyan))'
                   : 'linear-gradient(90deg, var(--co-yellow), #AA99EE)',
                 transition: 'width 0.8s ease',
               }} />
@@ -322,12 +322,12 @@ export default function PlayerCard({
               padding: '12px',
               marginBottom: 10,
               background: isPending
-                ? 'rgba(255,229,0,0.06)'
-                : hasCredit ? 'rgba(255,229,0,0.05)'
+                ? 'rgba(255,155,0,0.06)'
+                : hasCredit ? 'rgba(255,155,0,0.05)'
                 : 'rgba(0,229,255,0.04)',
               border: `1px solid ${isPending
-                ? 'rgba(255,229,0,0.25)'
-                : hasCredit ? 'rgba(255,229,0,0.2)'
+                ? 'rgba(255,155,0,0.25)'
+                : hasCredit ? 'rgba(255,155,0,0.2)'
                 : 'rgba(0,229,255,0.15)'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
               cursor: 'default', userSelect: 'none',
@@ -359,7 +359,7 @@ export default function PlayerCard({
                   <div style={{ marginBottom: 4 }}>
                     <span style={{
                       fontFamily: 'var(--font-mono)', fontSize: '0.5rem',
-                      color: 'rgba(255,229,0,0.5)',
+                      color: 'rgba(255,155,0,0.5)',
                       letterSpacing: '0.2em', textTransform: 'uppercase',
                     }}>
                       do rozliczenia
@@ -371,7 +371,7 @@ export default function PlayerCard({
                   margin: 0, lineHeight: 1.1,
                   color: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
                   textShadow: isPending
-                    ? '0 0 14px rgba(255,229,0,0.45)'
+                    ? '0 0 14px rgba(255,155,0,0.45)'
                     : '0 0 14px rgba(0,229,255,0.4)',
                 }}>
                   {formatAmountShort(animatedAbs)}
@@ -464,7 +464,7 @@ export default function PlayerCard({
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: '0 0 12px rgba(0,229,255,0.1)',
                   }}>
-                    <CheckCircle2 size={22} style={{ color: 'var(--co-green)', filter: 'drop-shadow(0 0 4px rgba(0,229,255,0.5))' }} />
+                    <CheckCircle2 size={22} style={{ color: 'var(--co-green)', filter: 'drop-shadow(0 0 4px rgba(0,255,102,0.5))' }} />
                   </div>
                   <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '6px 12px', width: '100%', opacity: 0.5 }}>
                     + Wpłać na zapas

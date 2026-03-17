@@ -7,8 +7,8 @@
 /* ═══════════════════════════════════════════════════════════════════
    COLD OPERATOR  ·  Military-Hacker Cyberpunk
    Dominant:  Electric Cyan  #00E5FF
-   Support:   Ice Blue       #4FC3F7
-   Hazard:    Yellow         #FFE500  (neutral payment status)
+   Support:   Electric Blue  #0080FF
+   Hazard:    Yellow         #FF9B00  (neutral payment status)
    Positive:  Matrix Green   #00FF88
    Accent:    Neon Pink      #FF00FF  (<5% – micro-accents only)
    Base:      #030508 near-black with cold blue tint
@@ -27,12 +27,12 @@
   --co-cyan:     #00E5FF;   /* main accent */
   --co-cyan-mid: #00B4D8;   /* secondary cyan */
   --co-cyan-dim: #003A4A;   /* muted cyan bg */
-  --co-ice:      #4FC3F7;   /* softer blue for text/labels */
+  --co-ice:      #0080FF;   /* electric blue — replaces old ice pastel */
 
   /* ── Hazard Yellow — payment status (neutral, not aggressive) ── */
-  --co-yellow:   #FFE500;   /* hazard yellow, "do rozliczenia" */
-  --co-yellow-mid:#D4BF00;  /* dimmer yellow */
-  --co-yellow-dim:#2A2000;  /* yellow bg tint */
+  --co-yellow:   #FF9B00;   /* hazard yellow, "do rozliczenia" */
+  --co-yellow-mid:#CC7C00;  /* dimmer amber */
+  --co-yellow-dim:#1A1000;  /* yellow bg tint */
 
   /* ── Positive — Matrix Green ── */
   --co-green:    #00FF88;   /* settled / positive */
@@ -85,7 +85,7 @@
   --sw-border-hi:var(--co-border-hi);
   --sw-pink:     var(--co-pink);       /* kept for micro-accents */
   --sw-cyan:     var(--co-cyan);
-  --sw-purple:   var(--co-ice);
+  --sw-purple:   rgba(0,128,255,0.9);
   --sw-pending:  var(--co-yellow);
   --sw-settled:  var(--co-green);
   --sw-credit:   var(--co-yellow);
@@ -146,10 +146,10 @@ body::after {
   0%, 100% { box-shadow: 0 0 4px var(--co-cyan), 0 0 14px rgba(0,229,255,0.2), inset 0 0 6px rgba(0,229,255,0.03); }
   50%       { box-shadow: 0 0 12px var(--co-cyan), 0 0 32px rgba(0,229,255,0.38), inset 0 0 14px rgba(0,229,255,0.06); }
 }
-/* Hazard yellow — calm pulse, not aggressive */
+/* Warm amber — calm pulse, informational not alarming */
 @keyframes neon-yellow {
-  0%, 100% { box-shadow: 0 0 3px rgba(255,229,0,0.35), 0 0 10px rgba(255,229,0,0.12); }
-  50%       { box-shadow: 0 0 8px rgba(255,229,0,0.55), 0 0 20px rgba(255,229,0,0.22); }
+  0%, 100% { box-shadow: 0 0 3px rgba(255,155,0,0.35), 0 0 10px rgba(255,155,0,0.12); }
+  50%       { box-shadow: 0 0 8px rgba(255,155,0,0.55), 0 0 20px rgba(255,155,0,0.22); }
 }
 @keyframes neon-green {
   0%, 100% { box-shadow: 0 0 4px var(--co-green), 0 0 10px rgba(0,255,136,0.18); }
@@ -219,7 +219,7 @@ body::after {
   50%     { transform: rotate(10deg); }
 }
 @keyframes pending-flash {
-  0%   { background: rgba(255,229,0,0.10); }
+  0%   { background: rgba(255,155,0,0.10); }
   100% { background: transparent; }
 }
 @keyframes settle-flash {
@@ -341,7 +341,7 @@ body::after {
   /* Ice-blue button */
   .cyber-button-blue {
     background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.28);
-    color: var(--co-ice); font-family: var(--font-display); font-size: 0.85rem;
+    color: rgba(0,128,255,0.9); font-family: var(--font-display); font-size: 0.85rem;
     letter-spacing: 0.08em; transition: all 0.18s;
   }
   .cyber-button-blue:hover { background: rgba(0,229,255,0.08); box-shadow: 0 0 14px rgba(0,229,255,0.18); }

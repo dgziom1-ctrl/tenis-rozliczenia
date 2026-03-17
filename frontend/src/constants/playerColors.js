@@ -12,7 +12,7 @@ export const PLAYER_COLOR_PALETTE = [
   { bg: '#111800', border: '#CCFF00', text: '#CCFF00' },  // 2 → electric lime (75°)
   { bg: '#110018', border: '#CC00FF', text: '#CC00FF' },  // 3 → neon violet   (285°)
   { bg: '#001818', border: '#00FFFF', text: '#00FFFF' },  // 4 → electric cyan (180°)
-  { bg: '#141400', border: '#FFE500', text: '#FFE500' },  // 5 → hazard yellow (55°)
+  { bg: '#110A00', border: '#FF9B00', text: '#FF9B00' },  // 5 → hazard yellow (55°)
 ];
 
 /**

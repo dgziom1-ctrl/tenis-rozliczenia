@@ -40,7 +40,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
           fontFamily: 'var(--font-mono)',
           marginBottom: showError ? 4 : 12,
           border: `1px solid ${showError ? 'var(--co-yellow)' : '#2a2a2a'}`,
-          boxShadow: showError ? '0 0 10px rgba(255,229,0,0.2)' : 'none',
+          boxShadow: showError ? '0 0 10px rgba(255,155,0,0.2)' : 'none',
           clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
         }}
       />
@@ -64,7 +64,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             fontSize: '0.62rem', letterSpacing: '0.1em',
             ...(!isValid || isSaving ? {
-              background: 'var(--co-panel)', border: '1px solid #1a1a2e', color: '#333',
+              background: 'var(--co-panel)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
               cursor: 'not-allowed', fontFamily: 'var(--font-display)', fontWeight: 700,
             } : {}),
           }}
