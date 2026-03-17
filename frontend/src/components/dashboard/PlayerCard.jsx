@@ -112,9 +112,9 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
       <div style={{
         position: 'absolute', bottom: -2, right: -2,
         width: 10, height: 10,
-        background: isPending ? '#FF9B00' : 'var(--co-green)',
+        background: isPending ? c.border : 'var(--co-green)',
         border: '2px solid var(--co-void)',
-        boxShadow: isPending ? '0 0 5px rgba(255,155,0,0.6)' : '0 0 5px rgba(0,255,102,0.5)',
+        boxShadow: isPending ? `0 0 5px ${c.border}99` : '0 0 5px rgba(0,255,102,0.5)',
         borderRadius: '50%',
       }} />
     </div>
@@ -209,14 +209,9 @@ export default function PlayerCard({
   }, [player.name, onAddPayment, onPin, onUnpin, startPaymentUndo, cancelModal]);
 
   // Card color logic — neutralny dla pending
-  const accentColor = isPending ? '#FF9B00'
-    : hasCredit ? '#FF9B00'
-    : c.border;  // organizer also uses own color
+  const accentColor = c.border;   // always player's own color
 
-  const cardBorder = isPending
-    ? 'rgba(255,155,0,0.28)'
-    : hasCredit ? 'rgba(255,155,0,0.3)'
-    : 'var(--co-border)';
+  const cardBorder = `${c.border}30`;  // always player's own color, subtle
 
   const playerId = `P${String((player.name.charCodeAt(0) * 31 + playerIndex * 17) % 9000 + 1000)}`;
 
@@ -230,7 +225,7 @@ export default function PlayerCard({
         border: `1px solid ${cardBorder}`,
         display: 'flex', flexDirection: 'column',
         // pending: subtelny gentle glow, nie pulsujący neon
-        animation: 'none',  // no pulse — static, calm
+        animation: 'none',
         overflow: 'hidden',
         transition: 'border-color 0.3s, box-shadow 0.3s',
       }}
@@ -248,7 +243,7 @@ export default function PlayerCard({
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.52rem',
-          color: isPending ? 'rgba(255,155,0,0.55)' : 'var(--co-dim)',
+          color: isPending ? `${c.border}99` : 'var(--co-dim)',
           letterSpacing: '0.15em', textTransform: 'uppercase',
         }}>
           {/* Neutralne etykiety – żadnych wykrzykników, żadnego "dłużnik" */}
@@ -302,7 +297,7 @@ export default function PlayerCard({
                   ? 'linear-gradient(90deg, var(--co-cyan), var(--co-green))'
                   : pct >= 45
                   ? 'linear-gradient(90deg, var(--co-green), var(--co-cyan))'
-                  : 'linear-gradient(90deg, var(--co-yellow), #AA99EE)',
+                  : `linear-gradient(90deg, ${c.border}CC, ${c.border}66)`,
                 transition: 'width 0.8s ease',
               }} />
             </div>
