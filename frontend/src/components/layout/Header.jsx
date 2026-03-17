@@ -22,7 +22,6 @@ function Arena({ chaosMode, onHit }) {
     const g = canvas.getContext('2d');
     const W = 560, H = 155, CX = 265, CY = 78;
 
-    // Camera: 27° tilt (pitch) + 20° yaw
     const RX = 0.471, RY = -0.349;
     const cX = Math.cos(RX), sX = Math.sin(RX);
     const cY = Math.cos(RY), sY = Math.sin(RY);
@@ -31,7 +30,6 @@ function Arena({ chaosMode, onHit }) {
     const TX = 106, TZ = 36, NH = 19, TH = 5;
     const PR = 16,  PX = 122, PY = -21, CYCLE = 2400;
 
-    /* Projection: yaw(Y) then pitch(X) */
     const proj = (x, y, z) => {
       const x1 = x*cY + z*sY,  z1 = -x*sY + z*cY;
       const y2 = y*cX - z1*sX, z2 =  y*sX + z1*cX;
@@ -39,24 +37,25 @@ function Arena({ chaosMode, onHit }) {
       return [CX + x1*s, CY + y2*s, s];
     };
 
-    /* Ball KF contact points are synced to the paddle's swung position at peak impact.
-     * drawPaddle swings: swingX = px ± 22,  actualY = PY - 8
-     * So contact x = PX-22 = 100,  contact y = PY-8 = -29               */
-    const HIT_X = PX - 22;   // 100  — paddle x at peak swing
-    const HIT_Y = PY - 8;    // -29  — paddle y at peak swing (lifted)
+    /* Contact point: x=PX-22=100, y=PY-8=-29 (matches paddle at peak topspin sweep) */
+    const HIT_X = PX - 22;
+    const HIT_Y = PY - 8;
 
+    /* Topspin trajectory:
+     * Long segments (paddle→bounce): CP biased toward landing side so ball dips on arrival.
+     * Short segments (bounce→paddle): very flat CP — topspin keeps ball low & fast after bounce. */
     const KF = [
-      [-HIT_X, HIT_Y,  0.00],   // left  paddle at peak swing
-      [  65,    0,     0.28],   // bounce — RIGHT half (opponent of left)
-      [ HIT_X, HIT_Y,  0.50],   // right paddle at peak swing
-      [ -65,    0,     0.78],   // bounce — LEFT  half (opponent of right)
-      [-HIT_X, HIT_Y,  1.00],   // left  paddle (loop)
+      [-HIT_X, HIT_Y, 0.00],
+      [  65,    0,    0.28],
+      [ HIT_X, HIT_Y, 0.50],
+      [ -65,    0,    0.78],
+      [-HIT_X, HIT_Y, 1.00],
     ];
     const CP = [
-      [  0, -72],   // seg 0: left paddle -> right bounce  (high arc over net)
-      [ 88, -30],   // seg 1: right bounce -> right paddle
-      [  0, -72],   // seg 2: right paddle -> left bounce
-      [-88, -30],   // seg 3: left bounce  -> left paddle
+      [ 28, -70],   // left  paddle → right bounce : slight rightward bias
+      [ 92, -10],   // right bounce → right paddle : FLAT (topspin = ball stays low)
+      [-28, -70],   // right paddle → left  bounce
+      [-92, -10],   // left  bounce → left  paddle : FLAT
     ];
 
     const ballAt = (t) => {
@@ -72,7 +71,6 @@ function Arena({ chaosMode, onHit }) {
       ];
     };
 
-    /* Helpers */
     const quad = (pts, fill) => {
       g.beginPath();
       pts.forEach(([sx,sy], i) => i ? g.lineTo(sx, sy) : g.moveTo(sx, sy));
@@ -93,14 +91,14 @@ function Arena({ chaosMode, onHit }) {
 
     const HIT_T = 0.09;
     let lastHitState = false;
+    let spinAngle = 0;   // accumulated ball rotation (topspin)
 
     /* ── DRAW FRAME ── */
     const draw = (progress) => {
       g.clearRect(0, 0, W, H);
 
-      /* Hit detection — driven by distance to each paddle's hit time */
-      const leftHitT  = Math.min(progress, 1 - progress) * 2;   // 0 at t=0 & t=1
-      const rightHitT = Math.abs(progress - 0.5) * 2;           // 0 at t=0.5
+      const leftHitT  = Math.min(progress, 1-progress) * 2;
+      const rightHitT = Math.abs(progress - 0.5) * 2;
       const isHitting = leftHitT < HIT_T || rightHitT < HIT_T;
       if (isHitting !== lastHitState) {
         lastHitState = isHitting;
@@ -113,8 +111,6 @@ function Arena({ chaosMode, onHit }) {
       const tg = g.createLinearGradient(BL[0],BL[1],FL[0],FL[1]);
       tg.addColorStop(0,'#06091d'); tg.addColorStop(1,'#0f1a50');
       quad([FL,FR,BR,BL], tg);
-
-      /* Grid on table surface */
       for (let i = 1; i < 4; i++) {
         const wz = -TZ + (i/4)*TZ*2;
         seg(proj(-TX,0,wz), proj(TX,0,wz), `rgba(80,110,230,${0.04+i*0.013})`, 0.8);
@@ -123,8 +119,6 @@ function Arena({ chaosMode, onHit }) {
         const wx = -TX + (i/5)*TX*2;
         seg(proj(wx,0,-TZ), proj(wx,0,TZ), 'rgba(70,100,215,0.05)', 0.7);
       }
-
-      /* Table edges */
       seg(BL, FL, 'rgba(88,122,242,0.60)', 1.5);
       seg(BR, FR, 'rgba(88,122,242,0.60)', 1.5);
       seg(BL, BR, 'rgba(78,108,215,0.22)', 1.0);
@@ -159,7 +153,7 @@ function Arena({ chaosMode, onHit }) {
       seg(nTN, nTF, 'rgba(236,246,255,0.96)', 2.5);
       g.restore();
 
-      /* Paddles drawn BEFORE ball (ball always on top) */
+      /* Paddles before ball (ball always on top) */
       drawPaddle(-PX, progress, true);
       drawPaddle( PX, progress, false);
 
@@ -168,7 +162,11 @@ function Arena({ chaosMode, onHit }) {
       const bq = proj(bv[0], bv[1], 0);
       const bR = 6.4 * bq[2];
 
-      /* Shadow on table */
+      /* Accumulate spin angle: topspin rotates in same direction as travel */
+      const prevBv = ballAt((progress - 0.007 + 1) % 1);
+      spinAngle += (bv[0] - prevBv[0]) * 0.13;
+
+      /* Ball shadow */
       const bs = proj(bv[0], 0, 0);
       const sa = Math.max(0, 0.20*(1 - Math.abs(bv[1])/68));
       g.save(); g.translate(bs[0], bs[1]); g.scale(1, 0.34);
@@ -188,61 +186,113 @@ function Arena({ chaosMode, onHit }) {
       g.beginPath(); g.arc(bq[0], bq[1], bR, 0, Math.PI*2);
       g.fillStyle = bg; g.fill();
       g.restore();
+
+      /* ── TOPSPIN STRIPE ──
+         A horizontal seam band that scrolls top→bottom as the ball rotates forward.
+         spinAngle accumulates with travel distance → band sweeps continuously.   */
+      const stripeScreenY = bq[1] + Math.sin(spinAngle) * bR * 0.80;
+      const stripeVis     = Math.abs(Math.cos(spinAngle));
+      if (stripeVis > 0.06) {
+        const srx = bR * stripeVis * 0.92;
+        const sry = Math.max(0.7, srx * 0.13);
+        g.save();
+        /* Clip to ball disc */
+        g.beginPath(); g.arc(bq[0], bq[1], bR * 0.96, 0, Math.PI*2); g.clip();
+        /* Draw the flattened ellipse (seam band) */
+        g.save();
+        g.translate(bq[0], stripeScreenY);
+        g.scale(1, sry / srx);
+        g.beginPath(); g.arc(0, 0, srx, 0, Math.PI*2);
+        g.restore();
+        g.strokeStyle = `rgba(148, 172, 255, ${0.10 + 0.38 * stripeVis})`;
+        g.lineWidth = 1.4;
+        g.stroke();
+        g.restore();
+      }
     };
 
-    /* ── PADDLE ── */
+    /* ── PADDLE (TOPSPIN SWING) ──
+     *
+     * The three phases of a topspin stroke:
+     *
+     *  APPROACH (signedT: -APP_W → 0)
+     *    Paddle accelerates upward from rest toward the ball.
+     *    X: lunges forward, accelerating toward net.
+     *    Y: sweeps UP (from PY to HIT_Y = PY-8).
+     *    Tilt: paddle face closes (top toward net) — this is what creates topspin.
+     *
+     *  FOLLOW-THROUGH (signedT: 0 → FOL_W)
+     *    Paddle continues upward and forward past the ball.
+     *    X: stays mostly forward, slight pullback.
+     *    Y: continues sweeping UP (PY-8 → PY-24).
+     *    Tilt: face stays closed, gradually opens.
+     *
+     *  RETURN (signedT: FOL_W → FOL_W+RET_W)
+     *    Smoothly returns to idle rest position.
+     */
     const drawPaddle = (px, progress, isLeft) => {
-      /* hitT: 0 = exact moment of impact, grows away from it */
       const hitT = isLeft ? Math.min(progress, 1-progress)*2 : Math.abs(progress-0.5)*2;
-
-      /* SWING_W: total animation window (before + after impact).
-         Wide enough to be visible, asymmetric: longer approach, snappy return. */
-      const APPROACH = 0.30;  // how far before impact paddle starts moving
-      const FOLLOW   = 0.14;  // how far after impact before it's back to idle
-
-      /* Is the paddle in its swing animation? */
-      const inSwing = hitT < Math.max(APPROACH, FOLLOW);
-
-      /* Normalised progress through swing:
-         -1 = start of approach, 0 = impact, +1 = end of follow-through */
-      const swingPhase = hitT < APPROACH
-        ? -(hitT / APPROACH)          // negative = approaching
-        : hitT < FOLLOW
-          ?  (hitT / FOLLOW)          // positive = follow-through
-          : 1;                        // idle
-
-      /* Bell curve peaking at 0 (impact).
-         sin²(π/2 * (1 - |swingPhase|)) → 1 at impact, 0 at edges, smooth S */
-      const swing = inSwing
-        ? Math.pow(Math.sin(Math.PI * 0.5 * (1 - Math.abs(swingPhase))), 2)
-        : 0;
-
-      /* Tight window for glow effect only */
       const hitting = hitT < HIT_T;
 
-      /* ── MOTION ──
-         Paddle moves toward net (lunge), rises to meet ball, leans forward */
+      /* Are we before or after impact? */
+      const isApproaching = isLeft ? (progress > 0.5) : (progress < 0.5);
+      const signedT = isApproaching ? -hitT : hitT;
+
+      const APP_W = 0.34, FOL_W = 0.22, RET_W = 0.24;
+      const inApp  = signedT >= -APP_W && signedT <  0;
+      const inFol  = signedT >=  0     && signedT <= FOL_W;
+      const inRet  = signedT >  FOL_W  && signedT <= FOL_W + RET_W;
+      const inAnim = inApp || inFol || inRet;
+
+      /* Phase-local 0→1 progress */
+      const tApp = inApp ? (signedT + APP_W) / APP_W : 0;
+      const tFol = inFol ?  signedT / FOL_W           : 0;
+      const tRet = inRet ? (signedT - FOL_W) / RET_W  : 0;
+
+      const easeIn  = t => t * t * (3 - 2*t);   // smoothstep
+      const easeOut = t => 1 - (1-t) * (1-t);   // decelerate
+
       const netDir = isLeft ? 1 : -1;
-      const swingX = px + netDir * swing * 22;   // horizontal lunge toward net
-      const liftY  = swing * 8;                  // rise to meet the ball
-      const tiltZ  = netDir * swing * 12;        // 3D forward lean
 
-      /* Idle bob fades to zero during swing so it doesn't fight the motion */
+      /* Y offset from PY (negative = higher = topspin upswing) */
+      let yOff = 0;
+      if      (inApp) yOff = easeIn(tApp) * (-8);            //   0 → -8
+      else if (inFol) yOff = -8 + easeOut(tFol) * (-16);     //  -8 → -24
+      else if (inRet) yOff = -24 * (1 - easeIn(tRet));       // -24 →   0
+
+      /* X offset toward net */
+      let xOff = 0;
+      if      (inApp) xOff = tApp * tApp * 22;                //   0 → 22  (accelerate)
+      else if (inFol) xOff = 22 - tFol * 8;                   //  22 → 14
+      else if (inRet) xOff = 14 * (1 - easeIn(tRet));         //  14 →  0
+
+      /* Tilt factor: 1 = fully closed face, 0 = neutral */
+      let tiltF = 0;
+      if      (inApp) tiltF = easeIn(tApp);
+      else if (inFol) tiltF = 1 - tFol * 0.4;
+      else if (inRet) tiltF = 0.6 * (1 - tRet);
+      const tiltZ = netDir * tiltF * 13;
+
+      /* Idle bob — muted entirely during animation */
       const bobPhase = isLeft ? 0 : Math.PI * 0.65;
-      const idleBob  = Math.sin(progress * Math.PI * 4 + bobPhase) * 2.0 * (1 - swing);
-      const actualY  = PY - liftY + idleBob;
+      const bob = Math.sin(progress * Math.PI * 4 + bobPhase) * 2.0 * (inAnim ? 0 : 1);
 
-      const bump = 1 + swing * 0.13;
+      const swingX = px  + netDir * xOff;
+      const finalY = PY  + yOff + bob;
+
+      const bump = hitting ? 1 + (1 - hitT/HIT_T) * 0.12 : 1;
       const R    = PR * bump;
 
-      /* Project cardinal points */
-      const pc = proj(swingX, actualY, 0);
-      const pr = proj(swingX+R, actualY,   0),    pl = proj(swingX-R, actualY, 0);
-      const pt = proj(swingX,   actualY-R, tiltZ), pb = proj(swingX,  actualY+R, -tiltZ * 0.25);
+      const pc = proj(swingX, finalY, 0);
+      const pr = proj(swingX+R, finalY,     0);
+      const pl = proj(swingX-R, finalY,     0);
+      const pt = proj(swingX,   finalY-R,   tiltZ);
+      const pb = proj(swingX,   finalY+R,  -tiltZ * 0.25);
 
-      const cx = (pr[0]+pl[0])/2,  cy = (pt[1]+pb[1])/2;
-      const rx = Math.hypot(pr[0]-pl[0], pr[1]-pl[1]) / 2;
-      const ry = Math.hypot(pt[0]-pb[0], pt[1]-pb[1]) / 2;
+      const cx  = (pr[0]+pl[0]) / 2;
+      const cy  = (pt[1]+pb[1]) / 2;
+      const rx  = Math.hypot(pr[0]-pl[0], pr[1]-pl[1]) / 2;
+      const ry  = Math.hypot(pt[0]-pb[0], pt[1]-pb[1]) / 2;
       const ang = Math.atan2(pt[1]-pb[1], pt[0]-pb[0]) + Math.PI/2;
 
       /* Layer 1: outer glow halo */
@@ -250,7 +300,7 @@ function Arena({ chaosMode, onHit }) {
       g.shadowBlur  = hitting ? 20 : 8;
       g.shadowColor = hitting ? 'rgba(182,205,255,0.80)' : 'rgba(125,145,250,0.42)';
       g.strokeStyle = hitting ? 'rgba(192,215,255,0.68)' : 'rgba(120,140,245,0.38)';
-      g.lineWidth   = 3.5;
+      g.lineWidth = 3.5;
       ellipse(cx, cy, rx*1.1, ry*1.1, ang); g.stroke();
       g.restore();
 
@@ -261,7 +311,7 @@ function Arena({ chaosMode, onHit }) {
 
       /* Layer 3: rim stroke */
       g.strokeStyle = hitting ? 'rgba(185,208,255,0.88)' : 'rgba(135,155,250,0.62)';
-      g.lineWidth   = 1.9;
+      g.lineWidth = 1.9;
       ellipse(cx, cy, rx*.95, ry*.95, ang); g.stroke();
 
       /* Layer 4: rubber face */
@@ -270,9 +320,9 @@ function Arena({ chaosMode, onHit }) {
       rfg.addColorStop(1, hitting ? 'rgba(152,175,250,0.86)' : 'rgba(138,158,245,0.78)');
       ellipse(cx, cy, rx*.52, ry*.52, ang); g.fillStyle = rfg; g.fill();
 
-      /* Handle — follows swingX + actualY */
-      const hs = proj(swingX, actualY + R/pc[2] + 1,  0);
-      const he = proj(swingX, actualY + R/pc[2] + 14, 0);
+      /* Handle */
+      const hs = proj(swingX, finalY + R/pc[2] + 1,  0);
+      const he = proj(swingX, finalY + R/pc[2] + 14, 0);
       g.save(); g.lineCap = 'round';
       g.strokeStyle = 'rgba(44,48,92,0.90)'; g.lineWidth = 4.6*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
