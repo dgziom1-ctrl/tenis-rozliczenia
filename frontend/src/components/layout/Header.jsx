@@ -202,52 +202,53 @@ function Arena({ chaosMode, onHit }) {
 
     /* ── PADDLE ── */
     const drawPaddle = (px, progress, isLeft) => {
-      const hitT    = isLeft ? Math.min(progress,1-progress)*2 : Math.abs(progress-0.5)*2;
+      /* hitT: 0 = exact moment of impact, grows away from it */
+      const hitT = isLeft ? Math.min(progress, 1-progress)*2 : Math.abs(progress-0.5)*2;
+
+      /* SWING_W: total animation window (before + after impact).
+         Wide enough to be visible, asymmetric: longer approach, snappy return. */
+      const APPROACH = 0.30;  // how far before impact paddle starts moving
+      const FOLLOW   = 0.14;  // how far after impact before it's back to idle
+
+      /* Is the paddle in its swing animation? */
+      const inSwing = hitT < Math.max(APPROACH, FOLLOW);
+
+      /* Normalised progress through swing:
+         -1 = start of approach, 0 = impact, +1 = end of follow-through */
+      const swingPhase = hitT < APPROACH
+        ? -(hitT / APPROACH)          // negative = approaching
+        : hitT < FOLLOW
+          ?  (hitT / FOLLOW)          // positive = follow-through
+          : 1;                        // idle
+
+      /* Bell curve peaking at 0 (impact).
+         sin²(π/2 * (1 - |swingPhase|)) → 1 at impact, 0 at edges, smooth S */
+      const swing = inSwing
+        ? Math.pow(Math.sin(Math.PI * 0.5 * (1 - Math.abs(swingPhase))), 2)
+        : 0;
+
+      /* Tight window for glow effect only */
       const hitting = hitT < HIT_T;
 
-      /* Normalised distance within hit window: 0=impact edge, 1=impact center */
-      const hitNorm = hitting ? 1 - hitT / HIT_T : 0;
+      /* ── MOTION ──
+         Paddle moves toward net (lunge), rises to meet ball, leans forward */
+      const netDir = isLeft ? 1 : -1;
+      const swingX = px + netDir * swing * 22;   // horizontal lunge toward net
+      const liftY  = swing * 8;                  // rise to meet the ball
+      const tiltZ  = netDir * swing * 12;        // 3D forward lean
 
-      /* ── WINDUP WINDOW: slightly larger than HIT_T ──
-         Detect approach phase so we can add a back-swing before the lunge. */
-      const WIND_T  = HIT_T * 2.2;
-      const isWind  = !hitting && hitT < WIND_T;
-      /* windNorm: 0 at edge of windup, 1 at start of hit window */
-      const windNorm = isWind ? 1 - (hitT - HIT_T) / (WIND_T - HIT_T) : 0;
-
-      /* ── SWING: forward lunge toward net on impact (cos² ease-out) ── */
-      const swingFactor = hitting
-        ? Math.pow(Math.cos((hitT / HIT_T) * Math.PI * 0.5), 2)
-        : 0;
-
-      /* ── WINDUP: subtle pull-back just before the hit ── */
-      const windFactor = isWind
-        ? Math.pow(Math.sin(windNorm * Math.PI * 0.5), 2) * 0.45
-        : 0;
-
-      /* Combine: lunge forward on hit, slight pull-back during windup */
-      const netDir  = isLeft ? 1 : -1;
-      const swingX  = px + netDir * (swingFactor * 24 - windFactor * 8);
-
-      /* Y: paddle lunges UP to meet the ball (ball is at PY on impact) */
-      const swingY  = swingFactor * 8 + windFactor * 2;   // up = negative Y
-
-      /* 3D tilt: top of paddle leans toward net during swing */
-      const tiltZ = isLeft
-        ? swingFactor * 11 - windFactor * 3
-        : -(swingFactor * 11 - windFactor * 3);
-
-      /* Gentle idle vertical bob — different phase per paddle */
+      /* Idle bob fades to zero during swing so it doesn't fight the motion */
       const bobPhase = isLeft ? 0 : Math.PI * 0.65;
-      const bobY = PY - swingY + Math.sin(progress * Math.PI * 4 + bobPhase) * 2.2;
+      const idleBob  = Math.sin(progress * Math.PI * 4 + bobPhase) * 2.0 * (1 - swing);
+      const actualY  = PY - liftY + idleBob;
 
-      const bump = hitting ? 1 + swingFactor * 0.15 : 1;
+      const bump = 1 + swing * 0.13;
       const R    = PR * bump;
 
-      /* Project cardinal points — top uses tiltZ for forward lean */
-      const pc = proj(swingX, bobY, 0);
-      const pr = proj(swingX+R, bobY,    0),    pl = proj(swingX-R, bobY, 0);
-      const pt = proj(swingX,   bobY-R,  tiltZ), pb = proj(swingX,  bobY+R, -tiltZ * 0.25);
+      /* Project cardinal points */
+      const pc = proj(swingX, actualY, 0);
+      const pr = proj(swingX+R, actualY,   0),    pl = proj(swingX-R, actualY, 0);
+      const pt = proj(swingX,   actualY-R, tiltZ), pb = proj(swingX,  actualY+R, -tiltZ * 0.25);
 
       const cx = (pr[0]+pl[0])/2,  cy = (pt[1]+pb[1])/2;
       const rx = Math.hypot(pr[0]-pl[0], pr[1]-pl[1]) / 2;
@@ -279,9 +280,9 @@ function Arena({ chaosMode, onHit }) {
       rfg.addColorStop(1, hitting ? 'rgba(152,175,250,0.86)' : 'rgba(138,158,245,0.78)');
       ellipse(cx, cy, rx*.52, ry*.52, ang); g.fillStyle = rfg; g.fill();
 
-      /* Handle — follows swingX + bobY */
-      const hs = proj(swingX, bobY + R/pc[2] + 1,  0);
-      const he = proj(swingX, bobY + R/pc[2] + 14, 0);
+      /* Handle — follows swingX + actualY */
+      const hs = proj(swingX, actualY + R/pc[2] + 1,  0);
+      const he = proj(swingX, actualY + R/pc[2] + 14, 0);
       g.save(); g.lineCap = 'round';
       g.strokeStyle = 'rgba(44,48,92,0.90)'; g.lineWidth = 4.6*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
