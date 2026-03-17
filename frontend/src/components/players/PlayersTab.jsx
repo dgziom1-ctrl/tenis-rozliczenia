@@ -14,7 +14,7 @@ function SectionHeader({ icon: Icon, title, accent = 'var(--co-cyan)' }) {
       <div style={{ padding: '6px 8px', background: `rgba(0,0,0,0.6)`, border: `1px solid ${accent}25`, clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
         <Icon size={13} style={{ color: accent, display: 'block' }} />
       </div>
-      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: accent }}>
+      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.2rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: accent, textShadow: `0 0 16px ${accent}40` }}>
         {title}
       </span>
       <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${accent}20, transparent)` }} />

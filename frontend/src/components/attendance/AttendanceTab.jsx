@@ -60,9 +60,9 @@ function PodiumCard({ podiumEntry, totalWeeks }) {
   const exAequo = players.length > 1;
 
   const PLACE_STYLES = {
-    1: { border: 'var(--co-cyan)',  glow: 'rgba(0,229,255,0.45)', bg: 'rgba(0,229,255,0.05)', height: 120, label: '01ST', topLabel: '● GOLD' },
-    2: { border: '#8A8880',           glow: 'rgba(138,136,128,0.3)', bg: 'rgba(138,136,128,0.03)', height: 84, label: '02ND', topLabel: '● SILVER' },
-    3: { border: '#B87340',           glow: 'rgba(184,115,64,0.3)', bg: 'rgba(184,115,64,0.03)', height: 56, label: '03RD', topLabel: '● BRONZE' },
+    1: { border: '#00FFFF', glow: 'rgba(0,255,255,0.5)',  bg: 'rgba(0,255,255,0.04)',  height: 130, label: '#1', medal: '🥇', shimmer: true },
+    2: { border: '#C0C8D0', glow: 'rgba(192,200,208,0.3)', bg: 'rgba(192,200,208,0.025)', height: 88,  label: '#2', medal: '🥈', shimmer: false },
+    3: { border: '#C87832', glow: 'rgba(200,120,50,0.3)',  bg: 'rgba(200,120,50,0.025)', height: 60,  label: '#3', medal: '🥉', shimmer: false },
   };
   const s = PLACE_STYLES[podiumEntry.place] || PLACE_STYLES[3];
 
@@ -72,35 +72,53 @@ function PodiumCard({ podiumEntry, totalWeeks }) {
         const rank = getRank(player.attendancePercentage);
         return (
           <div key={player.name} style={{
-            width: '100%', padding: '12px 10px', textAlign: 'center',
-            background: s.bg, border: `1px solid ${s.border}45`,
+            width: '100%', padding: '14px 10px', textAlign: 'center',
+            background: s.bg,
+            border: `1px solid ${s.border}50`,
             marginBottom: 6,
             clipPath: 'polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%)',
             position: 'relative', overflow: 'hidden',
+            boxShadow: podiumEntry.place === 1 ? `0 0 20px ${s.glow}, inset 0 0 16px ${s.glow}20` : 'none',
           }}>
-            {/* Top classification stripe */}
+            {/* Top glow stripe */}
             <div style={{
               position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-              background: s.border, boxShadow: `0 0 8px ${s.glow}`,
+              background: s.border,
+              boxShadow: `0 0 10px ${s.glow}, 0 0 20px ${s.glow}`,
             }} />
-            <div style={{ fontSize: '1.4rem', marginBottom: 5 }}>{rank.emoji}</div>
+            {/* Shimmer for 1st place */}
+            {s.shimmer && <div style={{
+              position: 'absolute', inset: 0, pointerEvents: 'none',
+              background: `linear-gradient(105deg, transparent 40%, rgba(0,255,255,0.06) 50%, transparent 60%)`,
+              backgroundSize: '200% 100%',
+              animation: 'gold-shimmer 3s linear infinite',
+            }} />}
+            {/* Scan overlay */}
             <div style={{
-              fontFamily: 'var(--font-display)', fontSize: '1.1rem',
-              letterSpacing: '0.06em', color: s.border, marginBottom: 2, textTransform: 'uppercase',
-            }}>
-              {player.name}
+              position: 'absolute', inset: 0, pointerEvents: 'none',
+              background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px)',
+            }} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ fontSize: '1.6rem', marginBottom: 6 }}>{s.medal}</div>
+              <div style={{
+                fontFamily: 'var(--font-display)', fontSize: '1.3rem',
+                letterSpacing: '0.06em', color: s.border, marginBottom: 3, textTransform: 'uppercase',
+                textShadow: podiumEntry.place === 1 ? `0 0 16px ${s.glow}` : 'none',
+              }}>
+                {player.name}
+              </div>
+              <div style={{
+                fontFamily: 'var(--font-display)', fontSize: '2rem',
+                color: s.border, lineHeight: 1,
+                textShadow: `0 0 14px ${s.glow}`,
+              }}>
+                {player.attendancePercentage}%
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', marginTop: 3, marginBottom: 6, letterSpacing: '0.1em' }}>
+                {player.attendanceCount}/{totalWeeks} SESJI
+              </div>
+              {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
             </div>
-            <div style={{
-              fontFamily: 'var(--font-display)', fontSize: '1.8rem',
-              color: s.border, lineHeight: 1,
-              textShadow: `0 0 12px ${s.glow}`,
-            }}>
-              {player.attendancePercentage}%
-            </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 2, marginBottom: 5 }}>
-              {player.attendanceCount}/{totalWeeks} SESJI
-            </div>
-            {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
           </div>
         );
       })}
@@ -116,18 +134,22 @@ function PodiumCard({ podiumEntry, totalWeeks }) {
         background: `linear-gradient(to bottom, ${s.bg}, transparent)`,
         border: `1px solid ${s.border}40`,
         borderBottom: `3px solid ${s.border}`,
-        boxShadow: `0 8px 24px ${s.glow}, inset 0 0 20px ${s.glow}30`,
+        boxShadow: `0 0 30px ${s.glow}, 0 8px 24px rgba(0,0,0,0.5), inset 0 0 20px ${s.glow}25`,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
+        position: 'relative', overflow: 'hidden',
       }}>
-        <span style={{ fontSize: '2rem' }}>{pod.medal}</span>
+        {/* Ambient scan */}
+        {podiumEntry.place === 1 && <div style={{
+          position: 'absolute', left: 0, right: 0, height: '1px',
+          background: `linear-gradient(90deg, transparent, ${s.border}, transparent)`,
+          animation: 'podium-scan 2.5s ease-in-out infinite',
+          pointerEvents: 'none',
+        }} />}
         <span style={{
-          fontFamily: 'var(--font-display)', fontSize: '0.9rem',
-          letterSpacing: '0.2em', color: s.border,
+          fontFamily: 'var(--font-display)', fontSize: '2.2rem',
+          letterSpacing: '0.15em', color: s.border,
+          textShadow: `0 0 16px ${s.glow}`,
         }}>{s.label}</span>
-        <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: '0.52rem',
-          letterSpacing: '0.15em', color: `${s.border}80`,
-        }}>{s.topLabel}</span>
       </div>
     </div>
   );
@@ -155,13 +177,17 @@ function LeaderboardRow({ player, totalWeeks, stats, place }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 10,
-      padding: '9px 14px',
+      padding: '10px 14px',
       background: isTop3 ? 'rgba(0,229,255,0.025)' : 'rgba(255,255,255,0.01)',
       border: `1px solid ${isTop3 ? 'rgba(0,229,255,0.18)' : 'var(--co-border)'}`,
       marginBottom: 3,
       clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-      transition: 'border-color 0.2s, background 0.2s',
-    }}>
+      transition: 'border-color 0.2s, background 0.2s, transform 0.15s',
+      cursor: 'default',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,229,255,0.3)'; e.currentTarget.style.transform = 'translateX(3px)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = isTop3 ? 'rgba(0,229,255,0.18)' : 'var(--co-border)'; e.currentTarget.style.transform = 'translateX(0)'; }}
+    >
       <span style={{
         fontFamily: 'var(--font-mono)', fontSize: '0.68rem',
         color: isTop3 ? 'var(--co-cyan)' : 'var(--co-text)',
@@ -171,8 +197,8 @@ function LeaderboardRow({ player, totalWeeks, stats, place }) {
       </span>
       <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>{rank.emoji}</span>
       <span style={{
-        fontFamily: 'var(--font-display)', fontSize: '0.85rem',
-        letterSpacing: '0.06em', textTransform: 'uppercase', flex: 1, minWidth: 0,
+        fontFamily: 'var(--font-display)', fontSize: '0.95rem',
+        letterSpacing: '0.05em', textTransform: 'uppercase', flex: 1, minWidth: 0,
         textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap',
         color: isTop3 ? 'var(--co-text-hi)' : 'var(--co-text)',
       }}>{player.name}</span>
@@ -187,10 +213,10 @@ function LeaderboardRow({ player, totalWeeks, stats, place }) {
           {player.attendanceCount}/{totalWeeks}
         </span>
         <span style={{
-          fontFamily: 'var(--font-display)', fontSize: '1.05rem',
-          color: isTop3 ? 'var(--co-cyan)' : '#666',
-          width: 50, textAlign: 'right',
-          textShadow: isTop3 ? '0 0 8px rgba(0,229,255,0.35)' : 'none',
+          fontFamily: 'var(--font-display)', fontSize: '1.2rem',
+          color: isTop3 ? 'var(--co-cyan)' : 'var(--co-dim)',
+          width: 52, textAlign: 'right',
+          textShadow: isTop3 ? '0 0 10px rgba(0,229,255,0.4)' : 'none',
         }}>
           {player.attendancePercentage}%
         </span>

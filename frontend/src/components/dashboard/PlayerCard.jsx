@@ -254,8 +254,8 @@ export default function PlayerCard({
         <div style={{ flex: 1, minWidth: 0 }}>
           <h3 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(1.4rem, 5vw, 1.7rem)',
-            letterSpacing: '0.06em', textTransform: 'uppercase',
+            fontSize: 'clamp(1.5rem, 5vw, 1.85rem)',
+            letterSpacing: '0.05em', textTransform: 'uppercase',
             color: 'var(--co-text-hi)',
             margin: 0, lineHeight: 1,
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
@@ -313,6 +313,7 @@ export default function PlayerCard({
               cursor: 'default', userSelect: 'none',
               position: 'relative', overflow: 'hidden',
               textAlign: 'center',
+              transition: 'background 0.2s ease, border-color 0.2s ease',
             }}
           >
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
@@ -328,9 +329,9 @@ export default function PlayerCard({
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-yellow)', letterSpacing: '0.2em', marginBottom: 2 }}>
                   ↑ NADPŁATA
                 </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', color: 'var(--co-yellow)', margin: 0, lineHeight: 1.1 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', color: 'var(--co-yellow)', margin: 0, lineHeight: 1 }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '0.9rem', opacity: 0.5, marginLeft: 3 }}>ZŁ</span>
+                  <span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
               </div>
             ) : (
@@ -355,7 +356,7 @@ export default function PlayerCard({
                     : '0 0 14px rgba(0,229,255,0.4)',
                 }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 3 }}>ZŁ</span>
+                  <span style={{ fontSize: '0.9rem', opacity: 0.35, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
                 {isSettled && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-green)', letterSpacing: '0.2em', marginTop: 2 }}>
@@ -417,11 +418,11 @@ export default function PlayerCard({
                     style={{ padding: '11px 16px', width: '100%' }}
                   >
                     <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                      <span style={{ fontSize: '1.05rem', fontFamily: 'var(--font-display)', letterSpacing: '0.06em' }}>
+                      <span style={{ fontSize: '1.2rem', fontFamily: 'var(--font-display)', letterSpacing: '0.06em', lineHeight: 1 }}>
                         {formatAmountShort(debt)} ZŁ
                       </span>
-                      <span style={{ fontSize: '0.62rem', letterSpacing: '0.18em', opacity: 0.8, fontFamily: 'var(--font-mono)' }}>
-                        ⚡ WYŚLIJ BLIK
+                      <span style={{ fontSize: '0.6rem', letterSpacing: '0.22em', opacity: 0.75, fontFamily: 'var(--font-mono)' }}>
+                        ⚡ BLIK
                       </span>
                     </span>
                   </button>
@@ -455,7 +456,7 @@ export default function PlayerCard({
           )}
 
           {/* Barcode footer */}
-          <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--co-border)' }}>
+          <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             <Barcode name={player.name} color={accentColor} />
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.08em' }}>
