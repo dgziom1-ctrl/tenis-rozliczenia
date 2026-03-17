@@ -80,7 +80,7 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
 
 // ── Player card ────────────────────────────────────────────
 function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
-  const c = getPlayerColor(player.name);
+  const c = getPlayerColor(player.name, index);
   const initials = player.name.slice(0, 2).toUpperCase();
 
   return (

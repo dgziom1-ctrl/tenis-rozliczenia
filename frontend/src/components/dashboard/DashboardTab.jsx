@@ -9,64 +9,9 @@ import ConfettiOverlay, { CONFETTI_POOLS, generateConfetti } from './ConfettiOve
 import PlayerCard from './PlayerCard';
 import SettleConfirmModal from './SettleConfirmModal';
 import UndoBar from '../common/UndoBar';
-import { Activity, Radio, Zap, AlertTriangle, Database } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
-// ── Live status ticker ──────────────────────────────────────────────
-function SystemStatusBar({ debtCount, settledCount, totalWeeks }) {
-  const allClear = debtCount === 0 && settledCount > 0;
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '8px 16px',
-      background: '#060C12',
-      border: '1px solid var(--co-border)',
-      borderLeft: `3px solid ${allClear ? 'var(--co-green)' : debtCount > 0 ? 'var(--co-yellow)' : 'var(--co-cyan)'}`,
-      clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
-      flexWrap: 'wrap', gap: 8,
-    }}>
-      {/* Title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Database size={12} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} />
-        <span style={{
-          fontFamily: 'var(--font-display)', fontSize: '1rem',
-          fontWeight: 400, letterSpacing: '0.1em',
-          color: 'var(--co-cyan)', textTransform: 'uppercase',
-        }}>
-          Rozliczenia Graczy
-        </span>
-      </div>
 
-      {/* Stats */}
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{
-            width: 6, height: 6, background: 'var(--co-yellow)',
-            boxShadow: '0 0 5px var(--co-yellow)',
-            clipPath: 'polygon(50% 0, 100% 100%, 0 100%)',
-          }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#AAA' }}>
-            Zaległości: <span style={{ color: debtCount > 0 ? 'var(--co-yellow)' : '#AAA' }}>{debtCount}</span>
-          </span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: 'var(--co-green)', boxShadow: '0 0 5px var(--co-green)',
-          }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#AAA' }}>
-            Rozliczeni: <span style={{ color: 'var(--co-green)' }}>{settledCount}</span>
-          </span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <Zap size={10} style={{ color: 'var(--co-cyan)' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#AAA' }}>
-            Sesje: <span style={{ color: 'var(--co-cyan)' }}>{totalWeeks}</span>
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function DashboardTab({ data, history, playSound }) {
   const [openDetails,   setOpenDetails]   = useState(null);
@@ -182,11 +127,7 @@ export default function DashboardTab({ data, history, playSound }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-        <SystemStatusBar
-          debtCount={debtCount}
-          settledCount={settledCount}
-          totalWeeks={totalWeeks}
-        />
+
 
         {/* Undo toast */}
         {undoToast && (
@@ -214,6 +155,16 @@ export default function DashboardTab({ data, history, playSound }) {
             </p>
           </div>
         )}
+
+        {/* Session count — subtle, top-right of grid */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: -8 }}>
+          <span style={{
+            fontFamily: 'var(--font-mono)', fontSize: '0.58rem',
+            color: 'var(--co-dim)', letterSpacing: '0.12em',
+          }}>
+            sesji: <span style={{ color: 'var(--co-ice, #4FC3F7)' }}>{totalWeeks}</span>
+          </span>
+        </div>
 
         {/* Player cards grid */}
         <div style={{

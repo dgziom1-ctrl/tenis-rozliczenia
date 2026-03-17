@@ -69,12 +69,12 @@ function CornerBrackets({ color, size = 12, thickness = 1 }) {
 
 // ── Avatar ───────────────────────────────────────────────────────
 function PlayerAvatar({ name, index, isPending, isOrganizer }) {
-  const c = getPlayerColor(name);
+  const c = getPlayerColor(name, index);
   const initials = name.slice(0, 2).toUpperCase();
   // Pending: soft lavender, never aggressive red
   const borderColor = isPending
     ? '#FFE500'
-    : isOrganizer ? 'var(--co-cyan)' : c.border;
+: c.border;  // organizer uses own palette color
   const bg = isPending ? '#0C1420' : c.bg;
 
   return (
@@ -112,11 +112,9 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
       <div style={{
         position: 'absolute', bottom: -2, right: -2,
         width: 10, height: 10,
-        background: isPending ? '#FFE500'
-          : isOrganizer ? 'var(--co-cyan)' : 'var(--co-green)',
+        background: isPending ? '#FFE500' : 'var(--co-green)',
         border: '2px solid var(--co-void)',
-        boxShadow: isPending ? '0 0 5px #FFE500'
-          : isOrganizer ? '0 0 5px var(--co-cyan)' : '0 0 5px var(--co-green)',
+        boxShadow: isPending ? '0 0 5px rgba(255,229,0,0.6)' : '0 0 5px rgba(0,255,102,0.5)',
         borderRadius: '50%',
       }} />
     </div>
@@ -163,7 +161,7 @@ export default function PlayerCard({
   const pct         = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
   const rank        = getRank(pct);
   const tokens      = useThemeTokens();
-  const c           = getPlayerColor(player.name);
+  const c           = getPlayerColor(player.name, playerIndex);
 
   const [modal,     setModal]     = useState(null);
   const [customAmt, setCustomAmt] = useState('');
@@ -211,10 +209,9 @@ export default function PlayerCard({
   }, [player.name, onAddPayment, onPin, onUnpin, startPaymentUndo, cancelModal]);
 
   // Card color logic — neutralny dla pending
-  const accentColor = isPending ? 'var(--co-yellow)'
-    : hasCredit ? 'var(--co-yellow)'
-    : isOrganizer ? 'var(--co-cyan)'
-    : c.border;
+  const accentColor = isPending ? '#FFE500'
+    : hasCredit ? '#FFE500'
+    : c.border;  // organizer also uses own color
 
   const cardBorder = isPending
     ? 'rgba(255,229,0,0.28)'
@@ -496,16 +493,26 @@ export default function PlayerCard({
       {isOrganizer && (
         <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <div style={{
-            padding: '10px 20px', border: '1px solid rgba(0,229,255,0.2)',
+            padding: '8px 20px',
+            border: `1px solid ${c.border}30`,
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
-            background: 'rgba(0,229,255,0.03)', textAlign: 'center',
+            background: `${c.border}05`, textAlign: 'center',
           }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.15em', color: 'var(--co-cyan)', margin: 0 }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.15em', color: c.text, margin: 0 }}>
               Ogarnia rezerwację
             </p>
           </div>
+          {/* Barcode + labels — same as other players */}
           <div style={{ marginTop: 8, width: '100%', borderTop: '1px solid var(--co-border)', paddingTop: 8 }}>
-            <Barcode name={player.name} color="var(--co-cyan)" />
+            <Barcode name={player.name} color={c.border} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.08em' }}>
+                {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.06em' }}>
+                SW-NET
+              </span>
+            </div>
           </div>
         </div>
       )}
