@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { CheckCircle2, Shield, Clock, TrendingUp, ChevronDown } from 'lucide-react';
+import { CheckCircle2, Shield, TrendingUp, ChevronDown } from 'lucide-react';
+import { getPlayerColor } from '../../constants/playerColors';
 import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
 import { formatAmountShort } from '../../utils/format';
 import { useThemeTokens } from '../../context/ThemeContext';
@@ -31,15 +32,7 @@ function useAnimatedValue(value, duration = 900) {
   return display;
 }
 
-// ── Player color palette (synthwave) ────────────────────────────
-const PLAYER_COLORS = [
-  { bg: '#041420', border: '#00E5FF', text: '#00E5FF', tag: 'P01' },
-  { bg: '#041A14', border: '#00FF88', text: '#00FF88', tag: 'P02' },
-  { bg: '#0C1020', border: '#4FC3F7', text: '#4FC3F7', tag: 'P03' },
-  { bg: '#141408', border: '#B8D400', text: '#B8D400', tag: 'P04' },
-  { bg: '#0A0820', border: '#7B8FFF', text: '#8FA0FF', tag: 'P05' },
-  { bg: '#04181A', border: '#00D4CC', text: '#00D4CC', tag: 'P06' },
-];
+// Colors come from shared getPlayerColor(name) — deterministic by name
 
 // ── Pseudo-barcode (seeded by name) ─────────────────────────────
 function Barcode({ name, color }) {
@@ -76,7 +69,7 @@ function CornerBrackets({ color, size = 12, thickness = 1 }) {
 
 // ── Avatar ───────────────────────────────────────────────────────
 function PlayerAvatar({ name, index, isPending, isOrganizer }) {
-  const c = PLAYER_COLORS[index % PLAYER_COLORS.length];
+  const c = getPlayerColor(name);
   const initials = name.slice(0, 2).toUpperCase();
   // Pending: soft lavender, never aggressive red
   const borderColor = isPending
@@ -92,7 +85,7 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
         border: `1px solid ${borderColor}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
         boxShadow: isPending
-          ? `0 0 8px rgba(255,229,0,0.4), inset 0 0 6px rgba(255,229,0,0.05)`
+          ? `0 0 5px rgba(255,229,0,0.25), inset 0 0 4px rgba(255,229,0,0.03)`
           : `0 0 12px ${borderColor}40, inset 0 0 6px ${borderColor}08`,
         animation: isPending ? 'neon-yellow 3s ease-in-out infinite' : 'none',
         overflow: 'hidden', position: 'relative',
@@ -171,7 +164,7 @@ export default function PlayerCard({
   const pct         = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
   const rank        = getRank(pct);
   const tokens      = useThemeTokens();
-  const c           = PLAYER_COLORS[playerIndex % PLAYER_COLORS.length];
+  const c           = getPlayerColor(player.name);
 
   const [modal,     setModal]     = useState(null);
   const [customAmt, setCustomAmt] = useState('');
@@ -225,7 +218,7 @@ export default function PlayerCard({
     : c.border;
 
   const cardBorder = isPending
-    ? 'rgba(255,229,0,0.4)'
+    ? 'rgba(255,229,0,0.28)'
     : hasCredit ? 'rgba(255,229,0,0.3)'
     : 'var(--co-border)';
 
@@ -241,7 +234,7 @@ export default function PlayerCard({
         border: `1px solid ${cardBorder}`,
         display: 'flex', flexDirection: 'column',
         // pending: subtelny gentle glow, nie pulsujący neon
-        animation: isPending ? 'neon-yellow 4s ease-in-out infinite' : 'none',
+        animation: 'none',  // no pulse — static, calm
         overflow: 'hidden',
         transition: 'border-color 0.3s, box-shadow 0.3s',
       }}
@@ -259,7 +252,7 @@ export default function PlayerCard({
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.52rem',
-          color: isPending ? '#FFE500' : 'var(--co-dim)',
+          color: isPending ? 'rgba(255,229,0,0.55)' : 'var(--co-dim)',
           letterSpacing: '0.15em', textTransform: 'uppercase',
         }}>
           {/* Neutralne etykiety – żadnych wykrzykników, żadnego "dłużnik" */}
@@ -367,12 +360,14 @@ export default function PlayerCard({
             ) : (
               <div style={{ position: 'relative', zIndex: 1 }}>
                 {isPending && (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginBottom: 3 }}>
-                    <Clock size={10} style={{ color: '#FFE500', opacity: 0.7 }} />
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: '#FFE500', letterSpacing: '0.18em', opacity: 0.85 }}>
-                      Oczekuje wpłaty
+                  <div style={{ marginBottom: 4 }}>
+                    <span style={{
+                      fontFamily: 'var(--font-mono)', fontSize: '0.5rem',
+                      color: 'rgba(255,229,0,0.5)',
+                      letterSpacing: '0.2em', textTransform: 'uppercase',
+                    }}>
+                      do rozliczenia
                     </span>
-                    <Clock size={10} style={{ color: 'var(--co-yellow)', opacity: 0.7 }} />
                   </div>
                 )}
                 <p style={{

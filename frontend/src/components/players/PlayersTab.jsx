@@ -1,18 +1,12 @@
 import { useState, useCallback } from 'react';
+import { getPlayerColor } from '../../constants/playerColors';
 import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Lock, Check, X, Zap, Shield } from 'lucide-react';
 import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } from '../../firebase/index';
 import { ADMIN_PASSWORD, SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { useToast } from '../common/Toast';
 import { useThemeTokens } from '../../context/ThemeContext';
 
-const AVATAR_COLORS = [
-  { bg: '#120800', border: 'var(--co-cyan)', text: 'var(--co-cyan)' },
-  { bg: '#0a0010', border: '#a855f7', text: '#a855f7' },
-  { bg: '#001000', border: 'var(--co-green)', text: 'var(--co-green)' },
-  { bg: '#000a10', border: 'var(--co-cyan)', text: 'var(--co-cyan)' },
-  { bg: '#100000', border: 'var(--co-yellow)', text: 'var(--co-yellow)' },
-  { bg: '#080808', border: '#888', text: '#888' },
-];
+// Colors from shared getPlayerColor — same as dashboard
 
 function SectionHeader({ icon: Icon, title, accent = 'var(--co-cyan)' }) {
   return (
@@ -86,23 +80,25 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
 
 // ── Player card ────────────────────────────────────────────
 function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
-  const c = AVATAR_COLORS[index % AVATAR_COLORS.length];
+  const c = getPlayerColor(player.name);
   const initials = player.name.slice(0, 2).toUpperCase();
 
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-      background: 'var(--co-dark)', border: '1px solid var(--co-border)',
+      background: 'var(--co-dark)', border: `1px solid ${isOrganizer ? 'rgba(0,229,255,0.3)' : c.border + '35'}`,
       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
       transition: 'border-color 0.2s',
+      boxShadow: `inset 0 0 10px ${isOrganizer ? 'rgba(0,229,255,0.03)' : c.border + '08'}`,
     }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = '#2a2a2a'}
-      onMouseLeave={e => e.currentTarget.style.borderColor = '#1a1a1a'}
+      onMouseEnter={e => e.currentTarget.style.borderColor = isOrganizer ? 'rgba(0,229,255,0.5)' : c.border + '60'}
+      onMouseLeave={e => e.currentTarget.style.borderColor = isOrganizer ? 'rgba(0,229,255,0.3)' : c.border + '35'}
     >
       {/* Avatar */}
       <div style={{
         width: 38, height: 38, flexShrink: 0,
-        background: c.bg, border: `1px solid ${c.border}40`,
+        background: c.bg, border: `1px solid ${c.border}55`,
+        boxShadow: `0 0 8px ${c.border}30`,
         borderRadius: isOrganizer ? '50%' : '4px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         clipPath: isOrganizer ? 'none' : 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
@@ -304,7 +300,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                       <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5, textTransform: 'uppercase' }}>
                         <AlertTriangle size={12} /> USUNĄĆ NA ZAWSZE?
                       </p>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#888', marginBottom: 12 }}>{name}</p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)', marginBottom: 12 }}>{name}</p>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button onClick={() => handlePermanentDelete(name)} style={{
                           flex: 1, padding: '8px', background: 'var(--co-yellow)', color: '#000', border: 'none', cursor: 'pointer',
