@@ -39,34 +39,24 @@ function Arena({ chaosMode, onHit }) {
       return [CX + x1*s, CY + y2*s, s];
     };
 
-    /*
-     * FIXED BALL TRAJECTORY
-     * ──────────────────────
-     * Ping pong rule: ball bounces on the OPPONENT's side of the table.
-     *
-     * KF: [ x, y, t ]
-     *   t=0.00 → left  paddle hits  (x = -PX)
-     *   t=0.28 → ball bounces RIGHT side (+65) — opponent's half when hit from left
-     *   t=0.50 → right paddle hits  (x = +PX)
-     *   t=0.78 → ball bounces LEFT  side (-65) — opponent's half when hit from right
-     *   t=1.00 → left  paddle hits  (x = -PX, same as t=0)
-     *
-     * CP: quadratic bezier control points per segment.
-     *   Segments 0 & 2: high arc over the net   → CP at x≈0, y=-68
-     *   Segments 1 & 3: short rise into paddle  → CP nudged toward paddle
-     */
+    /* Ball KF contact points are synced to the paddle's swung position at peak impact.
+     * drawPaddle swings: swingX = px ± 22,  actualY = PY - 8
+     * So contact x = PX-22 = 100,  contact y = PY-8 = -29               */
+    const HIT_X = PX - 22;   // 100  — paddle x at peak swing
+    const HIT_Y = PY - 8;    // -29  — paddle y at peak swing (lifted)
+
     const KF = [
-      [-PX, PY,  0.00],   // left  paddle
-      [ 65,  0,  0.28],   // bounce — RIGHT half (opponent of left player)
-      [ PX, PY,  0.50],   // right paddle
-      [-65,  0,  0.78],   // bounce — LEFT  half (opponent of right player)
-      [-PX, PY,  1.00],   // left  paddle (loop)
+      [-HIT_X, HIT_Y,  0.00],   // left  paddle at peak swing
+      [  65,    0,     0.28],   // bounce — RIGHT half (opponent of left)
+      [ HIT_X, HIT_Y,  0.50],   // right paddle at peak swing
+      [ -65,    0,     0.78],   // bounce — LEFT  half (opponent of right)
+      [-HIT_X, HIT_Y,  1.00],   // left  paddle (loop)
     ];
     const CP = [
-      [  0, -68],   // seg 0: left paddle → right bounce  (high arc over net)
-      [ 85, -28],   // seg 1: right bounce → right paddle (low approach)
-      [  0, -68],   // seg 2: right paddle → left bounce  (high arc over net)
-      [-85, -28],   // seg 3: left bounce  → left paddle  (low approach)
+      [  0, -72],   // seg 0: left paddle -> right bounce  (high arc over net)
+      [ 88, -30],   // seg 1: right bounce -> right paddle
+      [  0, -72],   // seg 2: right paddle -> left bounce
+      [-88, -30],   // seg 3: left bounce  -> left paddle
     ];
 
     const ballAt = (t) => {
