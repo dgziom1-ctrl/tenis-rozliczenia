@@ -109,48 +109,48 @@ function Arena({ chaosMode, onHit }) {
       const FL=proj(-TX,0,-TZ), FR=proj(TX,0,-TZ);
       const BR=proj(TX,0,TZ),   BL=proj(-TX,0,TZ);
       const tg = g.createLinearGradient(BL[0],BL[1],FL[0],FL[1]);
-      tg.addColorStop(0,'#06091d'); tg.addColorStop(1,'#0f1a50');
+      tg.addColorStop(0,'#020810'); tg.addColorStop(1,'#041828');
       quad([FL,FR,BR,BL], tg);
       for (let i = 1; i < 4; i++) {
         const wz = -TZ + (i/4)*TZ*2;
-        seg(proj(-TX,0,wz), proj(TX,0,wz), `rgba(80,110,230,${0.04+i*0.013})`, 0.8);
+        seg(proj(-TX,0,wz), proj(TX,0,wz), `rgba(0,180,255,${0.03+i*0.012})`, 0.8);
       }
       for (let i = 1; i < 5; i++) {
         const wx = -TX + (i/5)*TX*2;
-        seg(proj(wx,0,-TZ), proj(wx,0,TZ), 'rgba(70,100,215,0.05)', 0.7);
+        seg(proj(wx,0,-TZ), proj(wx,0,TZ), 'rgba(0,160,255,0.04)', 0.7);
       }
-      seg(BL, FL, 'rgba(88,122,242,0.60)', 1.5);
-      seg(BR, FR, 'rgba(88,122,242,0.60)', 1.5);
-      seg(BL, BR, 'rgba(78,108,215,0.22)', 1.0);
-      seg(proj(0,0,-TZ), proj(0,0,TZ), 'rgba(158,178,252,0.11)', 1);
+      seg(BL, FL, 'rgba(0,200,255,0.55)', 1.5);
+      seg(BR, FR, 'rgba(0,200,255,0.55)', 1.5);
+      seg(BL, BR, 'rgba(0,160,255,0.18)', 1.0);
+      seg(proj(0,0,-TZ), proj(0,0,TZ), 'rgba(0,229,255,0.10)', 1);
 
       /* Table front face */
       const FL2=proj(-TX,TH,-TZ), FR2=proj(TX,TH,-TZ);
       const fg = g.createLinearGradient(0,FL[1],0,FL2[1]);
-      fg.addColorStop(0,'rgba(62,98,218,0.50)'); fg.addColorStop(1,'rgba(25,48,145,0.06)');
+      fg.addColorStop(0,'rgba(0,140,220,0.35)'); fg.addColorStop(1,'rgba(0,80,160,0.04)');
       quad([FL,FR,FR2,FL2], fg);
-      g.save(); g.shadowBlur=5; g.shadowColor='rgba(92,138,255,0.52)';
-      seg(FL, FR, 'rgba(138,172,255,0.86)', 1.8);
+      g.save(); g.shadowBlur=5; g.shadowColor='rgba(0,229,255,0.50)';
+      seg(FL, FR, 'rgba(0,229,255,0.80)', 1.8);
       g.restore();
 
       /* Net */
       const nBN=proj(0,0,-TZ), nBF=proj(0,0,TZ);
       const nTN=proj(0,-NH,-TZ), nTF=proj(0,-NH,TZ);
       const ng = g.createLinearGradient(nTN[0],nTN[1],nBN[0],nBN[1]);
-      ng.addColorStop(0,'rgba(145,165,255,0.22)'); ng.addColorStop(1,'rgba(52,82,192,0.04)');
+      ng.addColorStop(0,'rgba(0,200,255,0.18)'); ng.addColorStop(1,'rgba(0,100,200,0.03)');
       quad([nBN,nBF,nTF,nTN], ng);
       for (let r = 0; r <= 4; r++) {
         const ny = -NH*(1-r/4);
-        seg(proj(0,ny,-TZ), proj(0,ny,TZ), `rgba(132,155,245,${0.06+r*0.02})`, 0.85);
+        seg(proj(0,ny,-TZ), proj(0,ny,TZ), `rgba(0,200,255,${0.05+r*0.02})`, 0.85);
       }
       for (let c = 0; c <= 8; c++) {
         const wz = -TZ + (c/8)*TZ*2;
-        seg(proj(0,0,wz), proj(0,-NH,wz), 'rgba(112,138,228,0.08)', 0.8);
+        seg(proj(0,0,wz), proj(0,-NH,wz), 'rgba(0,180,255,0.07)', 0.8);
       }
-      seg(nBN, nTN, 'rgba(202,220,255,0.80)', 2.2);
-      seg(nBF, nTF, 'rgba(198,215,255,0.44)', 1.4);
-      g.save(); g.shadowBlur=7; g.shadowColor='rgba(185,212,255,0.90)';
-      seg(nTN, nTF, 'rgba(236,246,255,0.96)', 2.5);
+      seg(nBN, nTN, 'rgba(0,229,255,0.75)', 2.2);
+      seg(nBF, nTF, 'rgba(0,200,255,0.38)', 1.4);
+      g.save(); g.shadowBlur=7; g.shadowColor='rgba(0,229,255,0.95)';
+      seg(nTN, nTF, 'rgba(200,248,255,0.95)', 2.5);
       g.restore();
 
       /* Paddles before ball (ball always on top) */
@@ -171,18 +171,18 @@ function Arena({ chaosMode, onHit }) {
       const sa = Math.max(0, 0.20*(1 - Math.abs(bv[1])/68));
       g.save(); g.translate(bs[0], bs[1]); g.scale(1, 0.34);
       g.beginPath(); g.arc(0, 0, bR*1.55, 0, Math.PI*2);
-      g.fillStyle = `rgba(36,62,188,${sa})`; g.fill();
+      g.fillStyle = `rgba(0,50,120,${sa})`; g.fill();
       g.restore();
 
       /* Ghost trail */
       const tp = (progress-.02+1)%1, tv = ballAt(tp), tq = proj(tv[0],tv[1],0);
       g.beginPath(); g.arc(tq[0], tq[1], 3.6*tq[2], 0, Math.PI*2);
-      g.fillStyle = 'rgba(168,190,255,0.07)'; g.fill();
+      g.fillStyle = 'rgba(0,200,255,0.06)'; g.fill();
 
       /* Ball sphere */
       g.save(); g.shadowBlur=13*bq[2]; g.shadowColor='rgba(255,255,255,0.86)';
       const bg = g.createRadialGradient(bq[0]-bR*.3,bq[1]-bR*.3,0, bq[0],bq[1],bR);
-      bg.addColorStop(0,'#fff'); bg.addColorStop(.46,'#dadff8'); bg.addColorStop(1,'#9aa0dc');
+      bg.addColorStop(0,'#ffffff'); bg.addColorStop(.46,'#d8f5ff'); bg.addColorStop(1,'#80c8e0');
       g.beginPath(); g.arc(bq[0], bq[1], bR, 0, Math.PI*2);
       g.fillStyle = bg; g.fill();
       g.restore();
@@ -204,7 +204,7 @@ function Arena({ chaosMode, onHit }) {
         g.scale(1, sry / srx);
         g.beginPath(); g.arc(0, 0, srx, 0, Math.PI*2);
         g.restore();
-        g.strokeStyle = `rgba(148, 172, 255, ${0.10 + 0.38 * stripeVis})`;
+        g.strokeStyle = `rgba(0, 220, 255, ${0.12 + 0.35 * stripeVis})`;
         g.lineWidth = 1.4;
         g.stroke();
         g.restore();
@@ -298,35 +298,35 @@ function Arena({ chaosMode, onHit }) {
       /* Layer 1: outer glow halo */
       g.save();
       g.shadowBlur  = hitting ? 20 : 8;
-      g.shadowColor = hitting ? 'rgba(182,205,255,0.80)' : 'rgba(125,145,250,0.42)';
-      g.strokeStyle = hitting ? 'rgba(192,215,255,0.68)' : 'rgba(120,140,245,0.38)';
+      g.shadowColor = hitting ? 'rgba(0,229,255,0.90)' : 'rgba(0,180,255,0.40)';
+      g.strokeStyle = hitting ? 'rgba(0,229,255,0.70)' : 'rgba(0,160,255,0.36)';
       g.lineWidth = 3.5;
       ellipse(cx, cy, rx*1.1, ry*1.1, ang); g.stroke();
       g.restore();
 
       /* Layer 2: dark body */
       const bdg = g.createRadialGradient(cx-rx*.16,cy-ry*.16,0, cx,cy,Math.max(rx,ry)*1.05);
-      bdg.addColorStop(0,'#252456'); bdg.addColorStop(.76,'#12122c'); bdg.addColorStop(1,'#09091e');
+      bdg.addColorStop(0,'#062038'); bdg.addColorStop(.76,'#031428'); bdg.addColorStop(1,'#010C1C');
       ellipse(cx, cy, rx, ry, ang); g.fillStyle = bdg; g.fill();
 
       /* Layer 3: rim stroke */
-      g.strokeStyle = hitting ? 'rgba(185,208,255,0.88)' : 'rgba(135,155,250,0.62)';
+      g.strokeStyle = hitting ? 'rgba(0,229,255,0.90)' : 'rgba(0,180,255,0.55)';
       g.lineWidth = 1.9;
       ellipse(cx, cy, rx*.95, ry*.95, ang); g.stroke();
 
       /* Layer 4: rubber face */
       const rfg = g.createRadialGradient(cx-rx*.1,cy-ry*.1,0, cx,cy,rx*.52);
-      rfg.addColorStop(0, hitting ? 'rgba(222,232,255,0.96)' : 'rgba(192,208,255,0.92)');
-      rfg.addColorStop(1, hitting ? 'rgba(152,175,250,0.86)' : 'rgba(138,158,245,0.78)');
+      rfg.addColorStop(0, hitting ? 'rgba(0,229,255,0.95)' : 'rgba(0,180,220,0.85)');
+      rfg.addColorStop(1, hitting ? 'rgba(0,160,210,0.88)' : 'rgba(0,120,180,0.72)');
       ellipse(cx, cy, rx*.52, ry*.52, ang); g.fillStyle = rfg; g.fill();
 
       /* Handle */
       const hs = proj(swingX, finalY + R/pc[2] + 1,  0);
       const he = proj(swingX, finalY + R/pc[2] + 14, 0);
       g.save(); g.lineCap = 'round';
-      g.strokeStyle = 'rgba(44,48,92,0.90)'; g.lineWidth = 4.6*pc[2];
+      g.strokeStyle = 'rgba(2,12,28,0.95)'; g.lineWidth = 4.6*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
-      g.strokeStyle = 'rgba(88,104,165,0.70)'; g.lineWidth = 2.1*pc[2];
+      g.strokeStyle = 'rgba(0,80,140,0.65)'; g.lineWidth = 2.1*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
       g.lineCap = 'butt'; g.restore();
     };
@@ -440,7 +440,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
               letterSpacing:'.18em',color:'var(--co-cyan)',padding:'2px 6px',
               background:'rgba(0,229,255,0.07)',border:'1px solid rgba(0,229,255,.22)' }}>BLIK</span>
-            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.9rem',letterSpacing:'.06em',color:'#e0e0e0' }}>
+            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.9rem',letterSpacing:'.06em',color:'var(--co-text)' }}>
               {blikNumber}
             </span>
             <div style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
@@ -523,7 +523,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
           <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
             letterSpacing:'.15em',color:'var(--co-cyan)',padding:'2px 5px',
             background:'rgba(0,229,255,0.1)',border:'1px solid rgba(0,229,255,.2)' }}>BLIK</span>
-          <span style={{ fontFamily:'var(--font-mono)',color:'#e0e0e0',fontSize:'.85rem',letterSpacing:'.06em' }}>
+          <span style={{ fontFamily:'var(--font-mono)',color:'var(--co-text)',fontSize:'.85rem',letterSpacing:'.06em' }}>
             {blikNumber}
           </span>
           {copied ? <Check size={12} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
@@ -534,7 +534,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             {isConnected ? '● ONLINE' : '○ OFFLINE'}
           </span>
           <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
-            border:isMuted?'1px solid rgba(255,155,0,.4)':'1px solid #252535',
+            border:isMuted?'1px solid rgba(255,155,0,.4)':'1px solid var(--co-border)',
             color:isMuted?'var(--co-yellow)':'var(--co-dim)',
             background:'transparent',padding:'4px 6px',cursor:'pointer',
             clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
