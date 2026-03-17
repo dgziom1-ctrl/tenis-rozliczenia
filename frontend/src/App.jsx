@@ -30,24 +30,24 @@ function CyberLoadingScreen() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--sw-void)', flexDirection: 'column', gap: 28,
+      background: 'var(--co-void)', flexDirection: 'column', gap: 28,
       fontFamily: 'var(--font-mono)',
     }}>
       {/* Top hazard stripe */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3,
-        background: 'repeating-linear-gradient(-45deg, var(--sw-pink) 0px, var(--sw-pink) 8px, rgba(0,0,0,0.6) 8px, rgba(0,0,0,0.6) 16px)',
-        boxShadow: '0 0 16px rgba(255,0,255,0.8)', zIndex: 1000,
+        background: 'repeating-linear-gradient(-45deg, var(--co-cyan) 0px, var(--co-cyan) 8px, rgba(0,0,0,0.6) 8px, rgba(0,0,0,0.6) 16px)',
+        boxShadow: '0 0 16px rgba(0,229,255,0.8)', zIndex: 1000,
       }} />
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
         {/* Logo hex */}
         <div style={{
           width: 72, height: 72,
-          border: '2px solid var(--sw-pink)',
+          border: '2px solid var(--co-cyan)',
           clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(255,0,255,0.06)',
-          boxShadow: '0 0 30px rgba(255,0,255,0.35), inset 0 0 20px rgba(255,0,255,0.05)',
+          background: 'rgba(0,229,255,0.06)',
+          boxShadow: '0 0 30px rgba(0,229,255,0.35), inset 0 0 20px rgba(0,229,255,0.05)',
           animation: 'neon-orange 1.5s ease-in-out infinite',
           position: 'relative', overflow: 'hidden',
         }}>
@@ -63,13 +63,13 @@ function CyberLoadingScreen() {
         <div style={{ textAlign: 'center' }}>
           <p style={{
             fontFamily: 'var(--font-display)', fontSize: '2rem', letterSpacing: '0.1em',
-            color: 'var(--sw-pink)', textTransform: 'uppercase',
-            textShadow: '0 0 20px rgba(255,0,255,0.5)',
+            color: 'var(--co-cyan)', textTransform: 'uppercase',
+            textShadow: '0 0 20px rgba(0,229,255,0.5)',
             margin: 0, lineHeight: 1,
           }}>CYBER-PONG</p>
           <p style={{
             fontFamily: 'var(--font-mono)', fontSize: '0.58rem', letterSpacing: '0.25em',
-            color: 'rgba(255,0,255,0.45)', textTransform: 'uppercase', marginTop: 4,
+            color: 'rgba(0,229,255,0.45)', textTransform: 'uppercase', marginTop: 4,
             animation: 'flicker 2s infinite',
           }}>
             INITIALIZING SYSTEM...
@@ -79,7 +79,7 @@ function CyberLoadingScreen() {
         {/* Boot log */}
         <div style={{
           width: 280, background: '#07070A',
-          border: '1px solid var(--sw-border)',
+          border: '1px solid var(--co-border)',
           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
           padding: '10px 14px',
         }}>
@@ -90,7 +90,7 @@ function CyberLoadingScreen() {
           ].map((line, i) => (
             <p key={i} style={{
               fontFamily: 'var(--font-mono)', fontSize: '0.6rem',
-              color: i < 2 ? 'var(--sw-settled)' : 'rgba(0,255,255,0.4)',
+              color: i < 2 ? 'var(--co-green)' : 'rgba(0,229,255,0.4)',
               letterSpacing: '0.08em', margin: '2px 0',
               animation: i === 2 ? 'flicker 1.5s infinite' : 'none',
             }}>{line}</p>
@@ -101,8 +101,8 @@ function CyberLoadingScreen() {
         <div style={{ width: 280, height: 3, background: '#1A1A14', overflow: 'hidden', position: 'relative' }}>
           <div style={{
             height: '100%', width: '35%',
-            background: 'linear-gradient(90deg, transparent, var(--sw-pink), var(--sw-pink))',
-            boxShadow: '0 0 10px var(--sw-pink)',
+            background: 'linear-gradient(90deg, transparent, var(--co-cyan), var(--co-cyan))',
+            boxShadow: '0 0 10px var(--co-cyan)',
             animation: 'loading-bar 1.1s ease-in-out infinite',
           }} />
         </div>
@@ -127,22 +127,22 @@ function CyberErrorScreen() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--sw-void)', padding: 24, flexDirection: 'column', gap: 20,
+      background: 'var(--co-void)', padding: 24, flexDirection: 'column', gap: 20,
     }}>
       {/* Blood-red hazard stripe */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3,
-        background: 'repeating-linear-gradient(-45deg, var(--sw-pending) 0px, var(--sw-pending) 8px, rgba(0,0,0,0.6) 8px, rgba(0,0,0,0.6) 16px)',
-        boxShadow: '0 0 16px rgba(139,130,204,0.8)', zIndex: 1000,
+        background: 'repeating-linear-gradient(-45deg, var(--co-yellow) 0px, var(--co-yellow) 8px, rgba(0,0,0,0.6) 8px, rgba(0,0,0,0.6) 16px)',
+        boxShadow: '0 0 16px rgba(255,229,0,0.8)', zIndex: 1000,
       }} />
 
       <div style={{
         padding: '28px 24px', textAlign: 'center', maxWidth: 380, width: '100%',
         background: '#0D0008',
-        border: '1px solid rgba(139,130,204,0.45)',
+        border: '1px solid rgba(255,229,0,0.45)',
         clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px))',
-        boxShadow: '0 0 40px rgba(139,130,204,0.2), inset 0 0 30px rgba(139,130,204,0.04)',
+        boxShadow: '0 0 40px rgba(255,229,0,0.2), inset 0 0 30px rgba(255,229,0,0.04)',
         position: 'relative', overflow: 'hidden',
-        animation: 'neon-pending 2s ease-in-out infinite',
+        animation: 'neon-yellow 2s ease-in-out infinite',
       }}>
         {/* Scanlines */}
         <div style={{
@@ -151,18 +151,18 @@ function CyberErrorScreen() {
         }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: '2.8rem', marginBottom: 14, filter: 'drop-shadow(0 0 8px rgba(139,130,204,0.6))' }}>☠</div>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '0.12em', color: 'var(--sw-pending)', marginBottom: 6, textTransform: 'uppercase',
-            textShadow: '0 0 16px rgba(139,130,204,0.6)',
+          <div style={{ fontSize: '2.8rem', marginBottom: 14, filter: 'drop-shadow(0 0 8px rgba(255,229,0,0.6))' }}>☠</div>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', marginBottom: 6, textTransform: 'uppercase',
+            textShadow: '0 0 16px rgba(255,229,0,0.6)',
           }}>
             CONNECTION FAILURE
           </p>
           <div style={{
-            padding: '10px 12px', background: 'rgba(139,130,204,0.06)',
-            border: '1px solid rgba(139,130,204,0.2)', marginBottom: 20,
+            padding: '10px 12px', background: 'rgba(255,229,0,0.06)',
+            border: '1px solid rgba(255,229,0,0.2)', marginBottom: 20,
             clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
           }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--sw-dim)', letterSpacing: '0.06em', lineHeight: 1.7 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.06em', lineHeight: 1.7 }}>
               {'>'} ERR: FIREBASE_TIMEOUT<br/>
               {'>'} Sprawdź internet lub plik .env<br/>
               {'>'} SYSTEM HALTED
@@ -229,54 +229,54 @@ function AppContent() {
           <div style={{
             position: 'absolute', top: '-15%', left: '50%', transform: 'translateX(-50%)',
             width: '90vw', height: '70vh',
-            background: 'radial-gradient(ellipse at center top, rgba(255,0,255,0.08) 0%, rgba(180,55,0,0.03) 45%, transparent 72%)',
+            background: 'radial-gradient(ellipse at center top, rgba(0,229,255,0.08) 0%, rgba(180,55,0,0.03) 45%, transparent 72%)',
           }} />
           {/* Secondary warm glow — bottom-left */}
           <div style={{
             position: 'absolute', bottom: '-10%', left: '-5%',
             width: '55vw', height: '55vh',
-            background: 'radial-gradient(ellipse at bottom left, rgba(139,130,204,0.04) 0%, transparent 65%)',
+            background: 'radial-gradient(ellipse at bottom left, rgba(255,229,0,0.04) 0%, transparent 65%)',
           }} />
           {/* Acid accent — mid right */}
           <div style={{
             position: 'absolute', top: '40%', right: '-5%',
             width: '35vw', height: '40vh',
-            background: 'radial-gradient(ellipse at right center, rgba(0,255,255,0.02) 0%, transparent 60%)',
+            background: 'radial-gradient(ellipse at right center, rgba(0,229,255,0.02) 0%, transparent 60%)',
           }} />
           {/* Fine dot grid */}
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,0,255,0.07) 1px, transparent 0)',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,229,255,0.07) 1px, transparent 0)',
             backgroundSize: '28px 28px',
           }} />
           {/* Horizontal scan line at mid height */}
           <div style={{
             position: 'absolute', top: '50%', left: 0, right: 0,
             height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,0,255,0.06) 20%, rgba(255,0,255,0.12) 50%, rgba(255,0,255,0.06) 80%, transparent 100%)',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.06) 20%, rgba(0,229,255,0.12) 50%, rgba(0,229,255,0.06) 80%, transparent 100%)',
           }} />
           {/* Coarse grid overlay */}
           <div style={{
             position: 'absolute', inset: 0,
             backgroundImage: `
-              linear-gradient(rgba(255,0,255,0.025) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,0,255,0.025) 1px, transparent 1px)
+              linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px)
             `,
             backgroundSize: '80px 80px',
           }} />
           {/* Ground plane glow */}
           <div style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, height: '30vh',
-            background: 'linear-gradient(to top, rgba(255,0,255,0.03) 0%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(0,229,255,0.03) 0%, transparent 100%)',
           }} />
           {/* Vertical side accent lines */}
           <div style={{
             position: 'absolute', top: 0, bottom: 0, left: 0, width: '1px',
-            background: 'linear-gradient(to bottom, rgba(255,0,255,0.15) 0%, transparent 40%)',
+            background: 'linear-gradient(to bottom, rgba(0,229,255,0.15) 0%, transparent 40%)',
           }} />
           <div style={{
             position: 'absolute', top: 0, bottom: 0, right: 0, width: '1px',
-            background: 'linear-gradient(to bottom, rgba(255,0,255,0.15) 0%, transparent 40%)',
+            background: 'linear-gradient(to bottom, rgba(0,229,255,0.15) 0%, transparent 40%)',
           }} />
         </div>
         <div className="max-w-7xl mx-auto relative">

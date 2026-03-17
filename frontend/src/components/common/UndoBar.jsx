@@ -11,7 +11,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
       padding: compact ? '8px 12px' : '12px 16px',
       background: tokens.undoBg,
       border: `1px solid ${tokens.undoBorder}`,
-      boxShadow: compact ? 'none' : '0 0 16px rgba(255,0,255,0.08)',
+      boxShadow: compact ? 'none' : '0 0 16px rgba(0,229,255,0.08)',
       clipPath: compact
         ? 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)'
         : 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
@@ -21,8 +21,8 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         position: 'absolute', bottom: 0, left: 0,
         height: compact ? 2 : 2,
         width: `${progressPct}%`,
-        background: 'var(--sw-pink)',
-        boxShadow: '0 0 6px var(--sw-pink)',
+        background: 'var(--co-cyan)',
+        boxShadow: '0 0 6px var(--co-cyan)',
         transition: 'width 1s linear',
       }} />
 
@@ -51,7 +51,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         padding: compact ? '4px 8px' : '6px 12px',
         background: 'transparent',
         border: `1px solid ${tokens.undoBorder}`,
-        color: 'var(--sw-pink)',
+        color: 'var(--co-cyan)',
         cursor: 'pointer', transition: 'all 0.15s',
         fontFamily: 'var(--font-display)', fontWeight: 700,
         fontSize: compact ? '0.45rem' : '0.52rem', letterSpacing: '0.12em',
@@ -60,7 +60,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
           ? 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)'
           : 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
       }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,0,255,0.08)'; e.currentTarget.style.borderColor = 'var(--sw-pink)'; }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,229,255,0.08)'; e.currentTarget.style.borderColor = 'var(--co-cyan)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = tokens.undoBorder; }}
       >
         <RotateCcw size={compact ? 10 : 12} /> {buttonLabel}

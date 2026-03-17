@@ -27,8 +27,8 @@ export default function Navigation({ activeTab, setActiveTab }) {
                   <span style={{
                     position: 'absolute', top: -3, right: -4,
                     width: 5, height: 5,
-                    background: 'var(--sw-pink)',
-                    boxShadow: '0 0 5px var(--sw-pink)',
+                    background: 'var(--co-pink)',
+                    boxShadow: '0 0 5px var(--co-pink)',
                     borderRadius: '50%',
                   }} />
                 )}
@@ -54,8 +54,8 @@ export default function Navigation({ activeTab, setActiveTab }) {
                 <span style={{
                   position: 'absolute', top: -3, right: -4,
                   width: 5, height: 5, borderRadius: '50%',
-                  background: 'var(--sw-pink)',
-                  boxShadow: '0 0 5px var(--sw-pink)',
+                  background: 'var(--co-pink)',
+                  boxShadow: '0 0 5px var(--co-pink)',
                 }} />
               )}
             </span>

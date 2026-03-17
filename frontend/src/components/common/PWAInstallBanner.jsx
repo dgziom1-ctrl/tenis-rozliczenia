@@ -40,9 +40,9 @@ export default function PWAInstallBanner() {
     left: 10, right: 10,
     zIndex: 45,
     background: '#0a0a0f',
-    border: '1px solid rgba(255,0,255,0.35)',
+    border: '1px solid rgba(0,229,255,0.35)',
     clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
-    boxShadow: '0 0 24px rgba(255,0,255,0.12), 0 4px 30px rgba(0,0,0,0.9)',
+    boxShadow: '0 0 24px rgba(0,229,255,0.12), 0 4px 30px rgba(0,0,0,0.9)',
     animation: 'pwaSlideUp 0.3s ease-out',
     overflow: 'hidden',
   };
@@ -50,28 +50,28 @@ export default function PWAInstallBanner() {
   if (!isIOS) {
     return (
       <div style={bannerStyle}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, var(--sw-pink), transparent)', opacity: 0.6 }} />
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, var(--co-cyan), transparent)', opacity: 0.6 }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
           <div style={{
             width: 36, height: 36, flexShrink: 0,
-            background: 'rgba(255,0,255,0.08)', border: '1px solid rgba(255,0,255,0.3)',
+            background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.3)',
             clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <span style={{ fontSize: '1.2rem' }}>🕹️</span>
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.16em', color: 'var(--sw-pink)', margin: 0, textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.16em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
               DODAJ DO EKRANU GŁÓWNEGO
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-dim)', margin: '2px 0 0' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
               Otwieraj jak natywna aplikacja
             </p>
           </div>
           <button onClick={handleInstall} style={{
             flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5,
             padding: '7px 12px',
-            background: 'var(--sw-pink)', color: '#000',
+            background: 'var(--co-cyan)', color: '#000',
             border: 'none', cursor: 'pointer',
             fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.12em',
             clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
@@ -80,7 +80,7 @@ export default function PWAInstallBanner() {
             <Download size={12} /> DODAJ
           </button>
           <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: '#3a3a3a', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0, transition: 'color 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.color = 'var(--sw-pink)'}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--co-cyan)'}
             onMouseLeave={e => e.currentTarget.style.color = '#3a3a3a'}
           >
             <X size={15} />
@@ -92,28 +92,28 @@ export default function PWAInstallBanner() {
 
   // iOS steps
   const steps = [
-    { n: '01', content: <span>Stuknij ikonę <span style={{ color: 'var(--sw-pink)' }}>Udostępnij</span> na dole Safari <Share size={11} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 2 }} /></span> },
-    { n: '02', content: <span>Wybierz <span style={{ color: 'var(--sw-pink)' }}>"Dodaj do ekranu głównego"</span></span> },
-    { n: '03', content: <span>Stuknij <span style={{ color: 'var(--sw-pink)' }}>"Dodaj"</span> w prawym górnym rogu</span> },
+    { n: '01', content: <span>Stuknij ikonę <span style={{ color: 'var(--co-cyan)' }}>Udostępnij</span> na dole Safari <Share size={11} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 2 }} /></span> },
+    { n: '02', content: <span>Wybierz <span style={{ color: 'var(--co-cyan)' }}>"Dodaj do ekranu głównego"</span></span> },
+    { n: '03', content: <span>Stuknij <span style={{ color: 'var(--co-cyan)' }}>"Dodaj"</span> w prawym górnym rogu</span> },
   ];
 
   return (
     <div style={bannerStyle}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, var(--sw-pink), transparent)', opacity: 0.6 }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, var(--co-cyan), transparent)', opacity: 0.6 }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px 10px' }}>
-        <div style={{ width: 32, height: 32, flexShrink: 0, background: 'rgba(255,0,255,0.08)', border: '1px solid rgba(255,0,255,0.25)', clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, flexShrink: 0, background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.25)', clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ fontSize: '1rem' }}>🕹️</span>
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.16em', color: 'var(--sw-pink)', margin: 0, textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.16em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
             DODAJ DO EKRANU GŁÓWNEGO
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-dim)', margin: '2px 0 0' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
             Działa jak natywna aplikacja
           </p>
         </div>
         <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: '#3a3a3a', cursor: 'pointer', padding: 4, flexShrink: 0, transition: 'color 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.color = 'var(--sw-pink)'}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--co-cyan)'}
           onMouseLeave={e => e.currentTarget.style.color = '#3a3a3a'}
         >
           <X size={15} />
@@ -124,19 +124,19 @@ export default function PWAInstallBanner() {
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 22, height: 22, flexShrink: 0,
-              border: '1px solid rgba(255,0,255,0.25)',
+              border: '1px solid rgba(0,229,255,0.25)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(255,0,255,0.04)',
+              background: 'rgba(0,229,255,0.04)',
             }}>
-              <span style={{ fontFamily: 'var(--font-display)', color: 'var(--sw-pink)', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.05em' }}>{step.n}</span>
+              <span style={{ fontFamily: 'var(--font-display)', color: 'var(--co-cyan)', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.05em' }}>{step.n}</span>
             </div>
             <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#888', lineHeight: 1.4 }}>{step.content}</p>
           </div>
         ))}
       </div>
       <div style={{ textAlign: 'center', paddingBottom: 8, marginTop: -4 }}>
-        <span style={{ color: 'rgba(255,0,255,0.25)', fontSize: '0.8rem' }}>↓</span>
+        <span style={{ color: 'rgba(0,229,255,0.25)', fontSize: '0.8rem' }}>↓</span>
       </div>
     </div>
   );

@@ -18,19 +18,19 @@ function SystemStatusBar({ debtCount, settledCount, totalWeeks }) {
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '8px 16px',
-      background: '#0B0015',
-      border: '1px solid var(--sw-border)',
-      borderLeft: `3px solid ${allClear ? 'var(--sw-settled)' : debtCount > 0 ? 'var(--sw-pending)' : 'var(--sw-pink)'}`,
+      background: '#060C12',
+      border: '1px solid var(--co-border)',
+      borderLeft: `3px solid ${allClear ? 'var(--co-green)' : debtCount > 0 ? 'var(--co-yellow)' : 'var(--co-cyan)'}`,
       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
       flexWrap: 'wrap', gap: 8,
     }}>
       {/* Title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Database size={12} style={{ color: 'var(--sw-pink)', flexShrink: 0 }} />
+        <Database size={12} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} />
         <span style={{
           fontFamily: 'var(--font-display)', fontSize: '1rem',
           fontWeight: 400, letterSpacing: '0.1em',
-          color: 'var(--sw-pink)', textTransform: 'uppercase',
+          color: 'var(--co-cyan)', textTransform: 'uppercase',
         }}>
           Rozliczenia Graczy
         </span>
@@ -40,27 +40,27 @@ function SystemStatusBar({ debtCount, settledCount, totalWeeks }) {
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <div style={{
-            width: 6, height: 6, background: 'var(--sw-pending)',
-            boxShadow: '0 0 5px var(--sw-pending)',
+            width: 6, height: 6, background: 'var(--co-yellow)',
+            boxShadow: '0 0 5px var(--co-yellow)',
             clipPath: 'polygon(50% 0, 100% 100%, 0 100%)',
           }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#AAA' }}>
-            Zaległości: <span style={{ color: debtCount > 0 ? 'var(--sw-pending)' : '#AAA' }}>{debtCount}</span>
+            Zaległości: <span style={{ color: debtCount > 0 ? 'var(--co-yellow)' : '#AAA' }}>{debtCount}</span>
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <div style={{
             width: 6, height: 6, borderRadius: '50%',
-            background: 'var(--sw-settled)', boxShadow: '0 0 5px var(--sw-settled)',
+            background: 'var(--co-green)', boxShadow: '0 0 5px var(--co-green)',
           }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#AAA' }}>
-            Rozliczeni: <span style={{ color: 'var(--sw-settled)' }}>{settledCount}</span>
+            Rozliczeni: <span style={{ color: 'var(--co-green)' }}>{settledCount}</span>
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <Zap size={10} style={{ color: 'var(--sw-pink)' }} />
+          <Zap size={10} style={{ color: 'var(--co-cyan)' }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#AAA' }}>
-            Sesje: <span style={{ color: 'var(--sw-pink)' }}>{totalWeeks}</span>
+            Sesje: <span style={{ color: 'var(--co-cyan)' }}>{totalWeeks}</span>
           </span>
         </div>
       </div>
@@ -200,16 +200,16 @@ export default function DashboardTab({ data, history, playSound }) {
         {/* Empty state */}
         {totalWeeks === 0 && (
           <div style={{
-            background: 'var(--sw-panel)', border: '1px solid var(--sw-border)',
+            background: 'var(--co-panel)', border: '1px solid var(--co-border)',
             clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
             padding: 40, textAlign: 'center',
           }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', letterSpacing: '0.1em', color: 'var(--sw-pink)', marginBottom: 8 }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', marginBottom: 8 }}>
               BRAK ROZGRYWEK
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--sw-dim)' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
               {'>'} Dodaj pierwszą sesję w zakładce{' '}
-              <span style={{ color: 'var(--sw-pink)' }}>LOG</span>
+              <span style={{ color: 'var(--co-cyan)' }}>LOG</span>
             </p>
           </div>
         )}

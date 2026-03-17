@@ -33,12 +33,12 @@ function useAnimatedValue(value, duration = 900) {
 
 // ── Player color palette (synthwave) ────────────────────────────
 const PLAYER_COLORS = [
-  { bg: '#1A0026', border: '#FF00FF', text: '#FF00FF', tag: 'P01' },
-  { bg: '#001A26', border: '#00FFFF', text: '#00FFFF', tag: 'P02' },
-  { bg: '#1A001A', border: '#B060FF', text: '#C080FF', tag: 'P03' },
-  { bg: '#001A1A', border: '#00FFAA', text: '#00FFAA', tag: 'P04' },
-  { bg: '#1A1A00', border: '#FFD700', text: '#FFD700', tag: 'P05' },
-  { bg: '#0D001A', border: '#FF6BFF', text: '#FF8FFF', tag: 'P06' },
+  { bg: '#041420', border: '#00E5FF', text: '#00E5FF', tag: 'P01' },
+  { bg: '#041A14', border: '#00FF88', text: '#00FF88', tag: 'P02' },
+  { bg: '#0C1020', border: '#4FC3F7', text: '#4FC3F7', tag: 'P03' },
+  { bg: '#141408', border: '#B8D400', text: '#B8D400', tag: 'P04' },
+  { bg: '#0A0820', border: '#7B8FFF', text: '#8FA0FF', tag: 'P05' },
+  { bg: '#04181A', border: '#00D4CC', text: '#00D4CC', tag: 'P06' },
 ];
 
 // ── Pseudo-barcode (seeded by name) ─────────────────────────────
@@ -80,9 +80,9 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
   const initials = name.slice(0, 2).toUpperCase();
   // Pending: soft lavender, never aggressive red
   const borderColor = isPending
-    ? 'var(--sw-pending)'
-    : isOrganizer ? 'var(--sw-cyan)' : c.border;
-  const bg = isPending ? '#140020' : c.bg;
+    ? '#FFE500'
+    : isOrganizer ? 'var(--co-cyan)' : c.border;
+  const bg = isPending ? '#0C1420' : c.bg;
 
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -92,22 +92,22 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
         border: `1px solid ${borderColor}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
         boxShadow: isPending
-          ? `0 0 10px rgba(139,130,204,0.35), inset 0 0 8px rgba(139,130,204,0.06)`
+          ? `0 0 8px rgba(255,229,0,0.4), inset 0 0 6px rgba(255,229,0,0.05)`
           : `0 0 12px ${borderColor}40, inset 0 0 6px ${borderColor}08`,
-        animation: isPending ? 'neon-pending 3s ease-in-out infinite' : 'none',
+        animation: isPending ? 'neon-yellow 3s ease-in-out infinite' : 'none',
         overflow: 'hidden', position: 'relative',
       }}>
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
           background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px)',
         }} />
         {isOrganizer
-          ? <Shield size={22} style={{ color: 'var(--sw-cyan)' }} />
+          ? <Shield size={22} style={{ color: 'var(--co-cyan)' }} />
           : <>
               <span style={{
                 fontFamily: 'var(--font-display)', fontSize: '1.3rem',
-                color: isPending ? 'var(--sw-pending)' : c.text,
+                color: isPending ? 'var(--co-yellow)' : c.text,
                 lineHeight: 1,
-                textShadow: `0 0 10px ${isPending ? 'rgba(139,130,204,0.5)' : borderColor + '55'}`,
+                textShadow: `0 0 10px ${isPending ? 'rgba(255,229,0,0.5)' : borderColor + '55'}`,
               }}>{initials}</span>
               <span style={{
                 fontFamily: 'var(--font-mono)', fontSize: '0.4rem',
@@ -120,11 +120,11 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
       <div style={{
         position: 'absolute', bottom: -2, right: -2,
         width: 10, height: 10,
-        background: isPending ? 'var(--sw-pending)'
-          : isOrganizer ? 'var(--sw-cyan)' : 'var(--sw-settled)',
-        border: '2px solid var(--sw-void)',
-        boxShadow: isPending ? '0 0 5px var(--sw-pending)'
-          : isOrganizer ? '0 0 5px var(--sw-cyan)' : '0 0 5px var(--sw-settled)',
+        background: isPending ? '#FFE500'
+          : isOrganizer ? 'var(--co-cyan)' : 'var(--co-green)',
+        border: '2px solid var(--co-void)',
+        boxShadow: isPending ? '0 0 5px #FFE500'
+          : isOrganizer ? '0 0 5px var(--co-cyan)' : '0 0 5px var(--co-green)',
         borderRadius: '50%',
       }} />
     </div>
@@ -134,10 +134,10 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
 // ── Rank badge ───────────────────────────────────────────────────
 function RankBadge({ rank, pct }) {
   const rankColors = {
-    'LEGENDA': '#FFD700', 'MISTRZ': '#FF8C00', 'WETERAN': '#B060FF',
-    'STAŁY': '#FF00FF', 'GOŚĆ': '#55406A', 'DUCH': '#2E1E45',
+    'LEGENDA': 'var(--co-yellow)', 'MISTRZ': '#FF8C00', 'WETERAN': 'var(--co-ice)',
+    'STAŁY': 'var(--co-cyan)', 'GOŚĆ': 'var(--co-dim)', 'DUCH': 'var(--co-dim2)',
   };
-  const col = rankColors[rank.name] || '#55406A';
+  const col = rankColors[rank.name] || 'var(--co-dim)';
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -219,15 +219,15 @@ export default function PlayerCard({
   }, [player.name, onAddPayment, onPin, onUnpin, startPaymentUndo, cancelModal]);
 
   // Card color logic — neutralny dla pending
-  const accentColor = isPending ? 'var(--sw-pending)'
-    : hasCredit ? 'var(--sw-credit)'
-    : isOrganizer ? 'var(--sw-cyan)'
+  const accentColor = isPending ? 'var(--co-yellow)'
+    : hasCredit ? 'var(--co-yellow)'
+    : isOrganizer ? 'var(--co-cyan)'
     : c.border;
 
   const cardBorder = isPending
-    ? 'rgba(139,130,204,0.35)'
-    : hasCredit ? 'rgba(255,215,0,0.3)'
-    : 'var(--sw-border)';
+    ? 'rgba(255,229,0,0.4)'
+    : hasCredit ? 'rgba(255,229,0,0.3)'
+    : 'var(--co-border)';
 
   const playerId = `P${String((player.name.charCodeAt(0) * 31 + playerIndex * 17) % 9000 + 1000)}`;
 
@@ -237,11 +237,11 @@ export default function PlayerCard({
       className={`${justSettled ? 'settle-flash' : ''} crt-card`}
       style={{
         position: 'relative',
-        background: 'linear-gradient(160deg, var(--sw-panel) 0%, var(--sw-dark) 100%)',
+        background: 'linear-gradient(160deg, var(--co-panel) 0%, var(--co-dark) 100%)',
         border: `1px solid ${cardBorder}`,
         display: 'flex', flexDirection: 'column',
         // pending: subtelny gentle glow, nie pulsujący neon
-        animation: isPending ? 'neon-pending 4s ease-in-out infinite' : 'none',
+        animation: isPending ? 'neon-yellow 4s ease-in-out infinite' : 'none',
         overflow: 'hidden',
         transition: 'border-color 0.3s, box-shadow 0.3s',
       }}
@@ -252,14 +252,14 @@ export default function PlayerCard({
       <div style={{
         padding: '4px 12px',
         background: isPending
-          ? 'rgba(139,130,204,0.06)'
-          : 'rgba(255,0,255,0.03)',
-        borderBottom: `1px solid ${isPending ? 'rgba(139,130,204,0.15)' : 'rgba(255,0,255,0.08)'}`,
+          ? 'rgba(255,229,0,0.04)'
+          : 'rgba(0,229,255,0.03)',
+        borderBottom: `1px solid ${isPending ? 'rgba(255,229,0,0.18)' : 'rgba(0,229,255,0.08)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.52rem',
-          color: isPending ? 'var(--sw-pending)' : 'var(--sw-dim)',
+          color: isPending ? '#FFE500' : 'var(--co-dim)',
           letterSpacing: '0.15em', textTransform: 'uppercase',
         }}>
           {/* Neutralne etykiety – żadnych wykrzykników, żadnego "dłużnik" */}
@@ -270,7 +270,7 @@ export default function PlayerCard({
         </span>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.5rem',
-          color: 'var(--sw-dim)', letterSpacing: '0.1em',
+          color: 'var(--co-dim)', letterSpacing: '0.1em',
         }}>{playerId}</span>
       </div>
 
@@ -287,7 +287,7 @@ export default function PlayerCard({
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(1.4rem, 5vw, 1.7rem)',
             letterSpacing: '0.06em', textTransform: 'uppercase',
-            color: 'var(--sw-text-hi)',
+            color: 'var(--co-text-hi)',
             margin: 0, lineHeight: 1,
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>{player.name}</h3>
@@ -299,10 +299,10 @@ export default function PlayerCard({
           {/* Attendance bar */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--sw-dim)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-dim)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                 Obecność
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--sw-dim)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>
                 {player.attendanceCount}/{totalWeeks}
               </span>
             </div>
@@ -310,10 +310,10 @@ export default function PlayerCard({
               <div style={{
                 position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`,
                 background: pct >= 75
-                  ? 'linear-gradient(90deg, var(--sw-cyan), var(--sw-settled))'
+                  ? 'linear-gradient(90deg, var(--co-cyan), var(--co-green))'
                   : pct >= 45
-                  ? 'linear-gradient(90deg, var(--sw-pink), var(--sw-purple))'
-                  : 'linear-gradient(90deg, var(--sw-pending), #AA99EE)',
+                  ? 'linear-gradient(90deg, var(--co-cyan), var(--co-ice))'
+                  : 'linear-gradient(90deg, var(--co-yellow), #AA99EE)',
                 transition: 'width 0.8s ease',
               }} />
             </div>
@@ -333,13 +333,13 @@ export default function PlayerCard({
               padding: '12px',
               marginBottom: 10,
               background: isPending
-                ? 'rgba(139,130,204,0.06)'
-                : hasCredit ? 'rgba(255,215,0,0.05)'
-                : 'rgba(0,255,255,0.04)',
+                ? 'rgba(255,229,0,0.06)'
+                : hasCredit ? 'rgba(255,229,0,0.05)'
+                : 'rgba(0,229,255,0.04)',
               border: `1px solid ${isPending
-                ? 'rgba(139,130,204,0.2)'
-                : hasCredit ? 'rgba(255,215,0,0.2)'
-                : 'rgba(0,255,255,0.15)'}`,
+                ? 'rgba(255,229,0,0.25)'
+                : hasCredit ? 'rgba(255,229,0,0.2)'
+                : 'rgba(0,229,255,0.15)'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
               cursor: 'default', userSelect: 'none',
               position: 'relative', overflow: 'hidden',
@@ -352,14 +352,14 @@ export default function PlayerCard({
 
             {justSettled ? (
               <div style={{ animation: 'checkPop 0.4s ease-out forwards', position: 'relative', zIndex: 1 }}>
-                <CheckCircle2 style={{ color: 'var(--sw-settled)', margin: '0 auto' }} size={30} />
+                <CheckCircle2 style={{ color: 'var(--co-green)', margin: '0 auto' }} size={30} />
               </div>
             ) : hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--sw-credit)', letterSpacing: '0.2em', marginBottom: 2 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-yellow)', letterSpacing: '0.2em', marginBottom: 2 }}>
                   ↑ NADPŁATA
                 </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', color: 'var(--sw-credit)', margin: 0, lineHeight: 1.1 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', color: 'var(--co-yellow)', margin: 0, lineHeight: 1.1 }}>
                   +{formatAmountShort(animatedAbs)}
                   <span style={{ fontSize: '0.9rem', opacity: 0.5, marginLeft: 3 }}>ZŁ</span>
                 </p>
@@ -368,33 +368,33 @@ export default function PlayerCard({
               <div style={{ position: 'relative', zIndex: 1 }}>
                 {isPending && (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginBottom: 3 }}>
-                    <Clock size={10} style={{ color: 'var(--sw-pending)', opacity: 0.7 }} />
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--sw-pending)', letterSpacing: '0.18em', opacity: 0.85 }}>
+                    <Clock size={10} style={{ color: '#FFE500', opacity: 0.7 }} />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: '#FFE500', letterSpacing: '0.18em', opacity: 0.85 }}>
                       Oczekuje wpłaty
                     </span>
-                    <Clock size={10} style={{ color: 'var(--sw-pending)', opacity: 0.7 }} />
+                    <Clock size={10} style={{ color: 'var(--co-yellow)', opacity: 0.7 }} />
                   </div>
                 )}
                 <p style={{
                   fontFamily: 'var(--font-display)', fontSize: '2.4rem',
                   margin: 0, lineHeight: 1.1,
-                  color: isPending ? 'var(--sw-pending)' : 'var(--sw-settled)',
+                  color: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
                   textShadow: isPending
-                    ? '0 0 14px rgba(139,130,204,0.45)'
-                    : '0 0 14px rgba(0,255,255,0.4)',
+                    ? '0 0 14px rgba(255,229,0,0.45)'
+                    : '0 0 14px rgba(0,229,255,0.4)',
                 }}>
                   {formatAmountShort(animatedAbs)}
                   <span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 3 }}>ZŁ</span>
                 </p>
                 {isSettled && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--sw-settled)', letterSpacing: '0.2em', marginTop: 2 }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-green)', letterSpacing: '0.2em', marginTop: 2 }}>
                     STATUS: CLEAR
                   </p>
                 )}
               </div>
             )}
             {adminMode && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-warn)', letterSpacing: '0.1em', marginTop: 4, position: 'relative', zIndex: 1 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-yellow)', letterSpacing: '0.1em', marginTop: 4, position: 'relative', zIndex: 1 }}>
                 ⚠ TRYB EDYCJI
               </p>
             )}
@@ -468,12 +468,12 @@ export default function PlayerCard({
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '8px 0' }}>
                   <div style={{
                     width: 46, height: 46,
-                    background: 'rgba(0,255,255,0.05)', border: '1px solid rgba(0,255,255,0.22)',
+                    background: 'rgba(0,229,255,0.05)', border: '1px solid rgba(0,229,255,0.22)',
                     clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 0 12px rgba(0,255,255,0.1)',
+                    boxShadow: '0 0 12px rgba(0,229,255,0.1)',
                   }}>
-                    <CheckCircle2 size={22} style={{ color: 'var(--sw-settled)', filter: 'drop-shadow(0 0 4px rgba(0,255,255,0.5))' }} />
+                    <CheckCircle2 size={22} style={{ color: 'var(--co-green)', filter: 'drop-shadow(0 0 4px rgba(0,229,255,0.5))' }} />
                   </div>
                   <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '6px 12px', width: '100%', opacity: 0.5 }}>
                     + Wpłać na zapas
@@ -484,13 +484,13 @@ export default function PlayerCard({
           )}
 
           {/* Barcode footer */}
-          <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--sw-border)' }}>
+          <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--co-border)' }}>
             <Barcode name={player.name} color={accentColor} />
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--sw-dim)', letterSpacing: '0.08em' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.08em' }}>
                 {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--sw-dim)', letterSpacing: '0.06em' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.06em' }}>
                 SW-NET
               </span>
             </div>
@@ -502,16 +502,16 @@ export default function PlayerCard({
       {isOrganizer && (
         <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <div style={{
-            padding: '10px 20px', border: '1px solid rgba(0,255,255,0.2)',
+            padding: '10px 20px', border: '1px solid rgba(0,229,255,0.2)',
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
-            background: 'rgba(0,255,255,0.03)', textAlign: 'center',
+            background: 'rgba(0,229,255,0.03)', textAlign: 'center',
           }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.15em', color: 'var(--sw-cyan)', margin: 0 }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.15em', color: 'var(--co-cyan)', margin: 0 }}>
               Zarządza rezerwacją
             </p>
           </div>
-          <div style={{ marginTop: 8, width: '100%', borderTop: '1px solid var(--sw-border)', paddingTop: 8 }}>
-            <Barcode name={player.name} color="var(--sw-cyan)" />
+          <div style={{ marginTop: 8, width: '100%', borderTop: '1px solid var(--co-border)', paddingTop: 8 }}>
+            <Barcode name={player.name} color="var(--co-cyan)" />
           </div>
         </div>
       )}

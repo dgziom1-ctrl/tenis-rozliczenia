@@ -30,7 +30,7 @@ function FieldLabel({ children }) {
       display: 'block',
       fontFamily: 'var(--font-display)', fontSize: '0.9rem',
       letterSpacing: '0.12em', textTransform: 'uppercase',
-      color: 'var(--sw-dim)', marginBottom: 8,
+      color: 'var(--co-dim)', marginBottom: 8,
     }}>
       {children}
     </label>
@@ -53,24 +53,24 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
       className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
         background: '#0a0a0f',
-        border: '1px solid rgba(255,0,255,0.4)',
+        border: '1px solid rgba(0,229,255,0.4)',
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
-        boxShadow: '0 0 60px rgba(255,0,255,0.15), 0 4px 60px rgba(0,0,0,0.95)',
+        boxShadow: '0 0 60px rgba(0,229,255,0.15), 0 4px 60px rgba(0,0,0,0.95)',
         padding: '28px 24px', width: '100%', maxWidth: 400,
       }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
           <div style={{
             width: 40, height: 40,
-            background: 'rgba(0,255,255,0.08)',
-            border: '1px solid rgba(0,255,255,0.35)',
+            background: 'rgba(0,229,255,0.08)',
+            border: '1px solid rgba(0,229,255,0.35)',
             clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <CheckCircle2 size={20} style={{ color: 'var(--sw-settled)' }} />
+            <CheckCircle2 size={20} style={{ color: 'var(--co-green)' }} />
           </div>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--sw-settled)', marginBottom: 3, textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--co-green)', marginBottom: 3, textTransform: 'uppercase' }}>
               Zapisano!
             </p>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.06em', color: '#e8e8e8', margin: 0 }}>
@@ -83,18 +83,18 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
           {[
             { label: 'DATA', value: formatDate(date), color: '#c8c8c8' },
-            { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--sw-pink)' },
+            { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
             { label: 'OBECNI', value: presentCount, color: '#c8c8c8' },
             multisportCount > 0
-              ? { label: 'MULTISPORT', value: `⚡ ${multisportCount}`, color: 'var(--sw-settled)' }
+              ? { label: 'MULTISPORT', value: `⚡ ${multisportCount}`, color: 'var(--co-green)' }
               : { label: 'PŁACĄ', value: payingCount, color: '#c8c8c8' },
           ].map(({ label, value, color }) => (
             <div key={label} style={{
-              padding: '10px 12px', background: 'var(--sw-dark)',
-              border: '1px solid var(--sw-border)',
+              padding: '10px 12px', background: 'var(--co-dark)',
+              border: '1px solid var(--co-border)',
               clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
             }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--sw-dim)', marginBottom: 4, textTransform: 'uppercase' }}>{label}</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 4, textTransform: 'uppercase' }}>{label}</p>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color, margin: 0 }}>{value}</p>
             </div>
           ))}
@@ -104,18 +104,18 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
         {payingCount > 0 && (
           <div style={{
             padding: '16px', marginBottom: 16, textAlign: 'center',
-            background: 'rgba(255,0,255,0.04)',
-            border: '1px solid rgba(255,0,255,0.3)',
+            background: 'rgba(0,229,255,0.04)',
+            border: '1px solid rgba(0,229,255,0.3)',
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
           }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--sw-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
               KAŻDY PŁACI
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4rem', color: 'var(--sw-pink)', textShadow: '0 0 20px rgba(255,0,255,0.5)', margin: 0 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
               {formatAmountShort(perPerson)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ</span>
             </p>
             {multisportCount > 0 && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-dim)', marginTop: 4 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 4 }}>
                 {payingCount} os. płaci · {multisportCount} os. gratis
               </p>
             )}
@@ -130,7 +130,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
             fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em',
             cursor: 'pointer', transition: 'all 0.18s',
             ...(copied ? {
-              background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.4)', color: 'var(--sw-settled)',
+              background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.4)', color: 'var(--co-green)',
             } : {
               background: 'transparent', border: '1px solid #2a2a2a', color: '#888',
             }),
@@ -158,28 +158,28 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '12px 16px',
-      background: 'rgba(255,0,255,0.03)',
-      border: '1px solid rgba(255,0,255,0.2)',
+      background: 'rgba(0,229,255,0.03)',
+      border: '1px solid rgba(0,229,255,0.2)',
       clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Calculator size={14} style={{ color: 'var(--sw-dim)' }} />
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--sw-dim)', textTransform: 'uppercase' }}>
+        <Calculator size={14} style={{ color: 'var(--co-dim)' }} />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
           Podział kosztów
         </span>
       </div>
       <div style={{ textAlign: 'right' }}>
         {paying.length > 0 ? (
           <>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.4rem', color: 'var(--sw-pink)', textShadow: '0 0 10px rgba(255,0,255,0.3)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.4rem', color: 'var(--co-cyan)', textShadow: '0 0 10px rgba(0,229,255,0.3)' }}>
               {formatAmountShort(perPerson)} ZŁ
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', color: 'var(--sw-dim)', marginLeft: 8, letterSpacing: '0.12em' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', color: 'var(--co-dim)', marginLeft: 8, letterSpacing: '0.12em' }}>
               / os. ({paying.length} PŁACI)
             </span>
           </>
         ) : (
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.1em', color: 'var(--sw-settled)' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.1em', color: 'var(--co-green)' }}>
             ⚡ WSZYSCY MAJĄ MULTISPORT
           </span>
         )}
@@ -190,9 +190,9 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
 
 // ── Player toggle grid ────────────────────────────────────
 function PlayerToggleGrid({ names, selected, onToggle, accent = 'yellow' }) {
-  const accentColor = accent === 'green' ? 'var(--sw-settled)' : 'var(--sw-pink)';
-  const accentAlpha = accent === 'green' ? 'rgba(0,255,255,0.08)' : 'rgba(255,0,255,0.08)';
-  const accentBorder = accent === 'green' ? 'rgba(0,255,255,0.4)' : 'rgba(255,0,255,0.4)';
+  const accentColor = accent === 'green' ? 'var(--co-green)' : 'var(--co-cyan)';
+  const accentAlpha = accent === 'green' ? 'rgba(0,229,255,0.08)' : 'rgba(0,229,255,0.08)';
+  const accentBorder = accent === 'green' ? 'rgba(0,229,255,0.4)' : 'rgba(0,229,255,0.4)';
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
@@ -206,9 +206,9 @@ function PlayerToggleGrid({ names, selected, onToggle, accent = 'yellow' }) {
             clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
             ...(active ? {
               background: accentAlpha, border: `1px solid ${accentBorder}`, color: accentColor,
-              boxShadow: `0 0 10px ${accent === 'green' ? 'rgba(0,255,255,0.1)' : 'rgba(255,0,255,0.1)'}`,
+              boxShadow: `0 0 10px ${accent === 'green' ? 'rgba(0,229,255,0.1)' : 'rgba(0,229,255,0.1)'}`,
             } : {
-              background: 'var(--sw-dark)', border: '1px solid var(--sw-border)', color: '#444',
+              background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: '#444',
             }),
           }}>
             {name}
@@ -308,15 +308,15 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)', padding: '20px 20px' }}>
 
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid var(--sw-border)' }}>
-            <div style={{ padding: '7px 9px', background: 'rgba(255,0,255,0.07)', border: '1px solid rgba(255,0,255,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
-              <CalendarPlus size={16} style={{ color: 'var(--sw-pink)', display: 'block' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid var(--co-border)' }}>
+            <div style={{ padding: '7px 9px', background: 'rgba(0,229,255,0.07)', border: '1px solid rgba(0,229,255,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+              <CalendarPlus size={16} style={{ color: 'var(--co-cyan)', display: 'block' }} />
             </div>
             <div>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.22em', color: 'var(--sw-pink)', textTransform: 'uppercase' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.22em', color: 'var(--co-cyan)', textTransform: 'uppercase' }}>
                 Dodaj nową sesję
               </span>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-dim)', margin: '2px 0 0' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
                 zapisz dzisiejszą grę ping-ponga
               </p>
             </div>
@@ -350,10 +350,10 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                         fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
                         clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                         ...(active ? {
-                          background: 'rgba(255,0,255,0.1)', border: '1px solid rgba(255,0,255,0.5)',
-                          color: 'var(--sw-pink)', boxShadow: '0 0 8px rgba(255,0,255,0.15)',
+                          background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.5)',
+                          color: 'var(--co-cyan)', boxShadow: '0 0 8px rgba(0,229,255,0.15)',
                         } : {
-                          background: 'var(--sw-dark)', border: '1px solid var(--sw-border)', color: '#555',
+                          background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: '#555',
                         }),
                       }}>
                       {cost === 0 ? 'FREE' : cost}
@@ -370,11 +370,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             </div>
 
             {/* Present players */}
-            <div style={{ padding: '16px', background: 'var(--sw-dark)', border: '1px solid var(--sw-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+            <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
               <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
-                <Users size={13} style={{ color: 'var(--sw-pink)' }} />
+                <Users size={13} style={{ color: 'var(--co-cyan)' }} />
                 Kto grał?
-                <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-pink)' }}>
+                <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)' }}>
                   [{presentPlayers.length}/{playerNames?.length || 0}]
                 </span>
               </p>
@@ -383,12 +383,12 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Multisport */}
             {presentPlayers.length > 0 && (
-              <div style={{ padding: '16px', background: 'var(--sw-dark)', border: '1px solid var(--sw-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+              <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
-                  <Zap size={13} style={{ color: 'var(--sw-settled)' }} />
+                  <Zap size={13} style={{ color: 'var(--co-green)' }} />
                   Kto miał Multisport? (płaci 0 zł)
                   {multisportPlayers.length > 0 && (
-                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-settled)' }}>
+                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>
                       ⚡{multisportPlayers.length}
                     </span>
                   )}
@@ -411,7 +411,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                   cursor: isDisabled ? 'not-allowed' : 'pointer',
                   fontFamily: 'var(--font-display)', fontWeight: 700,
                   ...(isDisabled ? {
-                    background: 'var(--sw-panel)', border: '1px solid var(--sw-border)', color: '#333',
+                    background: 'var(--co-panel)', border: '1px solid var(--co-border)', color: '#333',
                   } : {}),
                 }}>
                 {isSaving
@@ -419,7 +419,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                   : <><CheckCircle2 size={16} /> ZAPISZ SESJĘ</>}
               </button>
               {!isSaving && isDisabled && (
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--sw-dim)', textAlign: 'center', marginTop: 8 }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', textAlign: 'center', marginTop: 8 }}>
                   {'>'} {isDuplicateDate ? '⚠ Zmień datę — sesja już istnieje' : !totalCost ? 'Wpisz koszt sesji żeby kontynuować' : 'Zaznacz co najmniej jednego gracza'}
                 </p>
               )}

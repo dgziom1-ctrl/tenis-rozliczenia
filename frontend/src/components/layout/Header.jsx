@@ -385,7 +385,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
 
   const activateChaos = () => {
     setChaosMode(true);
-    const pool = ['🏓','⚡','💀','🎮','💥','⚠️','🔥','🎯','💣','🌪️'];
+    const pool = ['🏓','⚡','💀','🎮','💥','⚠️','🔥','🎯','💣','🌊'];
     setConfetti(Array.from({ length: 40 }, (_, i) => ({
       id: i, emoji: pool[Math.floor(Math.random() * pool.length)],
       x: Math.random()*100, delay: Math.random()*1.2,
@@ -399,7 +399,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   const CopyIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
       fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-      style={{ color:'var(--sw-dim)' }}>
+      style={{ color:'var(--co-dim)' }}>
       <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
       <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
     </svg>
@@ -419,38 +419,38 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
       {chaosMode && (
         <div className="fixed inset-0 pointer-events-none" style={{ zIndex:49,
           animation:'chaosFlash 0.6s ease-out forwards',
-          background:'radial-gradient(ellipse at 50% 30%,rgba(255,0,255,0.12) 0%,rgba(0,255,255,0.04) 60%,transparent 80%)' }}/>
+          background:'radial-gradient(ellipse at 50% 30%,rgba(0,229,255,0.12) 0%,rgba(0,229,255,0.04) 60%,transparent 80%)' }}/>
       )}
 
       <header style={{ position:'relative',overflow:'visible',
-        background:'linear-gradient(180deg,#06000E 0%,#0B0015 100%)',
-        borderBottom:'1px solid var(--sw-border)' }}>
+        background:'linear-gradient(180deg,#020408 0%,#050B10 100%)',
+        borderBottom:'1px solid var(--co-border)' }}>
 
-        <div style={{ position:'absolute',top:0,left:0,width:80,height:2,background:'var(--sw-pink)',boxShadow:'0 0 10px rgba(255,0,255,.7)',zIndex:2 }}/>
-        <div style={{ position:'absolute',top:0,right:0,width:80,height:2,background:'var(--sw-pink)',boxShadow:'0 0 10px rgba(255,0,255,.7)',zIndex:2 }}/>
-        <div style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,var(--sw-pink),transparent)',zIndex:2 }}/>
-        <div style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,var(--sw-cyan),transparent)',zIndex:2 }}/>
+        <div style={{ position:'absolute',top:0,left:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'0 0 10px rgba(0,229,255,.7)',zIndex:2 }}/>
+        <div style={{ position:'absolute',top:0,right:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'0 0 10px rgba(0,229,255,.7)',zIndex:2 }}/>
+        <div style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,rgba(0,229,255,0.9),transparent)',zIndex:2 }}/>
+        <div style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,rgba(0,229,255,0.6),transparent)',zIndex:2 }}/>
 
         <div style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
           <button onClick={handleCopy} style={{ display:'flex',alignItems:'center',gap:'8px',
-            background:'var(--sw-dark)',border:'1px solid var(--sw-border)',padding:'7px 12px',cursor:'pointer',
+            background:'var(--co-dark)',border:'1px solid var(--co-border)',padding:'7px 12px',cursor:'pointer',
             transition:'all .18s',clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}>
-            <Smartphone size={14} style={{ color:'var(--sw-dim)' }}/>
+            <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
-              letterSpacing:'.18em',color:'var(--sw-pink)',padding:'2px 6px',
-              background:'rgba(255,0,255,0.1)',border:'1px solid rgba(255,0,255,.25)' }}>BLIK</span>
+              letterSpacing:'.18em',color:'var(--co-cyan)',padding:'2px 6px',
+              background:'rgba(0,229,255,0.07)',border:'1px solid rgba(0,229,255,.22)' }}>BLIK</span>
             <span style={{ fontFamily:'var(--font-mono)',fontSize:'.9rem',letterSpacing:'.06em',color:'#e0e0e0' }}>
               {blikNumber}
             </span>
-            <div style={{ width:1,height:14,background:'var(--sw-border)',margin:'0 2px' }}/>
-            {copied ? <Check size={13} style={{ color:'var(--sw-settled)' }}/> : <CopyIcon/>}
+            <div style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
+            {copied ? <Check size={13} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
           </button>
           <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
             justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
-            border:isMuted?'1px solid rgba(139,130,204,.5)':'1px solid var(--sw-border)',
-            color:isMuted?'var(--sw-pending)':'var(--sw-dim)',
-            background:isMuted?'rgba(139,130,204,.08)':'transparent',
+            border:isMuted?'1px solid rgba(255,229,0,.5)':'1px solid var(--co-border)',
+            color:isMuted?'var(--co-yellow)':'var(--co-dim)',
+            background:isMuted?'rgba(255,229,0,.08)':'transparent',
             clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
             {isMuted ? <VolumeX size={17}/> : <Volume2 size={17}/>}
           </button>
@@ -460,17 +460,17 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
           <div style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
-            <div style={{ height:1,width:36,background:'linear-gradient(to right,transparent,rgba(255,0,255,.4))' }}/>
+            <div style={{ height:1,width:36,background:'linear-gradient(to right,transparent,rgba(0,229,255,.4))' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
-              letterSpacing:'.28em',color:'rgba(255,0,255,0.5)',textTransform:'uppercase' }}>
+              letterSpacing:'.28em',color:'rgba(0,229,255,0.45)',textTransform:'uppercase' }}>
               CENTRUM DOWODZENIA
             </span>
-            <div style={{ height:1,width:36,background:'linear-gradient(to left,transparent,rgba(0,255,255,.4))' }}/>
+            <div style={{ height:1,width:36,background:'linear-gradient(to left,transparent,rgba(0,229,255,.4))' }}/>
           </div>
 
           <div style={{ width:'100%',maxWidth:560,marginBottom:14,
             overflow:'visible',
-            filter:chaosMode?'none':'drop-shadow(0 0 20px rgba(255,0,255,.12))' }}>
+            filter:chaosMode?'none':'drop-shadow(0 0 20px rgba(0,229,255,.12))' }}>
             <Arena chaosMode={chaosMode} onHit={handleHit}/>
           </div>
 
@@ -480,15 +480,15 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               display:'block',fontFamily:'var(--font-display)',fontWeight:900,
               fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:'.06em',lineHeight:1,textAlign:'center',
               ...(chaosMode
-                ? { color:'#FF88FF',animation:'headerBounce .4s ease-in-out 3',
-                    textShadow:'0 0 30px rgba(255,0,255,.8),0 0 60px rgba(0,255,255,.3),2px 2px 0 rgba(0,0,0,.9)' }
-                : { color:'#EE88EE',
-                    textShadow:'0 0 20px rgba(255,0,255,.3),0 0 40px rgba(0,255,255,.15),2px 2px 0 rgba(0,0,0,.95)' }),
+                ? { color:'#00E5FF',animation:'headerBounce .4s ease-in-out 3',
+                    textShadow:'0 0 30px rgba(0,229,255,.8),0 0 60px rgba(0,229,255,.3),2px 2px 0 rgba(0,0,0,.9)' }
+                : { color:'#A8D8E8',
+                    textShadow:'0 0 20px rgba(0,229,255,.3),0 0 40px rgba(0,229,255,.15),2px 2px 0 rgba(0,0,0,.95)' }),
             }}>CYBER-PONG</span>
           </button>
 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
-            background:'linear-gradient(90deg,transparent,rgba(255,0,255,.25) 40%,rgba(0,255,255,.25) 60%,transparent)' }}/>
+            background:'linear-gradient(90deg,transparent,rgba(0,229,255,.25) 40%,rgba(0,229,255,.25) 60%,transparent)' }}/>
 
           {/* JACK IN — lights up exactly when ball hits paddle */}
           <div style={{ display:'flex',alignItems:'center',gap:'14px' }}>
@@ -496,46 +496,46 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
               fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
               letterSpacing:'.2em',textTransform:'uppercase',
               transition:'color .06s,text-shadow .06s',
-              color:    hitting ? 'var(--sw-pink)' : 'rgba(255,0,255,0.08)',
-              textShadow: hitting ? '0 0 12px rgba(255,0,255,.8)' : 'none',
+              color:    hitting ? 'var(--co-cyan)' : 'rgba(0,229,255,0.08)',
+              textShadow: hitting ? '0 0 12px rgba(0,229,255,.8)' : 'none',
             }}>⚡ JACK IN ⚡</span>
-            <span style={{ color:'var(--sw-border)' }}>│</span>
+            <span style={{ color:'var(--co-border)' }}>│</span>
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
               letterSpacing:'.1em',
-              color:isConnected?'var(--sw-settled)':'var(--sw-pending)',
-              textShadow:isConnected?'0 0 8px var(--sw-settled)':'0 0 8px var(--sw-pending)' }}>
+              color:isConnected?'var(--co-green)':'var(--co-yellow)',
+              textShadow:isConnected?'0 0 8px var(--co-green)':'0 0 8px var(--co-yellow)' }}>
               {isConnected ? '● ONLINE' : '○ OFFLINE'}
             </span>
-            <span style={{ color:'var(--sw-border)' }}>│</span>
-            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.68rem',color:'var(--sw-dim)' }}>
+            <span style={{ color:'var(--co-border)' }}>│</span>
+            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.68rem',color:'var(--co-dim)' }}>
               v2.0.77
             </span>
           </div>
         </div>
       </header>
 
-      <div style={{ height:2,background:'linear-gradient(90deg,transparent,var(--sw-pink) 30%,var(--sw-cyan) 70%,transparent)',opacity:.6 }}/>
+      <div style={{ height:2,background:'linear-gradient(90deg,transparent,var(--co-cyan) 50%,transparent)',opacity:.6 }}/>
 
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
         <button onClick={handleCopy} style={{ background:'transparent',border:'none',padding:0,
           cursor:'pointer',display:'flex',alignItems:'center',gap:'6px' }}>
           <span style={{ fontSize:'.9rem' }}>🏓</span>
           <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
-            letterSpacing:'.15em',color:'var(--sw-pink)',padding:'2px 5px',
-            background:'rgba(255,0,255,0.1)',border:'1px solid rgba(255,0,255,.2)' }}>BLIK</span>
+            letterSpacing:'.15em',color:'var(--co-cyan)',padding:'2px 5px',
+            background:'rgba(0,229,255,0.1)',border:'1px solid rgba(0,229,255,.2)' }}>BLIK</span>
           <span style={{ fontFamily:'var(--font-mono)',color:'#e0e0e0',fontSize:'.85rem',letterSpacing:'.06em' }}>
             {blikNumber}
           </span>
-          {copied ? <Check size={12} style={{ color:'var(--sw-settled)' }}/> : <CopyIcon/>}
+          {copied ? <Check size={12} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
         </button>
         <div style={{ display:'flex',alignItems:'center',gap:'10px' }}>
           <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
-            letterSpacing:'.08em',color:isConnected?'var(--sw-settled)':'var(--sw-pending)' }}>
+            letterSpacing:'.08em',color:isConnected?'var(--co-green)':'var(--co-yellow)' }}>
             {isConnected ? '● ONLINE' : '○ OFFLINE'}
           </span>
           <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
-            border:isMuted?'1px solid rgba(139,130,204,.4)':'1px solid #252535',
-            color:isMuted?'var(--sw-pending)':'var(--sw-dim)',
+            border:isMuted?'1px solid rgba(255,229,0,.4)':'1px solid #252535',
+            color:isMuted?'var(--co-yellow)':'var(--co-dim)',
             background:'transparent',padding:'4px 6px',cursor:'pointer',
             clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
             {isMuted ? <VolumeX size={15}/> : <Volume2 size={15}/>}
