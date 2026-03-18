@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { TrendingUp, ChevronDown } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { getPlayerColor } from '../../constants/playerColors';
 import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
 import { formatAmountShort } from '../../utils/format';

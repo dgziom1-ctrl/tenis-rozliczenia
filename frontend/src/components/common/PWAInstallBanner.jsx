@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, X, Share, Zap } from 'lucide-react';
+import { Download, Share, X } from 'lucide-react';
 
 export default function PWAInstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);

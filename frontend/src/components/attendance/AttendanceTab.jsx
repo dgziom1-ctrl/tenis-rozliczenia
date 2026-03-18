@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { CalendarDays, TrendingUp, Flame, Trophy, Zap, Target, Award, ChevronRight, X, Activity, Hash } from 'lucide-react';
+import { Award, CalendarDays, Flame, Target, TrendingUp, X, Zap } from 'lucide-react';
 import { RANKS, PODIUM, PODIUM_ORDER, getRank } from '../../constants';
 import { formatDate } from '../../utils/format';
 import { getPlayerColor } from '../../constants/playerColors';

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CalendarPlus, Users, Zap, CalendarDays, CheckCircle2, Calculator, Copy, Terminal } from 'lucide-react';
+import { Calculator, CalendarDays, CalendarPlus, CheckCircle2, Copy, Users, Zap } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';

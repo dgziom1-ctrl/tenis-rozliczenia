@@ -1,4 +1,4 @@
-import { HandCoins, CheckCircle2, X, Crosshair } from 'lucide-react';
+import { CheckCircle2, HandCoins, X } from 'lucide-react';
 import { formatAmountShort } from '../../utils/format';
 
 export default function SettleConfirmModal({ playerName, debt, onConfirm, onCancel, tokens }) {

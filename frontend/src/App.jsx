@@ -14,7 +14,7 @@ import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
 import { useScrolled } from './hooks/useScrolled';
 import { ThemeContext } from './context/ThemeContext';
-import { Zap } from 'lucide-react';
+import {  } from 'lucide-react';
 
 const INITIAL_APP_DATA = {
   summary: {},

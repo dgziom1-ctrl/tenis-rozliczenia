@@ -1,4 +1,4 @@
-import { ChevronDown, Minus } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useThemeTokens } from '../../context/ThemeContext';
 import { formatDate, formatAmountShort } from '../../utils/format';
 
