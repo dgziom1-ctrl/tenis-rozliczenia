@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { CheckCircle2 } from 'lucide-react';
 import { getPlayerColor } from '../../constants/playerColors';
 import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
 import { formatAmountShort } from '../../utils/format';
@@ -212,10 +211,24 @@ export default function PlayerCard({
         background: 'linear-gradient(160deg, var(--co-panel) 0%, var(--co-dark) 100%)',
         border: `1px solid ${cardBorder}`,
         display: 'flex', flexDirection: 'column',
-        // pending: subtelny gentle glow, nie pulsujący neon
         animation: 'none',
         overflow: 'hidden',
-        transition: 'border-color 0.3s, box-shadow 0.3s',
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+        boxShadow: isPending
+          ? `0 0 18px rgba(255,32,144,0.13), 0 0 40px rgba(255,32,144,0.05), inset 0 0 20px rgba(255,32,144,0.03)`
+          : 'none',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = `${c.border}70`;
+        e.currentTarget.style.boxShadow = isPending
+          ? `0 0 24px rgba(255,32,144,0.2), 0 0 50px rgba(255,32,144,0.07), inset 0 0 20px rgba(255,32,144,0.04)`
+          : `0 0 16px ${c.border}30, 0 0 32px ${c.border}10`;
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = cardBorder;
+        e.currentTarget.style.boxShadow = isPending
+          ? `0 0 18px rgba(255,32,144,0.13), 0 0 40px rgba(255,32,144,0.05), inset 0 0 20px rgba(255,32,144,0.03)`
+          : 'none';
       }}
     >
       <CornerBrackets color={accentColor} size={14} thickness={1} />
@@ -237,7 +250,7 @@ export default function PlayerCard({
           {/* Neutralne etykiety – żadnych wykrzykników, żadnego "dłużnik" */}
           {isPending ? 'Do rozliczenia'
             : isOrganizer ? 'Organizator'
-            : isSettled ? '✓ Rozliczony'
+            : isSettled ? 'Rozliczony'
             : '↑ Nadpłata'}
         </span>
         <span style={{
@@ -326,7 +339,7 @@ export default function PlayerCard({
             {justSettled ? (
               <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', animation: 'slide-in-up 0.3s ease-out' }}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.15em', color: 'var(--co-green)', textShadow: '0 0 20px rgba(0,255,136,0.6)', margin: 0 }}>
-                  OPŁACONO ✓
+                  OPŁACONO
                 </p>
               </div>
             ) : hasCredit ? (
@@ -365,7 +378,7 @@ export default function PlayerCard({
                 </p>
                 {isSettled && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'rgba(0,255,136,0.6)', letterSpacing: '0.2em', marginTop: 2 }}>
-                    ✓ rozliczony
+                    rozliczony
                   </p>
                 )}
               </div>
@@ -442,17 +455,8 @@ export default function PlayerCard({
                 </button>
               )}
               {isSettled && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '8px 0' }}>
-                  <div style={{
-                    width: 46, height: 46,
-                    background: 'rgba(0,229,255,0.05)', border: '1px solid rgba(0,229,255,0.22)',
-                    clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 0 12px rgba(0,229,255,0.1)',
-                  }}>
-                    <CheckCircle2 size={22} style={{ color: 'var(--co-green)', filter: 'drop-shadow(0 0 4px rgba(0,255,102,0.5))' }} />
-                  </div>
-                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '6px 12px', width: '100%', opacity: 0.5 }}>
+                <div style={{ padding: '4px 0' }}>
+                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '6px 12px', width: '100%', opacity: 0.45 }}>
                     + Wpłać na zapas
                   </button>
                 </div>

@@ -476,28 +476,31 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
 
           <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
-            {/* Ghost layer — glitch chromatic aberration */}
-            {!chaosMode && <span aria-hidden="true" style={{
+            {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
+            {!chaosMode && hitting && <span aria-hidden="true" style={{
               position:'absolute',inset:0,
               display:'block',fontFamily:'var(--font-display)',fontWeight:900,
               fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:'.06em',lineHeight:1,textAlign:'center',
               color:'transparent',pointerEvents:'none',userSelect:'none',
-              textShadow:'-3px 0 #FF2090',
-              clipPath:'polygon(0 25%, 100% 25%, 100% 55%, 0 55%)',
-              animation:'title-glitch 3.5s steps(1) infinite 1.5s',
-              opacity:0.85,
+              textShadow:'-4px 0 #FF2090, 4px 0 var(--co-cyan)',
+              clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
+              opacity:1,
             }}>CYBER-PONG</span>}
-            {/* Main title */}
+            {/* Main title — glitch on hit */}
             <span style={{
               display:'block',fontFamily:'var(--font-display)',fontWeight:900,
               fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:'.06em',lineHeight:1,textAlign:'center',
               position:'relative',
+              transition:'text-shadow 0.06s, transform 0.06s',
               ...(chaosMode
                 ? { color:'#00E5FF',animation:'headerBounce .4s ease-in-out 3',
                     textShadow:'0 0 30px rgba(0,229,255,.8),0 0 60px rgba(0,229,255,.3),2px 2px 0 rgba(0,0,0,.9)' }
+                : hitting
+                ? { color:'#E0F4FF',
+                    textShadow:'0 0 28px rgba(0,229,255,.9),0 0 60px rgba(0,229,255,.4),3px 0 #FF2090,-3px 0 var(--co-cyan)',
+                    transform:'translateX(1px)' }
                 : { color:'#B8E0EE',
                     textShadow:'0 0 20px rgba(0,229,255,.25),2px 2px 0 rgba(0,0,0,.98)',
-                    animation:'title-glitch 3.5s steps(1) infinite',
                 }),
             }}>CYBER-PONG</span>
           </button>

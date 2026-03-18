@@ -593,18 +593,20 @@ select option { background: #090F18; color: var(--co-text); }
 }
 
 /* ══ CARD HOVER GLOW ════════════════════════════════════════════ */
-/* Applied via player-card-wrap class */
 .player-card-wrap {
-  transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), filter 0.18s ease;
+  transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), filter 0.2s ease;
+  position: relative;
 }
+/* The inner card element gets the border glow via JS inline style
+   but we make the wrapper lift and add a subtle brightness bump */
 .player-card-wrap:hover {
   transform: translateY(-4px);
-  filter: brightness(1.08) saturate(1.1);
+  filter: brightness(1.06) saturate(1.08);
   z-index: 2;
-  position: relative;
 }
 .player-card-wrap:active {
   transform: translateY(-1px);
+  filter: brightness(1.03);
 }
 
 /* ══ BUTTON SIZE FIX ════════════════════════════════════════════ */
