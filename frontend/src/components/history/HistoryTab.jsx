@@ -55,7 +55,7 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
         boxShadow: error
-          ? '0 0 30px rgba(255,155,0,0.3)'
+          ? '0 0 30px rgba(255,32,144,0.3)'
           : '0 0 30px rgba(0,229,255,0.15)',
         transition: 'all 0.2s',
       }}>
@@ -76,9 +76,9 @@ function PasswordModal({ action, onConfirm, onCancel, tokens }) {
             style={{
               width: '100%', padding: '10px 12px',
               fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
-              border: `1px solid ${error ? 'var(--co-yellow)' : '#2a2a2a'}`,
+              border: `1px solid ${error ? 'var(--co-yellow)' : 'var(--co-border)'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-              boxShadow: error ? '0 0 12px rgba(255,155,0,0.3)' : 'none',
+              boxShadow: error ? '0 0 12px rgba(255,32,144,0.3)' : 'none',
             }}
           />
           {error && (
@@ -110,7 +110,7 @@ function LogEntry({ row, onEdit, onDelete }) {
       padding: '12px 14px', marginBottom: 4,
       transition: 'border-color 0.2s',
     }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = '#2a2a2a'}
+      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--co-border)'}
       onMouseLeave={e => e.currentTarget.style.borderColor = '#141414'}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -136,7 +136,7 @@ function LogEntry({ row, onEdit, onDelete }) {
               transition: 'all 0.15s',
             }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,229,255,0.4)'; e.currentTarget.style.color = 'var(--co-cyan)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--co-dim)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = 'var(--co-dim)'; }}
             >
               <Pencil size={13} />
             </button>
@@ -147,8 +147,8 @@ function LogEntry({ row, onEdit, onDelete }) {
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
               transition: 'all 0.15s',
             }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,155,0,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--co-dim)'; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = 'var(--co-dim)'; }}
             >
               <Trash2 size={13} />
             </button>
@@ -272,7 +272,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             <Terminal size={14} style={{ color: 'var(--co-green)', display: 'block' }} />
           </div>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.2rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-green)' }}>
-            Historia sesji ping-ponga
+            HISTORIA
           </span>
           <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,229,255,0.2), transparent)' }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
@@ -403,10 +403,10 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
                   if (isDeletingRow) return (
                     <div key={row.id} style={{
-                      background: 'rgba(255,155,0,0.04)', border: '1px solid rgba(255,155,0,0.35)',
+                      background: 'rgba(255,32,144,0.04)', border: '1px solid rgba(255,32,144,0.35)',
                       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
                       padding: 16, marginBottom: 4,
-                      boxShadow: '0 0 20px rgba(255,155,0,0.1)',
+                      boxShadow: '0 0 20px rgba(255,32,144,0.1)',
                     }}>
                       <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', marginBottom: 4, textTransform: 'uppercase' }}>
                         ⚠ Usunąć sesję z dnia {formatDate(row.datePlayed)}?

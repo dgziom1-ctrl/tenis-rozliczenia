@@ -39,7 +39,7 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
         border: `1px solid ${error ? 'var(--co-yellow)' : 'rgba(0,229,255,0.35)'}`,
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
-        boxShadow: error ? '0 0 30px rgba(255,155,0,0.25)' : '0 0 30px rgba(0,229,255,0.12)',
+        boxShadow: error ? '0 0 30px rgba(255,32,144,0.25)' : '0 0 30px rgba(0,229,255,0.12)',
         transition: 'all 0.2s',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
@@ -58,9 +58,9 @@ function PasswordModal({ playerName, onConfirm, onCancel, tokens }) {
             className="cyber-input"
             style={{
               width: '100%', padding: '10px 12px', fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
-              border: `1px solid ${error ? 'var(--co-yellow)' : '#2a2a2a'}`,
+              border: `1px solid ${error ? 'var(--co-yellow)' : 'var(--co-border)'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-              boxShadow: error ? '0 0 10px rgba(255,155,0,0.3)' : 'none',
+              boxShadow: error ? '0 0 10px rgba(255,32,144,0.3)' : 'none',
             }}
           />
           {error && <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--co-yellow)', textAlign: 'center' }}>⚠ ❌ Złe hasło</p>}
@@ -108,12 +108,10 @@ function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
 
       {/* Name + class */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#d0d0d0', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 400, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--co-text-hi)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {player.name}
         </p>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.15em', color: isOrganizer ? 'var(--co-cyan)' : c.border, opacity: 0.7, margin: '2px 0 0', textTransform: 'uppercase' }}>
-          {isOrganizer ? '🏓 Ogarnia rez.' : '🏓 Gracz'}
-        </p>
+
       </div>
 
       {/* Action */}
@@ -126,8 +124,8 @@ function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
           transition: 'all 0.15s',
           flexShrink: 0,
         }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,155,0,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.color = 'var(--co-dim)'; }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = 'var(--co-dim)'; }}
           title="Usuń gracza"
         >
           <Trash2 size={14} />
@@ -241,7 +239,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {/* Player list */}
         {players && players.length > 0 && (
           <div style={{ marginBottom: 28 }}>
-            <SectionHeader icon={Cpu} title="Aktywni gracze" />
+            <SectionHeader icon={Cpu} title="AKTYWNI GRACZE" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 8 }}>
               {[...players]
                 .sort((a, b) => {
@@ -298,7 +296,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                 <div key={name}>
                   {confirmDelete === name ? (
                     <div style={{
-                      padding: '14px', background: 'rgba(255,155,0,0.04)', border: '1px solid rgba(255,155,0,0.3)',
+                      padding: '14px', background: 'rgba(255,32,144,0.04)', border: '1px solid rgba(255,32,144,0.3)',
                       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
                     }}>
                       <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5, textTransform: 'uppercase' }}>
@@ -343,7 +341,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                           color: '#3a3a3a', transition: 'all 0.15s',
                           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                         }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,155,0,0.4)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.4)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#3a3a3a'; }}
                           title="Usuń na zawsze">
                           <Trash2 size={13} />

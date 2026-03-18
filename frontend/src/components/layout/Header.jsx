@@ -448,9 +448,9 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
           </button>
           <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
             justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
-            border:isMuted?'1px solid rgba(255,155,0,.5)':'1px solid var(--co-border)',
-            color:isMuted?'var(--co-yellow)':'var(--co-dim)',
-            background:isMuted?'rgba(255,155,0,.08)':'transparent',
+            border:isMuted?'1px solid rgba(255,32,144,.5)':'1px solid var(--co-border)',
+            color:isMuted?'#FF4444':'var(--co-dim)',
+            background:isMuted?'rgba(255,68,68,.08)':'transparent',
             clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
             {isMuted ? <VolumeX size={17}/> : <Volume2 size={17}/>}
           </button>
@@ -502,8 +502,8 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             <span style={{ color:'var(--co-border)' }}>│</span>
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
               letterSpacing:'.1em',
-              color:isConnected?'var(--co-green)':'var(--co-yellow)',
-              textShadow:isConnected?'0 0 8px var(--co-green)':'0 0 8px var(--co-yellow)' }}>
+              color:isConnected?'var(--co-green)':'#FF3333',
+              textShadow:isConnected?'0 0 8px rgba(0,255,136,0.5)':'0 0 8px rgba(255,50,50,0.5)' }}>
               {isConnected ? '● ONLINE' : '○ OFFLINE'}
             </span>
             <span style={{ color:'var(--co-border)' }}>│</span>
@@ -530,11 +530,11 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
         </button>
         <div style={{ display:'flex',alignItems:'center',gap:'10px' }}>
           <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
-            letterSpacing:'.08em',color:isConnected?'var(--co-green)':'var(--co-yellow)' }}>
+            letterSpacing:'.08em',color:isConnected?'var(--co-green)':'#FF3333' }}>
             {isConnected ? '● ONLINE' : '○ OFFLINE'}
           </span>
           <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
-            border:isMuted?'1px solid rgba(255,155,0,.4)':'1px solid var(--co-border)',
+            border:isMuted?'1px solid rgba(255,32,144,.4)':'1px solid var(--co-border)',
             color:isMuted?'var(--co-yellow)':'var(--co-dim)',
             background:'transparent',padding:'4px 6px',cursor:'pointer',
             clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>

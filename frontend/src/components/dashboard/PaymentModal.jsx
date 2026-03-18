@@ -39,8 +39,8 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
           fontSize: '1.3rem', textAlign: 'center',
           fontFamily: 'var(--font-mono)',
           marginBottom: showError ? 4 : 12,
-          border: `1px solid ${showError ? 'var(--co-yellow)' : '#2a2a2a'}`,
-          boxShadow: showError ? '0 0 10px rgba(255,155,0,0.2)' : 'none',
+          border: `1px solid ${showError ? 'var(--co-yellow)' : 'var(--co-border)'}`,
+          boxShadow: showError ? '0 0 10px rgba(255,32,144,0.2)' : 'none',
           clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
         }}
       />

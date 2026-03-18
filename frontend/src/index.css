@@ -8,7 +8,7 @@
    COLD OPERATOR  ·  Military-Hacker Cyberpunk
    Dominant:  Electric Cyan  #00E5FF
    Support:   Electric Blue  #0080FF
-   Hazard:    Yellow         #FF9B00  (neutral payment status)
+   Hazard:    Yellow         #FF2090  (neutral payment status)
    Positive:  Matrix Green   #00FF88
    Accent:    Neon Pink      #FF00FF  (<5% – micro-accents only)
    Base:      #030508 near-black with cold blue tint
@@ -30,9 +30,9 @@
   --co-ice:      #0080FF;   /* electric blue — replaces old ice pastel */
 
   /* ── Hazard Yellow — payment status (neutral, not aggressive) ── */
-  --co-yellow:   #FF9B00;   /* hazard yellow, "do rozliczenia" */
-  --co-yellow-mid:#CC7C00;  /* dimmer amber */
-  --co-yellow-dim:#1A1000;  /* yellow bg tint */
+  --co-yellow:   #FF2090;   /* hazard yellow, "do rozliczenia" */
+  --co-yellow-mid:#CC1A74;  /* dimmer amber */
+  --co-yellow-dim:#1A0012;  /* yellow bg tint */
 
   /* ── Positive — Matrix Green ── */
   --co-green:    #00FF88;   /* settled / positive */
@@ -148,8 +148,8 @@ body::after {
 }
 /* Warm amber — calm pulse, informational not alarming */
 @keyframes neon-yellow {
-  0%, 100% { box-shadow: 0 0 3px rgba(255,155,0,0.35), 0 0 10px rgba(255,155,0,0.12); }
-  50%       { box-shadow: 0 0 8px rgba(255,155,0,0.55), 0 0 20px rgba(255,155,0,0.22); }
+  0%, 100% { box-shadow: 0 0 3px rgba(255,32,144,0.35), 0 0 10px rgba(255,32,144,0.12); }
+  50%       { box-shadow: 0 0 8px rgba(255,32,144,0.55), 0 0 20px rgba(255,32,144,0.22); }
 }
 @keyframes neon-green {
   0%, 100% { box-shadow: 0 0 4px var(--co-green), 0 0 10px rgba(0,255,136,0.18); }
@@ -219,7 +219,7 @@ body::after {
   50%     { transform: rotate(10deg); }
 }
 @keyframes pending-flash {
-  0%   { background: rgba(255,155,0,0.10); }
+  0%   { background: rgba(255,32,144,0.10); }
   100% { background: transparent; }
 }
 @keyframes settle-flash {
@@ -372,25 +372,27 @@ body::after {
 
 /* ── Glitch text — CYBER-PONG title ── */
 @keyframes title-glitch {
-  0%,  88%, 100% { clip-path: none; transform: none; opacity: 1; }
-  89% {
-    clip-path: polygon(0 15%, 100% 15%, 100% 40%, 0 40%);
-    transform: translate(-4px, 0);
-    opacity: 0.9;
-    text-shadow: 4px 0 #FF0080, -4px 0 var(--co-cyan);
+  0%,  75%, 100% { clip-path: none; transform: none; opacity: 1; filter: none; }
+  76% {
+    clip-path: polygon(0 10%, 100% 10%, 100% 38%, 0 38%);
+    transform: translate(-6px, 1px);
+    opacity: 1;
+    filter: hue-rotate(40deg);
+    text-shadow: 6px 0 #FF2090, -6px 0 var(--co-cyan);
   }
-  90% {
-    clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%);
-    transform: translate(4px, 0);
-    text-shadow: -4px 0 #FF0080, 4px 0 var(--co-cyan);
+  77% {
+    clip-path: polygon(0 60%, 100% 60%, 100% 82%, 0 82%);
+    transform: translate(7px, -1px);
+    text-shadow: -7px 0 #FF2090, 7px 0 var(--co-cyan);
   }
-  91% { clip-path: none; transform: none; text-shadow: none; }
-  92% {
-    clip-path: polygon(0 5%, 100% 5%, 100% 20%, 0 20%);
-    transform: translate(-2px, 1px);
-    opacity: 0.85;
+  78% { clip-path: none; transform: translate(-3px,0); text-shadow: 3px 0 var(--co-cyan); filter: none; }
+  79% {
+    clip-path: polygon(0 3%, 100% 3%, 100% 18%, 0 18%);
+    transform: translate(4px, 2px);
+    opacity: 0.7;
+    text-shadow: -4px 0 #FF2090;
   }
-  93% { clip-path: none; transform: none; opacity: 1; }
+  80% { clip-path: none; transform: none; opacity: 1; text-shadow: none; }
 }
 
 /* ── Podium scanline sweep ── */
@@ -411,8 +413,25 @@ body::after {
   to   { transform: translateY(-2px); }
 }
 
+
+/* ── Bottom sheet slide up (PlayerSessionModal) ── */
+@keyframes sheet-up {
+  0%   { transform: translateY(100%); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.bottom-sheet-enter {
+  animation: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Number counter glow ── */
+@keyframes num-glow {
+  0%, 100% { text-shadow: 0 0 8px currentColor; }
+  50%       { text-shadow: 0 0 18px currentColor, 0 0 32px currentColor; }
+}
+
 /* ── Stagger helpers ── */
-.card-stagger-1 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.card-stagger-1 { animation: card-enter 0.45s cubic-bezier(0.22,1,0.36,1) both; }
 .card-stagger-2 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.06s both; }
 .card-stagger-3 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.12s both; }
 .card-stagger-4 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.18s both; }
@@ -579,8 +598,10 @@ select option { background: #090F18; color: var(--co-text); }
   transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), filter 0.18s ease;
 }
 .player-card-wrap:hover {
-  transform: translateY(-3px);
-  filter: brightness(1.06);
+  transform: translateY(-4px);
+  filter: brightness(1.08) saturate(1.1);
+  z-index: 2;
+  position: relative;
 }
 .player-card-wrap:active {
   transform: translateY(-1px);

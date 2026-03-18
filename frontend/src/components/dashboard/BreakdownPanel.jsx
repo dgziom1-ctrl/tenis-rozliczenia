@@ -52,7 +52,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
                 </TerminalRow>
               ))}
               {breakdown.sessions.length > 1 && (
-                <TerminalRow highlight="rgba(255,155,0,0.04)">
+                <TerminalRow highlight="rgba(255,32,144,0.04)">
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>RAZEM SESJE</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-yellow)' }}>
                     -{formatAmountShort(breakdown.totalSessions)} ZŁ

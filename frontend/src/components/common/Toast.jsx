@@ -63,8 +63,8 @@ const STYLES = {
   },
   error: {
     bg:       '#0e0606',
-    border:   'rgba(255,155,0,0.4)',
-    shadow:   '0 0 20px rgba(255,155,0,0.12)',
+    border:   'rgba(255,32,144,0.4)',
+    shadow:   '0 0 20px rgba(255,32,144,0.12)',
     accent:   'var(--co-yellow)',
     icon:     <AlertCircle size={16} style={{ color: 'var(--co-yellow)', flexShrink: 0 }} />,
     prefix:   'ERR',

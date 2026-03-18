@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { CheckCircle2, TrendingUp, ChevronDown } from 'lucide-react';
+import { TrendingUp, ChevronDown } from 'lucide-react';
 import { getPlayerColor } from '../../constants/playerColors';
 import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
 import { formatAmountShort } from '../../utils/format';
@@ -99,7 +99,7 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
         width: 10, height: 10,
         background: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
         border: '2px solid var(--co-void)',
-        boxShadow: isPending ? '0 0 4px rgba(255,155,0,0.5)' : '0 0 4px rgba(0,255,102,0.5)',
+        boxShadow: isPending ? '0 0 4px rgba(255,32,144,0.5)' : '0 0 4px rgba(0,255,102,0.5)',
         borderRadius: '50%',
       }} />
     </div>
@@ -109,7 +109,7 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
 // ── Rank badge ───────────────────────────────────────────────────
 function RankBadge({ rank, pct }) {
   const rankColors = {
-    'LEGENDA': 'var(--co-yellow)', 'MISTRZ': '#FF9B00', 'WETERAN': 'rgba(0,128,255,0.9)',
+    'LEGENDA': '#FFD700',  // gold 'MISTRZ': '#FF2090', 'WETERAN': '#7B8FFF',  // electric indigo
     'STAŁY': 'var(--co-cyan)', 'GOŚĆ': 'var(--co-dim)', 'DUCH': 'var(--co-dim2)',
   };
   const col = rankColors[rank.name] || 'var(--co-dim)';
@@ -196,7 +196,10 @@ export default function PlayerCard({
   // Card color logic — neutralny dla pending
   const accentColor = c.border;   // always player's own color
 
-  const cardBorder = `${c.border}30`;  // always player's own color, subtle
+  // Settled cards get a very subtle green tint on top of player color
+  const cardBorder = isSettled && !isOrganizer
+    ? `${c.border}25`
+    : `${c.border}30`;
 
   const playerId = `P${String((player.name.charCodeAt(0) * 31 + playerIndex * 17) % 9000 + 1000)}`;
 
@@ -221,9 +224,9 @@ export default function PlayerCard({
       <div style={{
         padding: '4px 12px',
         background: isPending
-          ? 'rgba(255,155,0,0.04)'
+          ? 'rgba(255,32,144,0.04)'
           : 'rgba(0,229,255,0.03)',
-        borderBottom: `1px solid ${isPending ? 'rgba(255,155,0,0.18)' : 'rgba(0,229,255,0.08)'}`,
+        borderBottom: `1px solid ${isPending ? 'rgba(255,32,144,0.18)' : 'rgba(0,229,255,0.08)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{
@@ -302,12 +305,12 @@ export default function PlayerCard({
               padding: '12px',
               marginBottom: 10,
               background: isPending
-                ? 'rgba(255,155,0,0.06)'
-                : hasCredit ? 'rgba(255,155,0,0.05)'
+                ? 'rgba(255,32,144,0.06)'
+                : hasCredit ? 'rgba(255,32,144,0.05)'
                 : 'rgba(0,229,255,0.04)',
               border: `1px solid ${isPending
-                ? 'rgba(255,155,0,0.25)'
-                : hasCredit ? 'rgba(255,155,0,0.2)'
+                ? 'rgba(255,32,144,0.25)'
+                : hasCredit ? 'rgba(255,32,144,0.2)'
                 : 'rgba(0,229,255,0.15)'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
               cursor: 'default', userSelect: 'none',
@@ -321,8 +324,10 @@ export default function PlayerCard({
             }} />
 
             {justSettled ? (
-              <div style={{ animation: 'checkPop 0.4s ease-out forwards', position: 'relative', zIndex: 1 }}>
-                <CheckCircle2 style={{ color: 'var(--co-green)', margin: '0 auto' }} size={30} />
+              <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', animation: 'slide-in-up 0.3s ease-out' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.15em', color: 'var(--co-green)', textShadow: '0 0 20px rgba(0,255,136,0.6)', margin: 0 }}>
+                  OPŁACONO ✓
+                </p>
               </div>
             ) : hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
@@ -340,7 +345,7 @@ export default function PlayerCard({
                   <div style={{ marginBottom: 4 }}>
                     <span style={{
                       fontFamily: 'var(--font-mono)', fontSize: '0.5rem',
-                      color: 'rgba(255,155,0,0.5)',
+                      color: 'rgba(255,32,144,0.5)',
                       letterSpacing: '0.2em', textTransform: 'uppercase',
                     }}>
                       do rozliczenia
@@ -352,15 +357,15 @@ export default function PlayerCard({
                   margin: 0, lineHeight: 1.1,
                   color: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
                   textShadow: isPending
-                    ? '0 0 14px rgba(255,155,0,0.45)'
+                    ? '0 0 14px rgba(255,32,144,0.45)'
                     : '0 0 14px rgba(0,229,255,0.4)',
                 }}>
                   {formatAmountShort(animatedAbs)}
                   <span style={{ fontSize: '0.9rem', opacity: 0.35, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
                 {isSettled && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-green)', letterSpacing: '0.2em', marginTop: 2 }}>
-                    STATUS: CLEAR
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'rgba(0,255,136,0.6)', letterSpacing: '0.2em', marginTop: 2 }}>
+                    ✓ rozliczony
                   </p>
                 )}
               </div>
@@ -479,8 +484,8 @@ export default function PlayerCard({
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
             background: `${c.border}05`, textAlign: 'center',
           }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.15em', color: c.text, margin: 0 }}>
-              Ogarnia rezerwację
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.18em', color: c.text, margin: 0, opacity: 0.7 }}>
+              org · rezerwacje
             </p>
           </div>
           {/* Barcode + labels — same as other players */}
