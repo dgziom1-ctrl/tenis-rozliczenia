@@ -230,7 +230,7 @@ function LeaderboardRow({ player, totalWeeks, stats, place, onClick }) {
 }
 
 // ─── Full leaderboard ─────────────────────────────────────────────
-function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
+function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats, onSelect }) {
   const theRest = ranked.filter(p => p.place > 3);
   return (
     <div style={{
@@ -248,11 +248,11 @@ function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats }) {
       }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
         <SectionHeader icon={TrendingUp} title="RANKING" sub="frekwencja · wszystkie sesje" />
-        <Podium podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} onSelect={setSelectedPlayer} />
+        <Podium podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} onSelect={onSelect} />
         {theRest.length > 0 && (
           <div style={{ borderTop: '1px solid var(--co-border)', paddingTop: 14 }}>
             {theRest.map(player => (
-              <LeaderboardRow key={player.name} player={player} totalWeeks={totalWeeks} stats={stats} place={player.place} />
+              <LeaderboardRow key={player.name} player={player} totalWeeks={totalWeeks} stats={stats} place={player.place} onClick={() => onSelect(player.name)} />
             ))}
           </div>
         )}
