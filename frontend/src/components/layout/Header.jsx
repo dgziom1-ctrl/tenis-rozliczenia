@@ -475,15 +475,30 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
           </div>
 
           <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
-            style={{ background:'transparent',border:'none',padding:0,cursor:'pointer' }}>
+            style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
+            {/* Ghost layer — glitch chromatic aberration */}
+            {!chaosMode && <span aria-hidden="true" style={{
+              position:'absolute',inset:0,
+              display:'block',fontFamily:'var(--font-display)',fontWeight:900,
+              fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:'.06em',lineHeight:1,textAlign:'center',
+              color:'transparent',pointerEvents:'none',userSelect:'none',
+              textShadow:'-3px 0 #FF2090',
+              clipPath:'polygon(0 25%, 100% 25%, 100% 55%, 0 55%)',
+              animation:'title-glitch 3.5s steps(1) infinite 1.5s',
+              opacity:0.85,
+            }}>CYBER-PONG</span>}
+            {/* Main title */}
             <span style={{
               display:'block',fontFamily:'var(--font-display)',fontWeight:900,
               fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:'.06em',lineHeight:1,textAlign:'center',
+              position:'relative',
               ...(chaosMode
                 ? { color:'#00E5FF',animation:'headerBounce .4s ease-in-out 3',
                     textShadow:'0 0 30px rgba(0,229,255,.8),0 0 60px rgba(0,229,255,.3),2px 2px 0 rgba(0,0,0,.9)' }
-                : { color:'#A8D8E8',
-                    textShadow:'0 0 20px rgba(0,229,255,.3),0 0 40px rgba(0,229,255,.15),2px 2px 0 rgba(0,0,0,.95)' }),
+                : { color:'#B8E0EE',
+                    textShadow:'0 0 20px rgba(0,229,255,.25),2px 2px 0 rgba(0,0,0,.98)',
+                    animation:'title-glitch 3.5s steps(1) infinite',
+                }),
             }}>CYBER-PONG</span>
           </button>
 

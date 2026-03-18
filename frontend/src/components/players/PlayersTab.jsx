@@ -99,9 +99,9 @@ function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
         width: 38, height: 38, flexShrink: 0,
         background: c.bg, border: `1px solid ${c.border}55`,
         boxShadow: `0 0 8px ${c.border}30`,
-        borderRadius: isOrganizer ? '50%' : '4px',
+        borderRadius: '2px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        clipPath: isOrganizer ? 'none' : 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+        clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
       }}>
         <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, color: c.text }}>{initials}</span>
       </div>
