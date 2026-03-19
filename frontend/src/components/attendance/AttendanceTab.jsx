@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { Award, CalendarDays, Flame, Target, TrendingUp, X, Zap } from 'lucide-react';
+import { Award, CalendarDays, Flame, Target, TrendingUp, X } from 'lucide-react';
 import { RANKS, PODIUM, PODIUM_ORDER, getRank } from '../../constants';
 import { formatDate } from '../../utils/format';
 import { getPlayerColor } from '../../constants/playerColors';
@@ -208,11 +208,7 @@ function LeaderboardRow({ player, totalWeeks, stats, place, onClick }) {
       }}>{player.name}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
-        {player.multisportCount > 0 && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)', display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Zap size={8} />{player.multisportCount}
-          </span>
-        )}
+
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
           {player.attendanceCount}/{totalWeeks}
         </span>
