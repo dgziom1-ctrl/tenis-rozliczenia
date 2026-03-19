@@ -449,20 +449,22 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled, the
             <div style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
             {copied ? <Check size={13} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
           </button>
-          <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
-            justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
-            border:isMuted?'1px solid rgba(255,32,144,.5)':'1px solid var(--co-border)',
-            color:isMuted?'#FF4444':'var(--co-dim)',
-            background:isMuted?'rgba(255,68,68,.08)':'transparent',
-            clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
-            {isMuted ? <VolumeX size={17}/> : <Volume2 size={17}/>}
-          </button>
-          <button onClick={onToggleTheme} style={{ display:'flex',alignItems:'center',
-            justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
-            border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
-            clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
-            {theme === 'light' ? <Moon size={17}/> : <Sun size={17}/>}
-          </button>
+          <div style={{ display:'flex',alignItems:'center',gap:6 }}>
+            <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
+              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
+              border:isMuted?'1px solid rgba(255,32,144,.5)':'1px solid var(--co-border)',
+              color:isMuted?'#FF4444':'var(--co-dim)',
+              background:isMuted?'rgba(255,68,68,.08)':'transparent',
+              clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
+              {isMuted ? <VolumeX size={17}/> : <Volume2 size={17}/>}
+            </button>
+            <button onClick={onToggleTheme} style={{ display:'flex',alignItems:'center',
+              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
+              border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
+              clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
+              {theme === 'light' ? <Moon size={17}/> : <Sun size={17}/>}
+            </button>
+          </div>
         </div>
 
         <div style={{ position:'relative',zIndex:10,padding:'18px 16px 22px',

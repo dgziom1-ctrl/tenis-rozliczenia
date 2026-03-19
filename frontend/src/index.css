@@ -673,35 +673,37 @@ select option { background: #090F18; color: var(--co-text); }
 
 /* ══ LIGHT MODE ════════════════════════════════════════════════ */
 body.theme-light {
-  background-color: #EEF3F8;
-  color: #1a2a3a;
+  background-color: #F2F5F9;
+  color: #1E3040;
 
-  --co-void:      #EEF3F8;
-  --co-dark:      #E4ECF4;
-  --co-panel:     #FFFFFF;
-  --co-raised:    #F5F9FC;
-  --co-border:    #C0D4E8;
-  --co-border-hi: #90AECA;
+  --co-void:      #F2F5F9;
+  --co-dark:      #E8EEF4;
+  --co-panel:     #FAFCFE;
+  --co-raised:    #FFFFFF;
+  --co-border:    #CCD9E5;
+  --co-border-hi: #A8C0D2;
 
-  --co-cyan:      #0070A0;
-  --co-cyan-mid:  #005580;
-  --co-cyan-dim:  #C8E4F0;
-  --co-ice:       #0055AA;
+  --co-cyan:      #1A6FA0;
+  --co-cyan-mid:  #125580;
+  --co-cyan-dim:  #D8ECF5;
+  --co-ice:       #1055A0;
 
-  --co-yellow:    #B0004A;
-  --co-yellow-mid:#880038;
-  --co-yellow-dim:#FFD8E8;
+  --co-yellow:    #A00048;
+  --co-yellow-mid:#800038;
+  --co-yellow-dim:#FFDCEA;
 
-  --co-green:     #006638;
-  --co-green-dim: #C8ECD8;
+  --co-green:     #1A7040;
+  --co-green-dim: #D0EDE0;
 
-  --co-pink:      #AA00AA;
+  --co-pink:      #9900AA;
 
-  --co-text:      #2A4A6A;
-  --co-text-hi:   #081828;
-  --co-dim:       #6888A0;
-  --co-dim2:      #A0BBCC;
-  --co-overlay:   rgba(80,110,140,0.75);
+  --co-text:      #34506A;
+  --co-text-hi:   #0E2030;
+  --co-dim:       #82A0B8;
+  --co-dim2:      #B8CCDA;
+
+  --co-overlay:   rgba(20,50,80,0.55);
+  --dot-color:    rgba(0,80,130,0.04);
 }
 
 /* Fix hardcoded dark backgrounds in light mode */
@@ -734,12 +736,16 @@ body.theme-light [style*="rgba(0,0,0,0.95)"] {
 
 /* Cards — fix all the dark inline backgrounds */
 body.theme-light .player-card-wrap > div {
-  background: linear-gradient(160deg, #ffffff 0%, #f0f6fc 100%) !important;
+  background: linear-gradient(160deg, #ffffff 0%, #f4f8fc 100%) !important;
+  box-shadow: 0 2px 12px rgba(0,60,100,0.08), 0 0 0 1px rgba(180,200,220,0.6) !important;
+}
+body.theme-light .player-card-wrap:hover > div {
+  box-shadow: 0 4px 20px rgba(0,80,140,0.13), 0 0 0 1px rgba(0,110,160,0.3) !important;
 }
 
 /* Header arena background */
 body.theme-light header {
-  background: linear-gradient(180deg, #dce8f4 0%, #e8f0f8 100%) !important;
+  background: linear-gradient(180deg, #E4EEF6 0%, #EDF3F9 100%) !important;
   border-bottom-color: var(--co-border) !important;
 }
 
@@ -902,9 +908,6 @@ body.theme-light .cyber-button-outline:hover {
 }
 
 /* Player card lift */
-body.theme-light .player-card-wrap:hover {
-  filter: brightness(0.98) saturate(1.05);
-}
 
 /* Leaderboard rows */
 body.theme-light .leaderboard-row {
