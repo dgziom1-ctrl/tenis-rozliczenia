@@ -146,11 +146,13 @@ describe('Navigation — renderowanie zakładek', () => {
 
   it('pokazuje wszystkie 5 zakładek', () => {
     render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={vi.fn()} />);
-    expect(screen.getByText('BAZA')).toBeInTheDocument();
-    expect(screen.getByText('RANKING')).toBeInTheDocument();
-    expect(screen.getByText('DODAJ')).toBeInTheDocument();
-    expect(screen.getByText('HISTORIA')).toBeInTheDocument();
-    expect(screen.getByText('GRACZE')).toBeInTheDocument();
+    // Komponent renderuje dwie nawigacje (desktop + mobile) — obie zawierają te same
+    // etykiety, więc getAllByText zamiast getByText (które rzuciłoby "multiple elements").
+    expect(screen.getAllByText('BAZA').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('RANKING').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('DODAJ').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('HISTORIA').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('GRACZE').length).toBeGreaterThan(0);
   });
 
   it('wywołuje setActiveTab po kliknięciu zakładki', async () => {
@@ -158,7 +160,8 @@ describe('Navigation — renderowanie zakładek', () => {
     const setTab = vi.fn();
 
     render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={setTab} />);
-    await user.click(screen.getByText('HISTORIA'));
+    // Klikamy pierwszy znaleziony przycisk z tym tekstem (desktop nav)
+    await user.click(screen.getAllByText('HISTORIA')[0]);
     expect(setTab).toHaveBeenCalledWith(TABS.HISTORY);
   });
 
@@ -173,7 +176,7 @@ describe('Navigation — renderowanie zakładek', () => {
       ['HISTORIA', TABS.HISTORY],
       ['GRACZE',   TABS.PLAYERS],
     ]) {
-      await user.click(screen.getByText(label));
+      await user.click(screen.getAllByText(label)[0]);
       expect(setTab).toHaveBeenLastCalledWith(tabId);
     }
   });
