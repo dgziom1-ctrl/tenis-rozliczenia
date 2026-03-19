@@ -180,6 +180,9 @@ exports.onSessionAdded = onValueUpdated(
             playerName,
             streak:     String(streak),
             url:        `/?tab=attendance&player=${encodeURIComponent(playerName)}`,
+            // Unikalny tag per gracz — bez tego wszystkie serie mają ten sam tag
+            // i każde kolejne powiadomienie zastępuje poprzednie zamiast wyświetlić nowe
+            tag:        `streak-${playerName}`,
           }
         );
       }

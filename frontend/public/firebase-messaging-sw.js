@@ -29,7 +29,10 @@ messaging.onBackgroundMessage((payload) => {
     badge:    '/icon-192v2.png',
     vibrate:  [100, 50, 100],
     data:     { url: data.url || '/?tab=dashboard', ...data },
-    tag:      data.type || 'default',
+    // Użyj tagu z data (ustawionego przez Cloud Function) dla unikalności.
+    // Cloud Function wysyła tag: 'session-YYYY-MM-DD' lub 'streak-ImięGracza'
+    // co gwarantuje że każde powiadomienie wyświetla się osobno.
+    tag:      data.tag || data.type || 'default',
     renotify: true,
   });
 });

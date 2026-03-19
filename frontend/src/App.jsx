@@ -228,14 +228,15 @@ function AppContent() {
         setActiveTab(TABS.DASHBOARD);
       }
     };
-    navigator.serviceWorker?.addEventListener('message', handleSwMessage);
+    // window.addEventListener odbiera postMessage od SW (nie navigator.serviceWorker)
+    window.addEventListener('message', handleSwMessage);
 
     return () => {
       clearTimeout(timer);
       if (typeof unsub === 'function') unsub();
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online',  handleOnline);
-      navigator.serviceWorker?.removeEventListener('message', handleSwMessage);
+      window.removeEventListener('message', handleSwMessage);
     };
   }, []);
 
