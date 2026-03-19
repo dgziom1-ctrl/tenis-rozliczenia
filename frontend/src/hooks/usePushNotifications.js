@@ -39,7 +39,14 @@ export function usePushNotifications() {
   // ── Powiadomienia gdy apka jest OTWARTA (foreground) ──────────────────────
   // Gdy apka jest aktywna, FCM nie pokazuje powiadomień automatycznie —
   // trzeba obsłużyć je samodzielnie przez onMessage().
-  // Używamy natywnego Notification API żeby nie tworzyć zależności od Toast.
+  //
+  // WAŻNE: używamy registration.showNotification() zamiast new Notification(),
+  // żeby klik w powiadomienie zawsze przechodził przez SW notificationclick.
+  // Dzięki temu SW wysyła postMessage do apki z poprawnym URL (tab + player),
+  // co otwiera właściwą zakładkę i modal gracza — zarówno dla new_session
+  // (→ Dashboard) jak i streak (→ RANKING + modal gracza).
+  // new Notification() nie ma dostępu do SW notificationclick i klik
+  // nie robiłby nic użytecznego.
   useEffect(() => {
     if (safeNotificationPermission() !== 'granted') return;
     if (!('serviceWorker' in navigator)) return;
@@ -47,20 +54,37 @@ export function usePushNotifications() {
     let unsubscribe = null;
     try {
       const messaging = getMessaging();
-      unsubscribe = onMessage(messaging, (payload) => {
+      unsubscribe = onMessage(messaging, async (payload) => {
         const { title, body } = payload.notification || {};
         if (!title) return;
-        // Pokazuj natywne powiadomienie przeglądarki gdy apka jest na pierwszym planie
+
         try {
-          new Notification(title, {
-            body:  body || '',
-            icon:  '/icon-192v2.png',
-            badge: '/icon-192v2.png',
-            tag:   payload.data?.type || 'default',
+          // Preferuj SW showNotification — klik obsługuje notificationclick w SW
+          const registration = await navigator.serviceWorker.ready;
+          await registration.showNotification(title, {
+            body:     body || '',
+            icon:     '/icon-192v2.png',
+            badge:    '/icon-192v2.png',
+            vibrate:  [100, 50, 100],
+            tag:      payload.data?.tag || payload.data?.type || 'default',
+            renotify: true,
+            // data trafia do event.notification.data w SW notificationclick
+            data: {
+              url: payload.data?.url || '/?tab=dashboard',
+              ...payload.data,
+            },
           });
         } catch {
-          // Niektóre przeglądarki nie pozwalają na new Notification() bez SW —
-          // w tym wypadku powiadomienie po prostu nie pojawia się gdy apka jest otwarta
+          // Fallback — niektóre starsze przeglądarki nie wspierają SW showNotification
+          try {
+            new Notification(title, {
+              body:  body || '',
+              icon:  '/icon-192v2.png',
+              badge: '/icon-192v2.png',
+            });
+          } catch {
+            // ignoruj — brak wsparcia
+          }
         }
       });
     } catch {
