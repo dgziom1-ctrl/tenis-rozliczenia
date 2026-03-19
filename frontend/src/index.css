@@ -668,3 +668,35 @@ select option { background: #090F18; color: var(--co-text); }
 .rank-badge-hint-dot {
   animation: rank-hint-pulse 1.2s ease-in-out 4;
 }
+
+/* ══ LIGHT MODE ════════════════════════════════════════════════ */
+body.theme-light {
+  background-color: #F0F4F8;
+  color: #1a2a3a;
+
+  --co-void:      #E8EFF5;
+  --co-dark:      #F0F4F8;
+  --co-panel:     #FFFFFF;
+  --co-raised:    #F8FAFC;
+  --co-border:    #C8D8E8;
+  --co-border-hi: #A0B8CC;
+
+  --co-cyan:      #0080B0;
+  --co-cyan-mid:  #006090;
+  --co-cyan-dim:  #D0E8F4;
+  --co-ice:       #0060A0;
+
+  --co-yellow:    #CC0060;
+  --co-yellow-mid:#990048;
+  --co-yellow-dim:#FFE0EE;
+
+  --co-green:     #007744;
+  --co-green-dim: #D0F0E4;
+
+  --co-pink:      #CC00CC;
+
+  --co-text:      #2A4A6A;
+  --co-text-hi:   #0A1A2A;
+  --co-dim:       #7090A8;
+  --co-dim2:      #A8C0D0;
+}

@@ -13,6 +13,7 @@ import { SpinnerOverlay } from './components/common/LoadingSkeleton';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
 import { useScrolled } from './hooks/useScrolled';
+import { useTheme } from './hooks/useTheme';
 import { ThemeContext } from './context/ThemeContext';
 import {  } from 'lucide-react';
 
@@ -192,6 +193,7 @@ function AppContent() {
 
   const scrolled     = useScrolled();
   const { playSound } = useAudio(isMuted);
+  const { theme, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoadTimeout(true), 8000);
@@ -294,6 +296,8 @@ function AppContent() {
             setIsMuted={setIsMuted}
             isConnected={isConnected}
             scrolled={scrolled}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
           <Navigation activeTab={activeTab} setActiveTab={switchTab} />
           <main className="main-content">

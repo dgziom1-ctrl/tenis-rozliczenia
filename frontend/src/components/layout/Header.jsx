@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Smartphone, Check } from 'lucide-react';
+import { Volume2, VolumeX, Smartphone, Check, Sun, Moon } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 const CSS = `
@@ -350,7 +350,7 @@ function Arena({ chaosMode, onHit }) {
 /* ═══════════════════════════════════════════════════
    HEADER
 ═══════════════════════════════════════════════════ */
-export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
+export default function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleTheme }) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti,  setConfetti]  = useState([]);
@@ -457,6 +457,12 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
             {isMuted ? <VolumeX size={17}/> : <Volume2 size={17}/>}
           </button>
+          <button onClick={onToggleTheme} style={{ display:'flex',alignItems:'center',
+            justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
+            border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
+            clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
+            {theme === 'light' ? <Moon size={17}/> : <Sun size={17}/>}
+          </button>
         </div>
 
         <div style={{ position:'relative',zIndex:10,padding:'18px 16px 22px',
@@ -560,6 +566,12 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
             background:'transparent',padding:'4px 6px',cursor:'pointer',
             clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
             {isMuted ? <VolumeX size={15}/> : <Volume2 size={15}/>}
+          </button>
+          <button onClick={onToggleTheme} style={{ display:'flex',alignItems:'center',
+            border:'1px solid var(--co-border)',color:'var(--co-dim)',
+            background:'transparent',padding:'4px 6px',cursor:'pointer',
+            clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
+            {theme === 'light' ? <Moon size={15}/> : <Sun size={15}/>}
           </button>
         </div>
       </div>
