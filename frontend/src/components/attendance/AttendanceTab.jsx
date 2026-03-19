@@ -3,7 +3,7 @@ import { Award, CalendarDays, Flame, Target, TrendingUp, X } from 'lucide-react'
 import { RANKS, PODIUM, PODIUM_ORDER, getRank, SOUND_TYPES } from '../../constants';
 import { formatDate } from '../../utils/format';
 import { getPlayerColor } from '../../constants/playerColors';
-import { calculatePlayerStats, assignRankingPlaces, groupSessionsByMonth, getPlayerBadge } from '../../utils/calculations';
+import { calculatePlayerStats, assignRankingPlaces, groupSessionsByMonth } from '../../utils/calculations';
 import { SectionHeader } from '../common/SharedUI';
 
 // ─── Streak badge ────────────────────────────────────────────────
@@ -141,9 +141,8 @@ function Podium({ podiumPlayers, totalWeeks, onSelect }) {
 }
 
 // ─── Leaderboard row ─────────────────────────────────────────────
-function LeaderboardRow({ player, totalWeeks, stats, place, onClick }) {
+function LeaderboardRow({ player, totalWeeks, place, onClick }) {
   const rank = getRank(player.attendancePercentage);
-  const specialTitle = getPlayerBadge(player, stats);
   const isTop3 = place <= 3;
 
   return (
@@ -175,17 +174,6 @@ function LeaderboardRow({ player, totalWeeks, stats, place, onClick }) {
       }}>{player.name}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
-        {specialTitle && (
-          <span style={{
-            fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
-            color: 'var(--co-yellow)', padding: '1px 5px',
-            border: '1px solid rgba(255,210,0,0.3)', background: 'rgba(255,210,0,0.06)',
-            clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
-            whiteSpace: 'nowrap',
-          }}>
-            {specialTitle.label}
-          </span>
-        )}
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
           {player.attendanceCount}/{totalWeeks}
         </span>
@@ -225,7 +213,7 @@ function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats, onSelect }) {
         {theRest.length > 0 && (
           <div style={{ borderTop: '1px solid var(--co-border)', paddingTop: 14 }}>
             {theRest.map(player => (
-              <LeaderboardRow key={player.name} player={player} totalWeeks={totalWeeks} stats={stats} place={player.place} onClick={() => onSelect(player.name)} />
+              <LeaderboardRow key={player.name} player={player} totalWeeks={totalWeeks} place={player.place} onClick={() => onSelect(player.name)} />
             ))}
           </div>
         )}
@@ -544,21 +532,6 @@ export default function AttendanceTab({ players, history, summary, playSound }) 
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const stats      = useMemo(() => calculatePlayerStats(players, history, totalWeeks), [players, history, totalWeeks]);
 
-  const handleSelect = useCallback((name) => {
-    setSelectedPlayer(name);
-    const player = stats.find(p => p.name === name);
-    if (player && playSound) {
-      const ranked = stats
-        .slice()
-        .sort((a, b) => b.attendancePercentage - a.attendancePercentage || b.attendanceCount - a.attendanceCount);
-      if (ranked[0]?.name === name) {
-        playSound(SOUND_TYPES.RANK1);
-      } else {
-        playSound(SOUND_TYPES.CLICK);
-      }
-    }
-  }, [stats, playSound]);
-
   const ranked = useMemo(() => {
     const sorted = [...stats].sort((a, b) => {
       if (b.attendancePercentage !== a.attendancePercentage) return b.attendancePercentage - a.attendancePercentage;
@@ -567,6 +540,17 @@ export default function AttendanceTab({ players, history, summary, playSound }) 
     });
     return assignRankingPlaces(sorted);
   }, [stats]);
+
+  const handleSelect = useCallback((name) => {
+    setSelectedPlayer(name);
+    if (!playSound) return;
+    const player = ranked.find(p => p.name === name);
+    if (player?.place === 1) {
+      playSound(SOUND_TYPES.RANK1);
+    } else {
+      playSound(SOUND_TYPES.CLICK);
+    }
+  }, [ranked, playSound]);
 
   const podiumPlayers = useMemo(() => {
     const byPlace = {};
