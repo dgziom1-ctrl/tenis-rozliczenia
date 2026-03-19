@@ -250,21 +250,6 @@ function AppContent() {
             backgroundImage: 'radial-gradient(circle at 1px 1px, var(--dot-color, rgba(0,229,255,0.07)) 1px, transparent 0)',
             backgroundSize: '28px 28px',
           }} />
-          {/* Horizontal scan line at mid height */}
-          <div style={{
-            position: 'absolute', top: '50%', left: 0, right: 0,
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.06) 20%, rgba(0,229,255,0.12) 50%, rgba(0,229,255,0.06) 80%, transparent 100%)',
-          }} />
-          {/* Coarse grid overlay */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: `
-              linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px)
-            `,
-            backgroundSize: '80px 80px',
-          }} />
           {/* Ground plane glow */}
           <div style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, height: '30vh',
