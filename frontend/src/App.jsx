@@ -215,7 +215,9 @@ function AppContent() {
       window.history.replaceState({}, '', window.location.pathname);
     }
 
-    // Przypadek 2: apka była otwarta — SW wysyła postMessage
+    // Przypadek 2: apka byla otwarta — SW wysyla postMessage przez client.postMessage()
+    // WAZNE: wiadomosci z Service Workera trafiaja na navigator.serviceWorker,
+    // NIE na window. window.addEventListener('message') ich nie odbiera.
     const handleSwMessage = (event) => {
       if (event.data?.type !== 'NOTIFICATION_CLICK') return;
       const url    = new URL(event.data.url);
@@ -228,15 +230,20 @@ function AppContent() {
         setActiveTab(TABS.DASHBOARD);
       }
     };
-    // window.addEventListener odbiera postMessage od SW (nie navigator.serviceWorker)
-    window.addEventListener('message', handleSwMessage);
+
+    const swContainer = navigator.serviceWorker;
+    if (swContainer) {
+      swContainer.addEventListener('message', handleSwMessage);
+    }
 
     return () => {
       clearTimeout(timer);
       if (typeof unsub === 'function') unsub();
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online',  handleOnline);
-      window.removeEventListener('message', handleSwMessage);
+      if (swContainer) {
+        swContainer.removeEventListener('message', handleSwMessage);
+      }
     };
   }, []);
 
