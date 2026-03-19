@@ -369,7 +369,10 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled }) {
   }, []);
 
   /* Stable callback — avoids re-mounting canvas on every render */
-  const handleHit = useCallback((state) => setHitting(state), []);
+  const handleHit = useCallback((state) => {
+    setHitting(state);
+    if (state) window.dispatchEvent(new CustomEvent('paddleHit'));
+  }, []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(blikNumber.replace(/\s/g, ''));

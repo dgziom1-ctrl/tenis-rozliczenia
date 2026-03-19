@@ -111,10 +111,12 @@ function RankBadge({ rank, pct }) {
   const rankIdx = RANKS.findIndex(r => r.name === rank.name);
   const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
   const [visible, setVisible] = useState(false);
+  const [tapped, setTapped] = useState(false);
   const timerRef = useRef(null);
 
   const handleTap = (e) => {
     e.stopPropagation();
+    setTapped(true);
     clearTimeout(timerRef.current);
     setVisible(true);
     timerRef.current = setTimeout(() => setVisible(false), 2500);
@@ -126,6 +128,7 @@ function RankBadge({ rank, pct }) {
     <div style={{ position: 'relative', display: 'inline-flex' }}>
       <div
         onClick={handleTap}
+        className={tapped ? '' : 'rank-badge-hint'}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
           padding: '2px 7px 2px 4px',

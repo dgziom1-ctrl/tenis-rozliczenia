@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { CalendarDays, Flame, Target, TrendingUp, X } from 'lucide-react';
 import { RANKS, PODIUM, PODIUM_ORDER, getRank, SOUND_TYPES } from '../../constants';
 import { formatDate } from '../../utils/format';
@@ -27,16 +27,22 @@ function StreakBadge({ streak }) {
 
 // ─── Podium Card ─────────────────────────────────────────────────
 function PodiumCard({ podiumEntry, totalWeeks, onSelect }) {
-  const pod = PODIUM[podiumEntry.place];
   const players = podiumEntry.players;
   const exAequo = players.length > 1;
+  const [shimmerKey, setShimmerKey] = useState(0);
 
   const PLACE_STYLES = {
-    1: { border: '#00FFFF', glow: 'rgba(0,255,255,0.5)',   bg: 'rgba(0,255,255,0.04)',   height: 130, label: '#1', medal: '🥇', shimmer: true },
-    2: { border: '#0080FF', glow: 'rgba(0,128,255,0.4)',   bg: 'rgba(0,128,255,0.03)',   height: 90,  label: '#2', medal: '🥈', shimmer: false },
-    3: { border: '#CC00FF', glow: 'rgba(204,0,255,0.35)',  bg: 'rgba(204,0,255,0.025)',  height: 62,  label: '#3', medal: '🥉', shimmer: false },
+    1: { border: '#00FFFF', glow: 'rgba(0,255,255,0.5)',   bg: 'rgba(0,255,255,0.04)',   height: 130, label: '#1', medal: '🥇' },
+    2: { border: '#0080FF', glow: 'rgba(0,128,255,0.4)',   bg: 'rgba(0,128,255,0.03)',   height: 90,  label: '#2', medal: '🥈' },
+    3: { border: '#CC00FF', glow: 'rgba(204,0,255,0.35)',  bg: 'rgba(204,0,255,0.025)',  height: 62,  label: '#3', medal: '🥉' },
   };
   const s = PLACE_STYLES[podiumEntry.place] || PLACE_STYLES[3];
+
+  useEffect(() => {
+    const onHit = () => setShimmerKey(k => k + 1);
+    window.addEventListener('paddleHit', onHit);
+    return () => window.removeEventListener('paddleHit', onHit);
+  }, []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: 190 }}>
@@ -58,13 +64,15 @@ function PodiumCard({ podiumEntry, totalWeeks, onSelect }) {
               background: s.border,
               boxShadow: `0 0 10px ${s.glow}, 0 0 20px ${s.glow}`,
             }} />
-            {/* Shimmer for 1st place */}
-            {s.shimmer && <div style={{
-              position: 'absolute', inset: 0, pointerEvents: 'none',
-              background: `linear-gradient(105deg, transparent 40%, rgba(0,255,255,0.06) 50%, transparent 60%)`,
-              backgroundSize: '200% 100%',
-              animation: 'gold-shimmer 3s linear infinite',
-            }} />}
+            {/* Shimmer — synced to paddle hit for all 3 places */}
+            <div
+              key={shimmerKey}
+              style={{
+                position: 'absolute', inset: 0, pointerEvents: 'none',
+                background: `linear-gradient(105deg, transparent 20%, ${s.border}18 50%, transparent 80%)`,
+                animation: shimmerKey > 0 ? 'gold-shimmer 0.55s ease-out forwards' : 'none',
+              }}
+            />
             {/* Scan overlay */}
             <div style={{
               position: 'absolute', inset: 0, pointerEvents: 'none',
@@ -352,11 +360,11 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
     >
       <div className="bottom-sheet-enter" style={{
         width: '100%', maxWidth: 560, margin: '0 auto',
-        maxHeight: '85vh',
+        maxHeight: 'calc(100vh - 48px)',
         background: 'var(--co-panel)',
         border: `1px solid ${c.border}40`,
         borderBottom: 'none',
-        borderRadius: '12px 12px 0 0',
+        borderRadius: '16px 16px 0 0',
         display: 'flex', flexDirection: 'column',
         boxShadow: `0 -8px 40px rgba(0,0,0,0.8), 0 0 40px ${c.border}15`,
         overflow: 'hidden',

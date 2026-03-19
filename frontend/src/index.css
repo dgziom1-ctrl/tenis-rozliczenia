@@ -403,8 +403,8 @@ body::after {
 
 /* ── Gold shimmer ── */
 @keyframes gold-shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0%   { transform: translateX(-120%); opacity: 1; }
+  100% { transform: translateX(220%);  opacity: 0; }
 }
 
 /* ── Hover lift ── */
@@ -658,4 +658,13 @@ select option { background: #090F18; color: var(--co-text); }
 .filter-btn:hover {
   border-color: rgba(0,229,255,0.4) !important;
   color: var(--co-cyan) !important;
+}
+
+/* ══ RANK BADGE TAP HINT ══ */
+@keyframes rank-hint-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0); }
+  50%       { box-shadow: 0 0 0 3px rgba(0,229,255,0.18); }
+}
+.rank-badge-hint {
+  animation: rank-hint-pulse 2.5s ease-in-out 3;
 }
