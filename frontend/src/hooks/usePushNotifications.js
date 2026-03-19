@@ -15,7 +15,9 @@ function hashToken(token) {
 }
 
 export function usePushNotifications() {
-  const [permission, setPermission] = useState(Notification.permission);
+  const [permission, setPermission] = useState(() => {
+    try { return typeof Notification !== 'undefined' ? Notification.permission : 'default'; } catch { return 'default'; }
+  });
   const [isSupported, setIsSupported] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 

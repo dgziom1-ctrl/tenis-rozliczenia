@@ -9,13 +9,11 @@ import HistoryTab from './components/history/HistoryTab';
 import PlayersTab from './components/players/PlayersTab';
 import { subscribeToData } from './firebase/index';
 import { SOUND_TYPES, TABS } from './constants';
-import { SpinnerOverlay } from './components/common/LoadingSkeleton';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
 import { useScrolled } from './hooks/useScrolled';
 import { useTheme } from './hooks/useTheme';
 import { ThemeContext } from './context/ThemeContext';
-import {  } from 'lucide-react';
 
 const INITIAL_APP_DATA = {
   summary: {},
