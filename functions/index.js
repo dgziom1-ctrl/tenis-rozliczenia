@@ -5,10 +5,7 @@ const { getDatabase }    = require('firebase-admin/database');
 
 initializeApp();
 
-// ─── Normaliza tablice z Firebase RTDB ───────────────────────────────────────
-// RTDB przechowuje tablice jako {0: val, 1: val} — Admin SDK konwertuje
-// z powrotem do tablic JS, ale tylko gdy klucze są sekwencyjne od 0.
-// Używamy toArray() wszędzie żeby być 100% pewni.
+// ─── Normalizacja tablic z Firebase RTDB ─────────────────────────────────────
 function toArray(val) {
   if (!val) return [];
   if (Array.isArray(val)) return val;
@@ -25,6 +22,15 @@ async function getAllTokens() {
   return Object.values(snap.val() || {}).map(t => t.token).filter(Boolean);
 }
 
+// Usuwaj tokeny TYLKO gdy FCM wyraźnie mówi że są trwale nieważne.
+// Błędy tymczasowe (sieć, quota, serwer) NIE powinny usuwać tokenu —
+// inaczej po pierwszym problemie sieciowym tracimy token i już nigdy
+// nie dostajemy powiadomień.
+const PERMANENT_INVALID_CODES = new Set([
+  'messaging/registration-token-not-registered',  // odinstalowana apka / wylogowany
+  'messaging/invalid-registration-token',          // token nigdy nie był ważny
+]);
+
 async function removeDeadTokens(deadTokens) {
   if (!deadTokens.length) return;
   const snap = await getDatabase().ref('fcmTokens').get();
@@ -36,7 +42,7 @@ async function removeDeadTokens(deadTokens) {
     }
   }
   await Promise.all(removes);
-  if (removes.length) console.log(`Usunięto ${removes.length} nieważnych tokenów`);
+  console.log(`Usunięto ${removes.length} trwale nieważnych tokenów`);
 }
 
 // ─── Wysyłka FCM ──────────────────────────────────────────────────────────────
@@ -47,7 +53,6 @@ async function sendToAll(tokens, title, body, data = {}) {
     const chunk = tokens.slice(i, i + 500);
     const msg = {
       notification: { title, body },
-      // Wszystkie wartości data muszą być stringami
       data: Object.fromEntries(
         Object.entries(data).map(([k, v]) => [k, String(v)])
       ),
@@ -72,12 +77,24 @@ async function sendToAll(tokens, title, body, data = {}) {
     try {
       const result = await getMessaging().sendEachForMulticast(msg);
       console.log(`FCM: ${result.successCount} OK, ${result.failureCount} błąd z ${chunk.length}`);
-      const dead = result.responses
-        .map((r, idx) => (!r.success ? chunk[idx] : null))
+
+      // Zbierz TYLKO trwale nieważne tokeny (nie tymczasowe błędy sieciowe)
+      const permanentlyDead = result.responses
+        .map((r, idx) => {
+          if (r.success) return null;
+          const code = r.error?.code || '';
+          console.log(`  Token ${idx} błąd: ${code}`);
+          return PERMANENT_INVALID_CODES.has(code) ? chunk[idx] : null;
+        })
         .filter(Boolean);
-      if (dead.length) await removeDeadTokens(dead);
+
+      if (permanentlyDead.length) {
+        console.log(`Trwale nieważne tokeny: ${permanentlyDead.length}`);
+        await removeDeadTokens(permanentlyDead);
+      }
     } catch (err) {
       console.error('FCM error:', err);
+      // Nie usuwaj tokenów przy błędzie sieciowym/serwerowym
     }
   }
 }
@@ -106,38 +123,38 @@ exports.onSessionAdded = onValueUpdated(
     const weeksBefore = toArray(before.weeks);
     const weeksAfter  = toArray(after.weeks);
 
-    // ── Wykrywanie nowej sesji przez ID, nie przez length ─────────────────
-    // Porównanie przez length zawodzi gdy:
-    //   - usunięto N sesji i dodano 1 (before.length == after.length)
-    //   - Firebase batchuje zapis i funkcja widzi stan pośredni
-    // Porównanie przez ID jest deterministyczne i zawsze poprawne.
-    const idsBefore = new Set(weeksBefore.map(w => w.id).filter(Boolean));
+    // Porównuj po ID — nie po length.
+    // Porównanie przez length zawodzi gdy usunięto N sesji i dodano 1
+    // (before.length == after.length), albo gdy Firebase batchuje zapis.
+    const idsBefore  = new Set(weeksBefore.map(w => w.id).filter(Boolean));
     const newSessions = weeksAfter.filter(w => w.id && !idsBefore.has(w.id));
 
-    console.log(`Tygodnie: przed=${weeksBefore.length}, po=${weeksAfter.length}, nowych=${newSessions.length}`);
+    console.log(`Trigger: przed=${weeksBefore.length}, po=${weeksAfter.length}, nowych=${newSessions.length}`);
 
     if (newSessions.length === 0) {
       console.log('Brak nowej sesji (edycja/usunięcie/płatność) — pomijam');
       return;
     }
 
-    // Bierzemy ostatnio dodaną sesję (posortowane po dacie)
     const newSession = newSessions.sort((a, b) =>
       (a.date || '').localeCompare(b.date || '')
     ).at(-1);
 
-    const present    = toArray(newSession.present);
-    const multi      = toArray(newSession.multiPlayers);
-    const date       = newSession.date || '';
-    const cost       = newSession.cost || 0;
-    const paying     = present.filter(p => !multi.includes(p));
-    const perPerson  = paying.length > 0 ? Math.round(cost / paying.length) : 0;
+    const present   = toArray(newSession.present);
+    const multi     = toArray(newSession.multiPlayers);
+    const date      = newSession.date || '';
+    const cost      = newSession.cost || 0;
+    const paying    = present.filter(p => !multi.includes(p));
+    const perPerson = paying.length > 0 ? Math.round(cost / paying.length) : 0;
 
     console.log(`Nowa sesja: ${date}, ${present.length} graczy, ${perPerson} zł/os.`);
 
     const tokens = await getAllTokens();
-    console.log(`Tokenów FCM: ${tokens.length}`);
-    if (!tokens.length) return;
+    console.log(`Tokenów FCM w bazie: ${tokens.length}`);
+    if (!tokens.length) {
+      console.log('UWAGA: brak tokenów FCM — nikt nie włączył powiadomień?');
+      return;
+    }
 
     // ── Powiadomienie o nowej sesji → klik otwiera Dashboard ─────────────
     await sendToAll(
@@ -147,7 +164,7 @@ exports.onSessionAdded = onValueUpdated(
       { type: 'new_session', date, url: '/?tab=dashboard' }
     );
 
-    // ── Powiadomienia o seriach → klik otwiera kartę gracza w Rankingu ───
+    // ── Powiadomienia o seriach → klik otwiera modal gracza w Rankingu ───
     const STREAK_MILESTONES = [5, 10, 20, 30, 50, 100];
     for (const playerName of present) {
       const streak = computeStreak(weeksAfter, playerName);
@@ -162,7 +179,6 @@ exports.onSessionAdded = onValueUpdated(
             type:       'streak',
             playerName,
             streak:     String(streak),
-            // Klik otwiera ranking z automatycznie otwartym modalem gracza
             url:        `/?tab=attendance&player=${encodeURIComponent(playerName)}`,
           }
         );
