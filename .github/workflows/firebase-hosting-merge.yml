@@ -25,18 +25,31 @@ jobs:
   build_and_deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
-    needs: test          # ← deploy odpala się tylko gdy testy przejdą
+    needs: test
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm install
         working-directory: ./frontend
+
+      - name: Install functions dependencies
+        run: npm install
+        working-directory: ./functions
+
+      - name: Inject Firebase config into Service Worker
+        run: |
+          sed -i "s|PLACEHOLDER_API_KEY|${{ secrets.VITE_FIREBASE_API_KEY }}|g" frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_AUTH_DOMAIN|${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}|g" frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_PROJECT_ID|${{ secrets.VITE_FIREBASE_PROJECT_ID }}|g" frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_STORAGE_BUCKET|${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}|g" frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_MESSAGING_SENDER_ID|${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}|g" frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_APP_ID|${{ secrets.VITE_FIREBASE_APP_ID }}|g" frontend/public/firebase-messaging-sw.js
 
       - name: Build React app
         run: npm run build
@@ -50,6 +63,7 @@ jobs:
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID:              ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_BLIK_NUMBER:                  ${{ secrets.VITE_BLIK_NUMBER }}
+          VITE_FIREBASE_VAPID_KEY:           ${{ secrets.VITE_FIREBASE_VAPID_KEY }}
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -57,3 +71,11 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}
           channelId: live
           projectId: tenis-rozliczenia
+          target: hosting
+
+      - name: Deploy Firebase Functions
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only functions --project tenis-rozliczenia
+        env:
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}

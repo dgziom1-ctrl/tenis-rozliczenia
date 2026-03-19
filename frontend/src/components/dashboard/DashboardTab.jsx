@@ -10,6 +10,7 @@ import PlayerCard from './PlayerCard';
 import SettleConfirmModal from './SettleConfirmModal';
 import UndoBar from '../common/UndoBar';
 import { Zap, ChevronDown } from 'lucide-react';
+import PushPermissionBanner from '../common/PushPermissionBanner';
 
 
 
@@ -129,6 +130,9 @@ export default function DashboardTab({ data, history, playSound }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
 
+
+        {/* Push notifications banner */}
+        <PushPermissionBanner playerNames={sortedPlayers.filter(p => p.name !== ORGANIZER_NAME).map(p => p.name)} />
 
         {/* Undo toast */}
         {undoToast && (
