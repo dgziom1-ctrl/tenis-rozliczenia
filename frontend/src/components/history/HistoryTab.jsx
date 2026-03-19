@@ -187,7 +187,6 @@ function AttendanceTrendChart({ history, playerNames }) {
       {/* SVG chart */}
       <div style={{ position: 'relative', background: 'rgba(0,229,255,0.015)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)', overflow: 'hidden' }}>
         {/* Scanline overlay */}
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px)' }} />
 
         <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
           <defs>

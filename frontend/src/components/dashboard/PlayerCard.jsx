@@ -82,9 +82,6 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
         boxShadow: `0 0 12px ${c.border}40, inset 0 0 6px ${c.border}08`,
         overflow: 'hidden', position: 'relative',
       }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px)',
-        }} />
         <span style={{
           fontFamily: 'var(--font-display)', fontSize: '1.3rem',
           color: c.text,
@@ -409,9 +406,6 @@ export default function PlayerCard({
               transition: 'background 0.2s ease, border-color 0.2s ease',
             }}
           >
-            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none',
-              background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px)',
-            }} />
 
             {justSettled ? (
               <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', animation: 'slide-in-up 0.3s ease-out' }}>

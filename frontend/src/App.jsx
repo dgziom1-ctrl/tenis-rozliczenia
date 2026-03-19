@@ -52,11 +52,6 @@ function CyberLoadingScreen() {
           animation: 'neon-orange 1.5s ease-in-out infinite',
           position: 'relative', overflow: 'hidden',
         }}>
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px)',
-            pointerEvents: 'none',
-          }} />
           <span style={{ fontSize: '1.9rem', position: 'relative', zIndex: 1 }}>🏓</span>
         </div>
 
@@ -145,11 +140,6 @@ function CyberErrorScreen() {
         position: 'relative', overflow: 'hidden',
         animation: 'neon-yellow 2s ease-in-out infinite',
       }}>
-        {/* Scanlines */}
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.14) 3px, rgba(0,0,0,0.14) 4px)',
-        }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: '2.8rem', marginBottom: 14, filter: 'drop-shadow(0 0 8px rgba(200,0,30,0.5))' }}>☠</div>

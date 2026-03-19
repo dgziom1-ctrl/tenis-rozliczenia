@@ -77,11 +77,6 @@ function PodiumCard({ podiumEntry, totalWeeks, onSelect }) {
                 animation: shimmerKey > 0 ? 'gold-shimmer 3s ease-out forwards' : 'none',
               }}
             />
-            {/* Scan overlay */}
-            <div style={{
-              position: 'absolute', inset: 0, pointerEvents: 'none',
-              background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px)',
-            }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: '1.6rem', marginBottom: 6 }}>{s.medal}</div>
               <div style={{
@@ -277,7 +272,6 @@ function RankingHistoryChart({ players, history }) {
         ))}
       </div>
       <div style={{ position: 'relative', background: 'rgba(0,229,255,0.015)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px)' }} />
         <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
           {/* Place labels on Y axis */}
           {Array.from({ length: maxPlace }, (_, i) => i + 1).map(place => (
