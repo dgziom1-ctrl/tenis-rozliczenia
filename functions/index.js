@@ -161,7 +161,7 @@ exports.onSessionAdded = onValueUpdated(
       tokens,
       '🏓 Nowa sesja dodana!',
       `${date} · ${present.length} graczy · ${perPerson} zł/os.`,
-      { type: 'new_session', date, url: '/?tab=dashboard' }
+      { type: 'new_session', date, url: '/?tab=dashboard', tag: `session-${date}` }
     );
 
     // ── Powiadomienia o seriach → klik otwiera modal gracza w Rankingu ───
