@@ -1,41 +1,10 @@
 import { useMemo, useState, useCallback } from 'react';
 import { Award, CalendarDays, Flame, Target, TrendingUp, X } from 'lucide-react';
-import { RANKS, PODIUM, PODIUM_ORDER, getRank } from '../../constants';
+import { RANKS, PODIUM, PODIUM_ORDER, getRank, SOUND_TYPES } from '../../constants';
 import { formatDate } from '../../utils/format';
 import { getPlayerColor } from '../../constants/playerColors';
 import { calculatePlayerStats, assignRankingPlaces, groupSessionsByMonth, getPlayerBadge } from '../../utils/calculations';
-
-// ─── Section Header ──────────────────────────────────────────────
-function SectionHeader({ icon: Icon, title, accent = 'var(--co-cyan)', sub }) {
-  return (
-    <div style={{ marginBottom: 22 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-        <div style={{
-          padding: '5px 7px',
-          background: `${accent}10`,
-          border: `1px solid ${accent}28`,
-          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-        }}>
-          <Icon size={13} style={{ color: accent, display: 'block' }} />
-        </div>
-        <span style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '1.25rem',
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: accent,
-        }}>{title}</span>
-        <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, ${accent}22, transparent)` }} />
-      </div>
-      {sub && (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', letterSpacing: '0.1em', paddingLeft: 34 }}>
-          {sub}
-        </p>
-      )}
-    </div>
-
-  );
-}
+import { SectionHeader } from '../common/SharedUI';
 
 // ─── Streak badge ────────────────────────────────────────────────
 function StreakBadge({ streak }) {
@@ -178,19 +147,17 @@ function LeaderboardRow({ player, totalWeeks, stats, place, onClick }) {
   const isTop3 = place <= 3;
 
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 10,
-      padding: '10px 14px',
-      background: isTop3 ? 'rgba(0,229,255,0.025)' : 'rgba(255,255,255,0.01)',
-      border: `1px solid ${isTop3 ? 'rgba(0,229,255,0.18)' : 'var(--co-border)'}`,
-      marginBottom: 3,
-      clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-      transition: 'border-color 0.2s, background 0.2s, transform 0.15s',
-      cursor: 'pointer',
-    }}
+    <div
+      className={`leaderboard-row ${isTop3 ? 'top3' : 'rest'}`}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '10px 14px',
+        background: isTop3 ? 'rgba(0,229,255,0.025)' : 'rgba(255,255,255,0.01)',
+        border: `1px solid ${isTop3 ? 'rgba(0,229,255,0.18)' : 'var(--co-border)'}`,
+        marginBottom: 3,
+        clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
+      }}
       onClick={onClick}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,229,255,0.4)'; e.currentTarget.style.transform = 'translateX(3px)'; e.currentTarget.style.background = isTop3 ? 'rgba(0,229,255,0.04)' : 'rgba(0,229,255,0.015)'; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = isTop3 ? 'rgba(0,229,255,0.18)' : 'var(--co-border)'; e.currentTarget.style.transform = 'translateX(0)'; e.currentTarget.style.background = isTop3 ? 'rgba(0,229,255,0.025)' : 'rgba(255,255,255,0.01)'; }}
     >
       <span style={{
         fontFamily: 'var(--font-mono)', fontSize: '0.68rem',
@@ -208,7 +175,17 @@ function LeaderboardRow({ player, totalWeeks, stats, place, onClick }) {
       }}>{player.name}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
-
+        {specialTitle && (
+          <span style={{
+            fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
+            color: 'var(--co-yellow)', padding: '1px 5px',
+            border: '1px solid rgba(255,210,0,0.3)', background: 'rgba(255,210,0,0.06)',
+            clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+            whiteSpace: 'nowrap',
+          }}>
+            {specialTitle.label}
+          </span>
+        )}
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
           {player.attendanceCount}/{totalWeeks}
         </span>
@@ -295,11 +272,17 @@ function MonthlyReport({ monthlyStats, players }) {
                 <th style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', fontWeight: 400, textTransform: 'uppercase' }}>
                   SESJE
                 </th>
-                {players?.map(p => (
-                  <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 400 }}>
-                    {p.name.length > 5 ? p.name.slice(0, 5) + '.' : p.name}
-                  </th>
-                ))}
+                {players?.map(p => {
+                  const c = getPlayerColor(p.name);
+                  return (
+                    <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 400 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                        <div style={{ width: '100%', height: 2, background: c.border, borderRadius: 1, opacity: 0.7 }} />
+                        <span style={{ color: c.border, whiteSpace: 'nowrap' }}>{p.name}</span>
+                      </div>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
@@ -343,7 +326,6 @@ function MonthlyReport({ monthlyStats, players }) {
 
 // ─── Rank guide ──────────────────────────────────────────────────
 function RankGuide() {
-  const rankColors = ['#FFD700', '#00FFFF', '#CC00FF', '#00FF66', '#0080FF', '#FF0080'];
   return (
     <div style={{
       background: 'var(--co-panel)',
@@ -356,17 +338,17 @@ function RankGuide() {
         {RANKS.map((r, i) => (
           <div key={i} style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '14px 8px',
-            background: `${rankColors[i]}08`,
-            border: `1px solid ${rankColors[i]}25`,
+            background: `${r.hex}08`,
+            border: `1px solid ${r.hex}25`,
             clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
             position: 'relative', overflow: 'hidden',
           }}>
             <div style={{
               position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-              background: rankColors[i], opacity: 0.6,
+              background: r.hex, opacity: 0.6,
             }} />
             <span style={{ fontSize: '1.5rem', marginBottom: 7 }}>{r.emoji}</span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.1em', color: rankColors[i], marginBottom: 4, textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.1em', color: r.hex, marginBottom: 4, textTransform: 'uppercase' }}>
               {r.name}
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-dim)' }}>
@@ -557,10 +539,25 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
 }
 
 // ─── Main ────────────────────────────────────────────────────────
-export default function AttendanceTab({ players, history, summary }) {
+export default function AttendanceTab({ players, history, summary, playSound }) {
   const totalWeeks = summary?.totalWeeks || 0;
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const stats      = useMemo(() => calculatePlayerStats(players, history, totalWeeks), [players, history, totalWeeks]);
+
+  const handleSelect = useCallback((name) => {
+    setSelectedPlayer(name);
+    const player = stats.find(p => p.name === name);
+    if (player && playSound) {
+      const ranked = stats
+        .slice()
+        .sort((a, b) => b.attendancePercentage - a.attendancePercentage || b.attendanceCount - a.attendanceCount);
+      if (ranked[0]?.name === name) {
+        playSound(SOUND_TYPES.RANK1);
+      } else {
+        playSound(SOUND_TYPES.CLICK);
+      }
+    }
+  }, [stats, playSound]);
 
   const ranked = useMemo(() => {
     const sorted = [...stats].sort((a, b) => {
@@ -595,7 +592,7 @@ export default function AttendanceTab({ players, history, summary }) {
       />
     )}
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'slide-in-up 0.3s ease-out' }}>
-      <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} stats={stats} onSelect={setSelectedPlayer} />
+      <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} stats={stats} onSelect={handleSelect} />
       <MonthlyReport monthlyStats={monthlyStats} players={players} />
       <RankGuide />
     </div>

@@ -76,6 +76,35 @@ export function useAudio(isMuted) {
         osc2.start(now + 0.12); osc2.stop(now + 0.35);
         break;
       }
+
+      case SOUND_TYPES.RANK1: {
+        // Fanfare — rising 4-note arpeggio
+        const freqs = [523, 659, 784, 1047];
+        freqs.forEach((freq, i) => {
+          const o = ctx.createOscillator();
+          const g2 = ctx.createGain();
+          o.connect(g2); g2.connect(ctx.destination);
+          o.type = 'square';
+          o.frequency.setValueAtTime(freq, now + i * 0.1);
+          g2.gain.setValueAtTime(0.12, now + i * 0.1);
+          g2.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.18);
+          o.start(now + i * 0.1);
+          o.stop(now + i * 0.1 + 0.18);
+        });
+        break;
+      }
+
+      case SOUND_TYPES.ERROR: {
+        // Descending buzz — bad password
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.25);
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.25);
+        osc.start(now); osc.stop(now + 0.25);
+        break;
+      }
+
       default:
         break;
     }

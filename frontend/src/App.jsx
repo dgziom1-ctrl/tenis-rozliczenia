@@ -202,7 +202,16 @@ function AppContent() {
       setIsLoading(false);
       setLoadTimeout(false);
     });
-    return () => { clearTimeout(timer); if (typeof unsub === 'function') unsub(); };
+    const handleOffline = () => setIsConnected(false);
+    const handleOnline  = () => setIsConnected(true);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online',  handleOnline);
+    return () => {
+      clearTimeout(timer);
+      if (typeof unsub === 'function') unsub();
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online',  handleOnline);
+    };
   }, []);
 
   const switchTab = useCallback((id) => {
@@ -300,6 +309,7 @@ function AppContent() {
                 players={appData.players}
                 history={appData.history}
                 summary={appData.summary}
+                playSound={playSound}
               />
             )}
             {activeTab === TABS.ADMIN && (

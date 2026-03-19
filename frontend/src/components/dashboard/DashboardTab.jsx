@@ -198,6 +198,7 @@ export default function DashboardTab({ data, history, playSound }) {
               <PlayerCard
                 player={player}
                 totalWeeks={totalWeeks}
+                history={history}
                 onSettle={handleSettleRequest}
                 justSettled={justSettled === player.name}
                 openDetails={showBreakdown}

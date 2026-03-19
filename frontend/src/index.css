@@ -613,3 +613,49 @@ select option { background: #090F18; color: var(--co-text); }
 .cyber-button-yellow, .cyber-button-outline, .cyber-button-blue {
   font-size: 0.85rem; letter-spacing: 0.1em;
 }
+
+/* ══ LEADERBOARD ROW HOVER (CSS replaces JS onMouseEnter/Leave) ══ */
+.leaderboard-row {
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+.leaderboard-row:hover {
+  border-color: rgba(0,229,255,0.4) !important;
+  transform: translateX(3px);
+}
+.leaderboard-row.top3:hover {
+  background: rgba(0,229,255,0.04) !important;
+}
+.leaderboard-row.rest:hover {
+  background: rgba(0,229,255,0.015) !important;
+}
+
+/* ══ LOG ENTRY HOVER ══ */
+.log-entry {
+  transition: border-color 0.2s;
+}
+.log-entry:hover {
+  border-color: rgba(0,229,255,0.2) !important;
+}
+
+/* ══ ICON BUTTON HOVER ══ */
+.icon-btn {
+  transition: border-color 0.15s, color 0.15s;
+}
+.icon-btn:hover {
+  border-color: rgba(0,229,255,0.4) !important;
+  color: var(--co-cyan) !important;
+}
+.icon-btn.danger:hover {
+  border-color: rgba(255,32,144,0.5) !important;
+  color: var(--co-yellow) !important;
+}
+
+/* ══ FILTER BUTTON HOVER ══ */
+.filter-btn {
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.filter-btn:hover {
+  border-color: rgba(0,229,255,0.4) !important;
+  color: var(--co-cyan) !important;
+}

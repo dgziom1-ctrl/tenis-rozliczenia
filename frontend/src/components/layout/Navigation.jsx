@@ -3,7 +3,7 @@ import { LayoutDashboard, PlusCircle, History, Users, Trophy } from 'lucide-reac
 const tabs = [
   { id: 'dashboard',  icon: LayoutDashboard, label: 'Baza',     shortLabel: 'BAZA'    },
   { id: 'attendance', icon: Trophy,           label: 'Ranking',  shortLabel: 'RANKING' },
-  { id: 'admin',      icon: PlusCircle,       label: 'Log',      shortLabel: 'LOG'     },
+  { id: 'admin',      icon: PlusCircle,       label: 'Dodaj',    shortLabel: 'DODAJ'   },
   { id: 'history',    icon: History,          label: 'Historia', shortLabel: 'HISTORIA'},
   { id: 'players',    icon: Users,            label: 'Gracze',   shortLabel: 'GRACZE'  },
 ];

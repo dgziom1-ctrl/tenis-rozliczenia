@@ -1,12 +1,11 @@
 import { useState, useMemo } from 'react';
-import { Terminal, Pencil, Trash2, Check, X, Zap, Users, Lock, CalendarDays, TrendingUp, BarChart2 } from 'lucide-react';
+import { Terminal, Pencil, Trash2, Check, X, Zap, Users, CalendarDays, TrendingUp, BarChart2, Search } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase/index';
-import { ADMIN_PASSWORD } from '../../constants';
 import { groupHistoryByMonth } from '../../utils/calculations';
 import { formatDate, formatAmount } from '../../utils/format';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
-import { useThemeTokens } from '../../context/ThemeContext';
+import { PasswordModal } from '../common/SharedUI';
 
 function EditDateInput({ value, onChange }) {
   return (
@@ -33,86 +32,15 @@ function EditDateInput({ value, onChange }) {
   );
 }
 
-function PasswordModal({ action, onConfirm, onCancel, tokens }) {
-  const [input, setInput] = useState('');
-  const [error, setError] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (input === ADMIN_PASSWORD) { onConfirm(); }
-    else {
-      setError(true); setInput('');
-      setTimeout(() => setError(false), 1500);
-    }
-  };
-
-  return (
-    <div style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(4px)' }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div style={{
-        background: 'var(--co-panel)',
-        border: `1px solid ${error ? 'var(--co-yellow)' : 'rgba(0,229,255,0.3)'}`,
-        clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
-        padding: 24, width: '100%', maxWidth: 360,
-        boxShadow: error
-          ? '0 0 30px rgba(255,32,144,0.3)'
-          : '0 0 30px rgba(0,229,255,0.15)',
-        transition: 'all 0.2s',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <Lock size={16} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} />
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.15em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
-            Podaj hasło admina
-          </h3>
-        </div>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--co-dim)', marginBottom: 16 }}>
-          {'>'} {action}
-        </p>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <input
-            type="password" value={input} onChange={e => setInput(e.target.value)}
-            placeholder="// ACCESS CODE..." autoFocus
-            className="cyber-input"
-            style={{
-              width: '100%', padding: '10px 12px',
-              fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
-              border: `1px solid ${error ? 'var(--co-yellow)' : 'var(--co-border)'}`,
-              clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-              boxShadow: error ? '0 0 12px rgba(255,32,144,0.3)' : 'none',
-            }}
-          />
-          {error && (
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-yellow)', textAlign: 'center' }}>
-              ⚠ ❌ Złe hasło
-            </p>
-          )}
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button type="submit" className="cyber-button-yellow" style={{ flex: 1, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              <Check size={14} /> POTWIERDŹ
-            </button>
-            <button type="button" onClick={onCancel} className="cyber-button-outline" style={{ flex: 1, padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              <X size={14} /> ANULUJ
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
 
 // Terminal log entry
 function LogEntry({ row, onEdit, onDelete }) {
-  const time = new Date(row.datePlayed).getTime();
   return (
-    <div className="scan-hover" style={{
-      background: 'var(--co-dark)', border: '1px solid var(--co-border)',
+    <div className="scan-hover log-entry" style={{
+      background: 'var(--co-dark)', border: '1px solid #141414',
       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
       padding: '12px 14px', marginBottom: 4,
-      transition: 'border-color 0.2s',
-    }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--co-border)'}
-      onMouseLeave={e => e.currentTarget.style.borderColor = '#141414'}
-    >
+    }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {/* Top row: date + actions */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -128,28 +56,20 @@ function LogEntry({ row, onEdit, onDelete }) {
           </div>
           {/* Actions */}
           <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={() => onEdit(row)} style={{
+            <button onClick={() => onEdit(row)} className="icon-btn" style={{
               padding: '5px 8px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
               color: 'var(--co-dim)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
-              transition: 'all 0.15s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,229,255,0.4)'; e.currentTarget.style.color = 'var(--co-cyan)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = 'var(--co-dim)'; }}
-            >
+            }}>
               <Pencil size={13} />
             </button>
-            <button onClick={() => onDelete(row.id)} style={{
+            <button onClick={() => onDelete(row.id)} className="icon-btn danger" style={{
               padding: '5px 8px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
               color: 'var(--co-dim)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
-              transition: 'all 0.15s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = 'var(--co-dim)'; }}
-            >
+            }}>
               <Trash2 size={13} />
             </button>
           </div>
@@ -370,8 +290,13 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const [isSaving,   setIsSaving]   = useState(false);
   const [isDeleting, setIsDeleting] = useState(null);
   const [pwModal,    setPwModal]    = useState(null);
-  const tokens = useThemeTokens();
+  const [filterPlayer, setFilterPlayer] = useState('');
   const { showError } = useToast();
+
+  const filteredHistory = useMemo(() => {
+    if (!filterPlayer) return history;
+    return history.filter(s => s.presentPlayers.includes(filterPlayer));
+  }, [history, filterPlayer]);
 
   const requestEdit   = (row) => setPwModal({ type: 'edit', row });
   const requestDelete = (id)  => setPwModal({ type: 'delete', rowId: id });
@@ -423,16 +348,16 @@ export default function HistoryTab({ history, playerNames, playSound }) {
     } finally { setIsDeleting(null); }
   };
 
-  const grouped = groupHistoryByMonth(history);
+  const grouped = groupHistoryByMonth(filteredHistory);
 
   return (
     <>
       {pwModal && (
         <PasswordModal
-          tokens={tokens}
           action={pwModal.type === 'edit' ? 'Podaj kod dostępu aby edytować sesję.' : 'Podaj kod dostępu aby usunąć sesję.'}
           onConfirm={handlePasswordConfirm}
           onCancel={() => setPwModal(null)}
+          playSound={playSound}
         />
       )}
 
@@ -464,6 +389,52 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             {'>'} Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--co-green)' }}>▮</span>
           </p>
         </div>
+
+        {/* Filter bar */}
+        {playerNames && playerNames.length > 0 && (
+          <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(0,229,255,0.04)', border: '1px solid rgba(0,229,255,0.12)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+              <Search size={11} style={{ color: 'var(--co-dim)' }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>FILTR</span>
+            </div>
+            <button
+              onClick={() => setFilterPlayer('')}
+              style={{
+                fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.08em',
+                padding: '4px 10px', cursor: 'pointer', border: '1px solid',
+                borderColor: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-border)',
+                color: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
+                background: !filterPlayer ? 'rgba(0,229,255,0.08)' : 'transparent',
+                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                transition: 'all 0.15s',
+              }}
+            >
+              WSZYSCY
+            </button>
+            {playerNames.map(name => (
+              <button
+                key={name}
+                onClick={() => setFilterPlayer(prev => prev === name ? '' : name)}
+                style={{
+                  fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.08em',
+                  padding: '4px 10px', cursor: 'pointer', border: '1px solid',
+                  borderColor: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-border)',
+                  color: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-dim)',
+                  background: filterPlayer === name ? 'rgba(0,229,255,0.08)' : 'transparent',
+                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {name}
+              </button>
+            ))}
+            {filterPlayer && (
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', marginLeft: 4 }}>
+                {filteredHistory.length} sesji
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Attendance trend chart */}
         {history.length >= 2 && (

@@ -107,11 +107,7 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
 
 // ── Rank badge ───────────────────────────────────────────────────
 function RankBadge({ rank, pct }) {
-  const rankColors = {
-    'LEGENDA': '#FFD700',  // gold 'MISTRZ': '#FF2090', 'WETERAN': '#7B8FFF',  // electric indigo
-    'STAŁY': 'var(--co-cyan)', 'GOŚĆ': 'var(--co-dim)', 'DUCH': 'var(--co-dim2)',
-  };
-  const col = rankColors[rank.name] || 'var(--co-dim)';
+  const col = rank.hex || 'var(--co-dim)';
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -132,7 +128,7 @@ function RankBadge({ rank, pct }) {
 
 // ── Main Component ───────────────────────────────────────────────
 export default function PlayerCard({
-  player, totalWeeks, onSettle, justSettled,
+  player, totalWeeks, history, onSettle, justSettled,
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment, onPin, onUnpin,
   playerIndex = 0,
@@ -302,6 +298,27 @@ export default function PlayerCard({
                 transition: 'width 0.8s ease',
               }} />
             </div>
+            {/* Session dots — last 10 sessions */}
+            {history && history.length > 0 && (
+              <div style={{ display: 'flex', gap: 3, marginTop: 6, flexWrap: 'wrap' }}>
+                {[...history].slice(0, 10).reverse().map((session, i) => {
+                  const attended = session.presentPlayers.includes(player.name);
+                  return (
+                    <div
+                      key={session.id || i}
+                      title={session.datePlayed}
+                      style={{
+                        width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+                        background: attended ? c.border : 'transparent',
+                        border: `1px solid ${attended ? c.border : 'rgba(255,255,255,0.15)'}`,
+                        boxShadow: attended ? `0 0 4px ${c.border}80` : 'none',
+                        transition: 'all 0.2s',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
