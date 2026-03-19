@@ -359,12 +359,12 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
         background: 'rgba(0,0,0,0.85)',
         backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'flex-end',
-        padding: '0',
+        padding: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
       <div className="bottom-sheet-enter" style={{
         width: '100%', maxWidth: 560, margin: '0 auto',
-        maxHeight: 'calc(100vh - 48px)',
+        maxHeight: 'calc(100vh - 32px)',
         background: 'var(--co-panel)',
         border: `1px solid ${c.border}40`,
         borderBottom: 'none',
@@ -448,8 +448,7 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
           const currentRank = getRank(pct);
           const rankIdx = RANKS.findIndex(r => r.name === currentRank.name);
           const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
-          const prevRank = rankIdx < RANKS.length - 1 ? RANKS[rankIdx + 1] : null;
-          const fromPct = prevRank ? prevRank.min : 0;
+          const fromPct = currentRank.min;
           const toPct = nextRank ? nextRank.min : 100;
           const progress = toPct > fromPct ? Math.min(1, (pct - fromPct) / (toPct - fromPct)) : 1;
           return (
