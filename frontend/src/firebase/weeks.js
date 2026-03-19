@@ -1,21 +1,30 @@
-import { makeId, todayISO } from '../utils/id';
+import { makeId } from '../utils/id';
 import { withTransaction } from './utils';
-import { ref, set } from 'firebase/database';
-import { database } from './config';
 
 export async function addSession({ datePlayed, totalCost, presentPlayers, multisportPlayers }) {
   if (!datePlayed || totalCost < 0 || !presentPlayers || presentPlayers.length === 0) {
     return { success: false, error: 'Nieprawidłowe dane sesji' };
   }
 
-  // Przechwytujemy ID sesji na zewnątrz transakcji, żeby móc go użyć
-  // do zapisu triggera po zatwierdzeniu transakcji.
-  // runTransaction może wywołać callback wielokrotnie (retry) — za każdym
-  // razem generujemy nowe ID, a 'newSessionId' zawsze ma wartość z ostatniego,
-  // zatwierdzonego wywołania.
-  let newSessionId = null;
+  // Trigger dla Cloud Function jest zapisywany WEWNĄTRZ tej samej transakcji
+  // jako pole lastAddedSession w /appData.
+  //
+  // Dlaczego nie osobna ścieżka (/notifications/pending):
+  //   - zapis do osobnej ścieżki wymaga dodatkowych reguł RTDB po stronie klienta
+  //   - jeśli reguły nie pozwalają na zapis, trigger nigdy nie dotrze do funkcji
+  //
+  // Dlaczego wewnątrz transakcji:
+  //   - jeden atomowy zapis do Firebase = jedno onValueUpdated event
+  //   - lastAddedSession.id zmienia się przy KAŻDYM dodaniu sesji,
+  //     nawet jeśli sesja z tą samą datą była wcześniej usunięta
+  //   - Cloud Function porównuje before.lastAddedSession.id vs after.lastAddedSession.id
+  //     zamiast szukać "nowych" wierszy po ID — ta metoda jest 100% niezawodna
+  //
+  // runTransaction może wywołać callback wielokrotnie (retry) —
+  // makeId() generuje nowe ID przy każdym wywołaniu, więc lastAddedSession
+  // zawsze ma ID ostatniego, zatwierdzonego wywołania.
 
-  const result = await withTransaction((current) => {
+  return withTransaction((current) => {
     const data  = current || {};
     const weeks = data.weeks || [];
 
@@ -23,43 +32,26 @@ export async function addSession({ datePlayed, totalCost, presentPlayers, multis
       throw new Error('Sesja z tą datą już istnieje');
     }
 
-    newSessionId = makeId();
+    const newId = makeId();
 
     return {
       ...data,
       weeks: [
         ...weeks,
         {
-          id:           newSessionId,
+          id:           newId,
           date:         datePlayed,
           cost:         totalCost,
           present:      presentPlayers,
           multiPlayers: multisportPlayers || [],
         },
       ],
+      // Trigger dla onValueUpdated w Cloud Function.
+      // Zmiana tego pola = sygnał ze nowa sesja zostala dodana.
+      // ts zapewnia ze pole sie zawsze zmienia.
+      lastAddedSession: { id: newId, ts: Date.now() },
     };
   }, 'Nie udało się zapisać sesji');
-
-  // Zapisz trigger dla Cloud Function.
-  // onValueCreated na /notifications/pending/{id} odpala się ZAWSZE — raz
-  // per nowy węzeł, niezależnie od poprzednich operacji na /appData.
-  // Dzięki temu powiadomienie działa też gdy sesja jest dodawana ponownie
-  // po wcześniejszym usunięciu (np. ta sama data, nowe ID).
-  if (result.success && newSessionId) {
-    try {
-      await set(ref(database, `notifications/pending/${newSessionId}`), {
-        sessionId: newSessionId,
-        date:      datePlayed,
-        ts:        Date.now(),
-      });
-    } catch (err) {
-      // Brak triggera = brak powiadomień, ale sesja już jest zapisana —
-      // nie blokujemy użytkownika, tylko logujemy błąd.
-      console.error('Nie udało się zapisać triggera powiadomienia:', err);
-    }
-  }
-
-  return result;
 }
 
 export async function updateWeek(weekId, { date, cost, present, multiPlayers }) {

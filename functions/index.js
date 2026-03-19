@@ -1,4 +1,4 @@
-const { onValueCreated } = require('firebase-functions/v2/database');
+const { onValueUpdated } = require('firebase-functions/v2/database');
 const { initializeApp }  = require('firebase-admin/app');
 const { getMessaging }   = require('firebase-admin/messaging');
 const { getDatabase }    = require('firebase-admin/database');
@@ -22,13 +22,9 @@ async function getAllTokens() {
   return Object.values(snap.val() || {}).map(t => t.token).filter(Boolean);
 }
 
-// Usuwaj tokeny TYLKO gdy FCM wyraźnie mówi że są trwale nieważne.
-// Błędy tymczasowe (sieć, quota, serwer) NIE powinny usuwać tokenu —
-// inaczej po pierwszym problemie sieciowym tracimy token i już nigdy
-// nie dostajemy powiadomień.
 const PERMANENT_INVALID_CODES = new Set([
-  'messaging/registration-token-not-registered',  // odinstalowana apka / wylogowany
-  'messaging/invalid-registration-token',          // token nigdy nie był ważny
+  'messaging/registration-token-not-registered',
+  'messaging/invalid-registration-token',
 ]);
 
 async function removeDeadTokens(deadTokens) {
@@ -78,7 +74,6 @@ async function sendToAll(tokens, title, body, data = {}) {
       const result = await getMessaging().sendEachForMulticast(msg);
       console.log(`FCM: ${result.successCount} OK, ${result.failureCount} błąd z ${chunk.length}`);
 
-      // Zbierz TYLKO trwale nieważne tokeny (nie tymczasowe błędy sieciowe)
       const permanentlyDead = result.responses
         .map((r, idx) => {
           if (r.success) return null;
@@ -94,7 +89,6 @@ async function sendToAll(tokens, title, body, data = {}) {
       }
     } catch (err) {
       console.error('FCM error:', err);
-      // Nie usuwaj tokenów przy błędzie sieciowym/serwerowym
     }
   }
 }
@@ -113,33 +107,43 @@ function computeStreak(weeks, playerName) {
   return streak;
 }
 
-
-
 // ─── Trigger ──────────────────────────────────────────────────────────────────
-// Słuchamy na /notifications/pending/{notifId} zamiast /appData.
-// Powód: onValueUpdated na /appData jest zawodny przy szybkich zmianach —
-// Firebase może scalić wiele zapisów w jedno zdarzenie i trigger pomija
-// nowe sesje dodane po usunięciu. onValueCreated odpala ZAWSZE, dokładnie
-// raz na każdy nowy węzeł, bez względu na poprzednie operacje.
-exports.onSessionAdded = onValueCreated(
-  { ref: '/notifications/pending/{notifId}', region: 'europe-west1' },
+// Detekcja nowej sesji przez lastAddedSession.id zamiast porównywania list tygodni.
+//
+// PROBLEM ze starym podejściem (porównywanie idsBefore vs idsAfter):
+//   Firebase może scalić wiele operacji (delete + add) w jedno onValueUpdated
+//   zdarzenie. Jeśli zdarzenie przyszło za późno lub zostało zbatchowane,
+//   funkcja mogła nie zostać wywołana wcale dla ponownego dodania.
+//
+// NOWE podejście:
+//   Frontend zapisuje lastAddedSession: { id, ts } WEWNĄTRZ tej samej transakcji
+//   co nowa sesja — jeden atomowy zapis. Cloud Function sprawdza:
+//     before.lastAddedSession.id !== after.lastAddedSession.id
+//   Jeśli tak — nowa sesja na pewno została dodana, bez względu na to ile
+//   operacji Firebase scalił w jedno zdarzenie. Pole ts gwarantuje zmianę
+//   nawet w skrajnych przypadkach.
+exports.onSessionAdded = onValueUpdated(
+  { ref: '/appData', region: 'europe-west1' },
   async (event) => {
-    const notifId  = event.params.notifId;
-    const pending  = event.data.val() || {};
+    const before = event.data.before.val() || {};
+    const after  = event.data.after.val()  || {};
 
-    // Usuń trigger natychmiast — gdyby funkcja uruchomiła się ponownie
-    // (np. retry po błędzie sieci), nie wyśle duplikatów.
-    await getDatabase().ref(`/notifications/pending/${notifId}`).remove();
+    const beforeTrigger = before.lastAddedSession || {};
+    const afterTrigger  = after.lastAddedSession  || {};
 
-    // Odczytaj aktualny stan appData — potrzebujemy tygodni do liczenia serii
-    const appSnap  = await getDatabase().ref('/appData').get();
-    const appData  = appSnap.val() || {};
-    const weeksAll = toArray(appData.weeks);
+    console.log(`Trigger: lastAddedSession before=${beforeTrigger.id || 'brak'}, after=${afterTrigger.id || 'brak'}`);
 
-    // Znajdź sesję na podstawie ID przesłanego przez frontend
-    const newSession = weeksAll.find(w => w.id === notifId);
+    // Brak zmiany lastAddedSession = edycja / usunięcie / płatność — pomijamy
+    if (!afterTrigger.id || afterTrigger.id === beforeTrigger.id) {
+      console.log('Brak nowej sesji (edycja/usunięcie/płatność) — pomijam');
+      return;
+    }
+
+    const weeksAfter = toArray(after.weeks);
+    const newSession = weeksAfter.find(w => w.id === afterTrigger.id);
+
     if (!newSession) {
-      console.log(`Sesja ${notifId} nie istnieje w bazie — pominięto (usunięta przed obsługą?)`);
+      console.log(`Sesja ${afterTrigger.id} nie istnieje w after.weeks — pomijam`);
       return;
     }
 
@@ -150,7 +154,7 @@ exports.onSessionAdded = onValueCreated(
     const paying    = present.filter(p => !multi.includes(p));
     const perPerson = paying.length > 0 ? Math.round(cost / paying.length) : 0;
 
-    console.log(`Nowa sesja: ${date}, ${present.length} graczy, ${perPerson} zł/os. (trigger: ${notifId})`);
+    console.log(`Nowa sesja: ${date}, ${present.length} graczy, ${perPerson} zł/os.`);
 
     const tokens = await getAllTokens();
     console.log(`Tokenów FCM w bazie: ${tokens.length}`);
@@ -170,7 +174,7 @@ exports.onSessionAdded = onValueCreated(
     // ── Powiadomienia o seriach → klik otwiera modal gracza w Rankingu ───
     const STREAK_MILESTONES = [5, 10, 20, 30, 50, 100];
     for (const playerName of present) {
-      const streak = computeStreak(weeksAll, playerName);
+      const streak = computeStreak(weeksAfter, playerName);
       console.log(`  ${playerName}: seria ${streak}`);
       if (STREAK_MILESTONES.includes(streak)) {
         const emoji = streak >= 50 ? '🏆' : streak >= 20 ? '🔥' : '⚡';
@@ -182,7 +186,6 @@ exports.onSessionAdded = onValueCreated(
             type:       'streak',
             playerName,
             streak:     String(streak),
-            // Klik → zakładka RANKING + modal gracza
             url:        `/?tab=attendance&player=${encodeURIComponent(playerName)}`,
             tag:        `streak-${playerName}`,
           }
