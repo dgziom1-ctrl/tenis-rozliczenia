@@ -7,12 +7,12 @@
  * Organizer always last → always gets index = (playerCount - 1).
  */
 export const PLAYER_COLOR_PALETTE = [
-  { bg: '#180010', border: '#FF0080', text: '#FF0080' },  // 0 → neon rose     (330°)
-  { bg: '#000D18', border: '#0080FF', text: '#0080FF' },  // 1 → electric blue (210°)
-  { bg: '#111800', border: '#CCFF00', text: '#CCFF00' },  // 2 → electric lime (75°)
-  { bg: '#110018', border: '#CC00FF', text: '#CC00FF' },  // 3 → neon violet   (285°)
-  { bg: '#001818', border: '#00FFFF', text: '#00FFFF' },  // 4 → electric cyan (180°)
-  { bg: '#110A00', border: '#FF9B00', text: '#FF9B00' },  // 5 → hazard yellow (55°)
+  { bg: '#FF008018', border: '#FF0080', text: '#FF0080' },  // 0 → neon rose
+  { bg: '#0080FF18', border: '#0080FF', text: '#0080FF' },  // 1 → electric blue
+  { bg: '#CCFF0018', border: '#AACC00', text: '#AACC00' },  // 2 → electric lime (darkened text)
+  { bg: '#CC00FF18', border: '#CC00FF', text: '#CC00FF' },  // 3 → neon violet
+  { bg: '#00FFFF18', border: '#00CCDD', text: '#00CCDD' },  // 4 → electric cyan (darkened)
+  { bg: '#FF9B0018', border: '#FF9B00', text: '#FF9B00' },  // 5 → hazard yellow
 ];
 
 /**

@@ -131,17 +131,6 @@ body::before {
   mix-blend-mode: overlay;
 }
 
-/* ── CRT scanlines ── */
-body::after {
-  content: '';
-  position: fixed; inset: 0; z-index: 1000; pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px, transparent 2px,
-    rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px
-  );
-}
-
 /* ══ ANIMATIONS ══════════════════════════════════════════════════ */
 
 @keyframes neon-cyan {
