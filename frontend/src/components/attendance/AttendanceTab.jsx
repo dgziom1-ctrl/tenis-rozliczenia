@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { Award, CalendarDays, Flame, Target, TrendingUp, X } from 'lucide-react';
+import { CalendarDays, Flame, Target, TrendingUp, X } from 'lucide-react';
 import { RANKS, PODIUM, PODIUM_ORDER, getRank, SOUND_TYPES } from '../../constants';
 import { formatDate } from '../../utils/format';
 import { getPlayerColor } from '../../constants/playerColors';
@@ -312,43 +312,6 @@ function MonthlyReport({ monthlyStats, players }) {
   );
 }
 
-// ─── Rank guide ──────────────────────────────────────────────────
-function RankGuide() {
-  return (
-    <div style={{
-      background: 'var(--co-panel)',
-      border: '1px solid var(--co-border)',
-      clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)',
-      padding: 24,
-    }}>
-      <SectionHeader icon={Award} title="RANGI" sub="poziom według frekwencji" accent="var(--co-cyan)" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 8 }}>
-        {RANKS.map((r, i) => (
-          <div key={i} style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '14px 8px',
-            background: `${r.hex}08`,
-            border: `1px solid ${r.hex}25`,
-            clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-              background: r.hex, opacity: 0.6,
-            }} />
-            <span style={{ fontSize: '1.5rem', marginBottom: 7 }}>{r.emoji}</span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.1em', color: r.hex, marginBottom: 4, textTransform: 'uppercase' }}>
-              {r.name}
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-dim)' }}>
-              {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 
 // ─── Player Session Drill-Down Modal ─────────────────────────────
 function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
@@ -467,6 +430,51 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
           ))}
         </div>
 
+        {/* Rank progression */}
+        {(() => {
+          const pct = player.attendancePercentage;
+          const currentRank = getRank(pct);
+          const rankIdx = RANKS.findIndex(r => r.name === currentRank.name);
+          const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
+          const prevRank = rankIdx < RANKS.length - 1 ? RANKS[rankIdx + 1] : null;
+          const fromPct = prevRank ? prevRank.min : 0;
+          const toPct = nextRank ? nextRank.min : 100;
+          const progress = toPct > fromPct ? Math.min(1, (pct - fromPct) / (toPct - fromPct)) : 1;
+          return (
+            <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15`, background: `${currentRank.hex}04` }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: currentRank.hex, letterSpacing: '0.08em' }}>
+                  {currentRank.emoji} {currentRank.name}
+                </span>
+                {nextRank ? (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)' }}>
+                    do {nextRank.emoji} {nextRank.name}: <span style={{ color: nextRank.hex }}>{Math.max(0, nextRank.min - pct)}%</span>
+                  </span>
+                ) : (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: currentRank.hex }}>
+                    ★ max ranga
+                  </span>
+                )}
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: 2,
+                  width: `${progress * 100}%`,
+                  background: nextRank
+                    ? `linear-gradient(90deg, ${currentRank.hex}, ${nextRank.hex})`
+                    : currentRank.hex,
+                  boxShadow: `0 0 6px ${currentRank.hex}80`,
+                  transition: 'width 0.6s ease',
+                }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--co-dim)' }}>{fromPct}%</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--co-dim)' }}>{nextRank ? `${toPct}%` : '100%'}</span>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Session log */}
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
@@ -578,7 +586,6 @@ export default function AttendanceTab({ players, history, summary, playSound }) 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'slide-in-up 0.3s ease-out' }}>
       <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} stats={stats} onSelect={handleSelect} />
       <MonthlyReport monthlyStats={monthlyStats} players={players} />
-      <RankGuide />
     </div>
   </>
   );

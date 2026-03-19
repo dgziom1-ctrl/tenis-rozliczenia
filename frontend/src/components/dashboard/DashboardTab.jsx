@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { settlePlayer, undoSettle, addPayment, removePayment } from '../../firebase/index';
-import { SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD } from '../../constants';
+import { SOUND_TYPES, ORGANIZER_NAME, SETTLED_THRESHOLD, RANKS } from '../../constants';
 import { buildDebtDisplayData } from '../../utils/calculations';
 import { useToast } from '../common/Toast';
 import { useUndoTimer } from '../../hooks/useUndoTimer';
@@ -9,7 +9,7 @@ import ConfettiOverlay, { CONFETTI_POOLS, generateConfetti } from './ConfettiOve
 import PlayerCard from './PlayerCard';
 import SettleConfirmModal from './SettleConfirmModal';
 import UndoBar from '../common/UndoBar';
-import { Zap } from 'lucide-react';
+import { Zap, ChevronDown } from 'lucide-react';
 
 
 
@@ -19,6 +19,7 @@ export default function DashboardTab({ data, history, playSound }) {
   const [confirmSettle, setConfirmSettle] = useState(null);
   const [pinnedPlayer,  setPinnedPlayer]  = useState(null);
   const [confetti,      setConfetti]      = useState([]);
+  const [showRankGuide, setShowRankGuide] = useState(false);
 
   const { showSuccess, showError }                          = useToast();
   const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer(8);
@@ -213,6 +214,45 @@ export default function DashboardTab({ data, history, playSound }) {
               </div>
             );
           })}
+        </div>
+
+        {/* ── Collapsible rank guide ── */}
+        <div style={{ background: 'var(--co-panel)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)' }}>
+          <button
+            onClick={() => setShowRankGuide(v => !v)}
+            style={{
+              width: '100%', padding: '10px 16px', background: 'transparent', border: 'none',
+              display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', letterSpacing: '0.15em' }}>
+              {RANKS.map(r => r.emoji).join(' ')}
+            </span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.78rem', letterSpacing: '0.12em', color: 'var(--co-dim)', textTransform: 'uppercase', flex: 1, textAlign: 'left' }}>
+              Co oznaczają rangi?
+            </span>
+            <ChevronDown size={13} style={{ color: 'var(--co-dim)', transform: showRankGuide ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+          </button>
+          {showRankGuide && (
+            <div style={{ padding: '0 16px 16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 6, borderTop: '1px solid var(--co-border)' }}>
+              {RANKS.map((r, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
+                  background: `${r.hex}06`, border: `1px solid ${r.hex}20`,
+                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                  marginTop: 6,
+                }}>
+                  <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{r.emoji}</span>
+                  <div>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', color: r.hex, margin: 0, letterSpacing: '0.08em' }}>{r.name}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', margin: 0 }}>
+                      {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { getPlayerColor } from '../../constants/playerColors';
-import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
+import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, RANKS } from '../../constants';
 import { formatAmountShort } from '../../utils/format';
 import { useThemeTokens } from '../../context/ThemeContext';
 import { usePaymentUndo } from '../../hooks/usePaymentUndo';
@@ -108,13 +108,23 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
 // ── Rank badge ───────────────────────────────────────────────────
 function RankBadge({ rank, pct }) {
   const col = rank.hex || 'var(--co-dim)';
+  const rankIdx = RANKS.findIndex(r => r.name === rank.name);
+  const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
+  const tooltipText = nextRank
+    ? `${rank.emoji} ${rank.name} (${rank.min}%+) · do ${nextRank.name} brakuje ${Math.max(0, nextRank.min - pct)}%`
+    : `${rank.emoji} ${rank.name} · maksymalna ranga!`;
+
   return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      padding: '2px 7px 2px 4px',
-      background: `${col}10`, border: `1px solid ${col}30`,
-      clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-    }}>
+    <div
+      title={tooltipText}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        padding: '2px 7px 2px 4px',
+        background: `${col}10`, border: `1px solid ${col}30`,
+        clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+        cursor: 'help',
+      }}
+    >
       <span style={{ fontSize: '0.65rem' }}>{rank.emoji}</span>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.08em', color: col }}>
         {rank.name}
