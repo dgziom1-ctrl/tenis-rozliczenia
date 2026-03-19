@@ -132,7 +132,7 @@ export default function DashboardTab({ data, history, playSound }) {
 
 
         {/* Push notifications banner */}
-        <PushPermissionBanner playerNames={sortedPlayers.filter(p => p.name !== ORGANIZER_NAME).map(p => p.name)} />
+        <PushPermissionBanner playerNames={sortedPlayers.map(p => p.name)} />
 
         {/* Undo toast */}
         {undoToast && (
