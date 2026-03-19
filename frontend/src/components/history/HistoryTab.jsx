@@ -381,7 +381,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
         </div>
 
         {/* Boot text */}
-        <div style={{ marginBottom: 20, padding: '10px 14px', background: '#060609', border: '1px solid #0f0f0f' }}>
+        <div style={{ marginBottom: 20, padding: '10px 14px', background: 'var(--co-dark)', border: '1px solid var(--co-border)' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-green)', lineHeight: 1.6, opacity: 0.7 }}>
             {'>'} System OK<br/>
             {'>'} Ładowanie historii...<br/>
@@ -458,7 +458,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             <div key={label}>
               {/* Month header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: '#060C12', border: '1px solid var(--co-border)', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-cyan)' }}>{label}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#3a3a3a' }}>[{rows.length}x]</span>
                 </div>
@@ -473,7 +473,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
                   if (isEditingRow) return (
                     <div key={row.id} style={{
-                      background: '#060C12', border: '1px solid rgba(0,229,255,0.25)',
+                      background: 'var(--co-dark)', border: '1px solid rgba(0,229,255,0.25)',
                       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
                       padding: 16, marginBottom: 4, display: 'flex', flexDirection: 'column', gap: 14,
                     }}>

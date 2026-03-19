@@ -49,7 +49,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
   };
 
   return (
-    <div style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(6px)' }}
+    <div style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
         background: 'var(--co-dark)',

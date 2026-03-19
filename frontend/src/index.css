@@ -53,6 +53,8 @@
   --font-body:    'Rajdhani', sans-serif;
 
   /* ── Legacy aliases (backward compat) ── */
+  --co-overlay:    rgba(0,0,0,0.88);
+  --dot-color:     rgba(0,229,255,0.07);
   --cz-void:       var(--co-void);
   --cz-dark:       var(--co-dark);
   --cz-panel:      var(--co-panel);
@@ -671,32 +673,298 @@ select option { background: #090F18; color: var(--co-text); }
 
 /* ══ LIGHT MODE ════════════════════════════════════════════════ */
 body.theme-light {
-  background-color: #F0F4F8;
+  background-color: #EEF3F8;
   color: #1a2a3a;
 
-  --co-void:      #E8EFF5;
-  --co-dark:      #F0F4F8;
+  --co-void:      #EEF3F8;
+  --co-dark:      #E4ECF4;
   --co-panel:     #FFFFFF;
-  --co-raised:    #F8FAFC;
-  --co-border:    #C8D8E8;
-  --co-border-hi: #A0B8CC;
+  --co-raised:    #F5F9FC;
+  --co-border:    #C0D4E8;
+  --co-border-hi: #90AECA;
 
-  --co-cyan:      #0080B0;
-  --co-cyan-mid:  #006090;
-  --co-cyan-dim:  #D0E8F4;
-  --co-ice:       #0060A0;
+  --co-cyan:      #0070A0;
+  --co-cyan-mid:  #005580;
+  --co-cyan-dim:  #C8E4F0;
+  --co-ice:       #0055AA;
 
-  --co-yellow:    #CC0060;
-  --co-yellow-mid:#990048;
-  --co-yellow-dim:#FFE0EE;
+  --co-yellow:    #B0004A;
+  --co-yellow-mid:#880038;
+  --co-yellow-dim:#FFD8E8;
 
-  --co-green:     #007744;
-  --co-green-dim: #D0F0E4;
+  --co-green:     #006638;
+  --co-green-dim: #C8ECD8;
 
-  --co-pink:      #CC00CC;
+  --co-pink:      #AA00AA;
 
   --co-text:      #2A4A6A;
-  --co-text-hi:   #0A1A2A;
-  --co-dim:       #7090A8;
-  --co-dim2:      #A8C0D0;
+  --co-text-hi:   #081828;
+  --co-dim:       #6888A0;
+  --co-dim2:      #A0BBCC;
+  --co-overlay:   rgba(80,110,140,0.75);
+}
+
+/* Fix hardcoded dark backgrounds in light mode */
+body.theme-light .cyber-box,
+body.theme-light .cyber-input {
+  background: var(--co-panel);
+}
+
+body.theme-light select option {
+  background: var(--co-panel);
+  color: var(--co-text);
+}
+
+/* Scanlines — lighter in light mode */
+body.theme-light .crt-card::after,
+body.theme-light .cyber-box::after {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.025) 3px, rgba(0,0,0,0.025) 4px
+  );
+}
+
+/* Modal overlays */
+body.theme-light [style*="rgba(0,0,0,0.85)"],
+body.theme-light [style*="rgba(0,0,0,0.9)"],
+body.theme-light [style*="rgba(0,0,0,0.95)"] {
+  background: rgba(100,130,160,0.7) !important;
+}
+
+/* Cards — fix all the dark inline backgrounds */
+body.theme-light .player-card-wrap > div {
+  background: linear-gradient(160deg, #ffffff 0%, #f0f6fc 100%) !important;
+}
+
+/* Header arena background */
+body.theme-light header {
+  background: linear-gradient(180deg, #dce8f4 0%, #e8f0f8 100%) !important;
+  border-bottom-color: var(--co-border) !important;
+}
+
+/* Boot terminal block in HistoryTab */
+body.theme-light [style*="#060609"],
+body.theme-light [style*="#0f0f0f"] {
+  background: #eef3f8 !important;
+  border-color: var(--co-border) !important;
+}
+
+/* Navigation */
+body.theme-light .desktop-nav-inner,
+body.theme-light .desktop-nav {
+  background: var(--co-panel);
+  border-color: var(--co-border);
+}
+
+body.theme-light .desktop-tab {
+  color: var(--co-dim);
+}
+body.theme-light .desktop-tab.active {
+  color: var(--co-cyan);
+  border-bottom-color: var(--co-cyan);
+}
+
+body.theme-light .mobile-nav {
+  background: var(--co-panel);
+  border-top-color: var(--co-border);
+}
+body.theme-light .mobile-nav-btn {
+  color: var(--co-dim);
+}
+body.theme-light .mobile-nav-btn.active {
+  color: var(--co-cyan);
+}
+
+/* Player card badges & barcode */
+body.theme-light .crt-card .barcode-container {
+  opacity: 0.2;
+}
+
+/* Cyber buttons in light mode */
+body.theme-light .cyber-button-yellow {
+  background: linear-gradient(135deg, var(--co-cyan), var(--co-cyan-mid));
+  color: #ffffff;
+}
+body.theme-light .cyber-button-outline {
+  border-color: rgba(0,112,160,0.4);
+  color: var(--co-cyan);
+}
+body.theme-light .cyber-button-outline:hover {
+  background: rgba(0,112,160,0.08);
+  border-color: var(--co-cyan);
+}
+
+/* Fix body dotgrid background */
+body.theme-light::before {
+  background-image: radial-gradient(circle at 1px 1px, rgba(0,80,120,0.06) 1px, transparent 0) !important;
+}
+
+/* ══ LIGHT MODE — COMPONENT OVERRIDES ══════════════════════════ */
+
+/* Navigation */
+body.theme-light .desktop-nav-inner {
+  background: #ffffff;
+  border-color: var(--co-border);
+  box-shadow: 0 2px 12px rgba(0,80,120,0.08);
+}
+body.theme-light .desktop-tab {
+  color: var(--co-dim);
+}
+body.theme-light .desktop-tab.active {
+  background: rgba(0,112,160,0.06);
+  border-color: rgba(0,112,160,0.3);
+  color: var(--co-cyan);
+  box-shadow: none;
+}
+body.theme-light .desktop-tab.active::after {
+  background: var(--co-cyan);
+  box-shadow: none;
+}
+body.theme-light .desktop-tab:not(.active):hover {
+  background: rgba(0,112,160,0.04);
+  border-color: rgba(0,112,160,0.15);
+  color: var(--co-cyan);
+}
+
+/* Mobile nav */
+body.theme-light .mobile-nav {
+  background: rgba(255,255,255,0.97);
+  border-top-color: var(--co-border);
+  box-shadow: 0 -2px 16px rgba(0,60,100,0.1);
+}
+body.theme-light .mobile-nav-btn {
+  color: var(--co-dim);
+}
+body.theme-light .mobile-nav-btn.active {
+  color: var(--co-cyan);
+  background: rgba(0,112,160,0.05);
+}
+body.theme-light .mobile-nav-btn.active::before {
+  background: var(--co-cyan);
+  box-shadow: none;
+}
+body.theme-light .mobile-nav-btn:active {
+  background: rgba(0,112,160,0.08);
+}
+
+/* Compact header (scrolled) */
+body.theme-light .compact-header {
+  background: rgba(255,255,255,0.97);
+  border-bottom-color: var(--co-border);
+  box-shadow: 0 2px 12px rgba(0,60,100,0.08);
+}
+
+/* Scanlines — barely visible in light mode */
+body.theme-light .crt-card::after,
+body.theme-light .cyber-box::after,
+body.theme-light [style*="repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0."] {
+  opacity: 0.3;
+}
+
+/* Cyber box */
+body.theme-light .cyber-box {
+  background: var(--co-panel);
+  border-color: var(--co-border);
+}
+
+/* Cyber input */
+body.theme-light .cyber-input {
+  background: #f5f8fb;
+  border-color: var(--co-border);
+  color: var(--co-text-hi);
+}
+body.theme-light .cyber-input:focus {
+  border-color: var(--co-cyan);
+  box-shadow: 0 0 0 2px rgba(0,112,160,0.1);
+}
+body.theme-light .cyber-input::placeholder {
+  color: var(--co-dim2);
+}
+
+/* Buttons */
+body.theme-light .cyber-button-yellow {
+  background: linear-gradient(135deg, #0080B0, #005580);
+  color: #ffffff;
+  box-shadow: none;
+}
+body.theme-light .cyber-button-yellow:hover {
+  box-shadow: 0 0 16px rgba(0,112,160,0.35);
+}
+body.theme-light .cyber-button-outline {
+  border-color: rgba(0,112,160,0.35);
+  color: var(--co-cyan);
+}
+body.theme-light .cyber-button-outline:hover {
+  background: rgba(0,112,160,0.06);
+  border-color: var(--co-cyan);
+  box-shadow: none;
+}
+
+/* Player card lift */
+body.theme-light .player-card-wrap:hover {
+  filter: brightness(0.98) saturate(1.05);
+}
+
+/* Leaderboard rows */
+body.theme-light .leaderboard-row {
+  background: rgba(255,255,255,0.7) !important;
+}
+body.theme-light .leaderboard-row:hover {
+  background: rgba(0,112,160,0.04) !important;
+  border-color: rgba(0,112,160,0.35) !important;
+}
+
+/* Log entries */
+body.theme-light .log-entry {
+  background: var(--co-panel) !important;
+  border-color: var(--co-border) !important;
+}
+body.theme-light .log-entry:hover {
+  border-color: rgba(0,112,160,0.3) !important;
+}
+
+/* Icon buttons */
+body.theme-light .icon-btn {
+  border-color: var(--co-border);
+  color: var(--co-dim);
+}
+body.theme-light .icon-btn:hover {
+  border-color: rgba(0,112,160,0.4) !important;
+  color: var(--co-cyan) !important;
+}
+body.theme-light .icon-btn.danger:hover {
+  border-color: rgba(176,0,74,0.4) !important;
+  color: var(--co-yellow) !important;
+}
+
+/* Filter buttons */
+body.theme-light .filter-btn {
+  border-color: var(--co-border);
+  color: var(--co-dim);
+}
+body.theme-light .filter-btn:hover {
+  border-color: rgba(0,112,160,0.4) !important;
+  color: var(--co-cyan) !important;
+}
+
+/* Scrollbar */
+body.theme-light ::-webkit-scrollbar-track { background: #e8f0f8; }
+body.theme-light ::-webkit-scrollbar-thumb { background: #b0c8dc; }
+body.theme-light ::-webkit-scrollbar-thumb:hover { background: #88aac0; }
+
+/* UndoBar */
+body.theme-light .undo-bar {
+  background: var(--co-panel);
+  border-color: var(--co-border);
+}
+
+/* Background dot grid */
+body.theme-light {
+  --dot-color: rgba(0,80,120,0.07);
+}
+
+/* Main page background override */
+body.theme-light .min-h-screen {
+  background: var(--co-void);
 }

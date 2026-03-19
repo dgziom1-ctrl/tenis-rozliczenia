@@ -257,7 +257,7 @@ function AppContent() {
           {/* Fine dot grid */}
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,229,255,0.07) 1px, transparent 0)',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, var(--dot-color, rgba(0,229,255,0.07)) 1px, transparent 0)',
             backgroundSize: '28px 28px',
           }} />
           {/* Horizontal scan line at mid height */}

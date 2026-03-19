@@ -12,7 +12,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
   return (
     <div style={{
       marginBottom: 12, padding: '16px 14px',
-      background: '#08080d',
+      background: 'var(--co-dark)',
       border: '1px solid rgba(0,229,255,0.25)',
       clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))',
       boxShadow: '0 0 20px rgba(0,229,255,0.08)',

@@ -21,7 +21,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }) {
 
   return (
     <div
-      style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'var(--co-overlay, rgba(0,0,0,0.9))', backdropFilter: 'blur(4px)' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
       <div style={{

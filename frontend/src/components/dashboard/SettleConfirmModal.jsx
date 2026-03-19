@@ -7,7 +7,7 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
     >
       <div style={{
         background: 'var(--co-dark)',
