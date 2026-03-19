@@ -415,7 +415,7 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
 
         {/* Stats grid */}
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
           gap: 1, padding: '0', background: 'var(--co-border)',
           borderBottom: `1px solid ${c.border}15`,
         }}>
@@ -423,7 +423,6 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
             { label: 'Sesje', value: sessions.length, color: c.border },
             { label: 'Opuszczone', value: missedSessions.length, color: 'var(--co-dim)' },
             { label: 'Seria', value: currentStreak, color: currentStreak > 2 ? 'var(--co-cyan)' : 'var(--co-dim)' },
-            { label: 'Multisport', value: multisportSessions.length, color: multisportSessions.length > 0 ? 'var(--co-green)' : 'var(--co-dim)' },
           ].map(stat => (
             <div key={stat.label} style={{ padding: '12px 8px', textAlign: 'center', background: 'var(--co-panel)' }}>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: stat.color, margin: 0, lineHeight: 1, textShadow: stat.color !== 'var(--co-dim)' ? `0 0 10px ${stat.color}40` : 'none' }}>
