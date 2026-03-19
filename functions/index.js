@@ -1,7 +1,8 @@
-const { onValueUpdated } = require('firebase-functions/v2/database');
-const { initializeApp }  = require('firebase-admin/app');
-const { getMessaging }   = require('firebase-admin/messaging');
-const { getDatabase }    = require('firebase-admin/database');
+const { onValueUpdated }  = require('firebase-functions/v2/database');
+const { onSchedule }      = require('firebase-functions/v2/scheduler');
+const { initializeApp }   = require('firebase-admin/app');
+const { getMessaging }    = require('firebase-admin/messaging');
+const { getDatabase }     = require('firebase-admin/database');
 
 initializeApp();
 
@@ -107,21 +108,7 @@ function computeStreak(weeks, playerName) {
   return streak;
 }
 
-// ─── Trigger ──────────────────────────────────────────────────────────────────
-// Detekcja nowej sesji przez lastAddedSession.id zamiast porównywania list tygodni.
-//
-// PROBLEM ze starym podejściem (porównywanie idsBefore vs idsAfter):
-//   Firebase może scalić wiele operacji (delete + add) w jedno onValueUpdated
-//   zdarzenie. Jeśli zdarzenie przyszło za późno lub zostało zbatchowane,
-//   funkcja mogła nie zostać wywołana wcale dla ponownego dodania.
-//
-// NOWE podejście:
-//   Frontend zapisuje lastAddedSession: { id, ts } WEWNĄTRZ tej samej transakcji
-//   co nowa sesja — jeden atomowy zapis. Cloud Function sprawdza:
-//     before.lastAddedSession.id !== after.lastAddedSession.id
-//   Jeśli tak — nowa sesja na pewno została dodana, bez względu na to ile
-//   operacji Firebase scalił w jedno zdarzenie. Pole ts gwarantuje zmianę
-//   nawet w skrajnych przypadkach.
+// ─── Trigger: nowa sesja ──────────────────────────────────────────────────────
 exports.onSessionAdded = onValueUpdated(
   { ref: '/appData', region: 'europe-west1' },
   async (event) => {
@@ -133,7 +120,6 @@ exports.onSessionAdded = onValueUpdated(
 
     console.log(`Trigger: lastAddedSession before=${beforeTrigger.id || 'brak'}, after=${afterTrigger.id || 'brak'}`);
 
-    // Brak zmiany lastAddedSession = edycja / usunięcie / płatność — pomijamy
     if (!afterTrigger.id || afterTrigger.id === beforeTrigger.id) {
       console.log('Brak nowej sesji (edycja/usunięcie/płatność) — pomijam');
       return;
@@ -158,12 +144,8 @@ exports.onSessionAdded = onValueUpdated(
 
     const tokens = await getAllTokens();
     console.log(`Tokenów FCM w bazie: ${tokens.length}`);
-    if (!tokens.length) {
-      console.log('UWAGA: brak tokenów FCM — nikt nie włączył powiadomień?');
-      return;
-    }
+    if (!tokens.length) return;
 
-    // ── Powiadomienie o nowej sesji → klik otwiera Dashboard ─────────────
     await sendToAll(
       tokens,
       '🏓 Nowa sesja dodana!',
@@ -171,7 +153,6 @@ exports.onSessionAdded = onValueUpdated(
       { type: 'new_session', date, url: '/?tab=dashboard', tag: `session-${date}` }
     );
 
-    // ── Powiadomienia o seriach → klik otwiera modal gracza w Rankingu ───
     const STREAK_MILESTONES = [5, 10, 20, 30, 50, 100];
     for (const playerName of present) {
       const streak = computeStreak(weeksAfter, playerName);
@@ -192,5 +173,75 @@ exports.onSessionAdded = onValueUpdated(
         );
       }
     }
+  }
+);
+
+// ─── Trigger: nowy gracz ──────────────────────────────────────────────────────
+// Porównuje players przed i po zapisie — jeśli pojawił się nowy, wysyła powiadomienie.
+exports.onPlayerAdded = onValueUpdated(
+  { ref: '/appData', region: 'europe-west1' },
+  async (event) => {
+    const before = event.data.before.val() || {};
+    const after  = event.data.after.val()  || {};
+
+    const playersBefore = new Set(toArray(before.players));
+    const playersAfter  = toArray(after.players);
+    const newPlayers    = playersAfter.filter(p => !playersBefore.has(p));
+
+    if (newPlayers.length === 0) return;
+
+    console.log(`Nowi gracze: ${newPlayers.join(', ')}`);
+
+    const tokens = await getAllTokens();
+    if (!tokens.length) return;
+
+    for (const playerName of newPlayers) {
+      console.log(`  Wysyłam powiadomienie o nowym graczu: ${playerName}`);
+      await sendToAll(
+        tokens,
+        '🎮 Nowy gracz!',
+        `${playerName} dołączył do gry!`,
+        {
+          type:       'new_player',
+          playerName,
+          url:        '/?tab=attendance',
+          tag:        `new-player-${playerName}`,
+        }
+      );
+    }
+  }
+);
+
+// ─── Scheduled: przypomnienie we wtorek o 19:00 ───────────────────────────────
+// Cron: "0 19 * * 2" = każdy wtorek o 19:00
+// Strefa: Europe/Warsaw (uwzględnia czas letni/zimowy automatycznie)
+exports.weeklyReminder = onSchedule(
+  {
+    schedule:  '0 19 * * 2',
+    timeZone:  'Europe/Warsaw',
+    region:    'europe-west1',
+  },
+  async () => {
+    console.log('Wysyłam cotygodniowe przypomnienie o sesji');
+
+    const tokens = await getAllTokens();
+    console.log(`Tokenów FCM w bazie: ${tokens.length}`);
+    if (!tokens.length) {
+      console.log('Brak tokenów — pomijam');
+      return;
+    }
+
+    await sendToAll(
+      tokens,
+      '🏓 Jutro ping-pong!',
+      'Jutro sesja — kto gra?',
+      {
+        type: 'reminder',
+        url:  '/?tab=dashboard',
+        tag:  'weekly-reminder',
+      }
+    );
+
+    console.log('Przypomnienie wysłane');
   }
 );
