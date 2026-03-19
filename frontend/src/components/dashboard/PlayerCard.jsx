@@ -431,17 +431,15 @@ export default function PlayerCard({
               </div>
             ) : (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                {isPending && (
-                  <div style={{ marginBottom: 4 }}>
-                    <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: '0.5rem',
-                      color: 'rgba(255,32,144,0.5)',
-                      letterSpacing: '0.2em', textTransform: 'uppercase',
-                    }}>
-                      do rozliczenia
-                    </span>
-                  </div>
-                )}
+                <div style={{ marginBottom: 4 }}>
+                  <span style={{
+                    fontFamily: 'var(--font-mono)', fontSize: '0.5rem',
+                    color: isPending ? 'rgba(255,32,144,0.5)' : 'rgba(0,255,136,0.5)',
+                    letterSpacing: '0.2em', textTransform: 'uppercase',
+                  }}>
+                    {isPending ? 'do rozliczenia' : 'rozliczony'}
+                  </span>
+                </div>
                 <p style={{
                   fontFamily: 'var(--font-display)', fontSize: '2.4rem',
                   margin: 0, lineHeight: 1.1,
@@ -453,11 +451,6 @@ export default function PlayerCard({
                   {formatAmountShort(animatedAbs)}
                   <span style={{ fontSize: '0.9rem', opacity: 0.35, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
-                {isSettled && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'rgba(0,255,136,0.6)', letterSpacing: '0.2em', marginTop: 2 }}>
-                    rozliczony
-                  </p>
-                )}
               </div>
             )}
             {adminMode && (
