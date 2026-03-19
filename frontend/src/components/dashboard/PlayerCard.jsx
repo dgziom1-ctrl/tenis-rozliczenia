@@ -125,10 +125,9 @@ function RankBadge({ rank, pct }) {
   useEffect(() => () => clearTimeout(timerRef.current), []);
 
   return (
-    <div style={{ position: 'relative', display: 'inline-flex' }}>
+    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
       <div
         onClick={handleTap}
-        className={tapped ? '' : 'rank-badge-hint'}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
           padding: '2px 7px 2px 4px',
@@ -145,6 +144,18 @@ function RankBadge({ rank, pct }) {
           {pct}%
         </span>
       </div>
+      {/* Tap hint — visible "?" label until first tap */}
+      {!tapped && (
+        <span style={{
+          fontFamily: 'var(--font-mono)', fontSize: '0.62rem',
+          color: col, opacity: 0.7,
+          letterSpacing: 0,
+          lineHeight: 1,
+          flexShrink: 0,
+        }}>
+          ?
+        </span>
+      )}
       {visible && (
         <div style={{
           position: 'absolute', bottom: 'calc(100% + 6px)', left: 0,

@@ -662,9 +662,9 @@ select option { background: #090F18; color: var(--co-text); }
 
 /* ══ RANK BADGE TAP HINT ══ */
 @keyframes rank-hint-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0); }
-  50%       { box-shadow: 0 0 0 3px rgba(0,229,255,0.18); }
+  0%, 100% { opacity: 0; }
+  50%       { opacity: 1; }
 }
-.rank-badge-hint {
-  animation: rank-hint-pulse 2.5s ease-in-out 3;
+.rank-badge-hint-dot {
+  animation: rank-hint-pulse 1.2s ease-in-out 4;
 }

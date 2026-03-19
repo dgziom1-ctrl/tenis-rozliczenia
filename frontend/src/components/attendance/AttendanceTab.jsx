@@ -74,7 +74,7 @@ function PodiumCard({ podiumEntry, totalWeeks, onSelect }) {
               style={{
                 position: 'absolute', inset: 0, pointerEvents: 'none',
                 background: `linear-gradient(105deg, transparent 20%, ${s.border}18 50%, transparent 80%)`,
-                animation: shimmerKey > 0 ? 'gold-shimmer 0.55s ease-out forwards' : 'none',
+                animation: shimmerKey > 0 ? 'gold-shimmer 3s ease-out forwards' : 'none',
               }}
             />
             {/* Scan overlay */}
