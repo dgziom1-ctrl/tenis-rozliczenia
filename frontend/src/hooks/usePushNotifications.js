@@ -14,10 +14,23 @@ function hashToken(token) {
   return Math.abs(h).toString(36);
 }
 
+// Bezpieczny odczyt Notification.permission —
+// iOS Safari w trybie przeglądarki (nie PWA) nie ma Notification API.
+// Dostęp bez sprawdzenia rzuca TypeError i crashuje całą aplikację.
+function safeNotificationPermission() {
+  try {
+    if (typeof Notification === 'undefined') return 'default';
+    return Notification.permission;
+  } catch {
+    return 'default';
+  }
+}
+
 export function usePushNotifications() {
-  const [permission, setPermission] = useState(() => {
-    try { return typeof Notification !== 'undefined' ? Notification.permission : 'default'; } catch { return 'default'; }
-  });
+  // useState z funkcją inicjalizującą — wykonuje się tylko raz podczas montowania.
+  // Gdyby był to useState(Notification.permission) bez funkcji,
+  // wyrażenie byłoby ewaluowane PRZED sprawdzeniem czy API istnieje.
+  const [permission, setPermission] = useState(safeNotificationPermission);
   const [isSupported, setIsSupported] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -27,7 +40,11 @@ export function usePushNotifications() {
       'serviceWorker' in navigator &&
       'PushManager' in window;
     setIsSupported(supported);
-    setPermission(Notification.permission);
+    // Odczytujemy permission ponownie po zamontowaniu —
+    // ale tylko gdy API na pewno istnieje (sprawdzone powyżej)
+    if (supported) {
+      setPermission(safeNotificationPermission());
+    }
   }, []);
 
   const registerToken = useCallback(async (playerName) => {

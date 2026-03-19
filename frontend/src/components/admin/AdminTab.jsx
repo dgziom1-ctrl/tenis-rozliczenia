@@ -220,7 +220,16 @@ function PlayerToggleGrid({ names, selected, onToggle, accent = 'yellow' }) {
 }
 
 // ── Date input overlay ────────────────────────────────────
+// iOS Safari: showPicker() nie istnieje i rzuca TypeError.
+// opacity:0 na iOS blokuje zdarzenia dotknięcia — używamy opacity:0.01
+// zamiast 0, co sprawia że input jest "widoczny" dla silnika zdarzeń iOS.
+// font-size:16px zapobiega automatycznemu zoomowi pola na iOS.
 function CyberDateInput({ value, onChange }) {
+  const handleClick = (e) => {
+    // showPicker() nie istnieje na iOS Safari — owijamy w try/catch
+    try { e.currentTarget.showPicker?.(); } catch {}
+  };
+
   return (
     <div style={{ position: 'relative' }}>
       <div className="cyber-input" style={{
@@ -232,12 +241,21 @@ function CyberDateInput({ value, onChange }) {
         <span>{formatDate(value)}</span>
         <CalendarDays size={14} style={{ opacity: 0.4, flexShrink: 0 }} />
       </div>
-      <input type="date" value={value} onChange={e => onChange(e.target.value)}
-        onClick={e => e.currentTarget.showPicker?.()}
+      <input
+        type="date"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onClick={handleClick}
         style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-          opacity: 0, cursor: 'pointer', zIndex: 2, padding: 0, border: 'none',
-          boxSizing: 'border-box', fontSize: '16px',
+          // iOS Safari nie wywołuje onClick/onChange na elemencie z opacity:0.
+          // opacity:0.01 jest praktycznie niewidoczne ale zachowuje obsługę zdarzeń.
+          opacity: 0.01,
+          cursor: 'pointer', zIndex: 2, padding: 0, border: 'none',
+          boxSizing: 'border-box',
+          // font-size >= 16px zapobiega automatycznemu zoomowi strony na iOS
+          // gdy użytkownik dotyka pola formularza
+          fontSize: '16px',
         }}
       />
     </div>
