@@ -56,7 +56,7 @@ describe('usePushNotifications — ochrona przed brakiem API', () => {
     }
   });
 
-  it('🔴 NIE CRASHUJE gdy Notification API jest niedostępne (useState)', () => {
+  it('🔴 NIE CRASHUJE gdy Notification API jest niedostępne (useState)', async () => {
     // Scenariusz: iOS Safari w trybie przeglądarki (nie PWA).
     // useState(Notification.permission) bez guard exploduje przy inicjalizacji.
     delete globalThis.Notification;

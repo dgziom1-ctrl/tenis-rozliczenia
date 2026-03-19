@@ -65,13 +65,13 @@ describe('App — smoke test', () => {
     expect(screen.queryByText('BAZA')).not.toBeInTheDocument();
   });
 
-  it('subscribeToData jest wywołane przy montowaniu', () => {
+  it('subscribeToData jest wywołane przy montowaniu', async () => {
     const { subscribeToData } = await import('../firebase/index');
     render(<App />);
     expect(subscribeToData).toHaveBeenCalledTimes(1);
   });
 
-  it('wywołuje funkcję cleanup Firebase przy odmontowaniu', () => {
+  it('wywołuje funkcję cleanup Firebase przy odmontowaniu', async () => {
     const unsub = vi.fn();
     const { subscribeToData } = await import('../firebase/index');
     subscribeToData.mockReturnValueOnce(unsub);
