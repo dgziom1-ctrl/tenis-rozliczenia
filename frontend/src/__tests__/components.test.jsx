@@ -47,6 +47,8 @@ import { TABS } from '../constants';
 // ════════════════════════════════════════════════════════════════════════════
 
 describe('App — smoke test', () => {
+  beforeEach(() => vi.clearAllMocks());
+
   it('🔴 renderuje się bez crashu', () => {
     // Najważniejszy test w całej apce.
     // Gdyby istniał przed naszą naprawą, od razu by wykrył problem.
