@@ -110,28 +110,64 @@ function RankBadge({ rank, pct }) {
   const col = rank.hex || 'var(--co-dim)';
   const rankIdx = RANKS.findIndex(r => r.name === rank.name);
   const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
-  const tooltipText = nextRank
-    ? `${rank.emoji} ${rank.name} (${rank.min}%+) · do ${nextRank.name} brakuje ${Math.max(0, nextRank.min - pct)}%`
-    : `${rank.emoji} ${rank.name} · maksymalna ranga!`;
+  const [visible, setVisible] = useState(false);
+  const timerRef = useRef(null);
+
+  const handleTap = (e) => {
+    e.stopPropagation();
+    clearTimeout(timerRef.current);
+    setVisible(true);
+    timerRef.current = setTimeout(() => setVisible(false), 2500);
+  };
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   return (
-    <div
-      title={tooltipText}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        padding: '2px 7px 2px 4px',
-        background: `${col}10`, border: `1px solid ${col}30`,
-        clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-        cursor: 'help',
-      }}
-    >
-      <span style={{ fontSize: '0.65rem' }}>{rank.emoji}</span>
-      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.08em', color: col }}>
-        {rank.name}
-      </span>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: col, opacity: 0.55 }}>
-        {pct}%
-      </span>
+    <div style={{ position: 'relative', display: 'inline-flex' }}>
+      <div
+        onClick={handleTap}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          padding: '2px 7px 2px 4px',
+          background: `${col}10`, border: `1px solid ${col}30`,
+          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+          cursor: 'pointer', userSelect: 'none',
+        }}
+      >
+        <span style={{ fontSize: '0.65rem' }}>{rank.emoji}</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.08em', color: col }}>
+          {rank.name}
+        </span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: col, opacity: 0.55 }}>
+          {pct}%
+        </span>
+      </div>
+      {visible && (
+        <div style={{
+          position: 'absolute', bottom: 'calc(100% + 6px)', left: 0,
+          background: 'var(--co-void)',
+          border: `1px solid ${col}50`,
+          padding: '6px 10px',
+          zIndex: 50,
+          whiteSpace: 'nowrap',
+          clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+          boxShadow: `0 0 12px ${col}30`,
+          animation: 'slide-in-up 0.15s ease-out',
+        }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', color: col, margin: 0, letterSpacing: '0.08em' }}>
+            {rank.emoji} {rank.name} · {rank.min}%+
+          </p>
+          {nextRank ? (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '3px 0 0' }}>
+              do {nextRank.emoji} {nextRank.name}: <span style={{ color: nextRank.hex }}>+{Math.max(0, nextRank.min - pct)}%</span>
+            </p>
+          ) : (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: col, margin: '3px 0 0' }}>
+              ★ to jest max ranga
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
