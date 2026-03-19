@@ -178,6 +178,8 @@ function AppContent() {
   const [isConnected,  setIsConnected]  = useState(false);
   const [isLoading,    setIsLoading]    = useState(true);
   const [loadTimeout,  setLoadTimeout]  = useState(false);
+  // Gracz do auto-otwarcia w Rankingu (z kliknięcia powiadomienia push)
+  const [notifPlayer,  setNotifPlayer]  = useState(null);
 
   const scrolled     = useScrolled();
   const { playSound } = useAudio(isMuted);
@@ -196,11 +198,44 @@ function AppContent() {
     const handleOnline  = () => setIsConnected(true);
     window.addEventListener('offline', handleOffline);
     window.addEventListener('online',  handleOnline);
+
+    // ── Deep-link z powiadomienia push ──────────────────────────────────────
+    // Przypadek 1: apka była zamknięta — URL ma ?tab=... i ?player=...
+    const params = new URLSearchParams(window.location.search);
+    const tabParam    = params.get('tab');
+    const playerParam = params.get('player');
+    if (tabParam === 'attendance') {
+      setActiveTab(TABS.ATTENDANCE);
+      if (playerParam) setNotifPlayer(decodeURIComponent(playerParam));
+    } else if (tabParam === 'dashboard') {
+      setActiveTab(TABS.DASHBOARD);
+    }
+    // Wyczyść query string żeby nie zostało po odświeżeniu
+    if (tabParam) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    // Przypadek 2: apka była otwarta — SW wysyła postMessage
+    const handleSwMessage = (event) => {
+      if (event.data?.type !== 'NOTIFICATION_CLICK') return;
+      const url    = new URL(event.data.url);
+      const tab    = url.searchParams.get('tab');
+      const player = url.searchParams.get('player');
+      if (tab === 'attendance') {
+        setActiveTab(TABS.ATTENDANCE);
+        if (player) setNotifPlayer(decodeURIComponent(player));
+      } else if (tab === 'dashboard') {
+        setActiveTab(TABS.DASHBOARD);
+      }
+    };
+    navigator.serviceWorker?.addEventListener('message', handleSwMessage);
+
     return () => {
       clearTimeout(timer);
       if (typeof unsub === 'function') unsub();
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online',  handleOnline);
+      navigator.serviceWorker?.removeEventListener('message', handleSwMessage);
     };
   }, []);
 
@@ -287,6 +322,8 @@ function AppContent() {
                 history={appData.history}
                 summary={appData.summary}
                 playSound={playSound}
+                initialPlayer={notifPlayer}
+                onInitialPlayerConsumed={() => setNotifPlayer(null)}
               />
             )}
             {activeTab === TABS.ADMIN && (

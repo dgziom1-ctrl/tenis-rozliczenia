@@ -691,9 +691,16 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
 }
 
 // ─── Main ────────────────────────────────────────────────────────
-export default function AttendanceTab({ players, history, summary, playSound }) {
+export default function AttendanceTab({ players, history, summary, playSound, initialPlayer, onInitialPlayerConsumed }) {
   const totalWeeks = summary?.totalWeeks || 0;
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+
+  // Auto-otwórz modal gracza gdy przyszło powiadomienie push o serii
+  useEffect(() => {
+    if (!initialPlayer) return;
+    setSelectedPlayer(initialPlayer);
+    if (onInitialPlayerConsumed) onInitialPlayerConsumed();
+  }, [initialPlayer, onInitialPlayerConsumed]);
   const stats      = useMemo(() => calculatePlayerStats(players, history, totalWeeks), [players, history, totalWeeks]);
 
   const ranked = useMemo(() => {
