@@ -71,7 +71,6 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}
           channelId: live
           projectId: tenis-rozliczenia
-          target: hosting
 
       - name: Deploy Firebase Functions
         uses: w9jds/firebase-action@master
