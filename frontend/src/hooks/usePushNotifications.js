@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken } from 'firebase/messaging';
 import { ref, set } from 'firebase/database';
 import { database } from '../firebase/config';
 
@@ -36,63 +36,7 @@ export function usePushNotifications() {
     if (supported) setPermission(safeNotificationPermission());
   }, []);
 
-  // ── Powiadomienia gdy apka jest OTWARTA (foreground) ──────────────────────
-  // Gdy apka jest aktywna, FCM nie pokazuje powiadomień automatycznie —
-  // trzeba obsłużyć je samodzielnie przez onMessage().
-  //
-  // WAŻNE: używamy registration.showNotification() zamiast new Notification(),
-  // żeby klik w powiadomienie zawsze przechodził przez SW notificationclick.
-  // Dzięki temu SW wysyła postMessage do apki z poprawnym URL (tab + player),
-  // co otwiera właściwą zakładkę i modal gracza — zarówno dla new_session
-  // (→ Dashboard) jak i streak (→ RANKING + modal gracza).
-  // new Notification() nie ma dostępu do SW notificationclick i klik
-  // nie robiłby nic użytecznego.
-  useEffect(() => {
-    if (safeNotificationPermission() !== 'granted') return;
-    if (!('serviceWorker' in navigator)) return;
 
-    let unsubscribe = null;
-    try {
-      const messaging = getMessaging();
-      unsubscribe = onMessage(messaging, async (payload) => {
-        const { title, body } = payload.notification || {};
-        if (!title) return;
-
-        try {
-          // Preferuj SW showNotification — klik obsługuje notificationclick w SW
-          const registration = await navigator.serviceWorker.ready;
-          await registration.showNotification(title, {
-            body:     body || '',
-            icon:     '/icon-192v2.png',
-            badge:    '/icon-192v2.png',
-            vibrate:  [100, 50, 100],
-            tag:      payload.data?.tag || payload.data?.type || 'default',
-            renotify: true,
-            // data trafia do event.notification.data w SW notificationclick
-            data: {
-              url: payload.data?.url || '/?tab=dashboard',
-              ...payload.data,
-            },
-          });
-        } catch {
-          // Fallback — niektóre starsze przeglądarki nie wspierają SW showNotification
-          try {
-            new Notification(title, {
-              body:  body || '',
-              icon:  '/icon-192v2.png',
-              badge: '/icon-192v2.png',
-            });
-          } catch {
-            // ignoruj — brak wsparcia
-          }
-        }
-      });
-    } catch {
-      // getMessaging() może rzucić jeśli Firebase nie jest skonfigurowany
-    }
-
-    return () => { if (unsubscribe) unsubscribe(); };
-  }, []);
 
   const registerToken = useCallback(async (playerName) => {
     if (!isSupported || !VAPID_KEY) {

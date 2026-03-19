@@ -8,6 +8,7 @@ import AdminTab from './components/admin/AdminTab';
 import HistoryTab from './components/history/HistoryTab';
 import PlayersTab from './components/players/PlayersTab';
 import { subscribeToData } from './firebase/index';
+import { getMessaging, onMessage } from 'firebase/messaging';
 import { SOUND_TYPES, TABS } from './constants';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
 import { useAudio } from './hooks/useAudio';
@@ -236,6 +237,39 @@ function AppContent() {
       swContainer.addEventListener('message', handleSwMessage);
     }
 
+    // ── Powiadomienia gdy apka jest OTWARTA (foreground) ──────────────────────
+    // WAŻNE: handler musi żyć w App.jsx (zawsze zamontowany), NIE w
+    // PushPermissionBanner — ten komponent chowa się gdy zgoda jest udzielona
+    // i jest renderowany tylko na zakładce Dashboard, więc na innych zakładkach
+    // foreground notifications w ogóle nie działały.
+    let unsubFcm = null;
+    try {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        const messaging = getMessaging();
+        unsubFcm = onMessage(messaging, async (payload) => {
+          const { title, body } = payload.notification || {};
+          if (!title) return;
+          try {
+            const reg = await navigator.serviceWorker?.ready;
+            await reg?.showNotification(title, {
+              body:     body || '',
+              icon:     '/icon-192v2.png',
+              badge:    '/icon-192v2.png',
+              vibrate:  [100, 50, 100],
+              tag:      payload.data?.tag || payload.data?.type || 'default',
+              renotify: true,
+              data: { url: payload.data?.url || '/?tab=dashboard', ...payload.data },
+            });
+          } catch {
+            // fallback — stare przeglądarki
+            try { new Notification(title, { body: body || '', icon: '/icon-192v2.png' }); } catch {}
+          }
+        });
+      }
+    } catch {
+      // getMessaging() może rzucić jeśli Firebase nie jest skonfigurowany
+    }
+
     return () => {
       clearTimeout(timer);
       if (typeof unsub === 'function') unsub();
@@ -244,6 +278,7 @@ function AppContent() {
       if (swContainer) {
         swContainer.removeEventListener('message', handleSwMessage);
       }
+      if (unsubFcm) unsubFcm();
     };
   }, []);
 
