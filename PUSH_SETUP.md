@@ -14,29 +14,21 @@
 3. Kliknij "Generate key pair"
 4. Skopiuj wygenerowany klucz
 
-### 3. Dodaj klucz do .env
-W pliku `frontend/.env.local` dodaj:
+### 3. Skonfiguruj .env.local
+W pliku `frontend/.env.local` dodaj VAPID key (pozostałe VITE_FIREBASE_* powinny
+już być — te same wartości są teraz potrzebne do service workera):
 ```
 VITE_FIREBASE_VAPID_KEY=twoj_klucz_vapid_tutaj
 ```
 
-### 4. Zaktualizuj Service Worker
-W pliku `frontend/public/firebase-messaging-sw.js` 
-zastąp PLACEHOLDER wartościami z Firebase Config:
-```js
-const firebaseConfig = {
-  apiKey: "twoj-api-key",
-  authDomain: "twoj-projekt.firebaseapp.com",
-  projectId: "twoj-projekt",
-  storageBucket: "twoj-projekt.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123:web:abc",
-};
-```
-(Te same wartości co w VITE_FIREBASE_* w .env.local)
+> ⚠️ **Ważne**: Plik `firebase-messaging-sw.js` jest teraz generowany
+> automatycznie przez Vite podczas `npm run build` i `npm run dev`.
+> **Nie edytuj go ręcznie** — zmiany zostaną nadpisane przy kolejnym buildzie.
+> Wcześniej trzeba było ręcznie wklejać config do tego pliku — to już
+> nie jest potrzebne.
 
-### 5. Dodaj regułę do Firebase Realtime Database
-W Firebase Console → Realtime Database → Rules dodaj:
+### 4. Dodaj regułę do Firebase Realtime Database
+W Firebase Console → Realtime Database → Rules:
 ```json
 {
   "rules": {
@@ -46,7 +38,7 @@ W Firebase Console → Realtime Database → Rules dodaj:
 }
 ```
 
-### 6. Deploy Cloud Functions
+### 5. Deploy Cloud Functions
 ```bash
 cd tenis-rozliczenia-main
 npm install -g firebase-tools   # jeśli nie masz
@@ -54,11 +46,12 @@ firebase login
 firebase deploy --only functions
 ```
 
-### 7. Deploy całej apki
+### 6. Zbuduj i wdróż apkę
 ```bash
-cd frontend && npm run build
+cd frontend
+npm run build   # Vite automatycznie generuje firebase-messaging-sw.js z prawdziwym configiem
 cd ..
-firebase deploy
+firebase deploy --only hosting
 ```
 
 ## Jak działa
@@ -67,9 +60,28 @@ firebase deploy
 - Użytkownik wybiera swoje imię i klika "Włącz"
 - Token FCM zapisuje się do Firebase (`fcmTokens/`)
 - Gdy ktoś doda sesję → Cloud Function wykrywa zmianę → wysyła push do wszystkich tokenów
-- Gdy ktoś zrobi serię 10/15/20... z rzędu → osobny push z gratulacjami
+- **Apka w tle**: powiadomienie pojawia się przez service worker (onBackgroundMessage)
+- **Apka otwarta**: powiadomienie pojawia się przez natywny Notification API (onMessage)
+- Gdy ktoś zrobi serię 5/10/15/20/25/30 z rzędu → osobny push z gratulacjami
+
+## Sprawdzanie logów Cloud Functions
+
+Jeśli powiadomienia nadal nie działają, sprawdź logi funkcji:
+```bash
+firebase functions:log --only onSessionAdded
+```
+
+Powinieneś zobaczyć linie jak:
+```
+Tygodnie: przed=5, po=6
+Nowa sesja: 2026-03-19, 4 graczy, 27 zł/os.
+Tokenów FCM: 3
+FCM: 3 sukces, 0 błąd z 3
+```
 
 ## Wymagania
 
 - Firebase Blaze plan (Functions wymagają płatnego planu, ale darmowy limit = 2M wywołań/miesiąc)
 - Node.js 20+
+- iOS: tylko jako PWA (dodane do ekranu głównego), iOS 16.4+
+- Android: Chrome, Edge, Firefox

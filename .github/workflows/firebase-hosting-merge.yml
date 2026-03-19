@@ -44,12 +44,13 @@ jobs:
 
       - name: Inject Firebase config into Service Worker
         run: |
-          sed -i "s|PLACEHOLDER_API_KEY|${{ secrets.VITE_FIREBASE_API_KEY }}|g" frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_AUTH_DOMAIN|${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}|g" frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_PROJECT_ID|${{ secrets.VITE_FIREBASE_PROJECT_ID }}|g" frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_STORAGE_BUCKET|${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}|g" frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_API_KEY|${{ secrets.VITE_FIREBASE_API_KEY }}|g"                       frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_AUTH_DOMAIN|${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}|g"               frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_DATABASE_URL|${{ secrets.VITE_FIREBASE_DATABASE_URL }}|g"             frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_PROJECT_ID|${{ secrets.VITE_FIREBASE_PROJECT_ID }}|g"                 frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_STORAGE_BUCKET|${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}|g"         frontend/public/firebase-messaging-sw.js
           sed -i "s|PLACEHOLDER_MESSAGING_SENDER_ID|${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}|g" frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_APP_ID|${{ secrets.VITE_FIREBASE_APP_ID }}|g" frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_APP_ID|${{ secrets.VITE_FIREBASE_APP_ID }}|g"                         frontend/public/firebase-messaging-sw.js
 
       - name: Build React app
         run: npm run build
@@ -62,6 +63,7 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET:      ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID:              ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_ADMIN_PASSWORD:               ${{ secrets.VITE_ADMIN_PASSWORD }}
           VITE_BLIK_NUMBER:                  ${{ secrets.VITE_BLIK_NUMBER }}
           VITE_FIREBASE_VAPID_KEY:           ${{ secrets.VITE_FIREBASE_VAPID_KEY }}
 
