@@ -39,7 +39,11 @@ function PodiumCard({ podiumEntry, totalWeeks, onSelect }) {
   const s = PLACE_STYLES[podiumEntry.place] || PLACE_STYLES[3];
 
   useEffect(() => {
-    const onHit = () => setShimmerKey(k => k + 1);
+    const hitCount = { n: 0 };
+    const onHit = () => {
+      hitCount.n += 1;
+      if (hitCount.n % 2 === 0) setShimmerKey(k => k + 1);
+    };
     window.addEventListener('paddleHit', onHit);
     return () => window.removeEventListener('paddleHit', onHit);
   }, []);
