@@ -358,26 +358,20 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
         position: 'fixed', inset: 0, zIndex: 100,
         background: 'rgba(0,0,0,0.85)',
         backdropFilter: 'blur(8px)',
-        display: 'flex', alignItems: 'flex-end',
-        padding: 'env(safe-area-inset-bottom, 0px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '16px',
       }}
     >
       <div className="bottom-sheet-enter" style={{
-        width: '100%', maxWidth: 560, margin: '0 auto',
+        width: '100%', maxWidth: 520,
         maxHeight: 'calc(100vh - 32px)',
         background: 'var(--co-panel)',
         border: `1px solid ${c.border}40`,
-        borderBottom: 'none',
-        borderRadius: '16px 16px 0 0',
+        borderRadius: '12px',
         display: 'flex', flexDirection: 'column',
-        boxShadow: `0 -8px 40px rgba(0,0,0,0.8), 0 0 40px ${c.border}15`,
+        boxShadow: `0 8px 40px rgba(0,0,0,0.8), 0 0 40px ${c.border}15`,
         overflow: 'hidden',
       }}>
-        {/* Handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
-          <div style={{ width: 36, height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
-        </div>
-
         {/* Header */}
         <div style={{
           padding: '8px 18px 14px',
@@ -448,9 +442,6 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
           const currentRank = getRank(pct);
           const rankIdx = RANKS.findIndex(r => r.name === currentRank.name);
           const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
-          const fromPct = currentRank.min;
-          const toPct = nextRank ? nextRank.min : 100;
-          const progress = toPct > fromPct ? Math.min(1, (pct - fromPct) / (toPct - fromPct)) : 1;
           return (
             <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15`, background: `${currentRank.hex}04` }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -470,7 +461,7 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
               <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{
                   height: '100%', borderRadius: 2,
-                  width: `${progress * 100}%`,
+                  width: `${pct}%`,
                   background: nextRank
                     ? `linear-gradient(90deg, ${currentRank.hex}, ${nextRank.hex})`
                     : currentRank.hex,
@@ -479,8 +470,9 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
                 }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--co-dim)' }}>{fromPct}%</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--co-dim)' }}>{nextRank ? `${toPct}%` : '100%'}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--co-dim)' }}>0%</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: currentRank.hex, fontWeight: 500 }}>{pct}%</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--co-dim)' }}>100%</span>
               </div>
             </div>
           );
