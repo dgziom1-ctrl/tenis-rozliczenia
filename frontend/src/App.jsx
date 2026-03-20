@@ -202,7 +202,7 @@ function AppContent() {
 
   const scrolled     = useScrolled();
   const { playSound } = useAudio(isMuted);
-  const { theme, toggle: toggleTheme, wipeColor } = useTheme();
+  const { theme, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoadTimeout(true), 8000);
@@ -308,24 +308,7 @@ function AppContent() {
 
   return (
     <ThemeContext.Provider value="cyber">
-      {/* ── Reveal motywu od dołu do góry ──
-           Motyw zmienia się natychmiast. Na wierzchu pojawia się overlay
-           w STARYM kolorze tła, który chowa się od dołu ku górze —
-           odsłaniając nowy motyw stopniowo. Content zawsze widoczny. */}
-      {wipeColor && (
-        <div
-          key={wipeColor}
-          aria-hidden="true"
-          style={{
-            position:      'fixed',
-            inset:         0,
-            zIndex:        9999,
-            pointerEvents: 'none',
-            background:    wipeColor,
-            animation:     'theme-reveal 0.52s cubic-bezier(0.76, 0, 0.24, 1) forwards',
-          }}
-        />
-      )}
+
       <div
         className="min-h-screen p-4 md:p-8 relative z-10"
         style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', position: 'relative' }}

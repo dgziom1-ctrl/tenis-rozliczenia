@@ -111,6 +111,7 @@ body {
   overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0.02em;
+  transition: background-color 0.4s ease, color 0.4s ease, background-image 0.4s ease;
 
   /* Cold operator background: deep cyan top bloom + fine grid */
   background-image:
@@ -121,12 +122,24 @@ body {
   background-attachment: fixed;
 }
 
-/* ── Theme reveal (od dołu do góry) ── */
-/* Overlay w starym kolorze tła chowa się od dołu ku górze,
-   odsłaniając nowy motyw — content zawsze widoczny pod spodem. */
-@keyframes theme-reveal {
-  0%   { clip-path: inset(0 0 0%   0); }  /* overlay pełny */
-  100% { clip-path: inset(0 0 100% 0); }  /* overlay zniknął (od dołu w górę) */
+/* ── Płynna zmiana motywu — wszystkie elementy interpolują kolory ── */
+*,
+*::before,
+*::after {
+  transition-property: background-color, color, border-color, box-shadow, fill, stroke;
+  transition-duration: 0.4s;
+  transition-timing-function: ease;
+}
+/* Wyłącz dla elementów które mają własne animacje lub gdzie transition psuje UX */
+.confetti-piece,
+[class*="animate-"],
+[style*="animation"],
+button:active,
+.settle-flash,
+.debt-flash,
+.card-stagger-1,
+.card-stagger-2 {
+  transition: none !important;
 }
 
 /* ── Film grain ── */
