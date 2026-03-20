@@ -151,6 +151,12 @@ describe('useTheme — localStorage i klasy body', () => {
   beforeEach(() => {
     localStorage.clear();
     document.body.className = '';
+    // toggle() używa setTimeout do animacji kurtyny — potrzebujemy fake timerów
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('domyślnie zwraca motyw "dark"', async () => {
@@ -163,7 +169,7 @@ describe('useTheme — localStorage i klasy body', () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle());
+    act(() => { result.current.toggle(); vi.runAllTimers(); });
     expect(result.current.theme).toBe('light');
   });
 
@@ -171,8 +177,8 @@ describe('useTheme — localStorage i klasy body', () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle());
-    act(() => result.current.toggle());
+    act(() => { result.current.toggle(); vi.runAllTimers(); });
+    act(() => { result.current.toggle(); vi.runAllTimers(); });
     expect(result.current.theme).toBe('dark');
   });
 
@@ -180,7 +186,7 @@ describe('useTheme — localStorage i klasy body', () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle()); // → light
+    act(() => { result.current.toggle(); vi.runAllTimers(); }); // → light
     expect(document.body.classList.contains('theme-light')).toBe(true);
   });
 
@@ -188,8 +194,8 @@ describe('useTheme — localStorage i klasy body', () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle()); // → light
-    act(() => result.current.toggle()); // → dark
+    act(() => { result.current.toggle(); vi.runAllTimers(); }); // → light
+    act(() => { result.current.toggle(); vi.runAllTimers(); }); // → dark
     expect(document.body.classList.contains('theme-light')).toBe(false);
   });
 
@@ -197,7 +203,7 @@ describe('useTheme — localStorage i klasy body', () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle()); // → light
+    act(() => { result.current.toggle(); vi.runAllTimers(); }); // → light
     expect(localStorage.getItem('cyber-pong-theme')).toBe('light');
   });
 
