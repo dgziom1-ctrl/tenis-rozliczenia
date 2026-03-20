@@ -8,6 +8,7 @@ import AdminTab from './components/admin/AdminTab';
 import HistoryTab from './components/history/HistoryTab';
 import PlayersTab from './components/players/PlayersTab';
 import { subscribeToData } from './firebase/index';
+import { saveRsvp, nextWednesdayISO } from './firebase/rsvp';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import { SOUND_TYPES, TABS } from './constants';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
@@ -224,6 +225,15 @@ function AppContent() {
     try {
       const p = new URLSearchParams(window.location.search);
       if (p.get('tab')) window.history.replaceState({}, '', window.location.pathname);
+
+      // Obsługa kliknięcia przycisku Tak/Nie w powiadomieniu RSVP
+      const rsvpAnswer = p.get('rsvp');
+      const rsvpPlayer = p.get('player');
+      const rsvpWeek   = p.get('week');
+      if (rsvpAnswer && rsvpPlayer && rsvpWeek) {
+        saveRsvp(decodeURIComponent(rsvpPlayer), rsvpWeek, rsvpAnswer);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
     } catch {}
 
     // Przypadek 2: apka byla otwarta — SW wysyla postMessage przez client.postMessage()
@@ -234,11 +244,23 @@ function AppContent() {
       const url    = new URL(event.data.url);
       const tab    = url.searchParams.get('tab');
       const player = url.searchParams.get('player');
+      const rsvp   = url.searchParams.get('rsvp');
+      const week   = url.searchParams.get('week');
+
+      // Obsługa RSVP — zapisz odpowiedź i przejdź do zakładki Dodaj
+      if (rsvp && player && week) {
+        saveRsvp(decodeURIComponent(player), week, rsvp);
+        setActiveTab(TABS.ADMIN);
+        return;
+      }
+
       if (tab === 'attendance') {
         setActiveTab(TABS.ATTENDANCE);
         if (player) setNotifPlayer(decodeURIComponent(player));
       } else if (tab === 'dashboard') {
         setActiveTab(TABS.DASHBOARD);
+      } else if (tab === 'admin') {
+        setActiveTab(TABS.ADMIN);
       }
     };
 

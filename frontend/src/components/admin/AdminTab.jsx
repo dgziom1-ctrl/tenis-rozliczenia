@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Calculator, CalendarDays, CalendarPlus, CheckCircle2, Copy, Users, Zap } from 'lucide-react';
+import { Calculator, CalendarDays, CalendarPlus, CheckCircle2, Copy, Users, Zap, UserCheck, UserX, HelpCircle } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { formatDate, formatAmountShort } from '../../utils/format';
 import { getPayingPlayers } from '../../utils/calculations';
+import { subscribeToRsvp, nextWednesdayISO } from '../../firebase/rsvp';
 import { useThemeTokens } from '../../context/ThemeContext';
 
 function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson }) {
@@ -262,6 +263,128 @@ function CyberDateInput({ value, onChange }) {
   );
 }
 
+
+// ── RSVP Panel ────────────────────────────────────────────
+function RsvpPanel({ playerNames }) {
+  const weekDate = nextWednesdayISO();
+  const [answers, setAnswers] = useState({});
+
+  useEffect(() => {
+    const unsub = subscribeToRsvp(weekDate, setAnswers);
+    return unsub;
+  }, [weekDate]);
+
+  const yes   = playerNames.filter(p => answers[p] === 'yes');
+  const no    = playerNames.filter(p => answers[p] === 'no');
+  const unsure = playerNames.filter(p => !answers[p]);
+
+  const formatDate = (iso) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+  };
+
+  return (
+    <div style={{
+      padding: '16px',
+      background: 'var(--co-dark)',
+      border: '1px solid var(--co-border)',
+      clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)',
+      marginBottom: 0,
+    }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <div style={{ padding: '5px 7px', background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+          <Users size={13} style={{ color: 'var(--co-cyan)', display: 'block' }} />
+        </div>
+        <div>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.14em', color: 'var(--co-cyan)', textTransform: 'uppercase' }}>
+            Kto gra w środę?
+          </span>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', margin: '2px 0 0', letterSpacing: '0.06em' }}>
+            {formatDate(weekDate)} · odpowiedzi z powiadomień
+          </p>
+        </div>
+        {/* Counter badge */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>
+            {yes.length}/{playerNames.length}
+          </span>
+        </div>
+      </div>
+
+      {/* Three columns */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+
+        {/* TAK */}
+        <div style={{ padding: '10px 10px', background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+            <UserCheck size={11} style={{ color: 'var(--co-green)' }} />
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--co-green)', textTransform: 'uppercase' }}>
+              Gram ({yes.length})
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {yes.length === 0
+              ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>—</span>
+              : yes.map(p => (
+                <span key={p} style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', letterSpacing: '0.06em', color: 'var(--co-green)' }}>
+                  {p}
+                </span>
+              ))
+            }
+          </div>
+        </div>
+
+        {/* NIE */}
+        <div style={{ padding: '10px 10px', background: 'rgba(255,32,144,0.04)', border: '1px solid rgba(255,32,144,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+            <UserX size={11} style={{ color: 'var(--co-yellow)' }} />
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--co-yellow)', textTransform: 'uppercase' }}>
+              Nie gram ({no.length})
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {no.length === 0
+              ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>—</span>
+              : no.map(p => (
+                <span key={p} style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', letterSpacing: '0.06em', color: 'var(--co-yellow)' }}>
+                  {p}
+                </span>
+              ))
+            }
+          </div>
+        </div>
+
+        {/* BRAK ODPOWIEDZI */}
+        <div style={{ padding: '10px 10px', background: 'transparent', border: '1px solid var(--co-border)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+            <HelpCircle size={11} style={{ color: 'var(--co-dim)' }} />
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+              ? ({unsure.length})
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {unsure.length === 0
+              ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>—</span>
+              : unsure.map(p => (
+                <span key={p} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>
+                  {p}
+                </span>
+              ))
+            }
+          </div>
+        </div>
+
+      </div>
+
+      {/* Footer hint */}
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-dim)', marginTop: 10, textAlign: 'center', letterSpacing: '0.06em' }}>
+        {'>'} odpowiedzi zapisują się automatycznie po kliknięciu powiadomienia we wtorek
+      </p>
+    </div>
+  );
+}
+
 // ── Main ─────────────────────────────────────────────────
 export default function AdminTab({ playerNames, defaultMultiPlayers, history, setActiveTab, playSound }) {
   const { showError } = useToast();
@@ -322,7 +445,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     <>
       <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} tokens={tokens} />
 
-      <div style={{ width: '100%', maxWidth: 680, margin: '0 auto', animation: 'slide-in-up 0.3s ease-out' }}>
+      <div style={{ width: '100%', maxWidth: 680, margin: '0 auto', animation: 'slide-in-up 0.3s ease-out', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {playerNames?.length > 0 && <RsvpPanel playerNames={playerNames} />}
         <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)', padding: '20px 20px' }}>
 
           {/* Header */}

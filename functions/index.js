@@ -215,6 +215,15 @@ exports.onPlayerAdded = onValueUpdated(
 // ─── Scheduled: przypomnienie we wtorek o 19:00 ───────────────────────────────
 // Cron: "0 19 * * 2" = każdy wtorek o 19:00
 // Strefa: Europe/Warsaw (uwzględnia czas letni/zimowy automatycznie)
+// Następna środa od podanej daty (lub sam dzień jeśli to środa)
+function nextWednesdayISO(fromDate) {
+  const d = new Date(fromDate);
+  const day = d.getDay();
+  const diff = (3 - day + 7) % 7 || 7;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().split('T')[0];
+}
+
 exports.weeklyReminder = onSchedule(
   {
     schedule:  '0 19 * * 2',
@@ -224,24 +233,63 @@ exports.weeklyReminder = onSchedule(
   async () => {
     console.log('Wysyłam cotygodniowe przypomnienie o sesji');
 
-    const tokens = await getAllTokens();
-    console.log(`Tokenów FCM w bazie: ${tokens.length}`);
-    if (!tokens.length) {
-      console.log('Brak tokenów — pomijam');
-      return;
+    const snap = await getDatabase().ref('fcmTokens').get();
+    if (!snap.exists()) { console.log('Brak tokenów'); return; }
+
+    const entries  = Object.values(snap.val() || {});
+    const weekDate = nextWednesdayISO(new Date().toISOString());
+    console.log(`Tydzień RSVP: ${weekDate}, tokenów: ${entries.length}`);
+
+    // Wysyłamy OSOBNO do każdego gracza — żeby URL miał właściwe imię
+    for (const entry of entries) {
+      const { token, playerName } = entry;
+      if (!token) continue;
+
+      const player  = playerName || 'unknown';
+      const yesUrl  = `/?tab=admin&rsvp=yes&player=${encodeURIComponent(player)}&week=${weekDate}`;
+      const noUrl   = `/?tab=admin&rsvp=no&player=${encodeURIComponent(player)}&week=${weekDate}`;
+
+      const msg = {
+        notification: { title: '🏓 Jutro ping-pong!', body: `${player}, grasz jutro?` },
+        data: {
+          type:   'reminder',
+          player,
+          week:   weekDate,
+          url:    yesUrl,
+          tag:    'weekly-reminder',
+          yesUrl,
+          noUrl,
+        },
+        webpush: {
+          notification: {
+            title:   '🏓 Jutro ping-pong!',
+            body:    `${player}, grasz jutro?`,
+            icon:    '/icon-192v2.png',
+            badge:   '/icon-192v2.png',
+            vibrate: [100, 50, 100],
+            tag:     'weekly-reminder',
+            renotify: true,
+            requireInteraction: true,
+            // Przyciski akcji w powiadomieniu webpush
+            actions: [
+              { action: 'yes', title: '✅ Gram!' },
+              { action: 'no',  title: '❌ Nie gram' },
+            ],
+          },
+          fcm_options: { link: yesUrl },
+          headers: { Urgency: 'high' },
+        },
+        tokens: [token],
+      };
+
+      try {
+        const result = await getMessaging().sendEachForMulticast(msg);
+        console.log(`  ${player}: ${result.successCount ? 'OK' : 'błąd'}`);
+      } catch (err) {
+        console.error(`  ${player} FCM error:`, err);
+      }
     }
 
-    await sendToAll(
-      tokens,
-      '🏓 Jutro ping-pong!',
-      'Jutro sesja — kto gra?',
-      {
-        type: 'reminder',
-        url:  '/?tab=dashboard',
-        tag:  'weekly-reminder',
-      }
-    );
-
-    console.log('Przypomnienie wysłane');
+    console.log('Przypomnienia wysłane');
   }
 );

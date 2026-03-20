@@ -39,9 +39,21 @@ messaging.onBackgroundMessage((payload) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = event.notification.data?.url
-    ? new URL(event.notification.data.url, self.location.origin).href
-    : new URL('/?tab=dashboard', self.location.origin).href;
+
+  const data    = event.notification.data || {};
+  const action  = event.action; // 'yes' | 'no' | '' (klik w sam notification)
+
+  // Wybierz URL na podstawie klikniętej akcji
+  let targetUrl;
+  if (action === 'yes' && data.yesUrl) {
+    targetUrl = new URL(data.yesUrl, self.location.origin).href;
+  } else if (action === 'no' && data.noUrl) {
+    targetUrl = new URL(data.noUrl, self.location.origin).href;
+  } else {
+    targetUrl = data.url
+      ? new URL(data.url, self.location.origin).href
+      : new URL('/?tab=dashboard', self.location.origin).href;
+  }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
