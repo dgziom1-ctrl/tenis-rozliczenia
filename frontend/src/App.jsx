@@ -202,7 +202,7 @@ function AppContent() {
 
   const scrolled     = useScrolled();
   const { playSound } = useAudio(isMuted);
-  const { theme, toggle: toggleTheme } = useTheme();
+  const { theme, toggle: toggleTheme, wipe } = useTheme();
 
   useEffect(() => {
     const timer = setTimeout(() => setLoadTimeout(true), 8000);
@@ -308,6 +308,21 @@ function AppContent() {
 
   return (
     <ThemeContext.Provider value="cyber">
+      {/* ── Kurtyna zmiany motywu ── */}
+      {wipe && (
+        <div
+          key={wipe}
+          aria-hidden="true"
+          style={{
+            position:   'fixed',
+            inset:      0,
+            zIndex:     9999,
+            pointerEvents: 'none',
+            background: wipe === 'to-light' ? '#F2F5F9' : '#030508',
+            animation:  'wipe-curtain 0.6s cubic-bezier(0.76, 0, 0.24, 1) both',
+          }}
+        />
+      )}
       <div
         className="min-h-screen p-4 md:p-8 relative z-10"
         style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', position: 'relative' }}

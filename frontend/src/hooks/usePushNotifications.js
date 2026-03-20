@@ -22,6 +22,36 @@ function safeNotificationPermission() {
   }
 }
 
+// Tłumaczy błędy FCM / PushManager na przyjazne komunikaty po polsku
+function friendlyPushError(err) {
+  const msg = (err?.message || '').toLowerCase();
+  const code = err?.code || '';
+
+  // "push service error" — przeglądarka nie może połączyć się z Google Push Service
+  // Najczęstsze przyczyny na PC: brak połączenia z googleapis.com, firewall,
+  // tryb prywatny bez uprawnień, Chrome bez konta Google w niektórych konfiguracjach
+  if (msg.includes('push service') || msg.includes('pushservice')) {
+    return 'Usługa push niedostępna w tej przeglądarce. Spróbuj w Chrome (nie incognito) lub na telefonie.';
+  }
+  if (msg.includes('registration failed') || msg.includes('service worker')) {
+    return 'Błąd rejestracji Service Worker. Odśwież stronę i spróbuj ponownie.';
+  }
+  if (msg.includes('network') || msg.includes('fetch')) {
+    return 'Brak połączenia z internetem. Sprawdź sieć i spróbuj ponownie.';
+  }
+  if (msg.includes('permission') || msg.includes('denied')) {
+    return 'Brak uprawnień do powiadomień. Sprawdź ustawienia przeglądarki.';
+  }
+  if (msg.includes('vapid') || msg.includes('applicationserverkey')) {
+    return 'Błąd konfiguracji VAPID. Skontaktuj się z administratorem.';
+  }
+  if (code === 'messaging/token-unsubscribe-failed') {
+    return 'Nie udało się wyrejestrować starego tokenu. Odśwież stronę.';
+  }
+  // Fallback — pokaż oryginalny komunikat po angielsku
+  return err?.message || 'Nieznany błąd';
+}
+
 export function usePushNotifications() {
   const [permission,    setPermission]    = useState(safeNotificationPermission);
   const [isSupported,   setIsSupported]   = useState(false);
@@ -36,16 +66,23 @@ export function usePushNotifications() {
     if (supported) setPermission(safeNotificationPermission());
   }, []);
 
-
-
   const registerToken = useCallback(async (playerName) => {
     if (!isSupported || !VAPID_KEY) {
       return { success: false, error: 'Brak wsparcia lub klucza VAPID' };
     }
     setIsRegistering(true);
     try {
-      // Rejestruj SW — Vite plugin zapewnia że ma poprawny Firebase config
+      // Wyrejestruj stare SW i zarejestruj świeże — rozwiązuje problem "push service error"
+      // który może pojawić się gdy stary SW jest w błędnym stanie po poprzedniej próbie
+      const existingRegs = await navigator.serviceWorker.getRegistrations();
+      for (const reg of existingRegs) {
+        if (reg.active?.scriptURL?.includes('firebase-messaging-sw')) {
+          await reg.unregister();
+        }
+      }
+
       const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      // Czekaj aż SW będzie gotowy (active) — bez tego getToken() może się nie udać
       await navigator.serviceWorker.ready;
 
       const perm = await Notification.requestPermission();
@@ -77,7 +114,7 @@ export function usePushNotifications() {
       return { success: true };
     } catch (err) {
       console.error('Push registration error:', err);
-      return { success: false, error: err.message };
+      return { success: false, error: friendlyPushError(err) };
     } finally {
       setIsRegistering(false);
     }
