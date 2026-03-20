@@ -7,14 +7,16 @@ import { database } from '../../firebase/config';
 const DISMISS_KEY   = 'push-banner-dismissed';
 const PLAYER_KEY    = 'push-registered-player';
 
-// Sprawdza czy bieżące urządzenie ma token w bazie
+// Sprawdza czy TO urządzenie ma token w bazie.
+// Podczas rejestracji zapisujemy hash tokenu w localStorage ('push-token-key').
+// Tutaj sprawdzamy czy ten konkretny klucz istnieje w Firebase — bez
+// wywoływania getToken() które mogłoby pokazać popup uprawnień.
 async function deviceHasToken() {
   try {
-    const snap = await get(ref(database, 'fcmTokens'));
-    if (!snap.exists()) return false;
-    // Jeśli są jakiekolwiek tokeny — zakładamy że to urządzenie jest zarejestrowane.
-    // Dokładne sprawdzenie wymagałoby getToken() które triggeruje popup uprawnień.
-    return Object.keys(snap.val()).length > 0;
+    const tokenKey = localStorage.getItem('push-token-key');
+    if (!tokenKey) return false;
+    const snap = await get(ref(database, `fcmTokens/${tokenKey}`));
+    return snap.exists();
   } catch {
     return false;
   }

@@ -111,6 +111,8 @@ body {
   overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0.02em;
+  /* Płynne przejście dark ↔ light */
+  transition: background-color 0.35s ease, color 0.35s ease;
 
   /* Cold operator background: deep cyan top bloom + fine grid */
   background-image:
@@ -664,6 +666,7 @@ select option { background: #090F18; color: var(--co-text); }
 body.theme-light {
   background-color: #F2F5F9;
   color: #1E3040;
+  transition: background-color 0.35s ease, color 0.35s ease;
 
   --co-void:      #F2F5F9;
   --co-dark:      #E8EEF4;
@@ -693,6 +696,17 @@ body.theme-light {
 
   --co-overlay:   rgba(20,50,80,0.55);
   --dot-color:    rgba(0,80,130,0.04);
+}
+
+/* Płynne przejście dla paneli i kart przy zmianie motywu */
+body, .cyber-box, .cyber-input, header,
+.desktop-nav-inner, .mobile-nav,
+.player-card-wrap > div,
+.crt-card {
+  transition: background-color 0.35s ease,
+              color 0.35s ease,
+              border-color 0.35s ease,
+              box-shadow 0.35s ease;
 }
 
 /* Fix hardcoded dark backgrounds in light mode */

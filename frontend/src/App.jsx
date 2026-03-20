@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ToastProvider } from './components/common/Toast';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
@@ -173,14 +173,32 @@ function CyberErrorScreen() {
 
 
 function AppContent() {
-  const [activeTab,    setActiveTab]    = useState(TABS.DASHBOARD);
+  // Czytaj URL params SYNCHRONICZNIE jako initial state — zamiast w useEffect.
+  // Dzięki temu pierwszy render już ma prawidłową zakładkę i gracza,
+  // bez żadnych problemów z kolejnością efektów / race condition z Firebase.
+  const [activeTab,    setActiveTab]    = useState(() => {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('tab') === 'attendance') return TABS.ATTENDANCE;
+      if (p.get('tab') === 'dashboard')  return TABS.DASHBOARD;
+    } catch {}
+    return TABS.DASHBOARD;
+  });
   const [isMuted,      setIsMuted]      = useState(false);
   const [appData,      setAppData]      = useState(INITIAL_APP_DATA);
   const [isConnected,  setIsConnected]  = useState(false);
   const [isLoading,    setIsLoading]    = useState(true);
   const [loadTimeout,  setLoadTimeout]  = useState(false);
   // Gracz do auto-otwarcia w Rankingu (z kliknięcia powiadomienia push)
-  const [notifPlayer,  setNotifPlayer]  = useState(null);
+  const [notifPlayer,  setNotifPlayer]  = useState(() => {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('tab') === 'attendance' && p.get('player')) {
+        return decodeURIComponent(p.get('player'));
+      }
+    } catch {}
+    return null;
+  });
 
   const scrolled     = useScrolled();
   const { playSound } = useAudio(isMuted);
@@ -201,20 +219,12 @@ function AppContent() {
     window.addEventListener('online',  handleOnline);
 
     // ── Deep-link z powiadomienia push ──────────────────────────────────────
-    // Przypadek 1: apka była zamknięta — URL ma ?tab=... i ?player=...
-    const params = new URLSearchParams(window.location.search);
-    const tabParam    = params.get('tab');
-    const playerParam = params.get('player');
-    if (tabParam === 'attendance') {
-      setActiveTab(TABS.ATTENDANCE);
-      if (playerParam) setNotifPlayer(decodeURIComponent(playerParam));
-    } else if (tabParam === 'dashboard') {
-      setActiveTab(TABS.DASHBOARD);
-    }
-    // Wyczyść query string żeby nie zostało po odświeżeniu
-    if (tabParam) {
-      window.history.replaceState({}, '', window.location.pathname);
-    }
+    // Przypadek 1: apka była zamknięta — URL params czytane synchronicznie
+    // w useState(), więc tutaj tylko czyścimy query string.
+    try {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('tab')) window.history.replaceState({}, '', window.location.pathname);
+    } catch {}
 
     // Przypadek 2: apka byla otwarta — SW wysyla postMessage przez client.postMessage()
     // WAZNE: wiadomosci z Service Workera trafiaja na navigator.serviceWorker,
@@ -286,6 +296,10 @@ function AppContent() {
     playSound(SOUND_TYPES.TAB);
     setActiveTab(id);
   }, [playSound]);
+
+  // Stabilna referencja — bez useCallback AttendanceTab re-triggerowałby
+  // useEffect przy każdym re-renderze App (nowa lambda = nowa referencja).
+  const handleNotifPlayerConsumed = useCallback(() => setNotifPlayer(null), []);
 
   if (isLoading) {
     if (loadTimeout) return <CyberErrorScreen />;
@@ -366,7 +380,7 @@ function AppContent() {
                 summary={appData.summary}
                 playSound={playSound}
                 initialPlayer={notifPlayer}
-                onInitialPlayerConsumed={() => setNotifPlayer(null)}
+                onInitialPlayerConsumed={handleNotifPlayerConsumed}
               />
             )}
             {activeTab === TABS.ADMIN && (

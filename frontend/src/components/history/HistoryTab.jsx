@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Terminal, Pencil, Trash2, Check, X, Zap, Users, CalendarDays, TrendingUp, BarChart2, Search } from 'lucide-react';
+import { Terminal, Pencil, Trash2, Check, X, Zap, Users, CalendarDays, TrendingUp, BarChart2, Search, Download, ArrowUpDown } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase/index';
 import { groupHistoryByMonth } from '../../utils/calculations';
 import { formatDate, formatAmount } from '../../utils/format';
@@ -290,12 +290,41 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const [isDeleting, setIsDeleting] = useState(null);
   const [pwModal,    setPwModal]    = useState(null);
   const [filterPlayer, setFilterPlayer] = useState('');
+  const [sortOrder,    setSortOrder]    = useState('desc'); // 'desc' = najnowsze, 'asc' = najstarsze
   const { showError } = useToast();
 
   const filteredHistory = useMemo(() => {
-    if (!filterPlayer) return history;
-    return history.filter(s => s.presentPlayers.includes(filterPlayer));
-  }, [history, filterPlayer]);
+    let h = !filterPlayer ? history : history.filter(s => s.presentPlayers.includes(filterPlayer));
+    // history z Firebase jest już posortowane od najnowszego (desc).
+    // Przy 'asc' odwracamy.
+    return sortOrder === 'asc' ? [...h].reverse() : h;
+  }, [history, filterPlayer, sortOrder]);
+
+  // ── Eksport CSV ──────────────────────────────────────────────────────────────
+  const handleExportCSV = () => {
+    const rows = [
+      ['Data', 'Koszt całkowity', 'Na osobę', 'Liczba graczy', 'Obecni', 'Multisport'],
+      ...filteredHistory.map(s => [
+        s.datePlayed,
+        s.totalCost,
+        s.costPerPerson?.toFixed(2) ?? '',
+        s.presentPlayers.length,
+        s.presentPlayers.join('; '),
+        s.multisportPlayers.join('; '),
+      ]),
+    ];
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), {
+      href: url,
+      download: filterPlayer ? `sesje_${filterPlayer}.csv` : 'sesje.csv',
+    });
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   const requestEdit   = (row) => setPwModal({ type: 'edit', row });
   const requestDelete = (id)  => setPwModal({ type: 'delete', rowId: id });
@@ -374,9 +403,45 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             HISTORIA
           </span>
           <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,229,255,0.2), transparent)' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
-            {history.length} REKORDÓW
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {/* Sort toggle */}
+            <button
+              onClick={() => setSortOrder(o => o === 'desc' ? 'asc' : 'desc')}
+              title={sortOrder === 'desc' ? 'Najnowsze pierwsze' : 'Najstarsze pierwsze'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '4px 8px', cursor: 'pointer',
+                background: 'transparent', border: '1px solid var(--co-border)',
+                color: 'var(--co-dim)',
+                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
+                transition: 'all 0.15s',
+              }}
+            >
+              <ArrowUpDown size={10} />
+              {sortOrder === 'desc' ? 'NOWE' : 'STARE'}
+            </button>
+            {/* Export CSV */}
+            <button
+              onClick={handleExportCSV}
+              title="Pobierz CSV"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '4px 8px', cursor: 'pointer',
+                background: 'transparent', border: '1px solid var(--co-border)',
+                color: 'var(--co-dim)',
+                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
+                transition: 'all 0.15s',
+              }}
+            >
+              <Download size={10} />
+              CSV
+            </button>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
+              {history.length} REKORDÓW
+            </span>
+          </div>
         </div>
 
         {/* Boot text */}

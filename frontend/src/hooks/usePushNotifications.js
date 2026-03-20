@@ -70,6 +70,10 @@ export function usePushNotifications() {
         ua:         navigator.userAgent.slice(0, 100),
       });
 
+      // Zapisz hash tokenu w localStorage — pozwala sprawdzić czy TO urządzenie
+      // ma token w bazie bez konieczności wywołania getToken() (które triggeruje popup).
+      try { localStorage.setItem('push-token-key', tokenKey); } catch {}
+
       return { success: true };
     } catch (err) {
       console.error('Push registration error:', err);
