@@ -1,17 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'cyber-pong-theme';
-
-// Czas animacji wipu w ms — musi odpowiadać CSS @keyframes wipe-curtain
-const WIPE_MS = 600;
+const WIPE_MS     = 520;
 
 export function useTheme() {
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem(STORAGE_KEY) || 'dark'; } catch { return 'dark'; }
   });
 
-  // wipe: null | 'to-light' | 'to-dark'
-  const [wipe, setWipe] = useState(null);
+  // prevColor: kolor tła poprzedniego motywu — overlay który znika
+  const [wipeColor, setWipeColor] = useState(null);
 
   useEffect(() => {
     document.body.classList.toggle('theme-light', theme === 'light');
@@ -21,19 +19,18 @@ export function useTheme() {
   const toggle = useCallback(() => {
     const next = theme === 'dark' ? 'light' : 'dark';
 
-    // 1. Uruchom animację kurtyny
-    setWipe(`to-${next}`);
+    // Zapamiętaj kolor STAREGO motywu — to będzie overlay który znika
+    const oldBg = theme === 'dark' ? '#030508' : '#F2F5F9';
 
-    // 2. Przełącz motyw w połowie animacji — gdy kurtyna zasłania ekran
-    setTimeout(() => {
-      setTheme(next);
-    }, WIPE_MS * 0.42);
+    // 1. Zmień motyw natychmiast — content już jest w nowym motywie
+    setTheme(next);
 
-    // 3. Zakończ animację
-    setTimeout(() => {
-      setWipe(null);
-    }, WIPE_MS);
+    // 2. Nałóż overlay w starym kolorze i zacznij animację chowania od dołu
+    setWipeColor(oldBg);
+
+    // 3. Po zakończeniu animacji usuń overlay
+    setTimeout(() => setWipeColor(null), WIPE_MS);
   }, [theme]);
 
-  return { theme, toggle, wipe };
+  return { theme, toggle, wipeColor };
 }

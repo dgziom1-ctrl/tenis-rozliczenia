@@ -121,13 +121,12 @@ body {
   background-attachment: fixed;
 }
 
-/* ── Theme wipe (kurtyna) ── */
-/* Kurtyna wjeżdża od dołu, przykrywa ekran, motyw się zmienia, kurtyna wyjeżdża w górę */
-@keyframes wipe-curtain {
-  0%   { transform: translateY(100%); }   /* poza ekranem na dole */
-  42%  { transform: translateY(0%);   }   /* przykrywa cały ekran — tu zmienia się motyw */
-  58%  { transform: translateY(0%);   }   /* chwila pauzy na pełnym ekranie */
-  100% { transform: translateY(-100%); }  /* wyjeżdża w górę */
+/* ── Theme reveal (od dołu do góry) ── */
+/* Overlay w starym kolorze tła chowa się od dołu ku górze,
+   odsłaniając nowy motyw — content zawsze widoczny pod spodem. */
+@keyframes theme-reveal {
+  0%   { clip-path: inset(0 0 0%   0); }  /* overlay pełny */
+  100% { clip-path: inset(0 0 100% 0); }  /* overlay zniknął (od dołu w górę) */
 }
 
 /* ── Film grain ── */
