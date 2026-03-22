@@ -1,0 +1,137 @@
+{
+  "appData": {
+    "defaultMultiPlayers": [
+      "Rafał"
+    ],
+    "lastAddedSession": {
+      "id": "mmynzaur-o11d",
+      "ts": 1773996949683
+    },
+    "paidUntilWeek": {
+      "Arek": "mmmk6f05-mmca"
+    },
+    "payments": {
+      "Krzysiek": [
+        {
+          "amount": 25,
+          "date": "2026-03-11",
+          "id": "1773233301012"
+        },
+        {
+          "amount": 30,
+          "date": "2026-03-20",
+          "id": "mmyprewt-9fbp"
+        }
+      ],
+      "Przemek": [
+        {
+          "amount": 25,
+          "date": "2026-03-11",
+          "id": "1773222484387"
+        },
+        {
+          "amount": 15,
+          "date": "2026-03-12",
+          "id": "mmn6h9o8-c2a7"
+        }
+      ]
+    },
+    "playerJoinWeek": {
+      "Kacek": 4,
+      "Kalms": 4,
+      "gfhfghf": 4,
+      "vbcbcvbcv": 4
+    },
+    "players": [
+      "Rafał",
+      "Kamil",
+      "Przemek",
+      "Mariusz",
+      "Arek",
+      "Krzysiek"
+    ],
+    "weeks": [
+      {
+        "cost": 55,
+        "date": "2026-02-25",
+        "id": "mmi4eud3",
+        "multiPlayers": [
+          "Rafał"
+        ],
+        "present": [
+          "Rafał",
+          "Kamil",
+          "Przemek",
+          "Arek",
+          "Krzysiek"
+        ]
+      },
+      {
+        "cost": 45,
+        "date": "2026-03-04",
+        "id": "mmi4fbn0",
+        "multiPlayers": [
+          "Rafał"
+        ],
+        "present": [
+          "Rafał",
+          "Kamil",
+          "Przemek",
+          "Arek",
+          "Krzysiek"
+        ]
+      },
+      {
+        "cost": 60,
+        "date": "2026-03-11",
+        "id": "mmmk6f05-mmca",
+        "present": [
+          "Kamil",
+          "Przemek",
+          "Arek",
+          "Krzysiek"
+        ]
+      },
+      {
+        "cost": 45,
+        "date": "2026-03-18",
+        "id": "mmwkx2ip-cjzr",
+        "multiPlayers": [
+          "Rafał"
+        ],
+        "present": [
+          "Rafał",
+          "Kamil",
+          "Arek",
+          "Krzysiek"
+        ]
+      }
+    ]
+  },
+  "fcmTokens": {
+    "6t1jc3": {
+      "playerName": "Kamil",
+      "token": "eE-dxHKYu40k2EFe4mkqJ4:APA91bGt97zam_L_axlZCbegRikL96cbaZHE3IUY6JKXRVH4urPQhQynTubGJzq7J4gB2GwulYRRUjJ05-lw2tzHJuXKazb4nt6uZpcGm5_cC8EqCFnxJp0",
+      "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Sa",
+      "updatedAt": 1773996931401
+    },
+    "cqkh7d": {
+      "playerName": "Kamil",
+      "token": "dlsyvbMUvU4vkGREmjpmc6:APA91bHlGbQQkRH0vn24CgAERgD4KPGMhlE4_37uDwvFgXYWdSwGligcPYr7FFtI_ltmrmdvoDUivaS9Hno0vfBMYHCKxz2GrrqpbAUB8C1tHDZqHdG7qH8",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Vers",
+      "updatedAt": 1773996223536
+    },
+    "kr4dwi": {
+      "playerName": "Rafał",
+      "token": "fv5Zxl9tH8KEWd0k7MI80j:APA91bEid9FiCRa13FVbHjqk7YNwhe1yKbVj6xOJ0t1U95uZusAQhaLYZsUfi1g23GDdK3d6jMRhoar5gTM_M-p3osfGKvVcFTaX4xIO8h42bXfeeFxG9do",
+      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Vers",
+      "updatedAt": 1774029432628
+    },
+    "z8ntjf": {
+      "playerName": "Przemek",
+      "token": "co7ncrVl2i2qlWzVvKMgj0:APA91bEQizuFyw9-2q0oqHby0Jb5_zi9ogPl2VX16Bens6hc9lhE_qpH92-W8UBCtNAOAmJT5nbDlyk2LJunle6B2Ta4_sd_PSVEWJ-m6yTj7gROuCBLWHQ",
+      "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/29.0 Chrome",
+      "updatedAt": 1774000061749
+    }
+  }
+}
