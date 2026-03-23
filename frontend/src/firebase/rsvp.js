@@ -12,9 +12,15 @@ export function nextWednesdayISO() {
 
 // Zapisz odpowiedź gracza
 export async function saveRsvp(playerName, weekDate, answer) {
-  if (!playerName || !weekDate || !['yes', 'no'].includes(answer)) return;
+  if (!playerName || !weekDate) return;
   try {
-    await set(ref(database, `rsvp/${weekDate}/${playerName}`), answer);
+    // 'reset' lub null = usuń głos
+    if (!answer || answer === 'reset' || !['yes', 'no'].includes(answer)) {
+      const { remove } = await import('firebase/database');
+      await remove(ref(database, `rsvp/${weekDate}/${playerName}`));
+    } else {
+      await set(ref(database, `rsvp/${weekDate}/${playerName}`), answer);
+    }
   } catch (err) {
     console.error('RSVP save error:', err);
   }

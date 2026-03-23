@@ -6,7 +6,7 @@ import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { formatDate, formatAmountShort } from '../../utils/format';
 import { getPayingPlayers } from '../../utils/calculations';
-import { subscribeToRsvp, nextWednesdayISO } from '../../firebase/rsvp';
+import { subscribeToRsvp, saveRsvp, nextWednesdayISO } from '../../firebase/rsvp';
 import { useThemeTokens } from '../../context/ThemeContext';
 
 function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson }) {
@@ -268,68 +268,25 @@ function CyberDateInput({ value, onChange }) {
 function RsvpPanel({ playerNames }) {
   const weekDate = nextWednesdayISO();
   const [answers, setAnswers] = useState({});
-  const [voting,  setVoting]  = useState(null); // imię gracza który właśnie głosuje
 
   useEffect(() => {
     const unsub = subscribeToRsvp(weekDate, setAnswers);
     return unsub;
   }, [weekDate]);
 
-  const yes    = playerNames.filter(p => answers[p] === 'yes');
-  const no     = playerNames.filter(p => answers[p] === 'no');
-  const unsure = playerNames.filter(p => !answers[p]);
+  const yes    = playerNames.filter(p => answers[p] === 'yes').length;
+  const no     = playerNames.filter(p => answers[p] === 'no').length;
+
+  const handleVote = async (name, answer) => {
+    // Kliknięcie tej samej odpowiedzi ponownie — kasuje głos
+    const newAnswer = answers[name] === answer ? null : answer;
+    await saveRsvp(name, weekDate, newAnswer || 'reset');
+  };
 
   const formatDate = (iso) => {
     const d = new Date(iso);
     return d.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
   };
-
-  // Klik na gracza otwiera mini-picker Gram/Nie gram
-  const handlePlayerClick = (name) => {
-    setVoting(v => v === name ? null : name);
-  };
-
-  const handleVote = async (name, answer) => {
-    await saveRsvp(name, weekDate, answer);
-    setVoting(null);
-  };
-
-  const renderName = (name, color) => (
-    <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <button
-        onClick={() => handlePlayerClick(name)}
-        style={{
-          fontFamily: 'var(--font-display)', fontSize: '0.72rem',
-          letterSpacing: '0.06em', color,
-          background: voting === name ? 'rgba(0,229,255,0.08)' : 'transparent',
-          border: voting === name ? '1px solid rgba(0,229,255,0.3)' : '1px solid transparent',
-          padding: '3px 6px', cursor: 'pointer', textAlign: 'left',
-          clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
-          transition: 'all 0.15s',
-        }}
-      >
-        {name}
-      </button>
-      {voting === name && (
-        <div style={{ display: 'flex', gap: 4 }}>
-          <button onClick={() => handleVote(name, 'yes')} style={{
-            flex: 1, padding: '4px', cursor: 'pointer',
-            fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.06em',
-            background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.4)',
-            color: 'var(--co-green)',
-            clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
-          }}>✅ Gram</button>
-          <button onClick={() => handleVote(name, 'no')} style={{
-            flex: 1, padding: '4px', cursor: 'pointer',
-            fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.06em',
-            background: 'rgba(255,32,144,0.08)', border: '1px solid rgba(255,32,144,0.3)',
-            color: 'var(--co-yellow)',
-            clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
-          }}>❌ Nie</button>
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div style={{
@@ -348,66 +305,81 @@ function RsvpPanel({ playerNames }) {
             Kto gra w środę?
           </span>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', margin: '2px 0 0', letterSpacing: '0.06em' }}>
-            {formatDate(weekDate)} · kliknij imię żeby zmienić odpowiedź
+            {formatDate(weekDate)}
           </p>
         </div>
-        <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>
-          {yes.length}/{playerNames.length}
-        </span>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>✅ {yes}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-yellow)' }}>❌ {no}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>? {playerNames.length - yes - no}</span>
+        </div>
       </div>
 
-      {/* Three columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-
-        {/* TAK */}
-        <div style={{ padding: '10px', background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
-            <UserCheck size={11} style={{ color: 'var(--co-green)' }} />
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--co-green)', textTransform: 'uppercase' }}>
-              Gram ({yes.length})
-            </span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {yes.length === 0
-              ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>—</span>
-              : yes.map(p => renderName(p, 'var(--co-green)'))}
-          </div>
-        </div>
-
-        {/* NIE */}
-        <div style={{ padding: '10px', background: 'rgba(255,32,144,0.04)', border: '1px solid rgba(255,32,144,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
-            <UserX size={11} style={{ color: 'var(--co-yellow)' }} />
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--co-yellow)', textTransform: 'uppercase' }}>
-              Nie gram ({no.length})
-            </span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {no.length === 0
-              ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>—</span>
-              : no.map(p => renderName(p, 'var(--co-yellow)'))}
-          </div>
-        </div>
-
-        {/* BRAK ODPOWIEDZI */}
-        <div style={{ padding: '10px', background: 'transparent', border: '1px solid var(--co-border)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
-            <HelpCircle size={11} style={{ color: 'var(--co-dim)' }} />
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
-              ? ({unsure.length})
-            </span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {unsure.length === 0
-              ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>—</span>
-              : unsure.map(p => renderName(p, 'var(--co-dim)'))}
-          </div>
-        </div>
-
+      {/* Player grid — każdy gracz to wiersz z imieniem i dwoma przyciskami */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {playerNames.map(name => {
+          const ans = answers[name];
+          return (
+            <div key={name} style={{
+              display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 6, alignItems: 'center',
+              padding: '8px 10px',
+              background: ans === 'yes' ? 'rgba(0,255,136,0.04)' : ans === 'no' ? 'rgba(255,32,144,0.04)' : 'var(--co-panel)',
+              border: `1px solid ${ans === 'yes' ? 'rgba(0,255,136,0.25)' : ans === 'no' ? 'rgba(255,32,144,0.2)' : 'var(--co-border)'}`,
+              clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+              transition: 'all 0.2s',
+            }}>
+              <span style={{
+                fontFamily: 'var(--font-display)', fontSize: '0.82rem',
+                letterSpacing: '0.08em',
+                color: ans === 'yes' ? 'var(--co-green)' : ans === 'no' ? 'var(--co-yellow)' : 'var(--co-text)',
+              }}>
+                {name}
+              </span>
+              <button
+                onClick={() => handleVote(name, 'yes')}
+                style={{
+                  padding: '5px 12px', cursor: 'pointer',
+                  fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.06em',
+                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                  transition: 'all 0.15s',
+                  ...(ans === 'yes' ? {
+                    background: 'rgba(0,255,136,0.18)', border: '1px solid rgba(0,255,136,0.6)',
+                    color: 'var(--co-green)', boxShadow: '0 0 8px rgba(0,255,136,0.2)',
+                  } : {
+                    background: 'transparent', border: '1px solid var(--co-border)',
+                    color: 'var(--co-dim)',
+                  }),
+                }}
+              >
+                ✅ Gram
+              </button>
+              <button
+                onClick={() => handleVote(name, 'no')}
+                style={{
+                  padding: '5px 12px', cursor: 'pointer',
+                  fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.06em',
+                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                  transition: 'all 0.15s',
+                  ...(ans === 'no' ? {
+                    background: 'rgba(255,32,144,0.12)', border: '1px solid rgba(255,32,144,0.5)',
+                    color: 'var(--co-yellow)', boxShadow: '0 0 8px rgba(255,32,144,0.15)',
+                  } : {
+                    background: 'transparent', border: '1px solid var(--co-border)',
+                    color: 'var(--co-dim)',
+                  }),
+                }}
+              >
+                ❌ Nie
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
+
+
 
 // ── Main ─────────────────────────────────────────────────
 export default function AdminTab({ playerNames, defaultMultiPlayers, history, setActiveTab, playSound }) {
