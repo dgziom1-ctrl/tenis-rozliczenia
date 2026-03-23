@@ -268,14 +268,15 @@ function CyberDateInput({ value, onChange }) {
 function RsvpPanel({ playerNames }) {
   const weekDate = nextWednesdayISO();
   const [answers, setAnswers] = useState({});
+  const [voting,  setVoting]  = useState(null); // imię gracza który właśnie głosuje
 
   useEffect(() => {
     const unsub = subscribeToRsvp(weekDate, setAnswers);
     return unsub;
   }, [weekDate]);
 
-  const yes   = playerNames.filter(p => answers[p] === 'yes');
-  const no    = playerNames.filter(p => answers[p] === 'no');
+  const yes    = playerNames.filter(p => answers[p] === 'yes');
+  const no     = playerNames.filter(p => answers[p] === 'no');
   const unsure = playerNames.filter(p => !answers[p]);
 
   const formatDate = (iso) => {
@@ -283,13 +284,59 @@ function RsvpPanel({ playerNames }) {
     return d.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
   };
 
+  // Klik na gracza otwiera mini-picker Gram/Nie gram
+  const handlePlayerClick = (name) => {
+    setVoting(v => v === name ? null : name);
+  };
+
+  const handleVote = async (name, answer) => {
+    await saveRsvp(name, weekDate, answer);
+    setVoting(null);
+  };
+
+  const renderName = (name, color) => (
+    <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <button
+        onClick={() => handlePlayerClick(name)}
+        style={{
+          fontFamily: 'var(--font-display)', fontSize: '0.72rem',
+          letterSpacing: '0.06em', color,
+          background: voting === name ? 'rgba(0,229,255,0.08)' : 'transparent',
+          border: voting === name ? '1px solid rgba(0,229,255,0.3)' : '1px solid transparent',
+          padding: '3px 6px', cursor: 'pointer', textAlign: 'left',
+          clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+          transition: 'all 0.15s',
+        }}
+      >
+        {name}
+      </button>
+      {voting === name && (
+        <div style={{ display: 'flex', gap: 4 }}>
+          <button onClick={() => handleVote(name, 'yes')} style={{
+            flex: 1, padding: '4px', cursor: 'pointer',
+            fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.06em',
+            background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.4)',
+            color: 'var(--co-green)',
+            clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+          }}>✅ Gram</button>
+          <button onClick={() => handleVote(name, 'no')} style={{
+            flex: 1, padding: '4px', cursor: 'pointer',
+            fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.06em',
+            background: 'rgba(255,32,144,0.08)', border: '1px solid rgba(255,32,144,0.3)',
+            color: 'var(--co-yellow)',
+            clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+          }}>❌ Nie</button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div style={{
       padding: '16px',
       background: 'var(--co-dark)',
       border: '1px solid var(--co-border)',
       clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)',
-      marginBottom: 0,
     }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
@@ -301,22 +348,19 @@ function RsvpPanel({ playerNames }) {
             Kto gra w środę?
           </span>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', margin: '2px 0 0', letterSpacing: '0.06em' }}>
-            {formatDate(weekDate)} · odpowiedzi z powiadomień
+            {formatDate(weekDate)} · kliknij imię żeby zmienić odpowiedź
           </p>
         </div>
-        {/* Counter badge */}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>
-            {yes.length}/{playerNames.length}
-          </span>
-        </div>
+        <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>
+          {yes.length}/{playerNames.length}
+        </span>
       </div>
 
       {/* Three columns */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
 
         {/* TAK */}
-        <div style={{ padding: '10px 10px', background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+        <div style={{ padding: '10px', background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
             <UserCheck size={11} style={{ color: 'var(--co-green)' }} />
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--co-green)', textTransform: 'uppercase' }}>
@@ -326,17 +370,12 @@ function RsvpPanel({ playerNames }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {yes.length === 0
               ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>—</span>
-              : yes.map(p => (
-                <span key={p} style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', letterSpacing: '0.06em', color: 'var(--co-green)' }}>
-                  {p}
-                </span>
-              ))
-            }
+              : yes.map(p => renderName(p, 'var(--co-green)'))}
           </div>
         </div>
 
         {/* NIE */}
-        <div style={{ padding: '10px 10px', background: 'rgba(255,32,144,0.04)', border: '1px solid rgba(255,32,144,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+        <div style={{ padding: '10px', background: 'rgba(255,32,144,0.04)', border: '1px solid rgba(255,32,144,0.2)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
             <UserX size={11} style={{ color: 'var(--co-yellow)' }} />
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--co-yellow)', textTransform: 'uppercase' }}>
@@ -346,17 +385,12 @@ function RsvpPanel({ playerNames }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {no.length === 0
               ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>—</span>
-              : no.map(p => (
-                <span key={p} style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', letterSpacing: '0.06em', color: 'var(--co-yellow)' }}>
-                  {p}
-                </span>
-              ))
-            }
+              : no.map(p => renderName(p, 'var(--co-yellow)'))}
           </div>
         </div>
 
         {/* BRAK ODPOWIEDZI */}
-        <div style={{ padding: '10px 10px', background: 'transparent', border: '1px solid var(--co-border)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+        <div style={{ padding: '10px', background: 'transparent', border: '1px solid var(--co-border)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
             <HelpCircle size={11} style={{ color: 'var(--co-dim)' }} />
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.1em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
@@ -366,21 +400,11 @@ function RsvpPanel({ playerNames }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {unsure.length === 0
               ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>—</span>
-              : unsure.map(p => (
-                <span key={p} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>
-                  {p}
-                </span>
-              ))
-            }
+              : unsure.map(p => renderName(p, 'var(--co-dim)'))}
           </div>
         </div>
 
       </div>
-
-      {/* Footer hint */}
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-dim)', marginTop: 10, textAlign: 'center', letterSpacing: '0.06em' }}>
-        {'>'} odpowiedzi zapisują się automatycznie po kliknięciu powiadomienia we wtorek
-      </p>
     </div>
   );
 }
