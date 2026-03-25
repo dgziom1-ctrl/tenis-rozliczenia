@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Terminal, Pencil, Trash2, Check, X, Zap, Users, CalendarDays, TrendingUp, BarChart2, Search, Download, ArrowUpDown } from 'lucide-react';
+import { Terminal, Pencil, Trash2, Check, X, Zap, Users, CalendarDays, TrendingUp, Search, Download, ArrowUpDown } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase/index';
 import { groupHistoryByMonth } from '../../utils/calculations';
 import { formatDate, formatAmount } from '../../utils/format';
@@ -32,7 +32,6 @@ function EditDateInput({ value, onChange }) {
   );
 }
 
-
 // Terminal log entry
 function LogEntry({ row, onEdit, onDelete }) {
   return (
@@ -44,7 +43,6 @@ function LogEntry({ row, onEdit, onDelete }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {/* Top row: date + actions */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {/* Terminal prompt */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)', opacity: 0.5 }}>{'>'}</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--co-green)' }}>
@@ -54,7 +52,6 @@ function LogEntry({ row, onEdit, onDelete }) {
               {formatDate(row.datePlayed)}
             </span>
           </div>
-          {/* Actions */}
           <div style={{ display: 'flex', gap: 6 }}>
             <button onClick={() => onEdit(row)} className="icon-btn" style={{
               padding: '5px 8px', background: 'transparent',
@@ -117,7 +114,6 @@ function AttendanceTrendChart({ history, playerNames }) {
 
   const data = useMemo(() => {
     if (!history || history.length === 0) return [];
-    // Show last 12 sessions newest→oldest, display oldest→newest
     const recent = [...history].slice(0, 12).reverse();
     return recent.map((s, i) => ({
       i,
@@ -134,11 +130,10 @@ function AttendanceTrendChart({ history, playerNames }) {
   const maxCost  = Math.max(...data.map(d => d.cost), 1);
   const n = data.length;
 
-  const xPos  = i => PAD.left + (i / (n - 1)) * innerW;
+  const xPos   = i => PAD.left + (i / (n - 1)) * innerW;
   const yCount = v => PAD.top + innerH - (v / maxCount) * innerH;
   const yCost  = v => PAD.top + innerH - (v / maxCost)  * innerH;
 
-  // Smooth SVG path using bezier curves
   const linePath = (pts) => pts.reduce((acc, [x, y], i) => {
     if (i === 0) return `M${x},${y}`;
     const prev = pts[i - 1];
@@ -148,11 +143,8 @@ function AttendanceTrendChart({ history, playerNames }) {
 
   const countPts = data.map(d => [xPos(d.i), yCount(d.count)]);
   const costPts  = data.map(d => [xPos(d.i), yCost(d.cost)]);
-
-  // Filled area under count line
   const areaPath = `${linePath(countPts)} L${xPos(n-1)},${PAD.top+innerH} L${xPos(0)},${PAD.top+innerH} Z`;
 
-  // Y-axis grid lines
   const gridLines = [0, 0.25, 0.5, 0.75, 1].map(p => ({
     y: PAD.top + innerH * (1 - p),
     label: Math.round(maxCount * p),
@@ -170,7 +162,6 @@ function AttendanceTrendChart({ history, playerNames }) {
             Trend frekwencji
           </span>
         </div>
-        {/* Legend */}
         <div style={{ display: 'flex', gap: 16 }}>
           {[
             { color: '#00E5FF', label: 'obecni' },
@@ -186,23 +177,18 @@ function AttendanceTrendChart({ history, playerNames }) {
 
       {/* SVG chart */}
       <div style={{ position: 'relative', background: 'rgba(0,229,255,0.015)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)', overflow: 'hidden' }}>
-        {/* Scanline overlay */}
-
         <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
           <defs>
-            {/* Area fill gradient */}
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.18" />
               <stop offset="100%" stopColor="#00E5FF" stopOpacity="0.01" />
             </linearGradient>
-            {/* Glow filter for lines */}
             <filter id="lineGlow" x="-20%" y="-80%" width="140%" height="260%">
               <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
               <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
           </defs>
 
-          {/* Grid lines + Y labels */}
           {gridLines.map(({ y, label }) => (
             <g key={y}>
               <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y}
@@ -214,32 +200,26 @@ function AttendanceTrendChart({ history, playerNames }) {
             </g>
           ))}
 
-          {/* Vertical session markers */}
           {data.map(d => (
             <line key={d.i} x1={xPos(d.i)} y1={PAD.top} x2={xPos(d.i)} y2={PAD.top + innerH}
               stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
           ))}
 
-          {/* Area fill under count line */}
           <path d={areaPath} fill="url(#areaGrad)" />
 
-          {/* Cost line (magenta, dashed) */}
           <path d={linePath(costPts)} fill="none"
             stroke="#FF2090" strokeWidth="1.5"
             strokeDasharray="5 3" opacity="0.7"
             filter="url(#lineGlow)" />
 
-          {/* Attendance count line (cyan, solid) */}
           <path d={linePath(countPts)} fill="none"
             stroke="#00E5FF" strokeWidth="2"
             filter="url(#lineGlow)" />
 
-          {/* Data point dots — cyan */}
           {countPts.map(([x, y], i) => (
             <g key={i}>
               <circle cx={x} cy={y} r="5" fill="var(--co-panel)" stroke="#00E5FF" strokeWidth="1.5" />
               <circle cx={x} cy={y} r="2.5" fill="#00E5FF" />
-              {/* Value label */}
               <text x={x} y={y - 9} textAnchor="middle"
                 fill="#00E5FF" fontSize="9" fontFamily="Space Mono, monospace" opacity="0.8">
                 {data[i].count}
@@ -247,12 +227,10 @@ function AttendanceTrendChart({ history, playerNames }) {
             </g>
           ))}
 
-          {/* Cost dots — magenta */}
           {costPts.map(([x, y], i) => (
             <circle key={i} cx={x} cy={y} r="3" fill="var(--co-panel)" stroke="#FF2090" strokeWidth="1.5" opacity="0.8" />
           ))}
 
-          {/* X-axis date labels — every other one on mobile */}
           {data.map((d, i) => (
             (i % Math.max(1, Math.floor(n / 6)) === 0) && (
               <text key={i} x={xPos(i)} y={H - 6} textAnchor="middle"
@@ -268,9 +246,9 @@ function AttendanceTrendChart({ history, playerNames }) {
       <div style={{ display: 'flex', gap: 1, marginTop: 8 }}>
         {[
           { label: 'Śr. obecność', value: (data.reduce((s, d) => s + d.count, 0) / data.length).toFixed(1) + ' os.', color: 'var(--co-cyan)' },
-          { label: 'Śr. koszt', value: (data.reduce((s, d) => s + d.cost, 0) / data.length).toFixed(2) + ' zł', color: '#FF2090' },
-          { label: 'Max sesja', value: Math.max(...data.map(d => d.count)) + ' os.', color: 'var(--co-green)' },
-          { label: 'Sesji', value: `${data.length}`, color: 'var(--co-ice, #0080FF)' },
+          { label: 'Śr. koszt',    value: (data.reduce((s, d) => s + d.cost,  0) / data.length).toFixed(2) + ' zł', color: '#FF2090' },
+          { label: 'Max sesja',    value: Math.max(...data.map(d => d.count)) + ' os.', color: 'var(--co-green)' },
+          { label: 'Sesji',        value: `${data.length}`, color: 'var(--co-ice, #0080FF)' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ flex: 1, padding: '8px 10px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color, margin: 0, lineHeight: 1, textShadow: `0 0 8px ${color}40` }}>{value}</p>
@@ -283,24 +261,21 @@ function AttendanceTrendChart({ history, playerNames }) {
 }
 
 export default function HistoryTab({ history, playerNames, playSound }) {
-  const [editingId,  setEditingId]  = useState(null);
-  const [editForm,   setEditForm]   = useState({});
-  const [deletingId, setDeletingId] = useState(null);
-  const [isSaving,   setIsSaving]   = useState(false);
-  const [isDeleting, setIsDeleting] = useState(null);
-  const [pwModal,    setPwModal]    = useState(null);
+  const [editingId,    setEditingId]    = useState(null);
+  const [editForm,     setEditForm]     = useState({});
+  const [deletingId,   setDeletingId]   = useState(null);
+  const [isSaving,     setIsSaving]     = useState(false);
+  const [isDeleting,   setIsDeleting]   = useState(null);
+  const [pwModal,      setPwModal]      = useState(null);
   const [filterPlayer, setFilterPlayer] = useState('');
-  const [sortOrder,    setSortOrder]    = useState('desc'); // 'desc' = najnowsze, 'asc' = najstarsze
+  const [sortOrder,    setSortOrder]    = useState('desc');
   const { showError } = useToast();
 
   const filteredHistory = useMemo(() => {
     let h = !filterPlayer ? history : history.filter(s => s.presentPlayers.includes(filterPlayer));
-    // history z Firebase jest już posortowane od najnowszego (desc).
-    // Przy 'asc' odwracamy.
     return sortOrder === 'asc' ? [...h].reverse() : h;
   }, [history, filterPlayer, sortOrder]);
 
-  // ── Eksport CSV ──────────────────────────────────────────────────────────────
   const handleExportCSV = () => {
     const rows = [
       ['Data', 'Koszt całkowity', 'Na osobę', 'Liczba graczy', 'Obecni', 'Multisport'],
@@ -394,8 +369,9 @@ export default function HistoryTab({ history, playerNames, playSound }) {
         padding: '20px 18px',
         animation: 'slide-in-up 0.3s ease-out',
       }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, paddingBottom: 14, borderBottom: '1px solid var(--co-border)' }}>
+
+        {/* ── 1. HEADER ─────────────────────────────────────────────── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, paddingBottom: 14, borderBottom: '1px solid var(--co-border)' }}>
           <div style={{ padding: '6px 8px', background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
             <Terminal size={14} style={{ color: 'var(--co-green)', display: 'block' }} />
           </div>
@@ -403,69 +379,29 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             HISTORIA
           </span>
           <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,229,255,0.2), transparent)' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {/* Sort toggle */}
-            <button
-              onClick={() => setSortOrder(o => o === 'desc' ? 'asc' : 'desc')}
-              title={sortOrder === 'desc' ? 'Najnowsze pierwsze' : 'Najstarsze pierwsze'}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                padding: '4px 8px', cursor: 'pointer',
-                background: 'transparent', border: '1px solid var(--co-border)',
-                color: 'var(--co-dim)',
-                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
-                transition: 'all 0.15s',
-              }}
-            >
-              <ArrowUpDown size={10} />
-              {sortOrder === 'desc' ? 'NOWE' : 'STARE'}
-            </button>
-            {/* Export CSV */}
-            <button
-              onClick={handleExportCSV}
-              title="Pobierz CSV"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                padding: '4px 8px', cursor: 'pointer',
-                background: 'transparent', border: '1px solid var(--co-border)',
-                color: 'var(--co-dim)',
-                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
-                transition: 'all 0.15s',
-              }}
-            >
-              <Download size={10} />
-              CSV
-            </button>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
-              {history.length} REKORDÓW
-            </span>
-          </div>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
+            {history.length} REKORDÓW
+          </span>
         </div>
 
-        {/* Boot text */}
+        {/* ── 2. BOOT TEXT ──────────────────────────────────────────── */}
         <div style={{ marginBottom: 20, padding: '10px 14px', background: 'var(--co-dark)', border: '1px solid var(--co-border)' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-green)', lineHeight: 1.6, opacity: 0.7 }}>
-            {'>'} System OK<br/>
-            {'>'} Ładowanie historii...<br/>
-            {'>'} {history.length} rekordów znaleziono<br/>
-            {'>'} Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--co-green)' }}>▮</span>
+            {'>'} System OK &nbsp;·&nbsp; {history.length} rekordów znaleziono &nbsp;·&nbsp; Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--co-green)' }}>▮</span>
           </p>
         </div>
 
-        {/* Attendance trend chart */}
-        {history.length >= 2 && (
-          <AttendanceTrendChart history={history} playerNames={playerNames} />
-        )}
-
-        {/* Filter bar */}
+        {/* ── 3. PASEK KONTROLEK (filtr + sort + CSV) ───────────────── */}
         {playerNames && playerNames.length > 0 && (
-          <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(0,229,255,0.04)', border: '1px solid rgba(0,229,255,0.12)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+          <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+
+            {/* Etykieta filtra */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(0,229,255,0.04)', border: '1px solid rgba(0,229,255,0.12)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)', flexShrink: 0 }}>
               <Search size={11} style={{ color: 'var(--co-dim)' }} />
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>FILTR</span>
             </div>
+
+            {/* Przyciski graczy */}
             <button
               onClick={() => setFilterPlayer('')}
               style={{
@@ -497,14 +433,62 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                 {name}
               </button>
             ))}
+
+            {/* Licznik po filtrowaniu */}
             {filterPlayer && (
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', marginLeft: 4 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)' }}>
                 {filteredHistory.length} sesji
               </span>
             )}
+
+            {/* Separator + akcje — wypychamy w prawo */}
+            <div style={{ flex: 1 }} />
+            <div style={{ width: 1, height: 18, background: 'var(--co-border)', flexShrink: 0 }} />
+
+            {/* Sort */}
+            <button
+              onClick={() => setSortOrder(o => o === 'desc' ? 'asc' : 'desc')}
+              title={sortOrder === 'desc' ? 'Najnowsze pierwsze' : 'Najstarsze pierwsze'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '4px 8px', cursor: 'pointer',
+                background: 'transparent', border: '1px solid var(--co-border)',
+                color: 'var(--co-dim)',
+                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
+                transition: 'all 0.15s', flexShrink: 0,
+              }}
+            >
+              <ArrowUpDown size={10} />
+              {sortOrder === 'desc' ? 'NOWE' : 'STARE'}
+            </button>
+
+            {/* CSV */}
+            <button
+              onClick={handleExportCSV}
+              title="Pobierz CSV"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '4px 8px', cursor: 'pointer',
+                background: 'transparent', border: '1px solid var(--co-border)',
+                color: 'var(--co-dim)',
+                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
+                transition: 'all 0.15s', flexShrink: 0,
+              }}
+            >
+              <Download size={10} />
+              CSV
+            </button>
           </div>
         )}
 
+        {/* ── 4. WYKRES TRENDU ──────────────────────────────────────── */}
+        {history.length >= 2 && (
+          <AttendanceTrendChart history={history} playerNames={playerNames} />
+        )}
+
+        {/* ── 5. EMPTY STATE ────────────────────────────────────────── */}
         {history.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
             <CalendarDays style={{ margin: '0 auto 16px', color: 'var(--co-dim)' }} size={40} />
@@ -517,6 +501,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
           </div>
         )}
 
+        {/* ── 6. LISTA SESJI ────────────────────────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {grouped.map(({ label, rows }) => (
             <div key={label}>
