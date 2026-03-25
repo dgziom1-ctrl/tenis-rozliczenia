@@ -12,7 +12,9 @@ export function nextWednesdayISO() {
 
 // Zapisz odpowiedź gracza
 export async function saveRsvp(playerName, weekDate, answer) {
-  if (!playerName || !weekDate) return;
+  if (!playerName || !weekDate) {
+    return { success: false, error: 'Brak danych RSVP' };
+  }
   try {
     // 'reset' lub null = usuń głos
     if (!answer || answer === 'reset' || !['yes', 'no'].includes(answer)) {
@@ -21,8 +23,10 @@ export async function saveRsvp(playerName, weekDate, answer) {
     } else {
       await set(ref(database, `rsvp/${weekDate}/${playerName}`), answer);
     }
+    return { success: true };
   } catch (err) {
     console.error('RSVP save error:', err);
+    return { success: false, error: err?.message || 'Nie udało się zapisać RSVP' };
   }
 }
 

@@ -30,6 +30,7 @@ export default function DashboardTab({ data, history, playSound }) {
   const totalWeeks    = data.summary?.totalWeeks ?? 0;
   const confettiTimer = useRef(null);
   const isSettlingRef = useRef(false);
+  const undoInFlightRef = useRef(false);
   useEffect(() => () => clearTimeout(confettiTimer.current), []);
 
   const handleSettleRequest = useCallback((playerName) => {
@@ -84,13 +85,18 @@ export default function DashboardTab({ data, history, playSound }) {
   }, [confirmSettle, data.players, playSound, showError, startUndo]);
 
   const handleUndo = useCallback(async () => {
-    if (!undoToast) return;
+    if (!undoToast || undoInFlightRef.current) return;
+    undoInFlightRef.current = true;
     playSound(SOUND_TYPES.CLICK);
-    const { playerName, previousValue, previousPayments } = undoToast.payload;
-    const result = await undoSettle(playerName, previousValue, previousPayments);
-    if (!result.success) { showError(result.error || 'Nie udało się cofnąć'); return; }
-    dismissUndo();
-    showSuccess('Rozliczenie cofnięte');
+    try {
+      const { playerName, previousValue, previousPayments } = undoToast.payload;
+      const result = await undoSettle(playerName, previousValue, previousPayments);
+      if (!result.success) { showError(result.error || 'Nie udało się cofnąć'); return; }
+      dismissUndo();
+      showSuccess('Rozliczenie cofnięte');
+    } finally {
+      undoInFlightRef.current = false;
+    }
   }, [undoToast, playSound, showError, showSuccess, dismissUndo]);
 
   const handleAddPayment = useCallback(async (playerName, amount) => {
@@ -104,6 +110,7 @@ export default function DashboardTab({ data, history, playSound }) {
     playSound(SOUND_TYPES.CLICK);
     const result = await removePayment(playerName, paymentId);
     if (!result.success) showError(result.error || 'Nie udało się cofnąć wpłaty');
+    return result;
   }, [playSound, showError]);
 
   const toggleDetails = useCallback((playerName) => {
@@ -118,13 +125,18 @@ export default function DashboardTab({ data, history, playSound }) {
 
   const sortedPlayers = useMemo(() => {
     if (!data.players) return [];
-    // Sort: alphabetical A→Z, organizer always last
-    const nonOrg   = data.players
-      .filter(p => p.name !== ORGANIZER_NAME)
-      .sort((a, b) => a.name.localeCompare(b.name, 'pl'));
+    // Sort: alphabetical A→Z, organizer always last, but pinned card (undo) to the top.
+    const nonOrg = data.players.filter(p => p.name !== ORGANIZER_NAME);
     const organizer = data.players.filter(p => p.name === ORGANIZER_NAME);
-    return [...nonOrg, ...organizer];
-  }, [data.players]);
+    const alphaSorted = [...nonOrg].sort((a, b) => a.name.localeCompare(b.name, 'pl'));
+    if (pinnedPlayer && pinnedPlayer !== ORGANIZER_NAME) {
+      const pinned = alphaSorted.find(p => p.name === pinnedPlayer);
+      if (pinned) {
+        return [pinned, ...alphaSorted.filter(p => p.name !== pinnedPlayer), ...organizer];
+      }
+    }
+    return [...alphaSorted, ...organizer];
+  }, [data.players, pinnedPlayer]);
 
   const debtCount   = sortedPlayers.filter(p => p.currentDebt > SETTLED_THRESHOLD && p.name !== ORGANIZER_NAME).length;
   const settledCount = sortedPlayers.filter(p => p.currentDebt <= SETTLED_THRESHOLD && p.name !== ORGANIZER_NAME).length;

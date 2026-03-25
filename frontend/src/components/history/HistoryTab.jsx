@@ -273,6 +273,12 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const { showError } = useToast();
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 639;
 
+  const parsedEditCost = editForm.cost === '' || editForm.cost === null || editForm.cost === undefined ? NaN : parseFloat(editForm.cost);
+  const isEditCostValid = Number.isFinite(parsedEditCost) && parsedEditCost >= 0;
+  const editCostError = isEditCostValid
+    ? null
+    : (editForm.cost === '' ? 'Wpisz koszt sesji' : 'Koszt musi być liczbą >= 0');
+
   const filteredHistory = useMemo(() => {
     let h = !filterPlayer ? history : history.filter(s => s.presentPlayers.includes(filterPlayer));
     return sortOrder === 'asc' ? [...h].reverse() : h;
@@ -321,9 +327,13 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
   const saveEdit = async () => {
     if (isSaving) return;
+    if (!isEditCostValid) {
+      showError(editCostError || 'Nieprawidłowy koszt');
+      return;
+    }
     setIsSaving(true);
     try {
-      const result = await updateWeek(editingId, { date: editForm.date, cost: parseFloat(editForm.cost), present: editForm.present, multiPlayers: editForm.multiPlayers });
+      const result = await updateWeek(editingId, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       setEditingId(null); setEditForm({});
     } finally { setIsSaving(false); }
@@ -695,6 +705,11 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                             className="cyber-input"
                             style={{ width: '100%', padding: '10px 12px', fontSize: '0.8rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
                           />
+                          {!isEditCostValid && (
+                            <p style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-yellow)' }}>
+                              ⚠ {editCostError}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div>
@@ -746,7 +761,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                         </div>
                       )}
                       <div style={{ display: 'flex', gap: 10 }}>
-                        <button onClick={saveEdit} disabled={isSaving}
+                        <button onClick={saveEdit} disabled={isSaving || !isEditCostValid}
                           className="cyber-button-yellow" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                           {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Check size={14} /> Zapisz</>}
                         </button>

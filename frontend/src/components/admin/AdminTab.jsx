@@ -269,6 +269,7 @@ function RsvpPanel({ playerNames }) {
   const weekDate = nextWednesdayISO();
   const [answers,  setAnswers]  = useState({});
   const [pending,  setPending]  = useState(null); // nazwa gracza którego głos jest w trakcie zapisu
+  const [rsvpError, setRsvpError] = useState(null);
 
   useEffect(() => {
     const unsub = subscribeToRsvp(weekDate, setAnswers);
@@ -282,8 +283,15 @@ function RsvpPanel({ playerNames }) {
     if (pending === name) return; // blokuj podwójne kliknięcie
     const newAnswer = answers[name] === answer ? null : answer;
     setPending(name);
-    await saveRsvp(name, weekDate, newAnswer || 'reset');
-    setPending(null);
+    setRsvpError(null);
+    try {
+      const result = await saveRsvp(name, weekDate, newAnswer || 'reset');
+      if (!result?.success) setRsvpError(result?.error || 'Nie udało się zapisać głosu');
+    } catch (err) {
+      setRsvpError(err?.message || 'Nie udało się zapisać głosu');
+    } finally {
+      setPending(null);
+    }
   };
 
   const formatDate = (iso) => {
@@ -382,6 +390,20 @@ function RsvpPanel({ playerNames }) {
           );
         })}
       </div>
+
+      {rsvpError && (
+        <p style={{
+          marginTop: 12,
+          fontFamily: 'var(--font-display)',
+          fontSize: '0.75rem',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: 'var(--co-yellow)',
+          textAlign: 'center',
+        }}>
+          ⚠ {rsvpError}
+        </p>
+      )}
     </div>
   );
 }
@@ -402,6 +424,12 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const [savedSummary,      setSavedSummary]      = useState(null);
 
   const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed);
+  const parsedTotalCost = totalCost === '' ? NaN : parseFloat(totalCost);
+  const isCostValid = Number.isFinite(parsedTotalCost) && parsedTotalCost >= 0;
+  const isPresentValid = presentPlayers.length > 0;
+  const totalCostError = isCostValid
+    ? null
+    : (totalCost === '' ? 'Wpisz koszt sesji żeby kontynuować' : 'Koszt musi być liczbą >= 0');
 
   useEffect(() => {
     if (!playerNames?.length) return;
@@ -425,8 +453,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const handleSaveSession = useCallback(async (e) => {
     e.preventDefault();
     if (isSaving) return;
+    if (!isPresentValid) { showError('Zaznacz co najmniej jednego gracza'); return; }
+    if (!isCostValid) { showError(totalCostError || 'Wpisz poprawny koszt sesji'); return; }
+    if (isDuplicateDate) { showError('Sesja z tą datą już istnieje'); return; }
     setIsSaving(true);
-    const cost     = parseFloat(totalCost);
+    const cost     = parsedTotalCost;
     const paying   = presentPlayers.filter(p => !multisportPlayers.includes(p));
     const perPerson = paying.length > 0 ? cost / paying.length : 0;
     try {
@@ -438,11 +469,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError]);
+  }, [isSaving, datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
-  const isDisabled = isSaving || presentPlayers.length === 0 || !totalCost || isDuplicateDate;
+  const isDisabled = isSaving || !isPresentValid || !isCostValid || isDuplicateDate;
 
   return (
     <>
@@ -512,6 +543,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
                 required
               />
+              {!isCostValid && (
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-yellow)', marginTop: 8 }}>
+                  ⚠ {totalCostError}
+                </p>
+              )}
             </div>
 
             {/* Present players */}
@@ -524,6 +560,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 </span>
               </p>
               <PlayerToggleGrid names={playerNames || []} selected={presentPlayers} onToggle={togglePresent} accent="yellow" />
+              {!isPresentValid && (
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-yellow)', marginTop: 10, textAlign: 'center' }}>
+                  ⚠ Wybierz przynajmniej jednego gracza
+                </p>
+              )}
             </div>
 
             {/* Multisport */}
@@ -565,7 +606,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               </button>
               {!isSaving && isDisabled && (
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', textAlign: 'center', marginTop: 8 }}>
-                  {'>'} {isDuplicateDate ? '⚠ Zmień datę — sesja już istnieje' : !totalCost ? 'Wpisz koszt sesji żeby kontynuować' : 'Zaznacz co najmniej jednego gracza'}
+                  {'>'} {isDuplicateDate ? '⚠ Zmień datę — sesja już istnieje' : !isCostValid ? totalCostError : 'Zaznacz co najmniej jednego gracza'}
                 </p>
               )}
             </div>

@@ -204,6 +204,7 @@ export default function PlayerCard({
   const [modal,     setModal]     = useState(null);
   const [customAmt, setCustomAmt] = useState('');
   const [isSaving,  setIsSaving]  = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
   const [adminMode, setAdminMode] = useState(false);
   const [flash,     setFlash]     = useState(false);
 
@@ -234,16 +235,29 @@ export default function PlayerCard({
   }, []);
   useEffect(() => () => clearTimeout(clickTimer.current), []);
 
-  const cancelModal = useCallback(() => { setModal(null); setCustomAmt(''); }, []);
+  const cancelModal = useCallback(() => { setPaymentError(null); setModal(null); setCustomAmt(''); }, []);
 
   const savePayment = useCallback(async (amount) => {
-    cancelModal(); setIsSaving(true); onPin(player.name);
-    const result = await onAddPayment(player.name, amount);
-    if (result?.paymentId) {
-      startPaymentUndo({ id: result.paymentId, amount });
-      setTimeout(() => cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-    } else { onUnpin(); }
-    setIsSaving(false);
+    setPaymentError(null);
+    setIsSaving(true);
+    onPin(player.name);
+
+    try {
+      const result = await onAddPayment(player.name, amount);
+      if (result?.paymentId && result?.success !== false) {
+        startPaymentUndo({ id: result.paymentId, amount });
+        setTimeout(() => cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+        cancelModal();
+      } else {
+        onUnpin();
+        setPaymentError(result?.error || 'Nie udało się zapisać wpłaty');
+      }
+    } catch (err) {
+      onUnpin();
+      setPaymentError(err?.message || 'Nie udało się zapisać wpłaty');
+    } finally {
+      setIsSaving(false);
+    }
   }, [player.name, onAddPayment, onPin, onUnpin, startPaymentUndo, cancelModal]);
 
   // Card color logic — neutralny dla pending
@@ -487,6 +501,7 @@ export default function PlayerCard({
             customAmt={customAmt} onAmtChange={setCustomAmt}
             onSave={savePayment} onCancel={cancelModal}
             isSaving={isSaving} tokens={tokens}
+            errorMsg={paymentError}
           />
 
           {/* Action buttons */}
@@ -508,6 +523,14 @@ export default function PlayerCard({
                         ⚡ BLIK
                       </span>
                     </span>
+                  </button>
+                  <button
+                    onClick={() => onSettle?.(player.name)}
+                    className="cyber-button-outline"
+                    style={{ padding: '8px 12px', width: '100%' }}
+                    title="Ustaw wpłatę automatycznie na podstawie wyliczonego salda"
+                  >
+                    Rozlicz (auto)
                   </button>
                   <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }}>
                     + Inna kwota

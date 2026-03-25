@@ -5,11 +5,12 @@ import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, save
 import { SOUND_TYPES, ORGANIZER_NAME } from '../../constants';
 import { useToast } from '../common/Toast';
 import { PasswordModal, SectionHeader } from '../common/SharedUI';
+import { InlineSpinner } from '../common/LoadingSkeleton';
 
 // Colors from shared getPlayerColor — same as dashboard
 
 // ── Player card ────────────────────────────────────────────
-function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
+function PlayerProfileCard({ player, index, onDelete, isOrganizer, disabled = false }) {
   const c = getPlayerColor(player.name, index);
   const initials = player.name.slice(0, 2).toUpperCase();
 
@@ -46,13 +47,18 @@ function PlayerProfileCard({ player, index, onDelete, isOrganizer }) {
 
       {/* Action */}
       {!isOrganizer ? (
-        <button onClick={() => onDelete(player.name)} style={{
+        <button
+          onClick={() => onDelete(player.name)}
+          disabled={disabled}
+          style={{
           padding: '7px 10px', background: 'transparent',
           border: '1px solid var(--co-border)', cursor: 'pointer',
           color: 'var(--co-dim)',
           clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
           transition: 'all 0.15s',
           flexShrink: 0,
+          opacity: disabled ? 0.55 : 1,
+          cursor: disabled ? 'not-allowed' : 'pointer',
         }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = 'var(--co-dim)'; }}
@@ -75,6 +81,8 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
   const [localMulti,    setLocalMulti]    = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [pwModal,       setPwModal]       = useState(null);
+  const [isAddingPlayer, setIsAddingPlayer] = useState(false);
+  const [processingPlayer, setProcessingPlayer] = useState(null);
   const { showSuccess, showError } = useToast();
 
   const currentMulti = localMulti ?? (defaultMultiPlayers || []);
@@ -91,33 +99,57 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
   const handleAddPlayer = async (e) => {
     e.preventDefault();
     if (!newPlayerName.trim()) return;
-    const result = await addPlayer(newPlayerName.trim());
-    if (!result.success) { showError(result.error || 'Nie udało się dodać gracza'); return; }
-    playSound(SOUND_TYPES.SUCCESS);
-    showSuccess(`✓ Dodano: ${newPlayerName.trim()}`);
-    setNewPlayerName('');
+    if (isAddingPlayer) return;
+    setIsAddingPlayer(true);
+    try {
+      const result = await addPlayer(newPlayerName.trim());
+      if (!result.success) { showError(result.error || 'Nie udało się dodać gracza'); return; }
+      playSound(SOUND_TYPES.SUCCESS);
+      showSuccess(`✓ Dodano: ${newPlayerName.trim()}`);
+      setNewPlayerName('');
+    } finally {
+      setIsAddingPlayer(false);
+    }
   };
 
   const handleSoftDelete = async (playerName) => {
-    const result = await softDeletePlayer(playerName);
-    if (!result.success) { showError(result.error || 'Nie udało się usunąć gracza'); return; }
-    playSound(SOUND_TYPES.DELETE);
-    showSuccess(`Gracz ${playerName} przeniesiony do kosza`);
-    setPwModal(null);
+    if (processingPlayer) return;
+    setProcessingPlayer(playerName);
+    try {
+      const result = await softDeletePlayer(playerName);
+      if (!result.success) { showError(result.error || 'Nie udało się usunąć gracza'); return; }
+      playSound(SOUND_TYPES.DELETE);
+      showSuccess(`Gracz ${playerName} przeniesiony do kosza`);
+      setPwModal(null);
+    } finally {
+      setProcessingPlayer(null);
+    }
   };
 
   const handleRestore = async (playerName) => {
-    const result = await restorePlayer(playerName);
-    if (!result.success) { showError(result.error || 'Nie udało się przywrócić gracza'); return; }
-    playSound(SOUND_TYPES.SUCCESS);
-    showSuccess(`✓ Przywrócono: ${playerName}`);
+    if (processingPlayer) return;
+    setProcessingPlayer(playerName);
+    try {
+      const result = await restorePlayer(playerName);
+      if (!result.success) { showError(result.error || 'Nie udało się przywrócić gracza'); return; }
+      playSound(SOUND_TYPES.SUCCESS);
+      showSuccess(`✓ Przywrócono: ${playerName}`);
+    } finally {
+      setProcessingPlayer(null);
+    }
   };
 
   const handlePermanentDelete = async (playerName) => {
-    const result = await permanentDeletePlayer(playerName);
-    if (!result.success) { showError(result.error || 'Nie udało się trwale usunąć'); return; }
-    playSound(SOUND_TYPES.DELETE);
-    setConfirmDelete(null);
+    if (processingPlayer) return;
+    setProcessingPlayer(playerName);
+    try {
+      const result = await permanentDeletePlayer(playerName);
+      if (!result.success) { showError(result.error || 'Nie udało się trwale usunąć'); return; }
+      playSound(SOUND_TYPES.DELETE);
+      setConfirmDelete(null);
+    } finally {
+      setProcessingPlayer(null);
+    }
   };
 
   return (
@@ -158,9 +190,15 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
               className="cyber-input"
               style={{ flex: 1, padding: '10px 14px', fontSize: '0.85rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
               required
+              disabled={isAddingPlayer}
             />
-            <button type="submit" className="cyber-button-yellow" style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.62rem', whiteSpace: 'nowrap', flexShrink: 0 }}>
-              <UserPlus size={14} /> DODAJ
+            <button
+              type="submit"
+              disabled={isAddingPlayer}
+              className="cyber-button-yellow"
+              style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.62rem', whiteSpace: 'nowrap', flexShrink: 0, opacity: isAddingPlayer ? 0.7 : 1, cursor: isAddingPlayer ? 'not-allowed' : 'pointer' }}
+            >
+              {isAddingPlayer ? <InlineSpinner size="sm" /> : <UserPlus size={14} />} {isAddingPlayer ? 'DODAJĘ...' : 'DODAJ'}
             </button>
           </form>
         </div>
@@ -177,7 +215,14 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                   return a.name.localeCompare(b.name, 'pl');
                 })
                 .map((p, i) => (
-                  <PlayerProfileCard key={p.name} player={p} index={i} onDelete={setPwModal} isOrganizer={p.name === ORGANIZER_NAME} />
+                  <PlayerProfileCard
+                    key={p.name}
+                    player={p}
+                    index={i}
+                    onDelete={setPwModal}
+                    isOrganizer={p.name === ORGANIZER_NAME}
+                    disabled={processingPlayer === p.name}
+                  />
                 ))}
             </div>
           </div>
@@ -237,8 +282,10 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                           flex: 1, padding: '8px', background: 'var(--co-yellow)', color: '#000', border: 'none', cursor: 'pointer',
                           fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', fontWeight: 700,
                           clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                          opacity: processingPlayer === name ? 0.65 : 1,
+                          pointerEvents: processingPlayer === name ? 'none' : 'auto',
                         }}>
-                          POTWIERDŹ
+                          {processingPlayer === name ? <InlineSpinner size="sm" /> : 'POTWIERDŹ'}
                         </button>
                         <button onClick={() => setConfirmDelete(null)} className="cyber-button-outline" style={{ flex: 1, padding: '8px' }}>
                           ANULUJ
@@ -259,6 +306,8 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                           padding: '6px 8px', background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
                           color: '#3a3a3a', transition: 'all 0.15s',
                           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+                          opacity: processingPlayer === name ? 0.65 : 1,
+                          pointerEvents: processingPlayer === name ? 'none' : 'auto',
                         }}
                           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,229,255,0.4)'; e.currentTarget.style.color = 'var(--co-green)'; }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#3a3a3a'; }}

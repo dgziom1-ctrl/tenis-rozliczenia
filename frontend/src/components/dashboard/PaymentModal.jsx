@@ -2,7 +2,7 @@ import { CheckCircle2, X, Zap } from 'lucide-react';
 import { formatAmountShort } from '../../utils/format';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 
-export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtChange, onSave, onCancel, isSaving, tokens }) {
+export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtChange, onSave, onCancel, isSaving, tokens, errorMsg = null }) {
   if (!type) return null;
 
   const parsedAmt = parseFloat(customAmt);
@@ -31,7 +31,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
         placeholder="np. 50"
         value={customAmt}
         onChange={e => onAmtChange(e.target.value)}
-        onKeyDown={e => { if (e.key === 'Enter' && isValid) onSave(parsedAmt); }}
+        onKeyDown={e => { if (e.key === 'Enter' && isValid && !isSaving) onSave(parsedAmt); }}
         autoFocus
         className="cyber-input"
         style={{
@@ -48,6 +48,12 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
       {showError && (
         <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ KWOTA MUSI BYĆ WIĘKSZA OD 0
+        </p>
+      )}
+
+      {errorMsg && !showError && (
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', textAlign: 'center', marginBottom: 8 }}>
+          ⚠ {errorMsg}
         </p>
       )}
       {!showError && customAmt === '' && (
@@ -71,7 +77,12 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
         >
           {isSaving ? <InlineSpinner size="sm" /> : <><CheckCircle2 size={13} /> Potwierdzam</>}
         </button>
-        <button onClick={onCancel} className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <button
+          onClick={onCancel}
+          disabled={isSaving}
+          className="cyber-button-outline"
+          style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: isSaving ? 0.65 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}
+        >
           <X size={13} /> ANULUJ
         </button>
       </div>

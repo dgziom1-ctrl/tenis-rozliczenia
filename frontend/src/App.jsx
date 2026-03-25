@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ToastProvider } from './components/common/Toast';
+import { ToastProvider, useToast } from './components/common/Toast';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
 import DashboardTab from './components/dashboard/DashboardTab';
@@ -27,7 +27,7 @@ const INITIAL_APP_DATA = {
   history: [],
 };
 
-function CyberLoadingScreen() {
+function CyberLoadingScreen({ slow = false, onRetry = null } = {}) {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -104,6 +104,46 @@ function CyberLoadingScreen() {
         </div>
       </div>
 
+      {slow && (
+        <div style={{
+          padding: '12px 14px',
+          background: 'rgba(0,229,255,0.05)',
+          border: '1px solid rgba(0,229,255,0.25)',
+          maxWidth: 380,
+          textAlign: 'center',
+          clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
+        }}>
+          <p style={{
+            margin: 0,
+            fontFamily: 'var(--font-display)',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--co-cyan)',
+            fontSize: '0.75rem',
+          }}>
+            POŁĄCZENIE WOLNE...
+          </p>
+          <p style={{
+            margin: '6px 0 0',
+            fontFamily: 'var(--font-mono)',
+            letterSpacing: '0.06em',
+            color: 'var(--co-dim)',
+            fontSize: '0.65rem',
+          }}>
+            Jeśli trwa to dłużej — spróbuj ponownie.
+          </p>
+          {onRetry && (
+            <button
+              onClick={onRetry}
+              className="cyber-button-yellow"
+              style={{ marginTop: 10, padding: '10px 18px', width: '100%', maxWidth: 280 }}
+            >
+              ↻ Retry
+            </button>
+          )}
+        </div>
+      )}
+
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes loading-bar {
           0%   { transform: translateX(-200%); }
@@ -119,7 +159,7 @@ function CyberLoadingScreen() {
 }
 
 
-function CyberErrorScreen() {
+function CyberErrorScreen({ onRetry } = {}) {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -160,7 +200,7 @@ function CyberErrorScreen() {
             </p>
           </div>
           <button
-            onClick={() => window.location.reload()}
+            onClick={onRetry ?? (() => window.location.reload())}
             className="cyber-button-yellow"
             style={{ padding: '13px 24px', width: '100%' }}
           >
@@ -180,8 +220,12 @@ function AppContent() {
   const [activeTab,    setActiveTab]    = useState(() => {
     try {
       const p = new URLSearchParams(window.location.search);
-      if (p.get('tab') === 'attendance') return TABS.ATTENDANCE;
-      if (p.get('tab') === 'dashboard')  return TABS.DASHBOARD;
+      const tab = p.get('tab')?.toLowerCase();
+      if (tab === TABS.ATTENDANCE) return TABS.ATTENDANCE;
+      if (tab === TABS.DASHBOARD)  return TABS.DASHBOARD;
+      if (tab === TABS.ADMIN)      return TABS.ADMIN;
+      if (tab === TABS.HISTORY)    return TABS.HISTORY;
+      if (tab === TABS.PLAYERS)    return TABS.PLAYERS;
     } catch {}
     return TABS.DASHBOARD;
   });
@@ -189,7 +233,10 @@ function AppContent() {
   const [appData,      setAppData]      = useState(INITIAL_APP_DATA);
   const [isConnected,  setIsConnected]  = useState(false);
   const [isLoading,    setIsLoading]    = useState(true);
-  const [loadTimeout,  setLoadTimeout]  = useState(false);
+  const [slowLoading, setSlowLoading]  = useState(false);
+  const [subscriptionError, setSubscriptionError] = useState(null);
+  const [retryNonce, setRetryNonce] = useState(0);
+  const { showSuccess, showError } = useToast();
   // Gracz do auto-otwarcia w Rankingu (z kliknięcia powiadomienia push)
   const [notifPlayer,  setNotifPlayer]  = useState(() => {
     try {
@@ -205,15 +252,37 @@ function AppContent() {
   const { playSound } = useAudio(isMuted);
   const { theme, toggle: toggleTheme } = useTheme();
 
+  // ── Subscription (retryable) ──────────────────────────────────────────
   useEffect(() => {
-    const timer = setTimeout(() => setLoadTimeout(true), 8000);
-    const unsub = subscribeToData((data) => {
+    setIsLoading(true);
+    setSlowLoading(false);
+    setSubscriptionError(null);
+
+    const timer = setTimeout(() => setSlowLoading(true), 8000);
+    const unsub = subscribeToData(
+      (data) => {
+        clearTimeout(timer);
+        setAppData(data);
+        setIsConnected(true);
+        setIsLoading(false);
+        setSlowLoading(false);
+      },
+      (error) => {
+        clearTimeout(timer);
+        setSubscriptionError(error);
+        setIsConnected(false);
+        setIsLoading(false);
+        setSlowLoading(false);
+      },
+    );
+
+    return () => {
       clearTimeout(timer);
-      setAppData(data);
-      setIsConnected(true);
-      setIsLoading(false);
-      setLoadTimeout(false);
-    });
+      if (typeof unsub === 'function') unsub();
+    };
+  }, [retryNonce]);
+
+  useEffect(() => {
     const handleOffline = () => setIsConnected(false);
     const handleOnline  = () => setIsConnected(true);
     window.addEventListener('offline', handleOffline);
@@ -224,15 +293,31 @@ function AppContent() {
     // w useState(), więc tutaj tylko czyścimy query string.
     try {
       const p = new URLSearchParams(window.location.search);
-      if (p.get('tab')) window.history.replaceState({}, '', window.location.pathname);
 
       // Obsługa kliknięcia przycisku Tak/Nie w powiadomieniu RSVP
       const rsvpAnswer = p.get('rsvp');
       const rsvpPlayer = p.get('player');
       const rsvpWeek   = p.get('week');
       if (rsvpAnswer && rsvpPlayer && rsvpWeek) {
-        saveRsvp(decodeURIComponent(rsvpPlayer), rsvpWeek, rsvpAnswer);
-        window.history.replaceState({}, '', window.location.pathname);
+        (async () => {
+          const result = await saveRsvp(decodeURIComponent(rsvpPlayer), rsvpWeek, rsvpAnswer);
+          if (result?.success) {
+            showSuccess('RSVP zapisane');
+            setActiveTab(TABS.ADMIN);
+          } else {
+            showError(result?.error || 'Nie udało się zapisać RSVP');
+          }
+
+          // Wyczyść parametry RSVP, ale zostaw tab ustawiony na admina.
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('tab', TABS.ADMIN);
+            url.searchParams.delete('rsvp');
+            url.searchParams.delete('player');
+            url.searchParams.delete('week');
+            window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`);
+          } catch {}
+        })();
       }
     } catch {}
 
@@ -249,8 +334,25 @@ function AppContent() {
 
       // Obsługa RSVP — zapisz odpowiedź i przejdź do zakładki Dodaj
       if (rsvp && player && week) {
-        saveRsvp(decodeURIComponent(player), week, rsvp);
-        setActiveTab(TABS.ADMIN);
+        (async () => {
+          const result = await saveRsvp(decodeURIComponent(player), week, rsvp);
+          if (result?.success) {
+            showSuccess('RSVP zapisane');
+            setActiveTab(TABS.ADMIN);
+          } else {
+            showError(result?.error || 'Nie udało się zapisać RSVP');
+          }
+
+          // Zostaw tylko "tab=admin"
+          try {
+            const url2 = new URL(window.location.href);
+            url2.searchParams.set('tab', TABS.ADMIN);
+            url2.searchParams.delete('rsvp');
+            url2.searchParams.delete('player');
+            url2.searchParams.delete('week');
+            window.history.replaceState({}, '', `${url2.pathname}?${url2.searchParams.toString()}`);
+          } catch {}
+        })();
         return;
       }
 
@@ -262,6 +364,11 @@ function AppContent() {
       } else if (tab === 'admin') {
         setActiveTab(TABS.ADMIN);
       }
+
+      // Utrzymaj spójność URL ↔ UI
+      try {
+        window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`);
+      } catch {}
     };
 
     const swContainer = navigator.serviceWorker;
@@ -303,8 +410,6 @@ function AppContent() {
     }
 
     return () => {
-      clearTimeout(timer);
-      if (typeof unsub === 'function') unsub();
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online',  handleOnline);
       if (swContainer) {
@@ -312,20 +417,31 @@ function AppContent() {
       }
       if (unsubFcm) unsubFcm();
     };
-  }, []);
+  }, [showSuccess, showError]);
 
   const switchTab = useCallback((id) => {
     playSound(SOUND_TYPES.TAB);
     setActiveTab(id);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', id);
+      url.searchParams.delete('player');
+      url.searchParams.delete('week');
+      url.searchParams.delete('rsvp');
+      window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`);
+    } catch {}
   }, [playSound]);
 
   // Stabilna referencja — bez useCallback AttendanceTab re-triggerowałby
   // useEffect przy każdym re-renderze App (nowa lambda = nowa referencja).
   const handleNotifPlayerConsumed = useCallback(() => setNotifPlayer(null), []);
 
+  if (subscriptionError) {
+    return <CyberErrorScreen onRetry={() => setRetryNonce(n => n + 1)} />;
+  }
+
   if (isLoading) {
-    if (loadTimeout) return <CyberErrorScreen />;
-    return <CyberLoadingScreen />;
+    return <CyberLoadingScreen slow={slowLoading} onRetry={() => setRetryNonce(n => n + 1)} />;
   }
 
   return (

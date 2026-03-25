@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useUndoTimer } from './useUndoTimer';
 
 /**
@@ -12,7 +12,8 @@ import { useUndoTimer } from './useUndoTimer';
  */
 export function usePaymentUndo({ playerName, onPin, onUnpin, onRemovePayment }) {
   const [lastPayment, setLastPayment] = useState(null);
-  const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer(8);
+  const [isUndoing, setIsUndoing] = useState(false);
+  const { undoToast, progressPct, startUndo, dismissUndo, clearUndo } = useUndoTimer(8);
 
   const clearPaymentUndo = useCallback(() => {
     dismissUndo();
@@ -27,10 +28,32 @@ export function usePaymentUndo({ playerName, onPin, onUnpin, onRemovePayment }) 
   }, [playerName, onPin, startUndo]);
 
   const handleUndoPayment = useCallback(async () => {
-    if (!lastPayment) return;
-    clearPaymentUndo();
-    await onRemovePayment(playerName, lastPayment.id);
-  }, [lastPayment, clearPaymentUndo, onRemovePayment, playerName]);
+    if (!lastPayment || isUndoing) return;
+    setIsUndoing(true);
+
+    // Zatrzymaj licznik, ale nie znikaj z UI dopóki usuwanie nie się powiedzie.
+    clearUndo();
+
+    try {
+      const result = await onRemovePayment(playerName, lastPayment.id);
+      if (result?.success) {
+        clearPaymentUndo();
+        return;
+      }
+
+      // Nie udało się cofnąć: przywróć licznik, żeby użytkownik mógł spróbować ponownie.
+      startUndo(lastPayment);
+    } finally {
+      setIsUndoing(false);
+    }
+  }, [lastPayment, clearPaymentUndo, onRemovePayment, playerName, isUndoing, clearUndo, startUndo]);
+
+  // Natural expiration: when countdown ends, remove undo UI and unpin the card.
+  useEffect(() => {
+    if (!undoToast && lastPayment && !isUndoing) {
+      clearPaymentUndo();
+    }
+  }, [undoToast, lastPayment, isUndoing, clearPaymentUndo]);
 
   const secondsLeft = undoToast?.secondsLeft ?? 0;
 
@@ -42,5 +65,6 @@ export function usePaymentUndo({ playerName, onPin, onUnpin, onRemovePayment }) 
     startPaymentUndo,
     clearPaymentUndo,
     handleUndoPayment,
+    isUndoing,
   };
 }
