@@ -22,6 +22,12 @@ function Arena({ chaosMode, onHit }) {
     const g = canvas.getContext('2d');
     const W = 560, H = 180, CX = 265, CY = 90;
 
+    // DPR-aware rendering: keep crisp visuals while limiting extreme DPR costs.
+    const dpr = Math.min((typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1, 2);
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+
     const RX = 0.471, RY = -0.349;
     const cX = Math.cos(RX), sX = Math.sin(RX);
     const cY = Math.cos(RY), sY = Math.sin(RY);
@@ -93,8 +99,91 @@ function Arena({ chaosMode, onHit }) {
     let lastHitState = false;
     let spinAngle = 0;   // accumulated ball rotation (topspin)
 
+    let impactStartTs = -Infinity;
+    const IMPACT_MS = 220;
+
+    // Offscreen cache for static geometry (table + net).
+    // Reduces per-frame CPU work while keeping paddles/ball fully dynamic.
+    const staticCanvas = document.createElement('canvas');
+    staticCanvas.width = canvas.width;
+    staticCanvas.height = canvas.height;
+    const sg = staticCanvas.getContext('2d');
+    if (sg) {
+      sg.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const quadS = (pts, fill) => {
+        sg.beginPath();
+        pts.forEach(([sx, sy], i) => (i ? sg.lineTo(sx, sy) : sg.moveTo(sx, sy)));
+        sg.closePath();
+        sg.fillStyle = fill;
+        sg.fill();
+      };
+      const segS = ([ax, ay], [bx, by], col, w) => {
+        sg.beginPath();
+        sg.moveTo(ax, ay);
+        sg.lineTo(bx, by);
+        sg.strokeStyle = col;
+        sg.lineWidth = w;
+        sg.stroke();
+      };
+
+      sg.clearRect(0, 0, W, H);
+
+      /* Table (static) */
+      const FL = proj(-TX, 0, -TZ), FR = proj(TX, 0, -TZ);
+      const BR = proj(TX, 0, TZ), BL = proj(-TX, 0, TZ);
+      const tg = sg.createLinearGradient(BL[0], BL[1], FL[0], FL[1]);
+      tg.addColorStop(0, '#020810'); tg.addColorStop(1, '#041828');
+      quadS([FL, FR, BR, BL], tg);
+      for (let i = 1; i < 4; i++) {
+        const wz = -TZ + (i / 4) * TZ * 2;
+        segS(proj(-TX, 0, wz), proj(TX, 0, wz), `rgba(0,180,255,${0.03 + i * 0.012})`, 0.8);
+      }
+      for (let i = 1; i < 5; i++) {
+        const wx = -TX + (i / 5) * TX * 2;
+        segS(proj(wx, 0, -TZ), proj(wx, 0, TZ), 'rgba(0,160,255,0.04)', 0.7);
+      }
+      segS(BL, FL, 'rgba(0,200,255,0.55)', 1.5);
+      segS(BR, FR, 'rgba(0,200,255,0.55)', 1.5);
+      segS(BL, BR, 'rgba(0,160,255,0.18)', 1.0);
+      segS(proj(0, 0, -TZ), proj(0, 0, TZ), 'rgba(0,229,255,0.10)', 1);
+
+      /* Table front face (static) */
+      const FL2 = proj(-TX, TH, -TZ), FR2 = proj(TX, TH, -TZ);
+      const fg = sg.createLinearGradient(0, FL[1], 0, FL2[1]);
+      fg.addColorStop(0, 'rgba(0,140,220,0.35)'); fg.addColorStop(1, 'rgba(0,80,160,0.04)');
+      quadS([FL, FR, FR2, FL2], fg);
+      sg.save();
+      sg.shadowBlur = 5;
+      sg.shadowColor = 'rgba(0,229,255,0.50)';
+      segS(FL, FR, 'rgba(0,229,255,0.80)', 1.8);
+      sg.restore();
+
+      /* Net (static) */
+      const nBN = proj(0, 0, -TZ), nBF = proj(0, 0, TZ);
+      const nTN = proj(0, -NH, -TZ), nTF = proj(0, -NH, TZ);
+      const ng = sg.createLinearGradient(nTN[0], nTN[1], nBN[0], nBN[1]);
+      ng.addColorStop(0, 'rgba(0,200,255,0.18)'); ng.addColorStop(1, 'rgba(0,100,200,0.03)');
+      quadS([nBN, nBF, nTF, nTN], ng);
+      for (let r = 0; r <= 4; r++) {
+        const ny = -NH * (1 - r / 4);
+        segS(proj(0, ny, -TZ), proj(0, ny, TZ), `rgba(0,200,255,${0.05 + r * 0.02})`, 0.85);
+      }
+      for (let c = 0; c <= 8; c++) {
+        const wz = -TZ + (c / 8) * TZ * 2;
+        segS(proj(0, 0, wz), proj(0, -NH, wz), 'rgba(0,180,255,0.07)', 0.8);
+      }
+      segS(nBN, nTN, 'rgba(0,229,255,0.75)', 2.2);
+      segS(nBF, nTF, 'rgba(0,200,255,0.38)', 1.4);
+      sg.save();
+      sg.shadowBlur = 7;
+      sg.shadowColor = 'rgba(0,229,255,0.95)';
+      segS(nTN, nTF, 'rgba(200,248,255,0.95)', 2.5);
+      sg.restore();
+    }
+
     /* ── DRAW FRAME ── */
-    const draw = (progress) => {
+    const draw = (progress, nowTs) => {
       g.clearRect(0, 0, W, H);
 
       const leftHitT  = Math.min(progress, 1-progress) * 2;
@@ -102,60 +191,23 @@ function Arena({ chaosMode, onHit }) {
       const isHitting = leftHitT < HIT_T || rightHitT < HIT_T;
       if (isHitting !== lastHitState) {
         lastHitState = isHitting;
+        if (isHitting) impactStartTs = nowTs;
         onHit?.(isHitting);
       }
 
-      /* Table */
-      const FL=proj(-TX,0,-TZ), FR=proj(TX,0,-TZ);
-      const BR=proj(TX,0,TZ),   BL=proj(-TX,0,TZ);
-      const tg = g.createLinearGradient(BL[0],BL[1],FL[0],FL[1]);
-      tg.addColorStop(0,'#020810'); tg.addColorStop(1,'#041828');
-      quad([FL,FR,BR,BL], tg);
-      for (let i = 1; i < 4; i++) {
-        const wz = -TZ + (i/4)*TZ*2;
-        seg(proj(-TX,0,wz), proj(TX,0,wz), `rgba(0,180,255,${0.03+i*0.012})`, 0.8);
-      }
-      for (let i = 1; i < 5; i++) {
-        const wx = -TX + (i/5)*TX*2;
-        seg(proj(wx,0,-TZ), proj(wx,0,TZ), 'rgba(0,160,255,0.04)', 0.7);
-      }
-      seg(BL, FL, 'rgba(0,200,255,0.55)', 1.5);
-      seg(BR, FR, 'rgba(0,200,255,0.55)', 1.5);
-      seg(BL, BR, 'rgba(0,160,255,0.18)', 1.0);
-      seg(proj(0,0,-TZ), proj(0,0,TZ), 'rgba(0,229,255,0.10)', 1);
+      const impactRaw = impactStartTs > 0 ? Math.max(0, (IMPACT_MS - (nowTs - impactStartTs)) / IMPACT_MS) : 0;
+      const impact = impactRaw * impactRaw * (3 - 2 * impactRaw); // smoother decay
+      const shakeAmp = impact * 3;
+      const shakeX = Math.sin(nowTs * 0.02) * shakeAmp;
+      const shakeY = Math.cos(nowTs * 0.017) * shakeAmp * 0.6;
 
-      /* Table front face */
-      const FL2=proj(-TX,TH,-TZ), FR2=proj(TX,TH,-TZ);
-      const fg = g.createLinearGradient(0,FL[1],0,FL2[1]);
-      fg.addColorStop(0,'rgba(0,140,220,0.35)'); fg.addColorStop(1,'rgba(0,80,160,0.04)');
-      quad([FL,FR,FR2,FL2], fg);
-      g.save(); g.shadowBlur=5; g.shadowColor='rgba(0,229,255,0.50)';
-      seg(FL, FR, 'rgba(0,229,255,0.80)', 1.8);
-      g.restore();
-
-      /* Net */
-      const nBN=proj(0,0,-TZ), nBF=proj(0,0,TZ);
-      const nTN=proj(0,-NH,-TZ), nTF=proj(0,-NH,TZ);
-      const ng = g.createLinearGradient(nTN[0],nTN[1],nBN[0],nBN[1]);
-      ng.addColorStop(0,'rgba(0,200,255,0.18)'); ng.addColorStop(1,'rgba(0,100,200,0.03)');
-      quad([nBN,nBF,nTF,nTN], ng);
-      for (let r = 0; r <= 4; r++) {
-        const ny = -NH*(1-r/4);
-        seg(proj(0,ny,-TZ), proj(0,ny,TZ), `rgba(0,200,255,${0.05+r*0.02})`, 0.85);
-      }
-      for (let c = 0; c <= 8; c++) {
-        const wz = -TZ + (c/8)*TZ*2;
-        seg(proj(0,0,wz), proj(0,-NH,wz), 'rgba(0,180,255,0.07)', 0.8);
-      }
-      seg(nBN, nTN, 'rgba(0,229,255,0.75)', 2.2);
-      seg(nBF, nTF, 'rgba(0,200,255,0.38)', 1.4);
-      g.save(); g.shadowBlur=7; g.shadowColor='rgba(0,229,255,0.95)';
-      seg(nTN, nTF, 'rgba(200,248,255,0.95)', 2.5);
-      g.restore();
+      g.save();
+      if (impact > 0) g.translate(shakeX, shakeY);
+      if (sg) g.drawImage(staticCanvas, 0, 0, W, H);
 
       /* Paddles before ball (ball always on top) */
-      drawPaddle(-PX, progress, true);
-      drawPaddle( PX, progress, false);
+      drawPaddle(-PX, progress, true, impact);
+      drawPaddle( PX, progress, false, impact);
 
       /* Ball */
       const bv = ballAt(progress);
@@ -180,7 +232,9 @@ function Arena({ chaosMode, onHit }) {
       g.fillStyle = 'rgba(0,200,255,0.06)'; g.fill();
 
       /* Ball sphere */
-      g.save(); g.shadowBlur=13*bq[2]; g.shadowColor='rgba(255,255,255,0.86)';
+      g.save();
+      g.shadowBlur = 13 * bq[2] * (1 + impact * 0.6);
+      g.shadowColor = `rgba(255,255,255,${Math.min(1, 0.86 + 0.18 * impact)})`;
       const bg = g.createRadialGradient(bq[0]-bR*.3,bq[1]-bR*.3,0, bq[0],bq[1],bR);
       bg.addColorStop(0,'#ffffff'); bg.addColorStop(.46,'#d8f5ff'); bg.addColorStop(1,'#80c8e0');
       g.beginPath(); g.arc(bq[0], bq[1], bR, 0, Math.PI*2);
@@ -192,8 +246,9 @@ function Arena({ chaosMode, onHit }) {
          spinAngle accumulates with travel distance → band sweeps continuously.   */
       const stripeScreenY = bq[1] + Math.sin(spinAngle) * bR * 0.80;
       const stripeVis     = Math.abs(Math.cos(spinAngle));
-      if (stripeVis > 0.06) {
-        const srx = bR * stripeVis * 0.92;
+      const stripeBoost   = stripeVis + impact * 0.9;
+      if (stripeBoost > 0.06) {
+        const srx = bR * stripeBoost * 0.92;
         const sry = Math.max(0.7, srx * 0.13);
         g.save();
         /* Clip to ball disc */
@@ -204,11 +259,12 @@ function Arena({ chaosMode, onHit }) {
         g.scale(1, sry / srx);
         g.beginPath(); g.arc(0, 0, srx, 0, Math.PI*2);
         g.restore();
-        g.strokeStyle = `rgba(0, 220, 255, ${0.12 + 0.35 * stripeVis})`;
+        g.strokeStyle = `rgba(0, 220, 255, ${0.12 + 0.35 * stripeVis + 0.30 * impact})`;
         g.lineWidth = 1.4;
         g.stroke();
         g.restore();
       }
+      g.restore(); // shake + cached static background scope
     };
 
     /* ── PADDLE (TOPSPIN SWING) ──
@@ -230,9 +286,10 @@ function Arena({ chaosMode, onHit }) {
      *  RETURN (signedT: FOL_W → FOL_W+RET_W)
      *    Smoothly returns to idle rest position.
      */
-    const drawPaddle = (px, progress, isLeft) => {
+    const drawPaddle = (px, progress, isLeft, impact) => {
       const hitT = isLeft ? Math.min(progress, 1-progress)*2 : Math.abs(progress-0.5)*2;
       const hitting = hitT < HIT_T;
+      const impactK = 1 + impact * (hitting ? 1.0 : 0.25);
 
       /* Are we before or after impact? */
       const isApproaching = isLeft ? (progress > 0.5) : (progress < 0.5);
@@ -297,9 +354,13 @@ function Arena({ chaosMode, onHit }) {
 
       /* Layer 1: outer glow halo */
       g.save();
-      g.shadowBlur  = hitting ? 20 : 8;
-      g.shadowColor = hitting ? 'rgba(0,229,255,0.90)' : 'rgba(0,180,255,0.40)';
-      g.strokeStyle = hitting ? 'rgba(0,229,255,0.70)' : 'rgba(0,160,255,0.36)';
+      g.shadowBlur  = (hitting ? 20 : 8) * impactK;
+      g.shadowColor = hitting
+        ? `rgba(0,229,255,${0.90 + 0.15 * impact})`
+        : `rgba(0,180,255,${0.40 + 0.08 * impact})`;
+      g.strokeStyle = hitting
+        ? `rgba(0,229,255,${0.70 + 0.15 * impact})`
+        : `rgba(0,160,255,${0.36 + 0.08 * impact})`;
       g.lineWidth = 3.5;
       ellipse(cx, cy, rx*1.1, ry*1.1, ang); g.stroke();
       g.restore();
@@ -310,7 +371,9 @@ function Arena({ chaosMode, onHit }) {
       ellipse(cx, cy, rx, ry, ang); g.fillStyle = bdg; g.fill();
 
       /* Layer 3: rim stroke */
-      g.strokeStyle = hitting ? 'rgba(0,229,255,0.90)' : 'rgba(0,180,255,0.55)';
+      g.strokeStyle = hitting
+        ? `rgba(0,229,255,${0.90 + 0.12 * impact})`
+        : `rgba(0,180,255,${0.55 + 0.06 * impact})`;
       g.lineWidth = 1.9;
       ellipse(cx, cy, rx*.95, ry*.95, ang); g.stroke();
 
@@ -335,7 +398,7 @@ function Arena({ chaosMode, onHit }) {
       if (!t0.current) t0.current = ts;
       // Draw every frame. requestAnimationFrame is synced with device refresh rate,
       // so 120Hz phones will naturally render at 120fps (up to browser limits).
-      draw(((ts - t0.current) % CYCLE) / CYCLE);
+      draw(((ts - t0.current) % CYCLE) / CYCLE, ts);
       raf.current = requestAnimationFrame(loop);
     };
 
