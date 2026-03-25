@@ -524,14 +524,6 @@ export default function PlayerCard({
                       </span>
                     </span>
                   </button>
-                  <button
-                    onClick={() => onSettle?.(player.name)}
-                    className="cyber-button-outline"
-                    style={{ padding: '8px 12px', width: '100%' }}
-                    title="Ustaw wpłatę automatycznie na podstawie wyliczonego salda"
-                  >
-                    Rozlicz (auto)
-                  </button>
                   <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }}>
                     + Inna kwota
                   </button>
