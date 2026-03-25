@@ -64,7 +64,7 @@ describe('App — smoke test', () => {
   it('nie pokazuje zakładek dopóki dane nie są gotowe', () => {
     render(<App />);
     // Nawigacja pojawia się dopiero po załadowaniu danych
-    expect(screen.queryByText('BAZA')).not.toBeInTheDocument();
+    expect(screen.queryByText('HOME')).not.toBeInTheDocument();
   });
 
   it('subscribeToData jest wywołane przy montowaniu', async () => {
@@ -150,7 +150,7 @@ describe('Navigation — renderowanie zakładek', () => {
     render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={vi.fn()} />);
     // Komponent renderuje dwie nawigacje (desktop + mobile) — obie zawierają te same
     // etykiety, więc getAllByText zamiast getByText (które rzuciłoby "multiple elements").
-    expect(screen.getAllByText('BAZA').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('HOME').length).toBeGreaterThan(0);
     expect(screen.getAllByText('RANKING').length).toBeGreaterThan(0);
     expect(screen.getAllByText('DODAJ').length).toBeGreaterThan(0);
     expect(screen.getAllByText('HISTORIA').length).toBeGreaterThan(0);
