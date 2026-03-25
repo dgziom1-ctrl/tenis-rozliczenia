@@ -543,11 +543,19 @@ body::before {
 }
 .mobile-nav-btn:active { background: rgba(0,229,255,0.07); }
 .mobile-nav-label {
-  font-size: 0.6rem !important; letter-spacing: 0.1em; line-height: 1;
+  font-size: 0.62rem !important; letter-spacing: 0.1em; line-height: 1;
   margin-top: 1px; font-family: var(--font-display); text-transform: uppercase;
 }
 
 @media (min-width: 640px) { .desktop-nav { display: block; } .mobile-nav { display: none; } }
+
+/* Push banner sits above mobile nav on mobile, at screen bottom on desktop */
+@media (min-width: 640px) {
+  .push-banner-sheet {
+    bottom: 0 !important;
+    border-radius: 0;
+  }
+}
 
 /* ══ COMPACT HEADER ══════════════════════════════════════════════ */
 .compact-header { display: none; }

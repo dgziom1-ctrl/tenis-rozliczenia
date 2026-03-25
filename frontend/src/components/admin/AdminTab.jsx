@@ -267,7 +267,8 @@ function CyberDateInput({ value, onChange }) {
 // ── RSVP Panel ────────────────────────────────────────────
 function RsvpPanel({ playerNames }) {
   const weekDate = nextWednesdayISO();
-  const [answers, setAnswers] = useState({});
+  const [answers,  setAnswers]  = useState({});
+  const [pending,  setPending]  = useState(null); // nazwa gracza którego głos jest w trakcie zapisu
 
   useEffect(() => {
     const unsub = subscribeToRsvp(weekDate, setAnswers);
@@ -278,9 +279,11 @@ function RsvpPanel({ playerNames }) {
   const no     = playerNames.filter(p => answers[p] === 'no').length;
 
   const handleVote = async (name, answer) => {
-    // Kliknięcie tej samej odpowiedzi ponownie — kasuje głos
+    if (pending === name) return; // blokuj podwójne kliknięcie
     const newAnswer = answers[name] === answer ? null : answer;
+    setPending(name);
     await saveRsvp(name, weekDate, newAnswer || 'reset');
+    setPending(null);
   };
 
   const formatDate = (iso) => {
@@ -318,7 +321,8 @@ function RsvpPanel({ playerNames }) {
       {/* Player grid — każdy gracz to wiersz z imieniem i dwoma przyciskami */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {playerNames.map(name => {
-          const ans = answers[name];
+          const ans        = answers[name];
+          const isSaving   = pending === name;
           return (
             <div key={name} style={{
               display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 6, alignItems: 'center',
@@ -327,6 +331,7 @@ function RsvpPanel({ playerNames }) {
               border: `1px solid ${ans === 'yes' ? 'rgba(0,255,136,0.25)' : ans === 'no' ? 'rgba(255,32,144,0.2)' : 'var(--co-border)'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
               transition: 'all 0.2s',
+              opacity: isSaving ? 0.7 : 1,
             }}>
               <span style={{
                 fontFamily: 'var(--font-display)', fontSize: '0.82rem',
@@ -337,8 +342,9 @@ function RsvpPanel({ playerNames }) {
               </span>
               <button
                 onClick={() => handleVote(name, 'yes')}
+                disabled={isSaving}
                 style={{
-                  padding: '5px 12px', cursor: 'pointer',
+                  padding: '5px 12px', cursor: isSaving ? 'default' : 'pointer',
                   fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.06em',
                   clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                   transition: 'all 0.15s',
@@ -351,12 +357,13 @@ function RsvpPanel({ playerNames }) {
                   }),
                 }}
               >
-                ✅ Gram
+                {isSaving ? '···' : '✅ Gram'}
               </button>
               <button
                 onClick={() => handleVote(name, 'no')}
+                disabled={isSaving}
                 style={{
-                  padding: '5px 12px', cursor: 'pointer',
+                  padding: '5px 12px', cursor: isSaving ? 'default' : 'pointer',
                   fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.06em',
                   clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                   transition: 'all 0.15s',
@@ -369,7 +376,7 @@ function RsvpPanel({ playerNames }) {
                   }),
                 }}
               >
-                ❌ Nie
+                {isSaving ? '···' : '❌ Nie'}
               </button>
             </div>
           );

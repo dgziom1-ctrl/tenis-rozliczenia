@@ -454,6 +454,11 @@ export default function HistoryTab({ history, playerNames, playSound }) {
           </p>
         </div>
 
+        {/* Attendance trend chart */}
+        {history.length >= 2 && (
+          <AttendanceTrendChart history={history} playerNames={playerNames} />
+        )}
+
         {/* Filter bar */}
         {playerNames && playerNames.length > 0 && (
           <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -498,11 +503,6 @@ export default function HistoryTab({ history, playerNames, playSound }) {
               </span>
             )}
           </div>
-        )}
-
-        {/* Attendance trend chart */}
-        {history.length >= 2 && (
-          <AttendanceTrendChart history={history} playerNames={playerNames} />
         )}
 
         {history.length === 0 && (

@@ -87,21 +87,23 @@ export default function PushPermissionBanner({ playerNames }) {
   };
 
   const bannerStyle = {
-    background: 'var(--co-panel)',
-    border: `1px solid ${showReregister || showManual ? 'rgba(255,160,0,0.4)' : 'rgba(0,229,255,0.3)'}`,
-    clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
-    padding: '14px 16px',
-    marginBottom: 16,
-    position: 'relative',
-    animation: 'slide-in-up 0.3s ease-out',
+    position: 'fixed',
+    bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))',
+    left: 0,
+    right: 0,
+    zIndex: 38,
+    background: 'rgba(4,8,14,0.97)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    borderTop: `2px solid ${showReregister || showManual ? 'rgba(255,160,0,0.5)' : 'rgba(0,229,255,0.35)'}`,
+    padding: '14px 16px 18px',
+    animation: 'sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both',
   };
 
   const accentColor = showReregister || showManual ? 'rgba(255,160,0,0.8)' : 'var(--co-cyan)';
 
   return (
-    <div style={bannerStyle}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: accentColor, opacity: 0.6 }} />
-
+    <div style={bannerStyle} className="push-banner-sheet">
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
         <div style={{
           padding: '8px', flexShrink: 0,
