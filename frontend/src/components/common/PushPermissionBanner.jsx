@@ -54,7 +54,9 @@ export default function PushPermissionBanner({ playerNames }) {
   // 2. permission === 'granted' ale token zniknął z bazy → re-rejestracja
   // 3. status === 'reregister' → użytkownik sam kliknął "Zarejestruj ponownie"
   const showOnboarding   = permission === 'default' && !dismissed;
-  const showReregister   = permission === 'granted' && tokenMissing;
+  // If user ignored/dismissed the banner, don't re-show it after refresh,
+  // even if the push token is missing.
+  const showReregister   = permission === 'granted' && tokenMissing && !dismissed;
   const showManual       = status === 'reregister';
 
   if (!showOnboarding && !showReregister && !showManual) return null;

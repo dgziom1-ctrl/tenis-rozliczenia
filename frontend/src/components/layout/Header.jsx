@@ -331,14 +331,47 @@ function Arena({ chaosMode, onHit }) {
       g.lineCap = 'butt'; g.restore();
     };
 
-    /* RAF loop */
+    /* RAF loop
+       - cap redraw rate to reduce CPU cost on mobile
+       - pause when tab is hidden for smoother scrolling ("speed feel") */
+    let lastDraw = 0;
+    const FRAME_MS = 1000 / 30; // ~30fps
+
     const loop = (ts) => {
       if (!t0.current) t0.current = ts;
-      draw(((ts - t0.current) % CYCLE) / CYCLE);
+
+      if (ts - lastDraw >= FRAME_MS) {
+        lastDraw = ts;
+        draw(((ts - t0.current) % CYCLE) / CYCLE);
+      }
+
       raf.current = requestAnimationFrame(loop);
     };
-    raf.current = requestAnimationFrame(loop);
-    return () => { cancelAnimationFrame(raf.current); t0.current = null; };
+
+    const startLoop = () => {
+      if (raf.current) return;
+      raf.current = requestAnimationFrame(loop);
+    };
+
+    const stopLoop = () => {
+      if (!raf.current) return;
+      cancelAnimationFrame(raf.current);
+      raf.current = null;
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') stopLoop();
+      else startLoop();
+    };
+
+    document.addEventListener('visibilitychange', onVisibility);
+    startLoop();
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      stopLoop();
+      t0.current = null;
+    };
   }, [chaosMode, onHit]);
 
   return (

@@ -268,8 +268,10 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const [isDeleting,   setIsDeleting]   = useState(null);
   const [pwModal,      setPwModal]      = useState(null);
   const [filterPlayer, setFilterPlayer] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortOrder,    setSortOrder]    = useState('desc');
   const { showError } = useToast();
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 639;
 
   const filteredHistory = useMemo(() => {
     let h = !filterPlayer ? history : history.filter(s => s.presentPlayers.includes(filterPlayer));
@@ -364,6 +366,117 @@ export default function HistoryTab({ history, playerNames, playSound }) {
         />
       )}
 
+      {isFilterOpen && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setIsFilterOpen(false); }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 70,
+            background: 'var(--co-overlay, rgba(0,0,0,0.85))',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 520,
+              background: 'var(--co-panel)',
+              border: '1px solid var(--co-border)',
+              borderRadius: '12px 12px 0 0',
+              overflow: 'hidden',
+              maxHeight: 'calc(100vh - 64px)',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <div style={{
+              padding: '12px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              borderBottom: '1px solid var(--co-border)',
+              background: 'rgba(0,229,255,0.03)',
+            }}>
+              <span style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '0.9rem',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'var(--co-cyan)',
+              }}>
+                Filtr gracza
+              </span>
+              <div style={{ flex: 1 }} />
+              <button
+                onClick={() => setIsFilterOpen(false)}
+                style={{
+                  padding: 6,
+                  background: 'transparent',
+                  border: '1px solid var(--co-border)',
+                  cursor: 'pointer',
+                  color: 'var(--co-dim)',
+                }}
+                aria-label="Zamknij filtr"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ padding: 14, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button
+                onClick={() => { setFilterPlayer(''); setIsFilterOpen(false); }}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  cursor: 'pointer',
+                  border: '1px solid var(--co-border)',
+                  background: !filterPlayer ? 'rgba(0,229,255,0.08)' : 'transparent',
+                  color: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
+                  clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '0.85rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                WSZYSCY
+              </button>
+
+              {playerNames?.map((name) => (
+                <button
+                  key={name}
+                  onClick={() => { setFilterPlayer(name); setIsFilterOpen(false); }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    cursor: 'pointer',
+                    border: '1px solid var(--co-border)',
+                    background: filterPlayer === name ? 'rgba(0,229,255,0.08)' : 'transparent',
+                    color: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-dim)',
+                    clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '0.85rem',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                  }}
+                >
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="cyber-box" style={{
         clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%)',
         padding: '20px 18px',
@@ -387,11 +500,20 @@ export default function HistoryTab({ history, playerNames, playSound }) {
         {/* ── 2. BOOT TEXT ──────────────────────────────────────────── */}
         <div style={{ marginBottom: 20, padding: '10px 14px', background: 'var(--co-dark)', border: '1px solid var(--co-border)' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-green)', lineHeight: 1.6, opacity: 0.7 }}>
-            {'>'} System OK &nbsp;·&nbsp; {history.length} rekordów znaleziono &nbsp;·&nbsp; Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--co-green)' }}>▮</span>
+            {'>'} System OK
+            <br />
+            {'>'} {history.length} rekordów znaleziono
+            <br />
+            {'>'} Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--co-green)' }}>▮</span>
           </p>
         </div>
 
-        {/* ── 3. PASEK KONTROLEK (filtr + sort + CSV) ───────────────── */}
+        {/* ── 3. WYKRES TRENDU ──────────────────────────────────────── */}
+        {history.length >= 2 && (
+          <AttendanceTrendChart history={history} playerNames={playerNames} />
+        )}
+
+        {/* ── 4. PASEK KONTROLEK (filtr + sort + CSV) ─────────────── */}
         {playerNames && playerNames.length > 0 && (
           <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
 
@@ -401,44 +523,84 @@ export default function HistoryTab({ history, playerNames, playSound }) {
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>FILTR</span>
             </div>
 
-            {/* Przyciski graczy */}
-            <button
-              onClick={() => setFilterPlayer('')}
-              style={{
-                fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.08em',
-                padding: '4px 10px', cursor: 'pointer', border: '1px solid',
-                borderColor: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-border)',
-                color: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
-                background: !filterPlayer ? 'rgba(0,229,255,0.08)' : 'transparent',
-                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                transition: 'all 0.15s',
-              }}
-            >
-              WSZYSCY
-            </button>
-            {playerNames.map(name => (
-              <button
-                key={name}
-                onClick={() => setFilterPlayer(prev => prev === name ? '' : name)}
-                style={{
-                  fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.08em',
-                  padding: '4px 10px', cursor: 'pointer', border: '1px solid',
-                  borderColor: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-border)',
-                  color: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-dim)',
-                  background: filterPlayer === name ? 'rgba(0,229,255,0.08)' : 'transparent',
-                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                  transition: 'all 0.15s',
-                }}
-              >
-                {name}
-              </button>
-            ))}
+            {/* Przyciski graczy (na mobile zamiast chipów otwieramy sheet) */}
+            {isMobile ? (
+              <>
+                <button
+                  onClick={() => setIsFilterOpen(true)}
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.08em',
+                    padding: '6px 10px',
+                    cursor: 'pointer',
+                    border: '1px solid',
+                    borderColor: 'var(--co-border)',
+                    color: filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
+                    background: 'transparent',
+                    clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                    transition: 'all 0.15s',
+                    flexShrink: 0,
+                  }}
+                >
+                  {filterPlayer || 'WSZYSCY'}
+                </button>
 
-            {/* Licznik po filtrowaniu */}
-            {filterPlayer && (
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)' }}>
-                {filteredHistory.length} sesji
-              </span>
+                {filterPlayer && (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)' }}>
+                    {filteredHistory.length} sesji
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setFilterPlayer('')}
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.08em',
+                    padding: '4px 10px',
+                    cursor: 'pointer',
+                    border: '1px solid',
+                    borderColor: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-border)',
+                    color: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
+                    background: !filterPlayer ? 'rgba(0,229,255,0.08)' : 'transparent',
+                    clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  WSZYSCY
+                </button>
+                {playerNames.map(name => (
+                  <button
+                    key={name}
+                    onClick={() => setFilterPlayer(prev => prev === name ? '' : name)}
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '0.7rem',
+                      letterSpacing: '0.08em',
+                      padding: '4px 10px',
+                      cursor: 'pointer',
+                      border: '1px solid',
+                      borderColor: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-border)',
+                      color: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-dim)',
+                      background: filterPlayer === name ? 'rgba(0,229,255,0.08)' : 'transparent',
+                      clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {name}
+                  </button>
+                ))}
+
+                {/* Licznik po filtrowaniu */}
+                {filterPlayer && (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)' }}>
+                    {filteredHistory.length} sesji
+                  </span>
+                )}
+              </>
             )}
 
             {/* Separator + akcje — wypychamy w prawo */}
@@ -481,11 +643,6 @@ export default function HistoryTab({ history, playerNames, playSound }) {
               CSV
             </button>
           </div>
-        )}
-
-        {/* ── 4. WYKRES TRENDU ──────────────────────────────────────── */}
-        {history.length >= 2 && (
-          <AttendanceTrendChart history={history} playerNames={playerNames} />
         )}
 
         {/* ── 5. EMPTY STATE ────────────────────────────────────────── */}

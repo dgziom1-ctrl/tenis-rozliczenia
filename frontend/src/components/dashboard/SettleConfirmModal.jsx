@@ -1,7 +1,15 @@
 import { CheckCircle2, HandCoins, X } from 'lucide-react';
 import { formatAmountShort } from '../../utils/format';
+import { InlineSpinner } from '../common/LoadingSkeleton';
 
-export default function SettleConfirmModal({ playerName, debt, onConfirm, onCancel, tokens }) {
+export default function SettleConfirmModal({
+  playerName,
+  debt,
+  onConfirm,
+  onCancel,
+  tokens,
+  isProcessing = false,
+}) {
   if (!playerName) return null;
 
   return (
@@ -66,17 +74,32 @@ export default function SettleConfirmModal({ playerName, debt, onConfirm, onCanc
 
         {/* Buttons */}
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={onConfirm} className="cyber-button-yellow" style={{
+          <button
+            onClick={onConfirm}
+            disabled={isProcessing}
+            className="cyber-button-yellow"
+            style={{
             flex: 1, padding: '12px',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             fontSize: '0.65rem',
-          }}>
-            <CheckCircle2 size={15} /> Tak, rozlicz
+            opacity: isProcessing ? 0.7 : 1,
+            cursor: isProcessing ? 'not-allowed' : 'pointer',
+          }}
+          >
+            {isProcessing ? <InlineSpinner size="sm" /> : <CheckCircle2 size={15} />}
+            {isProcessing ? 'Rozliczam...' : 'Tak, rozlicz'}
           </button>
-          <button onClick={onCancel} className="cyber-button-outline" style={{
+          <button
+            onClick={onCancel}
+            disabled={isProcessing}
+            className="cyber-button-outline"
+            style={{
             flex: 1, padding: '12px',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          }}>
+            opacity: isProcessing ? 0.7 : 1,
+            cursor: isProcessing ? 'not-allowed' : 'pointer',
+          }}
+          >
             <X size={15} /> ANULUJ
           </button>
         </div>

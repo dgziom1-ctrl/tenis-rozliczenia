@@ -103,7 +103,7 @@ function PlayerAvatar({ name, index, isPending, isOrganizer }) {
 }
 
 // ── Rank badge ───────────────────────────────────────────────────
-function RankBadge({ rank, pct }) {
+function RankBadge({ rank, pct, showHint = true }) {
   const col = rank.hex || 'var(--co-dim)';
   const rankIdx = RANKS.findIndex(r => r.name === rank.name);
   const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
@@ -142,7 +142,7 @@ function RankBadge({ rank, pct }) {
         </span>
       </div>
       {/* Tap hint — visible "?" label until first tap */}
-      {!tapped && (
+      {showHint && !tapped && (
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.62rem',
           color: col, opacity: 0.7,
@@ -190,6 +190,7 @@ export default function PlayerCard({
   onAddPayment, onRemovePayment, onPin, onUnpin,
   playerIndex = 0,
 }) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 639;
   const isOrganizer = player.name === ORGANIZER_NAME;
   const debt        = player.currentDebt;
   const isPending   = debt > SETTLED_THRESHOLD;    // "Do rozliczenia" – neutralny
@@ -331,7 +332,7 @@ export default function PlayerCard({
           }}>{player.name}</h3>
 
           <div style={{ marginTop: 4, marginBottom: 8 }}>
-            <RankBadge rank={rank} pct={pct} />
+            <RankBadge rank={rank} pct={pct} showHint={!isMobile} />
           </div>
 
           {/* Attendance bar */}
@@ -358,7 +359,7 @@ export default function PlayerCard({
             {/* Session dots — last 10 sessions */}
             {history && history.length > 0 && (
               <div style={{ display: 'flex', gap: 3, marginTop: 6, flexWrap: 'wrap' }}>
-                {[...history].slice(0, 10).reverse().map((session, i) => {
+                {[...history].slice(0, isMobile ? 6 : 10).reverse().map((session, i) => {
                   const attended = session.presentPlayers.includes(player.name);
                   return (
                     <div
@@ -529,17 +530,19 @@ export default function PlayerCard({
           )}
 
           {/* Barcode footer */}
-          <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            <Barcode name={player.name} color={accentColor} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.08em' }}>
-                {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
-              </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.06em' }}>
-                SW-NET
-              </span>
+          {!isMobile && (
+            <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <Barcode name={player.name} color={accentColor} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.08em' }}>
+                  {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.06em' }}>
+                  SW-NET
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
@@ -557,17 +560,19 @@ export default function PlayerCard({
             </p>
           </div>
           {/* Barcode + labels — same as other players */}
-          <div style={{ marginTop: 8, width: '100%', borderTop: '1px solid var(--co-border)', paddingTop: 8 }}>
-            <Barcode name={player.name} color={c.border} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.08em' }}>
-                {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
-              </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.06em' }}>
-                SW-NET
-              </span>
+          {!isMobile && (
+            <div style={{ marginTop: 8, width: '100%', borderTop: '1px solid var(--co-border)', paddingTop: 8 }}>
+              <Barcode name={player.name} color={c.border} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.08em' }}>
+                  {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.06em' }}>
+                  SW-NET
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>

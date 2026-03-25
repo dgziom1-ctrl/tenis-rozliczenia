@@ -18,6 +18,7 @@ export default function DashboardTab({ data, history, playSound }) {
   const [openDetails,   setOpenDetails]   = useState(null);
   const [justSettled,   setJustSettled]   = useState(null);
   const [confirmSettle, setConfirmSettle] = useState(null);
+  const [isSettling,    setIsSettling]    = useState(false);
   const [pinnedPlayer,  setPinnedPlayer]  = useState(null);
   const [confetti,      setConfetti]      = useState([]);
   const [showRankGuide, setShowRankGuide] = useState(false);
@@ -28,6 +29,7 @@ export default function DashboardTab({ data, history, playSound }) {
 
   const totalWeeks    = data.summary?.totalWeeks ?? 0;
   const confettiTimer = useRef(null);
+  const isSettlingRef = useRef(false);
   useEffect(() => () => clearTimeout(confettiTimer.current), []);
 
   const handleSettleRequest = useCallback((playerName) => {
@@ -39,35 +41,46 @@ export default function DashboardTab({ data, history, playSound }) {
   }, [data.players, playSound]);
 
   const handleConfirmSettle = useCallback(async () => {
-    if (!confirmSettle) return;
-    const { playerName } = confirmSettle;
-    setConfirmSettle(null);
-    setJustSettled(playerName);
-    playSound(SOUND_TYPES.SUCCESS);
+    if (!confirmSettle || isSettlingRef.current) return;
+    isSettlingRef.current = true;
+    setIsSettling(true);
 
-    const result = await settlePlayer(playerName);
-    if (!result.success) {
-      setJustSettled(null);
-      showError(result.error || 'Nie udało się rozliczyć gracza');
-      return;
+    try {
+      const { playerName } = confirmSettle;
+
+      const result = await settlePlayer(playerName);
+      if (!result.success) {
+        showError(result.error || 'Nie udało się rozliczyć gracza');
+        return;
+      }
+
+      setConfirmSettle(null);
+      setJustSettled(playerName);
+      playSound(SOUND_TYPES.SUCCESS);
+      setTimeout(() => setJustSettled(null), 1500);
+
+      const pool       = CONFETTI_POOLS.cyber;
+      const nonOrg     = data.players?.filter(p => p.name !== ORGANIZER_NAME) ?? [];
+      const allSettled = nonOrg.filter(p => p.name !== playerName).every(p => p.currentDebt <= SETTLED_THRESHOLD);
+
+      // Reduce animation payload on mobile (better thumb "speed feel")
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 639;
+      clearTimeout(confettiTimer.current);
+      if (allSettled && nonOrg.length > 0) {
+        setConfetti(generateConfetti(isMobile ? 35 : 55, pool));
+        confettiTimer.current = setTimeout(() => setConfetti([]), 5000);
+        playSound(SOUND_TYPES.COIN);
+      } else {
+        setConfetti(generateConfetti(isMobile ? 14 : 22, pool));
+        confettiTimer.current = setTimeout(() => setConfetti([]), 3500);
+      }
+
+      startUndo({ playerName, previousValue: result.previousValue, previousPayments: result.previousPayments });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      isSettlingRef.current = false;
+      setIsSettling(false);
     }
-    setTimeout(() => setJustSettled(null), 1500);
-
-    const pool       = CONFETTI_POOLS.cyber;
-    const nonOrg     = data.players?.filter(p => p.name !== ORGANIZER_NAME) ?? [];
-    const allSettled = nonOrg.filter(p => p.name !== playerName).every(p => p.currentDebt <= SETTLED_THRESHOLD);
-
-    clearTimeout(confettiTimer.current);
-    if (allSettled && nonOrg.length > 0) {
-      setConfetti(generateConfetti(55, pool));
-      confettiTimer.current = setTimeout(() => setConfetti([]), 5000);
-      playSound(SOUND_TYPES.COIN);
-    } else {
-      setConfetti(generateConfetti(22, pool));
-      confettiTimer.current = setTimeout(() => setConfetti([]), 3500);
-    }
-    startUndo({ playerName, previousValue: result.previousValue, previousPayments: result.previousPayments });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [confirmSettle, data.players, playSound, showError, startUndo]);
 
   const handleUndo = useCallback(async () => {
@@ -125,6 +138,7 @@ export default function DashboardTab({ data, history, playSound }) {
         onConfirm={handleConfirmSettle}
         onCancel={() => setConfirmSettle(null)}
         tokens={tokens}
+        isProcessing={isSettling}
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
