@@ -331,20 +331,11 @@ function Arena({ chaosMode, onHit }) {
       g.lineCap = 'butt'; g.restore();
     };
 
-    /* RAF loop
-       - cap redraw rate to reduce CPU cost on mobile
-       - pause when tab is hidden for smoother scrolling ("speed feel") */
-    let lastDraw = 0;
-    const FRAME_MS = 1000 / 30; // ~30fps
-
     const loop = (ts) => {
       if (!t0.current) t0.current = ts;
-
-      if (ts - lastDraw >= FRAME_MS) {
-        lastDraw = ts;
-        draw(((ts - t0.current) % CYCLE) / CYCLE);
-      }
-
+      // Draw every frame. requestAnimationFrame is synced with device refresh rate,
+      // so 120Hz phones will naturally render at 120fps (up to browser limits).
+      draw(((ts - t0.current) % CYCLE) / CYCLE);
       raf.current = requestAnimationFrame(loop);
     };
 

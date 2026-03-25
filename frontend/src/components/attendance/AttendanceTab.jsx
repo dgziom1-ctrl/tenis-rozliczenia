@@ -320,7 +320,9 @@ function RankingHistoryChart({ players, history }) {
 }
 
 function MonthlyReport({ monthlyStats, players }) {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 639;
+  // Keep the original horizontal table view (better "read feel" on mobile).
+  // The previous mobile card version was more cramped for thumb scrolling.
+  const isMobile = false;
 
   return (
     <div style={{
