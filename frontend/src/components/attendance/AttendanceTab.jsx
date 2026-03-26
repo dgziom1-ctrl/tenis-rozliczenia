@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { CalendarDays, Flame, Target, TrendingUp, X } from 'lucide-react';
-import { RANKS, PODIUM, PODIUM_ORDER, getRank, SOUND_TYPES } from '../../constants';
+import { RANKS, PODIUM, PODIUM_ORDER, getRank, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '../../constants';
 import { formatDate } from '../../utils/format';
 import { getPlayerColor } from '../../constants/playerColors';
 import { calculatePlayerStats, assignRankingPlaces, groupSessionsByMonth, getPlayerAchievements, computeRankingHistory } from '../../utils/calculations';
@@ -554,6 +554,11 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
   const multisportSessions = sessions.filter(s => s.multisportPlayers.includes(player.name));
   const avgCost = sessions.length > 0
     ? (sessions.reduce((sum, s) => {
+        const isMulti = s.multisportPlayers.includes(player.name);
+        if (s.sport === SPORT.SQUASH) {
+          const base = s.totalCost / Math.max(s.presentPlayers.length, 1);
+          return sum + Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base);
+        }
         const paying = s.presentPlayers.filter(p => !s.multisportPlayers.includes(p));
         const cost = paying.includes(player.name) ? (s.totalCost / Math.max(paying.length, 1)) : 0;
         return sum + cost;
@@ -727,8 +732,21 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
           {history.map((session, idx) => {
             const attended = session.presentPlayers.includes(player.name);
             const isMulti = session.multisportPlayers.includes(player.name);
-            const paying = session.presentPlayers.filter(p => !session.multisportPlayers.includes(p));
-            const cost = paying.includes(player.name) ? (session.totalCost / Math.max(paying.length, 1)).toFixed(2) : '0.00';
+            const isSquashSession = session.sport === SPORT.SQUASH;
+
+            // For squash: everyone pays; multisport holders get -15 zł discount.
+            // For ping-pong: multisport players pay nothing.
+            let costLabel = '—';
+            if (attended) {
+              if (isSquashSession) {
+                const base = session.totalCost / Math.max(session.presentPlayers.length, 1);
+                const playerCost = Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base);
+                costLabel = `${playerCost.toFixed(2)} zł`;
+              } else {
+                const paying = session.presentPlayers.filter(p => !session.multisportPlayers.includes(p));
+                costLabel = isMulti ? 'free' : `${(session.totalCost / Math.max(paying.length, 1)).toFixed(2)} zł`;
+              }
+            }
 
             return (
               <div key={session.id} style={{
@@ -761,8 +779,8 @@ function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
                   </span>
                 )}
                 {/* Cost / absent */}
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: attended ? (isMulti ? 'var(--co-green)' : c.border) : 'var(--co-dim)', width: 50, textAlign: 'right', flexShrink: 0 }}>
-                  {attended ? (isMulti ? 'free' : `${cost} zł`) : '—'}
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: attended ? (isMulti && !isSquashSession ? 'var(--co-green)' : c.border) : 'var(--co-dim)', width: 55, textAlign: 'right', flexShrink: 0 }}>
+                  {costLabel}
                 </span>
               </div>
             );

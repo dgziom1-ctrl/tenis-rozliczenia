@@ -137,10 +137,22 @@ exports.onSessionAdded = onValueUpdated(
     const multi     = toArray(newSession.multiPlayers);
     const date      = newSession.date || '';
     const cost      = newSession.cost || 0;
-    const paying    = present.filter(p => !multi.includes(p));
-    const perPerson = paying.length > 0 ? Math.round(cost / paying.length) : 0;
+    const sport     = newSession.sport || 'pingpong';
 
-    console.log(`Nowa sesja: ${date}, ${present.length} graczy, ${perPerson} zł/os.`);
+    let perPerson;
+    if (sport === 'squash') {
+      // Squash: everyone splits the rental cost
+      perPerson = present.length > 0 ? Math.round(cost / present.length) : 0;
+    } else {
+      // Ping-pong: only non-multisport players pay
+      const paying  = present.filter(p => !multi.includes(p));
+      perPerson = paying.length > 0 ? Math.round(cost / paying.length) : 0;
+    }
+
+    const sportEmoji = sport === 'squash' ? '🎾' : '🏓';
+    const sportLabel = sport === 'squash' ? 'Squash' : 'Ping-pong';
+
+    console.log(`Nowa sesja (${sportLabel}): ${date}, ${present.length} graczy, ${perPerson} zł/os.`);
 
     const tokens = await getAllTokens();
     console.log(`Tokenów FCM w bazie: ${tokens.length}`);
@@ -148,7 +160,7 @@ exports.onSessionAdded = onValueUpdated(
 
     await sendToAll(
       tokens,
-      '🏓 Nowa sesja dodana!',
+      `${sportEmoji} Nowa sesja dodana!`,
       `${date} · ${present.length} graczy · ${perPerson} zł/os.`,
       { type: 'new_session', date, url: '/?tab=dashboard', tag: `session-${date}` }
     );

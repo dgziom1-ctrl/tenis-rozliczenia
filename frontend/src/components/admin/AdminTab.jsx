@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Calculator, CalendarDays, CalendarPlus, CheckCircle2, Copy, Users, Zap, UserCheck, UserX, HelpCircle } from 'lucide-react';
 import { addSession } from '../../firebase/index';
-import { QUICK_COSTS, TABS, SOUND_TYPES } from '../../constants';
+import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '../../constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { formatDate, formatAmountShort } from '../../utils/format';
@@ -9,7 +9,21 @@ import { getPayingPlayers } from '../../utils/calculations';
 import { subscribeToRsvp, saveRsvp, nextWednesdayISO } from '../../firebase/rsvp';
 import { useThemeTokens } from '../../context/ThemeContext';
 
-function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson }) {
+function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport }) {
+  if (sport === SPORT.SQUASH) {
+    const base      = presentPlayers.length > 0 ? totalCost / presentPlayers.length : 0;
+    const discounted = Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT);
+    const multi      = multisportPlayers.filter(p => presentPlayers.includes(p));
+    let msg = `🎾 Graliśmy w squasha! (${formatDate(date)})\n`;
+    msg += `💰 Wynajem: ${formatAmountShort(totalCost)} zł\n`;
+    msg += `👥 Obecni (${presentPlayers.length}): ${presentPlayers.join(', ')}\n`;
+    msg += `💳 Bez karty: ${formatAmountShort(base)} zł/os.\n`;
+    if (multi.length > 0) {
+      msg += `⚡ Z Multisport (${multi.join(', ')}): ${formatAmountShort(discounted)} zł/os.\n`;
+    }
+    return msg.trim();
+  }
+
   const paying = getPayingPlayers(presentPlayers, multisportPlayers);
   const multi  = multisportPlayers.filter(p => presentPlayers.includes(p));
   let msg = `🏓 Graliśmy! (${formatDate(date)})\n`;
@@ -42,10 +56,11 @@ function FieldLabel({ children }) {
 function SessionSummaryModal({ summary, onClose, tokens }) {
   const [copied, setCopied] = useState(false);
   if (!summary) return null;
-  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers } = summary;
+  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport } = summary;
+  const isSquash = sport === SPORT.SQUASH;
 
   const handleCopy = async () => {
-    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson });
+    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport });
     try { await navigator.clipboard.writeText(msg); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch {}
   };
 
@@ -83,12 +98,10 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
         {/* Stats grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
           {[
+            { label: 'SPORT', value: isSquash ? '🎾 SQUASH' : '🏓 PING-PONG', color: isSquash ? 'var(--co-green)' : 'var(--co-cyan)' },
             { label: 'DATA', value: formatDate(date), color: '#c8c8c8' },
             { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
             { label: 'OBECNI', value: presentCount, color: '#c8c8c8' },
-            multisportCount > 0
-              ? { label: 'MULTISPORT', value: `⚡ ${multisportCount}`, color: 'var(--co-green)' }
-              : { label: 'PŁACĄ', value: payingCount, color: '#c8c8c8' },
           ].map(({ label, value, color }) => (
             <div key={label} style={{
               padding: '10px 12px', background: 'var(--co-dark)',
@@ -102,23 +115,41 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
         </div>
 
         {/* Per-person */}
-        {payingCount > 0 && (
+        {presentCount > 0 && (
           <div style={{
             padding: '16px', marginBottom: 16, textAlign: 'center',
             background: 'rgba(0,229,255,0.04)',
             border: '1px solid rgba(0,229,255,0.3)',
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
           }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
-              KAŻDY PŁACI
-            </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
-              {formatAmountShort(perPerson)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ</span>
-            </p>
-            {multisportCount > 0 && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 4 }}>
-                {payingCount} os. płaci · {multisportCount} os. gratis
-              </p>
+            {isSquash ? (
+              <>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+                  PODZIAŁ KOSZTÓW
+                </p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
+                  {formatAmountShort(perPerson)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
+                </p>
+                {multisportCount > 0 && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)', marginTop: 4 }}>
+                    ⚡ Z Multisport: {formatAmountShort(Math.max(0, perPerson - SQUASH_MULTISPORT_DISCOUNT))} zł · {multisportCount} os.
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+                  KAŻDY PŁACI
+                </p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
+                  {formatAmountShort(perPerson)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ</span>
+                </p>
+                {multisportCount > 0 && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 4 }}>
+                    {payingCount} os. płaci · {multisportCount} os. gratis
+                  </p>
+                )}
+              </>
             )}
           </div>
         )}
@@ -149,9 +180,53 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
 }
 
 // ── Live cost preview ─────────────────────────────────────
-function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers }) {
+function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport }) {
   const cost = parseFloat(totalCost);
   if (!totalCost || isNaN(cost) || cost <= 0 || presentPlayers.length === 0) return null;
+
+  const isSquash = sport === SPORT.SQUASH;
+
+  if (isSquash) {
+    const base       = cost / presentPlayers.length;
+    const discounted = Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT);
+    const hasMulti   = multisportPlayers.length > 0;
+    return (
+      <div style={{
+        padding: '12px 16px',
+        background: 'rgba(0,229,255,0.03)',
+        border: '1px solid rgba(0,229,255,0.2)',
+        clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <Calculator size={14} style={{ color: 'var(--co-dim)' }} />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+            Podział kosztów · Squash
+          </span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
+              Bez karty ({presentPlayers.length - multisportPlayers.length} os.)
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-cyan)' }}>
+              {(Math.round(base * 100) / 100).toFixed(2)} ZŁ
+            </span>
+          </div>
+          {hasMulti && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--co-green)', letterSpacing: '0.1em' }}>
+                ⚡ Z Multisport ({multisportPlayers.length} os.)
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-green)' }}>
+                {(Math.round(discounted * 100) / 100).toFixed(2)} ZŁ
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   const paying    = presentPlayers.filter(p => !multisportPlayers.includes(p));
   const perPerson = paying.length > 0 ? cost / paying.length : 0;
 
@@ -216,6 +291,37 @@ function PlayerToggleGrid({ names, selected, onToggle, accent = 'yellow' }) {
           </button>
         );
       })}
+    </div>
+  );
+}
+
+// ── Sport selector ────────────────────────────────────────
+function SportSelector({ value, onChange }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+      {[
+        { sport: SPORT.PINGPONG, label: '🏓 PING-PONG', active: value === SPORT.PINGPONG },
+        { sport: SPORT.SQUASH,   label: '🎾 SQUASH',    active: value === SPORT.SQUASH },
+      ].map(({ sport, label, active }) => (
+        <button
+          key={sport} type="button"
+          onClick={() => onChange(sport)}
+          style={{
+            padding: '11px 12px', cursor: 'pointer', transition: 'all 0.15s',
+            fontFamily: 'var(--font-display)', fontSize: '0.82rem', fontWeight: 700,
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+            clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
+            ...(active ? {
+              background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.5)',
+              color: 'var(--co-cyan)', boxShadow: '0 0 10px rgba(0,229,255,0.1)',
+            } : {
+              background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
+            }),
+          }}
+        >
+          {label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -416,12 +522,16 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const tokens = useThemeTokens();
 
   const today = new Date().toISOString().split('T')[0];
+  const [sport,             setSport]             = useState(SPORT.PINGPONG);
   const [datePlayed,        setDatePlayed]        = useState(today);
   const [totalCost,         setTotalCost]         = useState('');
   const [presentPlayers,    setPresentPlayers]    = useState([]);
   const [multisportPlayers, setMultisportPlayers] = useState([]);
   const [isSaving,          setIsSaving]          = useState(false);
   const [savedSummary,      setSavedSummary]      = useState(null);
+
+  const isSquash = sport === SPORT.SQUASH;
+  const activeCosts = isSquash ? SQUASH_QUICK_COSTS : QUICK_COSTS;
 
   const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed);
   const parsedTotalCost = totalCost === '' ? NaN : parseFloat(totalCost);
@@ -457,19 +567,34 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     if (!isCostValid) { showError(totalCostError || 'Wpisz poprawny koszt sesji'); return; }
     if (isDuplicateDate) { showError('Sesja z tą datą już istnieje'); return; }
     setIsSaving(true);
-    const cost     = parsedTotalCost;
-    const paying   = presentPlayers.filter(p => !multisportPlayers.includes(p));
-    const perPerson = paying.length > 0 ? cost / paying.length : 0;
+    const cost = parsedTotalCost;
+    // Per-person value shown in the summary modal (base amount before per-player adjustments)
+    const perPerson = isSquash
+      ? (presentPlayers.length > 0 ? cost / presentPlayers.length : 0)
+      : (() => {
+          const paying = presentPlayers.filter(p => !multisportPlayers.includes(p));
+          return paying.length > 0 ? cost / paying.length : 0;
+        })();
+    const paying = presentPlayers.filter(p => !multisportPlayers.includes(p));
     try {
-      const result = await addSession({ datePlayed, totalCost: cost, presentPlayers, multisportPlayers });
+      const result = await addSession({ datePlayed, totalCost: cost, presentPlayers, multisportPlayers, sport });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       playSound(SOUND_TYPES.SUCCESS);
-      setSavedSummary({ date: datePlayed, totalCost: cost, presentCount: presentPlayers.length, payingCount: paying.length, multisportCount: multisportPlayers.length, perPerson, presentPlayers: [...presentPlayers], multisportPlayers: [...multisportPlayers] });
+      setSavedSummary({
+        date: datePlayed, totalCost: cost,
+        presentCount: presentPlayers.length,
+        payingCount: paying.length,
+        multisportCount: multisportPlayers.length,
+        perPerson,
+        sport,
+        presentPlayers: [...presentPlayers],
+        multisportPlayers: [...multisportPlayers],
+      });
       setTotalCost('');
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost]);
+  }, [isSaving, datePlayed, totalCost, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, isSquash]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
@@ -493,12 +618,18 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 Dodaj nową sesję
               </span>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
-                zapisz dzisiejszą grę ping-ponga
+                {isSquash ? 'zapisz dzisiejszą grę squasha' : 'zapisz dzisiejszą grę ping-ponga'}
               </p>
             </div>
           </div>
 
           <form onSubmit={handleSaveSession} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* Sport */}
+            <div>
+              <FieldLabel>Sport</FieldLabel>
+              <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); }} />
+            </div>
 
             {/* Date */}
             <div>
@@ -516,7 +647,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               <FieldLabel>Koszt całkowity (zł)</FieldLabel>
               {/* Quick-cost buttons */}
               <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-                {QUICK_COSTS.map(cost => {
+                {activeCosts.map(cost => {
                   const active = totalCost === String(cost);
                   return (
                     <button type="button" key={cost}
@@ -532,7 +663,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                           background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
                         }),
                       }}>
-                      {cost === 0 ? 'FREE' : cost}
+                      {cost === 0 ? 'FREE' : `${cost} zł`}
                     </button>
                   );
                 })}
@@ -572,7 +703,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
                   <Zap size={13} style={{ color: 'var(--co-green)' }} />
-                  Kto miał Multisport? (płaci 0 zł)
+                  {isSquash ? 'Kto miał Multisport? (zniżka -15 zł)' : 'Kto miał Multisport? (płaci 0 zł)'}
                   {multisportPlayers.length > 0 && (
                     <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>
                       ⚡{multisportPlayers.length}
@@ -584,7 +715,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             )}
 
             {/* Live preview */}
-            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} />
+            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} />
 
             {/* Submit */}
             <div>

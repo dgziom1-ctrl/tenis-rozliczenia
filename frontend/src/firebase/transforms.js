@@ -1,5 +1,5 @@
 import { calculateDebt, roundToTwoDecimals, getPayingPlayers } from '../utils/calculations';
-import { ORGANIZER_NAME } from '../constants';
+import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '../constants';
 
 // ─── Private helpers ─────────────────────────────────────────────────────────
 
@@ -29,15 +29,31 @@ function buildSummary(playerStats, weeksLength) {
 
 function buildHistory(weeks) {
   return [...weeks].reverse().map(w => {
-    const payers = getPayingPlayers(w.present || [], w.multiPlayers || []);
-    const costPerPerson = payers.length > 0 ? w.cost / payers.length : 0;
+    const sport = w.sport || SPORT.PINGPONG;
+
+    let costPerPerson;
+    let costPerPersonMulti;
+
+    if (sport === SPORT.SQUASH) {
+      // Squash: everyone splits the rental cost; multisport holders get a personal -15 zł discount.
+      const base      = w.present?.length > 0 ? w.cost / w.present.length : 0;
+      costPerPerson      = roundToTwoDecimals(base);
+      costPerPersonMulti = roundToTwoDecimals(Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT));
+    } else {
+      // Ping-pong: multisport players pay 0; remaining players split the cost.
+      const payers   = getPayingPlayers(w.present || [], w.multiPlayers || []);
+      costPerPerson  = payers.length > 0 ? roundToTwoDecimals(w.cost / payers.length) : 0;
+      costPerPersonMulti = 0;
+    }
 
     return {
-      id: w.id,
-      datePlayed: w.date,
-      totalCost: w.cost,
-      costPerPerson: roundToTwoDecimals(costPerPerson),
-      presentPlayers: w.present || [],
+      id:                w.id,
+      datePlayed:        w.date,
+      totalCost:         w.cost,
+      sport,
+      costPerPerson,
+      costPerPersonMulti,
+      presentPlayers:    w.present    || [],
       multisportPlayers: w.multiPlayers || [],
     };
   });

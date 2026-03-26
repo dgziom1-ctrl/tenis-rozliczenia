@@ -6,6 +6,7 @@ import { formatDate, formatAmount } from '../../utils/format';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { PasswordModal } from '../common/SharedUI';
+import { SPORT } from '../../constants';
 
 function EditDateInput({ value, onChange }) {
   return (
@@ -34,6 +35,7 @@ function EditDateInput({ value, onChange }) {
 
 // Terminal log entry
 function LogEntry({ row, onEdit, onDelete }) {
+  const isSquash = row.sport === SPORT.SQUASH;
   return (
     <div className="scan-hover log-entry" style={{
       background: 'var(--co-dark)', border: '1px solid #141414',
@@ -50,6 +52,17 @@ function LogEntry({ row, onEdit, onDelete }) {
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)' }}>
               {formatDate(row.datePlayed)}
+            </span>
+            {/* Sport badge */}
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: '0.55rem',
+              padding: '2px 6px',
+              background: isSquash ? 'rgba(0,255,136,0.08)' : 'rgba(0,229,255,0.06)',
+              border: `1px solid ${isSquash ? 'rgba(0,255,136,0.3)' : 'rgba(0,229,255,0.2)'}`,
+              color: isSquash ? 'var(--co-green)' : 'var(--co-cyan)',
+              clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+            }}>
+              {isSquash ? '🎾 SQUASH' : '🏓 PING'}
             </span>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -286,9 +299,10 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
   const handleExportCSV = () => {
     const rows = [
-      ['Data', 'Koszt całkowity', 'Na osobę', 'Liczba graczy', 'Obecni', 'Multisport'],
+      ['Data', 'Sport', 'Koszt całkowity', 'Na osobę', 'Liczba graczy', 'Obecni', 'Multisport'],
       ...filteredHistory.map(s => [
         s.datePlayed,
+        s.sport === SPORT.SQUASH ? 'squash' : 'ping-pong',
         s.totalCost,
         s.costPerPerson?.toFixed(2) ?? '',
         s.presentPlayers.length,
@@ -316,7 +330,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
     if (pwModal.type === 'edit') {
       const row = pwModal.row;
       setEditingId(row.id);
-      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers] });
+      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers], sport: row.sport || SPORT.PINGPONG });
     } else if (pwModal.type === 'delete') {
       setDeletingId(pwModal.rowId);
     }
@@ -333,7 +347,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
     }
     setIsSaving(true);
     try {
-      const result = await updateWeek(editingId, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers });
+      const result = await updateWeek(editingId, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers, sport: editForm.sport || SPORT.PINGPONG });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       setEditingId(null); setEditForm({});
     } finally { setIsSaving(false); }

@@ -2,7 +2,7 @@
 // CALCULATION UTILITIES
 // ============================================================================
 
-import { ORGANIZER_NAME, MONTHS } from '../constants';
+import { ORGANIZER_NAME, MONTHS, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '../constants';
 
 export function roundToTwoDecimals(value) {
   return Math.round(value * 100) / 100;
@@ -17,6 +17,10 @@ export function getPayingPlayers(present = [], multisportPlayers = []) {
 // ─── Base helper: list of sessions a player owes for ─────────────────────────
 // Used by both calculateDebt (raw weeks) and calculateDebtBreakdown (UI history).
 // Returns [{id, costPerPerson}] oldest→newest for sessions after paidUntilWeekIdx.
+//
+// Squash rule: ALL present players owe something; Multisport holders get a
+// personal -15 zł discount on their share (they do NOT play for free).
+// Ping-pong rule (legacy): Multisport players pay 0 — excluded entirely.
 function unpaidSessionsFromWeeks(playerName, weeks, paidUntilWeekId) {
   const lastPaidIndex = paidUntilWeekId
     ? weeks.findIndex(w => w.id === paidUntilWeekId)
@@ -24,12 +28,22 @@ function unpaidSessionsFromWeeks(playerName, weeks, paidUntilWeekId) {
 
   const result = [];
   for (let idx = lastPaidIndex + 1; idx < weeks.length; idx++) {
-    const week       = weeks[idx];
-    const isPresent  = (week.present     || []).includes(playerName);
-    const isMulti    = (week.multiPlayers || []).includes(playerName);
-    if (isPresent && !isMulti) {
-      const paying = getPayingPlayers(week.present || [], week.multiPlayers || []);
-      result.push({ id: week.id, costPerPerson: paying.length > 0 ? week.cost / paying.length : 0 });
+    const week      = weeks[idx];
+    const isPresent = (week.present || []).includes(playerName);
+    if (!isPresent) continue;
+
+    if (week.sport === SPORT.SQUASH) {
+      // Squash: everyone splits the rental; Multisport holders deduct 15 zł from their share.
+      const base    = week.present.length > 0 ? week.cost / week.present.length : 0;
+      const isMulti = (week.multiPlayers || []).includes(playerName);
+      result.push({ id: week.id, costPerPerson: roundToTwoDecimals(Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base)) });
+    } else {
+      // Ping-pong: Multisport players play for free — they don't enter the debt ledger.
+      const isMulti = (week.multiPlayers || []).includes(playerName);
+      if (!isMulti) {
+        const paying = getPayingPlayers(week.present || [], week.multiPlayers || []);
+        result.push({ id: week.id, costPerPerson: paying.length > 0 ? week.cost / paying.length : 0 });
+      }
     }
   }
   return result;
@@ -69,13 +83,19 @@ export function calculateDebtBreakdown(playerName, debtAmount, history) {
     const isPresent = session.presentPlayers.includes(playerName);
     const isMulti   = session.multisportPlayers.includes(playerName);
 
-    if (isPresent && !isMulti && session.costPerPerson > 0) {
-      sessions.push({
-        sessionId: session.id,
-        date:      session.datePlayed,
-        amount:    session.costPerPerson,
-      });
-      accumulated = roundToTwoDecimals(accumulated + session.costPerPerson);
+    // Squash: ALL present players owe — multisport holders pay discounted share.
+    // Ping-pong: only non-multisport players owe.
+    const owes = session.sport === SPORT.SQUASH ? isPresent : (isPresent && !isMulti);
+
+    if (owes) {
+      const amount = session.sport === SPORT.SQUASH
+        ? (isMulti ? (session.costPerPersonMulti ?? session.costPerPerson) : session.costPerPerson)
+        : session.costPerPerson;
+
+      if (amount > 0) {
+        sessions.push({ sessionId: session.id, date: session.datePlayed, amount });
+        accumulated = roundToTwoDecimals(accumulated + amount);
+      }
     }
   }
 
@@ -99,15 +119,21 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
     ? chronological.findIndex(s => s.id === paidUntilId)
     : -1;
 
-  const sessionFilter = s =>
-    s.presentPlayers.includes(player.name) &&
-    !s.multisportPlayers.includes(player.name);
+  const sessionFilter = s => {
+    if (!s.presentPlayers.includes(player.name)) return false;
+    // Squash: all present players owe something (incl. multisport holders).
+    if (s.sport === SPORT.SQUASH) return true;
+    // Ping-pong: multisport players play for free.
+    return !s.multisportPlayers.includes(player.name);
+  };
 
-  const sessionMap = s => ({
-    sessionId: s.id,
-    date:      s.datePlayed,
-    amount:    s.costPerPerson,
-  });
+  const sessionMap = s => {
+    const isMulti = s.multisportPlayers.includes(player.name);
+    const amount = s.sport === SPORT.SQUASH
+      ? (isMulti ? (s.costPerPersonMulti ?? s.costPerPerson) : s.costPerPerson)
+      : s.costPerPerson;
+    return { sessionId: s.id, date: s.datePlayed, amount };
+  };
 
   // ALL sessions the player was charged for — before and after any cutoff.
   // We always show the full picture so the breakdown is never incomplete.

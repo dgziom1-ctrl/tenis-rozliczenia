@@ -39,6 +39,17 @@ export const MONTHS = [
 export const UNDO_TIMEOUT_SECONDS = 8;
 export const QUICK_COSTS = [0, 15, 30, 45, 60];
 
+export const SPORT = {
+  PINGPONG: 'pingpong',
+  SQUASH:   'squash',
+};
+
+// Squash rental price depends on how many Multisport cards are used:
+// 0 cards → 85 zł, 1 card → 70 zł, 2 cards → 55 zł
+export const SQUASH_BASE_PRICE        = 85;
+export const SQUASH_MULTISPORT_DISCOUNT = 15; // per card, reduces both rental AND personal share
+export const SQUASH_QUICK_COSTS       = [85, 70, 55];
+
 export const SOUND_TYPES = {
   TAB:     'tab',
   CLICK:   'click',

@@ -1,7 +1,7 @@
 import { makeId } from '../utils/id';
 import { withTransaction } from './utils';
 
-export async function addSession({ datePlayed, totalCost, presentPlayers, multisportPlayers }) {
+export async function addSession({ datePlayed, totalCost, presentPlayers, multisportPlayers, sport = 'pingpong' }) {
   if (!datePlayed || totalCost < 0 || !presentPlayers || presentPlayers.length === 0) {
     return { success: false, error: 'Nieprawidłowe dane sesji' };
   }
@@ -42,6 +42,7 @@ export async function addSession({ datePlayed, totalCost, presentPlayers, multis
           id:           newId,
           date:         datePlayed,
           cost:         totalCost,
+          sport:        sport,
           present:      presentPlayers,
           multiPlayers: multisportPlayers || [],
         },
@@ -54,7 +55,7 @@ export async function addSession({ datePlayed, totalCost, presentPlayers, multis
   }, 'Nie udało się zapisać sesji');
 }
 
-export async function updateWeek(weekId, { date, cost, present, multiPlayers }) {
+export async function updateWeek(weekId, { date, cost, present, multiPlayers, sport }) {
   return withTransaction((current) => {
     const data  = current || {};
     const weeks = data.weeks || [];
@@ -63,7 +64,12 @@ export async function updateWeek(weekId, { date, cost, present, multiPlayers }) 
     if (idx === -1) throw new Error('Nie znaleziono sesji');
 
     const updatedWeeks = [...weeks];
-    updatedWeeks[idx]  = { id: weekId, date, cost, present, multiPlayers: multiPlayers || [] };
+    updatedWeeks[idx]  = {
+      id: weekId, date, cost, present,
+      multiPlayers: multiPlayers || [],
+      // Preserve sport if not provided (backward-compat with old sessions)
+      sport: sport || weeks[idx].sport || 'pingpong',
+    };
 
     return { ...data, weeks: updatedWeeks };
   }, 'Nie udało się zaktualizować sesji');
