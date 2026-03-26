@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Terminal, Pencil, Trash2, Check, X, Zap, Users, CalendarDays, TrendingUp, Search, Download, ArrowUpDown } from 'lucide-react';
 import { updateWeek, deleteWeek } from '../../firebase/index';
 import { groupHistoryByMonth } from '../../utils/calculations';
@@ -7,6 +7,7 @@ import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { PasswordModal } from '../common/SharedUI';
 import { SPORT } from '../../constants';
+import UndoBar from '../common/UndoBar';
 
 function EditDateInput({ value, onChange }) {
   return (
@@ -66,7 +67,7 @@ function LogEntry({ row, onEdit, onDelete }) {
             </span>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={() => onEdit(row)} className="icon-btn" style={{
+            <button onClick={() => onEdit(row)} className="icon-btn" aria-label="Edytuj sesję" style={{
               padding: '5px 8px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
               color: 'var(--co-dim)',
@@ -74,7 +75,7 @@ function LogEntry({ row, onEdit, onDelete }) {
             }}>
               <Pencil size={13} />
             </button>
-            <button onClick={() => onDelete(row.id)} className="icon-btn danger" style={{
+            <button onClick={() => onDelete(row.id)} className="icon-btn danger" aria-label="Usuń sesję" style={{
               padding: '5px 8px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
               color: 'var(--co-dim)',
@@ -283,8 +284,16 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const [filterPlayer, setFilterPlayer] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortOrder,    setSortOrder]    = useState('desc');
-  const { showError } = useToast();
+  const [showAll,      setShowAll]      = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [undoSecondsLeft, setUndoSecondsLeft] = useState(0);
+  const undoTimerRef = useRef(null);
+  const undoCountdownRef = useRef(null);
+  const { showError, showSuccess } = useToast();
+  const filterOverlayRef = useRef(null);
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 639;
+
+  useEffect(() => { if (isFilterOpen) filterOverlayRef.current?.focus(); }, [isFilterOpen]);
 
   const parsedEditCost = editForm.cost === '' || editForm.cost === null || editForm.cost === undefined ? NaN : parseFloat(editForm.cost);
   const isEditCostValid = Number.isFinite(parsedEditCost) && parsedEditCost >= 0;
@@ -294,8 +303,12 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
   const filteredHistory = useMemo(() => {
     let h = !filterPlayer ? history : history.filter(s => s.presentPlayers.includes(filterPlayer));
+    if (pendingDeleteId) h = h.filter(s => s.id !== pendingDeleteId);
     return sortOrder === 'asc' ? [...h].reverse() : h;
-  }, [history, filterPlayer, sortOrder]);
+  }, [history, filterPlayer, sortOrder, pendingDeleteId]);
+
+  // Reset pagination when filter/sort changes
+  useEffect(() => { setShowAll(false); }, [filterPlayer, sortOrder]);
 
   const handleExportCSV = () => {
     const rows = [
@@ -313,14 +326,16 @@ export default function HistoryTab({ history, playerNames, playSound }) {
     const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
+    const safeName = filterPlayer.replace(/[\/\\:*?"<>|]/g, '_');
     const a    = Object.assign(document.createElement('a'), {
       href: url,
-      download: filterPlayer ? `sesje_${filterPlayer}.csv` : 'sesje.csv',
+      download: filterPlayer ? `sesje_${safeName}.csv` : 'sesje.csv',
     });
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    showSuccess(`Wyeksportowano ${filteredHistory.length} sesji`);
   };
 
   const requestEdit   = (row) => setPwModal({ type: 'edit', row });
@@ -367,17 +382,48 @@ export default function HistoryTab({ history, playerNames, playSound }) {
     });
   };
 
+  const UNDO_SECONDS = 8;
+
+  const clearUndoTimers = useCallback(() => {
+    if (undoTimerRef.current) { clearTimeout(undoTimerRef.current); undoTimerRef.current = null; }
+    if (undoCountdownRef.current) { clearInterval(undoCountdownRef.current); undoCountdownRef.current = null; }
+  }, []);
+
   const handleDelete = async (id) => {
-    if (isDeleting) return;
-    setIsDeleting(id);
-    try {
-      const result = await deleteWeek(id);
-      if (!result.success) { showError(result.error || 'Nie udało się usunąć sesji'); return; }
-      setDeletingId(null);
-    } finally { setIsDeleting(null); }
+    setDeletingId(null);
+    setPendingDeleteId(id);
+    setUndoSecondsLeft(UNDO_SECONDS);
+    clearUndoTimers();
+
+    undoCountdownRef.current = setInterval(() => {
+      setUndoSecondsLeft(prev => {
+        if (prev <= 1) { clearInterval(undoCountdownRef.current); undoCountdownRef.current = null; return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+
+    undoTimerRef.current = setTimeout(async () => {
+      clearUndoTimers();
+      try {
+        const result = await deleteWeek(id);
+        if (!result.success) { showError(result.error || 'Nie udało się usunąć sesji'); }
+      } catch { showError('Nie udało się usunąć sesji'); }
+      setPendingDeleteId(null);
+    }, UNDO_SECONDS * 1000);
   };
 
-  const grouped = groupHistoryByMonth(filteredHistory);
+  const handleUndo = useCallback(() => {
+    clearUndoTimers();
+    setPendingDeleteId(null);
+    setUndoSecondsLeft(0);
+  }, [clearUndoTimers]);
+
+  useEffect(() => {
+    return () => clearUndoTimers();
+  }, [clearUndoTimers]);
+
+  const visibleHistory = showAll ? filteredHistory : filteredHistory.slice(0, 50);
+  const grouped = groupHistoryByMonth(visibleHistory);
 
   return (
     <>
@@ -392,7 +438,12 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
       {isFilterOpen && (
         <div
+          ref={filterOverlayRef}
           onClick={(e) => { if (e.target === e.currentTarget) setIsFilterOpen(false); }}
+          tabIndex={-1}
+          onKeyDown={e => e.key === 'Escape' && setIsFilterOpen(false)}
+          role="dialog"
+          aria-modal="true"
           style={{
             position: 'fixed',
             inset: 0,
@@ -635,6 +686,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             <button
               onClick={() => setSortOrder(o => o === 'desc' ? 'asc' : 'desc')}
               title={sortOrder === 'desc' ? 'Najnowsze pierwsze' : 'Najstarsze pierwsze'}
+              aria-label="Zmień kolejność"
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '4px 8px', cursor: 'pointer',
@@ -653,6 +705,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             <button
               onClick={handleExportCSV}
               title="Pobierz CSV"
+              aria-label="Eksportuj CSV"
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '4px 8px', cursor: 'pointer',
@@ -776,10 +829,12 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                       )}
                       <div style={{ display: 'flex', gap: 10 }}>
                         <button onClick={saveEdit} disabled={isSaving || !isEditCostValid}
+                          aria-label="Zapisz zmiany"
                           className="cyber-button-yellow" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                           {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Check size={14} /> Zapisz</>}
                         </button>
                         <button onClick={cancelEdit} disabled={isSaving}
+                          aria-label="Anuluj edycję"
                           className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                           <X size={14} /> ANULUJ
                         </button>
@@ -798,21 +853,20 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                         ⚠ Usunąć sesję z dnia {formatDate(row.datePlayed)}?
                       </p>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', marginBottom: 14 }}>
-                        Ta operacja jest nieodwracalna.
+                        Będziesz mieć 8 sekund na cofnięcie.
                       </p>
                       <div style={{ display: 'flex', gap: 10 }}>
-                        <button onClick={() => handleDelete(row.id)} disabled={isDeleting === row.id}
+                        <button onClick={() => handleDelete(row.id)}
                           style={{
                             flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                             background: 'var(--co-yellow)', color: '#000',
                             fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.12em',
                             border: 'none', cursor: 'pointer',
                             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
-                            opacity: isDeleting === row.id ? 0.5 : 1,
                           }}>
-                          {isDeleting === row.id ? <><InlineSpinner size="sm" /> USUWAM...</> : <><Trash2 size={14} /> POTWIERDŹ USUNIĘCIE</>}
+                          <Trash2 size={14} /> POTWIERDŹ USUNIĘCIE
                         </button>
-                        <button onClick={() => setDeletingId(null)} disabled={isDeleting === row.id}
+                        <button onClick={() => setDeletingId(null)}
                           className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                           <X size={14} /> ANULUJ
                         </button>
@@ -828,7 +882,36 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             </div>
           ))}
         </div>
+        {!showAll && filteredHistory.length > 50 && (
+          <button
+            onClick={() => setShowAll(true)}
+            style={{
+              display: 'block', width: '100%', marginTop: 16, padding: '12px',
+              fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.1em',
+              textTransform: 'uppercase', color: 'var(--co-cyan)',
+              background: 'rgba(0,229,255,0.05)', border: '1px solid rgba(0,229,255,0.3)',
+              cursor: 'pointer',
+              clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
+              transition: 'background 0.15s, border-color 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,229,255,0.12)'; e.currentTarget.style.borderColor = 'rgba(0,229,255,0.6)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,229,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(0,229,255,0.3)'; }}
+          >
+            Pokaż wszystkie ({filteredHistory.length} sesji)
+          </button>
+        )}
       </div>
+
+      {pendingDeleteId && (
+        <div style={{ position: 'fixed', bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))', left: 8, right: 8, zIndex: 80, maxWidth: 500, margin: '0 auto' }}>
+          <UndoBar
+            message="Sesja usunięta"
+            secondsLeft={undoSecondsLeft}
+            progressPct={(undoSecondsLeft / UNDO_SECONDS) * 100}
+            onUndo={handleUndo}
+          />
+        </div>
+      )}
     </>
   );
 }

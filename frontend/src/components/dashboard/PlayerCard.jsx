@@ -1,190 +1,21 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, memo } from 'react';
 import { getPlayerColor } from '../../constants/playerColors';
-import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, RANKS } from '../../constants';
+import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
+import { FONT, CLIP } from '../../constants/styles';
 import { formatAmountShort } from '../../utils/format';
 import { useThemeTokens } from '../../context/ThemeContext';
 import { usePaymentUndo } from '../../hooks/usePaymentUndo';
 import BreakdownPanel from './BreakdownPanel';
 import PaymentModal from './PaymentModal';
 import UndoBar from '../common/UndoBar';
-
-// ── Animated counter ────────────────────────────────────────────
-function useAnimatedValue(value, duration = 900) {
-  const [display, setDisplay] = useState(value);
-  const fromRef = useRef(value);
-  const rafRef  = useRef(null);
-  useEffect(() => {
-    const from = fromRef.current, to = value;
-    if (from === to) return;
-    cancelAnimationFrame(rafRef.current);
-    const start = performance.now();
-    const tick = (now) => {
-      const t = Math.min((now - start) / duration, 1);
-      const e = 1 - Math.pow(1 - t, 3);
-      setDisplay(from + (to - from) * e);
-      if (t < 1) rafRef.current = requestAnimationFrame(tick);
-      else { fromRef.current = to; setDisplay(to); }
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [value, duration]);
-  return display;
-}
-
-// Colors come from shared getPlayerColor(name) — deterministic by name
-
-// ── Pseudo-barcode (seeded by name) ─────────────────────────────
-function Barcode({ name, color }) {
-  const bars = Array.from({ length: 28 }, (_, i) => {
-    const code = name.charCodeAt(i % name.length) + i * 7;
-    return { width: (code % 3) + 1, gap: (code % 5) === 0 };
-  });
-  return (
-    <div style={{ display: 'flex', alignItems: 'stretch', height: 18, gap: '1px', overflow: 'hidden', opacity: 0.35 }}>
-      {bars.map((b, i) => (
-        <div key={i} style={{
-          width: b.width * 2, flexShrink: 0,
-          background: b.gap ? 'transparent' : color,
-          opacity: b.gap ? 0 : (0.4 + (i % 3) * 0.2),
-        }} />
-      ))}
-    </div>
-  );
-}
-
-// ── Corner brackets ──────────────────────────────────────────────
-function CornerBrackets({ color, size = 12, thickness = 1 }) {
-  const s = { position: 'absolute', width: size, height: size, pointerEvents: 'none' };
-  const b = `${thickness}px solid ${color}`;
-  return (
-    <>
-      <div style={{ ...s, top: -1, left: -1, borderTop: b, borderLeft: b }} />
-      <div style={{ ...s, top: -1, right: -1, borderTop: b, borderRight: b }} />
-      <div style={{ ...s, bottom: -1, left: -1, borderBottom: b, borderLeft: b }} />
-      <div style={{ ...s, bottom: -1, right: -1, borderBottom: b, borderRight: b }} />
-    </>
-  );
-}
-
-// ── Avatar ───────────────────────────────────────────────────────
-function PlayerAvatar({ name, index, isPending, isOrganizer }) {
-  const c = getPlayerColor(name, index);
-  const initials = name.slice(0, 2).toUpperCase();
-  // Avatar always uses player's own color — never changes based on debt status
-
-  return (
-    <div style={{ position: 'relative', flexShrink: 0 }}>
-      <div style={{
-        width: 60, height: 60,
-        background: c.bg,
-        border: `1px solid ${c.border}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
-        boxShadow: `0 0 12px ${c.border}40, inset 0 0 6px ${c.border}08`,
-        overflow: 'hidden', position: 'relative',
-      }}>
-        <span style={{
-          fontFamily: 'var(--font-display)', fontSize: '1.3rem',
-          color: c.text,
-          lineHeight: 1,
-          textShadow: `0 0 10px ${c.border}55`,
-        }}>{initials}</span>
-      </div>
-      {/* Status dot — only this element carries semantic color */}
-      <div style={{
-        position: 'absolute', bottom: -2, right: -2,
-        width: 10, height: 10,
-        background: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
-        border: '2px solid var(--co-void)',
-        boxShadow: isPending ? '0 0 4px rgba(255,32,144,0.5)' : '0 0 4px rgba(0,255,102,0.5)',
-        borderRadius: '50%',
-      }} />
-    </div>
-  );
-}
-
-// ── Rank badge ───────────────────────────────────────────────────
-function RankBadge({ rank, pct, showHint = true }) {
-  const col = rank.hex || 'var(--co-dim)';
-  const rankIdx = RANKS.findIndex(r => r.name === rank.name);
-  const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
-  const [visible, setVisible] = useState(false);
-  const [tapped, setTapped] = useState(false);
-  const timerRef = useRef(null);
-
-  const handleTap = (e) => {
-    e.stopPropagation();
-    setTapped(true);
-    clearTimeout(timerRef.current);
-    setVisible(true);
-    timerRef.current = setTimeout(() => setVisible(false), 2500);
-  };
-
-  useEffect(() => () => clearTimeout(timerRef.current), []);
-
-  return (
-    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-      <div
-        onClick={handleTap}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 4,
-          padding: '2px 7px 2px 4px',
-          background: `${col}10`, border: `1px solid ${col}30`,
-          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-          cursor: 'pointer', userSelect: 'none',
-        }}
-      >
-        <span style={{ fontSize: '0.65rem' }}>{rank.emoji}</span>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.08em', color: col }}>
-          {rank.name}
-        </span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: col, opacity: 0.55 }}>
-          {pct}%
-        </span>
-      </div>
-      {/* Tap hint — visible "?" label until first tap */}
-      {showHint && !tapped && (
-        <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: '0.62rem',
-          color: col, opacity: 0.7,
-          letterSpacing: 0,
-          lineHeight: 1,
-          flexShrink: 0,
-        }}>
-          ?
-        </span>
-      )}
-      {visible && (
-        <div style={{
-          position: 'absolute', bottom: 'calc(100% + 6px)', left: 0,
-          background: 'var(--co-void)',
-          border: `1px solid ${col}50`,
-          padding: '6px 10px',
-          zIndex: 50,
-          whiteSpace: 'nowrap',
-          clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-          boxShadow: `0 0 12px ${col}30`,
-          animation: 'slide-in-up 0.15s ease-out',
-        }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', color: col, margin: 0, letterSpacing: '0.08em' }}>
-            {rank.emoji} {rank.name} · {rank.min}%+
-          </p>
-          {nextRank ? (
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '3px 0 0' }}>
-              do {nextRank.emoji} {nextRank.name}: <span style={{ color: nextRank.hex }}>+{Math.max(0, nextRank.min - pct)}%</span>
-            </p>
-          ) : (
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: col, margin: '3px 0 0' }}>
-              ★ to jest max ranga
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+import { useAnimatedValue } from './useAnimatedValue';
+import { Barcode } from './Barcode';
+import { CornerBrackets } from './CornerBrackets';
+import { PlayerAvatar } from './PlayerAvatar';
+import { RankBadge } from './RankBadge';
 
 // ── Main Component ───────────────────────────────────────────────
-export default function PlayerCard({
+function PlayerCard({
   player, totalWeeks, history, onSettle, justSettled,
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment, onPin, onUnpin,
@@ -352,7 +183,7 @@ export default function PlayerCard({
           {/* Attendance bar */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-dim)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              <span style={{ ...FONT.monoLabel }}>
                 Obecność
               </span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>
@@ -372,7 +203,9 @@ export default function PlayerCard({
             </div>
             {/* Session dots — last 10 sessions */}
             {history && history.length > 0 && (
-              <div style={{ display: 'flex', gap: 3, marginTop: 6, flexWrap: 'wrap' }}>
+              <div
+                title={`Ostatnie ${[...history].slice(0, isMobile ? 6 : 10).length} sesji`}
+                style={{ display: 'flex', gap: 3, marginTop: 6, flexWrap: 'wrap' }}>
                 {[...history].slice(0, isMobile ? 6 : 10).reverse().map((session, i) => {
                   const attended = session.presentPlayers.includes(player.name);
                   return (
@@ -414,7 +247,7 @@ export default function PlayerCard({
                 ? 'rgba(255,32,144,0.25)'
                 : hasCredit ? 'rgba(255,32,144,0.2)'
                 : 'rgba(0,229,255,0.15)'}`,
-              clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+              clipPath: CLIP.tag,
               cursor: 'default', userSelect: 'none',
               position: 'relative', overflow: 'hidden',
               textAlign: 'center',
@@ -514,6 +347,7 @@ export default function PlayerCard({
                     disabled={isSaving}
                     className="cyber-button-yellow"
                     style={{ padding: '11px 16px', width: '100%' }}
+                    aria-label={`Zapłać ${formatAmountShort(debt)} zł przez BLIK`}
                   >
                     <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                       <span style={{ fontSize: '1.2rem', fontFamily: 'var(--font-display)', letterSpacing: '0.06em', lineHeight: 1 }}>
@@ -524,7 +358,7 @@ export default function PlayerCard({
                       </span>
                     </span>
                   </button>
-                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }}>
+                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }} aria-label="Wpłać inną kwotę">
                     + Inna kwota
                   </button>
                 </>
@@ -549,10 +383,10 @@ export default function PlayerCard({
             <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <Barcode name={player.name} color={accentColor} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.08em' }}>
+                <span style={{ ...FONT.monoMicro, letterSpacing: '0.08em' }}>
                   {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.06em' }}>
+                <span style={{ ...FONT.monoMicro, letterSpacing: '0.06em' }}>
                   SW-NET
                 </span>
               </div>
@@ -579,10 +413,10 @@ export default function PlayerCard({
             <div style={{ marginTop: 8, width: '100%', borderTop: '1px solid var(--co-border)', paddingTop: 8 }}>
               <Barcode name={player.name} color={c.border} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.08em' }}>
+                <span style={{ ...FONT.monoMicro, letterSpacing: '0.08em' }}>
                   {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.42rem', color: 'var(--co-dim)', letterSpacing: '0.06em' }}>
+                <span style={{ ...FONT.monoMicro, letterSpacing: '0.06em' }}>
                   SW-NET
                 </span>
               </div>
@@ -593,3 +427,5 @@ export default function PlayerCard({
     </div>
   );
 }
+
+export default memo(PlayerCard);

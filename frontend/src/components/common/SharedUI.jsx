@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Lock, Check, X } from 'lucide-react';
 import { ADMIN_PASSWORD, SOUND_TYPES } from '../../constants';
 
@@ -6,6 +6,8 @@ import { ADMIN_PASSWORD, SOUND_TYPES } from '../../constants';
 export function PasswordModal({ action, onConfirm, onCancel, playSound }) {
   const [input, setInput] = useState('');
   const [error, setError] = useState(false);
+  const overlayRef = useRef(null);
+  useEffect(() => { overlayRef.current?.focus(); }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -21,8 +23,13 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }) {
 
   return (
     <div
+      ref={overlayRef}
       style={{ background: 'var(--co-overlay, rgba(0,0,0,0.9))', backdropFilter: 'blur(4px)' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      tabIndex={-1}
+      onKeyDown={e => e.key === 'Escape' && onCancel()}
+      role="dialog"
+      aria-modal="true"
     >
       <div style={{
         background: 'var(--co-panel)',

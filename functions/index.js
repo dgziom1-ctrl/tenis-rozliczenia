@@ -1,5 +1,4 @@
 const { onValueUpdated }  = require('firebase-functions/v2/database');
-const { onSchedule }      = require('firebase-functions/v2/scheduler');
 const { initializeApp }   = require('firebase-admin/app');
 const { getMessaging }    = require('firebase-admin/messaging');
 const { getDatabase }     = require('firebase-admin/database');
@@ -94,6 +93,11 @@ async function sendToAll(tokens, title, body, data = {}) {
   }
 }
 
+// ─── Sanitize player names for notification payloads ──────────────────────────
+function sanitizeName(name) {
+  return String(name || '').replace(/[<>"'&]/g, '').slice(0, 100);
+}
+
 // ─── Seria gracza ─────────────────────────────────────────────────────────────
 function computeStreak(weeks, playerName) {
   if (!weeks.length) return 0;
@@ -174,13 +178,13 @@ exports.onSessionAdded = onValueUpdated(
         await sendToAll(
           tokens,
           `${emoji} Seria ${streak}!`,
-          `${playerName} ma ${streak} sesji z rzędu!`,
+          `${sanitizeName(playerName)} ma ${streak} sesji z rzędu!`,
           {
             type:       'streak',
-            playerName,
+            playerName: sanitizeName(playerName),
             streak:     String(streak),
-            url:        `/?tab=attendance&player=${encodeURIComponent(playerName)}`,
-            tag:        `streak-${playerName}`,
+            url:        `/?tab=attendance&player=${encodeURIComponent(sanitizeName(playerName))}`,
+            tag:        `streak-${sanitizeName(playerName)}`,
           }
         );
       }
@@ -212,96 +216,14 @@ exports.onPlayerAdded = onValueUpdated(
       await sendToAll(
         tokens,
         '🎮 Nowy gracz!',
-        `${playerName} dołączył do gry!`,
+        `${sanitizeName(playerName)} dołączył do gry!`,
         {
           type:       'new_player',
-          playerName,
+          playerName: sanitizeName(playerName),
           url:        '/?tab=attendance',
-          tag:        `new-player-${playerName}`,
+          tag:        `new-player-${sanitizeName(playerName)}`,
         }
       );
     }
-  }
-);
-
-// ─── Scheduled: przypomnienie we wtorek o 19:00 ───────────────────────────────
-// Cron: "0 19 * * 2" = każdy wtorek o 19:00
-// Strefa: Europe/Warsaw (uwzględnia czas letni/zimowy automatycznie)
-// Następna środa od podanej daty (lub sam dzień jeśli to środa)
-function nextWednesdayISO(fromDate) {
-  const d = new Date(fromDate);
-  const day = d.getDay();
-  const diff = (3 - day + 7) % 7 || 7;
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().split('T')[0];
-}
-
-exports.weeklyReminder = onSchedule(
-  {
-    schedule:  '0 19 * * 2',
-    timeZone:  'Europe/Warsaw',
-    region:    'europe-west1',
-  },
-  async () => {
-    console.log('Wysyłam cotygodniowe przypomnienie o sesji');
-
-    const snap = await getDatabase().ref('fcmTokens').get();
-    if (!snap.exists()) { console.log('Brak tokenów'); return; }
-
-    const entries  = Object.values(snap.val() || {});
-    const weekDate = nextWednesdayISO(new Date().toISOString());
-    console.log(`Tydzień RSVP: ${weekDate}, tokenów: ${entries.length}`);
-
-    // Wysyłamy OSOBNO do każdego gracza — żeby URL miał właściwe imię
-    for (const entry of entries) {
-      const { token, playerName } = entry;
-      if (!token) continue;
-
-      const player  = playerName || 'unknown';
-      const yesUrl  = `/?tab=admin&rsvp=yes&player=${encodeURIComponent(player)}&week=${weekDate}`;
-      const noUrl   = `/?tab=admin&rsvp=no&player=${encodeURIComponent(player)}&week=${weekDate}`;
-
-      const msg = {
-        notification: { title: '🏓 Jutro ping-pong!', body: `${player}, grasz jutro?` },
-        data: {
-          type:   'reminder',
-          player,
-          week:   weekDate,
-          url:    yesUrl,
-          tag:    'weekly-reminder',
-          yesUrl,
-          noUrl,
-        },
-        webpush: {
-          notification: {
-            title:   '🏓 Jutro ping-pong!',
-            body:    `${player}, grasz jutro?`,
-            icon:    '/icon-192v2.png',
-            badge:   '/icon-192v2.png',
-            vibrate: [100, 50, 100],
-            tag:     'weekly-reminder',
-            renotify: true,
-            requireInteraction: true,
-            // Przyciski akcji w powiadomieniu webpush
-            actions: [
-              { action: 'yes', title: '✅ Gram!' },
-              { action: 'no',  title: '❌ Nie gram' },
-            ],
-          },
-          fcm_options: { link: yesUrl },
-          headers: { Urgency: 'high' },
-        },
-        tokens: [token],
-      };
-
-      try {
-        const result = await getMessaging().sendEachForMulticast(msg);
-        console.log(`  ${player}: ${result.successCount ? 'OK' : 'błąd'}`);
-      } catch (err) {
-        console.error(`  ${player} FCM error:`, err);
-      }
-    }
-
-    console.log('Przypomnienia wysłane');
   }
 );

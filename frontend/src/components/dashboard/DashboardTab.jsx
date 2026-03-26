@@ -31,6 +31,7 @@ export default function DashboardTab({ data, history, playSound }) {
   const confettiTimer = useRef(null);
   const isSettlingRef = useRef(false);
   const undoInFlightRef = useRef(false);
+  const operationLockRef = useRef(false);
   useEffect(() => () => clearTimeout(confettiTimer.current), []);
 
   const handleSettleRequest = useCallback((playerName) => {
@@ -42,7 +43,8 @@ export default function DashboardTab({ data, history, playSound }) {
   }, [data.players, playSound]);
 
   const handleConfirmSettle = useCallback(async () => {
-    if (!confirmSettle || isSettlingRef.current) return;
+    if (!confirmSettle || isSettlingRef.current || operationLockRef.current) return;
+    operationLockRef.current = true;
     isSettlingRef.current = true;
     setIsSettling(true);
 
@@ -81,11 +83,13 @@ export default function DashboardTab({ data, history, playSound }) {
     } finally {
       isSettlingRef.current = false;
       setIsSettling(false);
+      operationLockRef.current = false;
     }
   }, [confirmSettle, data.players, playSound, showError, startUndo]);
 
   const handleUndo = useCallback(async () => {
-    if (!undoToast || undoInFlightRef.current) return;
+    if (!undoToast || undoInFlightRef.current || operationLockRef.current) return;
+    operationLockRef.current = true;
     undoInFlightRef.current = true;
     playSound(SOUND_TYPES.CLICK);
     try {
@@ -96,6 +100,7 @@ export default function DashboardTab({ data, history, playSound }) {
       showSuccess('Rozliczenie cofnięte');
     } finally {
       undoInFlightRef.current = false;
+      operationLockRef.current = false;
     }
   }, [undoToast, playSound, showError, showSuccess, dismissUndo]);
 

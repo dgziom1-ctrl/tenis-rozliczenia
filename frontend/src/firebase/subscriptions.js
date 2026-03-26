@@ -7,9 +7,14 @@ export function subscribeToData(callback, onError) {
   return onValue(
     dataRef,
     (snapshot) => {
-      const normalized = normalizeRawData(snapshot.val() || {});
-      setCurrentData(normalized);
-      callback(buildUIData(normalized));
+      try {
+        const normalized = normalizeRawData(snapshot.val() || {});
+        setCurrentData(normalized);
+        callback(buildUIData(normalized));
+      } catch (error) {
+        console.error('Data processing error:', error);
+        if (typeof onError === 'function') onError(error);
+      }
     },
     (error) => {
       if (typeof onError === 'function') onError(error);

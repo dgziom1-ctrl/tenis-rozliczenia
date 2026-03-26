@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react';
 import { CheckCircle2, HandCoins, X } from 'lucide-react';
 import { formatAmountShort } from '../../utils/format';
 import { InlineSpinner } from '../common/LoadingSkeleton';
@@ -10,12 +11,20 @@ export default function SettleConfirmModal({
   tokens,
   isProcessing = false,
 }) {
+  const overlayRef = useRef(null);
+  useEffect(() => { overlayRef.current?.focus(); }, []);
+
   if (!playerName) return null;
 
   return (
     <div
+      ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
+      tabIndex={-1}
+      onKeyDown={e => e.key === 'Escape' && onCancel()}
+      role="dialog"
+      aria-modal="true"
     >
       <div style={{
         background: 'var(--co-dark)',

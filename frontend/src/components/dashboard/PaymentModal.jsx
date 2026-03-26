@@ -1,16 +1,26 @@
+import { useRef, useEffect } from 'react';
 import { CheckCircle2, X, Zap } from 'lucide-react';
 import { formatAmountShort } from '../../utils/format';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 
 export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtChange, onSave, onCancel, isSaving, tokens, errorMsg = null }) {
+  const panelRef = useRef(null);
+  useEffect(() => { panelRef.current?.focus(); }, []);
+
   if (!type) return null;
 
   const parsedAmt = parseFloat(customAmt);
-  const isValid   = !isNaN(parsedAmt) && parsedAmt > 0;
+  const isValid   = !isNaN(parsedAmt) && parsedAmt >= 0.01;
   const showError = customAmt !== '' && !isValid;
 
+  const handleBlur = () => {
+    if (customAmt !== '' && !isNaN(parseFloat(customAmt))) {
+      onAmtChange(parseFloat(customAmt).toFixed(2));
+    }
+  };
+
   return (
-    <div style={{
+    <div ref={panelRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onCancel()} role="dialog" aria-modal="true" style={{
       marginBottom: 12, padding: '16px 14px',
       background: 'var(--co-dark)',
       border: '1px solid rgba(0,229,255,0.25)',
@@ -31,6 +41,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
         placeholder="np. 50"
         value={customAmt}
         onChange={e => onAmtChange(e.target.value)}
+        onBlur={handleBlur}
         onKeyDown={e => { if (e.key === 'Enter' && isValid && !isSaving) onSave(parsedAmt); }}
         autoFocus
         className="cyber-input"
@@ -47,7 +58,7 @@ export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtCh
 
       {showError && (
         <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', textAlign: 'center', marginBottom: 8 }}>
-          ⚠ KWOTA MUSI BYĆ WIĘKSZA OD 0
+          ⚠ {customAmt !== '' && parseFloat(customAmt) > 0 && parseFloat(customAmt) < 0.01 ? 'Minimalna kwota to 0.01 zł' : 'KWOTA MUSI BYĆ WIĘKSZA OD 0'}
         </p>
       )}
 

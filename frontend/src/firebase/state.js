@@ -1,11 +1,10 @@
-// Shared mutable reference to current data snapshot.
-// Populated by subscriptions.js on every Firebase update.
-// Use getCurrentData() for reads — do not mutate _currentData directly.
-
+// Module-scoped state — intentionally mutable singleton.
+// Used by firebase transactions that need current data outside React tree.
+// Safe because: (1) single-threaded JS, (2) always written by onValue before read by transactions.
 let _currentData = null;
 
 export function setCurrentData(data) {
-  _currentData = data;
+  _currentData = Object.freeze(data); // prevent accidental mutation
 }
 
 export function getCurrentData() {

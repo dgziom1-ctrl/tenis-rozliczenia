@@ -38,6 +38,8 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           border: '1px solid var(--co-border)',
           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
           overflow: 'hidden',
+          maxHeight: 300,
+          overflowY: 'auto',
         }}>
           {/* Sessions */}
           {breakdown.sessions.length > 0 ? (

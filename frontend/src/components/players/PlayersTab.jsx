@@ -52,7 +52,7 @@ function PlayerProfileCard({ player, index, onDelete, isOrganizer, disabled = fa
           disabled={disabled}
           style={{
           padding: '7px 10px', background: 'transparent',
-          border: '1px solid var(--co-border)', cursor: 'pointer',
+          border: '1px solid var(--co-border)',
           color: 'var(--co-dim)',
           clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
           transition: 'all 0.15s',

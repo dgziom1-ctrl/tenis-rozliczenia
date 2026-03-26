@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Calculator, CalendarDays, CalendarPlus, CheckCircle2, Copy, Users, Zap, UserCheck, UserX, HelpCircle } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Calculator, CalendarDays, CalendarPlus, CheckCircle2, Copy, Users, Zap } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '../../constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { formatDate, formatAmountShort } from '../../utils/format';
 import { getPayingPlayers } from '../../utils/calculations';
-import { subscribeToRsvp, saveRsvp, nextWednesdayISO } from '../../firebase/rsvp';
+
 import { useThemeTokens } from '../../context/ThemeContext';
 
 function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport }) {
@@ -55,17 +55,21 @@ function FieldLabel({ children }) {
 // ── Session summary modal ─────────────────────────────────
 function SessionSummaryModal({ summary, onClose, tokens }) {
   const [copied, setCopied] = useState(false);
+  const { showError } = useToast();
+  const overlayRef = useRef(null);
+  useEffect(() => { overlayRef.current?.focus(); }, []);
   if (!summary) return null;
   const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport } = summary;
   const isSquash = sport === SPORT.SQUASH;
 
   const handleCopy = async () => {
     const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport });
-    try { await navigator.clipboard.writeText(msg); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch {}
+    try { await navigator.clipboard.writeText(msg); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { showError('Nie udało się skopiować tekstu'); }
   };
 
   return (
-    <div style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
+    <div ref={overlayRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onClose()} role="dialog" aria-modal="true"
+      style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
         background: 'var(--co-dark)',
@@ -370,151 +374,6 @@ function CyberDateInput({ value, onChange }) {
 }
 
 
-// ── RSVP Panel ────────────────────────────────────────────
-function RsvpPanel({ playerNames }) {
-  const weekDate = nextWednesdayISO();
-  const [answers,  setAnswers]  = useState({});
-  const [pending,  setPending]  = useState(null); // nazwa gracza którego głos jest w trakcie zapisu
-  const [rsvpError, setRsvpError] = useState(null);
-
-  useEffect(() => {
-    const unsub = subscribeToRsvp(weekDate, setAnswers);
-    return unsub;
-  }, [weekDate]);
-
-  const yes    = playerNames.filter(p => answers[p] === 'yes').length;
-  const no     = playerNames.filter(p => answers[p] === 'no').length;
-
-  const handleVote = async (name, answer) => {
-    if (pending === name) return; // blokuj podwójne kliknięcie
-    const newAnswer = answers[name] === answer ? null : answer;
-    setPending(name);
-    setRsvpError(null);
-    try {
-      const result = await saveRsvp(name, weekDate, newAnswer || 'reset');
-      if (!result?.success) setRsvpError(result?.error || 'Nie udało się zapisać głosu');
-    } catch (err) {
-      setRsvpError(err?.message || 'Nie udało się zapisać głosu');
-    } finally {
-      setPending(null);
-    }
-  };
-
-  const formatDate = (iso) => {
-    const d = new Date(iso);
-    return d.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
-  };
-
-  return (
-    <div style={{
-      padding: '16px',
-      background: 'var(--co-dark)',
-      border: '1px solid var(--co-border)',
-      clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)',
-    }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-        <div style={{ padding: '5px 7px', background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
-          <Users size={13} style={{ color: 'var(--co-cyan)', display: 'block' }} />
-        </div>
-        <div>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.14em', color: 'var(--co-cyan)', textTransform: 'uppercase' }}>
-            Kto gra w środę?
-          </span>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', margin: '2px 0 0', letterSpacing: '0.06em' }}>
-            {formatDate(weekDate)}
-          </p>
-        </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>✅ {yes}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-yellow)' }}>❌ {no}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>? {playerNames.length - yes - no}</span>
-        </div>
-      </div>
-
-      {/* Player grid — każdy gracz to wiersz z imieniem i dwoma przyciskami */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {playerNames.map(name => {
-          const ans        = answers[name];
-          const isSaving   = pending === name;
-          return (
-            <div key={name} style={{
-              display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 6, alignItems: 'center',
-              padding: '8px 10px',
-              background: ans === 'yes' ? 'rgba(0,255,136,0.04)' : ans === 'no' ? 'rgba(255,32,144,0.04)' : 'var(--co-panel)',
-              border: `1px solid ${ans === 'yes' ? 'rgba(0,255,136,0.25)' : ans === 'no' ? 'rgba(255,32,144,0.2)' : 'var(--co-border)'}`,
-              clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-              transition: 'all 0.2s',
-              opacity: isSaving ? 0.7 : 1,
-            }}>
-              <span style={{
-                fontFamily: 'var(--font-display)', fontSize: '0.82rem',
-                letterSpacing: '0.08em',
-                color: ans === 'yes' ? 'var(--co-green)' : ans === 'no' ? 'var(--co-yellow)' : 'var(--co-text)',
-              }}>
-                {name}
-              </span>
-              <button
-                onClick={() => handleVote(name, 'yes')}
-                disabled={isSaving}
-                style={{
-                  padding: '5px 12px', cursor: isSaving ? 'default' : 'pointer',
-                  fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.06em',
-                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                  transition: 'all 0.15s',
-                  ...(ans === 'yes' ? {
-                    background: 'rgba(0,255,136,0.18)', border: '1px solid rgba(0,255,136,0.6)',
-                    color: 'var(--co-green)', boxShadow: '0 0 8px rgba(0,255,136,0.2)',
-                  } : {
-                    background: 'transparent', border: '1px solid var(--co-border)',
-                    color: 'var(--co-dim)',
-                  }),
-                }}
-              >
-                {isSaving ? '···' : '✅ Gram'}
-              </button>
-              <button
-                onClick={() => handleVote(name, 'no')}
-                disabled={isSaving}
-                style={{
-                  padding: '5px 12px', cursor: isSaving ? 'default' : 'pointer',
-                  fontFamily: 'var(--font-display)', fontSize: '0.7rem', letterSpacing: '0.06em',
-                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                  transition: 'all 0.15s',
-                  ...(ans === 'no' ? {
-                    background: 'rgba(255,32,144,0.12)', border: '1px solid rgba(255,32,144,0.5)',
-                    color: 'var(--co-yellow)', boxShadow: '0 0 8px rgba(255,32,144,0.15)',
-                  } : {
-                    background: 'transparent', border: '1px solid var(--co-border)',
-                    color: 'var(--co-dim)',
-                  }),
-                }}
-              >
-                {isSaving ? '···' : '❌ Nie'}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      {rsvpError && (
-        <p style={{
-          marginTop: 12,
-          fontFamily: 'var(--font-display)',
-          fontSize: '0.75rem',
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: 'var(--co-yellow)',
-          textAlign: 'center',
-        }}>
-          ⚠ {rsvpError}
-        </p>
-      )}
-    </div>
-  );
-}
-
-
 
 // ── Main ─────────────────────────────────────────────────
 export default function AdminTab({ playerNames, defaultMultiPlayers, history, setActiveTab, playSound }) {
@@ -605,7 +464,6 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
       <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} tokens={tokens} />
 
       <div style={{ width: '100%', maxWidth: 680, margin: '0 auto', animation: 'slide-in-up 0.3s ease-out', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {playerNames?.length > 0 && <RsvpPanel playerNames={playerNames} />}
         <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)', padding: '20px 20px' }}>
 
           {/* Header */}

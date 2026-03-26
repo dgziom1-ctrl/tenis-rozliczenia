@@ -8,7 +8,7 @@ import AdminTab from './components/admin/AdminTab';
 import HistoryTab from './components/history/HistoryTab';
 import PlayersTab from './components/players/PlayersTab';
 import { subscribeToData } from './firebase/index';
-import { saveRsvp, nextWednesdayISO } from './firebase/rsvp';
+
 import { getMessaging, onMessage } from 'firebase/messaging';
 import { SOUND_TYPES, TABS } from './constants';
 import PWAInstallBanner from './components/common/PWAInstallBanner';
@@ -289,38 +289,6 @@ function AppContent() {
     window.addEventListener('online',  handleOnline);
 
     // ── Deep-link z powiadomienia push ──────────────────────────────────────
-    // Przypadek 1: apka była zamknięta — URL params czytane synchronicznie
-    // w useState(), więc tutaj tylko czyścimy query string.
-    try {
-      const p = new URLSearchParams(window.location.search);
-
-      // Obsługa kliknięcia przycisku Tak/Nie w powiadomieniu RSVP
-      const rsvpAnswer = p.get('rsvp');
-      const rsvpPlayer = p.get('player');
-      const rsvpWeek   = p.get('week');
-      if (rsvpAnswer && rsvpPlayer && rsvpWeek) {
-        (async () => {
-          const result = await saveRsvp(decodeURIComponent(rsvpPlayer), rsvpWeek, rsvpAnswer);
-          if (result?.success) {
-            showSuccess('RSVP zapisane');
-            setActiveTab(TABS.ADMIN);
-          } else {
-            showError(result?.error || 'Nie udało się zapisać RSVP');
-          }
-
-          // Wyczyść parametry RSVP, ale zostaw tab ustawiony na admina.
-          try {
-            const url = new URL(window.location.href);
-            url.searchParams.set('tab', TABS.ADMIN);
-            url.searchParams.delete('rsvp');
-            url.searchParams.delete('player');
-            url.searchParams.delete('week');
-            window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`);
-          } catch {}
-        })();
-      }
-    } catch {}
-
     // Przypadek 2: apka byla otwarta — SW wysyla postMessage przez client.postMessage()
     // WAZNE: wiadomosci z Service Workera trafiaja na navigator.serviceWorker,
     // NIE na window. window.addEventListener('message') ich nie odbiera.
@@ -329,32 +297,6 @@ function AppContent() {
       const url    = new URL(event.data.url);
       const tab    = url.searchParams.get('tab');
       const player = url.searchParams.get('player');
-      const rsvp   = url.searchParams.get('rsvp');
-      const week   = url.searchParams.get('week');
-
-      // Obsługa RSVP — zapisz odpowiedź i przejdź do zakładki Dodaj
-      if (rsvp && player && week) {
-        (async () => {
-          const result = await saveRsvp(decodeURIComponent(player), week, rsvp);
-          if (result?.success) {
-            showSuccess('RSVP zapisane');
-            setActiveTab(TABS.ADMIN);
-          } else {
-            showError(result?.error || 'Nie udało się zapisać RSVP');
-          }
-
-          // Zostaw tylko "tab=admin"
-          try {
-            const url2 = new URL(window.location.href);
-            url2.searchParams.set('tab', TABS.ADMIN);
-            url2.searchParams.delete('rsvp');
-            url2.searchParams.delete('player');
-            url2.searchParams.delete('week');
-            window.history.replaceState({}, '', `${url2.pathname}?${url2.searchParams.toString()}`);
-          } catch {}
-        })();
-        return;
-      }
 
       if (tab === 'attendance') {
         setActiveTab(TABS.ATTENDANCE);
@@ -427,7 +369,6 @@ function AppContent() {
       url.searchParams.set('tab', id);
       url.searchParams.delete('player');
       url.searchParams.delete('week');
-      url.searchParams.delete('rsvp');
       window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`);
     } catch {}
   }, [playSound]);
@@ -445,7 +386,7 @@ function AppContent() {
   }
 
   return (
-    <ThemeContext.Provider value="cyber">
+    <ThemeContext.Provider value={theme}>
 
       <div
         className="min-h-screen p-4 md:p-8 relative z-10"
