@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 
 export const ThemeContext = createContext('dark');
 
-const CYBER_TOKENS = {
+export const CYBER_TOKENS = {
   confirmBg:        'var(--co-cyan)',
   confirmBorder:    'var(--co-cyan)',
   confirmText:      '#030508',
@@ -32,7 +32,7 @@ const CYBER_TOKENS = {
   fontSize:         '0.9rem',
 };
 
-const LIGHT_TOKENS = {
+export const LIGHT_TOKENS = {
   confirmBg:        '#0891b2',
   confirmBorder:    '#0891b2',
   confirmText:      '#ffffff',

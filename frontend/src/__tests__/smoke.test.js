@@ -227,11 +227,11 @@ describe('context/ThemeContext.jsx — eksporty', () => {
   });
 
   it('useThemeTokens zwraca obiekt z wymaganymi tokenami', async () => {
-    const { useThemeTokens } = await import('../context/ThemeContext');
-    const tokens = useThemeTokens();
+    const { CYBER_TOKENS, LIGHT_TOKENS } = await import('../context/ThemeContext');
     const required = ['confirmBg', 'bodyText', 'mutedText', 'accentText', 'modalBg'];
     for (const key of required) {
-      expect(tokens[key], `brakuje tokenu: ${key}`).toBeDefined();
+      expect(CYBER_TOKENS[key], `CYBER brakuje tokenu: ${key}`).toBeDefined();
+      expect(LIGHT_TOKENS[key], `LIGHT brakuje tokenu: ${key}`).toBeDefined();
     }
   });
 });
