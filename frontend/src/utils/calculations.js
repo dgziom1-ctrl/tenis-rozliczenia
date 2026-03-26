@@ -375,6 +375,50 @@ export function getPlayerAchievements(player, history) {
   return earned;
 }
 
+// ─── Season helpers ───────────────────────────────────────────────────────────
+
+/** Extract unique years from history, sorted newest→oldest. */
+export function getAvailableSeasons(history) {
+  if (!history || history.length === 0) return [];
+  const years = new Set();
+  history.forEach(s => {
+    if (s.datePlayed) years.add(parseInt(s.datePlayed.slice(0, 4), 10));
+  });
+  return [...years].sort((a, b) => b - a);
+}
+
+/** Filter history to a single calendar year. */
+export function filterHistoryByYear(history, year) {
+  if (!year) return history;
+  const prefix = String(year);
+  return history.filter(s => s.datePlayed?.startsWith(prefix));
+}
+
+/**
+ * Compute seasonal player stats — recalculates attendanceCount and
+ * attendancePercentage based only on sessions within the given history slice.
+ */
+export function calculateSeasonPlayerStats(players, seasonHistory) {
+  if (!players || !seasonHistory) return [];
+  const totalWeeks = seasonHistory.length;
+
+  return players.map(player => {
+    const { name } = player;
+    const attendanceCount = seasonHistory.filter(s => s.presentPlayers.includes(name)).length;
+    const attendancePercentage = totalWeeks > 0 ? Math.round((attendanceCount / totalWeeks) * 100) : 0;
+
+    let currentStreak = 0;
+    for (const session of seasonHistory) {
+      if (session.presentPlayers.includes(name)) currentStreak++;
+      else break;
+    }
+
+    const multisportCount = seasonHistory.filter(s => s.multisportPlayers.includes(name)).length;
+
+    return { ...player, attendanceCount, attendancePercentage, currentStreak, multisportCount };
+  }).filter(p => p.attendanceCount > 0); // hide players with 0 sessions in season
+}
+
 // ─── Ranking history — computed from session data ─────────────────────────────
 // Returns array of { month, rankings: [{name, pct, place}] } oldest→newest
 export function computeRankingHistory(players, history) {
