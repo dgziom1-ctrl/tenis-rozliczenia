@@ -143,20 +143,32 @@ exports.onSessionAdded = onValueUpdated(
     const cost      = newSession.cost || 0;
     const sport     = newSession.sport || 'pingpong';
 
-    let perPerson;
+    const SQUASH_MULTISPORT_DISCOUNT = 15;
+    let notifBody;
     if (sport === 'squash') {
-      // Squash: everyone splits the rental cost
-      perPerson = present.length > 0 ? Math.round(cost / present.length) : 0;
+      // Mirror the hypothetical-cost logic from transforms.js:
+      // pretend no cards were used → everyone pays equal share → card holders get -15 zł discount.
+      const multiPresent  = multi.filter(p => present.includes(p));
+      const multiCount    = multiPresent.length;
+      const hypothetical  = cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
+      const base          = present.length > 0 ? hypothetical / present.length : 0;
+      const perPerson     = Math.round(base);
+      const perPersonMulti = Math.round(Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT));
+
+      notifBody = multiCount > 0
+        ? `${date} · ${present.length} graczy · ${perPerson} zł/os. (${perPersonMulti} zł z kartą)`
+        : `${date} · ${present.length} graczy · ${perPerson} zł/os.`;
+
+      console.log(`Nowa sesja (Squash): ${date}, ${present.length} graczy, ${perPerson} zł/os. (z kartą: ${perPersonMulti} zł)`);
     } else {
       // Ping-pong: only non-multisport players pay
-      const paying  = present.filter(p => !multi.includes(p));
-      perPerson = paying.length > 0 ? Math.round(cost / paying.length) : 0;
+      const paying   = present.filter(p => !multi.includes(p));
+      const perPerson = paying.length > 0 ? Math.round(cost / paying.length) : 0;
+      notifBody = `${date} · ${present.length} graczy · ${perPerson} zł/os.`;
+      console.log(`Nowa sesja (Ping-pong): ${date}, ${present.length} graczy, ${perPerson} zł/os.`);
     }
 
     const sportEmoji = sport === 'squash' ? '🎾' : '🏓';
-    const sportLabel = sport === 'squash' ? 'Squash' : 'Ping-pong';
-
-    console.log(`Nowa sesja (${sportLabel}): ${date}, ${present.length} graczy, ${perPerson} zł/os.`);
 
     const tokens = await getAllTokens();
     console.log(`Tokenów FCM w bazie: ${tokens.length}`);
@@ -165,7 +177,7 @@ exports.onSessionAdded = onValueUpdated(
     await sendToAll(
       tokens,
       `${sportEmoji} Nowa sesja dodana!`,
-      `${date} · ${present.length} graczy · ${perPerson} zł/os.`,
+      notifBody,
       { type: 'new_session', date, url: '/?tab=dashboard', tag: `session-${date}` }
     );
 

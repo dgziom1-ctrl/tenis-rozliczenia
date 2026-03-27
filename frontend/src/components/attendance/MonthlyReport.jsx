@@ -27,8 +27,6 @@ export default function MonthlyReport({ monthlyStats, players }) {
               }));
 
               const nonZero = presenceEntries.filter(e => e.count > 0).sort((a, b) => b.count - a.count);
-              const top = nonZero.slice(0, 4);
-              const restCount = Math.max(0, nonZero.length - top.length);
 
               return (
                 <div
@@ -52,8 +50,8 @@ export default function MonthlyReport({ monthlyStats, players }) {
                   </div>
 
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {top.length > 0 ? (
-                      top.map((e) => {
+                    {nonZero.length > 0 ? (
+                      nonZero.map((e) => {
                         const c = getPlayerColor(e.name);
                         const isMax = e.count === rowData.total;
                         return (
@@ -83,11 +81,6 @@ export default function MonthlyReport({ monthlyStats, players }) {
                     ) : (
                       <span style={{ ...FONT.mono('0.7rem'), color: 'var(--co-dim)' }}>
                         Brak obecności
-                      </span>
-                    )}
-                    {restCount > 0 && (
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--co-dim)', padding: '6px 10px' }}>
-                        +{restCount} więcej
                       </span>
                     )}
                   </div>

@@ -17,22 +17,10 @@ export default function Navigation({ activeTab, setActiveTab }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              aria-pressed={activeTab === tab.id}
               aria-current={activeTab === tab.id ? 'page' : undefined}
               className={`desktop-tab ${activeTab === tab.id ? 'active' : ''}`}
             >
-              <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-                <tab.icon size={13} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
-                {tab.id === 'admin' && activeTab !== tab.id && (
-                  <span style={{
-                    position: 'absolute', top: -3, right: -4,
-                    width: 5, height: 5,
-                    background: 'var(--co-pink)',
-                    boxShadow: '0 0 5px var(--co-pink)',
-                    borderRadius: '50%',
-                  }} />
-                )}
-              </span>
+              <tab.icon size={13} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
               {tab.label.toUpperCase()}
             </button>
           ))}
@@ -48,17 +36,7 @@ export default function Navigation({ activeTab, setActiveTab }) {
             aria-current={activeTab === tab.id ? 'page' : undefined}
             className={`mobile-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
           >
-            <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-              <tab.icon size={20} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
-              {tab.id === 'admin' && activeTab !== tab.id && (
-                <span style={{
-                  position: 'absolute', top: -3, right: -4,
-                  width: 5, height: 5, borderRadius: '50%',
-                  background: 'var(--co-pink)',
-                  boxShadow: '0 0 5px var(--co-pink)',
-                }} />
-              )}
-            </span>
+            <tab.icon size={20} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
             <span className="mobile-nav-label">{tab.shortLabel}</span>
           </button>
         ))}

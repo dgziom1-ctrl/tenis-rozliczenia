@@ -280,15 +280,6 @@ function PlayerCard({
               </div>
             ) : (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ marginBottom: 4 }}>
-                  <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
-                    color: isPending ? 'rgba(255,32,144,0.5)' : 'rgba(0,255,136,0.5)',
-                    letterSpacing: '0.2em', textTransform: 'uppercase',
-                  }}>
-                    {isPending ? 'do rozliczenia' : 'rozliczony'}
-                  </span>
-                </div>
                 <p style={{
                   fontFamily: 'var(--font-display)', fontSize: '2.4rem',
                   margin: 0, lineHeight: 1.1,
