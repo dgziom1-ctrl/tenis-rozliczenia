@@ -99,8 +99,8 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'slide-in-up 0.3s ease-out' }}>
       <SeasonSelector seasons={seasons} selected={selectedSeason} onChange={setSelectedSeason} />
 
-      {/* Wrapped button for past seasons */}
-      {wrappableSeasons.length > 0 && selectedSeason && selectedSeason < currentYear && (
+      {/* Wrapped button — show when a past season is selected */}
+      {selectedSeason && selectedSeason < currentYear && (
         <button
           onClick={() => setWrappedYear(selectedSeason)}
           style={{

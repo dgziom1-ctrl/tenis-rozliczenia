@@ -35,8 +35,10 @@ function buildHistory(weeks) {
     let costPerPersonMulti;
 
     if (sport === SPORT.SQUASH) {
-      // Squash: everyone splits the rental cost; multisport holders get a personal -15 zł discount.
-      const base      = w.present?.length > 0 ? w.cost / w.present.length : 0;
+      // Squash: hypothetical full cost (no cards) split equally; cardholders deduct 15 zł.
+      const multiCount   = (w.multiPlayers || []).filter(p => (w.present || []).includes(p)).length;
+      const hypothetical = w.cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
+      const base         = w.present?.length > 0 ? hypothetical / w.present.length : 0;
       costPerPerson      = roundToTwoDecimals(base);
       costPerPersonMulti = roundToTwoDecimals(Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT));
     } else {

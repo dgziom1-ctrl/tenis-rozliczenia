@@ -28,7 +28,10 @@ export function getPlayerSessionCost(session, playerName) {
   if (!present.includes(playerName)) return 0;
 
   if (sport === SPORT.SQUASH) {
-    const base = present.length > 0 ? cost / present.length : 0;
+    // Hypothetical full cost (as if no cards were used) ensures the sum always equals actual cost.
+    const multiCount = multi.filter(p => present.includes(p)).length;
+    const hypothetical = cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
+    const base = present.length > 0 ? hypothetical / present.length : 0;
     return round2(Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base));
   }
 
@@ -49,7 +52,9 @@ export function getSessionBaseCost(session) {
   const sport   = session.sport || SPORT.PINGPONG;
 
   if (sport === SPORT.SQUASH) {
-    return present.length > 0 ? round2(cost / present.length) : 0;
+    const multiCount = multi.filter(p => present.includes(p)).length;
+    const hypothetical = cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
+    return present.length > 0 ? round2(hypothetical / present.length) : 0;
   }
 
   const paying = present.filter(p => !multi.includes(p));

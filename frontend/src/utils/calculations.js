@@ -33,9 +33,12 @@ function unpaidSessionsFromWeeks(playerName, weeks, paidUntilWeekId) {
     if (!isPresent) continue;
 
     if (week.sport === SPORT.SQUASH) {
-      // Squash: everyone splits the rental; Multisport holders deduct 15 zł from their share.
-      const base    = week.present.length > 0 ? week.cost / week.present.length : 0;
-      const isMulti = (week.multiPlayers || []).includes(playerName);
+      // Squash: hypothetical full cost (no cards) split equally; cardholders deduct 15 zł.
+      const multi     = week.multiPlayers || [];
+      const multiCount = multi.filter(p => (week.present || []).includes(p)).length;
+      const hypothetical = week.cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
+      const base    = week.present.length > 0 ? hypothetical / week.present.length : 0;
+      const isMulti = multi.includes(playerName);
       result.push({ id: week.id, costPerPerson: roundToTwoDecimals(Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base)) });
     } else {
       // Ping-pong: Multisport players play for free — they don't enter the debt ledger.

@@ -11,9 +11,10 @@ import { useThemeTokens } from '../../context/ThemeContext';
 
 function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport }) {
   if (sport === SPORT.SQUASH) {
-    const base      = presentPlayers.length > 0 ? totalCost / presentPlayers.length : 0;
-    const discounted = Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT);
     const multi      = multisportPlayers.filter(p => presentPlayers.includes(p));
+    const hypothetical = totalCost + multi.length * SQUASH_MULTISPORT_DISCOUNT;
+    const base       = presentPlayers.length > 0 ? hypothetical / presentPlayers.length : 0;
+    const discounted = Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT);
     let msg = `🎾 Graliśmy w squasha! (${formatDate(date)})\n`;
     msg += `💰 Wynajem: ${formatAmountShort(totalCost)} zł\n`;
     msg += `👥 Obecni (${presentPlayers.length}): ${presentPlayers.join(', ')}\n`;
@@ -191,7 +192,9 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport }
   const isSquash = sport === SPORT.SQUASH;
 
   if (isSquash) {
-    const base       = cost / presentPlayers.length;
+    const multiCount = multisportPlayers.filter(p => presentPlayers.includes(p)).length;
+    const hypothetical = cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
+    const base       = hypothetical / presentPlayers.length;
     const discounted = Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT);
     const hasMulti   = multisportPlayers.length > 0;
     return (
@@ -429,7 +432,10 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     const cost = parsedTotalCost;
     // Per-person value shown in the summary modal (base amount before per-player adjustments)
     const perPerson = isSquash
-      ? (presentPlayers.length > 0 ? cost / presentPlayers.length : 0)
+      ? (() => {
+          const multiCount = multisportPlayers.filter(p => presentPlayers.includes(p)).length;
+          return presentPlayers.length > 0 ? (cost + multiCount * SQUASH_MULTISPORT_DISCOUNT) / presentPlayers.length : 0;
+        })()
       : (() => {
           const paying = presentPlayers.filter(p => !multisportPlayers.includes(p));
           return paying.length > 0 ? cost / paying.length : 0;
