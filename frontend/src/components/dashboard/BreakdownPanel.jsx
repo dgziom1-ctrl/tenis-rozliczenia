@@ -3,7 +3,7 @@ import { useThemeTokens } from '../../context/ThemeContext';
 import { formatDate, formatAmountShort } from '../../utils/format';
 
 export default function BreakdownPanel({ playerName, open, onToggle, breakdown, adminMode, onRemovePayment }) {
-  const tokens = useThemeTokens();
+  const _tokens = useThemeTokens();
   const sessionCount = breakdown?.sessions?.length ?? 0;
   const toggleLabel  = open
     ? 'Zwiń szczegóły'

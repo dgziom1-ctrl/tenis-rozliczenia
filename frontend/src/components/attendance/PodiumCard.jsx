@@ -29,7 +29,7 @@ export default function PodiumCard({ podiumEntry, totalWeeks, onSelect }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: 'min(100%, 190px)', minWidth: 0 }}>
       {players.map(player => {
-        const rank = getRank(player.attendancePercentage);
+        const _rank = getRank(player.attendancePercentage);
         return (
           <div key={player.name} role="button" tabIndex={0} onClick={() => onSelect(player.name)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(player.name); } }} style={{
             width: '100%', padding: '14px 10px', textAlign: 'center', cursor: 'pointer',

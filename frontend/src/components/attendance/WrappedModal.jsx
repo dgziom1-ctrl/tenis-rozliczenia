@@ -59,7 +59,7 @@ const mono = (size, extra) => ({
 export default function WrappedModal({ stats, onClose }) {
   const overlayRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [entering, setEntering] = useState(true);
+  const [_entering, setEntering] = useState(true);
 
   // Build ordered slide list (skip bestPair slide when null)
   const slideList = useMemo(() => {

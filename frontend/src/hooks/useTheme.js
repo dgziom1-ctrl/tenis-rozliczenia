@@ -9,7 +9,7 @@ export function useTheme() {
 
   useEffect(() => {
     document.body.classList.toggle('theme-light', theme === 'light');
-    try { localStorage.setItem(STORAGE_KEY, theme); } catch {}
+    try { localStorage.setItem(STORAGE_KEY, theme); } catch { /* localStorage unavailable */ }
   }, [theme]);
 
   const toggle = useCallback(() => {

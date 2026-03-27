@@ -7,7 +7,7 @@ export class ErrorBoundary extends Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(_error) {
     return { hasError: true };
   }
 
@@ -38,7 +38,7 @@ export class ErrorBoundary extends Component {
               Aplikacja napotkała nieoczekiwany błąd. Spróbuj odświeżyć stronę.
             </p>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.MODE === 'development' && this.state.error && (
               <details className="mb-6 p-4 bg-black/40 rounded-lg border border-rose-900">
                 <summary className="text-rose-400 font-mono text-sm cursor-pointer mb-2">
                   Szczegóły błędu (dev mode)

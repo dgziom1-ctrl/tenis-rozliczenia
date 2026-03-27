@@ -23,10 +23,12 @@ export default function ConfettiOverlay({ pieces }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const CONFETTI_POOLS = {
   cyber: ['🏓','⚡','🎱','🌀','🎉','✨','🏆','💫','🎮','🌟'],
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function generateConfetti(count, pool) {
   return Array.from({ length: count }, (_, i) => ({
     id:     i,

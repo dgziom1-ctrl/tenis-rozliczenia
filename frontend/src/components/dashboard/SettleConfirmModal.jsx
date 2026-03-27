@@ -8,7 +8,6 @@ export default function SettleConfirmModal({
   debt,
   onConfirm,
   onCancel,
-  tokens,
   isProcessing = false,
 }) {
   const overlayRef = useRef(null);

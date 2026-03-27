@@ -1,9 +1,8 @@
 import { useRef, useEffect } from 'react';
 import { CheckCircle2, X, Zap } from 'lucide-react';
-import { formatAmountShort } from '../../utils/format';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 
-export default function PaymentModal({ type, debt, hasCredit, customAmt, onAmtChange, onSave, onCancel, isSaving, tokens, errorMsg = null }) {
+export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, onSave, onCancel, isSaving, errorMsg = null }) {
   const panelRef = useRef(null);
   useEffect(() => { panelRef.current?.focus(); }, []);
 

@@ -59,7 +59,7 @@ function LeaderboardRow({ player, totalWeeks, place, onClick }) {
 }
 
 // ─── Full leaderboard ─────────────────────────────────────────────
-export default function Leaderboard({ ranked, podiumPlayers, totalWeeks, stats, onSelect }) {
+export default function Leaderboard({ ranked, podiumPlayers, totalWeeks, onSelect }) {
   const theRest = ranked.filter(p => p.place > 3);
   return (
     <div style={{

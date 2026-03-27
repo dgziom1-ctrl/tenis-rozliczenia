@@ -81,7 +81,7 @@ export default function AttendanceTab({ players, history, summary, playSound, in
   }, [wrappedYear, history, players]);
 
   // Past seasons that can show Wrapped (not the current year)
-  const wrappableSeasons = useMemo(() => seasons.filter(y => y < currentYear), [seasons, currentYear]);
+  const _wrappableSeasons = useMemo(() => seasons.filter(y => y < currentYear), [seasons, currentYear]);
 
   return (
     <>

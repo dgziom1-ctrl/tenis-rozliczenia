@@ -17,7 +17,7 @@ import { RankBadge } from './RankBadge';
 
 // ── Main Component ───────────────────────────────────────────────
 function PlayerCard({
-  player, totalWeeks, history, onSettle, justSettled,
+  player, totalWeeks, history, justSettled,
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment, onPin, onUnpin,
   playerIndex = 0,

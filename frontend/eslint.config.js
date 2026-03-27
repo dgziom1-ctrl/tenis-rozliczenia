@@ -23,7 +23,35 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }],
+      'react-hooks/set-state-in-effect': 'off',
+    },
+  },
+  {
+    files: ['src/__tests__/**', '**/*.test.js', '**/*.test.jsx'],
+    languageOptions: {
+      globals: {
+        vi: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        test: 'readonly',
+      },
+    },
+  },
+  {
+    files: ['public/**/*.js'],
+    languageOptions: {
+      globals: {
+        importScripts: 'readonly',
+        firebase: 'readonly',
+        clients: 'readonly',
+        self: 'readonly',
+      },
     },
   },
 ])

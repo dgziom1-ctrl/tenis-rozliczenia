@@ -8,7 +8,7 @@ export default function PWAInstallBanner() {
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches) return;
-    try { if (localStorage.getItem('pwa-dismissed')) return; } catch {}
+    try { if (localStorage.getItem('pwa-dismissed')) return; } catch { /* localStorage unavailable */ }
 
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(ios);
@@ -29,7 +29,7 @@ export default function PWAInstallBanner() {
 
   const dismiss = () => {
     setShow(false);
-    try { localStorage.setItem('pwa-dismissed', '1'); } catch {}
+    try { localStorage.setItem('pwa-dismissed', '1'); } catch { /* localStorage unavailable */ }
   };
 
   if (!show) return null;

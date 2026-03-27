@@ -77,12 +77,12 @@ function Arena({ chaosMode, onHit }) {
       ];
     };
 
-    const quad = (pts, fill) => {
+    const _quad = (pts, fill) => {
       g.beginPath();
       pts.forEach(([sx,sy], i) => i ? g.lineTo(sx, sy) : g.moveTo(sx, sy));
       g.closePath(); g.fillStyle = fill; g.fill();
     };
-    const seg = ([ax,ay],[bx,by], col, w) => {
+    const _seg = ([ax,ay],[bx,by], col, w) => {
       g.beginPath(); g.moveTo(ax,ay); g.lineTo(bx,by);
       g.strokeStyle = col; g.lineWidth = w; g.stroke();
     };
@@ -437,6 +437,15 @@ function Arena({ chaosMode, onHit }) {
 /* ═══════════════════════════════════════════════════
    HEADER
 ═══════════════════════════════════════════════════ */
+const CopyIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+    style={{ color:'var(--co-dim)' }}>
+    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+  </svg>
+);
+
 function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleTheme }) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
@@ -485,15 +494,6 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
     clearTimeout(chaosTimer.current);
     chaosTimer.current = setTimeout(() => { setChaosMode(false); setConfetti([]); }, 4000);
   };
-
-  const CopyIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-      fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-      style={{ color:'var(--co-dim)' }}>
-      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-    </svg>
-  );
 
   return (
     <>

@@ -111,7 +111,7 @@ export function usePushNotifications() {
 
       // Zapisz hash tokenu w localStorage — pozwala sprawdzić czy TO urządzenie
       // ma token w bazie bez konieczności wywołania getToken() (które triggeruje popup).
-      try { localStorage.setItem('push-token-key', tokenKey); } catch {}
+      try { localStorage.setItem('push-token-key', tokenKey); } catch { /* localStorage unavailable */ }
 
       return { success: true };
     } catch (err) {

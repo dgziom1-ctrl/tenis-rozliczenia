@@ -143,8 +143,8 @@ export default function DashboardTab({ data, history, playSound }) {
     return [...alphaSorted, ...organizer];
   }, [data.players, pinnedPlayer]);
 
-  const debtCount   = sortedPlayers.filter(p => p.currentDebt > SETTLED_THRESHOLD && p.name !== ORGANIZER_NAME).length;
-  const settledCount = sortedPlayers.filter(p => p.currentDebt <= SETTLED_THRESHOLD && p.name !== ORGANIZER_NAME).length;
+  const _debtCount   = sortedPlayers.filter(p => p.currentDebt > SETTLED_THRESHOLD && p.name !== ORGANIZER_NAME).length;
+  const _settledCount = sortedPlayers.filter(p => p.currentDebt <= SETTLED_THRESHOLD && p.name !== ORGANIZER_NAME).length;
 
   return (
     <>

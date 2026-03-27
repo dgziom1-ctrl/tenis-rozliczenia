@@ -196,7 +196,7 @@ describe('firebase/transforms.js — eksporty', () => {
   it('normalizeRawData zwraca kompletny obiekt gdy wejście jest null', async () => {
     const { normalizeRawData } = await import('../firebase/transforms');
     // snapshot Firebase może zwrócić null gdy baza jest pusta
-    const result = normalizeRawData(null ?? {});
+    const result = normalizeRawData({});
     expect(result).toBeDefined();
   });
 });

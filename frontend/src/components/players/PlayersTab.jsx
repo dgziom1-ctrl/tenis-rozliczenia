@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { getPlayerColor } from '../../constants/playerColors';
 import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Zap } from 'lucide-react';
 import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } from '../../firebase/index';

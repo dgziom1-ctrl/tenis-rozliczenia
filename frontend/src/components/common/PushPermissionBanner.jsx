@@ -35,7 +35,7 @@ export default function PushPermissionBanner({ playerNames }) {
       if (localStorage.getItem(DISMISS_KEY)) setDismissed(true);
       const saved = localStorage.getItem(PLAYER_KEY);
       if (saved) setSelectedPlayer(saved);
-    } catch {}
+    } catch { /* localStorage unavailable */ }
   }, []);
 
   // Gdy permission jest 'granted' sprawdź czy token jest faktycznie w bazie.
@@ -65,7 +65,7 @@ export default function PushPermissionBanner({ playerNames }) {
     setDismissed(true);
     setTokenMissing(false);
     setStatus(null);
-    try { localStorage.setItem(DISMISS_KEY, '1'); } catch {}
+    try { localStorage.setItem(DISMISS_KEY, '1'); } catch { /* localStorage unavailable */ }
   };
 
   const handleEnable = async () => {
@@ -80,7 +80,7 @@ export default function PushPermissionBanner({ playerNames }) {
     if (result.success) {
       setStatus('success');
       setTokenMissing(false);
-      try { localStorage.setItem(PLAYER_KEY, selectedPlayer); } catch {}
+      try { localStorage.setItem(PLAYER_KEY, selectedPlayer); } catch { /* localStorage unavailable */ }
       setTimeout(dismiss, 2500);
     } else {
       setErrorMsg(result.error || 'Nieznany błąd');

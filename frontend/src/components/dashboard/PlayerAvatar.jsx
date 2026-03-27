@@ -1,7 +1,7 @@
 import { getPlayerColor } from '../../constants/playerColors';
 
 // ── Avatar ───────────────────────────────────────────────────────
-export function PlayerAvatar({ name, index, isPending, isOrganizer }) {
+export function PlayerAvatar({ name, index, isPending }) {
   const c = getPlayerColor(name, index);
   const initials = name.slice(0, 2).toUpperCase();
   // Avatar always uses player's own color — never changes based on debt status

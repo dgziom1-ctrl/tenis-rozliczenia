@@ -24,7 +24,7 @@ function EditDateInput({ value, onChange }) {
       </div>
       <input
         type="date" value={value} onChange={e => onChange(e.target.value)}
-        onClick={e => { try { e.currentTarget.showPicker?.(); } catch {} }}
+        onClick={e => { try { e.currentTarget.showPicker?.(); } catch { /* showPicker not supported */ } }}
         style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
           opacity: 0, cursor: 'pointer', zIndex: 2, padding: 0, border: 'none',
@@ -122,7 +122,7 @@ function LogEntry({ row, onEdit, onDelete }) {
 
 
 // ══ ATTENDANCE TREND CHART (pure SVG, no deps) ════════════════════════════════
-function AttendanceTrendChart({ history, playerNames }) {
+function AttendanceTrendChart({ history }) {
   const W = 560, H = 140, PAD = { top: 18, right: 16, bottom: 32, left: 36 };
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
@@ -280,7 +280,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const [editForm,     setEditForm]     = useState({});
   const [deletingId,   setDeletingId]   = useState(null);
   const [isSaving,     setIsSaving]     = useState(false);
-  const [isDeleting,   setIsDeleting]   = useState(null);
+  const [_isDeleting,   _setIsDeleting]   = useState(null);
   const [pwModal,      setPwModal]      = useState(null);
   const [filterPlayer, setFilterPlayer] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -329,7 +329,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
       const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       url  = URL.createObjectURL(blob);
-      const safeName = filterPlayer.replace(/[\/\\:*?"<>|]/g, '_');
+      const safeName = filterPlayer.replace(/[/\\:*?"<>|]/g, '_');
       const a    = Object.assign(document.createElement('a'), {
         href: url,
         download: filterPlayer ? `sesje_${safeName}.csv` : 'sesje.csv',

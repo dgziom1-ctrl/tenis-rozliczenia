@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ToastProvider, useToast } from './components/common/Toast';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
@@ -226,7 +226,7 @@ function AppContent() {
   const [slowLoading, setSlowLoading]  = useState(false);
   const [subscriptionError, setSubscriptionError] = useState(null);
   const [retryNonce, setRetryNonce] = useState(0);
-  const { showSuccess, showError } = useToast();
+  useToast();
   // Gracz do auto-otwarcia w Rankingu (z kliknięcia powiadomienia push)
   const [notifPlayer,  setNotifPlayer]  = useState(() => {
     try {

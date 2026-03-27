@@ -9,7 +9,7 @@ export default {
 };
 
 export const Default = {
-  render: () => {
+  render: function Render() {
     const [activeTab, setActiveTab] = useState('dashboard');
     return (
       <div style={{ minHeight: '100px', position: 'relative' }}>

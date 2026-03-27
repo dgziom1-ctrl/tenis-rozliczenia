@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Calculator, CalendarDays, CalendarPlus, CheckCircle2, Copy, Users, Zap } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '../../constants';
@@ -54,7 +54,7 @@ function FieldLabel({ children }) {
 }
 
 // ── Session summary modal ─────────────────────────────────
-function SessionSummaryModal({ summary, onClose, tokens }) {
+function SessionSummaryModal({ summary, onClose }) {
   const [copied, setCopied] = useState(false);
   const { showError } = useToast();
   const overlayRef = useRef(null);
@@ -342,7 +342,7 @@ function SportSelector({ value, onChange }) {
 function CyberDateInput({ value, onChange }) {
   const handleClick = (e) => {
     // showPicker() nie istnieje na iOS Safari — owijamy w try/catch
-    try { e.currentTarget.showPicker?.(); } catch {}
+    try { e.currentTarget.showPicker?.(); } catch { /* showPicker not supported */ }
   };
 
   return (

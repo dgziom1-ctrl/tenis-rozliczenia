@@ -15,15 +15,14 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
 
   const c = player ? getPlayerColor(player.name) : null;
 
-  const { sessions, missedSessions, multisportSessions } = useMemo(() => {
-    if (!player) return { sessions: [], missedSessions: [], multisportSessions: [] };
+  const { sessions, missedSessions } = useMemo(() => {
+    if (!player) return { sessions: [], missedSessions: [] };
     const sessions = history.filter(s => s.presentPlayers.includes(player.name));
     const missedSessions = history.filter(s => !s.presentPlayers.includes(player.name));
-    const multisportSessions = sessions.filter(s => s.multisportPlayers.includes(player.name));
-    return { sessions, missedSessions, multisportSessions };
+    return { sessions, missedSessions };
   }, [history, player]);
 
-  const avgCost = useMemo(() => {
+  const _avgCost = useMemo(() => {
     if (!player) return '0.00';
     return sessions.length > 0
       ? (sessions.reduce((sum, s) => sum + getPlayerSessionCost(s, player.name), 0) / sessions.length).toFixed(2)
@@ -31,7 +30,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
   }, [sessions, player]);
 
   const currentStreak = player?.currentStreak || 0;
-  const longestStreak = useMemo(() => {
+  const _longestStreak = useMemo(() => {
     if (!player) return 0;
     let max = 0, cur = 0;
     for (const s of [...history].reverse()) {
