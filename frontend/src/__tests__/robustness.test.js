@@ -318,11 +318,11 @@ describe('deleteWeek — paidUntilWeek cleanup', () => {
     expect(saved.paidUntilWeek.Bob).toBeUndefined();
   });
 
-  it('non-existent weekId is a no-op', async () => {
+  it('non-existent weekId returns error', async () => {
     seed({ weeks: [{ id: 'w1' }], paidUntilWeek: { Alice: 'w1' } });
-    expect((await deleteWeek('FAKE_ID')).success).toBe(true);
-    // transaction aborted (returns current unchanged) → saveData not called
-    expect(mockSaveData).not.toHaveBeenCalled();
+    const result = await deleteWeek('FAKE_ID');
+    expect(result.success).toBe(false);
+    expect(result.error).toBeTruthy();
   });
 });
 

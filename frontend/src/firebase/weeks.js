@@ -76,12 +76,17 @@ export async function updateWeek(weekId, { date, cost, present, multiPlayers, sp
 }
 
 export async function deleteWeek(weekId) {
-  return withTransaction((current) => {
+  let weekFound = true;
+
+  const result = await withTransaction((current) => {
     const data          = current || {};
     const originalWeeks = data.weeks || [];
     const deletedIdx    = originalWeeks.findIndex(w => w.id === weekId);
 
-    if (deletedIdx === -1) return; // nothing to delete — abort write
+    if (deletedIdx === -1) {
+      weekFound = false;
+      return data;
+    }
 
     const newWeeks     = originalWeeks.filter(w => w.id !== weekId);
     const remainingIds = new Set(newWeeks.map(w => w.id));
@@ -103,4 +108,9 @@ export async function deleteWeek(weekId) {
 
     return { ...data, weeks: newWeeks, paidUntilWeek };
   }, 'Nie udało się usunąć sesji');
+
+  if (result.success && !weekFound) {
+    return { success: false, error: 'Week not found' };
+  }
+  return result;
 }

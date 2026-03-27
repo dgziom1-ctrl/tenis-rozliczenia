@@ -17,7 +17,7 @@ export default function SeasonSelector({ seasons, selected, onChange }) {
       marginBottom: 16,
     }}>
       <span style={{
-        ...FONT.mono('0.58rem'),
+        ...FONT.mono('0.65rem'),
         color: 'var(--co-dim)',
         letterSpacing: '0.15em',
         marginRight: 4,

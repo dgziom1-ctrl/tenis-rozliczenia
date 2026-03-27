@@ -1,5 +1,5 @@
 import { Volume2, VolumeX, Smartphone, Check, Sun, Moon } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 const CSS = `
 @keyframes confettiBurst{0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) translateX(var(--drift)) rotate(720deg);opacity:0}}
@@ -437,7 +437,7 @@ function Arena({ chaosMode, onHit }) {
 /* ═══════════════════════════════════════════════════
    HEADER
 ═══════════════════════════════════════════════════ */
-export default function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleTheme }) {
+function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleTheme }) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti,  setConfetti]  = useState([]);
@@ -667,3 +667,5 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled, the
     </>
   );
 }
+
+export default React.memo(Header);

@@ -141,7 +141,7 @@ export default function PushPermissionBanner({ playerNames }) {
               {/* Player selector */}
               {playerNames && playerNames.length > 0 && (
                 <div style={{ marginBottom: 10 }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', letterSpacing: '0.1em', marginBottom: 6 }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.1em', marginBottom: 6 }}>
                     KIM JESTEŚ?
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -194,7 +194,7 @@ export default function PushPermissionBanner({ playerNames }) {
           )}
         </div>
 
-        <button onClick={dismiss} style={{
+        <button onClick={dismiss} aria-label="Zamknij" style={{
           background: 'transparent', border: 'none', cursor: 'pointer',
           color: 'var(--co-dim)', padding: 4, flexShrink: 0,
         }}>

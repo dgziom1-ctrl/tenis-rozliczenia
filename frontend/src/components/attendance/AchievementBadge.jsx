@@ -50,7 +50,7 @@ export default function AchievementBadge({ achievement: a, accentColor }) {
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: accentColor, margin: 0 }}>
             {a.emoji} {a.label}
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', margin: '3px 0 0' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: '3px 0 0' }}>
             {a.desc}
           </p>
         </div>

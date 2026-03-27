@@ -31,7 +31,7 @@ export default function PodiumCard({ podiumEntry, totalWeeks, onSelect }) {
       {players.map(player => {
         const rank = getRank(player.attendancePercentage);
         return (
-          <div key={player.name} onClick={() => onSelect(player.name)} style={{
+          <div key={player.name} role="button" tabIndex={0} onClick={() => onSelect(player.name)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(player.name); } }} style={{
             width: '100%', padding: '14px 10px', textAlign: 'center', cursor: 'pointer',
             background: s.bg,
             border: `1px solid ${s.border}50`,

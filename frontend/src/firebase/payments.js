@@ -63,6 +63,13 @@ export async function undoSettle(playerName, previousValue, previousPayments) {
 }
 
 export async function addPayment(playerName, amount) {
+  if (typeof playerName !== 'string' || playerName.trim() === '') {
+    return { success: false, error: 'Invalid input' };
+  }
+  if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {
+    return { success: false, error: 'Invalid input' };
+  }
+
   const paymentId = makeId();
 
   const result = await withTransaction((current) => {
@@ -89,16 +96,32 @@ export async function addPayment(playerName, amount) {
 }
 
 export async function removePayment(playerName, paymentId) {
-  return withTransaction((current) => {
+  let paymentFound = true;
+
+  const result = await withTransaction((current) => {
     const data = current || {};
-    if (!data.payments?.[playerName]) return data;
+    if (!data.payments?.[playerName]) {
+      paymentFound = false;
+      return data;
+    }
+
+    const existing = data.payments[playerName];
+    if (!existing.some(p => p.id === paymentId)) {
+      paymentFound = false;
+      return data;
+    }
 
     return {
       ...data,
       payments: {
         ...data.payments,
-        [playerName]: data.payments[playerName].filter(p => p.id !== paymentId),
+        [playerName]: existing.filter(p => p.id !== paymentId),
       },
     };
   }, 'Nie udało się cofnąć wpłaty');
+
+  if (result.success && !paymentFound) {
+    return { success: false, error: 'Payment not found' };
+  }
+  return result;
 }

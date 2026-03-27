@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 // ─── Count-up hook ───────────────────────────────────────────────
 function useCountUp(target, duration = 1200, active = false) {
@@ -62,14 +62,12 @@ export default function WrappedModal({ stats, onClose }) {
   const [entering, setEntering] = useState(true);
 
   // Build ordered slide list (skip bestPair slide when null)
-  const slides = useCallback(() => {
+  const slideList = useMemo(() => {
     const base = [0, 1, 2];
     if (stats.bestPair) base.push(3);
     base.push(4, 5);
     return base;
   }, [stats.bestPair]);
-
-  const slideList = slides();
   const totalSlides = slideList.length;
   const activeSlideId = slideList[currentSlide] ?? 0;
 
@@ -168,13 +166,13 @@ export default function WrappedModal({ stats, onClose }) {
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🏓</div>
                 <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-cyan)' }}>{cPP}</div>
-                <div style={{ ...mono('clamp(0.5rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PING PONG</div>
+                <div style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PING PONG</div>
               </div>
               {stats.squashSessions > 0 && (
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🏸</div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-green)' }}>{cSQ}</div>
-                  <div style={{ ...mono('clamp(0.5rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>SQUASH</div>
+                  <div style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>SQUASH</div>
                 </div>
               )}
             </div>
@@ -186,7 +184,7 @@ export default function WrappedModal({ stats, onClose }) {
               border: '1px solid rgba(0,229,255,0.15)',
               clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
             }}>
-              <div style={{ ...mono('clamp(0.5rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.12em', marginBottom: 4 }}>
+              <div style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.12em', marginBottom: 4 }}>
                 WYDALIŚMY
               </div>
               <div style={{ ...display('clamp(1.4rem, 5vw, 2.2rem)'), color: 'var(--co-green)' }}>
@@ -207,7 +205,7 @@ export default function WrappedModal({ stats, onClose }) {
           <div style={{ textAlign: 'center', maxWidth: 480, width: '100%' }}>
             {/* Busiest month */}
             <div style={{
-              ...mono('clamp(0.55rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
+              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
               color: 'var(--co-dim)', marginBottom: 14,
             }}>
               NAJAKTYWNIEJSZY MIESIĄC
@@ -238,7 +236,7 @@ export default function WrappedModal({ stats, onClose }) {
             {stats.mostExpensiveSession && (
               <>
                 <div style={{
-                  ...mono('clamp(0.55rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
+                  ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
                   color: 'var(--co-dim)', marginBottom: 16,
                 }}>
                   NAJDROŻSZA SESJA
@@ -255,7 +253,7 @@ export default function WrappedModal({ stats, onClose }) {
                   <div style={{ ...display('clamp(1.4rem, 5vw, 2.4rem)'), color: 'var(--co-pink)', marginBottom: 6 }}>
                     {stats.mostExpensiveSession.cost?.toFixed(2)} ZŁ
                   </div>
-                  <div style={{ ...mono('clamp(0.55rem, 1.8vw, 0.7rem)'), color: 'var(--co-dim)' }}>
+                  <div style={{ ...mono('clamp(0.65rem, 1.8vw, 0.7rem)'), color: 'var(--co-dim)' }}>
                     {stats.mostExpensiveSession.players} graczy
                   </div>
                 </div>
@@ -269,7 +267,7 @@ export default function WrappedModal({ stats, onClose }) {
         return (
           <div style={{ textAlign: 'center', maxWidth: 460, width: '100%' }}>
             <div style={{
-              ...mono('clamp(0.55rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
+              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
               color: 'var(--co-dim)', marginBottom: 28,
             }}>
               NAJLEPSZA PARA
@@ -325,7 +323,7 @@ export default function WrappedModal({ stats, onClose }) {
         return (
           <div style={{ textAlign: 'center', maxWidth: 500, width: '100%' }}>
             <div style={{
-              ...mono('clamp(0.55rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
+              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
               color: 'var(--co-dim)', marginBottom: 24,
             }}>
               RANKING {stats.year}
@@ -351,10 +349,10 @@ export default function WrappedModal({ stats, onClose }) {
                   }}>
                     {p.name}
                   </div>
-                  <div style={{ ...mono('clamp(0.55rem, 1.8vw, 0.75rem)'), color: 'var(--co-text)' }}>
+                  <div style={{ ...mono('clamp(0.65rem, 1.8vw, 0.75rem)'), color: 'var(--co-text)' }}>
                     {p.percentage}%
                   </div>
-                  <div style={{ ...mono('clamp(0.45rem, 1.4vw, 0.6rem)'), color: 'var(--co-dim)', marginTop: 2 }}>
+                  <div style={{ ...mono('clamp(0.65rem, 1.4vw, 0.65rem)'), color: 'var(--co-dim)', marginTop: 2 }}>
                     {p.attended} sesji
                   </div>
                 </div>
@@ -375,16 +373,16 @@ export default function WrappedModal({ stats, onClose }) {
                     padding: '5px 0',
                     borderBottom: '1px solid var(--co-separator)',
                   }}>
-                    <span style={{ ...mono('clamp(0.5rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', width: 24 }}>
+                    <span style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', width: 24 }}>
                       #{p.place}
                     </span>
                     <span style={{ ...mono('clamp(0.6rem, 2vw, 0.8rem)'), color: 'var(--co-text)', flex: 1 }}>
                       {p.name}
                     </span>
-                    <span style={{ ...mono('clamp(0.5rem, 1.5vw, 0.65rem)'), color: 'var(--co-cyan)' }}>
+                    <span style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-cyan)' }}>
                       {p.percentage}%
                     </span>
-                    <span style={{ ...mono('clamp(0.45rem, 1.3vw, 0.55rem)'), color: 'var(--co-dim)', width: 50, textAlign: 'right' }}>
+                    <span style={{ ...mono('clamp(0.65rem, 1.3vw, 0.65rem)'), color: 'var(--co-dim)', width: 50, textAlign: 'right' }}>
                       {p.attended} sesji
                     </span>
                   </div>
@@ -402,7 +400,7 @@ export default function WrappedModal({ stats, onClose }) {
         return (
           <div style={{ textAlign: 'center', maxWidth: 460, width: '100%' }}>
             <div style={{
-              ...mono('clamp(0.55rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
+              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
               color: 'var(--co-dim)', marginBottom: 8,
             }}>
               MISTRZ ROKU {stats.year}
@@ -441,7 +439,7 @@ export default function WrappedModal({ stats, onClose }) {
                   <div style={{ ...display('clamp(1rem, 3.5vw, 1.6rem)'), color: s.color }}>
                     {s.value}
                   </div>
-                  <div style={{ ...mono('clamp(0.4rem, 1.2vw, 0.55rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em', marginTop: 4 }}>
+                  <div style={{ ...mono('clamp(0.65rem, 1.2vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em', marginTop: 4 }}>
                     {s.label}
                   </div>
                 </div>
@@ -574,7 +572,7 @@ export default function WrappedModal({ stats, onClose }) {
       {/* Slide counter */}
       <div style={{
         position: 'absolute', top: 20, right: 24,
-        ...mono('clamp(0.5rem, 1.5vw, 0.65rem)'),
+        ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'),
         color: 'var(--co-dim)', letterSpacing: '0.1em',
         zIndex: 4,
       }}>

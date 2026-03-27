@@ -35,12 +35,12 @@ export default function RankingHistoryChart({ players, history }) {
         {playerNames.map((name, i) => (
           <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 18, height: 2, background: COLORS[i % COLORS.length], borderRadius: 1 }} />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)' }}>{name}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>{name}</span>
           </div>
         ))}
       </div>
       <div style={{ position: 'relative', background: 'rgba(0,229,255,0.015)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)', overflow: 'hidden' }}>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Wykres historii rankingu" style={{ display: 'block', width: '100%', height: 'auto' }}>
           {/* Place labels on Y axis */}
           {Array.from({ length: maxPlace }, (_, i) => i + 1).map(place => (
             <g key={place}>
@@ -80,7 +80,7 @@ export default function RankingHistoryChart({ players, history }) {
           ))}
         </svg>
       </div>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-dim)', marginTop: 8, letterSpacing: '0.08em' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', marginTop: 8, letterSpacing: '0.08em' }}>
         * pozycja liczona na podstawie frekwencji po każdym miesiącu
       </p>
     </div>

@@ -13,34 +13,40 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
   const overlayRef = useRef(null);
   useEffect(() => { overlayRef.current?.focus(); }, []);
 
-  if (!player) return null;
-
-  const c = getPlayerColor(player.name);
+  const c = player ? getPlayerColor(player.name) : null;
 
   const { sessions, missedSessions, multisportSessions } = useMemo(() => {
+    if (!player) return { sessions: [], missedSessions: [], multisportSessions: [] };
     const sessions = history.filter(s => s.presentPlayers.includes(player.name));
     const missedSessions = history.filter(s => !s.presentPlayers.includes(player.name));
     const multisportSessions = sessions.filter(s => s.multisportPlayers.includes(player.name));
     return { sessions, missedSessions, multisportSessions };
-  }, [history, player.name]);
+  }, [history, player]);
 
-  const avgCost = useMemo(() =>
-    sessions.length > 0
+  const avgCost = useMemo(() => {
+    if (!player) return '0.00';
+    return sessions.length > 0
       ? (sessions.reduce((sum, s) => sum + getPlayerSessionCost(s, player.name), 0) / sessions.length).toFixed(2)
-      : '0.00',
-    [sessions, player.name]);
+      : '0.00';
+  }, [sessions, player]);
 
-  const currentStreak = player.currentStreak || 0;
+  const currentStreak = player?.currentStreak || 0;
   const longestStreak = useMemo(() => {
+    if (!player) return 0;
     let max = 0, cur = 0;
     for (const s of [...history].reverse()) {
       if (s.presentPlayers.includes(player.name)) { cur++; max = Math.max(max, cur); }
       else cur = 0;
     }
     return max;
-  }, [history, player.name]);
+  }, [history, player]);
 
-  const achievements = useMemo(() => getPlayerAchievements(player, history), [player, history]);
+  const achievements = useMemo(() => {
+    if (!player) return [];
+    return getPlayerAchievements(player, history);
+  }, [player, history]);
+
+  if (!player) return null;
 
   return (
     <div
@@ -91,11 +97,11 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
             <p style={{ ...FONT.display('1.4rem', '0.06em'), color: 'var(--co-text-hi)', margin: 0, lineHeight: 1 }}>
               {player.name.toUpperCase()}
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', margin: '3px 0 0', letterSpacing: '0.12em' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: '3px 0 0', letterSpacing: '0.12em' }}>
               {player.attendanceCount}/{totalWeeks} sesji · {player.attendancePercentage}% frekwencja
             </p>
           </div>
-          <button onClick={onClose} style={{
+          <button onClick={onClose} aria-label="Zamknij" style={{
             background: 'transparent', border: '1px solid var(--co-border)',
             color: 'var(--co-dim)', cursor: 'pointer', padding: '6px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -124,7 +130,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
               <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: stat.color, margin: 0, lineHeight: 1, textShadow: stat.color !== 'var(--co-dim)' ? `0 0 10px ${stat.color}40` : 'none' }}>
                 {stat.value}
               </p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 {stat.label}
               </p>
             </div>
@@ -148,7 +154,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
                     do {nextRank.emoji} {nextRank.name}: <span style={{ color: nextRank.hex }}>{Math.max(0, nextRank.min - pct)}%</span>
                   </span>
                 ) : (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: currentRank.hex }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: currentRank.hex }}>
                     ★ max ranga
                   </span>
                 )}
@@ -166,7 +172,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                 <span style={{ ...FONT.monoTiny }}>0%</span>
-                <span style={{ ...FONT.mono('0.5rem'), color: currentRank.hex, fontWeight: 500 }}>{pct}%</span>
+                <span style={{ ...FONT.mono('0.65rem'), color: currentRank.hex, fontWeight: 500 }}>{pct}%</span>
                 <span style={{ ...FONT.monoTiny }}>100%</span>
               </div>
             </div>
@@ -176,7 +182,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
         {/* Achievements */}
         {achievements.length > 0 && (
             <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15` }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
                 // osiągnięcia — {achievements.length}
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -221,7 +227,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
                 transition: 'opacity 0.15s',
               }}>
                 {/* Session number */}
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-dim)', width: 24, flexShrink: 0 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', width: 24, flexShrink: 0 }}>
                   #{String(history.length - idx).padStart(2,'0')}
                 </span>
                 {/* Status dot */}

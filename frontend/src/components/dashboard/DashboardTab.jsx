@@ -260,7 +260,7 @@ export default function DashboardTab({ data, history, playSound }) {
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
             }}
           >
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', letterSpacing: '0.15em' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.15em' }}>
               {RANKS.map(r => r.emoji).join(' ')}
             </span>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.78rem', letterSpacing: '0.12em', color: 'var(--co-dim)', textTransform: 'uppercase', flex: 1, textAlign: 'left' }}>
@@ -280,7 +280,7 @@ export default function DashboardTab({ data, history, playSound }) {
                   <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{r.emoji}</span>
                   <div>
                     <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', color: r.hex, margin: 0, letterSpacing: '0.08em' }}>{r.name}</p>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', margin: 0 }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: 0 }}>
                       {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
                     </p>
                   </div>

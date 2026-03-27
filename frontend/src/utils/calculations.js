@@ -156,7 +156,13 @@ export function buildDebtDisplayData(player, history, payments, paidUntilWeek) {
   if (cutoffIdx >= 0 && !playerPayments.some(p => p.id === '__legacy_settled__')) {
     const settledCost = roundToTwoDecimals(
       chronological.slice(0, cutoffIdx + 1).filter(sessionFilter)
-        .reduce((s, x) => s + x.costPerPerson, 0),
+        .reduce((s, x) => {
+          const isMulti = x.multisportPlayers.includes(player.name);
+          const amount = x.sport === SPORT.SQUASH
+            ? (isMulti ? (x.costPerPersonMulti ?? x.costPerPerson) : x.costPerPerson)
+            : x.costPerPerson;
+          return s + amount;
+        }, 0),
     );
     const settlementDate = chronological[cutoffIdx]?.datePlayed ?? null;
 

@@ -8,6 +8,7 @@ import { InlineSpinner } from '../common/LoadingSkeleton';
 import { PasswordModal } from '../common/SharedUI';
 import { SPORT } from '../../constants';
 import UndoBar from '../common/UndoBar';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 function EditDateInput({ value, onChange }) {
   return (
@@ -23,7 +24,7 @@ function EditDateInput({ value, onChange }) {
       </div>
       <input
         type="date" value={value} onChange={e => onChange(e.target.value)}
-        onClick={e => e.currentTarget.showPicker?.()}
+        onClick={e => { try { e.currentTarget.showPicker?.(); } catch {} }}
         style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
           opacity: 0, cursor: 'pointer', zIndex: 2, padding: 0, border: 'none',
@@ -56,7 +57,7 @@ function LogEntry({ row, onEdit, onDelete }) {
             </span>
             {/* Sport badge */}
             <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.55rem',
+              fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
               padding: '2px 6px',
               background: isSquash ? 'rgba(0,255,136,0.08)' : 'rgba(0,229,255,0.06)',
               border: `1px solid ${isSquash ? 'rgba(0,255,136,0.3)' : 'rgba(0,229,255,0.2)'}`,
@@ -183,7 +184,7 @@ function AttendanceTrendChart({ history, playerNames }) {
           ].map(({ color, label }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <div style={{ width: 20, height: 2, background: color, boxShadow: `0 0 4px ${color}` }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>{label}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>{label}</span>
             </div>
           ))}
         </div>
@@ -191,7 +192,7 @@ function AttendanceTrendChart({ history, playerNames }) {
 
       {/* SVG chart */}
       <div style={{ position: 'relative', background: 'rgba(0,229,255,0.015)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)', overflow: 'hidden' }}>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Wykres trendu frekwencji" style={{ display: 'block', width: '100%', height: 'auto' }}>
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.18" />
@@ -266,7 +267,7 @@ function AttendanceTrendChart({ history, playerNames }) {
         ].map(({ label, value, color }) => (
           <div key={label} style={{ flex: 1, padding: '8px 10px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color, margin: 0, lineHeight: 1, textShadow: `0 0 8px ${color}40` }}>{value}</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</p>
           </div>
         ))}
       </div>
@@ -291,7 +292,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   const undoCountdownRef = useRef(null);
   const { showError, showSuccess } = useToast();
   const filterOverlayRef = useRef(null);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 639;
+  const isMobile = useIsMobile();
 
   useEffect(() => { if (isFilterOpen) filterOverlayRef.current?.focus(); }, [isFilterOpen]);
 
@@ -311,31 +312,37 @@ export default function HistoryTab({ history, playerNames, playSound }) {
   useEffect(() => { setShowAll(false); }, [filterPlayer, sortOrder]);
 
   const handleExportCSV = () => {
-    const rows = [
-      ['Data', 'Sport', 'Koszt całkowity', 'Na osobę', 'Liczba graczy', 'Obecni', 'Multisport'],
-      ...filteredHistory.map(s => [
-        s.datePlayed,
-        s.sport === SPORT.SQUASH ? 'squash' : 'ping-pong',
-        s.totalCost,
-        s.costPerPerson?.toFixed(2) ?? '',
-        s.presentPlayers.length,
-        s.presentPlayers.join('; '),
-        s.multisportPlayers.join('; '),
-      ]),
-    ];
-    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const safeName = filterPlayer.replace(/[\/\\:*?"<>|]/g, '_');
-    const a    = Object.assign(document.createElement('a'), {
-      href: url,
-      download: filterPlayer ? `sesje_${safeName}.csv` : 'sesje.csv',
-    });
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showSuccess(`Wyeksportowano ${filteredHistory.length} sesji`);
+    let url;
+    try {
+      const rows = [
+        ['Data', 'Sport', 'Koszt całkowity', 'Na osobę', 'Liczba graczy', 'Obecni', 'Multisport'],
+        ...filteredHistory.map(s => [
+          s.datePlayed,
+          s.sport === SPORT.SQUASH ? 'squash' : 'ping-pong',
+          s.totalCost,
+          s.costPerPerson?.toFixed(2) ?? '',
+          s.presentPlayers.length,
+          s.presentPlayers.join('; '),
+          s.multisportPlayers.join('; '),
+        ]),
+      ];
+      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      url  = URL.createObjectURL(blob);
+      const safeName = filterPlayer.replace(/[\/\\:*?"<>|]/g, '_');
+      const a    = Object.assign(document.createElement('a'), {
+        href: url,
+        download: filterPlayer ? `sesje_${safeName}.csv` : 'sesje.csv',
+      });
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showSuccess(`Wyeksportowano ${filteredHistory.length} sesji`);
+    } catch (err) {
+      console.warn('CSV export failed:', err);
+    } finally {
+      if (url) URL.revokeObjectURL(url);
+    }
   };
 
   const requestEdit   = (row) => setPwModal({ type: 'edit', row });
@@ -595,7 +602,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
             {/* Etykieta filtra */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(0,229,255,0.04)', border: '1px solid rgba(0,229,255,0.12)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)', flexShrink: 0 }}>
               <Search size={11} style={{ color: 'var(--co-dim)' }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>FILTR</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>FILTR</span>
             </div>
 
             {/* Przyciski graczy (na mobile zamiast chipów otwieramy sheet) */}
@@ -622,7 +629,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                 </button>
 
                 {filterPlayer && (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>
                     {filteredHistory.length} sesji
                   </span>
                 )}
@@ -671,7 +678,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
 
                 {/* Licznik po filtrowaniu */}
                 {filterPlayer && (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', color: 'var(--co-dim)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>
                     {filteredHistory.length} sesji
                   </span>
                 )}
@@ -693,7 +700,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
                 clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
+                fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.08em',
                 transition: 'all 0.15s', flexShrink: 0,
               }}
             >
@@ -712,7 +719,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
                 clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                fontFamily: 'var(--font-mono)', fontSize: '0.55rem', letterSpacing: '0.08em',
+                fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.08em',
                 transition: 'all 0.15s', flexShrink: 0,
               }}
             >

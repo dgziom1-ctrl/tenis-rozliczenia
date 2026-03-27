@@ -24,14 +24,17 @@ export function PlayerAvatar({ name, index, isPending, isOrganizer }) {
         }}>{initials}</span>
       </div>
       {/* Status dot — only this element carries semantic color */}
-      <div style={{
-        position: 'absolute', bottom: -2, right: -2,
-        width: 10, height: 10,
-        background: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
-        border: '2px solid var(--co-void)',
-        boxShadow: isPending ? '0 0 4px rgba(255,32,144,0.5)' : '0 0 4px rgba(0,255,102,0.5)',
-        borderRadius: '50%',
-      }} />
+      <div
+        title={isPending ? 'Niezapłacone' : 'Rozliczone'}
+        style={{
+          position: 'absolute', bottom: -2, right: -2,
+          width: 10, height: 10,
+          background: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
+          border: '2px solid var(--co-void)',
+          boxShadow: isPending ? '0 0 4px rgba(255,32,144,0.5)' : '0 0 4px rgba(0,255,102,0.5)',
+          borderRadius: '50%',
+        }}
+      />
     </div>
   );
 }

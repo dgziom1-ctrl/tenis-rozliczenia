@@ -5,6 +5,7 @@ import { FONT, CLIP } from '../../constants/styles';
 import { formatAmountShort } from '../../utils/format';
 import { useThemeTokens, ThemeContext } from '../../context/ThemeContext';
 import { usePaymentUndo } from '../../hooks/usePaymentUndo';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import BreakdownPanel from './BreakdownPanel';
 import PaymentModal from './PaymentModal';
 import UndoBar from '../common/UndoBar';
@@ -21,7 +22,7 @@ function PlayerCard({
   onAddPayment, onRemovePayment, onPin, onUnpin,
   playerIndex = 0,
 }) {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 639;
+  const isMobile = useIsMobile();
   const isOrganizer = player.name === ORGANIZER_NAME;
   const debt        = player.currentDebt;
   const isPending   = debt > SETTLED_THRESHOLD;    // "Do rozliczenia" – neutralny
@@ -148,7 +149,7 @@ function PlayerCard({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: '0.52rem',
+          fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
           color: isPending ? `${c.border}99` : 'var(--co-dim)',
           letterSpacing: '0.15em', textTransform: 'uppercase',
         }}>
@@ -159,7 +160,7 @@ function PlayerCard({
             : '↑ Nadpłata'}
         </span>
         <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: '0.5rem',
+          fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
           color: 'var(--co-dim)', letterSpacing: '0.1em',
         }}>{playerId}</span>
       </div>
@@ -192,7 +193,7 @@ function PlayerCard({
               <span style={{ ...FONT.monoLabel }}>
                 Obecność
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'var(--co-dim)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>
                 {player.attendanceCount}/{totalWeeks}
               </span>
             </div>
@@ -269,7 +270,7 @@ function PlayerCard({
               </div>
             ) : hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.52rem', color: 'var(--co-yellow)', letterSpacing: '0.2em', marginBottom: 2 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-yellow)', letterSpacing: '0.2em', marginBottom: 2 }}>
                   ↑ NADPŁATA
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', color: 'var(--co-yellow)', margin: 0, lineHeight: 1 }}>
@@ -281,7 +282,7 @@ function PlayerCard({
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ marginBottom: 4 }}>
                   <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: '0.5rem',
+                    fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
                     color: isPending ? 'rgba(255,32,144,0.5)' : 'rgba(0,255,136,0.5)',
                     letterSpacing: '0.2em', textTransform: 'uppercase',
                   }}>

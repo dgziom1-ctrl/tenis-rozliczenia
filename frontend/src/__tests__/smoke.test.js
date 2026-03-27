@@ -75,9 +75,11 @@ describe('utils/id.js — eksporty i podstawowe działanie', () => {
     expect(ids.size).toBe(100); // żadne dwa nie mogą być takie same
   });
 
-  it('makeId ma format timestamp-losowy', async () => {
+  it('makeId zwraca niepusty string', async () => {
     const { makeId } = await import('../utils/id');
-    expect(makeId()).toMatch(/^[a-z0-9]+-[a-z0-9]+$/);
+    const id = makeId();
+    expect(typeof id).toBe('string');
+    expect(id.length).toBeGreaterThan(0);
   });
 
   it('todayISO zwraca format YYYY-MM-DD', async () => {

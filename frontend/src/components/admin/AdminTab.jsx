@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Calculator, CalendarDays, CalendarPlus, CheckCircle2, Copy, Users, Zap } from 'lucide-react';
 import { addSession } from '../../firebase/index';
 import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '../../constants';
@@ -70,6 +70,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
 
   return (
     <div ref={overlayRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onClose()} role="dialog" aria-modal="true"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div style={{
@@ -213,7 +214,7 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport }
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
-              Bez karty ({presentPlayers.length - multisportPlayers.length} os.)
+              Bez karty ({presentPlayers.length - multisportPlayers.filter(p => presentPlayers.includes(p)).length} os.)
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-cyan)' }}>
               {(Math.round(base * 100) / 100).toFixed(2)} ZŁ
@@ -274,8 +275,8 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport }
 // ── Player toggle grid ────────────────────────────────────
 function PlayerToggleGrid({ names, selected, onToggle, accent = 'yellow' }) {
   const accentColor = accent === 'green' ? 'var(--co-green)' : 'var(--co-cyan)';
-  const accentAlpha = accent === 'green' ? 'rgba(0,229,255,0.08)' : 'rgba(0,229,255,0.08)';
-  const accentBorder = accent === 'green' ? 'rgba(0,229,255,0.4)' : 'rgba(0,229,255,0.4)';
+  const accentAlpha = accent === 'green' ? 'rgba(0,255,136,0.08)' : 'rgba(0,229,255,0.08)';
+  const accentBorder = accent === 'green' ? 'rgba(0,255,136,0.4)' : 'rgba(0,229,255,0.4)';
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
@@ -289,7 +290,7 @@ function PlayerToggleGrid({ names, selected, onToggle, accent = 'yellow' }) {
             clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
             ...(active ? {
               background: accentAlpha, border: `1px solid ${accentBorder}`, color: accentColor,
-              boxShadow: `0 0 10px ${accent === 'green' ? 'rgba(0,229,255,0.1)' : 'rgba(0,229,255,0.1)'}`,
+              boxShadow: `0 0 10px ${accent === 'green' ? 'rgba(0,255,136,0.1)' : 'rgba(0,229,255,0.1)'}`,
             } : {
               background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
             }),
@@ -391,6 +392,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const [multisportPlayers, setMultisportPlayers] = useState([]);
   const [isSaving,          setIsSaving]          = useState(false);
   const [savedSummary,      setSavedSummary]      = useState(null);
+  const [costTouched,       setCostTouched]       = useState(false);
 
   const isSquash = sport === SPORT.SQUASH;
   const activeCosts = isSquash ? SQUASH_QUICK_COSTS : QUICK_COSTS;
@@ -403,8 +405,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     ? null
     : (totalCost === '' ? 'Wpisz koszt sesji żeby kontynuować' : 'Koszt musi być liczbą >= 0');
 
+  const initializedRef = useRef(false);
   useEffect(() => {
     if (!playerNames?.length) return;
+    if (initializedRef.current) return;
+    initializedRef.current = true;
     setPresentPlayers([...playerNames]);
     setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
   }, [playerNames, defaultMultiPlayers]);
@@ -456,6 +461,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         multisportPlayers: [...multisportPlayers],
       });
       setTotalCost('');
+      setCostTouched(false);
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
     } finally { setIsSaving(false); }
@@ -533,12 +539,13 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 })}
               </div>
               <input type="number" value={totalCost} onChange={e => setTotalCost(e.target.value)}
+                onBlur={() => setCostTouched(true)}
                 placeholder="lub wpisz ręcznie..."
                 className="cyber-input"
                 style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
                 required
               />
-              {!isCostValid && (
+              {costTouched && !isCostValid && (
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-yellow)', marginTop: 8 }}>
                   ⚠ {totalCostError}
                 </p>

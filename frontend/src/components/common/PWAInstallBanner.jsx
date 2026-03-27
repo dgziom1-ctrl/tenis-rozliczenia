@@ -79,7 +79,7 @@ export default function PWAInstallBanner() {
           }}>
             <Download size={12} /> DODAJ
           </button>
-          <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: 'var(--co-close-btn)', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0, transition: 'color 0.15s' }}
+          <button onClick={dismiss} aria-label="Zamknij" style={{ background: 'transparent', border: 'none', color: 'var(--co-close-btn)', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0, transition: 'color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color = 'var(--co-cyan)'}
             onMouseLeave={e => e.currentTarget.style.color = 'var(--co-close-btn)'}
           >
@@ -112,7 +112,7 @@ export default function PWAInstallBanner() {
             Działa jak natywna aplikacja
           </p>
         </div>
-        <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: 'var(--co-close-btn)', cursor: 'pointer', padding: 4, flexShrink: 0, transition: 'color 0.15s' }}
+        <button onClick={dismiss} aria-label="Zamknij" style={{ background: 'transparent', border: 'none', color: 'var(--co-close-btn)', cursor: 'pointer', padding: 4, flexShrink: 0, transition: 'color 0.15s' }}
           onMouseEnter={e => e.currentTarget.style.color = 'var(--co-cyan)'}
           onMouseLeave={e => e.currentTarget.style.color = 'var(--co-close-btn)'}
         >

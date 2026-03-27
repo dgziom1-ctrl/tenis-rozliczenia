@@ -7,6 +7,7 @@
 // AttendanceTab, HistoryTab, and calculations.js.
 
 import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '../constants';
+import { roundToTwoDecimals } from './calculations';
 
 /**
  * Calculate how much a specific player owes for a single session.
@@ -32,13 +33,13 @@ export function getPlayerSessionCost(session, playerName) {
     const multiCount = multi.filter(p => present.includes(p)).length;
     const hypothetical = cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
     const base = present.length > 0 ? hypothetical / present.length : 0;
-    return round2(Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base));
+    return roundToTwoDecimals(Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base));
   }
 
   // Ping-pong
   if (isMulti) return 0;
   const paying = present.filter(p => !multi.includes(p));
-  return paying.length > 0 ? round2(cost / paying.length) : 0;
+  return paying.length > 0 ? roundToTwoDecimals(cost / paying.length) : 0;
 }
 
 /**
@@ -54,13 +55,9 @@ export function getSessionBaseCost(session) {
   if (sport === SPORT.SQUASH) {
     const multiCount = multi.filter(p => present.includes(p)).length;
     const hypothetical = cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
-    return present.length > 0 ? round2(hypothetical / present.length) : 0;
+    return present.length > 0 ? roundToTwoDecimals(hypothetical / present.length) : 0;
   }
 
   const paying = present.filter(p => !multi.includes(p));
-  return paying.length > 0 ? round2(cost / paying.length) : 0;
-}
-
-function round2(v) {
-  return Math.round(v * 100) / 100;
+  return paying.length > 0 ? roundToTwoDecimals(cost / paying.length) : 0;
 }

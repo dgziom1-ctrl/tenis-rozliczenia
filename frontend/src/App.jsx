@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { ToastProvider, useToast } from './components/common/Toast';
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
@@ -64,7 +64,7 @@ function CyberLoadingScreen({ slow = false, onRetry = null } = {}) {
             margin: 0, lineHeight: 1,
           }}>CYBER-PONG</p>
           <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: '0.58rem', letterSpacing: '0.25em',
+            fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.25em',
             color: 'rgba(0,229,255,0.45)', textTransform: 'uppercase', marginTop: 4,
             animation: 'flicker 2s infinite',
           }}>
@@ -144,16 +144,6 @@ function CyberLoadingScreen({ slow = false, onRetry = null } = {}) {
         </div>
       )}
 
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes loading-bar {
-          0%   { transform: translateX(-200%); }
-          100% { transform: translateX(700%); }
-        }
-        @keyframes flicker {
-          0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
-          20%, 24%, 55% { opacity: 0.2; }
-        }
-      `}} />
     </div>
   );
 }
@@ -226,7 +216,7 @@ function AppContent() {
       if (tab === TABS.ADMIN)      return TABS.ADMIN;
       if (tab === TABS.HISTORY)    return TABS.HISTORY;
       if (tab === TABS.PLAYERS)    return TABS.PLAYERS;
-    } catch {}
+    } catch (err) { console.warn('Failed to parse URL tab param:', err); }
     return TABS.DASHBOARD;
   });
   const [isMuted,      setIsMuted]      = useState(false);
@@ -244,7 +234,7 @@ function AppContent() {
       if (p.get('tab') === 'attendance' && p.get('player')) {
         return decodeURIComponent(p.get('player'));
       }
-    } catch {}
+    } catch (err) { console.warn('Failed to parse URL player param:', err); }
     return null;
   });
 
@@ -310,7 +300,7 @@ function AppContent() {
       // Utrzymaj spójność URL ↔ UI
       try {
         window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`);
-      } catch {}
+      } catch (err) { console.warn('Failed to replaceState for SW notification:', err); }
     };
 
     const swContainer = navigator.serviceWorker;
@@ -341,14 +331,14 @@ function AppContent() {
               renotify: true,
               data: { url: payload.data?.url || '/?tab=dashboard', ...payload.data },
             });
-          } catch {
-            // fallback — stare przeglądarki
-            try { new Notification(title, { body: body || '', icon: '/icon-192v2.png' }); } catch {}
+          } catch (err) {
+            console.warn('showNotification failed, trying fallback:', err);
+            try { new Notification(title, { body: body || '', icon: '/icon-192v2.png' }); } catch (err2) { console.warn('Fallback Notification also failed:', err2); }
           }
         });
       }
-    } catch {
-      // getMessaging() może rzucić jeśli Firebase nie jest skonfigurowany
+    } catch (err) {
+      console.warn('getMessaging() failed (Firebase may not be configured):', err);
     }
 
     return () => {
@@ -359,7 +349,7 @@ function AppContent() {
       }
       if (unsubFcm) unsubFcm();
     };
-  }, [showSuccess, showError]);
+  }, []);
 
   const switchTab = useCallback((id) => {
     playSound(SOUND_TYPES.TAB);
@@ -370,12 +360,19 @@ function AppContent() {
       url.searchParams.delete('player');
       url.searchParams.delete('week');
       window.history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}`);
-    } catch {}
+    } catch (err) { console.warn('Failed to replaceState for tab switch:', err); }
   }, [playSound]);
 
   // Stabilna referencja — bez useCallback AttendanceTab re-triggerowałby
   // useEffect przy każdym re-renderze App (nowa lambda = nowa referencja).
   const handleNotifPlayerConsumed = useCallback(() => setNotifPlayer(null), []);
+
+  const dashboardData = useMemo(() => ({
+    summary: appData.summary,
+    players: appData.players,
+    paidUntilWeek: appData.paidUntilWeek,
+    payments: appData.payments,
+  }), [appData.summary, appData.players, appData.paidUntilWeek, appData.payments]);
 
   if (subscriptionError) {
     return <CyberErrorScreen onRetry={() => setRetryNonce(n => n + 1)} />;
@@ -448,7 +445,7 @@ function AppContent() {
           <main className="main-content">
             {activeTab === TABS.DASHBOARD  && (
               <DashboardTab
-                data={{ summary: appData.summary, players: appData.players, paidUntilWeek: appData.paidUntilWeek, payments: appData.payments }}
+                data={dashboardData}
                 history={appData.history}
                 playSound={playSound}
               />

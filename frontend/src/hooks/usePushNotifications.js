@@ -6,11 +6,13 @@ import { database } from '../firebase/config';
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
 function hashToken(token) {
-  let h = 0;
+  let h1 = 0x811c9dc5, h2 = 0x01000193;
   for (let i = 0; i < token.length; i++) {
-    h = (Math.imul(31, h) + token.charCodeAt(i)) | 0;
+    const c = token.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 0x01000193);
+    h2 = Math.imul(h2 ^ c, 0x811c9dc5);
   }
-  return Math.abs(h).toString(36);
+  return (Math.abs(h1) >>> 0).toString(36) + (Math.abs(h2) >>> 0).toString(36);
 }
 
 function safeNotificationPermission() {

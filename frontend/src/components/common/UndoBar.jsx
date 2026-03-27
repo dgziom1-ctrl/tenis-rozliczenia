@@ -54,7 +54,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         color: 'var(--co-cyan)',
         cursor: 'pointer', transition: 'all 0.15s',
         fontFamily: 'var(--font-display)', fontWeight: 700,
-        fontSize: compact ? '0.45rem' : '0.52rem', letterSpacing: '0.12em',
+        fontSize: compact ? '0.65rem' : '0.65rem', letterSpacing: '0.12em',
         textTransform: 'uppercase',
         clipPath: compact
           ? 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)'

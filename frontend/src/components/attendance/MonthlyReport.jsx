@@ -2,10 +2,11 @@ import { CalendarDays } from 'lucide-react';
 import { getPlayerColor } from '../../constants/playerColors';
 import { FONT, CLIP, PANEL } from '../../constants/styles';
 import { SectionHeader } from '../common/SharedUI';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // ─── Monthly report ────────────────────────────────────────────────
 export default function MonthlyReport({ monthlyStats, players }) {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 639;
+  const isMobile = useIsMobile();
 
   return (
     <div style={{

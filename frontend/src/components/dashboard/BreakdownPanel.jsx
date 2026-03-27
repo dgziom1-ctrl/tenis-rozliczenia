@@ -13,7 +13,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
 
   return (
     <div style={{ marginBottom: 12 }}>
-      <button onClick={onToggle} style={{
+      <button onClick={onToggle} aria-expanded={open} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
         width: '100%', padding: '6px 10px',
         background: 'transparent', border: '1px solid var(--co-border)',

@@ -20,8 +20,12 @@ function LeaderboardRow({ player, totalWeeks, place, onClick }) {
         border: `1px solid ${isTop3 ? 'rgba(0,229,255,0.18)' : 'var(--co-border)'}`,
         marginBottom: 3,
         clipPath: CLIP.card,
+        cursor: 'pointer',
       }}
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(); } }}
     >
       <span style={{
         fontFamily: 'var(--font-mono)', fontSize: '0.68rem',

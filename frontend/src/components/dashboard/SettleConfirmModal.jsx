@@ -23,6 +23,7 @@ export default function SettleConfirmModal({
       style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
       tabIndex={-1}
       onKeyDown={e => e.key === 'Escape' && onCancel()}
+      onClick={e => { if (e.target === e.currentTarget) onCancel(); }}
       role="dialog"
       aria-modal="true"
     >
