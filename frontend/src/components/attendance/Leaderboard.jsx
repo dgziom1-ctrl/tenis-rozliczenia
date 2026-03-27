@@ -16,7 +16,7 @@ function LeaderboardRow({ player, totalWeeks, place, onClick }) {
       style={{
         display: 'flex', alignItems: 'center', gap: 10,
         padding: '10px 14px',
-        background: isTop3 ? 'rgba(0,229,255,0.025)' : 'rgba(255,255,255,0.01)',
+        background: isTop3 ? 'rgba(0,229,255,0.025)' : 'transparent',
         border: `1px solid ${isTop3 ? 'rgba(0,229,255,0.18)' : 'var(--co-border)'}`,
         marginBottom: 3,
         clipPath: CLIP.card,

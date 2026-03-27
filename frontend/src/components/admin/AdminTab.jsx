@@ -94,7 +94,7 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--co-green)', marginBottom: 3, textTransform: 'uppercase' }}>
               Zapisano!
             </p>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.06em', color: '#e8e8e8', margin: 0 }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.06em', color: 'var(--co-text-hi)', margin: 0 }}>
               Sesja zapisana!
             </h3>
           </div>
@@ -104,9 +104,9 @@ function SessionSummaryModal({ summary, onClose, tokens }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
           {[
             { label: 'SPORT', value: isSquash ? '🎾 SQUASH' : '🏓 PING-PONG', color: isSquash ? 'var(--co-green)' : 'var(--co-cyan)' },
-            { label: 'DATA', value: formatDate(date), color: '#c8c8c8' },
+            { label: 'DATA', value: formatDate(date), color: 'var(--co-text)' },
             { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
-            { label: 'OBECNI', value: presentCount, color: '#c8c8c8' },
+            { label: 'OBECNI', value: presentCount, color: 'var(--co-text)' },
           ].map(({ label, value, color }) => (
             <div key={label} style={{
               padding: '10px 12px', background: 'var(--co-dark)',

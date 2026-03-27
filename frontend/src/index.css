@@ -47,6 +47,16 @@
   --co-dim:      #2A4560;   /* muted text */
   --co-dim2:     #152030;   /* very muted */
 
+  /* ── Theme-switchable inline helpers ── */
+  --co-bar-track:    rgba(255,255,255,0.06);
+  --co-dot-empty:    rgba(255,255,255,0.15);
+  --co-close-btn:    #3a3a3a;
+  --co-toast-success:#031208;
+  --co-toast-error:  #0e0606;
+  --co-toast-info:   #080808;
+  --co-toast-text:   #c8c8c8;
+  --co-separator:    rgba(255,255,255,0.05);
+
   /* ── Fonts ── */
   --font-display: 'Bebas Neue', monospace;
   --font-mono:    'Space Mono', 'Courier New', monospace;
@@ -691,155 +701,170 @@ select option { background: #090F18; color: var(--co-text); }
   animation: rank-hint-pulse 1.2s ease-in-out 4;
 }
 
-/* ══ LIGHT MODE ════════════════════════════════════════════════ */
+/* ══ LIGHT MODE ════════════════════════════════════════════════
+   Warm-slate palette · no neon glows · muted teal/rose accents
+   ════════════════════════════════════════════════════════════ */
 body.theme-light {
-  background-color: #F2F5F9;
-  color: #1E3040;
+  background-color: #F8FAFC;
+  color: #334155;
 
-  --co-void:      #F2F5F9;
-  --co-dark:      #E8EEF4;
-  --co-panel:     #FAFCFE;
+  /* ── Backgrounds — warm slate ── */
+  --co-void:      #F8FAFC;
+  --co-dark:      #F1F5F9;
+  --co-panel:     #FFFFFF;
   --co-raised:    #FFFFFF;
-  --co-border:    #CCD9E5;
-  --co-border-hi: #A8C0D2;
+  --co-border:    #CBD5E1;
+  --co-border-hi: #94A3B8;
 
-  --co-cyan:      #1A6FA0;
-  --co-cyan-mid:  #125580;
-  --co-cyan-dim:  #D8ECF5;
-  --co-ice:       #1055A0;
+  /* ── Primary — Muted Teal ── */
+  --co-cyan:      #0D9488;
+  --co-cyan-mid:  #0F766E;
+  --co-cyan-dim:  #CCFBF1;
+  --co-ice:       #0284C7;
 
-  --co-yellow:    #A00048;
-  --co-yellow-mid:#800038;
-  --co-yellow-dim:#FFDCEA;
+  /* ── Accent — Rose (replaces neon-pink "yellow") ── */
+  --co-yellow:    #BE185D;
+  --co-yellow-mid:#9D174D;
+  --co-yellow-dim:#FCE7F3;
 
-  --co-green:     #1A7040;
-  --co-green-dim: #D0EDE0;
+  /* ── Positive — Leafy green ── */
+  --co-green:     #16A34A;
+  --co-green-dim: #DCFCE7;
 
-  --co-pink:      #9900AA;
+  /* ── Micro-accent — Soft purple ── */
+  --co-pink:      #A855F7;
 
-  --co-text:      #34506A;
-  --co-text-hi:   #0E2030;
-  --co-dim:       #82A0B8;
-  --co-dim2:      #B8CCDA;
+  /* ── Neutrals ── */
+  --co-text:      #475569;
+  --co-text-hi:   #0F172A;
+  --co-dim:       #94A3B8;
+  --co-dim2:      #CBD5E1;
 
-  --co-overlay:   rgba(20,50,80,0.55);
-  --dot-color:    rgba(0,80,130,0.04);
+  --co-overlay:   rgba(15,23,42,0.45);
+  --dot-color:    rgba(13,148,136,0.04);
+
+  /* ── Theme-switchable helpers (light overrides) ── */
+  --co-bar-track:    rgba(0,60,100,0.06);
+  --co-dot-empty:    rgba(0,60,100,0.18);
+  --co-close-btn:    #94A3B8;
+  --co-toast-success:#F0FDF4;
+  --co-toast-error:  #FEF2F2;
+  --co-toast-info:   #F0F9FF;
+  --co-toast-text:   #334155;
+  --co-separator:    rgba(0,60,100,0.08);
 }
 
-/* Fix hardcoded dark backgrounds in light mode */
+/* ── Body background — soft teal bloom + fine dot grid ── */
+body.theme-light {
+  background-image:
+    radial-gradient(ellipse 75% 45% at 50% -8%, rgba(13,148,136,0.04) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 30% at 50% 110%, rgba(13,148,136,0.02) 0%, transparent 60%),
+    radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
+}
+
+/* ── Film grain — almost invisible in light mode ── */
+@media (min-width: 768px) {
+  body.theme-light::before {
+    opacity: 0.015;
+    mix-blend-mode: multiply;
+  }
+}
+
+/* ── Kill neon pulse animations ── */
+body.theme-light .neon-border-yellow,
+body.theme-light .neon-border-red,
+body.theme-light .neon-border-green,
+body.theme-light .neon-cyan-anim,
+body.theme-light .neon-green-anim,
+body.theme-light .neon-yellow-anim {
+  animation: none !important;
+}
+
+/* ── Kill text glow (text-shadow) ── */
+body.theme-light [style*="textShadow"],
+body.theme-light [style*="text-shadow"] {
+  text-shadow: none !important;
+}
+
+/* ── Kill inline glow box-shadows on cards ── */
+body.theme-light .crt-card[style*="box-shadow"],
+body.theme-light .crt-card[style*="boxShadow"] {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+}
+
+/* ══ COMPONENT OVERRIDES ══════════════════════════════════════ */
+
+/* Fix hardcoded dark backgrounds */
 body.theme-light .cyber-box,
 body.theme-light .cyber-input {
   background: var(--co-panel);
 }
-
 body.theme-light select option {
   background: var(--co-panel);
   color: var(--co-text);
 }
 
-/* Scanlines — lighter in light mode */
+/* Scanlines — barely visible */
 body.theme-light .crt-card::after,
 body.theme-light .cyber-box::after {
   background: repeating-linear-gradient(
     to bottom,
     transparent 0px, transparent 3px,
-    rgba(0,0,0,0.025) 3px, rgba(0,0,0,0.025) 4px
+    rgba(0,0,0,0.015) 3px, rgba(0,0,0,0.015) 4px
   );
+  opacity: 0.3;
 }
 
 /* Modal overlays */
 body.theme-light [style*="rgba(0,0,0,0.85)"],
+body.theme-light [style*="rgba(0,0,0,0.88)"],
 body.theme-light [style*="rgba(0,0,0,0.9)"],
 body.theme-light [style*="rgba(0,0,0,0.95)"] {
-  background: rgba(100,130,160,0.7) !important;
+  background: rgba(15,23,42,0.45) !important;
+  backdrop-filter: blur(8px) !important;
 }
 
-/* Cards — fix all the dark inline backgrounds */
+/* Cards — warm white, subtle shadow */
+body.theme-light .crt-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04) !important;
+}
+body.theme-light .crt-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.06) !important;
+}
 body.theme-light .player-card-wrap > div {
-  background: linear-gradient(160deg, #ffffff 0%, #f4f8fc 100%) !important;
-  box-shadow: 0 2px 12px rgba(0,60,100,0.08), 0 0 0 1px rgba(180,200,220,0.6) !important;
+  background: linear-gradient(160deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px var(--co-border) !important;
 }
 body.theme-light .player-card-wrap:hover > div {
-  box-shadow: 0 4px 20px rgba(0,80,140,0.13), 0 0 0 1px rgba(0,110,160,0.3) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 0 0 1px var(--co-border-hi) !important;
 }
 
-/* Header arena background */
+/* Header */
 body.theme-light header {
-  background: linear-gradient(180deg, #E4EEF6 0%, #EDF3F9 100%) !important;
+  background: linear-gradient(180deg, #F1F5F9 0%, #F8FAFC 100%) !important;
   border-bottom-color: var(--co-border) !important;
 }
 
 /* Boot terminal block in HistoryTab */
 body.theme-light [style*="#060609"],
 body.theme-light [style*="#0f0f0f"] {
-  background: #eef3f8 !important;
+  background: #F1F5F9 !important;
   border-color: var(--co-border) !important;
 }
 
-/* Navigation */
+/* ── Navigation ── */
 body.theme-light .desktop-nav-inner,
 body.theme-light .desktop-nav {
-  background: var(--co-panel);
+  background: #FFFFFF;
   border-color: var(--co-border);
-}
-
-body.theme-light .desktop-tab {
-  color: var(--co-dim);
-}
-body.theme-light .desktop-tab.active {
-  color: var(--co-cyan);
-  border-bottom-color: var(--co-cyan);
-}
-
-body.theme-light .mobile-nav {
-  background: var(--co-panel);
-  border-top-color: var(--co-border);
-}
-body.theme-light .mobile-nav-btn {
-  color: var(--co-dim);
-}
-body.theme-light .mobile-nav-btn.active {
-  color: var(--co-cyan);
-}
-
-/* Player card badges & barcode */
-body.theme-light .crt-card .barcode-container {
-  opacity: 0.2;
-}
-
-/* Cyber buttons in light mode */
-body.theme-light .cyber-button-yellow {
-  background: linear-gradient(135deg, var(--co-cyan), var(--co-cyan-mid));
-  color: #ffffff;
-}
-body.theme-light .cyber-button-outline {
-  border-color: rgba(0,112,160,0.4);
-  color: var(--co-cyan);
-}
-body.theme-light .cyber-button-outline:hover {
-  background: rgba(0,112,160,0.08);
-  border-color: var(--co-cyan);
-}
-
-/* Fix body dotgrid background */
-body.theme-light::before {
-  background-image: radial-gradient(circle at 1px 1px, rgba(0,80,120,0.06) 1px, transparent 0) !important;
-}
-
-/* ══ LIGHT MODE — COMPONENT OVERRIDES ══════════════════════════ */
-
-/* Navigation */
-body.theme-light .desktop-nav-inner {
-  background: #ffffff;
-  border-color: var(--co-border);
-  box-shadow: 0 2px 12px rgba(0,80,120,0.08);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 body.theme-light .desktop-tab {
   color: var(--co-dim);
 }
 body.theme-light .desktop-tab.active {
-  background: rgba(0,112,160,0.06);
-  border-color: rgba(0,112,160,0.3);
+  background: rgba(13,148,136,0.06);
+  border-color: rgba(13,148,136,0.25);
   color: var(--co-cyan);
   box-shadow: none;
 }
@@ -848,146 +873,137 @@ body.theme-light .desktop-tab.active::after {
   box-shadow: none;
 }
 body.theme-light .desktop-tab:not(.active):hover {
-  background: rgba(0,112,160,0.04);
-  border-color: rgba(0,112,160,0.15);
+  background: rgba(13,148,136,0.04);
+  border-color: rgba(13,148,136,0.12);
   color: var(--co-cyan);
 }
 
-/* Mobile nav */
+/* ── Mobile nav ── */
 body.theme-light .mobile-nav {
   background: rgba(255,255,255,0.97);
   border-top-color: var(--co-border);
-  box-shadow: 0 -2px 16px rgba(0,60,100,0.1);
+  box-shadow: 0 -1px 6px rgba(0,0,0,0.06);
 }
 body.theme-light .mobile-nav-btn {
   color: var(--co-dim);
 }
 body.theme-light .mobile-nav-btn.active {
   color: var(--co-cyan);
-  background: rgba(0,112,160,0.05);
+  background: rgba(13,148,136,0.06);
 }
 body.theme-light .mobile-nav-btn.active::before {
   background: var(--co-cyan);
   box-shadow: none;
 }
 body.theme-light .mobile-nav-btn:active {
-  background: rgba(0,112,160,0.08);
+  background: rgba(13,148,136,0.08);
 }
 
 /* Compact header (scrolled) */
 body.theme-light .compact-header {
   background: rgba(255,255,255,0.97);
   border-bottom-color: var(--co-border);
-  box-shadow: 0 2px 12px rgba(0,60,100,0.08);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
-/* Scanlines — barely visible in light mode */
-body.theme-light .crt-card::after,
-body.theme-light .cyber-box::after,
-body.theme-light [style*="repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0."] {
-  opacity: 0.3;
+/* Player card badges & barcode */
+body.theme-light .crt-card .barcode-container {
+  opacity: 0.12;
 }
 
-/* Cyber box */
+/* ── Cyber box ── */
 body.theme-light .cyber-box {
   background: var(--co-panel);
   border-color: var(--co-border);
 }
 
-/* Cyber input */
+/* ── Cyber input ── */
 body.theme-light .cyber-input {
-  background: #f5f8fb;
+  background: #F8FAFC;
   border-color: var(--co-border);
   color: var(--co-text-hi);
 }
 body.theme-light .cyber-input:focus {
   border-color: var(--co-cyan);
-  box-shadow: 0 0 0 2px rgba(0,112,160,0.1);
+  box-shadow: 0 0 0 2px rgba(13,148,136,0.1);
 }
 body.theme-light .cyber-input::placeholder {
   color: var(--co-dim2);
 }
 
-/* Buttons */
+/* ── Buttons ── */
 body.theme-light .cyber-button-yellow {
-  background: linear-gradient(135deg, #0080B0, #005580);
-  color: #ffffff;
-  box-shadow: none;
+  background: linear-gradient(135deg, var(--co-cyan), var(--co-cyan-mid));
+  color: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 body.theme-light .cyber-button-yellow:hover {
-  box-shadow: 0 0 16px rgba(0,112,160,0.35);
+  box-shadow: 0 2px 8px rgba(13,148,136,0.25);
 }
 body.theme-light .cyber-button-outline {
-  border-color: rgba(0,112,160,0.35);
+  border-color: rgba(13,148,136,0.35);
   color: var(--co-cyan);
 }
 body.theme-light .cyber-button-outline:hover {
-  background: rgba(0,112,160,0.06);
+  background: rgba(13,148,136,0.06);
   border-color: var(--co-cyan);
   box-shadow: none;
 }
 
-/* Player card lift */
-
-/* Leaderboard rows */
+/* ── Leaderboard rows ── */
 body.theme-light .leaderboard-row {
-  background: rgba(255,255,255,0.7) !important;
+  background: rgba(255,255,255,0.8) !important;
 }
 body.theme-light .leaderboard-row:hover {
-  background: rgba(0,112,160,0.04) !important;
-  border-color: rgba(0,112,160,0.35) !important;
+  background: rgba(13,148,136,0.04) !important;
+  border-color: rgba(13,148,136,0.25) !important;
 }
 
-/* Log entries */
+/* ── Log entries ── */
 body.theme-light .log-entry {
   background: var(--co-panel) !important;
   border-color: var(--co-border) !important;
 }
 body.theme-light .log-entry:hover {
-  border-color: rgba(0,112,160,0.3) !important;
+  border-color: rgba(13,148,136,0.3) !important;
 }
 
-/* Icon buttons */
+/* ── Icon buttons ── */
 body.theme-light .icon-btn {
   border-color: var(--co-border);
   color: var(--co-dim);
 }
 body.theme-light .icon-btn:hover {
-  border-color: rgba(0,112,160,0.4) !important;
+  border-color: rgba(13,148,136,0.4) !important;
   color: var(--co-cyan) !important;
 }
 body.theme-light .icon-btn.danger:hover {
-  border-color: rgba(176,0,74,0.4) !important;
+  border-color: rgba(190,24,93,0.35) !important;
   color: var(--co-yellow) !important;
 }
 
-/* Filter buttons */
+/* ── Filter buttons ── */
 body.theme-light .filter-btn {
   border-color: var(--co-border);
   color: var(--co-dim);
 }
 body.theme-light .filter-btn:hover {
-  border-color: rgba(0,112,160,0.4) !important;
+  border-color: rgba(13,148,136,0.4) !important;
   color: var(--co-cyan) !important;
 }
 
-/* Scrollbar */
-body.theme-light ::-webkit-scrollbar-track { background: #e8f0f8; }
-body.theme-light ::-webkit-scrollbar-thumb { background: #b0c8dc; }
-body.theme-light ::-webkit-scrollbar-thumb:hover { background: #88aac0; }
+/* ── Scrollbar ── */
+body.theme-light ::-webkit-scrollbar-track { background: #F1F5F9; }
+body.theme-light ::-webkit-scrollbar-thumb { background: #CBD5E1; }
+body.theme-light ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
-/* UndoBar */
+/* ── UndoBar ── */
 body.theme-light .undo-bar {
   background: var(--co-panel);
   border-color: var(--co-border);
 }
 
-/* Background dot grid */
-body.theme-light {
-  --dot-color: rgba(0,80,120,0.07);
-}
-
-/* Main page background override */
+/* ── Main page background ── */
 body.theme-light .min-h-screen {
   background: var(--co-void);
 }

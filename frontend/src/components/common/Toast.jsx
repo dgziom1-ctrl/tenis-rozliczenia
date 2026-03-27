@@ -57,7 +57,7 @@ function ToastContainer({ toasts, removeToast }) {
 
 const STYLES = {
   success: {
-    bg:       '#031208',
+    bg:       'var(--co-toast-success)',
     border:   'rgba(0,255,102,0.3)',
     shadow:   '0 0 18px rgba(0,255,102,0.08)',
     accent:   'var(--co-green)',
@@ -65,7 +65,7 @@ const STYLES = {
     prefix:   'OK',
   },
   error: {
-    bg:       '#0e0606',
+    bg:       'var(--co-toast-error)',
     border:   'rgba(255,32,144,0.4)',
     shadow:   '0 0 20px rgba(255,32,144,0.12)',
     accent:   'var(--co-yellow)',
@@ -73,7 +73,7 @@ const STYLES = {
     prefix:   'ERR',
   },
   info: {
-    bg:       '#080808',
+    bg:       'var(--co-toast-info)',
     border:   'rgba(0,229,255,0.25)',
     shadow:   '0 0 16px rgba(0,229,255,0.06)',
     accent:   'var(--co-cyan)',
@@ -115,7 +115,7 @@ function Toast({ toast, onClose }) {
         <p style={{
           flex: 1, margin: 0,
           fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-          color: '#c8c8c8', lineHeight: 1.5,
+          color: 'var(--co-toast-text)', lineHeight: 1.5,
         }}>
           {toast.message}
         </p>
@@ -123,11 +123,11 @@ function Toast({ toast, onClose }) {
         {/* Close */}
         <button onClick={onClose} style={{
           background: 'transparent', border: 'none',
-          color: '#3a3a3a', cursor: 'pointer',
+          color: 'var(--co-close-btn)', cursor: 'pointer',
           padding: '2px', flexShrink: 0, transition: 'color 0.15s',
         }}
           onMouseEnter={e => e.currentTarget.style.color = s.accent}
-          onMouseLeave={e => e.currentTarget.style.color = '#3a3a3a'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--co-close-btn)'}
           aria-label="Zamknij"
         >
           <X size={16} />

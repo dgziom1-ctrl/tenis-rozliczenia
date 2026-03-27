@@ -522,7 +522,7 @@ export default function Header({ isMuted, setIsMuted, isConnected, scrolled, the
         <div style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,rgba(0,229,255,0.6),transparent)',zIndex:2 }}/>
 
         <div style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
-          justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
+          justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
           <button onClick={handleCopy} style={{ display:'flex',alignItems:'center',gap:'8px',
             background:'var(--co-dark)',border:'1px solid var(--co-border)',padding:'7px 12px',cursor:'pointer',
             transition:'all .18s',clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}>

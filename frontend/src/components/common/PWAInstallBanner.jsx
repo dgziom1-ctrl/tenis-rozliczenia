@@ -79,9 +79,9 @@ export default function PWAInstallBanner() {
           }}>
             <Download size={12} /> DODAJ
           </button>
-          <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: '#3a3a3a', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0, transition: 'color 0.15s' }}
+          <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: 'var(--co-close-btn)', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0, transition: 'color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color = 'var(--co-cyan)'}
-            onMouseLeave={e => e.currentTarget.style.color = '#3a3a3a'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--co-close-btn)'}
           >
             <X size={15} />
           </button>
@@ -112,14 +112,14 @@ export default function PWAInstallBanner() {
             Działa jak natywna aplikacja
           </p>
         </div>
-        <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: '#3a3a3a', cursor: 'pointer', padding: 4, flexShrink: 0, transition: 'color 0.15s' }}
+        <button onClick={dismiss} style={{ background: 'transparent', border: 'none', color: 'var(--co-close-btn)', cursor: 'pointer', padding: 4, flexShrink: 0, transition: 'color 0.15s' }}
           onMouseEnter={e => e.currentTarget.style.color = 'var(--co-cyan)'}
-          onMouseLeave={e => e.currentTarget.style.color = '#3a3a3a'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--co-close-btn)'}
         >
           <X size={15} />
         </button>
       </div>
-      <div style={{ borderTop: '1px solid #141414', padding: '10px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ borderTop: '1px solid var(--co-border)', padding: '10px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {steps.map((step, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{

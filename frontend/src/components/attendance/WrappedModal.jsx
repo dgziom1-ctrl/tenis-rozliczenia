@@ -365,15 +365,15 @@ export default function WrappedModal({ stats, onClose }) {
             {rest.length > 0 && (
               <div style={{
                 textAlign: 'left', padding: '10px 14px',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.06)',
+                background: 'var(--co-separator)',
+                border: '1px solid var(--co-separator)',
                 maxHeight: 180, overflowY: 'auto',
               }}>
                 {rest.map((p) => (
                   <div key={p.name} style={{
                     display: 'flex', alignItems: 'center', gap: 8,
                     padding: '5px 0',
-                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    borderBottom: '1px solid var(--co-separator)',
                   }}>
                     <span style={{ ...mono('clamp(0.5rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', width: 24 }}>
                       #{p.place}
@@ -434,8 +434,8 @@ export default function WrappedModal({ stats, onClose }) {
               ].map(s => (
                 <div key={s.label} style={{
                   padding: 'clamp(8px, 2vw, 14px)',
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  background: 'var(--co-separator)',
+                  border: '1px solid var(--co-separator)',
                   clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))',
                 }}>
                   <div style={{ ...display('clamp(1rem, 3.5vw, 1.6rem)'), color: s.color }}>

@@ -158,11 +158,11 @@ function TerminalRow({ children, highlight }) {
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       padding: '6px 12px',
-      borderBottom: '1px solid rgba(255,255,255,0.03)',
+      borderBottom: '1px solid var(--co-separator)',
       background: highlight || 'transparent',
       transition: 'background 0.15s',
     }}
-      onMouseEnter={e => { if (!highlight) e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+      onMouseEnter={e => { if (!highlight) e.currentTarget.style.background = 'var(--co-separator)'; }}
       onMouseLeave={e => { if (!highlight) e.currentTarget.style.background = 'transparent'; }}
     >
       {children}

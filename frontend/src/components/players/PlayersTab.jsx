@@ -176,7 +176,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
               {'>'} zarządzaj składem
             </p>
           </div>
-          <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#3a3a3a' }}>
+          <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-close-btn)' }}>
             [{players?.length || 0} graczy]
           </span>
         </div>
@@ -298,29 +298,29 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                       padding: '10px 12px', background: 'var(--co-dark)', border: '1px solid var(--co-border)',
                       clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)',
                     }}>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: '#3a3a3a', display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--co-close-btn)', display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                         <Cpu size={13} style={{ opacity: 0.3 }} /> {name}
                       </span>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button onClick={() => handleRestore(name)} style={{
                           padding: '6px 8px', background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-                          color: '#3a3a3a', transition: 'all 0.15s',
+                          color: 'var(--co-close-btn)', transition: 'all 0.15s',
                           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                           opacity: processingPlayer === name ? 0.65 : 1,
                           pointerEvents: processingPlayer === name ? 'none' : 'auto',
                         }}
                           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,229,255,0.4)'; e.currentTarget.style.color = 'var(--co-green)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#3a3a3a'; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = ''; }}
                           title="Przywróć">
                           <RotateCcw size={13} />
                         </button>
                         <button onClick={() => setConfirmDelete(name)} style={{
                           padding: '6px 8px', background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-                          color: '#3a3a3a', transition: 'all 0.15s',
+                          color: 'var(--co-close-btn)', transition: 'all 0.15s',
                           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                         }}
                           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.4)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e1e1e'; e.currentTarget.style.color = '#3a3a3a'; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = ''; }}
                           title="Usuń na zawsze">
                           <Trash2 size={13} />
                         </button>

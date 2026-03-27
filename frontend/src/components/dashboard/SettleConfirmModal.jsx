@@ -28,9 +28,9 @@ export default function SettleConfirmModal({
     >
       <div style={{
         background: 'var(--co-dark)',
-        border: '1px solid rgba(0,229,255,0.4)',
+        border: '1px solid var(--co-border-hi)',
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
-        boxShadow: '0 0 50px rgba(0,229,255,0.15), 0 4px 60px rgba(0,0,0,0.95)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
         padding: '26px 22px', width: '100%', maxWidth: 380,
       }}>
         {/* Yellow corner accent */}
@@ -41,7 +41,7 @@ export default function SettleConfirmModal({
           <div style={{
             width: 40, height: 40,
             background: 'rgba(0,229,255,0.07)',
-            border: '1px solid rgba(0,229,255,0.35)',
+            border: '1px solid var(--co-border-hi)',
             clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
@@ -51,7 +51,7 @@ export default function SettleConfirmModal({
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', opacity: 0.7, marginBottom: 3, textTransform: 'uppercase' }}>
               POTWIERDZENIE WPŁATY
             </p>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', letterSpacing: '0.06em', color: '#e8e8e8', margin: 0 }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', letterSpacing: '0.06em', color: 'var(--co-text-hi)', margin: 0 }}>
               ROZLICZ GRACZA
             </h3>
           </div>
@@ -60,7 +60,7 @@ export default function SettleConfirmModal({
         {/* Player name + amount */}
         <div style={{ marginBottom: 20 }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--co-text)', marginBottom: 12 }}>
-            {'>'} <span style={{ color: '#e8e8e8', fontWeight: 600 }}>{playerName}</span> zapłacił?
+            {'>'} <span style={{ color: 'var(--co-text-hi)', fontWeight: 600 }}>{playerName}</span> zapłacił?
           </p>
           <div style={{
             padding: '16px', textAlign: 'center',
@@ -74,7 +74,7 @@ export default function SettleConfirmModal({
             <span style={{
               fontFamily: 'var(--font-mono)', fontSize: '2.2rem',
               color: 'var(--co-cyan)',
-              textShadow: '0 0 20px rgba(0,229,255,0.4)',
+              textShadow: 'none',
             }}>
               {formatAmountShort(debt)}<span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 4 }}>ZŁ</span>
             </span>

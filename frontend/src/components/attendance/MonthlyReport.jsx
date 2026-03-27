@@ -127,7 +127,7 @@ export default function MonthlyReport({ monthlyStats, players }) {
                 </thead>
                 <tbody>
                   {monthlyStats.map(([month, rowData]) => (
-                    <tr key={month} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <tr key={month} style={{ borderBottom: '1px solid var(--co-separator)' }}>
                       <td style={{ padding: '10px 12px', fontSize: '0.8rem', color: 'var(--co-text)', fontFamily: 'var(--font-display)', letterSpacing: '0.08em', whiteSpace: 'nowrap', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 1, borderRight: '1px solid rgba(0,229,255,0.08)' }}>{month}</td>
                       <td style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--co-cyan)', textAlign: 'center' }}>{rowData.total}</td>
                       {players?.map(p => {

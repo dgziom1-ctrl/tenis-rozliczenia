@@ -153,7 +153,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
                   </span>
                 )}
               </div>
-              <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: 3, background: 'var(--co-bar-track)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{
                   height: '100%', borderRadius: 2,
                   width: `${pct}%`,
@@ -214,8 +214,8 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
               <div key={session.id} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '8px 10px', marginBottom: 3,
-                background: attended ? `${c.border}08` : 'rgba(255,255,255,0.015)',
-                border: `1px solid ${attended ? c.border + '25' : 'rgba(255,255,255,0.05)'}`,
+                background: attended ? `${c.border}08` : 'transparent',
+                border: `1px solid ${attended ? c.border + '25' : 'var(--co-separator)'}`,
                 clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))',
                 opacity: attended ? 1 : 0.45,
                 transition: 'opacity 0.15s',

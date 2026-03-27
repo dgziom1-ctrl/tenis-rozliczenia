@@ -39,7 +39,7 @@ function LogEntry({ row, onEdit, onDelete }) {
   const isSquash = row.sport === SPORT.SQUASH;
   return (
     <div className="scan-hover log-entry" style={{
-      background: 'var(--co-dark)', border: '1px solid #141414',
+      background: 'var(--co-dark)', border: '1px solid var(--co-border)',
       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
       padding: '12px 14px', marginBottom: 4,
     }}>
@@ -216,7 +216,7 @@ function AttendanceTrendChart({ history, playerNames }) {
 
           {data.map(d => (
             <line key={d.i} x1={xPos(d.i)} y1={PAD.top} x2={xPos(d.i)} y2={PAD.top + innerH}
-              stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+              stroke="var(--co-separator)" strokeWidth="1" />
           ))}
 
           <path d={areaPath} fill="url(#areaGrad)" />
@@ -743,7 +743,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-cyan)' }}>{label}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#3a3a3a' }}>[{rows.length}x]</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)' }}>[{rows.length}x]</span>
                 </div>
                 <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,229,255,0.25), transparent)' }} />
               </div>

@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback, useEffect, memo } from 'react';
+import { useState, useRef, useCallback, useEffect, memo, useContext } from 'react';
 import { getPlayerColor } from '../../constants/playerColors';
 import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '../../constants';
 import { FONT, CLIP } from '../../constants/styles';
 import { formatAmountShort } from '../../utils/format';
-import { useThemeTokens } from '../../context/ThemeContext';
+import { useThemeTokens, ThemeContext } from '../../context/ThemeContext';
 import { usePaymentUndo } from '../../hooks/usePaymentUndo';
 import BreakdownPanel from './BreakdownPanel';
 import PaymentModal from './PaymentModal';
@@ -30,6 +30,8 @@ function PlayerCard({
   const pct         = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
   const rank        = getRank(pct);
   const tokens      = useThemeTokens();
+  const theme       = useContext(ThemeContext);
+  const isLight     = theme === 'light';
   const c           = getPlayerColor(player.name, playerIndex);
 
   const [modal,     setModal]     = useState(null);
@@ -113,20 +115,24 @@ function PlayerCard({
         animation: 'none',
         overflow: 'hidden',
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-        boxShadow: isPending
+        boxShadow: isPending && !isLight
           ? `0 0 18px rgba(255,32,144,0.13), 0 0 40px rgba(255,32,144,0.05), inset 0 0 20px rgba(255,32,144,0.03)`
+          : isPending && isLight
+          ? `0 1px 4px rgba(0,0,0,0.06)`
           : 'none',
       }}
       onMouseEnter={e => {
         e.currentTarget.style.borderColor = `${c.border}70`;
         e.currentTarget.style.boxShadow = isPending
-          ? `0 0 24px rgba(255,32,144,0.2), 0 0 50px rgba(255,32,144,0.07), inset 0 0 20px rgba(255,32,144,0.04)`
-          : `0 0 16px ${c.border}30, 0 0 32px ${c.border}10`;
+          ? (isLight ? '0 2px 8px rgba(0,0,0,0.1)' : `0 0 24px rgba(255,32,144,0.2), 0 0 50px rgba(255,32,144,0.07), inset 0 0 20px rgba(255,32,144,0.04)`)
+          : (isLight ? '0 2px 8px rgba(0,0,0,0.08)' : `0 0 16px ${c.border}30, 0 0 32px ${c.border}10`);
       }}
       onMouseLeave={e => {
         e.currentTarget.style.borderColor = cardBorder;
-        e.currentTarget.style.boxShadow = isPending
+        e.currentTarget.style.boxShadow = isPending && !isLight
           ? `0 0 18px rgba(255,32,144,0.13), 0 0 40px rgba(255,32,144,0.05), inset 0 0 20px rgba(255,32,144,0.03)`
+          : isPending && isLight
+          ? `0 1px 4px rgba(0,0,0,0.06)`
           : 'none';
       }}
     >
@@ -190,7 +196,7 @@ function PlayerCard({
                 {player.attendanceCount}/{totalWeeks}
               </span>
             </div>
-            <div style={{ height: 2, background: 'rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 2, background: 'var(--co-bar-track)', position: 'relative', overflow: 'hidden' }}>
               <div style={{
                 position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`,
                 background: pct >= 75
@@ -215,7 +221,7 @@ function PlayerCard({
                       style={{
                         width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
                         background: attended ? c.border : 'transparent',
-                        border: `1px solid ${attended ? c.border : 'rgba(255,255,255,0.15)'}`,
+                        border: `1px solid ${attended ? c.border : 'var(--co-dot-empty)'}`,
                         boxShadow: attended ? `0 0 4px ${c.border}80` : 'none',
                         transition: 'all 0.2s',
                       }}
@@ -257,7 +263,7 @@ function PlayerCard({
 
             {justSettled ? (
               <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', animation: 'slide-in-up 0.3s ease-out' }}>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.15em', color: 'var(--co-green)', textShadow: '0 0 20px rgba(0,255,136,0.6)', margin: 0 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.15em', color: 'var(--co-green)', textShadow: isLight ? 'none' : '0 0 20px rgba(0,255,136,0.6)', margin: 0 }}>
                   OPŁACONO
                 </p>
               </div>
@@ -286,7 +292,7 @@ function PlayerCard({
                   fontFamily: 'var(--font-display)', fontSize: '2.4rem',
                   margin: 0, lineHeight: 1.1,
                   color: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
-                  textShadow: isPending
+                  textShadow: isLight ? 'none' : isPending
                     ? '0 0 14px rgba(255,32,144,0.45)'
                     : '0 0 14px rgba(0,229,255,0.4)',
                 }}>
@@ -380,7 +386,7 @@ function PlayerCard({
 
           {/* Barcode footer */}
           {!isMobile && (
-            <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
               <Barcode name={player.name} color={accentColor} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
                 <span style={{ ...FONT.monoMicro, letterSpacing: '0.08em' }}>
