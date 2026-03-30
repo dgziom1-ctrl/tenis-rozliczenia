@@ -168,7 +168,7 @@ export default function DashboardTab({ data, history, playSound }) {
         {/* Undo toast */}
         {undoToast && (
           <UndoBar
-            message={<>Opłacono: <span style={{ color: tokens.bodyText }}>{undoToast.payload.playerName}</span></>}
+            message={<>Rozliczono: <span style={{ color: tokens.bodyText }}>{undoToast.payload.playerName}</span></>}
             secondsLeft={undoToast.secondsLeft}
             progressPct={progressPct}
             onUndo={handleUndo}
@@ -198,7 +198,7 @@ export default function DashboardTab({ data, history, playSound }) {
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--co-dim)', lineHeight: 1.7 }}>
               {'>'} System gotowy.<br/>
               {'>'} Dodaj pierwszą sesję w zakładce{' '}
-              <span style={{ color: 'var(--co-cyan)', borderBottom: '1px solid rgba(0,229,255,0.3)' }}>LOG</span>
+              <span style={{ color: 'var(--co-cyan)', borderBottom: '1px solid rgba(0,229,255,0.3)' }}>DODAJ</span>
               <span className="terminal-cursor" />
             </p>
           </div>
@@ -251,8 +251,8 @@ export default function DashboardTab({ data, history, playSound }) {
           })}
         </div>
 
-        {/* ── Collapsible rank guide ── */}
-        <div style={{ background: 'var(--co-panel)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)' }}>
+        {/* ── Collapsible rank guide — only show when there's data ── */}
+        {totalWeeks > 0 && <div style={{ background: 'var(--co-panel)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)' }}>
           <button
             onClick={() => setShowRankGuide(v => !v)}
             style={{
@@ -288,7 +288,7 @@ export default function DashboardTab({ data, history, playSound }) {
               ))}
             </div>
           )}
-        </div>
+        </div>}
       </div>
     </>
   );

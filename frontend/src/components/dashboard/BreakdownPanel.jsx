@@ -38,7 +38,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           border: '1px solid var(--co-border)',
           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
           overflow: 'hidden',
-          maxHeight: 300,
+          maxHeight: 'min(300px, 50vh)',
           overflowY: 'auto',
         }}>
           {/* Sessions */}
@@ -76,7 +76,9 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
               {breakdown.payments.map((item, idx) => (
                 <TerminalRow key={idx}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-dim)' }}>
-                    {item.id === '__legacy_settled__' ? 'Rozliczono' : formatDate(item.date)}
+                     {item.id === '__legacy_settled__'
+                       ? (item.date ? `Rozliczono ${formatDate(item.date)}` : 'Rozliczono')
+                       : formatDate(item.date)}
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-cyan)', fontWeight: 600 }}>

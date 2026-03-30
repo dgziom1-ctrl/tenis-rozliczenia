@@ -20,7 +20,7 @@ function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers,
     msg += `👥 Obecni (${presentPlayers.length}): ${presentPlayers.join(', ')}\n`;
     msg += `💳 Bez karty: ${formatAmountShort(base)} zł/os.\n`;
     if (multi.length > 0) {
-      msg += `⚡ Z Multisport (${multi.join(', ')}): ${formatAmountShort(discounted)} zł/os.\n`;
+      msg += `⚡ Cena z kartą (${multi.join(', ')}): ${formatAmountShort(discounted)} zł/os.\n`;
     }
     return msg.trim();
   }
@@ -35,7 +35,7 @@ function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers,
     if (paying.length !== presentPlayers.length) msg += ` (${paying.length} os.)`;
     msg += '\n';
   }
-  if (multi.length > 0) msg += `⚡ Multisport (gratis): ${multi.join(', ')}\n`;
+  if (multi.length > 0) msg += `⚡ Multisport (bezpłatnie): ${multi.join(', ')}\n`;
   return msg.trim();
 }
 
@@ -138,7 +138,7 @@ function SessionSummaryModal({ summary, onClose }) {
                 </p>
                 {multisportCount > 0 && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)', marginTop: 4 }}>
-                    ⚡ Z Multisport: {formatAmountShort(Math.max(0, perPerson - SQUASH_MULTISPORT_DISCOUNT))} zł · {multisportCount} os.
+                    ⚡ Cena z kartą: {formatAmountShort(Math.max(0, perPerson - SQUASH_MULTISPORT_DISCOUNT))} zł · {multisportCount} os.
                   </p>
                 )}
               </>
@@ -223,7 +223,7 @@ function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport }
           {hasMulti && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--co-green)', letterSpacing: '0.1em' }}>
-                ⚡ Z Multisport ({multisportPlayers.length} os.)
+                ⚡ Cena z kartą ({multiCount} os.)
               </span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-green)' }}>
                 {(Math.round(discounted * 100) / 100).toFixed(2)} ZŁ

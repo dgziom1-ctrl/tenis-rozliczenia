@@ -154,7 +154,7 @@ function PlayerCard({
           letterSpacing: '0.15em', textTransform: 'uppercase',
         }}>
           {/* Neutralne etykiety – żadnych wykrzykników, żadnego "dłużnik" */}
-          {isPending ? 'Do rozliczenia'
+          {isPending ? 'Do wpłaty'
             : isOrganizer ? 'Organizator'
             : isSettled ? 'Rozliczony'
             : '↑ Nadpłata'}
@@ -265,7 +265,7 @@ function PlayerCard({
             {justSettled ? (
               <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', animation: 'slide-in-up 0.3s ease-out' }}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.15em', color: 'var(--co-green)', textShadow: isLight ? 'none' : '0 0 20px rgba(0,255,136,0.6)', margin: 0 }}>
-                  OPŁACONO
+                  ROZLICZONO
                 </p>
               </div>
             ) : hasCredit ? (

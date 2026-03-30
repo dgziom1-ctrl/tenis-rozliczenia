@@ -48,7 +48,7 @@ export const SPORT = {
 // 0 cards → 85 zł, 1 card → 70 zł, 2 cards → 55 zł
 export const SQUASH_BASE_PRICE        = 85;
 export const SQUASH_MULTISPORT_DISCOUNT = 15; // per card, reduces both rental AND personal share
-export const SQUASH_QUICK_COSTS       = [85, 70, 55];
+export const SQUASH_QUICK_COSTS       = [55, 70, 85, 110, 125, 140, 155, 170];
 
 export const SOUND_TYPES = {
   TAB:     'tab',

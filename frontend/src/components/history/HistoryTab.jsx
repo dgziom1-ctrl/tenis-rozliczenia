@@ -436,7 +436,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
     <>
       {pwModal && (
         <PasswordModal
-          action={pwModal.type === 'edit' ? 'Podaj kod dostępu aby edytować sesję.' : 'Podaj kod dostępu aby usunąć sesję.'}
+          action={pwModal.type === 'edit' ? 'Podaj kod dostępu aby edytować sesję.' : 'Podaj kod dostępu aby usunąć sesję. Uwaga: usunięcie przeliczy salda wszystkich graczy.'}
           onConfirm={handlePasswordConfirm}
           onCancel={() => setPwModal(null)}
           playSound={playSound}
@@ -737,7 +737,7 @@ export default function HistoryTab({ history, playerNames, playSound }) {
               BRAK DANYCH
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)', marginTop: 8 }}>
-              {'>'} Dodaj pierwszą sesję w zakładce LOG_
+              {'>'} Dodaj pierwszą sesję w zakładce DODAJ_
             </p>
           </div>
         )}
