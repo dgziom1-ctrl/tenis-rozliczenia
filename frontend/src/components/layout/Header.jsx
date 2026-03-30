@@ -1,12 +1,12 @@
 import { Volume2, VolumeX, Smartphone, Check, Sun, Moon } from 'lucide-react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-
+ 
 const CSS = `
 @keyframes confettiBurst{0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) translateX(var(--drift)) rotate(720deg);opacity:0}}
 @keyframes chaosFlash{0%{opacity:1}100%{opacity:0}}
 @keyframes headerBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 `;
-
+ 
 /* ═══════════════════════════════════════════════════
    3D Arena — canvas, real perspective, yaw+pitch cam
 ═══════════════════════════════════════════════════ */
@@ -14,39 +14,39 @@ function Arena({ chaosMode, onHit }) {
   const ref = useRef(null);
   const raf = useRef(null);
   const t0  = useRef(null);
-
+ 
   useEffect(() => {
     if (chaosMode) { cancelAnimationFrame(raf.current); return; }
     const canvas = ref.current;
     if (!canvas) return;
     const g = canvas.getContext('2d');
     const W = 560, H = 180, CX = 265, CY = 90;
-
+ 
     // DPR-aware rendering: keep crisp visuals while limiting extreme DPR costs.
     const dpr = Math.min((typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1, 2);
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
-
+ 
     const RX = 0.471, RY = -0.349;
     const cX = Math.cos(RX), sX = Math.sin(RX);
     const cY = Math.cos(RY), sY = Math.sin(RY);
     const FOV = 370, DIST = 290;
-
+ 
     const TX = 106, TZ = 36, NH = 19, TH = 5;
     const PR = 16,  PX = 122, PY = -21, CYCLE = 2400;
-
+ 
     const proj = (x, y, z) => {
       const x1 = x*cY + z*sY,  z1 = -x*sY + z*cY;
       const y2 = y*cX - z1*sX, z2 =  y*sX + z1*cX;
       const s = FOV / (z2 + DIST);
       return [CX + x1*s, CY + y2*s, s];
     };
-
+ 
     /* Contact point: x=PX-22=100, y=PY-8=-29 (matches paddle at peak topspin sweep) */
     const HIT_X = PX - 22;
     const HIT_Y = PY - 8;
-
+ 
     /* Topspin trajectory:
      * Long segments (paddle→bounce): CP biased toward landing side so ball dips on arrival.
      * Short segments (bounce→paddle): very flat CP — topspin keeps ball low & fast after bounce. */
@@ -63,7 +63,7 @@ function Arena({ chaosMode, onHit }) {
       [-28, -70],   // right paddle → left  bounce
       [-92, -10],   // left  bounce → left  paddle : FLAT
     ];
-
+ 
     const ballAt = (t) => {
       let i = 3;
       for (let j = 0; j < 4; j++) {
@@ -76,7 +76,7 @@ function Arena({ chaosMode, onHit }) {
         KF[i][1]*mt*mt + CP[i][1]*2*mt*tl + KF[i+1][1]*tl*tl,
       ];
     };
-
+ 
     const _quad = (pts, fill) => {
       g.beginPath();
       pts.forEach(([sx,sy], i) => i ? g.lineTo(sx, sy) : g.moveTo(sx, sy));
@@ -94,14 +94,14 @@ function Arena({ chaosMode, onHit }) {
       g.beginPath(); g.arc(0, 0, Math.max(rx, 0.1), 0, Math.PI*2);
       g.restore();
     };
-
+ 
     const HIT_T = 0.09;
     let lastHitState = false;
     let spinAngle = 0;   // accumulated ball rotation (topspin)
-
+ 
     let impactStartTs = -Infinity;
     const IMPACT_MS = 220;
-
+ 
     // Offscreen cache for static geometry (table + net).
     // Reduces per-frame CPU work while keeping paddles/ball fully dynamic.
     const staticCanvas = document.createElement('canvas');
@@ -110,7 +110,7 @@ function Arena({ chaosMode, onHit }) {
     const sg = staticCanvas.getContext('2d');
     if (sg) {
       sg.setTransform(dpr, 0, 0, dpr, 0, 0);
-
+ 
       const quadS = (pts, fill) => {
         sg.beginPath();
         pts.forEach(([sx, sy], i) => (i ? sg.lineTo(sx, sy) : sg.moveTo(sx, sy)));
@@ -126,9 +126,9 @@ function Arena({ chaosMode, onHit }) {
         sg.lineWidth = w;
         sg.stroke();
       };
-
+ 
       sg.clearRect(0, 0, W, H);
-
+ 
       /* Table (static) */
       const FL = proj(-TX, 0, -TZ), FR = proj(TX, 0, -TZ);
       const BR = proj(TX, 0, TZ), BL = proj(-TX, 0, TZ);
@@ -147,7 +147,7 @@ function Arena({ chaosMode, onHit }) {
       segS(BR, FR, 'rgba(0,200,255,0.55)', 1.5);
       segS(BL, BR, 'rgba(0,160,255,0.18)', 1.0);
       segS(proj(0, 0, -TZ), proj(0, 0, TZ), 'rgba(0,229,255,0.10)', 1);
-
+ 
       /* Table front face (static) */
       const FL2 = proj(-TX, TH, -TZ), FR2 = proj(TX, TH, -TZ);
       const fg = sg.createLinearGradient(0, FL[1], 0, FL2[1]);
@@ -158,7 +158,7 @@ function Arena({ chaosMode, onHit }) {
       sg.shadowColor = 'rgba(0,229,255,0.50)';
       segS(FL, FR, 'rgba(0,229,255,0.80)', 1.8);
       sg.restore();
-
+ 
       /* Net (static) */
       const nBN = proj(0, 0, -TZ), nBF = proj(0, 0, TZ);
       const nTN = proj(0, -NH, -TZ), nTF = proj(0, -NH, TZ);
@@ -181,11 +181,11 @@ function Arena({ chaosMode, onHit }) {
       segS(nTN, nTF, 'rgba(200,248,255,0.95)', 2.5);
       sg.restore();
     }
-
+ 
     /* ── DRAW FRAME ── */
     const draw = (progress, nowTs) => {
       g.clearRect(0, 0, W, H);
-
+ 
       const leftHitT  = Math.min(progress, 1-progress) * 2;
       const rightHitT = Math.abs(progress - 0.5) * 2;
       const isHitting = leftHitT < HIT_T || rightHitT < HIT_T;
@@ -194,30 +194,30 @@ function Arena({ chaosMode, onHit }) {
         if (isHitting) impactStartTs = nowTs;
         onHit?.(isHitting);
       }
-
+ 
       const impactRaw = impactStartTs > 0 ? Math.max(0, (IMPACT_MS - (nowTs - impactStartTs)) / IMPACT_MS) : 0;
       const impact = impactRaw * impactRaw * (3 - 2 * impactRaw); // smoother decay
       const shakeAmp = impact * 3;
       const shakeX = Math.sin(nowTs * 0.02) * shakeAmp;
       const shakeY = Math.cos(nowTs * 0.017) * shakeAmp * 0.6;
-
+ 
       g.save();
       if (impact > 0) g.translate(shakeX, shakeY);
       if (sg) g.drawImage(staticCanvas, 0, 0, W, H);
-
+ 
       /* Paddles before ball (ball always on top) */
       drawPaddle(-PX, progress, true, impact);
       drawPaddle( PX, progress, false, impact);
-
+ 
       /* Ball */
       const bv = ballAt(progress);
       const bq = proj(bv[0], bv[1], 0);
       const bR = 6.4 * bq[2];
-
+ 
       /* Accumulate spin angle: topspin rotates in same direction as travel */
       const prevBv = ballAt((progress - 0.007 + 1) % 1);
       spinAngle += (bv[0] - prevBv[0]) * 0.13;
-
+ 
       /* Ball shadow */
       const bs = proj(bv[0], 0, 0);
       const sa = Math.max(0, 0.20*(1 - Math.abs(bv[1])/68));
@@ -225,12 +225,12 @@ function Arena({ chaosMode, onHit }) {
       g.beginPath(); g.arc(0, 0, bR*1.55, 0, Math.PI*2);
       g.fillStyle = `rgba(0,50,120,${sa})`; g.fill();
       g.restore();
-
+ 
       /* Ghost trail */
       const tp = (progress-.02+1)%1, tv = ballAt(tp), tq = proj(tv[0],tv[1],0);
       g.beginPath(); g.arc(tq[0], tq[1], 3.6*tq[2], 0, Math.PI*2);
       g.fillStyle = 'rgba(0,200,255,0.06)'; g.fill();
-
+ 
       /* Ball sphere */
       g.save();
       g.shadowBlur = 13 * bq[2] * (1 + impact * 0.6);
@@ -240,7 +240,7 @@ function Arena({ chaosMode, onHit }) {
       g.beginPath(); g.arc(bq[0], bq[1], bR, 0, Math.PI*2);
       g.fillStyle = bg; g.fill();
       g.restore();
-
+ 
       /* ── TOPSPIN STRIPE ──
          A horizontal seam band that scrolls top→bottom as the ball rotates forward.
          spinAngle accumulates with travel distance → band sweeps continuously.   */
@@ -266,7 +266,7 @@ function Arena({ chaosMode, onHit }) {
       }
       g.restore(); // shake + cached static background scope
     };
-
+ 
     /* ── PADDLE (TOPSPIN SWING) ──
      *
      * The three phases of a topspin stroke:
@@ -290,68 +290,68 @@ function Arena({ chaosMode, onHit }) {
       const hitT = isLeft ? Math.min(progress, 1-progress)*2 : Math.abs(progress-0.5)*2;
       const hitting = hitT < HIT_T;
       const impactK = 1 + impact * (hitting ? 1.0 : 0.25);
-
+ 
       /* Are we before or after impact? */
       const isApproaching = isLeft ? (progress > 0.5) : (progress < 0.5);
       const signedT = isApproaching ? -hitT : hitT;
-
+ 
       const APP_W = 0.34, FOL_W = 0.22, RET_W = 0.24;
       const inApp  = signedT >= -APP_W && signedT <  0;
       const inFol  = signedT >=  0     && signedT <= FOL_W;
       const inRet  = signedT >  FOL_W  && signedT <= FOL_W + RET_W;
       const inAnim = inApp || inFol || inRet;
-
+ 
       /* Phase-local 0→1 progress */
       const tApp = inApp ? (signedT + APP_W) / APP_W : 0;
       const tFol = inFol ?  signedT / FOL_W           : 0;
       const tRet = inRet ? (signedT - FOL_W) / RET_W  : 0;
-
+ 
       const easeIn  = t => t * t * (3 - 2*t);   // smoothstep
       const easeOut = t => 1 - (1-t) * (1-t);   // decelerate
-
+ 
       const netDir = isLeft ? 1 : -1;
-
+ 
       /* Y offset from PY (negative = higher = topspin upswing) */
       let yOff = 0;
       if      (inApp) yOff = easeIn(tApp) * (-8);            //   0 → -8
       else if (inFol) yOff = -8 + easeOut(tFol) * (-16);     //  -8 → -24
       else if (inRet) yOff = -24 * (1 - easeIn(tRet));       // -24 →   0
-
+ 
       /* X offset toward net */
       let xOff = 0;
       if      (inApp) xOff = tApp * tApp * 22;                //   0 → 22  (accelerate)
       else if (inFol) xOff = 22 - tFol * 8;                   //  22 → 14
       else if (inRet) xOff = 14 * (1 - easeIn(tRet));         //  14 →  0
-
+ 
       /* Tilt factor: 1 = fully closed face, 0 = neutral */
       let tiltF = 0;
       if      (inApp) tiltF = easeIn(tApp);
       else if (inFol) tiltF = 1 - tFol * 0.4;
       else if (inRet) tiltF = 0.6 * (1 - tRet);
       const tiltZ = netDir * tiltF * 13;
-
+ 
       /* Idle bob — muted entirely during animation */
       const bobPhase = isLeft ? 0 : Math.PI * 0.65;
       const bob = Math.sin(progress * Math.PI * 4 + bobPhase) * 2.0 * (inAnim ? 0 : 1);
-
+ 
       const swingX = px  + netDir * xOff;
       const finalY = PY  + yOff + bob;
-
+ 
       const bump = hitting ? 1 + (1 - hitT/HIT_T) * 0.12 : 1;
       const R    = PR * bump;
-
+ 
       const pc = proj(swingX, finalY, 0);
       const pr = proj(swingX+R, finalY,     0);
       const pl = proj(swingX-R, finalY,     0);
       const pt = proj(swingX,   finalY-R,   tiltZ);
       const pb = proj(swingX,   finalY+R,  -tiltZ * 0.25);
-
+ 
       const cx  = (pr[0]+pl[0]) / 2;
       const cy  = (pt[1]+pb[1]) / 2;
       const rx  = Math.hypot(pr[0]-pl[0], pr[1]-pl[1]) / 2;
       const ry  = Math.hypot(pt[0]-pb[0], pt[1]-pb[1]) / 2;
       const ang = Math.atan2(pt[1]-pb[1], pt[0]-pb[0]) + Math.PI/2;
-
+ 
       /* Layer 1: outer glow halo */
       g.save();
       g.shadowBlur  = (hitting ? 20 : 8) * impactK;
@@ -364,25 +364,25 @@ function Arena({ chaosMode, onHit }) {
       g.lineWidth = 3.5;
       ellipse(cx, cy, rx*1.1, ry*1.1, ang); g.stroke();
       g.restore();
-
+ 
       /* Layer 2: dark body */
       const bdg = g.createRadialGradient(cx-rx*.16,cy-ry*.16,0, cx,cy,Math.max(rx,ry)*1.05);
       bdg.addColorStop(0,'#062038'); bdg.addColorStop(.76,'#031428'); bdg.addColorStop(1,'#010C1C');
       ellipse(cx, cy, rx, ry, ang); g.fillStyle = bdg; g.fill();
-
+ 
       /* Layer 3: rim stroke */
       g.strokeStyle = hitting
         ? `rgba(0,229,255,${0.90 + 0.12 * impact})`
         : `rgba(0,180,255,${0.55 + 0.06 * impact})`;
       g.lineWidth = 1.9;
       ellipse(cx, cy, rx*.95, ry*.95, ang); g.stroke();
-
+ 
       /* Layer 4: rubber face */
       const rfg = g.createRadialGradient(cx-rx*.1,cy-ry*.1,0, cx,cy,rx*.52);
       rfg.addColorStop(0, hitting ? 'rgba(0,229,255,0.95)' : 'rgba(0,180,220,0.85)');
       rfg.addColorStop(1, hitting ? 'rgba(0,160,210,0.88)' : 'rgba(0,120,180,0.72)');
       ellipse(cx, cy, rx*.52, ry*.52, ang); g.fillStyle = rfg; g.fill();
-
+ 
       /* Handle */
       const hs = proj(swingX, finalY + R/pc[2] + 1,  0);
       const he = proj(swingX, finalY + R/pc[2] + 14, 0);
@@ -393,7 +393,7 @@ function Arena({ chaosMode, onHit }) {
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
       g.lineCap = 'butt'; g.restore();
     };
-
+ 
     const loop = (ts) => {
       if (!t0.current) t0.current = ts;
       // Draw every frame. requestAnimationFrame is synced with device refresh rate,
@@ -401,39 +401,39 @@ function Arena({ chaosMode, onHit }) {
       draw(((ts - t0.current) % CYCLE) / CYCLE, ts);
       raf.current = requestAnimationFrame(loop);
     };
-
+ 
     const startLoop = () => {
       if (raf.current) return;
       raf.current = requestAnimationFrame(loop);
     };
-
+ 
     const stopLoop = () => {
       if (!raf.current) return;
       cancelAnimationFrame(raf.current);
       raf.current = null;
     };
-
+ 
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') stopLoop();
       else startLoop();
     };
-
+ 
     document.addEventListener('visibilitychange', onVisibility);
     startLoop();
-
+ 
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
       stopLoop();
       t0.current = null;
     };
   }, [chaosMode, onHit]);
-
+ 
   return (
     <canvas ref={ref} width={560} height={180}
       style={{ display:'block', width:'100%', maxWidth:560, height:'auto' }} />
   );
 }
-
+ 
 /* ═══════════════════════════════════════════════════
    HEADER
 ═══════════════════════════════════════════════════ */
@@ -445,7 +445,7 @@ const CopyIcon = () => (
     <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
   </svg>
 );
-
+ 
 function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleTheme }) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
@@ -454,34 +454,34 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
   const chaosTimer = useRef(null);
   const clickCount = useRef(0);
   const clickTimer = useRef(null);
-
+ 
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
-
+ 
   useEffect(() => {
     return () => {
       clearTimeout(chaosTimer.current);
       clearTimeout(clickTimer.current);
     };
   }, []);
-
+ 
   /* Stable callback — avoids re-mounting canvas on every render */
   const handleHit = useCallback((state) => {
     setHitting(state);
     if (state) window.dispatchEvent(new CustomEvent('paddleHit'));
   }, []);
-
+ 
   const handleCopy = () => {
     navigator.clipboard.writeText(blikNumber.replace(/\s/g, ''));
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
-
+ 
   const handleTitleClick = () => {
     clickCount.current += 1;
     clearTimeout(clickTimer.current);
     if (clickCount.current >= 5) { clickCount.current = 0; activateChaos(); }
     else clickTimer.current = setTimeout(() => { clickCount.current = 0; }, 2000);
   };
-
+ 
   const activateChaos = () => {
     setChaosMode(true);
     const pool = ['🏓','⚡','💀','🎮','💥','⚠️','🔥','🎯','💣','🌊'];
@@ -494,7 +494,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
     clearTimeout(chaosTimer.current);
     chaosTimer.current = setTimeout(() => { setChaosMode(false); setConfetti([]); }, 4000);
   };
-
+ 
   return (
     <>
       <style>{CSS}</style>
@@ -511,16 +511,16 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           animation:'chaosFlash 0.6s ease-out forwards',
           background:'radial-gradient(ellipse at 50% 30%,rgba(0,229,255,0.12) 0%,rgba(0,229,255,0.04) 60%,transparent 80%)' }}/>
       )}
-
+ 
       <header style={{ position:'relative',overflow:'visible',
         background:'linear-gradient(180deg,#020408 0%,#050B10 100%)',
         borderBottom:'1px solid var(--co-border)' }}>
-
+ 
         <div style={{ position:'absolute',top:0,left:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'0 0 10px rgba(0,229,255,.7)',zIndex:2 }}/>
         <div style={{ position:'absolute',top:0,right:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'0 0 10px rgba(0,229,255,.7)',zIndex:2 }}/>
         <div style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,rgba(0,229,255,0.9),transparent)',zIndex:2 }}/>
         <div style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,rgba(0,229,255,0.6),transparent)',zIndex:2 }}/>
-
+ 
         <div style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
           <button onClick={handleCopy} style={{ display:'flex',alignItems:'center',gap:'8px',
@@ -553,10 +553,10 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             </button>
           </div>
         </div>
-
+ 
         <div style={{ position:'relative',zIndex:10,padding:'18px 16px 22px',
           display:'flex',flexDirection:'column',alignItems:'center' }}>
-
+ 
           <div style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
             <div style={{ height:1,width:36,background:'linear-gradient(to right,transparent,rgba(0,229,255,.4))' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
@@ -565,13 +565,13 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             </span>
             <div style={{ height:1,width:36,background:'linear-gradient(to left,transparent,rgba(0,229,255,.4))' }}/>
           </div>
-
+ 
           <div style={{ width:'100%',maxWidth:560,marginBottom:14,
             overflow:'visible',
             filter:chaosMode?'none':'drop-shadow(0 0 20px rgba(0,229,255,.12))' }}>
             <Arena chaosMode={chaosMode} onHit={handleHit}/>
           </div>
-
+ 
           <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
             {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
@@ -602,10 +602,10 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
                 }),
             }}>CYBER-PONG</span>
           </button>
-
+ 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
             background:'linear-gradient(90deg,transparent,rgba(0,229,255,.25) 40%,rgba(0,229,255,.25) 60%,transparent)' }}/>
-
+ 
           {/* JACK IN — lights up exactly when ball hits paddle */}
           <div style={{ display:'flex',alignItems:'center',gap:'14px' }}>
             <span style={{
@@ -629,13 +629,13 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           </div>
         </div>
       </header>
-
+ 
       <div style={{ height:2,background:'linear-gradient(90deg,transparent,var(--co-cyan) 50%,transparent)',opacity:.6 }}/>
-
+ 
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
         <button onClick={handleCopy} style={{ background:'transparent',border:'none',padding:0,
           cursor:'pointer',display:'flex',alignItems:'center',gap:'6px' }}>
-          <span style={{ fontSize:'.9rem' }}>🏓</span>
+          <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
           <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
             letterSpacing:'.15em',color:'var(--co-cyan)',padding:'2px 5px',
             background:'rgba(0,229,255,0.1)',border:'1px solid rgba(0,229,255,.2)' }}>BLIK</span>
@@ -667,5 +667,5 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
     </>
   );
 }
-
+ 
 export default React.memo(Header);
