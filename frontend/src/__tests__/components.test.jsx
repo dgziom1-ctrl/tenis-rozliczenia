@@ -30,13 +30,17 @@ vi.mock('firebase/messaging', () => ({
 }));
 
 // subscribeToData nigdy nie wywołuje callbacku → apka zostaje w stanie ładowania
+vi.mock('../lib/firebase/index', async (importOriginal) => {
+  const original = await importOriginal();
+  return { ...original, subscribeToData: vi.fn(() => () => {}) };
+});
 vi.mock('../firebase/index', async (importOriginal) => {
   const original = await importOriginal();
   return { ...original, subscribeToData: vi.fn(() => () => {}) };
 });
 
 // ─── Importy komponentów ────────────────────────────────────────────────────
-import App from '../App';
+import App from '../app/App';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import Navigation from '../components/layout/Navigation';
 import UndoBar from '../components/common/UndoBar';
@@ -68,14 +72,14 @@ describe('App — smoke test', () => {
   });
 
   it('subscribeToData jest wywołane przy montowaniu', async () => {
-    const { subscribeToData } = await import('../firebase/index');
+    const { subscribeToData } = await import('../lib/firebase/index');
     render(<App />);
     expect(subscribeToData).toHaveBeenCalledTimes(1);
   });
 
   it('wywołuje funkcję cleanup Firebase przy odmontowaniu', async () => {
     const unsub = vi.fn();
-    const { subscribeToData } = await import('../firebase/index');
+    const { subscribeToData } = await import('../lib/firebase/index');
     subscribeToData.mockReturnValueOnce(unsub);
 
     const { unmount } = render(<App />);

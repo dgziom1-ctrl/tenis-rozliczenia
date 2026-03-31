@@ -1,12 +1,8 @@
-// Public API – importuj stąd zamiast z firebase.js
-export { subscribeToData } from './subscriptions';
-export { database } from './config';
-
-// Weeks
-export { addSession, updateWeek, deleteWeek } from './weeks';
-
-// Players
-export { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } from './players';
-
-// Payments
-export { settlePlayer, undoSettle, addPayment, removePayment } from './payments';
+// Backward-compat shim — will be removed after full migration to @/lib/firebase
+export {
+  subscribeToData,
+  database,
+  addSession, updateWeek, deleteWeek,
+  addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti,
+  settlePlayer, undoSettle, addPayment, removePayment,
+} from '../lib/firebase/index';
