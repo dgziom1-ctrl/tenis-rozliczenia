@@ -16,7 +16,7 @@ export default function DeleteConfirmation({ row, onConfirm, onCancel }: DeleteC
       padding: 16, marginBottom: 4,
       boxShadow: '0 0 20px rgba(255,32,144,0.1)',
     }}>
-      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', marginBottom: 4, textTransform: 'uppercase' }}>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--co-rose)', marginBottom: 4, textTransform: 'uppercase' }}>
         ⚠ Usunąć sesję z dnia {formatDate(row.datePlayed)}?
       </p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', marginBottom: 14 }}>
@@ -26,7 +26,7 @@ export default function DeleteConfirmation({ row, onConfirm, onCancel }: DeleteC
         <button onClick={() => onConfirm(row.id)}
           style={{
             flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            background: 'var(--co-yellow)', color: '#000',
+            background: 'var(--co-rose)', color: '#000',
             fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.12em',
             border: 'none', cursor: 'pointer',
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',

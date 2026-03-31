@@ -2,11 +2,6 @@ import { Volume2, VolumeX, Smartphone, Check, Sun, Moon } from 'lucide-react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ArenaCanvas from './ArenaCanvas';
 
-const CSS = `
-@keyframes confettiBurst{0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) translateX(var(--drift)) rotate(720deg);opacity:0}}
-@keyframes chaosFlash{0%{opacity:1}100%{opacity:0}}
-@keyframes headerBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
-`;
 
 /* ═══════════════════════════════════════════════════
    HEADER
@@ -80,7 +75,6 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
 
   return (
     <>
-      <style>{CSS}</style>
       {chaosMode && confetti.map(c => (
         <div key={c.id} className="fixed pointer-events-none z-50"
           style={{ left:`${c.x}%`,top:0,fontSize:`${c.size}px`,
@@ -234,7 +228,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           </span>
           <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
             border:isMuted?'1px solid rgba(255,32,144,.4)':'1px solid var(--co-border)',
-            color:isMuted?'var(--co-yellow)':'var(--co-dim)',
+            color:isMuted?'var(--co-rose)':'var(--co-dim)',
             background:'transparent',padding:'4px 6px',cursor:'pointer',
             clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
             {isMuted ? <VolumeX size={15}/> : <Volume2 size={15}/>}

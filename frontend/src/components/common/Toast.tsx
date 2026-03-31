@@ -69,8 +69,8 @@ const STYLES = {
     bg:       'var(--co-toast-error)',
     border:   'rgba(255,32,144,0.4)',
     shadow:   '0 0 20px rgba(255,32,144,0.12)',
-    accent:   'var(--co-yellow)',
-    icon:     <AlertCircle size={16} style={{ color: 'var(--co-yellow)', flexShrink: 0 }} />,
+    accent:   'var(--co-rose)',
+    icon:     <AlertCircle size={16} style={{ color: 'var(--co-rose)', flexShrink: 0 }} />,
     prefix:   'ERR',
   },
   info: {

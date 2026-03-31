@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react';
 import { CheckCircle2, HandCoins, X } from 'lucide-react';
 import { formatAmountShort } from '@/utils/format';
 import { InlineSpinner } from '../common/LoadingSkeleton';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 export default function SettleConfirmModal({
   playerName,
@@ -11,6 +12,7 @@ export default function SettleConfirmModal({
   isProcessing = false,
 }) {
   const overlayRef = useRef(null);
+  useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
 
   if (!playerName) return null;
@@ -18,7 +20,7 @@ export default function SettleConfirmModal({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
       tabIndex={-1}
       onKeyDown={e => e.key === 'Escape' && onCancel()}
@@ -26,7 +28,7 @@ export default function SettleConfirmModal({
       role="dialog"
       aria-modal="true"
     >
-      <div style={{
+      <div className="modal-enter" style={{
         background: 'var(--co-dark)',
         border: '1px solid var(--co-border-hi)',
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',

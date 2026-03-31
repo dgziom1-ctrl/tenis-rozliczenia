@@ -192,7 +192,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 required
               />
               {costTouched && !isCostValid && (
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-yellow)', marginTop: 8 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 8 }}>
                   ⚠ {totalCostError}
                 </p>
               )}
@@ -209,7 +209,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               </p>
               <PlayerToggleGrid names={playerNames || []} selected={presentPlayers} onToggle={togglePresent} accent="yellow" />
               {!isPresentValid && (
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-yellow)', marginTop: 10, textAlign: 'center' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
                   ⚠ Wybierz przynajmniej jednego gracza
                 </p>
               )}

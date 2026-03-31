@@ -6,11 +6,13 @@ import { formatDate } from '@/utils/format';
 import { getPlayerColor } from '@/constants/colors';
 import { getPlayerAchievements } from '@/utils/achievements';
 import { getPlayerSessionCost } from '@/utils/sessionCost';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import AchievementBadge from './AchievementBadge';
 
 // ─── Player Session Drill-Down Modal ─────────────────────────────
 export default function PlayerSessionModal({ player, history, totalWeeks, onClose }) {
   const overlayRef = useRef(null);
+  useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
 
   const c = player ? getPlayerColor(player.name) : null;
@@ -50,6 +52,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
   return (
     <div
       ref={overlayRef}
+      className="modal-overlay"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       tabIndex={-1}
       onKeyDown={e => e.key === 'Escape' && onClose()}

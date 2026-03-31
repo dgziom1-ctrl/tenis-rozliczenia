@@ -21,6 +21,7 @@ export default function PlayerFilterSheet({ isOpen, onClose, playerNames, filter
   return (
     <div
       ref={overlayRef}
+      className="modal-overlay"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       tabIndex={-1}
       onKeyDown={e => e.key === 'Escape' && onClose()}
@@ -39,6 +40,7 @@ export default function PlayerFilterSheet({ isOpen, onClose, playerNames, filter
       }}
     >
       <div
+        className="bottom-sheet-enter"
         style={{
           width: '100%',
           maxWidth: 520,

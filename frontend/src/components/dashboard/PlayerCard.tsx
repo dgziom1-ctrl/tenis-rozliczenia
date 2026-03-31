@@ -107,10 +107,9 @@ function PlayerCard({
   return (
     <div
       ref={cardRef}
-      className={`${justSettled ? 'settle-flash' : ''} crt-card`}
+      className={`${justSettled ? 'settle-flash' : ''} crt-card glass-card`}
       style={{
         position: 'relative',
-        background: 'linear-gradient(160deg, var(--co-panel) 0%, var(--co-dark) 100%)',
         border: `1px solid ${cardBorder}`,
         display: 'flex', flexDirection: 'column',
         animation: 'none',
@@ -270,10 +269,10 @@ function PlayerCard({
               </div>
             ) : hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-yellow)', letterSpacing: '0.2em', marginBottom: 2 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-rose)', letterSpacing: '0.2em', marginBottom: 2 }}>
                   ↑ NADPŁATA
                 </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', color: 'var(--co-yellow)', margin: 0, lineHeight: 1 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', color: 'var(--co-rose)', margin: 0, lineHeight: 1 }}>
                   +{formatAmountShort(animatedAbs)}
                   <span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
@@ -283,7 +282,7 @@ function PlayerCard({
                 <p style={{
                   fontFamily: 'var(--font-display)', fontSize: '2.4rem',
                   margin: 0, lineHeight: 1.1,
-                  color: isPending ? 'var(--co-yellow)' : 'var(--co-green)',
+                  color: isPending ? 'var(--co-rose)' : 'var(--co-green)',
                   textShadow: isLight ? 'none' : isPending
                     ? '0 0 14px rgba(255,32,144,0.45)'
                     : '0 0 14px rgba(0,229,255,0.4)',
@@ -294,7 +293,7 @@ function PlayerCard({
               </div>
             )}
             {adminMode && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-yellow)', letterSpacing: '0.1em', marginTop: 4, position: 'relative', zIndex: 1 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-rose)', letterSpacing: '0.1em', marginTop: 4, position: 'relative', zIndex: 1 }}>
                 ⚠ TRYB EDYCJI
               </p>
             )}

@@ -49,20 +49,20 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
           fontSize: '1.3rem', textAlign: 'center',
           fontFamily: 'var(--font-mono)',
           marginBottom: showError ? 4 : 12,
-          border: `1px solid ${showError ? 'var(--co-yellow)' : 'var(--co-border)'}`,
+          border: `1px solid ${showError ? 'var(--co-rose)' : 'var(--co-border)'}`,
           boxShadow: showError ? '0 0 10px rgba(255,32,144,0.2)' : 'none',
           clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
         }}
       />
 
       {showError && (
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', textAlign: 'center', marginBottom: 8 }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ {customAmt !== '' && parseFloat(customAmt) > 0 && parseFloat(customAmt) < 0.01 ? 'Minimalna kwota to 0.01 zł' : 'KWOTA MUSI BYĆ WIĘKSZA OD 0'}
         </p>
       )}
 
       {errorMsg && !showError && (
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', textAlign: 'center', marginBottom: 8 }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ {errorMsg}
         </p>
       )}

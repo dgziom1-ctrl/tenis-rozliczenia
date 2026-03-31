@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { Lock, Check, X } from 'lucide-react';
 import { ADMIN_PASSWORD, SOUND_TYPES } from '@/constants';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 // ─── Shared PasswordModal ────────────────────────────────────────
 export function PasswordModal({ action, onConfirm, onCancel, playSound }) {
   const [input, setInput] = useState('');
   const [error, setError] = useState(false);
   const overlayRef = useRef(null);
+  useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
 
   const handleSubmit = (e) => {
@@ -25,15 +27,15 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }) {
     <div
       ref={overlayRef}
       style={{ background: 'var(--co-overlay, rgba(0,0,0,0.9))', backdropFilter: 'blur(4px)' }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
       tabIndex={-1}
       onKeyDown={e => e.key === 'Escape' && onCancel()}
       role="dialog"
       aria-modal="true"
     >
-      <div style={{
+      <div className="modal-enter" style={{
         background: 'var(--co-panel)',
-        border: `1px solid ${error ? 'var(--co-yellow)' : 'rgba(0,229,255,0.3)'}`,
+        border: `1px solid ${error ? 'var(--co-rose)' : 'rgba(0,229,255,0.3)'}`,
         clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))',
         padding: 24, width: '100%', maxWidth: 360,
         boxShadow: error ? '0 0 30px rgba(255,32,144,0.3)' : '0 0 30px rgba(0,229,255,0.15)',
@@ -61,13 +63,13 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }) {
             style={{
               width: '100%', padding: '10px 12px',
               fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
-              border: `1px solid ${error ? 'var(--co-yellow)' : 'var(--co-border)'}`,
+              border: `1px solid ${error ? 'var(--co-rose)' : 'var(--co-border)'}`,
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
               boxShadow: error ? '0 0 12px rgba(255,32,144,0.3)' : 'none',
             }}
           />
           {error && (
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-yellow)', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-rose)', textAlign: 'center' }}>
               ⚠ Złe hasło
             </p>
           )}

@@ -59,7 +59,7 @@ export default function PlayerProfileCard({ player, index, onDelete, isOrganizer
           opacity: disabled ? 0.55 : 1,
           cursor: disabled ? 'not-allowed' : 'pointer',
         }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.5)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.5)'; e.currentTarget.style.color = 'var(--co-rose)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = 'var(--co-dim)'; }}
           title="Usuń gracza"
         >

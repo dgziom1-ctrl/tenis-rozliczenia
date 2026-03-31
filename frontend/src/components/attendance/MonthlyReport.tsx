@@ -99,7 +99,7 @@ export default function MonthlyReport({ monthlyStats, players }) {
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400, fontFamily: 'var(--font-mono)' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--cz-border-hi, #2E2E28)' }}>
+                  <tr style={{ borderBottom: '1px solid var(--co-border-hi)' }}>
                     <th style={{ padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', fontWeight: 400, textTransform: 'uppercase', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 2, borderRight: '1px solid rgba(0,229,255,0.08)' }}>
                       MIESIĄC
                     </th>
@@ -139,7 +139,7 @@ export default function MonthlyReport({ monthlyStats, players }) {
                               } : presence > 0 ? {
                                 color: 'var(--co-cyan)',
                               } : {
-                                color: 'var(--cz-dim2, #2A2A26)',
+                                color: 'var(--co-dim2)',
                               }),
                             }}>
                               {presence}

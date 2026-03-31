@@ -4,6 +4,7 @@ import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
 import { useToast } from '../common/Toast';
 import { formatDate, formatAmountShort } from '@/utils/format';
 import { getPayingPlayers } from '@/utils/debt';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import type { Sport } from '@/types/domain';
 
 interface SessionSummary {
@@ -65,6 +66,7 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
   const [copied, setCopied] = useState(false);
   const { showError } = useToast();
   const overlayRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
   if (!summary) return null;
   const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport } = summary;
@@ -79,8 +81,8 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
     <div ref={overlayRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onClose()} role="dialog" aria-modal="true"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div style={{
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="modal-enter" style={{
         background: 'var(--co-dark)',
         border: '1px solid rgba(0,229,255,0.4)',
         clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',

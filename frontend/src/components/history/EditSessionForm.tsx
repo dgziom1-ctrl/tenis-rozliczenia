@@ -55,7 +55,7 @@ export default function EditSessionForm({
             style={{ width: '100%', padding: '10px 12px', fontSize: '0.8rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
           />
           {!isEditCostValid && (
-            <p style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-yellow)' }}>
+            <p style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)' }}>
               ⚠ {editCostError}
             </p>
           )}

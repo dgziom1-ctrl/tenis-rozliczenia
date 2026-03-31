@@ -115,7 +115,7 @@ export default function Layout() {
             onToggleTheme={toggleTheme}
           />
           <Navigation activeTab={activeTab} setActiveTab={switchTab} />
-          <main className="main-content">
+          <main className="main-content page-enter" key={location.pathname}>
             <Outlet context={{ playSound }} />
           </main>
         </div>

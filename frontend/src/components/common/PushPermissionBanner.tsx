@@ -168,7 +168,7 @@ export default function PushPermissionBanner({ playerNames }) {
               )}
 
               {status === 'error' && (
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-yellow)', marginBottom: 8 }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-rose)', marginBottom: 8 }}>
                   ⚠ {errorMsg || 'Nie udało się włączyć. Sprawdź ustawienia przeglądarki.'}
                 </p>
               )}

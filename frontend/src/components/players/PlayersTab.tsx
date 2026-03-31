@@ -204,7 +204,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {/* Trash / deleted */}
         {deletedPlayers?.length > 0 && (
           <div>
-            <SectionHeader icon={Trash2} title="Kosz" accent="var(--co-yellow)" />
+            <SectionHeader icon={Trash2} title="Kosz" accent="var(--co-rose)" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 8 }}>
               {deletedPlayers.map(name => (
                 <div key={name}>
@@ -213,13 +213,13 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                       padding: '14px', background: 'rgba(255,32,144,0.04)', border: '1px solid rgba(255,32,144,0.3)',
                       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
                     }}>
-                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.12em', color: 'var(--co-yellow)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5, textTransform: 'uppercase' }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.12em', color: 'var(--co-rose)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5, textTransform: 'uppercase' }}>
                         <AlertTriangle size={12} /> USUNĄĆ NA ZAWSZE?
                       </p>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-text)', marginBottom: 12 }}>{name}</p>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button onClick={() => handlePermanentDelete(name)} style={{
-                          flex: 1, padding: '8px', background: 'var(--co-yellow)', color: '#000', border: 'none', cursor: 'pointer',
+                          flex: 1, padding: '8px', background: 'var(--co-rose)', color: '#000', border: 'none', cursor: 'pointer',
                           fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', fontWeight: 700,
                           clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                           opacity: processingPlayer === name ? 0.65 : 1,
@@ -259,7 +259,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                           color: 'var(--co-close-btn)', transition: 'all 0.15s',
                           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                         }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.4)'; e.currentTarget.style.color = 'var(--co-yellow)'; }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.4)'; e.currentTarget.style.color = 'var(--co-rose)'; }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = ''; }}
                           title="Usuń na zawsze">
                           <Trash2 size={13} />

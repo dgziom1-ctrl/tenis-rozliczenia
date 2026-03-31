@@ -48,7 +48,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
               {breakdown.sessions.map((item, idx) => (
                 <TerminalRow key={idx}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-dim)' }}>{formatDate(item.date)}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-yellow)', fontWeight: 600 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-rose)', fontWeight: 600 }}>
                     -{formatAmountShort(item.amount)} ZŁ
                   </span>
                 </TerminalRow>
@@ -56,7 +56,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
               {breakdown.sessions.length > 1 && (
                 <TerminalRow highlight="rgba(255,32,144,0.04)">
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>RAZEM SESJE</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-yellow)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-rose)' }}>
                     -{formatAmountShort(breakdown.totalSessions)} ZŁ
                   </span>
                 </TerminalRow>
@@ -87,7 +87,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
                     {adminMode && item.id !== '__legacy_settled__' && (
                       <button onClick={() => onRemovePayment(playerName, item.id)} style={{
                         background: 'transparent', border: 'none', cursor: 'pointer',
-                        color: 'var(--co-yellow)', opacity: 0.4, padding: '1px 2px', lineHeight: 1,
+                        color: 'var(--co-rose)', opacity: 0.4, padding: '1px 2px', lineHeight: 1,
                         fontSize: '0.7rem', transition: 'opacity 0.15s',
                       }}
                         onMouseEnter={e => e.currentTarget.style.opacity = 1}
@@ -123,7 +123,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
             </span>
             <span style={{
               fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 600,
-              color: breakdown.balance > 0.01 ? 'var(--co-yellow)'
+              color: breakdown.balance > 0.01 ? 'var(--co-rose)'
                    : breakdown.balance < -0.01 ? 'var(--co-cyan)'
                    : 'var(--co-green)',
             }}>
