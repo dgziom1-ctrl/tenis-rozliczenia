@@ -86,7 +86,6 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }) {
 }
 
 // ─── Shared SectionHeader ────────────────────────────────────────
-// eslint-disable-next-line no-unused-vars -- Icon is used in JSX below
 export function SectionHeader({ icon: Icon, title, accent = 'var(--co-cyan)', sub }) {
   return (
     <div style={{ marginBottom: 22 }}>

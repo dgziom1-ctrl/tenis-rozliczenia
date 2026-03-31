@@ -4,7 +4,6 @@ import { addSession } from '@/lib/firebase';
 import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
-import { formatAmountShort } from '@/utils/format';
 import { useThemeTokens } from '@/context/ThemeContext';
 import type { Sport } from '@/types/domain';
 import type { HistoryEntry, SoundType } from '@/types/ui';
