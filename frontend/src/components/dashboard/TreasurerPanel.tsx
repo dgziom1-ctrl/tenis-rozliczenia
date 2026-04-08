@@ -56,7 +56,7 @@ export default function TreasurerPanel({ players, open, onToggle }: TreasurerPan
   const toggleLabel = open
     ? 'Zwiń szczegóły'
     : debtors.length > 0
-      ? `Kto jest winien? (${debtors.length})`
+      ? `Do wpłaty (${debtors.length})`
       : 'Podsumowanie';
 
   return (
@@ -106,7 +106,7 @@ export default function TreasurerPanel({ players, open, onToggle }: TreasurerPan
           {/* Debtors — still owe */}
           {debtors.length > 0 && (
             <>
-              <SectionHeader label="Do oddania" />
+              <SectionHeader label="Do wpłaty" />
               {debtors.map(p => (
                 <Row
                   key={p.name}
@@ -121,7 +121,7 @@ export default function TreasurerPanel({ players, open, onToggle }: TreasurerPan
           {/* Creditors — overpaid (reduce Kamil's net recovery) */}
           {creditors.length > 0 && (
             <>
-              <SectionHeader label="Nadpłacili" />
+              <SectionHeader label="Nadpłata" />
               {creditors.map(p => (
                 <Row
                   key={p.name}
@@ -154,7 +154,7 @@ export default function TreasurerPanel({ players, open, onToggle }: TreasurerPan
               fontFamily: 'var(--font-display)', fontSize: '0.85rem',
               letterSpacing: '0.15em', color: 'var(--co-dim)', textTransform: 'uppercase',
             }}>
-              ◈ DO ODZYSKANIA
+              ◈ DO ZEBRANIA
             </span>
             <span style={{
               fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 600,

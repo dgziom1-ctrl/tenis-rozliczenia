@@ -160,7 +160,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
               textShadow:'-4px 0 #FF2090, 4px 0 var(--co-cyan)',
               clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
               opacity:1,
-            }}>CYBER-PONK</span>}
+            }}>CYBER-PONG</span>}
             {/* Main title — glitch on hit */}
             <span style={{
               display:'block',fontFamily:'var(--font-display)',fontWeight:900,
@@ -177,7 +177,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
                 : { color:'#B8E0EE',
                     textShadow:'0 0 20px rgba(0,229,255,.25),2px 2px 0 rgba(0,0,0,.98)',
                 }),
-            }}>CYBER-PONK</span>
+            }}>CYBER-PONG</span>
           </button>
 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',

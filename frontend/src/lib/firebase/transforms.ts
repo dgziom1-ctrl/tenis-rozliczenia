@@ -88,8 +88,9 @@ export function buildUIData(rawData: NormalizedData): UIData {
   );
   const treasurer = playerStats.find(p => p.name === ORGANIZER_NAME);
   if (treasurer) {
-    // Clamp at 0: if everyone overpaid, Kamil's card shows "rozliczone".
-    treasurer.currentDebt = roundToTwoDecimals(-Math.max(0, totalOwed));
+    // Pełne saldo bez clampowania: jeśli nadpłaty przewyższają zaległości,
+    // currentDebt > 0 → isPending=true → PersonCard pokazuje stan "saldo" zamiast "wszyscy rozliczeni".
+    treasurer.currentDebt = roundToTwoDecimals(-totalOwed);
   }
 
   return {

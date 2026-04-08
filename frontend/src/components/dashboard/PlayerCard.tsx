@@ -118,23 +118,23 @@ function PlayerCard({
         animation: 'none',
         overflow: 'hidden',
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-        boxShadow: isPending && !isLight
+        boxShadow: isPending && !isOrganizer && !isLight
           ? `0 0 18px rgba(255,32,144,0.13), 0 0 40px rgba(255,32,144,0.05), inset 0 0 20px rgba(255,32,144,0.03)`
-          : isPending && isLight
+          : isPending && !isOrganizer && isLight
           ? `0 1px 4px rgba(0,0,0,0.06)`
           : 'none',
       }}
       onMouseEnter={e => {
         e.currentTarget.style.borderColor = `${c.border}70`;
-        e.currentTarget.style.boxShadow = isPending
+        e.currentTarget.style.boxShadow = isPending && !isOrganizer
           ? (isLight ? '0 2px 8px rgba(0,0,0,0.1)' : `0 0 24px rgba(255,32,144,0.2), 0 0 50px rgba(255,32,144,0.07), inset 0 0 20px rgba(255,32,144,0.04)`)
           : (isLight ? '0 2px 8px rgba(0,0,0,0.08)' : `0 0 16px ${c.border}30, 0 0 32px ${c.border}10`);
       }}
       onMouseLeave={e => {
         e.currentTarget.style.borderColor = cardBorder;
-        e.currentTarget.style.boxShadow = isPending && !isLight
+        e.currentTarget.style.boxShadow = isPending && !isOrganizer && !isLight
           ? `0 0 18px rgba(255,32,144,0.13), 0 0 40px rgba(255,32,144,0.05), inset 0 0 20px rgba(255,32,144,0.03)`
-          : isPending && isLight
+          : isPending && !isOrganizer && isLight
           ? `0 1px 4px rgba(0,0,0,0.06)`
           : 'none';
       }}
@@ -144,21 +144,22 @@ function PlayerCard({
       {/* ── Header strip ── */}
       <div style={{
         padding: '4px 12px',
-        background: isPending
+        background: (!isOrganizer && isPending)
           ? 'rgba(255,32,144,0.04)'
-          : (isOrganizer && hasCredit) ? 'rgba(0,255,136,0.04)'
+          : hasCredit ? 'rgba(0,255,136,0.04)'
           : 'rgba(0,229,255,0.03)',
-        borderBottom: `1px solid ${isPending ? 'rgba(255,32,144,0.18)' : (isOrganizer && hasCredit) ? 'rgba(0,255,136,0.14)' : 'rgba(0,229,255,0.08)'}`,
+        borderBottom: `1px solid ${(!isOrganizer && isPending) ? 'rgba(255,32,144,0.18)' : hasCredit ? 'rgba(0,255,136,0.14)' : 'rgba(0,229,255,0.08)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
-          color: isPending ? `${c.border}99` : (isOrganizer && hasCredit) ? 'var(--co-green)' : 'var(--co-dim)',
+          color: (!isOrganizer && isPending) ? `${c.border}99` : hasCredit ? 'var(--co-green)' : 'var(--co-dim)',
           letterSpacing: '0.15em', textTransform: 'uppercase',
         }}>
           {/* Neutralne etykiety – żadnych wykrzykników, żadnego "dłużnik" */}
-          {isPending ? 'Do wpłaty'
-            : isOrganizer ? (hasCredit ? '↑ Do odzyskania' : '✓ Skarbnik')
+          {isOrganizer
+            ? (hasCredit ? '↑ Do zebrania' : isPending ? '↕ Saldo' : '✓ Skarbnik')
+            : isPending ? 'Do wpłaty'
             : isSettled ? 'Rozliczony'
             : '↑ Nadpłata'}
         </span>
@@ -416,14 +417,27 @@ function PlayerCard({
             {hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-green)', letterSpacing: '0.2em', marginBottom: 2 }}>
-                  ↑ DO ODZYSKANIA
+                  ↑ DO ZEBRANIA
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', color: 'var(--co-green)', margin: 0, lineHeight: 1, textShadow: isLight ? 'none' : '0 0 18px rgba(0,255,136,0.45)' }}>
                   +{formatAmountShort(animatedAbs)}
                   <span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(0,255,136,0.5)', letterSpacing: '0.12em', margin: '4px 0 0' }}>
-                  suma długów pozostałych graczy
+                  suma wpłat do zebrania od graczy
+                </p>
+              </div>
+            ) : isPending ? (
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-cyan)', letterSpacing: '0.2em', marginBottom: 2 }}>
+                  ↕ SALDO
+                </div>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', color: 'var(--co-cyan)', margin: 0, lineHeight: 1, textShadow: isLight ? 'none' : '0 0 18px rgba(0,229,255,0.35)' }}>
+                  {formatAmountShort(animatedAbs)}
+                  <span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                </p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(0,229,255,0.5)', letterSpacing: '0.12em', margin: '4px 0 0' }}>
+                  nadwyżka ponad zaległości
                 </p>
               </div>
             ) : (
