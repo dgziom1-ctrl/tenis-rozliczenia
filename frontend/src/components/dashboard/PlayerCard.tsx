@@ -247,11 +247,11 @@ function PlayerCard({
               marginBottom: 10,
               background: isPending
                 ? 'rgba(255,32,144,0.06)'
-                : hasCredit ? 'rgba(255,32,144,0.05)'
+                : hasCredit ? 'rgba(0,255,136,0.05)'
                 : 'rgba(0,229,255,0.04)',
               border: `1px solid ${isPending
                 ? 'rgba(255,32,144,0.25)'
-                : hasCredit ? 'rgba(255,32,144,0.2)'
+                : hasCredit ? 'rgba(0,255,136,0.22)'
                 : 'rgba(0,229,255,0.15)'}`,
               clipPath: CLIP.tag,
               cursor: 'default', userSelect: 'none',
@@ -269,10 +269,10 @@ function PlayerCard({
               </div>
             ) : hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-rose)', letterSpacing: '0.2em', marginBottom: 2 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-green)', letterSpacing: '0.2em', marginBottom: 2 }}>
                   ↑ NADPŁATA
                 </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', color: 'var(--co-rose)', margin: 0, lineHeight: 1 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', color: 'var(--co-green)', margin: 0, lineHeight: 1 }}>
                   +{formatAmountShort(animatedAbs)}
                   <span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>

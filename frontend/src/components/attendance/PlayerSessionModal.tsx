@@ -1,4 +1,5 @@
 import { useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { RANKS, getRank, SPORT } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
@@ -49,7 +50,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
 
   if (!player) return null;
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       className="modal-overlay"
@@ -258,5 +259,5 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
         </div>
       </div>
     </div>
-  );
+  , document.body);
 }
