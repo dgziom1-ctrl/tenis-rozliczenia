@@ -9,6 +9,8 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import BreakdownPanel from './BreakdownPanel';
 import PaymentModal from './PaymentModal';
 import UndoBar from '../common/UndoBar';
+import TreasurerPanel from './TreasurerPanel';
+import type { PlayerStats } from '@/types/ui';
 import { useAnimatedValue } from './useAnimatedValue';
 import { Barcode } from './Barcode';
 import { CornerBrackets } from './CornerBrackets';
@@ -21,7 +23,8 @@ function PlayerCard({
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment, onPin, onUnpin,
   playerIndex = 0,
-}) {
+  allPlayers,
+}: { [key: string]: any; allPlayers?: PlayerStats[] }) {
   const isMobile = useIsMobile();
   const isOrganizer = player.name === ORGANIZER_NAME;
   const debt        = player.currentDebt;
@@ -143,18 +146,19 @@ function PlayerCard({
         padding: '4px 12px',
         background: isPending
           ? 'rgba(255,32,144,0.04)'
+          : (isOrganizer && hasCredit) ? 'rgba(0,255,136,0.04)'
           : 'rgba(0,229,255,0.03)',
-        borderBottom: `1px solid ${isPending ? 'rgba(255,32,144,0.18)' : 'rgba(0,229,255,0.08)'}`,
+        borderBottom: `1px solid ${isPending ? 'rgba(255,32,144,0.18)' : (isOrganizer && hasCredit) ? 'rgba(0,255,136,0.14)' : 'rgba(0,229,255,0.08)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
-          color: isPending ? `${c.border}99` : 'var(--co-dim)',
+          color: isPending ? `${c.border}99` : (isOrganizer && hasCredit) ? 'var(--co-green)' : 'var(--co-dim)',
           letterSpacing: '0.15em', textTransform: 'uppercase',
         }}>
           {/* Neutralne etykiety – żadnych wykrzykników, żadnego "dłużnik" */}
           {isPending ? 'Do wpłaty'
-            : isOrganizer ? 'Organizator'
+            : isOrganizer ? (hasCredit ? '↑ Do odzyskania' : '✓ Skarbnik')
             : isSettled ? 'Rozliczony'
             : '↑ Nadpłata'}
         </span>
@@ -392,22 +396,57 @@ function PlayerCard({
         </div>
       )}
 
-      {/* Organizer */}
+      {/* ── Skarbnik section (Kamil only) ── */}
       {isOrganizer && (
-        <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <div style={{
-            padding: '8px 20px',
-            border: `1px solid ${c.border}30`,
-            clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
-            background: `${c.border}05`, textAlign: 'center',
-          }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.18em', color: c.text, margin: 0, opacity: 0.7 }}>
-              org · rezerwacje
-            </p>
+        <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+          {/* Do odzyskania balance block */}
+          <div
+            className={flash ? 'debt-flash' : ''}
+            style={{
+              padding: '12px',
+              background: hasCredit ? 'rgba(0,255,136,0.05)' : 'rgba(0,229,255,0.04)',
+              border: `1px solid ${hasCredit ? 'rgba(0,255,136,0.22)' : 'rgba(0,229,255,0.15)'}`,
+              clipPath: CLIP.tag,
+              textAlign: 'center',
+              position: 'relative', overflow: 'hidden',
+              transition: 'background 0.2s ease, border-color 0.2s ease',
+            }}
+          >
+            {hasCredit ? (
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-green)', letterSpacing: '0.2em', marginBottom: 2 }}>
+                  ↑ DO ODZYSKANIA
+                </div>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', color: 'var(--co-green)', margin: 0, lineHeight: 1, textShadow: isLight ? 'none' : '0 0 18px rgba(0,255,136,0.45)' }}>
+                  +{formatAmountShort(animatedAbs)}
+                  <span style={{ fontSize: '0.9rem', opacity: 0.4, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                </p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(0,255,136,0.5)', letterSpacing: '0.12em', margin: '4px 0 0' }}>
+                  suma długów pozostałych graczy
+                </p>
+              </div>
+            ) : (
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--co-green)', margin: 0, letterSpacing: '0.12em', textShadow: isLight ? 'none' : '0 0 14px rgba(0,255,136,0.35)' }}>
+                  ✓ WSZYSCY ROZLICZENI
+                </p>
+              </div>
+            )}
           </div>
-          {/* Barcode + labels — same as other players */}
+
+          {/* Who owes what */}
+          {allPlayers && (
+            <TreasurerPanel
+              players={allPlayers}
+              open={openDetails}
+              onToggle={() => onToggleDetails(player.name)}
+            />
+          )}
+
+          {/* Barcode footer */}
           {!isMobile && (
-            <div style={{ marginTop: 8, width: '100%', borderTop: '1px solid var(--co-border)', paddingTop: 8 }}>
+            <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
               <Barcode name={player.name} color={c.border} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
                 <span style={{ ...FONT.monoMicro, letterSpacing: '0.08em' }}>

@@ -77,6 +77,21 @@ export function buildUIData(rawData: NormalizedData): UIData {
     .map(name => buildPlayerStats(name, weeks, playerJoinWeek, paidUntilWeek, payments))
     .sort((a, b) => b.currentDebt - a.currentDebt || a.name.localeCompare(b.name, 'pl'));
 
+  // ── Skarbnik logic ──────────────────────────────────────────────────────────
+  // Kamil fronts 100% of every session at the reception.
+  // His "do odzyskania" = sum of what everyone else still owes.
+  // Stored as negative currentDebt → hasCredit=true → green display in PlayerCard.
+  const totalOwed = roundToTwoDecimals(
+    playerStats
+      .filter(p => p.name !== ORGANIZER_NAME)
+      .reduce((sum, p) => sum + p.currentDebt, 0),
+  );
+  const treasurer = playerStats.find(p => p.name === ORGANIZER_NAME);
+  if (treasurer) {
+    // Clamp at 0: if everyone overpaid, Kamil's card shows "rozliczone".
+    treasurer.currentDebt = roundToTwoDecimals(-Math.max(0, totalOwed));
+  }
+
   return {
     summary: buildSummary(playerStats, weeks.length),
     players: playerStats,

@@ -229,6 +229,7 @@ export default function DashboardTab({ data, history, playSound }) {
           {sortedPlayers.map((player, idx) => {
             const showBreakdown = openDetails === player.name;
             const stagger = `card-stagger-${Math.min(idx + 1, 6)}`;
+            const isOrg = player.name === ORGANIZER_NAME;
             return (
               <div key={player.name} className={`player-card-wrap ${stagger}`}>
               <PlayerCard
@@ -239,12 +240,13 @@ export default function DashboardTab({ data, history, playSound }) {
                 justSettled={justSettled === player.name}
                 openDetails={showBreakdown}
                 onToggleDetails={toggleDetails}
-                breakdown={showBreakdown ? getBreakdown(player) : null}
+                breakdown={(!isOrg && showBreakdown) ? getBreakdown(player) : null}
                 onAddPayment={handleAddPayment}
                 onRemovePayment={handleRemovePayment}
                 onPin={setPinnedPlayer}
                 onUnpin={() => setPinnedPlayer(null)}
                 playerIndex={idx}
+                allPlayers={isOrg ? data.players : undefined}
               />
               </div>
             );
