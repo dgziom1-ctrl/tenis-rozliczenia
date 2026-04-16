@@ -29,9 +29,9 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti,  setConfetti]  = useState([]);
   const [hitting,   setHitting]   = useState(false);
-  const chaosTimer = useRef(null);
+  const chaosTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clickCount = useRef(0);
-  const clickTimer = useRef(null);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
 

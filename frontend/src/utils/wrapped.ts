@@ -1,4 +1,4 @@
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { SPORT } from '@/constants';
 import { getPlayerSessionCost } from './sessionCost';
 import type { PlayerStats, HistoryEntry } from '@/types/ui';
 import type { WrappedStats, WrappedPlayerStats } from '@/types/ui';

@@ -1,9 +1,7 @@
 import { ChevronDown } from 'lucide-react';
-import { useThemeTokens } from '@/context/ThemeContext';
 import { formatDate, formatAmountShort } from '@/utils/format';
 
 export default function BreakdownPanel({ playerName, open, onToggle, breakdown, adminMode, onRemovePayment }) {
-  const _tokens = useThemeTokens();
   const sessionCount = breakdown?.sessions?.length ?? 0;
   const toggleLabel  = open
     ? 'Zwiń szczegóły'
@@ -90,8 +88,8 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
                         color: 'var(--co-rose)', opacity: 0.4, padding: '1px 2px', lineHeight: 1,
                         fontSize: '0.7rem', transition: 'opacity 0.15s',
                       }}
-                        onMouseEnter={e => e.currentTarget.style.opacity = 1}
-                        onMouseLeave={e => e.currentTarget.style.opacity = 0.4}
+                        onMouseEnter={e => { e.currentTarget.style.opacity = '1'; }}
+                        onMouseLeave={e => { e.currentTarget.style.opacity = '0.4'; }}
                         title="Usuń wpłatę"
                       >
                         ✕

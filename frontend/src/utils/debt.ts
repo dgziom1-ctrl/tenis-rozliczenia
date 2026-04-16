@@ -1,4 +1,4 @@
-import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT, OWN_RACKET_PLAYERS } from '@/constants';
 import type { Week, Payment } from '@/types/domain';
 import type { HistoryEntry, DebtSession, DebtDisplayData, DebtDisplayPayment, PlayerStats } from '@/types/ui';
 
@@ -8,6 +8,16 @@ export function roundToTwoDecimals(value: number): number {
 
 export function getPayingPlayers(present: string[] = [], multisportPlayers: string[] = []): string[] {
   return present.filter(p => !multisportPlayers.includes(p));
+}
+
+function getSquashPlayerAmountFromHistory(s: HistoryEntry, playerName: string, isMulti: boolean): number {
+  if (s.sport !== SPORT.SQUASH) return s.costPerPerson;
+  const baseAmount = isMulti ? (s.costPerPersonMulti ?? s.costPerPerson) : s.costPerPerson;
+  if (!OWN_RACKET_PLAYERS.includes(playerName)) return baseAmount;
+  const racketCost = s.racketCost ?? 0;
+  const rentingPlayers = s.presentPlayers.filter(p => !OWN_RACKET_PLAYERS.includes(p));
+  const racketShare = rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;
+  return roundToTwoDecimals(baseAmount - racketShare);
 }
 
 interface UnpaidSession {
@@ -32,13 +42,22 @@ function unpaidSessionsFromWeeks(
 
     if (week.sport === SPORT.SQUASH) {
       const multi = week.multiPlayers || [];
-      const multiCount = multi.filter(p => (week.present || []).includes(p)).length;
-      const hypothetical = week.cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
-      const base = week.present.length > 0 ? hypothetical / week.present.length : 0;
+      const present = week.present || [];
+      const racketCost = week.racketCost ?? 0;
+      const courtCost = week.cost - racketCost;
+      const multiCount = multi.filter(p => present.includes(p)).length;
+      const hypothetical = courtCost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
+      const base = present.length > 0 ? hypothetical / present.length : 0;
       const isMulti = multi.includes(playerName);
+      const courtShare = roundToTwoDecimals(Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base));
+      const rentingPlayers = present.filter(p => !OWN_RACKET_PLAYERS.includes(p));
+      const hasOwnRacket = OWN_RACKET_PLAYERS.includes(playerName);
+      const racketShare = hasOwnRacket
+        ? 0
+        : rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;
       result.push({
         id: week.id,
-        costPerPerson: roundToTwoDecimals(Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base)),
+        costPerPerson: roundToTwoDecimals(courtShare + racketShare),
       });
     } else {
       const isMulti = (week.multiPlayers || []).includes(playerName);
@@ -46,7 +65,7 @@ function unpaidSessionsFromWeeks(
         const paying = getPayingPlayers(week.present || [], week.multiPlayers || []);
         result.push({
           id: week.id,
-          costPerPerson: paying.length > 0 ? week.cost / paying.length : 0,
+          costPerPerson: paying.length > 0 ? roundToTwoDecimals(week.cost / paying.length) : 0,
         });
       }
     }
@@ -90,9 +109,7 @@ export function calculateDebtBreakdown(
     const owes = session.sport === SPORT.SQUASH ? isPresent : (isPresent && !isMulti);
 
     if (owes) {
-      const amount = session.sport === SPORT.SQUASH
-        ? (isMulti ? (session.costPerPersonMulti ?? session.costPerPerson) : session.costPerPerson)
-        : session.costPerPerson;
+      const amount = getSquashPlayerAmountFromHistory(session, playerName, isMulti);
 
       if (amount > 0) {
         sessions.push({ sessionId: session.id, date: session.datePlayed, amount });
@@ -123,9 +140,7 @@ export function buildDebtDisplayData(
 
   const sessionMap = (s: HistoryEntry): DebtSession => {
     const isMulti = s.multisportPlayers.includes(player.name);
-    const amount = s.sport === SPORT.SQUASH
-      ? (isMulti ? (s.costPerPersonMulti ?? s.costPerPerson) : s.costPerPerson)
-      : s.costPerPerson;
+    const amount = getSquashPlayerAmountFromHistory(s, player.name, isMulti);
     return { sessionId: s.id, date: s.datePlayed, amount };
   };
 
@@ -142,10 +157,7 @@ export function buildDebtDisplayData(
       chronological.slice(0, cutoffIdx + 1).filter(sessionFilter)
         .reduce((s, x) => {
           const isMulti = x.multisportPlayers.includes(player.name);
-          const amount = x.sport === SPORT.SQUASH
-            ? (isMulti ? (x.costPerPersonMulti ?? x.costPerPerson) : x.costPerPerson)
-            : x.costPerPerson;
-          return s + amount;
+          return s + getSquashPlayerAmountFromHistory(x, player.name, isMulti);
         }, 0),
     );
     const settlementDate = chronological[cutoffIdx]?.datePlayed ?? '';

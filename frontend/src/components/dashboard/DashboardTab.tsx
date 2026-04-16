@@ -11,10 +11,15 @@ import SettleConfirmModal from './SettleConfirmModal';
 import UndoBar from '../common/UndoBar';
 import { Zap, ChevronDown } from 'lucide-react';
 import PushPermissionBanner from '../common/PushPermissionBanner';
+import type { UIData, HistoryEntry, SoundType } from '@/types/ui';
 
+interface DashboardTabProps {
+  data: UIData;
+  history: HistoryEntry[];
+  playSound: (type: SoundType) => void;
+}
 
-
-export default function DashboardTab({ data, history, playSound }) {
+export default function DashboardTab({ data, history, playSound }: DashboardTabProps) {
   const [openDetails,   setOpenDetails]   = useState(null);
   const [justSettled,   setJustSettled]   = useState(null);
   const [confirmSettle, setConfirmSettle] = useState(null);

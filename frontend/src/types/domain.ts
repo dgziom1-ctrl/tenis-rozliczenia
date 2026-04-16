@@ -10,6 +10,7 @@ export interface Week {
   sport: Sport;
   present: string[];
   multiPlayers: string[];
+  racketCost?: number;
 }
 
 export interface Payment {

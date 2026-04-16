@@ -1,5 +1,5 @@
 import { calculateDebt, roundToTwoDecimals, getPayingPlayers } from '@/utils/debt';
-import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT, OWN_RACKET_PLAYERS } from '@/constants';
 import type { Week, NormalizedData } from '@/types/domain';
 import type { PlayerStats, HistoryEntry, Summary, UIData } from '@/types/ui';
 
@@ -37,12 +37,23 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
     let costPerPerson: number;
     let costPerPersonMulti: number;
 
+    const racketCost = w.racketCost ?? 0;
+
     if (sport === SPORT.SQUASH) {
-      const multiCount = (w.multiPlayers || []).filter(p => (w.present || []).includes(p)).length;
-      const hypothetical = w.cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
-      const base = w.present?.length > 0 ? hypothetical / w.present.length : 0;
-      costPerPerson = roundToTwoDecimals(base);
-      costPerPersonMulti = roundToTwoDecimals(Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT));
+      const present = w.present || [];
+      const multi = w.multiPlayers || [];
+      const courtCost = w.cost - racketCost;
+      const multiCount = multi.filter(p => present.includes(p)).length;
+      const hypothetical = courtCost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
+      const base = present.length > 0 ? hypothetical / present.length : 0;
+      const courtBase = roundToTwoDecimals(base);
+      const courtMulti = roundToTwoDecimals(Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT));
+
+      const rentingPlayers = present.filter(p => !OWN_RACKET_PLAYERS.includes(p));
+      const racketShare = rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;
+
+      costPerPerson = roundToTwoDecimals(courtBase + racketShare);
+      costPerPersonMulti = roundToTwoDecimals(courtMulti + racketShare);
     } else {
       const payers = getPayingPlayers(w.present || [], w.multiPlayers || []);
       costPerPerson = payers.length > 0 ? roundToTwoDecimals(w.cost / payers.length) : 0;
@@ -58,6 +69,7 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
       costPerPersonMulti,
       presentPlayers: w.present || [],
       multisportPlayers: w.multiPlayers || [],
+      racketCost: racketCost > 0 ? racketCost : undefined,
     };
   });
 }

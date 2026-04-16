@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Copy } from 'lucide-react';
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { SPORT, SQUASH_MULTISPORT_DISCOUNT, OWN_RACKET_PLAYERS } from '@/constants';
 import { useToast } from '../common/Toast';
 import { formatDate, formatAmountShort } from '@/utils/format';
-import { getPayingPlayers } from '@/utils/debt';
+import { buildGroupMessage } from '@/utils/message';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import type { Sport } from '@/types/domain';
 
@@ -17,49 +17,13 @@ interface SessionSummary {
   sport: Sport;
   presentPlayers: string[];
   multisportPlayers: string[];
+  racketCost: number;
 }
 
 export interface SessionSummaryModalProps {
   summary: SessionSummary | null;
   onClose: () => void;
   tokens?: any;
-}
-
-function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport }: {
-  date: string;
-  totalCost: number;
-  presentPlayers: string[];
-  multisportPlayers: string[];
-  perPerson: number;
-  sport: Sport;
-}) {
-  if (sport === SPORT.SQUASH) {
-    const multi      = multisportPlayers.filter(p => presentPlayers.includes(p));
-    const hypothetical = totalCost + multi.length * SQUASH_MULTISPORT_DISCOUNT;
-    const base       = presentPlayers.length > 0 ? hypothetical / presentPlayers.length : 0;
-    const discounted = Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT);
-    let msg = `🎾 Graliśmy w squasha! (${formatDate(date)})\n`;
-    msg += `💰 Wynajem: ${formatAmountShort(totalCost)} zł\n`;
-    msg += `👥 Obecni (${presentPlayers.length}): ${presentPlayers.join(', ')}\n`;
-    msg += `💳 Bez karty: ${formatAmountShort(base)} zł/os.\n`;
-    if (multi.length > 0) {
-      msg += `⚡ Cena z kartą (${multi.join(', ')}): ${formatAmountShort(discounted)} zł/os.\n`;
-    }
-    return msg.trim();
-  }
-
-  const paying = getPayingPlayers(presentPlayers, multisportPlayers);
-  const multi  = multisportPlayers.filter(p => presentPlayers.includes(p));
-  let msg = `🏓 Graliśmy! (${formatDate(date)})\n`;
-  msg += `💰 Koszt: ${formatAmountShort(totalCost)} zł\n`;
-  msg += `👥 Obecni (${presentPlayers.length}): ${presentPlayers.join(', ')}\n`;
-  if (paying.length > 0) {
-    msg += `💳 Każdy płaci: ${formatAmountShort(perPerson)} zł`;
-    if (paying.length !== presentPlayers.length) msg += ` (${paying.length} os.)`;
-    msg += '\n';
-  }
-  if (multi.length > 0) msg += `⚡ Multisport (bezpłatnie): ${multi.join(', ')}\n`;
-  return msg.trim();
 }
 
 export default function SessionSummaryModal({ summary, onClose }: SessionSummaryModalProps) {
@@ -69,11 +33,12 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
   useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
   if (!summary) return null;
-  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport } = summary;
+  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost } = summary;
   const isSquash = sport === SPORT.SQUASH;
+  const hasRackets = isSquash && racketCost > 0;
 
   const handleCopy = async () => {
-    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport });
+    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost });
     try { await navigator.clipboard.writeText(msg); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { showError('Nie udało się skopiować tekstu'); }
   };
 
@@ -143,11 +108,21 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
                   PODZIAŁ KOSZTÓW
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
-                  {formatAmountShort(perPerson)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
+                  {formatAmountShort(perPerson + (hasRackets ? racketCost / Math.max(1, presentPlayers.filter(p => !OWN_RACKET_PLAYERS.includes(p)).length) : 0))}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
                 </p>
                 {multisportCount > 0 && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)', marginTop: 4 }}>
-                    ⚡ Cena z kartą: {formatAmountShort(Math.max(0, perPerson - SQUASH_MULTISPORT_DISCOUNT))} zł · {multisportCount} os.
+                    ⚡ Cena z kartą: {formatAmountShort(Math.max(0, perPerson - SQUASH_MULTISPORT_DISCOUNT) + (hasRackets ? racketCost / Math.max(1, presentPlayers.filter(p => !OWN_RACKET_PLAYERS.includes(p)).length) : 0))} zł · {multisportCount} os.
+                  </p>
+                )}
+                {hasRackets && OWN_RACKET_PLAYERS.some(p => presentPlayers.includes(p)) && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)', marginTop: 2 }}>
+                    🎾 {OWN_RACKET_PLAYERS.filter(p => presentPlayers.includes(p)).join(', ')}: {formatAmountShort(perPerson)} zł (własna rakietka)
+                  </p>
+                )}
+                {hasRackets && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 2 }}>
+                    Kort: {formatAmountShort(totalCost - racketCost)} zł · Rakiety: {formatAmountShort(racketCost)} zł
                   </p>
                 )}
               </>

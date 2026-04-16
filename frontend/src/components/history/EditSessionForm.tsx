@@ -9,6 +9,7 @@ interface EditForm {
   present: string[];
   multiPlayers: string[];
   sport: Sport;
+  racketCost?: number;
 }
 
 interface EditSessionFormProps {

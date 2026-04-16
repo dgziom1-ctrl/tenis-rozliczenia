@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap } from 'lucide-react';
 import { addSession } from '@/lib/firebase';
-import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT, RACKET_PRICE, OWN_RACKET_PLAYERS } from '@/constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { useThemeTokens } from '@/context/ThemeContext';
@@ -33,16 +33,22 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const [totalCost,         setTotalCost]         = useState('');
   const [presentPlayers,    setPresentPlayers]    = useState<string[]>([]);
   const [multisportPlayers, setMultisportPlayers] = useState<string[]>([]);
+  const [racketCount,       setRacketCount]       = useState(0);
   const [isSaving,          setIsSaving]          = useState(false);
   const [savedSummary,      setSavedSummary]      = useState<{
     date: string; totalCost: number; presentCount: number; payingCount: number;
     multisportCount: number; perPerson: number; sport: Sport;
     presentPlayers: string[]; multisportPlayers: string[];
+    racketCost: number;
   } | null>(null);
   const [costTouched,       setCostTouched]       = useState(false);
 
   const isSquash = sport === SPORT.SQUASH;
   const activeCosts = isSquash ? SQUASH_QUICK_COSTS : QUICK_COSTS;
+  const ownRacketPresentCount = isSquash ? presentPlayers.filter(p => OWN_RACKET_PLAYERS.includes(p)).length : 0;
+  const maxRackets = Math.max(0, presentPlayers.length - ownRacketPresentCount);
+  const effectiveRacketCount = Math.min(racketCount, maxRackets);
+  const racketCost = isSquash ? effectiveRacketCount * RACKET_PRICE : 0;
 
   const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed);
   const parsedTotalCost = totalCost === '' ? NaN : parseFloat(totalCost);
@@ -82,6 +88,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     if (isDuplicateDate) { showError('Sesja z tą datą już istnieje'); return; }
     setIsSaving(true);
     const cost = parsedTotalCost;
+    const totalWithRackets = cost + racketCost;
     const perPerson = isSquash
       ? (() => {
           const multiCount = multisportPlayers.filter(p => presentPlayers.includes(p)).length;
@@ -93,11 +100,18 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         })();
     const paying = presentPlayers.filter(p => !multisportPlayers.includes(p));
     try {
-      const result = await addSession({ datePlayed, totalCost: cost, presentPlayers, multisportPlayers, sport });
+      const result = await addSession({
+        datePlayed,
+        totalCost: totalWithRackets,
+        presentPlayers,
+        multisportPlayers,
+        sport,
+        ...(racketCost > 0 ? { racketCost } : {}),
+      });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       playSound(SOUND_TYPES.SUCCESS);
       setSavedSummary({
-        date: datePlayed, totalCost: cost,
+        date: datePlayed, totalCost: totalWithRackets,
         presentCount: presentPlayers.length,
         payingCount: paying.length,
         multisportCount: multisportPlayers.length,
@@ -105,13 +119,15 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         sport,
         presentPlayers: [...presentPlayers],
         multisportPlayers: [...multisportPlayers],
+        racketCost,
       });
       setTotalCost('');
       setCostTouched(false);
+      setRacketCount(0);
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, isSquash]);
+  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, isSquash, racketCost]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
@@ -144,7 +160,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             {/* Sport */}
             <div>
               <FieldLabel>Sport</FieldLabel>
-              <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); }} />
+              <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); setRacketCount(0); }} />
             </div>
 
             {/* Date */}
@@ -231,8 +247,54 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               </div>
             )}
 
+            {/* Racket count — squash only */}
+            {isSquash && (
+              <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+                  🎾 Wypożyczone rakiety
+                  {ownRacketPresentCount > 0 && (
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)', marginLeft: 4 }}>
+                      · Rafał ma własną
+                    </span>
+                  )}
+                  {effectiveRacketCount > 0 && (
+                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)' }}>
+                      {effectiveRacketCount} × {RACKET_PRICE} = {racketCost} zł
+                    </span>
+                  )}
+                </p>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {Array.from({ length: maxRackets + 1 }, (_, i) => i).map(n => {
+                    const active = effectiveRacketCount === n;
+                    return (
+                      <button type="button" key={n}
+                        onClick={() => { setRacketCount(n); playSound(SOUND_TYPES.CLICK); }}
+                        style={{
+                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
+                          fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                          ...(active ? {
+                            background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.5)',
+                            color: 'var(--co-cyan)', boxShadow: '0 0 8px rgba(0,229,255,0.15)',
+                          } : {
+                            background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
+                          }),
+                        }}>
+                        {n === 0 ? '0' : `${n}`}
+                      </button>
+                    );
+                  })}
+                </div>
+                {effectiveRacketCount > 0 && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 8 }}>
+                    {'>'} Koszt rakiet ({effectiveRacketCount} × {RACKET_PRICE} zł) doliczany do salda każdego gracza oprócz Rafała
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Live preview */}
-            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} />
+            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} />
 
             {/* Submit */}
             <div>

@@ -23,7 +23,7 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   const { title, body } = payload.notification || {};
   const data = payload.data || {};
-  self.registration.showNotification(title || 'Cyber-Pong', {
+  self.registration.showNotification(title || 'Cyber-Ponk', {
     body,
     icon:     '/icon-192v2.png',
     badge:    '/icon-192v2.png',

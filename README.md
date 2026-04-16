@@ -1,4 +1,4 @@
-# 🕹️ Cyber-Pong
+# 🕹️ Cyber-Ponk
 
 > A real-time debt tracker and attendance leaderboard for a private ping-pong & squash group. Who showed up, what they owe, who's on a streak — all in one place.
 

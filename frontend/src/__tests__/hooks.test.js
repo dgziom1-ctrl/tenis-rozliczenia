@@ -198,11 +198,11 @@ describe('useTheme — localStorage i klasy body', () => {
     const { result } = renderHook(() => useTheme());
 
     act(() => result.current.toggle()); // → light
-    expect(localStorage.getItem('cyber-pong-theme')).toBe('light');
+    expect(localStorage.getItem('cyber-ponk-theme')).toBe('light');
   });
 
   it('odczytuje zapisany motyw z localStorage', async () => {
-    localStorage.setItem('cyber-pong-theme', 'light');
+    localStorage.setItem('cyber-ponk-theme', 'light');
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
     expect(result.current.theme).toBe('light');

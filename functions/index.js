@@ -93,6 +93,9 @@ async function sendToAll(tokens, title, body, data = {}) {
   }
 }
 
+// ─── Gracze z własnym sprzętem (nie płacą za wypożyczenie rakiet) ─────────────
+const OWN_RACKET_PLAYERS = ['Rafał'];
+
 // ─── Sanitize player names for notification payloads ──────────────────────────
 function sanitizeName(name) {
   return String(name || '').replace(/[<>"'&]/g, '').slice(0, 100);
@@ -137,29 +140,39 @@ exports.onSessionAdded = onValueUpdated(
       return;
     }
 
-    const present   = toArray(newSession.present);
-    const multi     = toArray(newSession.multiPlayers);
-    const date      = newSession.date || '';
-    const cost      = newSession.cost || 0;
-    const sport     = newSession.sport || 'pingpong';
+    const present      = toArray(newSession.present);
+    const multi        = toArray(newSession.multiPlayers);
+    const date         = newSession.date || '';
+    const cost         = newSession.cost || 0;
+    const racketCost   = newSession.racketCost || 0;
+    const sport        = newSession.sport || 'pingpong';
 
     const SQUASH_MULTISPORT_DISCOUNT = 15;
     let notifBody;
     if (sport === 'squash') {
-      // Mirror the hypothetical-cost logic from transforms.js:
-      // pretend no cards were used → everyone pays equal share → card holders get -15 zł discount.
+      const courtCost     = cost - racketCost;
       const multiPresent  = multi.filter(p => present.includes(p));
       const multiCount    = multiPresent.length;
-      const hypothetical  = cost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
+      const hypothetical  = courtCost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
       const base          = present.length > 0 ? hypothetical / present.length : 0;
       const perPerson     = Math.round(base);
       const perPersonMulti = Math.round(Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT));
 
-      notifBody = multiCount > 0
-        ? `${date} · ${present.length} graczy · ${perPerson} zł/os. (${perPersonMulti} zł z kartą)`
-        : `${date} · ${present.length} graczy · ${perPerson} zł/os.`;
+      const rentingPlayers = present.filter(p => !OWN_RACKET_PLAYERS.includes(p));
+      const racketShare = racketCost > 0 && rentingPlayers.length > 0
+        ? Math.round(racketCost / rentingPlayers.length)
+        : 0;
 
-      console.log(`Nowa sesja (Squash): ${date}, ${present.length} graczy, ${perPerson} zł/os. (z kartą: ${perPersonMulti} zł)`);
+      const totalPerPerson = perPerson + racketShare;
+      const totalPerPersonMulti = perPersonMulti + racketShare;
+
+      let costPart = multiCount > 0
+        ? `${totalPerPerson} zł/os. (${totalPerPersonMulti} zł z kartą)`
+        : `${totalPerPerson} zł/os.`;
+      if (racketCost > 0) costPart += ` · rakiety: ${racketCost} zł`;
+
+      notifBody = `${date} · ${present.length} graczy · ${costPart}`;
+      console.log(`Nowa sesja (Squash): ${date}, ${present.length} graczy, ${totalPerPerson} zł/os. (z kartą: ${totalPerPersonMulti} zł, rakiety: ${racketCost} zł)`);
     } else {
       // Ping-pong: only non-multisport players pay
       const paying   = present.filter(p => !multi.includes(p));

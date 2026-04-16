@@ -21,6 +21,7 @@ interface EditForm {
   present: string[];
   multiPlayers: string[];
   sport: Sport;
+  racketCost?: number;
 }
 
 interface HistoryTabProps {
@@ -103,7 +104,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     if (pwModal.type === 'edit') {
       const row = pwModal.row;
       setEditingId(row.id);
-      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers], sport: row.sport || SPORT.PINGPONG });
+      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers], sport: row.sport || SPORT.PINGPONG, racketCost: row.racketCost });
     } else if (pwModal.type === 'delete') {
       setDeletingId(pwModal.rowId);
     }
@@ -120,7 +121,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     }
     setIsSaving(true);
     try {
-      const result = await updateWeek(editingId!, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers, sport: editForm.sport || SPORT.PINGPONG });
+      const result = await updateWeek(editingId!, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers, sport: editForm.sport || SPORT.PINGPONG, racketCost: editForm.racketCost });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       setEditingId(null); setEditForm({} as EditForm);
     } finally { setIsSaving(false); }

@@ -35,7 +35,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
             color: 'var(--co-cyan)', textTransform: 'uppercase',
             textShadow: '0 0 20px rgba(0,229,255,0.5)',
             margin: 0, lineHeight: 1,
-          }}>CYBER-PONG</p>
+          }}>CYBER-PONK</p>
           <p style={{
             fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.25em',
             color: 'rgba(0,229,255,0.45)', textTransform: 'uppercase', marginTop: 4,

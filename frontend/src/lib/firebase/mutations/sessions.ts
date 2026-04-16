@@ -9,6 +9,7 @@ interface AddSessionParams {
   presentPlayers: string[];
   multisportPlayers: string[];
   sport?: Sport;
+  racketCost?: number;
 }
 
 export async function addSession({
@@ -17,6 +18,7 @@ export async function addSession({
   presentPlayers,
   multisportPlayers,
   sport = 'pingpong',
+  racketCost,
 }: AddSessionParams): Promise<TransactionResult> {
   if (!datePlayed || totalCost < 0 || !presentPlayers || presentPlayers.length === 0) {
     return { success: false, error: 'Nieprawidłowe dane sesji' };
@@ -42,6 +44,7 @@ export async function addSession({
           sport,
           present: presentPlayers,
           multiPlayers: multisportPlayers || [],
+          ...(racketCost != null && racketCost > 0 ? { racketCost } : {}),
         },
       ],
       lastAddedSession: { id: newId, ts: Date.now() },
@@ -55,11 +58,12 @@ interface UpdateWeekParams {
   present: string[];
   multiPlayers: string[];
   sport?: Sport;
+  racketCost?: number;
 }
 
 export async function updateWeek(
   weekId: string,
-  { date, cost, present, multiPlayers, sport }: UpdateWeekParams,
+  { date, cost, present, multiPlayers, sport, racketCost }: UpdateWeekParams,
 ): Promise<TransactionResult> {
   return withTransaction((current) => {
     const data = (current || {}) as RawAppData;
@@ -68,7 +72,7 @@ export async function updateWeek(
     if (idx === -1) throw new Error('Nie znaleziono sesji');
 
     const updatedWeeks = [...weeks];
-    updatedWeeks[idx] = {
+    const updated: typeof weeks[0] = {
       id: weekId,
       date,
       cost,
@@ -76,6 +80,10 @@ export async function updateWeek(
       multiPlayers: multiPlayers || [],
       sport: sport || weeks[idx].sport || 'pingpong',
     };
+    if (racketCost != null && racketCost > 0) {
+      updated.racketCost = racketCost;
+    }
+    updatedWeeks[idx] = updated;
     return { ...data, weeks: updatedWeeks } as RawAppData;
   }, 'Nie udało się zaktualizować sesji');
 }

@@ -372,7 +372,7 @@ button:active,
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ── Glitch text — CYBER-PONG title ── */
+/* ── Glitch text — CYBER-PONK title ── */
 @keyframes title-glitch {
   0%,  75%, 100% { clip-path: none; transform: none; opacity: 1; filter: none; }
   76% {

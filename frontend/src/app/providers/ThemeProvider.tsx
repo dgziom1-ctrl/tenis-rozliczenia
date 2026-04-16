@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { Theme, ThemeTokens } from '@/types/ui';
 
-const STORAGE_KEY = 'cyber-pong-theme';
+const STORAGE_KEY = 'cyber-ponk-theme';
 
 const CYBER_TOKENS: ThemeTokens = {
   confirmBg: 'var(--co-cyan)',

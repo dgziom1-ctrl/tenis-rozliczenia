@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Theme } from '@/types/ui';
 
-const STORAGE_KEY = 'cyber-pong-theme';
+const STORAGE_KEY = 'cyber-ponk-theme';
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
