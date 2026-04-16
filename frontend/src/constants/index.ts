@@ -8,7 +8,6 @@ export const SQUASH_BASE_PRICE = 85;
 export const SQUASH_MULTISPORT_DISCOUNT = 15;
 export const SQUASH_QUICK_COSTS = [55, 70, 85, 110, 125, 140, 155, 170];
 export const RACKET_PRICE = 5;
-export const OWN_RACKET_PLAYERS: string[] = ['Rafał'];
 export const SOUND_TYPES = { TAB: 'tab', CLICK: 'click', SUCCESS: 'success', DELETE: 'delete', COIN: 'coin', RANK1: 'rank1', ERROR: 'error' } as const;
 export const TABS = { DASHBOARD: 'dashboard', ATTENDANCE: 'attendance', ADMIN: 'admin', HISTORY: 'history', PLAYERS: 'players' } as const;
 export const ORGANIZER_NAME = 'Kamil';

@@ -22,6 +22,7 @@ interface EditForm {
   multiPlayers: string[];
   sport: Sport;
   racketCost?: number;
+  ownRacketPlayers?: string[];
 }
 
 interface HistoryTabProps {
@@ -104,7 +105,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     if (pwModal.type === 'edit') {
       const row = pwModal.row;
       setEditingId(row.id);
-      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers], sport: row.sport || SPORT.PINGPONG, racketCost: row.racketCost });
+      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers], sport: row.sport || SPORT.PINGPONG, racketCost: row.racketCost, ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [] });
     } else if (pwModal.type === 'delete') {
       setDeletingId(pwModal.rowId);
     }
@@ -121,7 +122,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     }
     setIsSaving(true);
     try {
-      const result = await updateWeek(editingId!, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers, sport: editForm.sport || SPORT.PINGPONG, racketCost: editForm.racketCost });
+      const result = await updateWeek(editingId!, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers, sport: editForm.sport || SPORT.PINGPONG, racketCost: editForm.racketCost, ownRacketPlayers: editForm.ownRacketPlayers });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       setEditingId(null); setEditForm({} as EditForm);
     } finally { setIsSaving(false); }
@@ -130,7 +131,12 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const togglePresent = (name: string) => {
     setEditForm(prev => {
       const inList = (prev.present || []).includes(name);
-      return { ...prev, present: inList ? prev.present.filter(p => p !== name) : [...prev.present, name], multiPlayers: inList ? (prev.multiPlayers || []).filter(p => p !== name) : prev.multiPlayers };
+      return {
+        ...prev,
+        present: inList ? prev.present.filter(p => p !== name) : [...prev.present, name],
+        multiPlayers: inList ? (prev.multiPlayers || []).filter(p => p !== name) : prev.multiPlayers,
+        ownRacketPlayers: inList ? (prev.ownRacketPlayers || []).filter(p => p !== name) : prev.ownRacketPlayers,
+      };
     });
   };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap } from 'lucide-react';
 import { addSession } from '@/lib/firebase';
-import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT, RACKET_PRICE, OWN_RACKET_PLAYERS } from '@/constants';
+import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT, RACKET_PRICE } from '@/constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { useThemeTokens } from '@/context/ThemeContext';
@@ -34,21 +34,24 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const [presentPlayers,    setPresentPlayers]    = useState<string[]>([]);
   const [multisportPlayers, setMultisportPlayers] = useState<string[]>([]);
   const [racketCount,       setRacketCount]       = useState(0);
+  const [racketPrice,       setRacketPrice]       = useState(RACKET_PRICE);
+  const [ownRacketPlayers,  setOwnRacketPlayers]  = useState<string[]>([]);
   const [isSaving,          setIsSaving]          = useState(false);
   const [savedSummary,      setSavedSummary]      = useState<{
     date: string; totalCost: number; presentCount: number; payingCount: number;
     multisportCount: number; perPerson: number; sport: Sport;
     presentPlayers: string[]; multisportPlayers: string[];
-    racketCost: number;
+    racketCost: number; ownRacketPlayers: string[];
   } | null>(null);
   const [costTouched,       setCostTouched]       = useState(false);
 
   const isSquash = sport === SPORT.SQUASH;
   const activeCosts = isSquash ? SQUASH_QUICK_COSTS : QUICK_COSTS;
-  const ownRacketPresentCount = isSquash ? presentPlayers.filter(p => OWN_RACKET_PLAYERS.includes(p)).length : 0;
+  const ownRacketPresentCount = isSquash ? ownRacketPlayers.filter(p => presentPlayers.includes(p)).length : 0;
   const maxRackets = Math.max(0, presentPlayers.length - ownRacketPresentCount);
   const effectiveRacketCount = Math.min(racketCount, maxRackets);
-  const racketCost = isSquash ? effectiveRacketCount * RACKET_PRICE : 0;
+  const parsedRacketPrice = racketPrice > 0 ? racketPrice : 0;
+  const racketCost = isSquash ? effectiveRacketCount * parsedRacketPrice : 0;
 
   const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed);
   const parsedTotalCost = totalCost === '' ? NaN : parseFloat(totalCost);
@@ -70,9 +73,18 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const togglePresent = useCallback((name: string) => {
     playSound(SOUND_TYPES.CLICK);
     setPresentPlayers(prev => {
-      if (prev.includes(name)) { setMultisportPlayers(m => m.filter(p => p !== name)); return prev.filter(p => p !== name); }
+      if (prev.includes(name)) {
+        setMultisportPlayers(m => m.filter(p => p !== name));
+        setOwnRacketPlayers(m => m.filter(p => p !== name));
+        return prev.filter(p => p !== name);
+      }
       return [...prev, name];
     });
+  }, [playSound]);
+
+  const toggleOwnRacket = useCallback((name: string) => {
+    playSound(SOUND_TYPES.CLICK);
+    setOwnRacketPlayers(prev => prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name]);
   }, [playSound]);
 
   const toggleMulti = useCallback((name: string) => {
@@ -100,6 +112,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         })();
     const paying = presentPlayers.filter(p => !multisportPlayers.includes(p));
     try {
+      const ownRacketForSession = ownRacketPlayers.filter(p => presentPlayers.includes(p));
       const result = await addSession({
         datePlayed,
         totalCost: totalWithRackets,
@@ -107,6 +120,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         multisportPlayers,
         sport,
         ...(racketCost > 0 ? { racketCost } : {}),
+        ...(ownRacketForSession.length > 0 ? { ownRacketPlayers: ownRacketForSession } : {}),
       });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       playSound(SOUND_TYPES.SUCCESS);
@@ -120,14 +134,17 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         presentPlayers: [...presentPlayers],
         multisportPlayers: [...multisportPlayers],
         racketCost,
+        ownRacketPlayers: [...ownRacketForSession],
       });
       setTotalCost('');
       setCostTouched(false);
       setRacketCount(0);
+      setRacketPrice(RACKET_PRICE);
+      setOwnRacketPlayers([]);
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, isSquash, racketCost]);
+  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, isSquash, racketCost, parsedRacketPrice]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
@@ -160,7 +177,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             {/* Sport */}
             <div>
               <FieldLabel>Sport</FieldLabel>
-              <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); setRacketCount(0); }} />
+              <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); setRacketCount(0); setRacketPrice(RACKET_PRICE); setOwnRacketPlayers([]); }} />
             </div>
 
             {/* Date */}
@@ -247,22 +264,71 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               </div>
             )}
 
+            {/* Own racket players — squash only */}
+            {isSquash && presentPlayers.length > 0 && (
+              <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+                  🎾 Własna rakietka
+                  {ownRacketPresentCount > 0 && (
+                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)' }}>
+                      {ownRacketPlayers.filter(p => presentPlayers.includes(p)).join(', ')}
+                    </span>
+                  )}
+                </p>
+                <PlayerToggleGrid names={presentPlayers} selected={ownRacketPlayers} onToggle={toggleOwnRacket} accent="amber" />
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 8 }}>
+                  {'>'} Zaznacz graczy którzy przynęśli własną rakietkę — nie płacą za wypożyczenie
+                </p>
+              </div>
+            )}
+
             {/* Racket count — squash only */}
             {isSquash && (
               <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
                   🎾 Wypożyczone rakiety
-                  {ownRacketPresentCount > 0 && (
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)', marginLeft: 4 }}>
-                      · Rafał ma własną
-                    </span>
-                  )}
                   {effectiveRacketCount > 0 && (
                     <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)' }}>
-                      {effectiveRacketCount} × {RACKET_PRICE} = {racketCost} zł
+                      {effectiveRacketCount} × {parsedRacketPrice} = {racketCost} zł
                     </span>
                   )}
                 </p>
+
+                {/* Price per racket */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
+                    Cena / szt.:
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={racketPrice}
+                    onChange={e => setRacketPrice(parseFloat(e.target.value) || 0)}
+                    className="cyber-input"
+                    style={{
+                      width: 72, padding: '5px 8px', fontSize: '0.8rem', textAlign: 'center',
+                      fontFamily: 'var(--font-mono)',
+                      clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                    }}
+                  />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>zł</span>
+                  {parsedRacketPrice !== RACKET_PRICE && (
+                    <button
+                      type="button"
+                      onClick={() => setRacketPrice(RACKET_PRICE)}
+                      style={{
+                        fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)',
+                        background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
+                        padding: '3px 8px', clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+                      }}
+                    >
+                      reset ({RACKET_PRICE} zł)
+                    </button>
+                  )}
+                </div>
+
+                {/* Racket count buttons */}
                 <div style={{ display: 'flex', gap: 6 }}>
                   {Array.from({ length: maxRackets + 1 }, (_, i) => i).map(n => {
                     const active = effectiveRacketCount === n;
@@ -287,14 +353,14 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 </div>
                 {effectiveRacketCount > 0 && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 8 }}>
-                    {'>'} Koszt rakiet ({effectiveRacketCount} × {RACKET_PRICE} zł) doliczany do salda każdego gracza oprócz Rafała
+                    {'>'} Koszt {effectiveRacketCount} × {parsedRacketPrice} zł dzielony między graczy bez własnej rakietki
                   </p>
                 )}
               </div>
             )}
 
             {/* Live preview */}
-            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} />
+            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} ownRacketPlayers={ownRacketPlayers} />
 
             {/* Submit */}
             <div>

@@ -93,9 +93,6 @@ async function sendToAll(tokens, title, body, data = {}) {
   }
 }
 
-// ─── Gracze z własnym sprzętem (nie płacą za wypożyczenie rakiet) ─────────────
-const OWN_RACKET_PLAYERS = ['Rafał'];
-
 // ─── Sanitize player names for notification payloads ──────────────────────────
 function sanitizeName(name) {
   return String(name || '').replace(/[<>"'&]/g, '').slice(0, 100);
@@ -144,8 +141,9 @@ exports.onSessionAdded = onValueUpdated(
     const multi        = toArray(newSession.multiPlayers);
     const date         = newSession.date || '';
     const cost         = newSession.cost || 0;
-    const racketCost   = newSession.racketCost || 0;
-    const sport        = newSession.sport || 'pingpong';
+    const racketCost      = newSession.racketCost || 0;
+    const ownRacketPlayers = toArray(newSession.ownRacketPlayers);
+    const sport           = newSession.sport || 'pingpong';
 
     const SQUASH_MULTISPORT_DISCOUNT = 15;
     let notifBody;
@@ -158,7 +156,7 @@ exports.onSessionAdded = onValueUpdated(
       const perPerson     = Math.round(base);
       const perPersonMulti = Math.round(Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT));
 
-      const rentingPlayers = present.filter(p => !OWN_RACKET_PLAYERS.includes(p));
+      const rentingPlayers = present.filter(p => !ownRacketPlayers.includes(p));
       const racketShare = racketCost > 0 && rentingPlayers.length > 0
         ? Math.round(racketCost / rentingPlayers.length)
         : 0;

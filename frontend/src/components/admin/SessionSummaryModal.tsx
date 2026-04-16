@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Copy } from 'lucide-react';
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT, OWN_RACKET_PLAYERS } from '@/constants';
+import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
 import { useToast } from '../common/Toast';
 import { formatDate, formatAmountShort } from '@/utils/format';
 import { buildGroupMessage } from '@/utils/message';
@@ -18,6 +18,7 @@ interface SessionSummary {
   presentPlayers: string[];
   multisportPlayers: string[];
   racketCost: number;
+  ownRacketPlayers: string[];
 }
 
 export interface SessionSummaryModalProps {
@@ -33,12 +34,12 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
   useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
   if (!summary) return null;
-  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost } = summary;
+  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers } = summary;
   const isSquash = sport === SPORT.SQUASH;
   const hasRackets = isSquash && racketCost > 0;
 
   const handleCopy = async () => {
-    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost });
+    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost, ownRacketPlayers });
     try { await navigator.clipboard.writeText(msg); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { showError('Nie udało się skopiować tekstu'); }
   };
 
@@ -108,16 +109,16 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
                   PODZIAŁ KOSZTÓW
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
-                  {formatAmountShort(perPerson + (hasRackets ? racketCost / Math.max(1, presentPlayers.filter(p => !OWN_RACKET_PLAYERS.includes(p)).length) : 0))}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
+                  {formatAmountShort(perPerson + (hasRackets ? racketCost / Math.max(1, presentPlayers.filter(p => !ownRacketPlayers.includes(p)).length) : 0))}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
                 </p>
                 {multisportCount > 0 && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)', marginTop: 4 }}>
-                    ⚡ Cena z kartą: {formatAmountShort(Math.max(0, perPerson - SQUASH_MULTISPORT_DISCOUNT) + (hasRackets ? racketCost / Math.max(1, presentPlayers.filter(p => !OWN_RACKET_PLAYERS.includes(p)).length) : 0))} zł · {multisportCount} os.
+                    ⚡ Cena z kartą: {formatAmountShort(Math.max(0, perPerson - SQUASH_MULTISPORT_DISCOUNT) + (hasRackets ? racketCost / Math.max(1, presentPlayers.filter(p => !ownRacketPlayers.includes(p)).length) : 0))} zł · {multisportCount} os.
                   </p>
                 )}
-                {hasRackets && OWN_RACKET_PLAYERS.some(p => presentPlayers.includes(p)) && (
+                {hasRackets && ownRacketPlayers.some(p => presentPlayers.includes(p)) && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)', marginTop: 2 }}>
-                    🎾 {OWN_RACKET_PLAYERS.filter(p => presentPlayers.includes(p)).join(', ')}: {formatAmountShort(perPerson)} zł (własna rakietka)
+                    🎾 {ownRacketPlayers.filter(p => presentPlayers.includes(p)).join(', ')}: {formatAmountShort(perPerson)} zł (własna rakietka)
                   </p>
                 )}
                 {hasRackets && (

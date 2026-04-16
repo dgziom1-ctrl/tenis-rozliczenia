@@ -1,4 +1,4 @@
-import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT, OWN_RACKET_PLAYERS } from '@/constants';
+import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
 import type { Week, Payment } from '@/types/domain';
 import type { HistoryEntry, DebtSession, DebtDisplayData, DebtDisplayPayment, PlayerStats } from '@/types/ui';
 
@@ -13,9 +13,10 @@ export function getPayingPlayers(present: string[] = [], multisportPlayers: stri
 function getSquashPlayerAmountFromHistory(s: HistoryEntry, playerName: string, isMulti: boolean): number {
   if (s.sport !== SPORT.SQUASH) return s.costPerPerson;
   const baseAmount = isMulti ? (s.costPerPersonMulti ?? s.costPerPerson) : s.costPerPerson;
-  if (!OWN_RACKET_PLAYERS.includes(playerName)) return baseAmount;
+  const ownRacket = s.ownRacketPlayers ?? [];
+  if (!ownRacket.includes(playerName)) return baseAmount;
   const racketCost = s.racketCost ?? 0;
-  const rentingPlayers = s.presentPlayers.filter(p => !OWN_RACKET_PLAYERS.includes(p));
+  const rentingPlayers = s.presentPlayers.filter(p => !ownRacket.includes(p));
   const racketShare = rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;
   return roundToTwoDecimals(baseAmount - racketShare);
 }
@@ -50,8 +51,9 @@ function unpaidSessionsFromWeeks(
       const base = present.length > 0 ? hypothetical / present.length : 0;
       const isMulti = multi.includes(playerName);
       const courtShare = roundToTwoDecimals(Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base));
-      const rentingPlayers = present.filter(p => !OWN_RACKET_PLAYERS.includes(p));
-      const hasOwnRacket = OWN_RACKET_PLAYERS.includes(playerName);
+      const ownRacket = week.ownRacketPlayers ?? [];
+      const rentingPlayers = present.filter(p => !ownRacket.includes(p));
+      const hasOwnRacket = ownRacket.includes(playerName);
       const racketShare = hasOwnRacket
         ? 0
         : rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;

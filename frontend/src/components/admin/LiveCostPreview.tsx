@@ -1,5 +1,5 @@
 import { Calculator } from 'lucide-react';
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT, OWN_RACKET_PLAYERS } from '@/constants';
+import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
 import { formatAmountShort } from '@/utils/format';
 import type { Sport } from '@/types/domain';
 
@@ -9,13 +9,14 @@ interface LiveCostPreviewProps {
   multisportPlayers: string[];
   sport: Sport;
   racketCost?: number;
+  ownRacketPlayers?: string[];
 }
 
 function fmt(n: number) {
   return (Math.round(n * 100) / 100).toFixed(2);
 }
 
-export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0 }: LiveCostPreviewProps) {
+export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [] }: LiveCostPreviewProps) {
   const courtCost = parseFloat(totalCost);
   if (!totalCost || isNaN(courtCost) || courtCost <= 0 || presentPlayers.length === 0) return null;
 
@@ -28,8 +29,8 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
     const base = hypothetical / presentPlayers.length;
     const discounted = Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT);
 
-    const rentingPlayers = presentPlayers.filter(p => !OWN_RACKET_PLAYERS.includes(p));
-    const ownRacketPresent = presentPlayers.filter(p => OWN_RACKET_PLAYERS.includes(p));
+    const ownRacketPresent = ownRacketPlayers.filter(p => presentPlayers.includes(p));
+    const rentingPlayers = presentPlayers.filter(p => !ownRacketPresent.includes(p));
     const racketShare = racketCost > 0 && rentingPlayers.length > 0
       ? racketCost / rentingPlayers.length
       : 0;

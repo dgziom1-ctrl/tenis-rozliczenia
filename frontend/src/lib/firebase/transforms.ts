@@ -1,5 +1,5 @@
 import { calculateDebt, roundToTwoDecimals, getPayingPlayers } from '@/utils/debt';
-import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT, OWN_RACKET_PLAYERS } from '@/constants';
+import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
 import type { Week, NormalizedData } from '@/types/domain';
 import type { PlayerStats, HistoryEntry, Summary, UIData } from '@/types/ui';
 
@@ -38,6 +38,7 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
     let costPerPersonMulti: number;
 
     const racketCost = w.racketCost ?? 0;
+    const ownRacket = w.ownRacketPlayers ?? [];
 
     if (sport === SPORT.SQUASH) {
       const present = w.present || [];
@@ -49,7 +50,7 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
       const courtBase = roundToTwoDecimals(base);
       const courtMulti = roundToTwoDecimals(Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT));
 
-      const rentingPlayers = present.filter(p => !OWN_RACKET_PLAYERS.includes(p));
+      const rentingPlayers = present.filter(p => !ownRacket.includes(p));
       const racketShare = rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;
 
       costPerPerson = roundToTwoDecimals(courtBase + racketShare);
@@ -70,6 +71,7 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
       presentPlayers: w.present || [],
       multisportPlayers: w.multiPlayers || [],
       racketCost: racketCost > 0 ? racketCost : undefined,
+      ownRacketPlayers: ownRacket.length > 0 ? ownRacket : undefined,
     };
   });
 }

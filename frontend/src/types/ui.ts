@@ -26,6 +26,7 @@ export interface HistoryEntry {
   presentPlayers: string[];
   multisportPlayers: string[];
   racketCost?: number;
+  ownRacketPlayers?: string[];
 }
 
 export interface Summary {

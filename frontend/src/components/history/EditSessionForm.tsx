@@ -10,6 +10,7 @@ interface EditForm {
   multiPlayers: string[];
   sport: Sport;
   racketCost?: number;
+  ownRacketPlayers?: string[];
 }
 
 interface EditSessionFormProps {

@@ -11,6 +11,7 @@ export interface Week {
   present: string[];
   multiPlayers: string[];
   racketCost?: number;
+  ownRacketPlayers?: string[];
 }
 
 export interface Payment {

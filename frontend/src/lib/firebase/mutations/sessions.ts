@@ -10,6 +10,7 @@ interface AddSessionParams {
   multisportPlayers: string[];
   sport?: Sport;
   racketCost?: number;
+  ownRacketPlayers?: string[];
 }
 
 export async function addSession({
@@ -19,6 +20,7 @@ export async function addSession({
   multisportPlayers,
   sport = 'pingpong',
   racketCost,
+  ownRacketPlayers,
 }: AddSessionParams): Promise<TransactionResult> {
   if (!datePlayed || totalCost < 0 || !presentPlayers || presentPlayers.length === 0) {
     return { success: false, error: 'Nieprawidłowe dane sesji' };
@@ -45,6 +47,7 @@ export async function addSession({
           present: presentPlayers,
           multiPlayers: multisportPlayers || [],
           ...(racketCost != null && racketCost > 0 ? { racketCost } : {}),
+          ...(ownRacketPlayers && ownRacketPlayers.length > 0 ? { ownRacketPlayers } : {}),
         },
       ],
       lastAddedSession: { id: newId, ts: Date.now() },
@@ -59,11 +62,12 @@ interface UpdateWeekParams {
   multiPlayers: string[];
   sport?: Sport;
   racketCost?: number;
+  ownRacketPlayers?: string[];
 }
 
 export async function updateWeek(
   weekId: string,
-  { date, cost, present, multiPlayers, sport, racketCost }: UpdateWeekParams,
+  { date, cost, present, multiPlayers, sport, racketCost, ownRacketPlayers }: UpdateWeekParams,
 ): Promise<TransactionResult> {
   return withTransaction((current) => {
     const data = (current || {}) as RawAppData;
@@ -82,6 +86,9 @@ export async function updateWeek(
     };
     if (racketCost != null && racketCost > 0) {
       updated.racketCost = racketCost;
+    }
+    if (ownRacketPlayers && ownRacketPlayers.length > 0) {
+      updated.ownRacketPlayers = ownRacketPlayers;
     }
     updatedWeeks[idx] = updated;
     return { ...data, weeks: updatedWeeks } as RawAppData;

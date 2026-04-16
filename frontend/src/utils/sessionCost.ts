@@ -1,4 +1,4 @@
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT, OWN_RACKET_PLAYERS } from '@/constants';
+import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
 import { roundToTwoDecimals } from './debt';
 
 interface SessionLike {
@@ -10,6 +10,7 @@ interface SessionLike {
   cost?: number;
   sport?: string;
   racketCost?: number;
+  ownRacketPlayers?: string[];
 }
 
 export function getPlayerSessionCost(session: SessionLike, playerName: string): number {
@@ -19,6 +20,7 @@ export function getPlayerSessionCost(session: SessionLike, playerName: string): 
   const sport = session.sport || SPORT.PINGPONG;
   const isMulti = multi.includes(playerName);
   const racketCost = session.racketCost ?? 0;
+  const ownRacket = session.ownRacketPlayers ?? [];
 
   if (!present.includes(playerName)) return 0;
 
@@ -29,8 +31,8 @@ export function getPlayerSessionCost(session: SessionLike, playerName: string): 
     const base = present.length > 0 ? hypothetical / present.length : 0;
     const courtShare = roundToTwoDecimals(Math.max(0, isMulti ? base - SQUASH_MULTISPORT_DISCOUNT : base));
 
-    const rentingPlayers = present.filter(p => !OWN_RACKET_PLAYERS.includes(p));
-    const hasOwnRacket = OWN_RACKET_PLAYERS.includes(playerName);
+    const rentingPlayers = present.filter(p => !ownRacket.includes(p));
+    const hasOwnRacket = ownRacket.includes(playerName);
     const racketShare = hasOwnRacket
       ? 0
       : rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;

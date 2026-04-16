@@ -1,4 +1,4 @@
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT, OWN_RACKET_PLAYERS } from '@/constants';
+import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
 import { formatDate, formatAmountShort } from './format';
 import { getPayingPlayers } from './debt';
 
@@ -10,9 +10,10 @@ interface MessageParams {
   perPerson: number;
   sport: string;
   racketCost?: number;
+  ownRacketPlayers?: string[];
 }
 
-export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost = 0 }: MessageParams): string {
+export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost = 0, ownRacketPlayers = [] }: MessageParams): string {
   if (sport === SPORT.SQUASH) {
     const courtCost = totalCost - racketCost;
     const multi = multisportPlayers.filter(p => presentPlayers.includes(p));
@@ -20,8 +21,8 @@ export function buildGroupMessage({ date, totalCost, presentPlayers, multisportP
     const base = presentPlayers.length > 0 ? hypothetical / presentPlayers.length : 0;
     const discounted = Math.max(0, base - SQUASH_MULTISPORT_DISCOUNT);
 
-    const rentingPlayers = presentPlayers.filter(p => !OWN_RACKET_PLAYERS.includes(p));
-    const ownRacketPresent = presentPlayers.filter(p => OWN_RACKET_PLAYERS.includes(p));
+    const ownRacketPresent = ownRacketPlayers.filter(p => presentPlayers.includes(p));
+    const rentingPlayers = presentPlayers.filter(p => !ownRacketPresent.includes(p));
     const racketShare = racketCost > 0 && rentingPlayers.length > 0
       ? racketCost / rentingPlayers.length
       : 0;
