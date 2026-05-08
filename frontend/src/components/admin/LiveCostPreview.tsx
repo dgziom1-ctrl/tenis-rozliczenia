@@ -10,13 +10,14 @@ interface LiveCostPreviewProps {
   sport: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  racketCount?: number;
 }
 
 function fmt(n: number) {
   return (Math.round(n * 100) / 100).toFixed(2);
 }
 
-export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [] }: LiveCostPreviewProps) {
+export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0 }: LiveCostPreviewProps) {
   const courtCost = parseFloat(totalCost);
   if (!totalCost || isNaN(courtCost) || courtCost <= 0 || presentPlayers.length === 0) return null;
 
@@ -36,9 +37,11 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
       : 0;
     const hasRackets = racketCost > 0;
 
+    // 4 grupy: bez karty + wypożycza, z kartą + wypożycza, bez karty + własna, z kartą + własna
     const nonMultiRenters = rentingPlayers.filter(p => !multisportPlayers.includes(p));
     const multiRenters = rentingPlayers.filter(p => multisportPlayers.includes(p));
     const nonMultiOwn = ownRacketPresent.filter(p => !multisportPlayers.includes(p));
+    const multiOwn = ownRacketPresent.filter(p => multisportPlayers.includes(p));
 
     return (
       <div style={{
@@ -89,9 +92,19 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
               </span>
             </div>
           )}
+          {multiOwn.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--co-green)', letterSpacing: '0.1em' }}>
+                ⚡🎾 {multiOwn.join(', ')} — karta + własna
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-green)' }}>
+                {fmt(discounted)} ZŁ
+              </span>
+            </div>
+          )}
           {hasRackets && (
             <div style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
-              {'>'} Kort: {formatAmountShort(courtCost)} zł · Rakiety ({rentingPlayers.length} szt.): {formatAmountShort(racketCost)} zł
+              {'>'} Kort: {formatAmountShort(courtCost)} zł · Rakiety ({racketCount} szt.): {formatAmountShort(racketCost)} zł
             </div>
           )}
         </div>

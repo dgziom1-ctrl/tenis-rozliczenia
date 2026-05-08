@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap } from 'lucide-react';
 import { addSession } from '@/lib/firebase';
-import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT, RACKET_PRICE } from '@/constants';
+import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT, RACKET_PRICE, SQUASH_MAX_COURT_RACKETS } from '@/constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { useThemeTokens } from '@/context/ThemeContext';
@@ -48,7 +48,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const isSquash = sport === SPORT.SQUASH;
   const activeCosts = isSquash ? SQUASH_QUICK_COSTS : QUICK_COSTS;
   const ownRacketPresentCount = isSquash ? ownRacketPlayers.filter(p => presentPlayers.includes(p)).length : 0;
-  const maxRackets = Math.max(0, presentPlayers.length - ownRacketPresentCount);
+  const maxRackets = Math.max(0, Math.min(SQUASH_MAX_COURT_RACKETS, presentPlayers.length - ownRacketPresentCount));
   const effectiveRacketCount = Math.min(racketCount, maxRackets);
   const parsedRacketPrice = racketPrice > 0 ? racketPrice : 0;
   const racketCost = isSquash ? effectiveRacketCount * parsedRacketPrice : 0;
@@ -193,7 +193,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Cost */}
             <div>
-              <FieldLabel>Koszt całkowity (zł)</FieldLabel>
+              <FieldLabel>{isSquash ? 'Koszt kortów (zł)' : 'Koszt całkowity (zł)'}</FieldLabel>
               {/* Quick-cost buttons */}
               <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
                 {activeCosts.map(cost => {
@@ -360,7 +360,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             )}
 
             {/* Live preview */}
-            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} ownRacketPlayers={ownRacketPlayers} />
+            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} ownRacketPlayers={ownRacketPlayers} racketCount={effectiveRacketCount} />
 
             {/* Submit */}
             <div>
