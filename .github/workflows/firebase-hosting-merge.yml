@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting and Functions on merge
+name: Deploy to Firebase Hosting on merge
 
 on:
   push:
@@ -18,19 +18,15 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
-
       - name: Install dependencies
         run: npm install
-
       - name: Lint
         run: npm run lint
-
       - name: Uruchom testy
         run: npm test
 
@@ -58,18 +54,13 @@ jobs:
         run: npm install
         working-directory: ./functions
 
-      # === KROK DODANY: Budowanie funkcji (wymagane m.in. dla TypeScriptu) ===
-      - name: Build functions
-        run: npm run build --if-present
-        working-directory: ./functions
-
       - name: Inject Firebase config into Service Worker
         run: |
-          sed -i "s|PLACEHOLDER_API_KEY|${{ secrets.VITE_FIREBASE_API_KEY }}|g"                 frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_AUTH_DOMAIN|${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}|g"           frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_DATABASE_URL|${{ secrets.VITE_FIREBASE_DATABASE_URL }}|g"         frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_PROJECT_ID|${{ secrets.VITE_FIREBASE_PROJECT_ID }}|g"             frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_STORAGE_BUCKET|${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}|g"     frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_API_KEY|${{ secrets.VITE_FIREBASE_API_KEY }}|g"                       frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_AUTH_DOMAIN|${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}|g"               frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_DATABASE_URL|${{ secrets.VITE_FIREBASE_DATABASE_URL }}|g"             frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_PROJECT_ID|${{ secrets.VITE_FIREBASE_PROJECT_ID }}|g"                 frontend/public/firebase-messaging-sw.js
+          sed -i "s|PLACEHOLDER_STORAGE_BUCKET|${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}|g"         frontend/public/firebase-messaging-sw.js
           sed -i "s|PLACEHOLDER_MESSAGING_SENDER_ID|${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}|g" frontend/public/firebase-messaging-sw.js
           sed -i "s|PLACEHOLDER_APP_ID|${{ secrets.VITE_FIREBASE_APP_ID }}|g"                         frontend/public/firebase-messaging-sw.js
 
@@ -88,22 +79,16 @@ jobs:
           VITE_BLIK_NUMBER:                  ${{ secrets.VITE_BLIK_NUMBER }}
           VITE_FIREBASE_VAPID_KEY:           ${{ secrets.VITE_FIREBASE_VAPID_KEY }}
 
-      - name: Install Firebase CLI globally
-        run: npm install -g firebase-tools
-
-      - name: Deploy Firebase Hosting
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}' > /tmp/sa_key.json
-          firebase deploy --only hosting --project tenis-rozliczenia
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: /tmp/sa_key.json
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}
+          channelId: live
+          projectId: tenis-rozliczenia
 
       - name: Deploy Firebase Functions
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}' > /tmp/sa_key.json
-          # Usunięto flagę --json, aby w razie błędu zobaczyć pełny stack trace w logach GitHub Actions
-          firebase deploy \
-            --only functions:onSessionAdded,functions:onPlayerAdded \
-            --project tenis-rozliczenia
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only functions:onSessionAdded,functions:onPlayerAdded --project tenis-rozliczenia
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: /tmp/sa_key.json
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}
