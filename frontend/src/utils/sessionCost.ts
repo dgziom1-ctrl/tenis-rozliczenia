@@ -1,5 +1,5 @@
 import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
-import { roundToTwoDecimals } from './debt';
+import { roundToTwoDecimals, getOvertimeShare } from './debt';
 
 interface SessionLike {
   presentPlayers?: string[];
@@ -11,6 +11,8 @@ interface SessionLike {
   sport?: string;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  overtimePlayers?: string[];
+  overtimeCost?: number;
 }
 
 export function getPlayerSessionCost(session: SessionLike, playerName: string): number {
@@ -23,6 +25,8 @@ export function getPlayerSessionCost(session: SessionLike, playerName: string): 
   const ownRacket = session.ownRacketPlayers ?? [];
 
   if (!present.includes(playerName)) return 0;
+
+  const overtimeShare = getOvertimeShare(playerName, session.overtimePlayers, session.overtimeCost);
 
   if (sport === SPORT.SQUASH) {
     const courtCost = totalCost - racketCost;
@@ -37,12 +41,13 @@ export function getPlayerSessionCost(session: SessionLike, playerName: string): 
       ? 0
       : rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;
 
-    return roundToTwoDecimals(courtShare + racketShare);
+    return roundToTwoDecimals(courtShare + racketShare + overtimeShare);
   }
 
-  if (isMulti) return 0;
+  if (isMulti) return overtimeShare;
   const paying = present.filter(p => !multi.includes(p));
-  return paying.length > 0 ? roundToTwoDecimals(totalCost / paying.length) : 0;
+  const firstHour = paying.length > 0 ? roundToTwoDecimals(totalCost / paying.length) : 0;
+  return roundToTwoDecimals(firstHour + overtimeShare);
 }
 
 export function getSessionBaseCost(session: SessionLike): number {

@@ -669,14 +669,26 @@ select option { background: #090F18; color: var(--co-text); }
 /* ══ ICON BUTTON HOVER ══ */
 .icon-btn {
   transition: border-color 0.15s, color 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-.icon-btn:hover {
-  border-color: rgba(0,229,255,0.4) !important;
-  color: var(--co-cyan) !important;
+.modal-close-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-.icon-btn.danger:hover {
-  border-color: rgba(255,32,144,0.5) !important;
-  color: var(--co-rose) !important;
+@media (hover: hover) {
+  .icon-btn:hover {
+    border-color: rgba(0,229,255,0.4) !important;
+    color: var(--co-cyan) !important;
+  }
+  .icon-btn.danger:hover {
+    border-color: rgba(255,32,144,0.5) !important;
+    color: var(--co-rose) !important;
+  }
+  .modal-close-btn:hover {
+    border-color: rgba(0,229,255,0.4) !important;
+    color: var(--co-cyan) !important;
+  }
 }
 
 /* ══ FILTER BUTTON HOVER ══ */
@@ -981,13 +993,15 @@ body.theme-light .icon-btn {
   border-color: var(--co-border);
   color: var(--co-dim);
 }
-body.theme-light .icon-btn:hover {
-  border-color: rgba(13,148,136,0.4) !important;
-  color: var(--co-cyan) !important;
-}
-body.theme-light .icon-btn.danger:hover {
-  border-color: rgba(190,24,93,0.35) !important;
-  color: var(--co-rose) !important;
+@media (hover: hover) {
+  body.theme-light .icon-btn:hover {
+    border-color: rgba(13,148,136,0.4) !important;
+    color: var(--co-cyan) !important;
+  }
+  body.theme-light .icon-btn.danger:hover {
+    border-color: rgba(190,24,93,0.35) !important;
+    color: var(--co-rose) !important;
+  }
 }
 
 /* ── Filter buttons ── */

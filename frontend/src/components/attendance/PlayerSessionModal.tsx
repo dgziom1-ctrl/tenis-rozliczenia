@@ -104,17 +104,15 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
               {player.attendanceCount}/{totalWeeks} sesji · {player.attendancePercentage}% frekwencja
             </p>
           </div>
-          <button onClick={onClose} aria-label="Zamknij" style={{
+          <button onClick={onClose} aria-label="Zamknij" className="modal-close-btn" style={{
             background: 'transparent', border: '1px solid var(--co-border)',
-            color: 'var(--co-dim)', cursor: 'pointer', padding: '6px',
+            color: 'var(--co-dim)', cursor: 'pointer',
+            minWidth: 40, minHeight: 40, padding: '8px', flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            clipPath: CLIP.badge,
+            clipPath: CLIP.badge, touchAction: 'manipulation',
             transition: 'color 0.15s, border-color 0.15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--co-cyan)'; e.currentTarget.style.borderColor = 'rgba(0,229,255,0.4)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--co-dim)'; e.currentTarget.style.borderColor = 'var(--co-border)'; }}
-          >
-            <X size={15} />
+          }}>
+            <X size={18} />
           </button>
         </div>
 

@@ -10,15 +10,34 @@ export function getPayingPlayers(present: string[] = [], multisportPlayers: stri
   return present.filter(p => !multisportPlayers.includes(p));
 }
 
+/**
+ * Koszt dogrywki przypadający na jednego gracza.
+ * Dzielony po równo pomiędzy WSZYSTKICH graczy dogrywki — karty lojalnościowe
+ * nie dają tu zniżki.
+ */
+export function getOvertimeShare(
+  playerName: string,
+  overtimePlayers: string[] = [],
+  overtimeCost = 0,
+): number {
+  if (overtimeCost <= 0 || overtimePlayers.length === 0) return 0;
+  if (!overtimePlayers.includes(playerName)) return 0;
+  return roundToTwoDecimals(overtimeCost / overtimePlayers.length);
+}
+
 function getSquashPlayerAmountFromHistory(s: HistoryEntry, playerName: string, isMulti: boolean): number {
-  if (s.sport !== SPORT.SQUASH) return s.costPerPerson;
+  const overtimeShare = getOvertimeShare(playerName, s.overtimePlayers, s.overtimeCost);
+  if (s.sport !== SPORT.SQUASH) {
+    const base = isMulti ? 0 : s.costPerPerson;
+    return roundToTwoDecimals(base + overtimeShare);
+  }
   const baseAmount = isMulti ? (s.costPerPersonMulti ?? s.costPerPerson) : s.costPerPerson;
   const ownRacket = s.ownRacketPlayers ?? [];
-  if (!ownRacket.includes(playerName)) return baseAmount;
+  if (!ownRacket.includes(playerName)) return roundToTwoDecimals(baseAmount + overtimeShare);
   const racketCost = s.racketCost ?? 0;
   const rentingPlayers = s.presentPlayers.filter(p => !ownRacket.includes(p));
   const racketShare = rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;
-  return roundToTwoDecimals(baseAmount - racketShare);
+  return roundToTwoDecimals(baseAmount - racketShare + overtimeShare);
 }
 
 interface UnpaidSession {
@@ -41,6 +60,8 @@ function unpaidSessionsFromWeeks(
     const isPresent = (week.present || []).includes(playerName);
     if (!isPresent) continue;
 
+    const overtimeShare = getOvertimeShare(playerName, week.overtimePlayers, week.overtimeCost);
+
     if (week.sport === SPORT.SQUASH) {
       const multi = week.multiPlayers || [];
       const present = week.present || [];
@@ -59,15 +80,22 @@ function unpaidSessionsFromWeeks(
         : rentingPlayers.length > 0 ? roundToTwoDecimals(racketCost / rentingPlayers.length) : 0;
       result.push({
         id: week.id,
-        costPerPerson: roundToTwoDecimals(courtShare + racketShare),
+        costPerPerson: roundToTwoDecimals(courtShare + racketShare + overtimeShare),
       });
     } else {
       const isMulti = (week.multiPlayers || []).includes(playerName);
       if (!isMulti) {
         const paying = getPayingPlayers(week.present || [], week.multiPlayers || []);
+        const firstHour = paying.length > 0 ? roundToTwoDecimals(week.cost / paying.length) : 0;
         result.push({
           id: week.id,
-          costPerPerson: paying.length > 0 ? roundToTwoDecimals(week.cost / paying.length) : 0,
+          costPerPerson: roundToTwoDecimals(firstHour + overtimeShare),
+        });
+      } else if (overtimeShare > 0) {
+        // Posiadacz karty nie płaci za 1. godzinę, ale płaci swoją część dogrywki.
+        result.push({
+          id: week.id,
+          costPerPerson: overtimeShare,
         });
       }
     }
@@ -108,9 +136,8 @@ export function calculateDebtBreakdown(
 
     const isPresent = session.presentPlayers.includes(playerName);
     const isMulti = session.multisportPlayers.includes(playerName);
-    const owes = session.sport === SPORT.SQUASH ? isPresent : (isPresent && !isMulti);
 
-    if (owes) {
+    if (isPresent) {
       const amount = getSquashPlayerAmountFromHistory(session, playerName, isMulti);
 
       if (amount > 0) {
@@ -136,8 +163,9 @@ export function buildDebtDisplayData(
 
   const sessionFilter = (s: HistoryEntry): boolean => {
     if (!s.presentPlayers.includes(player.name)) return false;
+    const inOvertime = (s.overtimePlayers ?? []).includes(player.name) && (s.overtimeCost ?? 0) > 0;
     if (s.sport === SPORT.SQUASH) return true;
-    return !s.multisportPlayers.includes(player.name);
+    return !s.multisportPlayers.includes(player.name) || inOvertime;
   };
 
   const sessionMap = (s: HistoryEntry): DebtSession => {

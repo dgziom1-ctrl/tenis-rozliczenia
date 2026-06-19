@@ -19,8 +19,8 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
     }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {/* Top row: date + actions */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)', opacity: 0.5 }}>{'>'}</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--co-green)' }}>
               SESSION_{String(row.id).slice(-4).toUpperCase()}
@@ -39,22 +39,26 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               {isSquash ? '🎾 SQUASH' : '🏓 PING'}
             </span>
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button onClick={() => onEdit(row)} className="icon-btn" aria-label="Edytuj sesję" style={{
-              padding: '5px 8px', background: 'transparent',
+              minWidth: 38, minHeight: 38,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '8px 11px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
-              color: 'var(--co-dim)',
+              color: 'var(--co-dim)', touchAction: 'manipulation',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
             }}>
-              <Pencil size={13} />
+              <Pencil size={15} />
             </button>
             <button onClick={() => onDelete(row.id)} className="icon-btn danger" aria-label="Usuń sesję" style={{
-              padding: '5px 8px', background: 'transparent',
+              minWidth: 38, minHeight: 38,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '8px 11px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
-              color: 'var(--co-dim)',
+              color: 'var(--co-dim)', touchAction: 'manipulation',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
             }}>
-              <Trash2 size={13} />
+              <Trash2 size={15} />
             </button>
           </div>
         </div>
@@ -87,6 +91,21 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
             )}
           </div>
         </div>
+
+        {/* Dogrywka */}
+        {row.overtimePlayers && row.overtimePlayers.length > 0 && (row.overtimeCost ?? 0) > 0 && (
+          <div style={{ paddingLeft: 16, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--co-amber)', textTransform: 'uppercase' }}>
+              ⏱ Dogrywka
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-amber)' }}>
+              {formatAmount(row.overtimeCost ?? 0)} ({formatAmount(row.overtimePerPerson ?? 0)} / os.)
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-dim)' }}>
+              {row.overtimePlayers.join(', ')}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

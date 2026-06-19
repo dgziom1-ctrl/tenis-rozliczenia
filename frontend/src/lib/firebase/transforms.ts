@@ -39,6 +39,11 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
 
     const racketCost = w.racketCost ?? 0;
     const ownRacket = w.ownRacketPlayers ?? [];
+    const overtimePlayers = w.overtimePlayers ?? [];
+    const overtimeCost = w.overtimeCost ?? 0;
+    const overtimePerPerson = overtimeCost > 0 && overtimePlayers.length > 0
+      ? roundToTwoDecimals(overtimeCost / overtimePlayers.length)
+      : 0;
 
     if (sport === SPORT.SQUASH) {
       const present = w.present || [];
@@ -72,6 +77,9 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
       multisportPlayers: w.multiPlayers || [],
       racketCost: racketCost > 0 ? racketCost : undefined,
       ownRacketPlayers: ownRacket.length > 0 ? ownRacket : undefined,
+      overtimePlayers: overtimePlayers.length > 0 ? overtimePlayers : undefined,
+      overtimeCost: overtimeCost > 0 ? overtimeCost : undefined,
+      overtimePerPerson: overtimePerPerson > 0 ? overtimePerPerson : undefined,
     };
   });
 }

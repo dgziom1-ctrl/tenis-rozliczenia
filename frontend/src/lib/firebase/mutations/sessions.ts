@@ -11,6 +11,8 @@ interface AddSessionParams {
   sport?: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  overtimePlayers?: string[];
+  overtimeCost?: number;
 }
 
 export async function addSession({
@@ -21,6 +23,8 @@ export async function addSession({
   sport = 'pingpong',
   racketCost,
   ownRacketPlayers,
+  overtimePlayers,
+  overtimeCost,
 }: AddSessionParams): Promise<TransactionResult> {
   if (!datePlayed || totalCost < 0 || !presentPlayers || presentPlayers.length === 0) {
     return { success: false, error: 'Nieprawidłowe dane sesji' };
@@ -48,6 +52,9 @@ export async function addSession({
           multiPlayers: multisportPlayers || [],
           ...(racketCost != null && racketCost > 0 ? { racketCost } : {}),
           ...(ownRacketPlayers && ownRacketPlayers.length > 0 ? { ownRacketPlayers } : {}),
+          ...(overtimePlayers && overtimePlayers.length > 0 && overtimeCost != null && overtimeCost > 0
+            ? { overtimePlayers, overtimeCost }
+            : {}),
         },
       ],
       lastAddedSession: { id: newId, ts: Date.now() },
@@ -63,11 +70,13 @@ interface UpdateWeekParams {
   sport?: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  overtimePlayers?: string[];
+  overtimeCost?: number;
 }
 
 export async function updateWeek(
   weekId: string,
-  { date, cost, present, multiPlayers, sport, racketCost, ownRacketPlayers }: UpdateWeekParams,
+  { date, cost, present, multiPlayers, sport, racketCost, ownRacketPlayers, overtimePlayers, overtimeCost }: UpdateWeekParams,
 ): Promise<TransactionResult> {
   return withTransaction((current) => {
     const data = (current || {}) as RawAppData;
@@ -89,6 +98,12 @@ export async function updateWeek(
     }
     if (ownRacketPlayers && ownRacketPlayers.length > 0) {
       updated.ownRacketPlayers = ownRacketPlayers;
+    }
+    // Dogrywka: zachowaj graczy obecnych na dogrywce (po filtrze present).
+    const overtimeInPresent = (overtimePlayers || []).filter(p => present.includes(p));
+    if (overtimeInPresent.length > 0 && overtimeCost != null && overtimeCost > 0) {
+      updated.overtimePlayers = overtimeInPresent;
+      updated.overtimeCost = overtimeCost;
     }
     updatedWeeks[idx] = updated;
     return { ...data, weeks: updatedWeeks } as RawAppData;

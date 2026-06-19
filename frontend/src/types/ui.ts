@@ -27,6 +27,12 @@ export interface HistoryEntry {
   multisportPlayers: string[];
   racketCost?: number;
   ownRacketPlayers?: string[];
+  /** Gracze, którzy zostali na dogrywkę. */
+  overtimePlayers?: string[];
+  /** Łączny koszt dogrywki. */
+  overtimeCost?: number;
+  /** Koszt dogrywki przypadający na jednego gracza dogrywki. */
+  overtimePerPerson?: number;
 }
 
 export interface Summary {

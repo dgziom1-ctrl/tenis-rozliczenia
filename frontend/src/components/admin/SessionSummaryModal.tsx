@@ -19,6 +19,9 @@ interface SessionSummary {
   multisportPlayers: string[];
   racketCost: number;
   ownRacketPlayers: string[];
+  overtimePlayers: string[];
+  overtimeCost: number;
+  overtimePerPerson: number;
 }
 
 export interface SessionSummaryModalProps {
@@ -34,12 +37,13 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
   useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
   if (!summary) return null;
-  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers } = summary;
+  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, overtimePlayers, overtimeCost, overtimePerPerson } = summary;
   const isSquash = sport === SPORT.SQUASH;
   const hasRackets = isSquash && racketCost > 0;
+  const hasOvertime = overtimeCost > 0 && overtimePlayers.length > 0;
 
   const handleCopy = async () => {
-    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost, ownRacketPlayers });
+    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost, ownRacketPlayers, overtimePlayers, overtimeCost });
     try { await navigator.clipboard.writeText(msg); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { showError('Nie udało się skopiować tekstu'); }
   };
 
@@ -138,6 +142,11 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
                 {multisportCount > 0 && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 4 }}>
                     {payingCount} os. płaci · {multisportCount} os. gratis
+                  </p>
+                )}
+                {hasOvertime && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)', marginTop: 4 }}>
+                    ⏱ Dogrywka: {formatAmountShort(overtimePerPerson)} zł/os. · {overtimePlayers.length} os.
                   </p>
                 )}
               </>

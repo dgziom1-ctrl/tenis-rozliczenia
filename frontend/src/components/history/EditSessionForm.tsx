@@ -1,6 +1,7 @@
-import { Check, X, Zap, Users } from 'lucide-react';
+import { Check, X, Zap, Users, Timer } from 'lucide-react';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import EditDateInput from './EditDateInput';
+import { SPORT } from '@/constants';
 import type { Sport } from '../../types/domain';
 
 interface EditForm {
@@ -11,6 +12,8 @@ interface EditForm {
   sport: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  overtimePlayers?: string[];
+  overtimeCost?: string | number;
 }
 
 interface EditSessionFormProps {
@@ -24,6 +27,7 @@ interface EditSessionFormProps {
   onCancel: () => void;
   onTogglePresent: (name: string) => void;
   onToggleMulti: (name: string) => void;
+  onToggleOvertime: (name: string) => void;
 }
 
 export default function EditSessionForm({
@@ -37,7 +41,9 @@ export default function EditSessionForm({
   onCancel,
   onTogglePresent,
   onToggleMulti,
+  onToggleOvertime,
 }: EditSessionFormProps) {
+  const isSquash = editForm.sport === SPORT.SQUASH;
   return (
     <div style={{
       background: 'var(--co-dark)', border: '1px solid rgba(0,229,255,0.25)',
@@ -101,6 +107,41 @@ export default function EditSessionForm({
                   transition: 'all 0.15s',
                   ...(editForm.multiPlayers?.includes(name) ? {
                     borderColor: 'rgba(0,229,255,0.5)', background: 'rgba(0,229,255,0.07)', color: 'var(--co-green)',
+                  } : {
+                    borderColor: 'var(--co-border)', background: 'transparent', color: 'var(--co-dim)',
+                  }),
+                }}>
+                {name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {editForm.present?.length > 0 && !isSquash && (
+        <div>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--co-amber)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+            <Timer size={11} /> DOGRYWKA
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)' }}>Koszt:</span>
+            <input type="number" min="0" step="0.5"
+              value={editForm.overtimeCost ?? ''}
+              onChange={e => setEditForm(p => ({ ...p, overtimeCost: e.target.value }))}
+              className="cyber-input"
+              style={{ width: 80, padding: '6px 8px', fontSize: '0.8rem', textAlign: 'center', fontFamily: 'var(--font-mono)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}
+            />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)' }}>zł (po równo, bez kart)</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+            {editForm.present.map(name => (
+              <button type="button" key={name} onClick={() => onToggleOvertime(name)}
+                style={{
+                  padding: '7px 8px', fontSize: '0.65rem', fontFamily: 'var(--font-display)', fontWeight: 600,
+                  letterSpacing: '0.06em', cursor: 'pointer', border: '1px solid',
+                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                  transition: 'all 0.15s',
+                  ...((editForm.overtimePlayers || []).includes(name) ? {
+                    borderColor: 'rgba(251,191,36,0.5)', background: 'rgba(251,191,36,0.08)', color: 'var(--co-amber)',
                   } : {
                     borderColor: 'var(--co-border)', background: 'transparent', color: 'var(--co-dim)',
                   }),

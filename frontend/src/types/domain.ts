@@ -12,6 +12,10 @@ export interface Week {
   multiPlayers: string[];
   racketCost?: number;
   ownRacketPlayers?: string[];
+  /** Gracze, którzy zostali na dogrywkę (dzielą overtimeCost po równo, bez zniżek). */
+  overtimePlayers?: string[];
+  /** Łączny koszt dogrywki (np. 15 zł za dodatkowy stół). */
+  overtimeCost?: number;
 }
 
 export interface Payment {

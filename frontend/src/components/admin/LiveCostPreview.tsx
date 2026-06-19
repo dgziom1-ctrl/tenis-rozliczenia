@@ -11,13 +11,15 @@ interface LiveCostPreviewProps {
   racketCost?: number;
   ownRacketPlayers?: string[];
   racketCount?: number;
+  overtimePlayers?: string[];
+  overtimeCost?: number;
 }
 
 function fmt(n: number) {
   return (Math.round(n * 100) / 100).toFixed(2);
 }
 
-export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0 }: LiveCostPreviewProps) {
+export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0, overtimePlayers = [], overtimeCost = 0 }: LiveCostPreviewProps) {
   const courtCost = parseFloat(totalCost);
   if (!totalCost || isNaN(courtCost) || courtCost <= 0 || presentPlayers.length === 0) return null;
 
@@ -115,36 +117,52 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
   const paying    = presentPlayers.filter(p => !multisportPlayers.includes(p));
   const perPerson = paying.length > 0 ? courtCost / paying.length : 0;
 
+  const overtimeInPresent = overtimePlayers.filter(p => presentPlayers.includes(p));
+  const hasOvertime = overtimeCost > 0 && overtimeInPresent.length > 0;
+  const overtimePerPerson = hasOvertime ? overtimeCost / overtimeInPresent.length : 0;
+
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      display: 'flex', flexDirection: 'column', gap: 8,
       padding: '12px 16px',
       background: 'rgba(0,229,255,0.03)',
       border: '1px solid rgba(0,229,255,0.2)',
       clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Calculator size={14} style={{ color: 'var(--co-dim)' }} />
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
-          Podział kosztów
-        </span>
-      </div>
-      <div style={{ textAlign: 'right' }}>
-        {paying.length > 0 ? (
-          <>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.4rem', color: 'var(--co-cyan)', textShadow: '0 0 10px rgba(0,229,255,0.3)' }}>
-              {formatAmountShort(perPerson)} ZŁ
-            </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', color: 'var(--co-dim)', marginLeft: 8, letterSpacing: '0.12em' }}>
-              / os. ({paying.length} PŁACI)
-            </span>
-          </>
-        ) : (
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.1em', color: 'var(--co-green)' }}>
-            ⚡ WSZYSCY MAJĄ MULTISPORT
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Calculator size={14} style={{ color: 'var(--co-dim)' }} />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+            {hasOvertime ? '1. godzina' : 'Podział kosztów'}
           </span>
-        )}
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          {paying.length > 0 ? (
+            <>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.4rem', color: 'var(--co-cyan)', textShadow: '0 0 10px rgba(0,229,255,0.3)' }}>
+                {formatAmountShort(perPerson)} ZŁ
+              </span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', color: 'var(--co-dim)', marginLeft: 8, letterSpacing: '0.12em' }}>
+                / os. ({paying.length} PŁACI)
+              </span>
+            </>
+          ) : (
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.1em', color: 'var(--co-green)' }}>
+              ⚡ WSZYSCY MAJĄ MULTISPORT
+            </span>
+          )}
+        </div>
       </div>
+      {hasOvertime && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--co-border)', paddingTop: 8 }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.12em', color: 'var(--co-amber)', textTransform: 'uppercase' }}>
+            ⏱ Dogrywka ({overtimeInPresent.length} os.)
+          </span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-amber)' }}>
+            {fmt(overtimePerPerson)} ZŁ / os.
+          </span>
+        </div>
+      )}
     </div>
   );
 }

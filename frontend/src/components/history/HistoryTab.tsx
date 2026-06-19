@@ -23,6 +23,8 @@ interface EditForm {
   sport: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  overtimePlayers?: string[];
+  overtimeCost?: string | number;
 }
 
 interface HistoryTabProps {
@@ -105,7 +107,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     if (pwModal.type === 'edit') {
       const row = pwModal.row;
       setEditingId(row.id);
-      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers], sport: row.sport || SPORT.PINGPONG, racketCost: row.racketCost, ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [] });
+      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers], sport: row.sport || SPORT.PINGPONG, racketCost: row.racketCost, ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [], overtimePlayers: row.overtimePlayers ? [...row.overtimePlayers] : [], overtimeCost: row.overtimeCost ?? '' });
     } else if (pwModal.type === 'delete') {
       setDeletingId(pwModal.rowId);
     }
@@ -122,7 +124,10 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     }
     setIsSaving(true);
     try {
-      const result = await updateWeek(editingId!, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers, sport: editForm.sport || SPORT.PINGPONG, racketCost: editForm.racketCost, ownRacketPlayers: editForm.ownRacketPlayers });
+      const overtimeInPresent = (editForm.overtimePlayers || []).filter(p => editForm.present.includes(p));
+      const parsedOvertimeCost = editForm.overtimeCost === '' || editForm.overtimeCost == null ? NaN : parseFloat(String(editForm.overtimeCost));
+      const hasOvertime = editForm.sport !== SPORT.SQUASH && overtimeInPresent.length > 0 && Number.isFinite(parsedOvertimeCost) && parsedOvertimeCost > 0;
+      const result = await updateWeek(editingId!, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers, sport: editForm.sport || SPORT.PINGPONG, racketCost: editForm.racketCost, ownRacketPlayers: editForm.ownRacketPlayers, overtimePlayers: hasOvertime ? overtimeInPresent : [], overtimeCost: hasOvertime ? parsedOvertimeCost : 0 });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       setEditingId(null); setEditForm({} as EditForm);
     } finally { setIsSaving(false); }
@@ -136,6 +141,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         present: inList ? prev.present.filter(p => p !== name) : [...prev.present, name],
         multiPlayers: inList ? (prev.multiPlayers || []).filter(p => p !== name) : prev.multiPlayers,
         ownRacketPlayers: inList ? (prev.ownRacketPlayers || []).filter(p => p !== name) : prev.ownRacketPlayers,
+        overtimePlayers: inList ? (prev.overtimePlayers || []).filter(p => p !== name) : prev.overtimePlayers,
       };
     });
   };
@@ -144,6 +150,14 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     setEditForm(prev => {
       const inList = (prev.multiPlayers || []).includes(name);
       return { ...prev, multiPlayers: inList ? prev.multiPlayers.filter(p => p !== name) : [...prev.multiPlayers, name] };
+    });
+  };
+
+  const toggleOvertime = (name: string) => {
+    setEditForm(prev => {
+      const list = prev.overtimePlayers || [];
+      const inList = list.includes(name);
+      return { ...prev, overtimePlayers: inList ? list.filter(p => p !== name) : [...list, name] };
     });
   };
 
@@ -421,6 +435,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                       onCancel={cancelEdit}
                       onTogglePresent={togglePresent}
                       onToggleMulti={toggleMulti}
+                      onToggleOvertime={toggleOvertime}
                     />
                   );
 

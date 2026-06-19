@@ -11,9 +11,16 @@ interface MessageParams {
   sport: string;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  overtimePlayers?: string[];
+  overtimeCost?: number;
 }
 
-export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost = 0, ownRacketPlayers = [] }: MessageParams): string {
+export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost = 0, ownRacketPlayers = [], overtimePlayers = [], overtimeCost = 0 }: MessageParams): string {
+  const overtimeInPresent = overtimePlayers.filter(p => presentPlayers.includes(p));
+  const hasOvertime = overtimeCost > 0 && overtimeInPresent.length > 0;
+  const overtimeLine = hasOvertime
+    ? `\u23f1 Dogrywka (${overtimeInPresent.join(', ')}): ${formatAmountShort(overtimeCost / overtimeInPresent.length)} z\u0142/os.\n`
+    : '';
   if (sport === SPORT.SQUASH) {
     const courtCost = totalCost - racketCost;
     const multi = multisportPlayers.filter(p => presentPlayers.includes(p));
@@ -39,6 +46,7 @@ export function buildGroupMessage({ date, totalCost, presentPlayers, multisportP
     if (racketCost > 0 && ownRacketPresent.length > 0) {
       msg += `🎾 ${ownRacketPresent.join(', ')} (własna rakietka): ${formatAmountShort(base)} zł/os.\n`;
     }
+    msg += overtimeLine;
     return msg.trim();
   }
 
@@ -53,5 +61,6 @@ export function buildGroupMessage({ date, totalCost, presentPlayers, multisportP
     msg += '\n';
   }
   if (multi.length > 0) msg += `⚡ Multisport (bezpłatnie): ${multi.join(', ')}\n`;
+  msg += overtimeLine;
   return msg.trim();
 }
