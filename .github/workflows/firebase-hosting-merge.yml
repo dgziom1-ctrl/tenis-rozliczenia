@@ -87,9 +87,11 @@ jobs:
         run: npm install -g firebase-tools
 
       - name: Deploy Firebase Hosting
-        run: firebase deploy --only hosting --project tenis-rozliczenia
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}' > /tmp/sa_key.json
+          firebase deploy --only hosting --project tenis-rozliczenia
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/sa_key.json
 
       - name: Deploy Firebase Functions
         run: |
