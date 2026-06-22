@@ -87,8 +87,12 @@ jobs:
           projectId: tenis-rozliczenia
 
       - name: Deploy Firebase Functions
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only functions:onSessionAdded,functions:onPlayerAdded --project tenis-rozliczenia
         env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-sa.json"
+          npx --yes firebase-tools@13 deploy \
+            --only functions:onSessionAdded,functions:onPlayerAdded \
+            --project tenis-rozliczenia \
+            --non-interactive --force
