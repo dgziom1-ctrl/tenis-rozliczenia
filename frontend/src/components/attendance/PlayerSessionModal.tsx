@@ -63,12 +63,12 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
         position: 'fixed', inset: 0, zIndex: 100,
         background: 'var(--co-overlay, rgba(0,0,0,0.85))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '16px',
+        padding: 'max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))',
       }}
     >
       <div className="bottom-sheet-enter" style={{
         width: '100%', maxWidth: 520,
-        maxHeight: 'calc(100vh - 32px)',
+        maxHeight: 'calc(100vh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom)))',
         background: 'var(--co-panel)',
         border: `1px solid ${c.border}40`,
         borderRadius: '12px',

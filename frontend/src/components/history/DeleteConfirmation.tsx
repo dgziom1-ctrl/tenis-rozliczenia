@@ -20,7 +20,7 @@ export default function DeleteConfirmation({ row, onConfirm, onCancel }: DeleteC
         ⚠ Usunąć sesję z dnia {formatDate(row.datePlayed)}?
       </p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', marginBottom: 14 }}>
-        Będziesz mieć 8 sekund na cofnięcie.
+        Tej operacji nie można cofnąć. Salda graczy zostaną przeliczone.
       </p>
       <div style={{ display: 'flex', gap: 10 }}>
         <button onClick={() => onConfirm(row.id)}

@@ -1,11 +1,10 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Terminal, CalendarDays, Search, Download, ArrowUpDown } from 'lucide-react';
 import { updateWeek, deleteWeek } from '@/lib/firebase';
 import { groupHistoryByMonth } from '@/utils/sessions';
 import { useToast } from '../common/Toast';
 import { PasswordModal } from '../common/SharedUI';
 import { SPORT } from '@/constants';
-import UndoBar from '../common/UndoBar';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import type { HistoryEntry, SoundType } from '../../types/ui';
 import type { Sport } from '../../types/domain';
@@ -44,10 +43,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortOrder,    setSortOrder]    = useState<'desc' | 'asc'>('desc');
   const [showAll,      setShowAll]      = useState(false);
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const [undoSecondsLeft, setUndoSecondsLeft] = useState(0);
-  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const undoCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { showError, showSuccess } = useToast();
   const isMobile = useIsMobile();
 
@@ -58,10 +53,9 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     : (editForm.cost === '' ? 'Wpisz koszt sesji' : 'Koszt musi być liczbą >= 0');
 
   const filteredHistory = useMemo(() => {
-    let h = !filterPlayer ? history : history.filter(s => s.presentPlayers.includes(filterPlayer));
-    if (pendingDeleteId) h = h.filter(s => s.id !== pendingDeleteId);
+    const h = !filterPlayer ? history : history.filter(s => s.presentPlayers.includes(filterPlayer));
     return sortOrder === 'asc' ? [...h].reverse() : h;
-  }, [history, filterPlayer, sortOrder, pendingDeleteId]);
+  }, [history, filterPlayer, sortOrder]);
 
   useEffect(() => { setShowAll(false); }, [filterPlayer, sortOrder]);
 
@@ -161,45 +155,14 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     });
   };
 
-  const UNDO_SECONDS = 8;
-
-  const clearUndoTimers = useCallback(() => {
-    if (undoTimerRef.current) { clearTimeout(undoTimerRef.current); undoTimerRef.current = null; }
-    if (undoCountdownRef.current) { clearInterval(undoCountdownRef.current); undoCountdownRef.current = null; }
-  }, []);
-
   const handleDelete = async (id: string) => {
     setDeletingId(null);
-    setPendingDeleteId(id);
-    setUndoSecondsLeft(UNDO_SECONDS);
-    clearUndoTimers();
-
-    undoCountdownRef.current = setInterval(() => {
-      setUndoSecondsLeft(prev => {
-        if (prev <= 1) { clearInterval(undoCountdownRef.current!); undoCountdownRef.current = null; return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-
-    undoTimerRef.current = setTimeout(async () => {
-      clearUndoTimers();
-      try {
-        const result = await deleteWeek(id);
-        if (!result.success) { showError(result.error || 'Nie udało się usunąć sesji'); }
-      } catch { showError('Nie udało się usunąć sesji'); }
-      setPendingDeleteId(null);
-    }, UNDO_SECONDS * 1000);
+    try {
+      const result = await deleteWeek(id);
+      if (!result.success) { showError(result.error || 'Nie udało się usunąć sesji'); return; }
+      showSuccess('Sesja usunięta');
+    } catch { showError('Nie udało się usunąć sesji'); }
   };
-
-  const handleUndo = useCallback(() => {
-    clearUndoTimers();
-    setPendingDeleteId(null);
-    setUndoSecondsLeft(0);
-  }, [clearUndoTimers]);
-
-  useEffect(() => {
-    return () => clearUndoTimers();
-  }, [clearUndoTimers]);
 
   const visibleHistory = showAll ? filteredHistory : filteredHistory.slice(0, 50);
   const grouped = groupHistoryByMonth(visibleHistory);
@@ -475,17 +438,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           </button>
         )}
       </div>
-
-      {pendingDeleteId && (
-        <div style={{ position: 'fixed', bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))', left: 8, right: 8, zIndex: 80, maxWidth: 500, margin: '0 auto' }}>
-          <UndoBar
-            message="Sesja usunięta"
-            secondsLeft={undoSecondsLeft}
-            progressPct={(undoSecondsLeft / UNDO_SECONDS) * 100}
-            onUndo={handleUndo}
-          />
-        </div>
-      )}
     </>
   );
 }
