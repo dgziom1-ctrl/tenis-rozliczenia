@@ -62,7 +62,6 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
       style={{
         position: 'fixed', inset: 0, zIndex: 100,
         background: 'var(--co-overlay, rgba(0,0,0,0.85))',
-        backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '16px',
       }}
@@ -108,11 +107,12 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
             background: 'transparent', border: '1px solid var(--co-border)',
             color: 'var(--co-dim)', cursor: 'pointer',
             minWidth: 40, minHeight: 40, padding: '8px', flexShrink: 0,
+            position: 'relative', zIndex: 1,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             clipPath: CLIP.badge, touchAction: 'manipulation',
             transition: 'color 0.15s, border-color 0.15s',
           }}>
-            <X size={18} />
+            <X size={18} style={{ pointerEvents: 'none' }} />
           </button>
         </div>
 
