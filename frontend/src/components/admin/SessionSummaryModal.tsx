@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Copy } from 'lucide-react';
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { SPORT, SQUASH_MULTISPORT_DISCOUNT, SPORT_EMOJI, SPORT_LABEL, isCourtSport } from '@/constants';
 import { useToast } from '../common/Toast';
 import { formatDate, formatAmountShort } from '@/utils/format';
 import { buildGroupMessage } from '@/utils/message';
@@ -38,7 +38,7 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
   useEffect(() => { overlayRef.current?.focus(); }, []);
   if (!summary) return null;
   const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, overtimePlayers, overtimeCost, overtimePerPerson } = summary;
-  const isSquash = sport === SPORT.SQUASH;
+  const isSquash = isCourtSport(sport);
   const hasRackets = isSquash && racketCost > 0;
   const hasOvertime = overtimeCost > 0 && overtimePlayers.length > 0;
 
@@ -83,7 +83,7 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
         {/* Stats grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
           {[
-            { label: 'SPORT', value: isSquash ? '🎾 SQUASH' : '🏓 PING-PONG', color: isSquash ? 'var(--co-green)' : 'var(--co-cyan)' },
+            { label: 'SPORT', value: `${SPORT_EMOJI[sport] ?? '🏓'} ${(SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase()}`, color: isSquash ? 'var(--co-green)' : 'var(--co-cyan)' },
             { label: 'DATA', value: formatDate(date), color: 'var(--co-text)' },
             { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
             { label: 'OBECNI', value: presentCount, color: 'var(--co-text)' },

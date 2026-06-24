@@ -1,4 +1,4 @@
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { SPORT, SQUASH_MULTISPORT_DISCOUNT, SPORT_EMOJI, isCourtSport } from '@/constants';
 import { formatDate, formatAmountShort } from './format';
 import { getPayingPlayers } from './debt';
 
@@ -21,7 +21,7 @@ export function buildGroupMessage({ date, totalCost, presentPlayers, multisportP
   const overtimeLine = hasOvertime
     ? `\u23f1 Dogrywka (${overtimeInPresent.join(', ')}): ${formatAmountShort(overtimeCost / overtimeInPresent.length)} z\u0142/os.\n`
     : '';
-  if (sport === SPORT.SQUASH) {
+  if (isCourtSport(sport)) {
     const courtCost = totalCost - racketCost;
     const multi = multisportPlayers.filter(p => presentPlayers.includes(p));
     const hypothetical = courtCost + multi.length * SQUASH_MULTISPORT_DISCOUNT;
@@ -34,7 +34,9 @@ export function buildGroupMessage({ date, totalCost, presentPlayers, multisportP
       ? racketCost / rentingPlayers.length
       : 0;
 
-    let msg = `🎾 Graliśmy w squasha! (${formatDate(date)})\n`;
+    const sportEmoji = SPORT_EMOJI[sport] ?? '🎾';
+    const sportWord = sport === SPORT.BADMINTON ? 'badmintona' : 'squasha';
+    let msg = `${sportEmoji} Graliśmy w ${sportWord}! (${formatDate(date)})\n`;
     msg += `💰 Wynajem: ${formatAmountShort(courtCost)} zł`;
     if (racketCost > 0) msg += ` + rakiety: ${formatAmountShort(racketCost)} zł`;
     msg += '\n';
@@ -44,7 +46,7 @@ export function buildGroupMessage({ date, totalCost, presentPlayers, multisportP
       msg += `⚡ Cena z kartą (${multi.join(', ')}): ${formatAmountShort(discounted + racketShare)} zł/os.\n`;
     }
     if (racketCost > 0 && ownRacketPresent.length > 0) {
-      msg += `🎾 ${ownRacketPresent.join(', ')} (własna rakietka): ${formatAmountShort(base)} zł/os.\n`;
+      msg += `${sportEmoji} ${ownRacketPresent.join(', ')} (własna rakietka): ${formatAmountShort(base)} zł/os.\n`;
     }
     msg += overtimeLine;
     return msg.trim();

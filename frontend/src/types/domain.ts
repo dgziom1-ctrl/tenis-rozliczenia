@@ -1,7 +1,8 @@
 export const SPORT_PINGPONG = 'pingpong' as const;
 export const SPORT_SQUASH = 'squash' as const;
+export const SPORT_BADMINTON = 'badminton' as const;
 
-export type Sport = typeof SPORT_PINGPONG | typeof SPORT_SQUASH;
+export type Sport = typeof SPORT_PINGPONG | typeof SPORT_SQUASH | typeof SPORT_BADMINTON;
 
 export interface Week {
   id: string;

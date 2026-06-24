@@ -1,5 +1,5 @@
 import { Calculator } from 'lucide-react';
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { SQUASH_MULTISPORT_DISCOUNT, SPORT_LABEL, isCourtSport } from '@/constants';
 import { formatAmountShort } from '@/utils/format';
 import type { Sport } from '@/types/domain';
 
@@ -23,7 +23,7 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
   const courtCost = parseFloat(totalCost);
   if (!totalCost || isNaN(courtCost) || courtCost <= 0 || presentPlayers.length === 0) return null;
 
-  const isSquash = sport === SPORT.SQUASH;
+  const isSquash = isCourtSport(sport);
 
   if (isSquash) {
     const multiInPresent = multisportPlayers.filter(p => presentPlayers.includes(p));
@@ -55,7 +55,7 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
           <Calculator size={14} style={{ color: 'var(--co-dim)' }} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
-            Podział kosztów · Squash
+            Podział kosztów · {SPORT_LABEL[sport] ?? 'Squash'}
           </span>
           {hasRackets && (
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)', marginLeft: 'auto' }}>

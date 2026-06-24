@@ -1,7 +1,7 @@
 import { Check, X, Zap, Users, Timer } from 'lucide-react';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import EditDateInput from './EditDateInput';
-import { SPORT } from '@/constants';
+import { isCourtSport } from '@/constants';
 import type { Sport } from '../../types/domain';
 
 interface EditForm {
@@ -43,7 +43,7 @@ export default function EditSessionForm({
   onToggleMulti,
   onToggleOvertime,
 }: EditSessionFormProps) {
-  const isSquash = editForm.sport === SPORT.SQUASH;
+  const isSquash = isCourtSport(editForm.sport);
   return (
     <div style={{
       background: 'var(--co-dark)', border: '1px solid rgba(0,229,255,0.25)',

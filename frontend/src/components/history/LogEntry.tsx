@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import { formatDate, formatAmount } from '@/utils/format';
-import { SPORT } from '@/constants';
+import { SPORT_EMOJI, SPORT_SHORT, isCourtSport } from '@/constants';
 import type { HistoryEntry } from '../../types/ui';
 
 interface LogEntryProps {
@@ -10,7 +10,7 @@ interface LogEntryProps {
 }
 
 export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
-  const isSquash = row.sport === SPORT.SQUASH;
+  const isSquash = isCourtSport(row.sport);
   return (
     <div className="scan-hover log-entry" style={{
       background: 'var(--co-dark)', border: '1px solid var(--co-border)',
@@ -36,7 +36,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               color: isSquash ? 'var(--co-green)' : 'var(--co-cyan)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
             }}>
-              {isSquash ? '🎾 SQUASH' : '🏓 PING'}
+              {`${SPORT_EMOJI[row.sport] ?? '🏓'} ${SPORT_SHORT[row.sport] ?? 'PING'}`}
             </span>
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>

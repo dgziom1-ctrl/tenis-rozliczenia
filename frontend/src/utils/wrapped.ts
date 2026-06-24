@@ -1,4 +1,4 @@
-import { SPORT } from '@/constants';
+import { isCourtSport } from '@/constants';
 import { getPlayerSessionCost } from './sessionCost';
 import type { PlayerStats, HistoryEntry } from '@/types/ui';
 import type { WrappedStats, WrappedPlayerStats } from '@/types/ui';
@@ -47,7 +47,7 @@ export function computeWrappedStats(
   const totalCostAll = yearHistory.reduce((sum, s) => sum + (s.totalCost || 0), 0);
   const avgPlayersPerSession = yearHistory.reduce((sum, s) => sum + s.presentPlayers.length, 0) / totalSessions;
 
-  const squashSessions = yearHistory.filter(s => s.sport === SPORT.SQUASH).length;
+  const squashSessions = yearHistory.filter(s => isCourtSport(s.sport)).length;
   const pingpongSessions = totalSessions - squashSessions;
 
   const monthCounts: Record<string, number> = {};

@@ -1,4 +1,4 @@
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { SPORT, SQUASH_MULTISPORT_DISCOUNT, isCourtSport } from '@/constants';
 import { roundToTwoDecimals, getOvertimeShare } from './debt';
 
 interface SessionLike {
@@ -28,7 +28,7 @@ export function getPlayerSessionCost(session: SessionLike, playerName: string): 
 
   const overtimeShare = getOvertimeShare(playerName, session.overtimePlayers, session.overtimeCost);
 
-  if (sport === SPORT.SQUASH) {
+  if (isCourtSport(sport)) {
     const courtCost = totalCost - racketCost;
     const multiCount = multi.filter(p => present.includes(p)).length;
     const hypothetical = courtCost + multiCount * SQUASH_MULTISPORT_DISCOUNT;
@@ -57,7 +57,7 @@ export function getSessionBaseCost(session: SessionLike): number {
   const sport = session.sport || SPORT.PINGPONG;
   const racketCost = session.racketCost ?? 0;
 
-  if (sport === SPORT.SQUASH) {
+  if (isCourtSport(sport)) {
     const courtCost = totalCost - racketCost;
     const multiCount = multi.filter(p => present.includes(p)).length;
     const hypothetical = courtCost + multiCount * SQUASH_MULTISPORT_DISCOUNT;

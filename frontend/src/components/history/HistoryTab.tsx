@@ -4,7 +4,7 @@ import { updateWeek, deleteWeek } from '@/lib/firebase';
 import { groupHistoryByMonth } from '@/utils/sessions';
 import { useToast } from '../common/Toast';
 import { PasswordModal } from '../common/SharedUI';
-import { SPORT } from '@/constants';
+import { SPORT, SPORT_LABEL, isCourtSport } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import type { HistoryEntry, SoundType } from '../../types/ui';
 import type { Sport } from '../../types/domain';
@@ -66,7 +66,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         ['Data', 'Sport', 'Koszt całkowity', 'Na osobę', 'Liczba graczy', 'Obecni', 'Multisport'],
         ...filteredHistory.map(s => [
           s.datePlayed,
-          s.sport === SPORT.SQUASH ? 'squash' : 'ping-pong',
+          (SPORT_LABEL[s.sport] ?? 'Ping-Pong').toLowerCase(),
           s.totalCost,
           s.costPerPerson?.toFixed(2) ?? '',
           s.presentPlayers.length,
@@ -120,7 +120,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     try {
       const overtimeInPresent = (editForm.overtimePlayers || []).filter(p => editForm.present.includes(p));
       const parsedOvertimeCost = editForm.overtimeCost === '' || editForm.overtimeCost == null ? NaN : parseFloat(String(editForm.overtimeCost));
-      const hasOvertime = editForm.sport !== SPORT.SQUASH && overtimeInPresent.length > 0 && Number.isFinite(parsedOvertimeCost) && parsedOvertimeCost > 0;
+      const hasOvertime = !isCourtSport(editForm.sport) && overtimeInPresent.length > 0 && Number.isFinite(parsedOvertimeCost) && parsedOvertimeCost > 0;
       const result = await updateWeek(editingId!, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers, sport: editForm.sport || SPORT.PINGPONG, racketCost: editForm.racketCost, ownRacketPlayers: editForm.ownRacketPlayers, overtimePlayers: hasOvertime ? overtimeInPresent : [], overtimeCost: hasOvertime ? parsedOvertimeCost : 0 });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       setEditingId(null); setEditForm({} as EditForm);

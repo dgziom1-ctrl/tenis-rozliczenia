@@ -1,5 +1,5 @@
 import { calculateDebt, roundToTwoDecimals, getPayingPlayers } from '@/utils/debt';
-import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT, isCourtSport } from '@/constants';
 import type { Week, NormalizedData } from '@/types/domain';
 import type { PlayerStats, HistoryEntry, Summary, UIData } from '@/types/ui';
 
@@ -45,7 +45,7 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
       ? roundToTwoDecimals(overtimeCost / overtimePlayers.length)
       : 0;
 
-    if (sport === SPORT.SQUASH) {
+    if (isCourtSport(sport)) {
       const present = w.present || [];
       const multi = w.multiPlayers || [];
       const courtCost = w.cost - racketCost;

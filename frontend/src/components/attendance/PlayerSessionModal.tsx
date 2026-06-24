@@ -1,7 +1,7 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { RANKS, getRank, SPORT } from '@/constants';
+import { RANKS, getRank, isCourtSport } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
 import { formatDate } from '@/utils/format';
 import { getPlayerColor } from '@/constants/colors';
@@ -207,7 +207,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
           {history.map((session, idx) => {
             const attended = session.presentPlayers.includes(player.name);
             const isMulti = session.multisportPlayers.includes(player.name);
-            const isSquashSession = session.sport === SPORT.SQUASH;
+            const isSquashSession = isCourtSport(session.sport);
 
             // For squash: everyone pays; multisport holders get -15 zł discount.
             // For ping-pong: multisport players pay nothing.

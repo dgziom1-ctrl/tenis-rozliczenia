@@ -1,4 +1,4 @@
-import { ORGANIZER_NAME, SPORT, SQUASH_MULTISPORT_DISCOUNT } from '@/constants';
+import { ORGANIZER_NAME, SQUASH_MULTISPORT_DISCOUNT, isCourtSport } from '@/constants';
 import type { Week, Payment } from '@/types/domain';
 import type { HistoryEntry, DebtSession, DebtDisplayData, DebtDisplayPayment, PlayerStats } from '@/types/ui';
 
@@ -27,7 +27,7 @@ export function getOvertimeShare(
 
 function getSquashPlayerAmountFromHistory(s: HistoryEntry, playerName: string, isMulti: boolean): number {
   const overtimeShare = getOvertimeShare(playerName, s.overtimePlayers, s.overtimeCost);
-  if (s.sport !== SPORT.SQUASH) {
+  if (!isCourtSport(s.sport)) {
     const base = isMulti ? 0 : s.costPerPerson;
     return roundToTwoDecimals(base + overtimeShare);
   }
@@ -62,7 +62,7 @@ function unpaidSessionsFromWeeks(
 
     const overtimeShare = getOvertimeShare(playerName, week.overtimePlayers, week.overtimeCost);
 
-    if (week.sport === SPORT.SQUASH) {
+    if (isCourtSport(week.sport)) {
       const multi = week.multiPlayers || [];
       const present = week.present || [];
       const racketCost = week.racketCost ?? 0;
@@ -164,7 +164,7 @@ export function buildDebtDisplayData(
   const sessionFilter = (s: HistoryEntry): boolean => {
     if (!s.presentPlayers.includes(player.name)) return false;
     const inOvertime = (s.overtimePlayers ?? []).includes(player.name) && (s.overtimeCost ?? 0) > 0;
-    if (s.sport === SPORT.SQUASH) return true;
+    if (isCourtSport(s.sport)) return true;
     return !s.multisportPlayers.includes(player.name) || inOvertime;
   };
 

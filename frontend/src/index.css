@@ -418,8 +418,19 @@ button:active,
 
 /* ── Modal overlay ── */
 .modal-overlay {
+  /* NOTE: backdrop-filter must NOT be applied directly to this fixed-position
+     overlay — on iOS Safari that makes child buttons (close / confirm) untappable.
+     The blur is rendered on a non-interactive ::before layer instead. */
+  isolation: isolate;
+}
+.modal-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
 }
 
 /* ── Bottom sheet slide up ── */
@@ -826,6 +837,8 @@ body.theme-light .cyber-box::after {
 /* Modal overlays */
 body.theme-light .modal-overlay {
   background: rgba(15,23,42,0.45) !important;
+}
+body.theme-light .modal-overlay::before {
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
 }

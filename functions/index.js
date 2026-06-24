@@ -147,7 +147,7 @@ exports.onSessionAdded = onValueUpdated(
 
     const SQUASH_MULTISPORT_DISCOUNT = 15;
     let notifBody;
-    if (sport === 'squash') {
+    if (sport === 'squash' || sport === 'badminton') {
       const courtCost     = cost - racketCost;
       const multiPresent  = multi.filter(p => present.includes(p));
       const multiCount    = multiPresent.length;
@@ -170,7 +170,7 @@ exports.onSessionAdded = onValueUpdated(
       if (racketCost > 0) costPart += ` · rakiety: ${racketCost} zł`;
 
       notifBody = `${date} · ${present.length} graczy · ${costPart}`;
-      console.log(`Nowa sesja (Squash): ${date}, ${present.length} graczy, ${totalPerPerson} zł/os. (z kartą: ${totalPerPersonMulti} zł, rakiety: ${racketCost} zł)`);
+      console.log(`Nowa sesja (${sport === 'badminton' ? 'Badminton' : 'Squash'}): ${date}, ${present.length} graczy, ${totalPerPerson} zł/os. (z kartą: ${totalPerPersonMulti} zł, rakiety: ${racketCost} zł)`);
     } else {
       // Ping-pong: only non-multisport players pay
       const paying   = present.filter(p => !multi.includes(p));
@@ -179,7 +179,7 @@ exports.onSessionAdded = onValueUpdated(
       console.log(`Nowa sesja (Ping-pong): ${date}, ${present.length} graczy, ${perPerson} zł/os.`);
     }
 
-    const sportEmoji = sport === 'squash' ? '🎾' : '🏓';
+    const sportEmoji = sport === 'squash' ? '🎾' : sport === 'badminton' ? '🏸' : '🏓';
 
     const tokens = await getAllTokens();
     console.log(`Tokenów FCM w bazie: ${tokens.length}`);

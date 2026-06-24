@@ -3,7 +3,12 @@ export const BREAKDOWN_EPSILON = 0.05;
 export const SETTLED_THRESHOLD = 0.01;
 export const UNDO_TIMEOUT_SECONDS = 8;
 export const QUICK_COSTS = [0, 15, 30, 45, 60];
-export const SPORT = { PINGPONG: 'pingpong', SQUASH: 'squash' } as const;
+export const SPORT = { PINGPONG: 'pingpong', SQUASH: 'squash', BADMINTON: 'badminton' } as const;
+/** Sporty kortowe (squash, badminton) — taki sam model kosztów: zniżka Multisport + rakiety. */
+export const isCourtSport = (sport?: string): boolean => sport === SPORT.SQUASH || sport === SPORT.BADMINTON;
+export const SPORT_EMOJI: Record<string, string> = { pingpong: '🏓', squash: '🎾', badminton: '🏸' };
+export const SPORT_LABEL: Record<string, string> = { pingpong: 'Ping-Pong', squash: 'Squash', badminton: 'Badminton' };
+export const SPORT_SHORT: Record<string, string> = { pingpong: 'PING', squash: 'SQUASH', badminton: 'BADM' };
 export const SQUASH_BASE_PRICE = 85;
 export const SQUASH_MULTISPORT_DISCOUNT = 15;
 export const SQUASH_QUICK_COSTS = [55, 70, 85, 110, 125, 140, 155, 170];

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap, Timer } from 'lucide-react';
 import { addSession } from '@/lib/firebase';
-import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT, RACKET_PRICE, SQUASH_MAX_COURT_RACKETS, OVERTIME_DEFAULT_COST } from '@/constants';
+import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, SQUASH_MULTISPORT_DISCOUNT, RACKET_PRICE, SQUASH_MAX_COURT_RACKETS, OVERTIME_DEFAULT_COST, isCourtSport } from '@/constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { useThemeTokens } from '@/context/ThemeContext';
@@ -48,7 +48,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   } | null>(null);
   const [costTouched,       setCostTouched]       = useState(false);
 
-  const isSquash = sport === SPORT.SQUASH;
+  const isSquash = isCourtSport(sport);
   const activeCosts = isSquash ? SQUASH_QUICK_COSTS : QUICK_COSTS;
   const ownRacketPresentCount = isSquash ? ownRacketPlayers.filter(p => presentPlayers.includes(p)).length : 0;
   const maxRackets = Math.max(0, Math.min(SQUASH_MAX_COURT_RACKETS, presentPlayers.length - ownRacketPresentCount));
@@ -189,7 +189,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 Dodaj nową sesję
               </span>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
-                {isSquash ? 'zapisz dzisiejszą grę squasha' : 'zapisz dzisiejszą grę ping-ponga'}
+                {sport === SPORT.SQUASH ? 'zapisz dzisiejszą grę squasha' : sport === SPORT.BADMINTON ? 'zapisz dzisiejszą grę badmintona' : 'zapisz dzisiejszą grę ping-ponga'}
               </p>
             </div>
           </div>
