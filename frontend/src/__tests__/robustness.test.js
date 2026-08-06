@@ -3,9 +3,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { calculateDebt, calculateDebtBreakdown } from '../utils/debt';
+import { calculateDebt, buildDebtDisplayData } from '../utils/debt';
 import { assignRankingPlaces } from '../utils/rankings';
-import { getPlayerBadge } from '../utils/achievements';
+import { getPlayerAchievements } from '../utils/achievements';
 import { buildUIData } from '../lib/firebase/transforms';
 import { formatDate, formatAmount } from '../utils/format';
 import * as stateModule from '../lib/firebase/state';
@@ -146,11 +146,11 @@ describe('calculateDebt — brute force floating point', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// calculateDebtBreakdown — new unified API
+// buildDebtDisplayData — rozbicie salda pokazywane w panelu gracza
 // ══════════════════════════════════════════════════════════════════════════════
 
-describe('calculateDebtBreakdown — direction & correctness', () => {
-  // history is newest-first (as buildHistory returns)
+describe('buildDebtDisplayData — kierunek i poprawność', () => {
+  // history jest od najnowszej sesji (tak zwraca buildHistory)
   const history = [
     { id: 'w5', datePlayed: '2025-05-01', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'], multisportPlayers: [] },
     { id: 'w4', datePlayed: '2025-04-01', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'], multisportPlayers: [] },
@@ -158,41 +158,45 @@ describe('calculateDebtBreakdown — direction & correctness', () => {
     { id: 'w2', datePlayed: '2025-02-01', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'], multisportPlayers: [] },
     { id: 'w1', datePlayed: '2025-01-01', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'], multisportPlayers: [] },
   ];
+  const player = (name) => ({ name, attendanceCount: 0, currentDebt: 0, eligibleWeeks: 5, joinDate: null });
 
-  it('returns sessions oldest-first', () => {
-    const b = calculateDebtBreakdown('Alice', 60, history);
-    expect(b[0].sessionId).toBe('w1');
-    expect(b[1].sessionId).toBe('w2');
-    expect(b[2].sessionId).toBe('w3');
+  it('wypisuje sesje od najstarszej', () => {
+    const d = buildDebtDisplayData(player('Alice'), history, {});
+    expect(d.sessions.map(s => s.sessionId)).toEqual(['w1', 'w2', 'w3', 'w4', 'w5']);
   });
 
-  it('stops accumulating when debt reached', () =>
-    expect(calculateDebtBreakdown('Alice', 40, history)).toHaveLength(2));
+  it('sumuje koszt wszystkich sesji gracza', () =>
+    expect(buildDebtDisplayData(player('Alice'), history, {}).totalSessions).toBe(100));
 
-  it('skips sessions where player was absent', () => {
+  it('pomija sesje, w których gracza nie było', () => {
     const h = [
-      { id: 'w3', datePlayed: '2025-03-01', sport: 'pingpong', totalCost: 30, costPerPerson: 30, presentPlayers: ['Bob'],         multisportPlayers: [] },
+      { id: 'w3', datePlayed: '2025-03-01', sport: 'pingpong', totalCost: 30, costPerPerson: 30, presentPlayers: ['Bob'],          multisportPlayers: [] },
       { id: 'w2', datePlayed: '2025-02-01', sport: 'pingpong', totalCost: 30, costPerPerson: 30, presentPlayers: ['Alice'],        multisportPlayers: [] },
       { id: 'w1', datePlayed: '2025-01-01', sport: 'pingpong', totalCost: 60, costPerPerson: 30, presentPlayers: ['Alice', 'Bob'], multisportPlayers: [] },
     ];
-    expect(calculateDebtBreakdown('Alice', 60, h).map(x => x.sessionId)).toEqual(['w1', 'w2']);
+    expect(buildDebtDisplayData(player('Alice'), h, {}).sessions.map(s => s.sessionId)).toEqual(['w1', 'w2']);
   });
 
-  it('skips multisport sessions', () => {
+  it('pomija sesje opłacone kartą Multisport', () => {
     const h = [
       { id: 'w2', datePlayed: '2025-02-01', sport: 'pingpong', totalCost: 30, costPerPerson: 30, presentPlayers: ['Alice'], multisportPlayers: ['Alice'] },
       { id: 'w1', datePlayed: '2025-01-01', sport: 'pingpong', totalCost: 30, costPerPerson: 30, presentPlayers: ['Alice'], multisportPlayers: [] },
     ];
-    const b = calculateDebtBreakdown('Alice', 30, h);
-    expect(b).toHaveLength(1);
-    expect(b[0].sessionId).toBe('w1');
+    const d = buildDebtDisplayData(player('Alice'), h, {});
+    expect(d.sessions).toHaveLength(1);
+    expect(d.sessions[0].sessionId).toBe('w1');
   });
 
-  it('returns empty for 0 debt', () =>
-    expect(calculateDebtBreakdown('Alice', 0, history)).toHaveLength(0));
+  it('gracz spoza historii ma puste rozbicie i zerowe saldo', () => {
+    const d = buildDebtDisplayData(player('Ghost'), history, {});
+    expect(d.sessions).toHaveLength(0);
+    expect(d.balance).toBe(0);
+  });
 
-  it('returns empty for unknown player', () =>
-    expect(calculateDebtBreakdown('Ghost', 100, history)).toHaveLength(0));
+  it('nadpłata daje ujemne saldo', () => {
+    const payments = { Alice: [{ id: 'p1', amount: 150, date: '2025-06-01' }] };
+    expect(buildDebtDisplayData(player('Alice'), history, payments).balance).toBe(-50);
+  });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -255,6 +259,61 @@ describe('buildUIData — integration', () => {
       ],      playerJoinWeek: { NewGuy: 1 },
     };
     expect(buildUIData(raw).players.find(p => p.name === 'NewGuy').attendanceCount).toBe(1);
+  });
+
+  it('playerJoinDate ogranicza liczbę sesji, które gracz mógł rozegrać', () => {
+    const raw = {
+      players: ['Alice', 'NewGuy'],
+      weeks: [
+        { id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice'],           multiPlayers: [] },
+        { id: 'w2', date: '2025-02-01', cost: 60, present: ['Alice', 'NewGuy'], multiPlayers: [] },
+      ],
+      playerJoinDate: { NewGuy: '2025-02-01' },
+    };
+    const newGuy = buildUIData(raw).players.find(p => p.name === 'NewGuy');
+    expect(newGuy.attendanceCount).toBe(1);
+    // Gracz nie mógł zagrać sesji sprzed swojego dołączenia, więc frekwencja
+    // liczy się z jednej sesji, nie z dwóch.
+    expect(newGuy.eligibleWeeks).toBe(1);
+  });
+
+  it('playerJoinDate ma pierwszeństwo przed zaszłościowym playerJoinWeek', () => {
+    const raw = {
+      players: ['NewGuy'],
+      weeks: [
+        { id: 'w1', date: '2025-01-01', cost: 60, present: ['NewGuy'], multiPlayers: [] },
+        { id: 'w2', date: '2025-02-01', cost: 60, present: ['NewGuy'], multiPlayers: [] },
+      ],
+      playerJoinDate: { NewGuy: '2025-01-01' },
+      playerJoinWeek: { NewGuy: 1 },
+    };
+    expect(buildUIData(raw).players.find(p => p.name === 'NewGuy').eligibleWeeks).toBe(2);
+  });
+
+  it('sesja dopisana wstecz nie zawyża puli sesji gracza', () => {
+    const raw = {
+      players: ['NewGuy'],
+      weeks: [
+        // Dopisana po fakcie, z datą sprzed dołączenia gracza.
+        { id: 'w0', date: '2024-11-01', cost: 60, present: [],          multiPlayers: [] },
+        { id: 'w1', date: '2025-01-01', cost: 60, present: ['NewGuy'],  multiPlayers: [] },
+      ],
+      playerJoinDate: { NewGuy: '2025-01-01' },
+    };
+    expect(buildUIData(raw).players.find(p => p.name === 'NewGuy').eligibleWeeks).toBe(1);
+  });
+
+  it('gracz bez daty dołączenia liczy się od pierwszej sesji', () => {
+    const raw = {
+      players: ['Alice'],
+      weeks: [
+        { id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice'], multiPlayers: [] },
+        { id: 'w2', date: '2025-02-01', cost: 60, present: [],        multiPlayers: [] },
+      ],
+    };
+    const alice = buildUIData(raw).players.find(p => p.name === 'Alice');
+    expect(alice.joinDate).toBeNull();
+    expect(alice.eligibleWeeks).toBe(2);
   });
 });
 
@@ -322,10 +381,25 @@ describe('addPlayer — robustness', () => {
   it('rejects whitespace-only',                 async () => expect((await addPlayer('   ')).success).toBe(false));
   it('rejects null',                            async () => expect((await addPlayer(null)).success).toBe(false));
 
-  it('sets playerJoinWeek to current week count', async () => {
+  // Data zamiast indeksu sesji: indeks przestawał się zgadzać po każdym
+  // usunięciu lub wstecznym dopisaniu sesji, więc frekwencja liczyła się
+  // od złego momentu.
+  it('zapisuje datę dołączenia w formacie YYYY-MM-DD', async () => {
     seed({ players: ['Alice'], weeks: [{ id: 'w1' }, { id: 'w2' }] });
     await addPlayer('NewGuy');
-    expect(mockSaveData.mock.calls[0][0].playerJoinWeek.NewGuy).toBe(2);
+    expect(mockSaveData.mock.calls[0][0].playerJoinDate.NewGuy).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('nie zapisuje już indeksu playerJoinWeek', async () => {
+    seed({ players: ['Alice'], weeks: [{ id: 'w1' }, { id: 'w2' }] });
+    await addPlayer('NewGuy');
+    expect(mockSaveData.mock.calls[0][0].playerJoinWeek?.NewGuy).toBeUndefined();
+  });
+
+  it('zachowuje daty dołączenia pozostałych graczy', async () => {
+    seed({ players: ['Alice'], weeks: [], playerJoinDate: { Alice: '2024-05-01' } });
+    await addPlayer('NewGuy');
+    expect(mockSaveData.mock.calls[0][0].playerJoinDate.Alice).toBe('2024-05-01');
   });
 });
 
@@ -538,36 +612,53 @@ describe('assignRankingPlaces — exploratory', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// getPlayerBadge — edge cases
+// getPlayerAchievements — odznaki gracza
 // ══════════════════════════════════════════════════════════════════════════════
 
-describe('getPlayerBadge — edge cases', () => {
-  it('sole player gets attendance king', () => {
-    const p = { name: 'A', currentStreak: 0, multisportCount: 0, attendanceCount: 5, attendancePercentage: 50 };
-    expect(getPlayerBadge(p, [p])?.icon).toBe('👑');
+describe('getPlayerAchievements — edge cases', () => {
+  const session = (id, date, present) => ({
+    id, datePlayed: date, sport: 'pingpong', totalCost: 30, costPerPerson: 30,
+    presentPlayers: present, multisportPlayers: [],
   });
 
-  it('streak=1 does not award streak title', () => {
-    const players = [
-      { name: 'A', currentStreak: 1, multisportCount: 0, attendanceCount: 10, attendancePercentage: 80 },
-      { name: 'B', currentStreak: 0, multisportCount: 0, attendanceCount: 5,  attendancePercentage: 50 },
-    ];
-    expect(getPlayerBadge(players[0], players)?.icon).not.toBe('🔥');
+  it('brak historii → brak odznak', () => {
+    const p = { name: 'A', attendanceCount: 0, multisportCount: 0, currentStreak: 0 };
+    expect(getPlayerAchievements(p, [])).toHaveLength(0);
   });
 
-  it('ghost title requires attendancePercentage < 40', () => {
-    const players = [
-      { name: 'A', currentStreak: 3, multisportCount: 2, attendanceCount: 10, attendancePercentage: 70 },
-      { name: 'B', currentStreak: 0, multisportCount: 0, attendanceCount: 1,  attendancePercentage: 10 },
-    ];
-    expect(getPlayerBadge(players[1], players)?.icon).toBe('💀');
+  it('pierwsza sesja daje Debiut', () => {
+    const p = { name: 'A', attendanceCount: 1, multisportCount: 0, currentStreak: 1 };
+    const ids = getPlayerAchievements(p, [session('w1', '2025-01-01', ['A'])]).map(a => a.id);
+    expect(ids).toContain('first_session');
   });
 
-  it('no title when all metrics tied', () => {
-    const players = [
-      { name: 'A', currentStreak: 3, multisportCount: 3, attendanceCount: 10, attendancePercentage: 70 },
-      { name: 'B', currentStreak: 3, multisportCount: 3, attendanceCount: 10, attendancePercentage: 70 },
+  it('nieobecność w każdej sesji nie daje Debiutu', () => {
+    const p = { name: 'A', attendanceCount: 0, multisportCount: 0, currentStreak: 0 };
+    const ids = getPlayerAchievements(p, [session('w1', '2025-01-01', ['B'])]).map(a => a.id);
+    expect(ids).not.toContain('first_session');
+  });
+
+  it('perfekcyjny miesiąc wymaga minimum 3 sesji', () => {
+    const p = { name: 'A', attendanceCount: 2, multisportCount: 0, currentStreak: 2 };
+    const twoOfTwo = [session('w1', '2025-01-01', ['A']), session('w2', '2025-01-08', ['A'])];
+    expect(getPlayerAchievements(p, twoOfTwo).map(a => a.id)).not.toContain('perfect_month');
+
+    const threeOfThree = [...twoOfTwo, session('w3', '2025-01-15', ['A'])];
+    expect(getPlayerAchievements(p, threeOfThree).map(a => a.id)).toContain('perfect_month');
+  });
+
+  it('seria liczy się z najdłuższego ciągu, nie z bieżącego', () => {
+    // `history` jest od najnowszej sesji, tak jak zwraca je buildHistory.
+    // Najnowsza sesja bez gracza zeruje bieżącą serię, ale rekord zostaje.
+    const history = [
+      session('w9', '2025-02-01', ['B']),
+      session('w5', '2025-01-05', ['A']),
+      session('w4', '2025-01-04', ['A']),
+      session('w3', '2025-01-03', ['A']),
+      session('w2', '2025-01-02', ['A']),
+      session('w1', '2025-01-01', ['A']),
     ];
-    expect(getPlayerBadge(players[0], players)).toBeNull();
+    const p = { name: 'A', attendanceCount: 5, multisportCount: 0, currentStreak: 0 };
+    expect(getPlayerAchievements(p, history).map(a => a.id)).toContain('streak_5');
   });
 });

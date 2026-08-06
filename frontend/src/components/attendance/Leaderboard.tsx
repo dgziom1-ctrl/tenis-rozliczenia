@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { getRank } from '@/constants';
 import { FONT, CLIP, PANEL } from '../../constants/styles';
@@ -9,13 +10,12 @@ import type { RankedPlayer } from '@/types/ui';
 
 interface LeaderboardRowProps {
   player: RankedPlayer;
-  totalWeeks: number;
   place: number;
   onClick: () => void;
 }
 
 // ─── Leaderboard row ─────────────────────────────────────────────
-function LeaderboardRow({ player, totalWeeks, place, onClick }: LeaderboardRowProps) {
+function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
   const rank = getRank(player.attendancePercentage);
   const isTop3 = place <= 3;
 
@@ -52,7 +52,7 @@ function LeaderboardRow({ player, totalWeeks, place, onClick }: LeaderboardRowPr
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
-          {player.attendanceCount}/{totalWeeks}
+          {player.attendanceCount}/{player.eligibleWeeks}
         </span>
         <span style={{
           fontFamily: 'var(--font-display)', fontSize: '1.2rem',
@@ -70,13 +70,12 @@ function LeaderboardRow({ player, totalWeeks, place, onClick }: LeaderboardRowPr
 interface LeaderboardProps {
   ranked: RankedPlayer[];
   podiumPlayers: PodiumEntry[];
-  totalWeeks: number;
   onSelect: (name: string) => void;
 }
 
 // ─── Full leaderboard ─────────────────────────────────────────────
-export default function Leaderboard({ ranked, podiumPlayers, totalWeeks, onSelect }: LeaderboardProps) {
-  const theRest = ranked.filter(p => p.place > 3);
+export default function Leaderboard({ ranked, podiumPlayers, onSelect }: LeaderboardProps) {
+  const theRest = useMemo(() => ranked.filter(p => p.place > 3), [ranked]);
   return (
     <div style={{
       ...PANEL.cyberCut,
@@ -90,11 +89,11 @@ export default function Leaderboard({ ranked, podiumPlayers, totalWeeks, onSelec
       }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
         <SectionHeader icon={TrendingUp} title="RANKING" sub="frekwencja · wszystkie sesje" />
-        <Podium podiumPlayers={podiumPlayers} totalWeeks={totalWeeks} onSelect={onSelect} />
+        <Podium podiumPlayers={podiumPlayers} onSelect={onSelect} />
         {theRest.length > 0 && (
           <div style={{ borderTop: '1px solid var(--co-border)', paddingTop: 14 }}>
             {theRest.map(player => (
-              <LeaderboardRow key={player.name} player={player} totalWeeks={totalWeeks} place={player.place} onClick={() => onSelect(player.name)} />
+              <LeaderboardRow key={player.name} player={player} place={player.place} onClick={() => onSelect(player.name)} />
             ))}
           </div>
         )}

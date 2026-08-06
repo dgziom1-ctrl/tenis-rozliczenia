@@ -1,10 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { Lock, Check, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { ADMIN_PASSWORD, SOUND_TYPES } from '@/constants';
+import { ADMIN_PASSWORD, isAdminPasswordConfigured, SOUND_TYPES } from '@/constants';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import type { SoundType } from '@/types/ui';
+
+/** Jak długo świeci komunikat o złym haśle. */
+const ERROR_FLASH_MS = 1500;
 
 export interface PasswordModalProps {
   action?: string;
@@ -18,19 +21,28 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
   const [input, setInput] = useState('');
   const [error, setError] = useState(false);
   const overlayRef = useRef<HTMLDivElement | null>(null);
+  const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const titleId = useId();
+  const inputId = useId();
+  const configured = isAdminPasswordConfigured();
+
   useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
+  useEffect(() => () => { if (errorTimer.current) clearTimeout(errorTimer.current); }, []);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (input === ADMIN_PASSWORD) {
+    // Gdy hasła nie skonfigurowano, `input === ADMIN_PASSWORD` byłoby prawdą
+    // dla pustego pola i puszczało dalej każdego — dlatego blokujemy wprost.
+    if (configured && input === ADMIN_PASSWORD) {
       onConfirm();
-    } else {
-      setError(true);
-      setInput('');
-      playSound?.(SOUND_TYPES.ERROR);
-      setTimeout(() => setError(false), 1500);
+      return;
     }
+    setError(true);
+    setInput('');
+    playSound?.(SOUND_TYPES.ERROR);
+    if (errorTimer.current) clearTimeout(errorTimer.current);
+    errorTimer.current = setTimeout(() => setError(false), ERROR_FLASH_MS);
   };
 
   return (
@@ -42,6 +54,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
       onKeyDown={e => e.key === 'Escape' && onCancel()}
       role="dialog"
       aria-modal="true"
+      aria-labelledby={titleId}
     >
       <div className="modal-enter" style={{
         background: 'var(--co-panel)',
@@ -53,7 +66,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <Lock size={16} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} />
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.15em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
+          <h3 id={titleId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', letterSpacing: '0.15em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
             Podaj hasło admina
           </h3>
         </div>
@@ -63,12 +76,16 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
           </p>
         )}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <label htmlFor={inputId} className="sr-only">Hasło admina</label>
           <input
+            id={inputId}
             type="password"
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="// ACCESS CODE..."
             autoFocus
+            autoComplete="current-password"
+            aria-invalid={error}
             className="cyber-input"
             style={{
               width: '100%', padding: '10px 12px',
@@ -79,8 +96,8 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
             }}
           />
           {error && (
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-rose)', textAlign: 'center' }}>
-              ⚠ Złe hasło
+            <p role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-rose)', textAlign: 'center' }}>
+              {configured ? '⚠ Złe hasło' : '⚠ Hasło admina nie jest skonfigurowane'}
             </p>
           )}
           <div style={{ display: 'flex', gap: 10 }}>

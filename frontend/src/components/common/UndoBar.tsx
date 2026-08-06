@@ -15,7 +15,9 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
   const tokens = useThemeTokens();
 
   return (
-    <div style={{
+    // aria-atomic="false" + ukryty licznik: bez tego czytnik ekranu czytałby
+    // cały pasek od nowa co sekundę, przy każdym tyknięciu odliczania.
+    <div role="status" aria-atomic="false" style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
       position: 'relative', overflow: 'hidden',
       padding: compact ? '8px 12px' : '12px 16px',
@@ -27,7 +29,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         : 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
     }}>
       {/* Progress bar */}
-      <div style={{
+      <div aria-hidden="true" style={{
         position: 'absolute', bottom: 0, left: 0,
         height: compact ? 2 : 2,
         width: `${progressPct}%`,
@@ -46,7 +48,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flexWrap: 'wrap',
       }}>
         {message}
-        <span style={{
+        <span aria-hidden="true" style={{
           fontFamily: 'var(--font-mono)',
           fontSize: '0.72rem',
           color: tokens.mutedText, opacity: 0.7, flexShrink: 0,
@@ -73,7 +75,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,229,255,0.08)'; e.currentTarget.style.borderColor = 'var(--co-cyan)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = tokens.undoBorder; }}
       >
-        <RotateCcw size={compact ? 10 : 12} /> {buttonLabel}
+        <RotateCcw size={compact ? 10 : 12} aria-hidden="true" /> {buttonLabel}
       </button>
     </div>
   );

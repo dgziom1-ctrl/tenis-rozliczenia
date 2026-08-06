@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Terminal, CalendarDays, Search, Download, ArrowUpDown } from 'lucide-react';
 import { updateWeek, deleteWeek } from '@/lib/firebase';
 import { groupHistoryByMonth } from '@/utils/sessions';
@@ -7,24 +7,20 @@ import { useToast } from '../common/Toast';
 import { PasswordModal } from '../common/SharedUI';
 import { SPORT, SPORT_LABEL, isCourtSport } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import type { HistoryEntry, SoundType } from '../../types/ui';
-import type { Sport } from '../../types/domain';
+import type { HistoryEntry, SoundType, SessionEditForm } from '../../types/ui';
 import LogEntry from './LogEntry';
 import AttendanceTrendChart from './AttendanceTrendChart';
 import EditSessionForm from './EditSessionForm';
 import DeleteConfirmation from './DeleteConfirmation';
 import PlayerFilterSheet from './PlayerFilterSheet';
 
-interface EditForm {
-  date: string;
-  cost: string | number;
-  present: string[];
-  multiPlayers: string[];
-  sport: Sport;
-  racketCost?: number;
-  ownRacketPlayers?: string[];
-  overtimePlayers?: string[];
-  overtimeCost?: string | number;
+/** Ile sesji pokazujemy, zanim użytkownik poprosi o pełną listę. */
+const INITIAL_VISIBLE_SESSIONS = 50;
+
+/** Edytowana sesja razem z jej identyfikatorem — jedno albo drugie nigdy nie występuje osobno. */
+interface EditState {
+  id: string;
+  form: SessionEditForm;
 }
 
 interface HistoryTabProps {
@@ -34,11 +30,10 @@ interface HistoryTabProps {
 }
 
 export default function HistoryTab({ history, playerNames, playSound }: HistoryTabProps) {
-  const [editingId,    setEditingId]    = useState<string | null>(null);
-  const [editForm,     setEditForm]     = useState<EditForm>({} as EditForm);
+  const [editing,      setEditing]      = useState<EditState | null>(null);
   const [deletingId,   setDeletingId]   = useState<string | null>(null);
   const [isSaving,     setIsSaving]     = useState(false);
-  const [_isDeleting,   _setIsDeleting]   = useState<string | null>(null);
+  const [isDeleting,   setIsDeleting]   = useState(false);
   const [pwModal,      setPwModal]      = useState<{ type: 'edit'; row: HistoryEntry } | { type: 'delete'; rowId: string } | null>(null);
   const [filterPlayer, setFilterPlayer] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -47,11 +42,17 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const { showError, showSuccess } = useToast();
   const isMobile = useIsMobile();
 
-  const parsedEditCost = parseAmount(editForm.cost as string | number);
+  // Stan blokuje dopiero po przerysowaniu, więc dwa kliknięcia w tym samym
+  // ticku zdążyłyby wysłać dwa zapisy. Ref blokuje je natychmiast.
+  const savingRef  = useRef(false);
+  const deletingRef = useRef(false);
+
+  const editForm = editing?.form;
+  const parsedEditCost = parseAmount(editForm?.cost ?? '');
   const isEditCostValid = isValidAmount(parsedEditCost, 0);
   const editCostError = isEditCostValid
     ? null
-    : (editForm.cost === '' ? 'Wpisz koszt sesji' : 'Koszt musi być liczbą >= 0');
+    : (editForm?.cost === '' ? 'Wpisz koszt sesji' : 'Koszt musi być liczbą >= 0');
 
   const filteredHistory = useMemo(() => {
     const h = !filterPlayer ? history : history.filter(s => s.presentPlayers.includes(filterPlayer));
@@ -89,46 +90,83 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
       showSuccess(`Wyeksportowano ${filteredHistory.length} sesji`);
     } catch (err) {
       console.warn('CSV export failed:', err);
+      showError('Nie udało się wyeksportować pliku CSV');
     } finally {
       if (url) URL.revokeObjectURL(url);
     }
   };
 
-  const requestEdit   = (row: HistoryEntry) => setPwModal({ type: 'edit', row });
-  const requestDelete = (id: string)  => setPwModal({ type: 'delete', rowId: id });
+  const requestEdit   = useCallback((row: HistoryEntry) => setPwModal({ type: 'edit', row }), []);
+  const requestDelete = useCallback((id: string) => setPwModal({ type: 'delete', rowId: id }), []);
 
   const handlePasswordConfirm = () => {
     if (!pwModal) return;
     if (pwModal.type === 'edit') {
       const row = pwModal.row;
-      setEditingId(row.id);
-      setEditForm({ date: row.datePlayed, cost: row.totalCost, present: [...row.presentPlayers], multiPlayers: [...row.multisportPlayers], sport: row.sport || SPORT.PINGPONG, racketCost: row.racketCost, ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [], overtimePlayers: row.overtimePlayers ? [...row.overtimePlayers] : [], overtimeCost: row.overtimeCost ?? '' });
-    } else if (pwModal.type === 'delete') {
+      setEditing({
+        id: row.id,
+        form: {
+          date: row.datePlayed,
+          cost: row.totalCost,
+          present: [...row.presentPlayers],
+          multiPlayers: [...row.multisportPlayers],
+          sport: row.sport || SPORT.PINGPONG,
+          racketCost: row.racketCost,
+          ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [],
+          overtimePlayers: row.overtimePlayers ? [...row.overtimePlayers] : [],
+          overtimeCost: row.overtimeCost ?? '',
+        },
+      });
+    } else {
       setDeletingId(pwModal.rowId);
     }
     setPwModal(null);
   };
 
-  const cancelEdit = () => { setEditingId(null); setEditForm({} as EditForm); };
+  const cancelEdit = useCallback(() => setEditing(null), []);
+
+  /** Aktualizuje wyłącznie formularz, zachowując identyfikator edytowanej sesji. */
+  const setEditForm = useCallback<React.Dispatch<React.SetStateAction<SessionEditForm>>>(update => {
+    setEditing(prev => {
+      if (!prev) return prev;
+      return { ...prev, form: typeof update === 'function' ? update(prev.form) : update };
+    });
+  }, []);
 
   const saveEdit = async () => {
-    if (isSaving) return;
+    if (savingRef.current || !editing) return;
     if (!isEditCostValid) {
       showError(editCostError || 'Nieprawidłowy koszt');
       return;
     }
+    savingRef.current = true;
     setIsSaving(true);
+    const { id, form } = editing;
     try {
-      const overtimeInPresent = (editForm.overtimePlayers || []).filter(p => editForm.present.includes(p));
-      const parsedOvertimeCost = parseAmount(editForm.overtimeCost as string | number);
-      const hasOvertime = !isCourtSport(editForm.sport) && overtimeInPresent.length > 0 && Number.isFinite(parsedOvertimeCost) && parsedOvertimeCost > 0;
-      const result = await updateWeek(editingId!, { date: editForm.date, cost: parsedEditCost, present: editForm.present, multiPlayers: editForm.multiPlayers, sport: editForm.sport || SPORT.PINGPONG, racketCost: editForm.racketCost, ownRacketPlayers: editForm.ownRacketPlayers, overtimePlayers: hasOvertime ? overtimeInPresent : [], overtimeCost: hasOvertime ? parsedOvertimeCost : 0 });
+      const overtimeInPresent = (form.overtimePlayers || []).filter(p => form.present.includes(p));
+      const parsedOvertimeCost = parseAmount(form.overtimeCost ?? '');
+      const hasOvertime = !isCourtSport(form.sport) && overtimeInPresent.length > 0 && parsedOvertimeCost > 0;
+      const result = await updateWeek(id, {
+        date: form.date,
+        cost: parsedEditCost,
+        present: form.present,
+        multiPlayers: form.multiPlayers,
+        sport: form.sport || SPORT.PINGPONG,
+        racketCost: form.racketCost,
+        ownRacketPlayers: form.ownRacketPlayers,
+        overtimePlayers: hasOvertime ? overtimeInPresent : [],
+        overtimeCost: hasOvertime ? parsedOvertimeCost : 0,
+      });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
-      setEditingId(null); setEditForm({} as EditForm);
-    } finally { setIsSaving(false); }
+      showSuccess('Sesja zaktualizowana');
+      setEditing(null);
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
   };
 
-  const togglePresent = (name: string) => {
+  const togglePresent = useCallback((name: string) => {
     setEditForm(prev => {
       const inList = (prev.present || []).includes(name);
       return {
@@ -139,33 +177,42 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         overtimePlayers: inList ? (prev.overtimePlayers || []).filter(p => p !== name) : prev.overtimePlayers,
       };
     });
-  };
+  }, [setEditForm]);
 
-  const toggleMulti = (name: string) => {
+  const toggleMulti = useCallback((name: string) => {
     setEditForm(prev => {
       const inList = (prev.multiPlayers || []).includes(name);
       return { ...prev, multiPlayers: inList ? prev.multiPlayers.filter(p => p !== name) : [...prev.multiPlayers, name] };
     });
-  };
+  }, [setEditForm]);
 
-  const toggleOvertime = (name: string) => {
+  const toggleOvertime = useCallback((name: string) => {
     setEditForm(prev => {
       const list = prev.overtimePlayers || [];
       const inList = list.includes(name);
       return { ...prev, overtimePlayers: inList ? list.filter(p => p !== name) : [...list, name] };
     });
-  };
+  }, [setEditForm]);
 
   const handleDelete = async (id: string) => {
-    setDeletingId(null);
+    // Usunięcie jest nieodwracalne — potwierdzenie znika dopiero PO zapisie,
+    // a ref blokuje drugie kliknięcie, zanim stan zdąży się odświeżyć.
+    if (deletingRef.current) return;
+    deletingRef.current = true;
+    setIsDeleting(true);
     try {
       const result = await deleteWeek(id);
       if (!result.success) { showError(result.error || 'Nie udało się usunąć sesji'); return; }
       showSuccess('Sesja usunięta');
+      setDeletingId(null);
     } catch { showError('Nie udało się usunąć sesji'); }
+    finally {
+      deletingRef.current = false;
+      setIsDeleting(false);
+    }
   };
 
-  const visibleHistory = showAll ? filteredHistory : filteredHistory.slice(0, 50);
+  const visibleHistory = showAll ? filteredHistory : filteredHistory.slice(0, INITIAL_VISIBLE_SESSIONS);
   const grouped = groupHistoryByMonth(visibleHistory);
 
   return (
@@ -383,13 +430,10 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
               {/* Log entries */}
               <div>
                 {rows.map((row) => {
-                  const isEditingRow  = editingId  === row.id;
-                  const isDeletingRow = deletingId === row.id;
-
-                  if (isEditingRow) return (
+                  if (editing?.id === row.id) return (
                     <EditSessionForm
                       key={row.id}
-                      editForm={editForm}
+                      editForm={editing.form}
                       setEditForm={setEditForm}
                       playerNames={playerNames}
                       isSaving={isSaving}
@@ -403,10 +447,11 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                     />
                   );
 
-                  if (isDeletingRow) return (
+                  if (deletingId === row.id) return (
                     <DeleteConfirmation
                       key={row.id}
                       row={row}
+                      isDeleting={isDeleting}
                       onConfirm={handleDelete}
                       onCancel={() => setDeletingId(null)}
                     />
@@ -420,7 +465,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
             </div>
           ))}
         </div>
-        {!showAll && filteredHistory.length > 50 && (
+        {!showAll && filteredHistory.length > INITIAL_VISIBLE_SESSIONS && (
           <button
             onClick={() => setShowAll(true)}
             style={{

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { CSSProperties } from 'react';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import type { WrappedStats } from '@/types/ui';
 
 // ─── Count-up hook ───────────────────────────────────────────────
@@ -66,7 +67,6 @@ interface WrappedModalProps {
 export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [_entering, setEntering] = useState(true);
 
   // Build ordered slide list (skip bestPair slide when null)
   const slideList = useMemo(() => {
@@ -78,15 +78,8 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
   const totalSlides = slideList.length;
   const activeSlideId = slideList[currentSlide] ?? 0;
 
-  // Inject keyframes & focus
+  useFocusTrap(overlayRef);
   useEffect(() => { injectKeyframes(); overlayRef.current?.focus(); }, []);
-
-  // Re-trigger entrance animation on slide change
-  useEffect(() => {
-    setEntering(true);
-    const t = setTimeout(() => setEntering(false), 600);
-    return () => clearTimeout(t);
-  }, [currentSlide]);
 
   const advance = useCallback(() => {
     if (currentSlide >= totalSlides - 1) { onClose(); return; }

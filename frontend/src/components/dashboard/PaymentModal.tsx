@@ -1,6 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useId } from 'react';
 import { CheckCircle2, X, Zap } from 'lucide-react';
 import { InlineSpinner } from '../common/LoadingSkeleton';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { parseAmount, isValidAmount } from '@/utils/format';
 import type { PAYMENT_MODAL } from '@/constants';
 
@@ -19,6 +20,11 @@ interface PaymentModalProps {
 
 export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, onSave, onCancel, isSaving, errorMsg = null }: PaymentModalProps) {
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const titleId = useId();
+  const inputId = useId();
+  const errorId = useId();
+
+  useFocusTrap(panelRef, type !== null);
   useEffect(() => { panelRef.current?.focus(); }, []);
 
   if (!type) return null;
@@ -35,7 +41,7 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
   };
 
   return (
-    <div ref={panelRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onCancel()} role="dialog" aria-modal="true" style={{
+    <div ref={panelRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onCancel()} role="dialog" aria-modal="true" aria-labelledby={titleId} style={{
       marginBottom: 12, padding: '16px 14px',
       background: 'var(--co-dark)',
       border: '1px solid rgba(0,229,255,0.25)',
@@ -45,13 +51,15 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <Zap size={12} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} />
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', textTransform: 'uppercase', margin: 0 }}>
+        <p id={titleId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', textTransform: 'uppercase', margin: 0 }}>
           {hasCredit ? 'Ile chcesz dopłacić?' : 'Kwota przelewu BLIK'}
         </p>
       </div>
 
       {/* Amount input */}
+      <label htmlFor={inputId} className="sr-only">Kwota w złotych</label>
       <input
+        id={inputId}
         type="text" inputMode="decimal"
         placeholder="np. 50"
         value={customAmt}
@@ -59,6 +67,8 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
         onBlur={handleBlur}
         onKeyDown={e => { if (e.key === 'Enter' && isValid && !isSaving) onSave(parsedAmt); }}
         autoFocus
+        aria-invalid={showError}
+        aria-describedby={showError || errorMsg ? errorId : undefined}
         className="cyber-input"
         style={{
           width: '100%', padding: '12px 14px',
@@ -72,18 +82,15 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
       />
 
       {showError && (
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
+        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ {customAmt !== '' && parsedAmt > 0 && parsedAmt < 0.01 ? 'Minimalna kwota to 0.01 zł' : 'KWOTA MUSI BYĆ WIĘKSZA OD 0'}
         </p>
       )}
 
       {errorMsg && !showError && (
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
+        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ {errorMsg}
         </p>
-      )}
-      {!showError && customAmt === '' && (
-        <div style={{ marginBottom: 0 }} />
       )}
 
       <div style={{ display: 'flex', gap: 8 }}>

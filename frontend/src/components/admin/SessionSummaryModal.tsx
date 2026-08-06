@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useId } from 'react';
 import { CheckCircle2, Copy } from 'lucide-react';
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT, SPORT_EMOJI, SPORT_LABEL, isCourtSport } from '@/constants';
+import { SQUASH_MULTISPORT_DISCOUNT, SPORT_EMOJI, SPORT_LABEL, isCourtSport } from '@/constants';
 import { useToast } from '../common/Toast';
 import { formatDate, formatAmountShort } from '@/utils/format';
 import { buildGroupMessage } from '@/utils/message';
@@ -25,18 +25,25 @@ interface SessionSummary {
   overtimePerPerson: number;
 }
 
-export interface SessionSummaryModalProps {
-  summary: SessionSummary | null;
+interface SessionSummaryModalProps {
+  /** Komponent montuje się dopiero razem z podsumowaniem — patrz AdminTab. */
+  summary: SessionSummary;
   onClose: () => void;
 }
+
+const COPIED_RESET_MS = 2500;
 
 export default function SessionSummaryModal({ summary, onClose }: SessionSummaryModalProps) {
   const [copied, setCopied] = useState(false);
   const { showError } = useToast();
   const overlayRef = useRef<HTMLDivElement>(null);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const titleId = useId();
+
   useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
-  if (!summary) return null;
+  useEffect(() => () => { if (copiedTimer.current) clearTimeout(copiedTimer.current); }, []);
+
   const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, overtimePlayers, overtimeCost, overtimePerPerson } = summary;
   const isSquash = isCourtSport(sport);
   const hasRackets = isSquash && racketCost > 0;
@@ -46,14 +53,15 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
     const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost, ownRacketPlayers, overtimePlayers, overtimeCost });
     if (await copyToClipboard(msg)) {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+      copiedTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS);
     } else {
       showError('Nie udało się skopiować tekstu');
     }
   };
 
   return (
-    <div ref={overlayRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onClose()} role="dialog" aria-modal="true"
+    <div ref={overlayRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onClose()} role="dialog" aria-modal="true" aria-labelledby={titleId}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
       className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -79,7 +87,7 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--co-green)', marginBottom: 3, textTransform: 'uppercase' }}>
               Zapisano!
             </p>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.06em', color: 'var(--co-text-hi)', margin: 0 }}>
+            <h3 id={titleId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.06em', color: 'var(--co-text-hi)', margin: 0 }}>
               Sesja zapisana!
             </h3>
           </div>

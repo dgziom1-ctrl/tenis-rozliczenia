@@ -4,30 +4,35 @@ import { formatDate } from '@/utils/format';
 interface CyberDateInputProps {
   value: string;
   onChange: (value: string) => void;
+  /** Etykieta dla czytników ekranu — pole daty jest wizualnie przykryte. */
+  label: string;
+  /** Węższy wariant używany w formularzu edycji sesji. */
+  compact?: boolean;
 }
 
 // iOS Safari: showPicker() nie istnieje i rzuca TypeError.
 // opacity:0 na iOS blokuje zdarzenia dotknięcia — używamy opacity:0.01
 // zamiast 0, co sprawia że input jest "widoczny" dla silnika zdarzeń iOS.
 // font-size:16px zapobiega automatycznemu zoomowi pola na iOS.
-export default function CyberDateInput({ value, onChange }: CyberDateInputProps) {
+export default function CyberDateInput({ value, onChange, label, compact = false }: CyberDateInputProps) {
   const handleClick = (e: React.MouseEvent<HTMLInputElement>) => {
     try { e.currentTarget.showPicker?.(); } catch { /* showPicker not supported */ }
   };
 
   return (
     <div style={{ position: 'relative' }}>
-      <div className="cyber-input" style={{
-        width: '100%', padding: '10px 14px', display: 'flex',
+      <div aria-hidden="true" className="cyber-input" style={{
+        width: '100%', padding: compact ? '10px 12px' : '10px 14px', display: 'flex',
         alignItems: 'center', justifyContent: 'space-between', gap: 10,
         clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-        pointerEvents: 'none', fontSize: '0.85rem', fontFamily: 'var(--font-mono)',
+        pointerEvents: 'none', fontSize: compact ? '0.8rem' : '0.85rem', fontFamily: 'var(--font-mono)',
       }}>
         <span>{formatDate(value)}</span>
         <CalendarDays size={14} style={{ opacity: 0.4, flexShrink: 0 }} />
       </div>
       <input
         type="date"
+        aria-label={label}
         value={value}
         onChange={e => onChange(e.target.value)}
         onClick={handleClick}

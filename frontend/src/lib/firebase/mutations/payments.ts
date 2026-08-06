@@ -1,7 +1,7 @@
 import { makeId, todayISO } from '@/utils/id';
 import { toGrosze, toZloty } from '@/utils/money';
 import { isPositiveMoney, normalizePlayerName } from '@/utils/validation';
-import { withTransaction } from '../transaction';
+import { withTransaction, reject } from '../transaction';
 import type { RawAppData, TransactionResult, AddPaymentResult, Payment } from '@/types/domain';
 
 export async function addPayment(
@@ -16,6 +16,15 @@ export async function addPayment(
     return { success: false, error: 'Wpisz poprawną kwotę (większą od 0)' };
   }
 
+  // Kwota i data są ustalane PRZED transakcją. Firebase może uruchomić callback
+  // wielokrotnie, a wtedy wpłata zapisana tuż po północy dostałaby inną datę
+  // przy kolejnej próbie.
+  const entry: Payment = {
+    id: paymentId,
+    amount: toZloty(toGrosze(amount)),
+    date: todayISO(),
+  };
+
   const result = await withTransaction((current) => {
     const data = (current || {}) as RawAppData;
     const existing = data.payments?.[name] ?? [];
@@ -28,7 +37,7 @@ export async function addPayment(
       ...data,
       payments: {
         ...(data.payments || {}),
-        [name]: [...existing, { id: paymentId, amount: toZloty(toGrosze(amount)), date: todayISO() }],
+        [name]: [...existing, entry],
       },
     } as RawAppData;
   }, 'Nie udało się dodać wpłaty');
@@ -43,15 +52,15 @@ export async function removePayment(
   const name = normalizePlayerName(playerName);
   if (!name) return { success: false, error: 'Nie wybrano gracza' };
 
-  let paymentFound = true;
-
-  const result = await withTransaction((current) => {
+  // „Nie znaleziono" zgłaszamy przerwaniem transakcji, a nie flagą na zewnątrz.
+  // Flaga ustawiona w próbie, która się nie zatwierdziła, przeżywała ponowienie
+  // i potrafiła zgłosić błąd po zapisie, który faktycznie doszedł do skutku.
+  return withTransaction((current) => {
     const data = (current || {}) as RawAppData;
     const existing: Payment[] = data.payments?.[name] ?? [];
 
     if (!existing.some(p => p.id === paymentId)) {
-      paymentFound = false;
-      return data;
+      reject('Nie znaleziono wpłaty do cofnięcia');
     }
 
     return {
@@ -62,9 +71,4 @@ export async function removePayment(
       },
     } as RawAppData;
   }, 'Nie udało się cofnąć wpłaty');
-
-  if (result.success && !paymentFound) {
-    return { success: false, error: 'Nie znaleziono wpłaty do cofnięcia' };
-  }
-  return result;
 }

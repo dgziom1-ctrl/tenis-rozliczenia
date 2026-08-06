@@ -4,6 +4,14 @@ export interface PlayerStats {
   name: string;
   attendanceCount: number;
   currentDebt: number;
+  /**
+   * Ile sesji w ogóle mogło się temu graczowi policzyć — czyli tych rozegranych
+   * od jego dołączenia. To mianownik frekwencji: gracz, który dołączył w połowie
+   * sezonu i był na każdej sesji od tamtej pory, ma 100%, a nie 50%.
+   */
+  eligibleWeeks: number;
+  /** Data pierwszej sesji, która się graczowi liczy (YYYY-MM-DD), albo null gdy liczą się wszystkie. */
+  joinDate: string | null;
 }
 
 export interface ExtendedPlayerStats extends PlayerStats {
@@ -82,12 +90,6 @@ export interface Rank {
   hex: string;
 }
 
-export interface PlayerBadge {
-  icon: string;
-  label: string;
-  color: string;
-}
-
 export interface Achievement {
   id: string;
   label: string;
@@ -98,6 +100,22 @@ export interface Achievement {
 export interface MonthGroup {
   label: string;
   rows: HistoryEntry[];
+}
+
+/**
+ * Formularz edycji sesji. Kwoty są tu tekstem, bo pochodzą wprost z pól
+ * wejściowych — na liczby zamienia je dopiero walidacja przed zapisem.
+ */
+export interface SessionEditForm {
+  date: string;
+  cost: string | number;
+  present: string[];
+  multiPlayers: string[];
+  sport: Sport;
+  racketCost?: number;
+  ownRacketPlayers?: string[];
+  overtimePlayers?: string[];
+  overtimeCost?: string | number;
 }
 
 export interface MonthlySessionData {

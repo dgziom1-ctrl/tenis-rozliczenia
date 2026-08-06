@@ -12,6 +12,7 @@ import type { StyleWithVars } from '@/types/css';
 const CopyIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+    aria-hidden="true" focusable="false"
     style={{ color:'var(--co-dim)' }}>
     <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
     <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
@@ -137,19 +138,23 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             {copied ? <Check size={13} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
           </button>
           <div style={{ display:'flex',alignItems:'center',gap:6 }}>
-            <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
+            <button onClick={() => setIsMuted(!isMuted)}
+              aria-label={isMuted ? 'Włącz dźwięki' : 'Wycisz dźwięki'} aria-pressed={isMuted}
+              style={{ display:'flex',alignItems:'center',
               justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
               border:isMuted?'1px solid rgba(255,32,144,.5)':'1px solid var(--co-border)',
               color:isMuted?'#FF4444':'var(--co-dim)',
               background:isMuted?'rgba(255,68,68,.08)':'transparent',
               clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
-              {isMuted ? <VolumeX size={17}/> : <Volume2 size={17}/>}
+              {isMuted ? <VolumeX size={17} aria-hidden="true"/> : <Volume2 size={17} aria-hidden="true"/>}
             </button>
-            <button onClick={onToggleTheme} style={{ display:'flex',alignItems:'center',
+            <button onClick={onToggleTheme}
+              aria-label={theme === 'light' ? 'Włącz tryb ciemny' : 'Włącz tryb jasny'}
+              style={{ display:'flex',alignItems:'center',
               justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
               border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
               clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
-              {theme === 'light' ? <Moon size={17}/> : <Sun size={17}/>}
+              {theme === 'light' ? <Moon size={17} aria-hidden="true"/> : <Sun size={17} aria-hidden="true"/>}
             </button>
           </div>
         </div>
@@ -249,18 +254,22 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             letterSpacing:'.08em',color:isConnected?'var(--co-green)':'#FF3333' }}>
             {isConnected ? '● ONLINE' : '○ OFFLINE'}
           </span>
-          <button onClick={() => setIsMuted(!isMuted)} style={{ display:'flex',alignItems:'center',
+          <button onClick={() => setIsMuted(!isMuted)}
+            aria-label={isMuted ? 'Włącz dźwięki' : 'Wycisz dźwięki'} aria-pressed={isMuted}
+            style={{ display:'flex',alignItems:'center',
             border:isMuted?'1px solid rgba(255,32,144,.4)':'1px solid var(--co-border)',
             color:isMuted?'var(--co-rose)':'var(--co-dim)',
             background:'transparent',padding:'4px 6px',cursor:'pointer',
             clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
-            {isMuted ? <VolumeX size={15}/> : <Volume2 size={15}/>}
+            {isMuted ? <VolumeX size={15} aria-hidden="true"/> : <Volume2 size={15} aria-hidden="true"/>}
           </button>
-          <button onClick={onToggleTheme} style={{ display:'flex',alignItems:'center',
+          <button onClick={onToggleTheme}
+            aria-label={theme === 'light' ? 'Włącz tryb ciemny' : 'Włącz tryb jasny'}
+            style={{ display:'flex',alignItems:'center',
             border:'1px solid var(--co-border)',color:'var(--co-dim)',
             background:'transparent',padding:'4px 6px',cursor:'pointer',
             clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
-            {theme === 'light' ? <Moon size={15}/> : <Sun size={15}/>}
+            {theme === 'light' ? <Moon size={15} aria-hidden="true"/> : <Sun size={15} aria-hidden="true"/>}
           </button>
         </div>
       </div>

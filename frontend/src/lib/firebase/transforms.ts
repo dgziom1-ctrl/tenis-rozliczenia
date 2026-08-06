@@ -1,22 +1,55 @@
 import { calculateDebt, roundToTwoDecimals } from '@/utils/debt';
 import { getSessionShares } from '@/utils/sessionCost';
+import { isValidISODate } from '@/utils/validation';
 import { ORGANIZER_NAME, SPORT } from '@/constants';
-import type { Week, NormalizedData } from '@/types/domain';
+import type { Week, NormalizedData, Payment, PlayerJoinDates } from '@/types/domain';
 import type { PlayerStats, HistoryEntry, Summary, UIData } from '@/types/ui';
+
+/** Data, której nie osiągnie żadna sesja — gracz zapisany „od następnej sesji". */
+const NEVER = '9999-12-31';
+
+/**
+ * Ustala datę, od której graczowi liczą się sesje.
+ *
+ * Nowe rekordy trzymają wprost datę (`playerJoinDate`). Starsze trzymały indeks
+ * w tablicy sesji (`playerJoinWeek`) — tłumaczymy go na datę sesji, która pod
+ * tym indeksem leży. Indeks poza zakresem znaczył „dopiero od kolejnej sesji",
+ * więc odwzorowujemy go datą, której żadna sesja nie osiągnie.
+ */
+function resolveJoinDate(
+  playerName: string,
+  weeks: Week[],
+  joinDates: PlayerJoinDates,
+  legacyJoinWeek: Record<string, number> | undefined,
+): string | null {
+  const explicit = joinDates?.[playerName];
+  if (isValidISODate(explicit)) return explicit;
+
+  const legacyIndex = legacyJoinWeek?.[playerName];
+  if (typeof legacyIndex !== 'number' || !Number.isFinite(legacyIndex) || legacyIndex <= 0) {
+    return null;
+  }
+  return weeks[Math.floor(legacyIndex)]?.date ?? NEVER;
+}
 
 function buildPlayerStats(
   playerName: string,
   weeks: Week[],
-  playerJoinWeek: Record<string, number>,
-  payments: Record<string, { id: string; amount: number; date: string }[]>,
+  joinDate: string | null,
+  payments: Record<string, Payment[]>,
 ): PlayerStats {
-  const joinedAt = playerJoinWeek?.[playerName] ?? 0;
-  const playerWeeks = weeks.slice(joinedAt);
-  const attendanceCount = playerWeeks.filter(w =>
+  const eligibleWeeks = joinDate === null ? weeks : weeks.filter(w => w.date >= joinDate);
+  const attendanceCount = eligibleWeeks.filter(w =>
     (w.present || []).includes(playerName),
   ).length;
   const currentDebt = calculateDebt(playerName, { weeks, payments });
-  return { name: playerName, attendanceCount, currentDebt };
+  return {
+    name: playerName,
+    attendanceCount,
+    currentDebt,
+    eligibleWeeks: eligibleWeeks.length,
+    joinDate,
+  };
 }
 
 function buildSummary(playerStats: PlayerStats[], weeksLength: number): Summary {
@@ -71,14 +104,20 @@ export function buildUIData(rawData: NormalizedData): UIData {
   const {
     players = [],
     weeks = [],
-    playerJoinWeek = {},
+    playerJoinDate = {},
+    playerJoinWeek,
     defaultMultiPlayers = [],
     deletedPlayers = [],
     payments = {},
   } = rawData;
 
   const playerStats = players
-    .map(name => buildPlayerStats(name, weeks, playerJoinWeek, payments))
+    .map(name => buildPlayerStats(
+      name,
+      weeks,
+      resolveJoinDate(name, weeks, playerJoinDate, playerJoinWeek),
+      payments,
+    ))
     .sort((a, b) => b.currentDebt - a.currentDebt || a.name.localeCompare(b.name, 'pl'));
 
   // ── Skarbnik logic ──────────────────────────────────────────────────────────
@@ -116,7 +155,8 @@ export function normalizeRawData(rawData: Partial<NormalizedData>): NormalizedDa
     players: rawData.players || [],
     weeks: sortWeeksByDate(rawData.weeks || []),
     defaultMultiPlayers: rawData.defaultMultiPlayers || [],
-    playerJoinWeek: rawData.playerJoinWeek || {},
+    playerJoinDate: rawData.playerJoinDate || {},
+    playerJoinWeek: rawData.playerJoinWeek,
     deletedPlayers: rawData.deletedPlayers || [],
     payments: rawData.payments || {},
   };

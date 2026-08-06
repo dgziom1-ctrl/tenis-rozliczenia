@@ -13,63 +13,28 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Install firebase-admin + jq
-        run: |
-          mkdir -p /tmp/backup-runner
-          cd /tmp/backup-runner
-          npm init -y
-          npm install firebase-admin
-          sudo apt-get install -y jq
-
-      - name: Run Backup Script
+      - name: Pobierz backup RTDB
         env:
-          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: |
-          cat << 'EOF' > /tmp/backup-runner/backup.js
-          const admin = require('firebase-admin');
-          const fs    = require('fs');
-
-          const DB_URL = 'https://tenis-rozliczenia-default-rtdb.europe-west1.firebasedatabase.app';
-
-          async function run() {
-            try {
-              const sa = JSON.parse(process.env.SERVICE_ACCOUNT);
-              admin.initializeApp({ credential: admin.credential.cert(sa), databaseURL: DB_URL });
-
-              console.log('--- Start backup RTDB ---');
-              const snapshot = await admin.database().ref('/').once('value');
-              const data     = snapshot.val();
-
-              fs.writeFileSync('/tmp/backup_full.json', JSON.stringify(data, null, 2));
-              console.log('Backup pobrany, usuwam fcmTokens...');
-              process.exit(0);
-            } catch (err) {
-              console.error('BLAD:', err.message);
-              process.exit(1);
-            }
-          }
-
-          run();
-          EOF
-          node /tmp/backup-runner/backup.js
-
-      - name: Usuń fcmTokens i zapisz finalny plik
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT || secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}
+          DATABASE_URL: https://tenis-rozliczenia-default-rtdb.europe-west1.firebasedatabase.app
         run: |
           DATE=$(date +'%Y-%m-%d')
-          mkdir -p /tmp/backup-out
-          jq 'del(.fcmTokens)' /tmp/backup_full.json > /tmp/backup-out/backup_rtdb_${DATE}.json
-          echo "Backup gotowy: backup_rtdb_${DATE}.json"
-          echo "Rozmiar: $(wc -c < /tmp/backup-out/backup_rtdb_${DATE}.json) bajtów"
+          echo "OUTPUT_FILE=$RUNNER_TEMP/backup-out/backup_rtdb_${DATE}.json" >> "$GITHUB_ENV"
+          OUTPUT_FILE="$RUNNER_TEMP/backup-out/backup_rtdb_${DATE}.json" \
+            node .github/scripts/backup-rtdb.mjs
 
       - name: Upload jako prywatny Artifact
         uses: actions/upload-artifact@v4
         with:
           name: backup-rtdb-${{ github.run_id }}
-          path: /tmp/backup-out/backup_rtdb_*.json
+          path: ${{ env.OUTPUT_FILE }}
           retention-days: 90   # GitHub kasuje automatycznie po 90 dniach
+          if-no-files-found: error
           # Artefakty są widoczne TYLKO dla osób z dostępem do repo (czyli tylko Ciebie)

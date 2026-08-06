@@ -8,8 +8,7 @@ import { useConnectionStatus } from './providers/appDataContext';
 import { useThemeContext } from './providers/themeContext';
 import { useAudio } from '@/hooks/useAudio';
 import { useScrolled } from '@/hooks/useScrolled';
-import { SOUND_TYPES } from '@/constants';
-import type { TabId } from '@/types/ui';
+import { SOUND_TYPES, TAB_PATHS, PATH_TO_TAB } from '@/constants';
 
 /**
  * `NotificationOptions` z lib.dom nie zna pól obsługiwanych tylko przez
@@ -20,21 +19,21 @@ interface SwNotificationOptions extends NotificationOptions {
   renotify?: boolean;
 }
 
-const PATH_TO_TAB: Record<string, TabId> = {
-  '/': 'dashboard',
-  '/attendance': 'attendance',
-  '/admin': 'admin',
-  '/history': 'history',
-  '/players': 'players',
-};
+/** Wiadomość, którą Service Worker wysyła po kliknięciu w powiadomienie. */
+interface NotificationClickMessage {
+  type: 'NOTIFICATION_CLICK';
+  url: string;
+}
 
-const TAB_TO_PATH: Record<TabId, string> = {
-  dashboard: '/',
-  attendance: '/attendance',
-  admin: '/admin',
-  history: '/history',
-  players: '/players',
-};
+/**
+ * `MessageEvent.data` to `any` — cokolwiek może przysłać dowolny worker
+ * z tego origin. Sprawdzamy kształt, zanim cokolwiek z tego przeczytamy.
+ */
+function isNotificationClick(data: unknown): data is NotificationClickMessage {
+  if (typeof data !== 'object' || data === null) return false;
+  const message = data as Record<string, unknown>;
+  return message.type === 'NOTIFICATION_CLICK' && typeof message.url === 'string';
+}
 
 export default function Layout() {
   const [isMuted, setIsMuted] = useState(false);
@@ -45,38 +44,41 @@ export default function Layout() {
   const scrolled = useScrolled();
   const { playSound } = useAudio(isMuted);
 
-  const activeTab = PATH_TO_TAB[location.pathname] || 'dashboard';
+  const activeTab = PATH_TO_TAB[location.pathname] ?? 'dashboard';
 
   const switchTab = useCallback((id: string) => {
     playSound(SOUND_TYPES.TAB);
-    const path = TAB_TO_PATH[id as TabId] || '/';
-    navigate(path);
+    void navigate(TAB_PATHS[id] ?? '/');
   }, [playSound, navigate]);
 
   useEffect(() => {
     let unsubFcm: (() => void) | null = null;
+
+    const showForegroundNotification = async (title: string, body: string, data: Record<string, string>) => {
+      try {
+        const reg = await navigator.serviceWorker?.ready;
+        const options: SwNotificationOptions = {
+          body,
+          icon: '/icon-192v2.png',
+          badge: '/icon-192v2.png',
+          vibrate: [100, 50, 100],
+          tag: data.tag || data.type || 'default',
+          renotify: true,
+          data: { ...data, url: data.url || '/?tab=dashboard' },
+        };
+        await reg?.showNotification(title, options);
+      } catch (err) {
+        console.warn('showNotification failed:', err);
+        try { new Notification(title, { body, icon: '/icon-192v2.png' }); } catch { /* powiadomienia niedostępne */ }
+      }
+    };
+
     try {
       if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-        const messaging = getMessaging();
-        unsubFcm = onMessage(messaging, async (payload) => {
+        unsubFcm = onMessage(getMessaging(), (payload) => {
           const { title, body } = payload.notification || {};
           if (!title) return;
-          try {
-            const reg = await navigator.serviceWorker?.ready;
-            const options: SwNotificationOptions = {
-              body: body || '',
-              icon: '/icon-192v2.png',
-              badge: '/icon-192v2.png',
-              vibrate: [100, 50, 100],
-              tag: payload.data?.tag || payload.data?.type || 'default',
-              renotify: true,
-              data: { url: payload.data?.url || '/?tab=dashboard', ...payload.data },
-            };
-            await reg?.showNotification(title, options);
-          } catch (err) {
-            console.warn('showNotification failed:', err);
-            try { new Notification(title, { body: body || '', icon: '/icon-192v2.png' }); } catch { /* */ }
-          }
+          void showForegroundNotification(title, body || '', payload.data ?? {});
         });
       }
     } catch (err) {
@@ -87,19 +89,26 @@ export default function Layout() {
 
   useEffect(() => {
     const swContainer = navigator.serviceWorker;
-    if (!swContainer) return;
+    if (!swContainer) return undefined;
 
     const handleSwMessage = (event: MessageEvent) => {
-      if (event.data?.type !== 'NOTIFICATION_CLICK') return;
-      const url = new URL(event.data.url);
-      const tab = url.searchParams.get('tab');
+      if (!isNotificationClick(event.data)) return;
 
+      let url: URL;
+      try {
+        url = new URL(event.data.url, window.location.origin);
+      } catch {
+        return; // uszkodzony adres z workera — ignorujemy zamiast wywracać aplikację
+      }
+
+      const tab = url.searchParams.get('tab');
       if (tab === 'attendance') {
-        navigate('/attendance' + (url.searchParams.get('player') ? `?player=${url.searchParams.get('player')}` : ''));
+        const player = url.searchParams.get('player');
+        void navigate(player ? `/attendance?player=${encodeURIComponent(player)}` : '/attendance');
       } else if (tab === 'dashboard') {
-        navigate('/');
+        void navigate('/');
       } else if (tab === 'admin') {
-        navigate('/admin');
+        void navigate('/admin');
       }
     };
 

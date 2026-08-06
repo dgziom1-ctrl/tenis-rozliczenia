@@ -1,5 +1,6 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useId } from 'react';
 import { X } from 'lucide-react';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface PlayerFilterSheetProps {
   isOpen: boolean;
@@ -11,7 +12,9 @@ interface PlayerFilterSheetProps {
 
 export default function PlayerFilterSheet({ isOpen, onClose, playerNames, filterPlayer, onSelect }: PlayerFilterSheetProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
+  useFocusTrap(overlayRef, isOpen);
   useEffect(() => {
     if (isOpen) overlayRef.current?.focus();
   }, [isOpen]);
@@ -27,6 +30,7 @@ export default function PlayerFilterSheet({ isOpen, onClose, playerNames, filter
       onKeyDown={e => e.key === 'Escape' && onClose()}
       role="dialog"
       aria-modal="true"
+      aria-labelledby={titleId}
       style={{
         position: 'fixed',
         inset: 0,
@@ -61,7 +65,7 @@ export default function PlayerFilterSheet({ isOpen, onClose, playerNames, filter
           borderBottom: '1px solid var(--co-border)',
           background: 'rgba(0,229,255,0.03)',
         }}>
-          <span style={{
+          <span id={titleId} style={{
             fontFamily: 'var(--font-display)',
             fontSize: '0.9rem',
             letterSpacing: '0.12em',

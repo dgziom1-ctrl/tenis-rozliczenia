@@ -57,21 +57,38 @@ interface ParsedSession {
   overtimeGrosze: number;
 }
 
+/**
+ * Lista imion bez duplikatów, pustych wpisów i wartości nie-tekstowych.
+ *
+ * Udziały trzymamy w mapie po imieniu, więc powtórzone imię dostałoby dwa
+ * udziały, a odczytany zostałby jeden — różnica wyparowałaby z rozliczenia.
+ * Zapis do bazy już odsiewa duplikaty; to zabezpieczenie dla starszych
+ * rekordów, które trafiły tam przed tamtą walidacją.
+ */
+function uniqueNames(names: readonly unknown[] | undefined): string[] {
+  if (!Array.isArray(names)) return [];
+  const seen = new Set<string>();
+  for (const name of names) {
+    if (typeof name === 'string' && name.length > 0) seen.add(name);
+  }
+  return [...seen];
+}
+
 function parseSession(session: SessionLike): ParsedSession {
-  const present = session.presentPlayers ?? session.present ?? [];
+  const present = uniqueNames(session.presentPlayers ?? session.present);
   const totalGrosze = Math.max(0, toGrosze(session.totalCost ?? session.cost ?? 0));
   // Cena rakiet jest częścią kwoty sesji, więc nigdy nie może jej przekroczyć.
   const racketGrosze = Math.min(Math.max(0, toGrosze(session.racketCost ?? 0)), totalGrosze);
 
   return {
     present,
-    multi: session.multisportPlayers ?? session.multiPlayers ?? [],
+    multi: uniqueNames(session.multisportPlayers ?? session.multiPlayers),
     totalGrosze,
     sport: session.sport || SPORT.PINGPONG,
     racketGrosze,
-    ownRacket: session.ownRacketPlayers ?? [],
+    ownRacket: uniqueNames(session.ownRacketPlayers),
     // Gracz nieobecny na sesji nie może współdzielić dogrywki.
-    overtimeParticipants: (session.overtimePlayers ?? []).filter(p => present.includes(p)),
+    overtimeParticipants: uniqueNames(session.overtimePlayers).filter(p => present.includes(p)),
     overtimeGrosze: Math.max(0, toGrosze(session.overtimeCost ?? 0)),
   };
 }

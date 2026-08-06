@@ -33,38 +33,7 @@ export function calculateDebt(playerName: string, data: DebtCalcData): number {
   return toZloty(sessionGrosze - paidGrosze);
 }
 
-/**
- * Najstarsze nierozliczone sesje składające się na bieżące zadłużenie.
- * Ostatnia pozycja jest przycinana do pozostałej kwoty, więc suma rozbicia
- * jest dokładnie równa `debtAmount` i nigdy go nie przekracza.
- */
-export function calculateDebtBreakdown(
-  playerName: string,
-  debtAmount: number,
-  history: HistoryEntry[],
-): DebtSession[] {
-  const debtGrosze = toGrosze(debtAmount);
-  if (debtGrosze <= 0 || !history) return [];
-
-  const chronological = [...history].reverse();
-  const sessions: DebtSession[] = [];
-  let remaining = debtGrosze;
-
-  for (const session of chronological) {
-    if (remaining <= 0) break;
-    if (!session.presentPlayers.includes(playerName)) continue;
-
-    const amountGrosze = toGrosze(getPlayerSessionCost(session, playerName));
-    if (amountGrosze <= 0) continue;
-
-    const applied = Math.min(amountGrosze, remaining);
-    sessions.push({ sessionId: session.id, date: session.datePlayed, amount: toZloty(applied) });
-    remaining -= applied;
-  }
-
-  return sessions;
-}
-
+/** Pełne rozliczenie gracza: wszystkie jego sesje i wszystkie jego wpłaty. */
 export function buildDebtDisplayData(
   player: PlayerStats,
   history: HistoryEntry[],

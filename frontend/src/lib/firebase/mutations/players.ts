@@ -1,3 +1,4 @@
+import { todayISO } from '@/utils/id';
 import { normalizePlayerName, normalizePlayerList } from '@/utils/validation';
 import { withTransaction, reject } from '../transaction';
 import type { RawAppData, TransactionResult } from '@/types/domain';
@@ -14,6 +15,10 @@ export async function addPlayer(name: string): Promise<TransactionResult> {
   if (!trimmed) {
     return { success: false, error: 'Nazwa gracza nie może być pusta' };
   }
+
+  // Liczone PRZED transakcją: Firebase może uruchomić callback wielokrotnie,
+  // a wtedy zapis tuż po północy dostałby różne daty przy kolejnych próbach.
+  const joinDate = todayISO();
 
   return withTransaction((current) => {
     const data = (current || {}) as RawAppData;
@@ -33,9 +38,11 @@ export async function addPlayer(name: string): Promise<TransactionResult> {
     return {
       ...data,
       players: [...players, trimmed],
-      playerJoinWeek: {
-        ...(data.playerJoinWeek || {}),
-        [trimmed]: (data.weeks || []).length,
+      // Frekwencję liczymy od dnia dołączenia, nie od pozycji w tablicy sesji —
+      // inaczej usunięcie albo wsteczne dopisanie sesji przesuwałoby próg.
+      playerJoinDate: {
+        ...(data.playerJoinDate || {}),
+        [trimmed]: joinDate,
       },
     } as RawAppData;
   }, 'Nie udało się dodać gracza');
@@ -55,6 +62,9 @@ export async function softDeletePlayer(playerName: string): Promise<TransactionR
       ...data,
       players: players.filter(p => p !== name),
       deletedPlayers: deleted.includes(name) ? deleted : [...deleted, name],
+      // Bez tego usunięty gracz zostawał w domyślnym składzie Multisport
+      // i wracał zaznaczony w formularzu nowej sesji.
+      defaultMultiPlayers: (data.defaultMultiPlayers || []).filter(p => p !== name),
     } as RawAppData;
   }, 'Nie udało się usunąć gracza');
 }
@@ -96,6 +106,8 @@ export async function permanentDeletePlayer(playerName: string): Promise<Transac
 
     const payments = { ...(data.payments || {}) };
     delete payments[name];
+    const playerJoinDate = { ...(data.playerJoinDate || {}) };
+    delete playerJoinDate[name];
     const playerJoinWeek = { ...(data.playerJoinWeek || {}) };
     delete playerJoinWeek[name];
 
@@ -103,7 +115,9 @@ export async function permanentDeletePlayer(playerName: string): Promise<Transac
       ...data,
       players: (data.players || []).filter(p => p !== name),
       deletedPlayers: (data.deletedPlayers || []).filter(p => p !== name),
+      defaultMultiPlayers: (data.defaultMultiPlayers || []).filter(p => p !== name),
       payments,
+      playerJoinDate,
       playerJoinWeek,
     } as RawAppData;
   }, 'Nie udało się trwale usunąć gracza');

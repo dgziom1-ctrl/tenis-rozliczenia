@@ -73,15 +73,6 @@ export default function ArenaCanvas({ chaosMode, onHit }: ArenaCanvasProps) {
       ];
     };
 
-    const _quad = (pts: ScreenPoint[], fill: string | CanvasGradient) => {
-      g.beginPath();
-      pts.forEach(([sx,sy], i) => i ? g.lineTo(sx, sy) : g.moveTo(sx, sy));
-      g.closePath(); g.fillStyle = fill; g.fill();
-    };
-    const _seg = ([ax,ay]: ScreenPoint,[bx,by]: ScreenPoint, col: string, w: number) => {
-      g.beginPath(); g.moveTo(ax,ay); g.lineTo(bx,by);
-      g.strokeStyle = col; g.lineWidth = w; g.stroke();
-    };
     const ellipse = (cx: number, cy: number, rx: number, ry: number, rot?: number) => {
       g.save();
       g.translate(cx, cy);
@@ -391,7 +382,7 @@ export default function ArenaCanvas({ chaosMode, onHit }: ArenaCanvasProps) {
   }, [chaosMode, onHit]);
 
   return (
-    <canvas ref={ref} width={560} height={180}
+    <canvas ref={ref} width={560} height={180} aria-hidden="true"
       style={{ display:'block', width:'100%', maxWidth:560, height:'auto' }} />
   );
 }

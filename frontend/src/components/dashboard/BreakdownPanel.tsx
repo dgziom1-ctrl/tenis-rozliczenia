@@ -103,8 +103,9 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
                         onMouseEnter={e => { e.currentTarget.style.opacity = '1'; }}
                         onMouseLeave={e => { e.currentTarget.style.opacity = '0.4'; }}
                         title="Usuń wpłatę"
+                        aria-label={`Usuń wpłatę ${formatAmountShort(item.amount)} zł z ${formatDate(item.date)}`}
                       >
-                        ✕
+                        <span aria-hidden="true">✕</span>
                       </button>
                     )}
                   </span>

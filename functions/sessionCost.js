@@ -14,9 +14,16 @@ function isCourtSport(sport) {
   return COURT_SPORTS.has(sport);
 }
 
+/** Zaokrąglenie „w połowie od zera", odporne na szum IEEE-754 (patrz money.ts). */
+function roundHalfAwayFromZero(value) {
+  const magnitude = Math.round(Number(Math.abs(value).toPrecision(12)));
+  if (magnitude === 0) return 0;
+  return value < 0 ? -magnitude : magnitude;
+}
+
 function toGrosze(zloty) {
   if (!Number.isFinite(zloty)) return 0;
-  return Math.round(zloty * GROSZE_PER_ZLOTY);
+  return roundHalfAwayFromZero(zloty * GROSZE_PER_ZLOTY);
 }
 
 function toZloty(grosze) {
@@ -32,16 +39,23 @@ function allocateExact(targets, totalGrosze) {
   const safeTargets = targets.map(t => (Number.isFinite(t) ? t : 0));
 
   const result = safeTargets.map(t => Math.floor(t));
-  let remainder = safeTotal - result.reduce((sum, v) => sum + v, 0);
+  const remainder = safeTotal - result.reduce((sum, v) => sum + v, 0);
 
   const byFraction = safeTargets
     .map((t, index) => ({ index, fraction: t - Math.floor(t) }))
     .sort((a, b) => b.fraction - a.fraction || a.index - b.index);
 
-  const step = remainder >= 0 ? 1 : -1;
-  for (let k = 0; remainder !== 0; k++) {
-    result[byFraction[k % count].index] += step;
-    remainder -= step;
+  // Reszta rozdawana hurtem, nie po jednym groszu — patrz money.ts.
+  const fullRounds = Math.trunc(remainder / count);
+  if (fullRounds !== 0) {
+    for (let i = 0; i < count; i++) result[i] += fullRounds;
+  }
+
+  let leftover = remainder - fullRounds * count;
+  const step = leftover >= 0 ? 1 : -1;
+  for (let k = 0; leftover !== 0; k++) {
+    result[byFraction[k].index] += step;
+    leftover -= step;
   }
 
   return result;
@@ -56,17 +70,26 @@ function allocateNonNegative(targets, totalGrosze) {
   const count = targets.length;
   if (count === 0) return [];
 
-  const eligible = targets.map(t => t > 0);
-  for (let guard = 0; guard <= count; guard++) {
-    const activeIndexes = targets.map((_, i) => i).filter(i => eligible[i]);
-    if (activeIndexes.length === 0) return new Array(count).fill(0);
+  const safeTotal = Number.isFinite(totalGrosze) ? Math.round(totalGrosze) : 0;
+  const safeTargets = targets.map(t => (Number.isFinite(t) ? t : 0));
 
-    const activeTargets = activeIndexes.map(i => targets[i]);
+  // Bez dodatniej wagi nie ma proporcji — dzielimy po równo, żeby kwota
+  // nie wyparowała z rozliczenia (patrz money.ts).
+  if (safeTotal <= 0 || safeTargets.every(t => t <= 0)) {
+    return splitEqually(safeTotal, count);
+  }
+
+  const eligible = safeTargets.map(t => t > 0);
+  for (let guard = 0; guard <= count; guard++) {
+    const activeIndexes = safeTargets.map((_, i) => i).filter(i => eligible[i]);
+    if (activeIndexes.length === 0) return splitEqually(safeTotal, count);
+
+    const activeTargets = activeIndexes.map(i => safeTargets[i]);
     const activeSum = activeTargets.reduce((sum, t) => sum + t, 0);
-    const scale = activeSum > 0 ? totalGrosze / activeSum : 0;
+    const scale = activeSum > 0 ? safeTotal / activeSum : 0;
     const scaled = activeTargets.map(t => t * scale);
 
-    const allocated = allocateExact(scaled, totalGrosze);
+    const allocated = allocateExact(scaled, safeTotal);
     const negativeAt = allocated.findIndex(v => v < 0);
     if (negativeAt === -1) {
       const result = new Array(count).fill(0);
@@ -76,23 +99,33 @@ function allocateNonNegative(targets, totalGrosze) {
     eligible[activeIndexes[negativeAt]] = false;
   }
 
-  return new Array(count).fill(0);
+  return splitEqually(safeTotal, count);
+}
+
+/** Imiona bez duplikatów i pustych wpisów — patrz sessionCost.ts. */
+function uniqueNames(names) {
+  if (!Array.isArray(names)) return [];
+  const seen = new Set();
+  for (const name of names) {
+    if (typeof name === 'string' && name.length > 0) seen.add(name);
+  }
+  return [...seen];
 }
 
 function parseSession(session) {
-  const present = session.presentPlayers || session.present || [];
-  const totalGrosze = Math.max(0, toGrosze(session.totalCost != null ? session.totalCost : session.cost || 0));
-  const racketGrosze = Math.min(Math.max(0, toGrosze(session.racketCost || 0)), totalGrosze);
+  const present = uniqueNames(session.presentPlayers || session.present);
+  const totalGrosze = Math.max(0, toGrosze(session.totalCost ?? session.cost ?? 0));
+  const racketGrosze = Math.min(Math.max(0, toGrosze(session.racketCost ?? 0)), totalGrosze);
 
   return {
     present,
-    multi: session.multisportPlayers || session.multiPlayers || [],
+    multi: uniqueNames(session.multisportPlayers || session.multiPlayers),
     totalGrosze,
     sport: session.sport || 'pingpong',
     racketGrosze,
-    ownRacket: session.ownRacketPlayers || [],
-    overtimeParticipants: (session.overtimePlayers || []).filter(p => present.includes(p)),
-    overtimeGrosze: Math.max(0, toGrosze(session.overtimeCost || 0)),
+    ownRacket: uniqueNames(session.ownRacketPlayers),
+    overtimeParticipants: uniqueNames(session.overtimePlayers).filter(p => present.includes(p)),
+    overtimeGrosze: Math.max(0, toGrosze(session.overtimeCost ?? 0)),
   };
 }
 

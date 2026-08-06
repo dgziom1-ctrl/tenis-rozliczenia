@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import { Download, Share, X } from 'lucide-react';
+
+/** Ile czekamy na iOS, zanim pokażemy podpowiedź instalacji. */
+const IOS_BANNER_DELAY_MS = 2000;
 
 /**
  * `beforeinstallprompt` nie istnieje w lib.dom.d.ts — to propozycja standardu
@@ -27,29 +30,41 @@ export default function PWAInstallBanner() {
   const [isIOS,          setIsIOS]          = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
-    try { if (localStorage.getItem('pwa-dismissed')) return; } catch { /* localStorage unavailable */ }
+    if (window.matchMedia('(display-mode: standalone)').matches) return undefined;
+    try { if (localStorage.getItem('pwa-dismissed')) return undefined; } catch { /* localStorage unavailable */ }
 
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(ios);
-    if (ios) { setTimeout(() => setShow(true), 2000); return; }
+    // iOS nie zna `beforeinstallprompt`, więc baner pokazujemy z opóźnieniem.
+    // Timer MUSI być sprzątany — bez tego wyjście z ekranu w ciągu tych 2 s
+    // ustawiało stan na odmontowanym komponencie.
+    if (ios) {
+      const t = setTimeout(() => setShow(true), IOS_BANNER_DELAY_MS);
+      return () => clearTimeout(t);
+    }
 
     const handler = (e: BeforeInstallPromptEvent) => { e.preventDefault(); setDeferredPrompt(e); setShow(true); };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') dismiss();
-    else setShow(false);
-  };
-
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     setShow(false);
     try { localStorage.setItem('pwa-dismissed', '1'); } catch { /* localStorage unavailable */ }
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') dismiss();
+      else setShow(false);
+    } catch {
+      // Przeglądarka potrafi odrzucić `prompt()` (np. wywołany drugi raz).
+      // Baner nie jest funkcją krytyczną — chowamy go bez komunikatu.
+      setShow(false);
+    }
   };
 
   if (!show) return null;
@@ -88,7 +103,7 @@ export default function PWAInstallBanner() {
               Otwieraj jak natywna aplikacja
             </p>
           </div>
-          <button onClick={handleInstall} style={{
+          <button onClick={() => void handleInstall()} style={{
             flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5,
             padding: '7px 12px',
             background: 'var(--co-cyan)', color: '#000',

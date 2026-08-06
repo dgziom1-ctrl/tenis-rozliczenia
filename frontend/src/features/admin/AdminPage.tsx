@@ -2,6 +2,7 @@ import { useOutletContext, useNavigate } from 'react-router';
 import { useCallback } from 'react';
 import { useAdminData } from '@/app/providers/appDataContext';
 import AdminTab from '@/components/admin/AdminTab';
+import { TAB_PATHS } from '@/constants';
 import type { SoundType } from '@/types/ui';
 
 export default function AdminPage() {
@@ -10,14 +11,7 @@ export default function AdminPage() {
   const navigate = useNavigate();
 
   const setActiveTab = useCallback((id: string) => {
-    const paths: Record<string, string> = {
-      dashboard: '/',
-      attendance: '/attendance',
-      admin: '/admin',
-      history: '/history',
-      players: '/players',
-    };
-    navigate(paths[id] || '/');
+    void navigate(TAB_PATHS[id] ?? '/');
   }, [navigate]);
 
   return (

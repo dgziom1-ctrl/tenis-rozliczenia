@@ -2,6 +2,7 @@ import { onValue } from 'firebase/database';
 import { dataRef } from './config';
 import { setCurrentData } from './state';
 import { buildUIData, normalizeRawData } from './transforms';
+import type { NormalizedData } from '@/types/domain';
 import type { UIData } from '@/types/ui';
 
 export type SubscribeErrorKind = 'connection' | 'data';
@@ -14,7 +15,10 @@ export function subscribeToData(
     dataRef,
     (snapshot) => {
       try {
-        const normalized = normalizeRawData(snapshot.val() || {});
+        // `snapshot.val()` jest z natury nietypowane — cokolwiek leży w bazie.
+        // `normalizeRawData` jest jedyną bramą, która nadaje temu kształt.
+        const raw = (snapshot.val() ?? {}) as Partial<NormalizedData>;
+        const normalized = normalizeRawData(raw);
         setCurrentData(normalized);
         callback(buildUIData(normalized));
       } catch (error) {

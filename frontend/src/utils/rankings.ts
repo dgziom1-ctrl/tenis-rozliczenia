@@ -1,5 +1,35 @@
 import type { PlayerStats, ExtendedPlayerStats, RankedPlayer, RankingHistoryEntry, HistoryEntry } from '@/types/ui';
 
+/** Procent całkowity; 0 sesji do rozegrania to 0%, nie NaN. */
+function percentage(part: number, whole: number): number {
+  return whole > 0 ? Math.round((part / whole) * 100) : 0;
+}
+
+/**
+ * Ile sesji z rzędu — licząc od najnowszej — gracz był obecny.
+ * `history` musi być posortowana od najnowszej do najstarszej.
+ */
+function currentStreakOf(name: string, history: HistoryEntry[]): number {
+  let streak = 0;
+  for (const session of history) {
+    if (!session.presentPlayers.includes(name)) break;
+    streak++;
+  }
+  return streak;
+}
+
+/**
+ * Ile razy gracz zagrał na karcie Multisport.
+ *
+ * Liczymy tylko sesje, na których faktycznie był — sama obecność imienia na
+ * liście kart bez obecności to ślad po niespójnym rekordzie, nie rozegrana gra.
+ */
+function multisportCountOf(name: string, history: HistoryEntry[]): number {
+  return history.filter(s =>
+    s.presentPlayers.includes(name) && s.multisportPlayers.includes(name),
+  ).length;
+}
+
 export function calculatePlayerStats(
   players: PlayerStats[],
   history: HistoryEntry[],
@@ -7,26 +37,21 @@ export function calculatePlayerStats(
 ): ExtendedPlayerStats[] {
   if (!players || !history) return [];
 
-  return players.map(player => {
-    const { name, attendanceCount } = player;
-    const attendancePercentage = totalWeeks > 0
-      ? Math.round((attendanceCount / totalWeeks) * 100)
-      : 0;
-
-    let currentStreak = 0;
-    for (const session of history) {
-      if (session.presentPlayers.includes(name)) {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
-
-    const multisportCount = history.filter(s => s.multisportPlayers.includes(name)).length;
-    return { ...player, attendancePercentage, currentStreak, multisportCount };
-  });
+  return players.map(player => ({
+    ...player,
+    // Mianownikiem są sesje rozegrane od dołączenia gracza, a nie wszystkie
+    // w historii — inaczej ktoś, kto dołączył w połowie sezonu i nie opuścił
+    // ani jednej gry, miałby 50% zamiast 100%.
+    attendancePercentage: percentage(player.attendanceCount, player.eligibleWeeks ?? totalWeeks),
+    currentStreak: currentStreakOf(player.name, history),
+    multisportCount: multisportCountOf(player.name, history),
+  }));
 }
 
+/**
+ * Nadaje miejsca w rankingu z obsługą remisów: równy procent = to samo miejsce,
+ * a kolejne miejsce przeskakuje o liczbę remisujących (1, 1, 3 — nie 1, 1, 2).
+ */
 export function assignRankingPlaces(sortedPlayers: ExtendedPlayerStats[]): RankedPlayer[] {
   let currentPlace = 1;
   return sortedPlayers.map((player, index) => {
@@ -42,21 +67,23 @@ export function calculateSeasonPlayerStats(
   seasonHistory: HistoryEntry[],
 ): ExtendedPlayerStats[] {
   if (!players || !seasonHistory) return [];
-  const totalWeeks = seasonHistory.length;
 
   return players.map(player => {
-    const { name } = player;
-    const attendanceCount = seasonHistory.filter(s => s.presentPlayers.includes(name)).length;
-    const attendancePercentage = totalWeeks > 0 ? Math.round((attendanceCount / totalWeeks) * 100) : 0;
+    // Sezon też liczymy od dołączenia gracza — sesje sprzed jego pierwszego
+    // dnia nie mogą obniżać mu frekwencji.
+    const eligible = player.joinDate
+      ? seasonHistory.filter(s => s.datePlayed >= player.joinDate!)
+      : seasonHistory;
+    const attendanceCount = eligible.filter(s => s.presentPlayers.includes(player.name)).length;
 
-    let currentStreak = 0;
-    for (const session of seasonHistory) {
-      if (session.presentPlayers.includes(name)) currentStreak++;
-      else break;
-    }
-
-    const multisportCount = seasonHistory.filter(s => s.multisportPlayers.includes(name)).length;
-    return { ...player, attendanceCount, attendancePercentage, currentStreak, multisportCount };
+    return {
+      ...player,
+      attendanceCount,
+      eligibleWeeks: eligible.length,
+      attendancePercentage: percentage(attendanceCount, eligible.length),
+      currentStreak: currentStreakOf(player.name, eligible),
+      multisportCount: multisportCountOf(player.name, eligible),
+    };
   }).filter(p => p.attendanceCount > 0);
 }
 
@@ -78,11 +105,12 @@ export function computeRankingHistory(
 
     const stats = playerNames.map(name => {
       const attended = sessionsUpTo.filter(s => s.presentPlayers.includes(name)).length;
-      const pct = Math.round((attended / total) * 100);
-      return { name, pct, attended };
+      return { name, pct: percentage(attended, total), attended };
     });
 
-    stats.sort((a, b) => b.pct - a.pct || b.attended - a.attended);
+    // Remis rozstrzygamy imieniem, żeby ten sam zestaw danych zawsze dawał
+    // ten sam wykres — bez tego kolejność zależałaby od kolejności graczy.
+    stats.sort((a, b) => b.pct - a.pct || b.attended - a.attended || a.name.localeCompare(b.name, 'pl'));
     let place = 1;
     const rankings = stats.map((p, i) => {
       if (i > 0 && p.pct < stats[i - 1].pct) place = i + 1;
