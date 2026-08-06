@@ -29,6 +29,8 @@ jobs:
         run: npm run typecheck
       - name: Lint
         run: npm run lint
+      - name: Martwy kod (CSS + osierocone moduły)
+        run: npm run lint:css && npm run lint:orphans
       - name: Uruchom testy
         run: npm test
 

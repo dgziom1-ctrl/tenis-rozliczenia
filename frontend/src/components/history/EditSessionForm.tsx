@@ -1,24 +1,13 @@
+import { useId } from 'react';
 import { Check, X, Zap, Users, Timer } from 'lucide-react';
 import { InlineSpinner } from '../common/LoadingSkeleton';
-import EditDateInput from './EditDateInput';
+import CyberDateInput from '../admin/CyberDateInput';
 import { isCourtSport } from '@/constants';
-import type { Sport } from '../../types/domain';
-
-interface EditForm {
-  date: string;
-  cost: string | number;
-  present: string[];
-  multiPlayers: string[];
-  sport: Sport;
-  racketCost?: number;
-  ownRacketPlayers?: string[];
-  overtimePlayers?: string[];
-  overtimeCost?: string | number;
-}
+import type { SessionEditForm } from '../../types/ui';
 
 interface EditSessionFormProps {
-  editForm: EditForm;
-  setEditForm: React.Dispatch<React.SetStateAction<EditForm>>;
+  editForm: SessionEditForm;
+  setEditForm: React.Dispatch<React.SetStateAction<SessionEditForm>>;
   playerNames: string[];
   isSaving: boolean;
   isEditCostValid: boolean;
@@ -44,6 +33,9 @@ export default function EditSessionForm({
   onToggleOvertime,
 }: EditSessionFormProps) {
   const isSquash = isCourtSport(editForm.sport);
+  const costId = useId();
+  const costErrorId = useId();
+  const overtimeCostId = useId();
   return (
     <div style={{
       background: 'var(--co-dark)', border: '1px solid rgba(0,229,255,0.25)',
@@ -52,18 +44,20 @@ export default function EditSessionForm({
     }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         <div>
-          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</label>
-          <EditDateInput value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</span>
+          <CyberDateInput compact label="Data sesji" value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
         </div>
         <div>
-          <label style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
-          <input type="text" inputMode="decimal" value={editForm.cost}
+          <label htmlFor={costId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
+          <input id={costId} type="text" inputMode="decimal" value={editForm.cost}
             onChange={e => setEditForm(p => ({ ...p, cost: e.target.value }))}
+            aria-invalid={!isEditCostValid}
+            aria-describedby={isEditCostValid ? undefined : costErrorId}
             className="cyber-input"
             style={{ width: '100%', padding: '10px 12px', fontSize: '0.8rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
           />
           {!isEditCostValid && (
-            <p style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)' }}>
+            <p id={costErrorId} role="alert" style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)' }}>
               ⚠ {editCostError}
             </p>
           )}
@@ -123,8 +117,8 @@ export default function EditSessionForm({
             <Timer size={11} /> DOGRYWKA
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)' }}>Koszt:</span>
-            <input type="text" inputMode="decimal"
+            <label htmlFor={overtimeCostId} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)' }}>Koszt:</label>
+            <input id={overtimeCostId} type="text" inputMode="decimal"
               value={editForm.overtimeCost ?? ''}
               onChange={e => setEditForm(p => ({ ...p, overtimeCost: e.target.value }))}
               className="cyber-input"
@@ -156,12 +150,12 @@ export default function EditSessionForm({
         <button onClick={onSave} disabled={isSaving || !isEditCostValid}
           aria-label="Zapisz zmiany"
           className="cyber-button-yellow" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Check size={14} /> Zapisz</>}
+          {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Check size={14} aria-hidden="true" /> Zapisz</>}
         </button>
         <button onClick={onCancel} disabled={isSaving}
           aria-label="Anuluj edycję"
           className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <X size={14} /> ANULUJ
+          <X size={14} aria-hidden="true" /> ANULUJ
         </button>
       </div>
     </div>

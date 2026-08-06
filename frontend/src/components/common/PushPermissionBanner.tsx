@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
-import { Bell, BellOff, X, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Bell, X, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { ref, get } from 'firebase/database';
 import { database } from '@/lib/firebase/config';
 
 const DISMISS_KEY   = 'push-banner-dismissed';
 const PLAYER_KEY    = 'push-registered-player';
+/** Jak długo pokazujemy potwierdzenie, zanim baner sam się schowa. */
+const SUCCESS_DISMISS_MS = 2500;
 
 // Sprawdza czy TO urządzenie ma token w bazie.
 // Podczas rejestracji zapisujemy hash tokenu w localStorage ('push-token-key').
@@ -36,6 +38,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
   const [status,          setStatus]          = useState<BannerStatus | null>(null); // 'success'|'error'|'reregister'|null
   const [errorMsg,        setErrorMsg]        = useState('');
   const [tokenMissing,    setTokenMissing]    = useState(false);
+  const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     try {
@@ -45,13 +48,17 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
     } catch { /* localStorage unavailable */ }
   }, []);
 
+  useEffect(() => () => { if (dismissTimer.current) clearTimeout(dismissTimer.current); }, []);
+
   // Gdy permission jest 'granted' sprawdź czy token jest faktycznie w bazie.
   // Poprzednia wersja kodu mogła go usunąć — wtedy pokażemy opcję ponownej rejestracji.
   useEffect(() => {
-    if (permission !== 'granted' || !isSupported) return;
-    deviceHasToken().then(has => {
-      if (!has) setTokenMissing(true);
+    if (permission !== 'granted' || !isSupported) return undefined;
+    let cancelled = false;
+    void deviceHasToken().then(has => {
+      if (!cancelled && !has) setTokenMissing(true);
     });
+    return () => { cancelled = true; };
   }, [permission, isSupported]);
 
   if (!isSupported) return null;
@@ -88,7 +95,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
       setStatus('success');
       setTokenMissing(false);
       try { localStorage.setItem(PLAYER_KEY, selectedPlayer); } catch { /* localStorage unavailable */ }
-      setTimeout(dismiss, 2500);
+      dismissTimer.current = setTimeout(dismiss, SUCCESS_DISMISS_MS);
     } else {
       setErrorMsg(result.error || 'Nieznany błąd');
       setStatus('error');
@@ -130,7 +137,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
 
         <div style={{ flex: 1 }}>
           {status === 'success' ? (
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--co-green)', letterSpacing: '0.08em' }}>
+            <p role="status" style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--co-green)', letterSpacing: '0.08em' }}>
               ✓ Powiadomienia włączone!
             </p>
           ) : (
@@ -156,6 +163,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
                       <button
                         key={name}
                         onClick={() => setSelectedPlayer(name)}
+                        aria-pressed={selectedPlayer === name}
                         style={{
                           fontFamily: 'var(--font-display)', fontSize: '0.72rem',
                           letterSpacing: '0.08em', padding: '4px 10px',
@@ -175,14 +183,14 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
               )}
 
               {status === 'error' && (
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-rose)', marginBottom: 8 }}>
+                <p role="alert" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-rose)', marginBottom: 8 }}>
                   ⚠ {errorMsg || 'Nie udało się włączyć. Sprawdź ustawienia przeglądarki.'}
                 </p>
               )}
 
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
-                  onClick={handleEnable}
+                  onClick={() => void handleEnable()}
                   disabled={isRegistering}
                   className="cyber-button-yellow"
                   style={{ padding: '8px 16px', fontSize: '0.78rem' }}

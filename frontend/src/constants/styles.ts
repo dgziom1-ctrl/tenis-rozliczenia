@@ -44,10 +44,6 @@ export const FONT = {
 };
 
 export const PANEL = {
-  base: {
-    background: 'var(--co-panel)',
-    border: '1px solid var(--co-border)',
-  } as CSSProperties,
   cyberCut: {
     background: 'var(--co-panel)',
     border: '1px solid var(--co-border)',

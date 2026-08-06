@@ -6,6 +6,8 @@
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 import { getSessionShares } from '../utils/sessionCost';
+import { allocateExact, allocateNonNegative, splitEqually, toGrosze } from '../utils/money';
+import { SQUASH_MULTISPORT_DISCOUNT, SPORT, isCourtSport } from '../constants';
 
 const require = createRequire(import.meta.url);
 const fns = require('../../../functions/sessionCost.js');
@@ -57,6 +59,25 @@ const SESSIONS = [
     label: 'kwota niepoprawna (NaN)',
     session: { sport: 'pingpong', cost: NaN, present: ['A', 'B'], multiPlayers: [] },
   },
+  {
+    label: 'zdublowane imię na liście obecnych',
+    session: { sport: 'pingpong', cost: 100, present: ['A', 'A', 'B'], multiPlayers: [] },
+  },
+  {
+    label: 'aliasy pól z warstwy UI (presentPlayers / totalCost)',
+    session: {
+      sport: 'squash', totalCost: 100, presentPlayers: ['A', 'B', 'C'],
+      multisportPlayers: ['A'], racketCost: 10, ownRacketPlayers: ['B'],
+    },
+  },
+  {
+    label: 'kwota z groszem na granicy zaokrąglenia (1.005)',
+    session: { sport: 'pingpong', cost: 1.005, present: ['A'], multiPlayers: [] },
+  },
+  {
+    label: 'squash, wszyscy z kartą — zniżka nie może zjeść całej kwoty',
+    session: { sport: 'squash', cost: 10, present: ['A', 'B', 'C'], multiPlayers: ['A', 'B', 'C'] },
+  },
 ];
 
 describe('Cloud Functions liczą koszty identycznie jak aplikacja', () => {
@@ -67,10 +88,60 @@ describe('Cloud Functions liczą koszty identycznie jak aplikacja', () => {
   it.each(SESSIONS)('$label — suma udziałów pokrywa całą kwotę sesji', ({ session }) => {
     const shares = fns.getSessionShares(session);
     const allocated = Object.values(shares.byPlayer)
-      .reduce((sum, s) => sum + Math.round(s.total * 100), 0);
-    const expected = Math.round((Number.isFinite(session.cost) ? session.cost : 0) * 100)
-      + Math.round((session.overtimeCost || 0) * 100);
+      .reduce((sum, s) => sum + toGrosze(s.total), 0);
+    const total = session.totalCost ?? session.cost ?? 0;
+    const expected = toGrosze(Number.isFinite(total) ? total : 0)
+      + toGrosze(session.overtimeCost ?? 0);
 
-    expect(allocated + Math.round(shares.unallocated * 100)).toBe(expected);
+    expect(allocated + toGrosze(shares.unallocated)).toBe(expected);
   });
+});
+
+// Stałe i helpery są w Cloud Functions przepisane ręcznie. Gdyby ktoś zmienił
+// je tylko po jednej stronie, kwoty w powiadomieniu rozjechałyby się z kartą
+// gracza dopiero na produkcji — dlatego pilnujemy ich tutaj wprost.
+describe('Cloud Functions używają tych samych stałych co aplikacja', () => {
+  it('zniżka Multisport jest identyczna', () => {
+    expect(fns.SQUASH_MULTISPORT_DISCOUNT).toBe(SQUASH_MULTISPORT_DISCOUNT);
+  });
+
+  it.each([SPORT.PINGPONG, SPORT.SQUASH, SPORT.BADMINTON, 'nieznany'])(
+    'klasyfikacja sportu „%s" jest identyczna',
+    (sport) => {
+      expect(fns.isCourtSport(sport)).toBe(isCourtSport(sport));
+    },
+  );
+});
+
+describe('Cloud Functions dzielą kwoty tym samym algorytmem', () => {
+  const ALLOCATIONS = [
+    { targets: [], total: 0 },
+    { targets: [0, 0, 0], total: 100 },
+    { targets: [-5, -5], total: 100 },
+    { targets: [1, 1, 1], total: 100 },
+    { targets: [10, -3], total: 100 },
+    { targets: [1, 2, 3], total: 0 },
+    { targets: [1, 1], total: -50 },
+  ];
+
+  it.each(ALLOCATIONS)('allocateExact($targets, $total)', ({ targets, total }) => {
+    expect(fns.allocateExact(targets, total)).toEqual(allocateExact(targets, total));
+  });
+
+  it.each(ALLOCATIONS)('allocateNonNegative($targets, $total)', ({ targets, total }) => {
+    const actual = fns.allocateNonNegative(targets, total);
+    expect(actual).toEqual(allocateNonNegative(targets, total));
+    // Kluczowa własność: nic nie ginie i nic się nie pojawia.
+    if (targets.length > 0) {
+      expect(actual.reduce((sum, v) => sum + v, 0)).toBe(total);
+    }
+  });
+
+  it.each([[100, 3], [100, 1], [0, 4], [7, 7], [5, 2]])(
+    'splitEqually(%i, %i)',
+    (total, count) => {
+      expect(fns.splitEqually(total, count)).toEqual(splitEqually(total, count));
+      expect(splitEqually(total, count).reduce((sum, v) => sum + v, 0)).toBe(total);
+    },
+  );
 });

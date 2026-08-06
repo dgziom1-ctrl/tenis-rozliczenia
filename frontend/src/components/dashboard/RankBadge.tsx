@@ -1,7 +1,10 @@
-import { useState, useRef, useEffect, type MouseEvent } from 'react';
+import { useState, useRef, useEffect, useId, type MouseEvent } from 'react';
 import { RANKS } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
 import type { Rank } from '@/types/ui';
+
+/** Jak długo wisi dymek z progiem następnej rangi. */
+const HINT_VISIBLE_MS = 2500;
 
 interface RankBadgeProps {
   rank: Rank;
@@ -17,21 +20,28 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
   const [visible, setVisible] = useState(false);
   const [tapped, setTapped] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipId = useId();
 
-  const handleTap = (e: MouseEvent<HTMLDivElement>) => {
+  const handleTap = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setTapped(true);
     clearTimeout(timerRef.current ?? undefined);
     setVisible(true);
-    timerRef.current = setTimeout(() => setVisible(false), 2500);
+    timerRef.current = setTimeout(() => setVisible(false), HINT_VISIBLE_MS);
   };
 
   useEffect(() => () => clearTimeout(timerRef.current ?? undefined), []);
 
   return (
     <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-      <div
+      {/* <button>, a nie <div onClick> — dymek z progiem następnej rangi
+          był wcześniej nieosiągalny z klawiatury. */}
+      <button
+        type="button"
         onClick={handleTap}
+        aria-expanded={visible}
+        aria-controls={visible ? tooltipId : undefined}
+        aria-label={`Ranga ${rank.name}, ${pct}% frekwencji — pokaż próg następnej rangi`}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
           padding: '2px 7px 2px 4px',
@@ -40,17 +50,17 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
           cursor: 'pointer', userSelect: 'none',
         }}
       >
-        <span style={{ fontSize: '0.65rem' }}>{rank.emoji}</span>
+        <span aria-hidden="true" style={{ fontSize: '0.65rem' }}>{rank.emoji}</span>
         <span style={{ ...FONT.display('0.75rem', '0.08em'), color: col }}>
           {rank.name}
         </span>
         <span style={{ ...FONT.monoTiny, color: col, opacity: 0.55 }}>
           {pct}%
         </span>
-      </div>
+      </button>
       {/* Tap hint — visible "?" label until first tap */}
       {showHint && !tapped && (
-        <span style={{
+        <span aria-hidden="true" style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.62rem',
           color: col, opacity: 0.7,
           letterSpacing: 0,
@@ -61,7 +71,7 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
         </span>
       )}
       {visible && (
-        <div style={{
+        <div id={tooltipId} role="status" style={{
           position: 'absolute', bottom: 'calc(100% + 6px)', left: 0,
           background: 'var(--co-void)',
           border: `1px solid ${col}50`,

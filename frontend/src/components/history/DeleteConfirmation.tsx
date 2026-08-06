@@ -1,14 +1,16 @@
 import { Trash2, X } from 'lucide-react';
 import { formatDate } from '@/utils/format';
+import { InlineSpinner } from '../common/LoadingSkeleton';
 import type { HistoryEntry } from '../../types/ui';
 
 interface DeleteConfirmationProps {
   row: HistoryEntry;
+  isDeleting: boolean;
   onConfirm: (id: string) => void;
   onCancel: () => void;
 }
 
-export default function DeleteConfirmation({ row, onConfirm, onCancel }: DeleteConfirmationProps) {
+export default function DeleteConfirmation({ row, isDeleting, onConfirm, onCancel }: DeleteConfirmationProps) {
   return (
     <div style={{
       background: 'rgba(255,32,144,0.04)', border: '1px solid rgba(255,32,144,0.35)',
@@ -23,18 +25,21 @@ export default function DeleteConfirmation({ row, onConfirm, onCancel }: DeleteC
         Tej operacji nie można cofnąć. Salda graczy zostaną przeliczone.
       </p>
       <div style={{ display: 'flex', gap: 10 }}>
-        <button onClick={() => onConfirm(row.id)}
+        <button onClick={() => onConfirm(row.id)} disabled={isDeleting}
           style={{
             flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            background: 'var(--co-rose)', color: '#000',
+            background: isDeleting ? 'var(--co-panel)' : 'var(--co-rose)',
+            color: isDeleting ? 'var(--co-dim)' : '#000',
             fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.12em',
-            border: 'none', cursor: 'pointer',
+            border: 'none', cursor: isDeleting ? 'not-allowed' : 'pointer',
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
           }}>
-          <Trash2 size={14} /> POTWIERDŹ USUNIĘCIE
+          {isDeleting
+            ? <><InlineSpinner size="sm" /> USUWAM...</>
+            : <><Trash2 size={14} /> POTWIERDŹ USUNIĘCIE</>}
         </button>
-        <button onClick={onCancel}
-          className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <button onClick={onCancel} disabled={isDeleting}
+          className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, cursor: isDeleting ? 'not-allowed' : 'pointer' }}>
           <X size={14} /> ANULUJ
         </button>
       </div>

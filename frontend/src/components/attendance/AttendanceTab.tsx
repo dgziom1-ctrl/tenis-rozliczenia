@@ -42,7 +42,6 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     () => selectedSeason ? filterHistoryByYear(history, selectedSeason) : history,
     [history, selectedSeason]
   );
-  const seasonTotalWeeks = selectedSeason ? seasonHistory.length : totalWeeks;
 
   // Use season-aware stats when filtering, global stats for all-time
   const stats = useMemo(() => {
@@ -91,8 +90,8 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     return computeWrappedStats(history, players, wrappedYear);
   }, [wrappedYear, history, players]);
 
-  // Past seasons that can show Wrapped (not the current year)
-  const _wrappableSeasons = useMemo(() => seasons.filter(y => y < currentYear), [seasons, currentYear]);
+  const handleCloseModal = useCallback(() => setSelectedPlayer(null), []);
+  const handleCloseWrapped = useCallback(() => setWrappedYear(null), []);
 
   return (
     <>
@@ -100,12 +99,11 @@ export default function AttendanceTab({ players, history, summary, playSound, in
       <PlayerSessionModal
         player={selectedStats}
         history={seasonHistory}
-        totalWeeks={seasonTotalWeeks}
-        onClose={() => setSelectedPlayer(null)}
+        onClose={handleCloseModal}
       />
     )}
     {wrappedStats && (
-      <WrappedModal stats={wrappedStats} onClose={() => setWrappedYear(null)} />
+      <WrappedModal stats={wrappedStats} onClose={handleCloseWrapped} />
     )}
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'slide-in-up 0.3s ease-out' }}>
       <SeasonSelector seasons={seasons} selected={selectedSeason} onChange={setSelectedSeason} />
@@ -133,7 +131,7 @@ export default function AttendanceTab({ players, history, summary, playSound, in
         </button>
       )}
 
-      <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} totalWeeks={seasonTotalWeeks} onSelect={handleSelect} />
+      <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} onSelect={handleSelect} />
       <RankingHistoryChart players={players} history={seasonHistory} />
       <MonthlyReport monthlyStats={monthlyStats} players={players} />
     </div>

@@ -34,11 +34,23 @@ interface NormalizedSession {
  *
  * Zwraca komunikat błędu zamiast rzucać, żeby wywołujący mógł go pokazać.
  */
+const SPORTS: readonly Sport[] = ['pingpong', 'squash', 'badminton'];
+
+function isSport(value: unknown): value is Sport {
+  return typeof value === 'string' && (SPORTS as readonly string[]).includes(value);
+}
+
 function normalizeSession(input: SessionInput): { session: NormalizedSession } | { error: string } {
   const { totalCost, sport = 'pingpong' } = input;
 
   if (!isValidMoney(totalCost)) {
     return { error: 'Koszt sesji musi być liczbą nieujemną' };
+  }
+
+  // Reguły bazy przepuszczają tylko te trzy wartości. Bez sprawdzenia tutaj
+  // zapis wracałby jako „permission denied" bez czytelnego powodu.
+  if (!isSport(sport)) {
+    return { error: 'Nieznana dyscyplina sportu' };
   }
 
   const present = normalizePlayerList(input.presentPlayers);
@@ -91,7 +103,11 @@ export async function addSession(params: AddSessionParams): Promise<TransactionR
   const normalized = normalizeSession(params);
   if ('error' in normalized) return { success: false, error: normalized.error };
 
+  // Id i znacznik czasu ustalamy PRZED transakcją, żeby kolejne próby tego
+  // samego zapisu wyglądały identycznie — inaczej Cloud Function widziałaby
+  // zmianę `lastAddedSession` i wysyłała powiadomienie po każdej próbie.
   const newId = makeId();
+  const addedAt = Date.now();
 
   return withTransaction((current) => {
     const data = (current || {}) as RawAppData;
@@ -106,7 +122,7 @@ export async function addSession(params: AddSessionParams): Promise<TransactionR
     return {
       ...data,
       weeks: sortWeeksByDate([...weeks, { id: newId, date: params.datePlayed, ...normalized.session }]),
-      lastAddedSession: { id: newId, ts: Date.now() },
+      lastAddedSession: { id: newId, ts: addedAt },
     } as RawAppData;
   }, 'Nie udało się zapisać sesji');
 }
@@ -164,22 +180,17 @@ export async function updateWeek(
 export async function deleteWeek(weekId: string): Promise<TransactionResult> {
   if (!weekId) return { success: false, error: 'Brak identyfikatora sesji' };
 
-  let weekFound = true;
-
-  const result = await withTransaction((current) => {
+  // „Nie znaleziono" zgłaszamy przerwaniem transakcji, a nie flagą na zewnątrz —
+  // flaga z próby, która się nie zatwierdziła, przeżywała ponowienie i potrafiła
+  // zgłosić błąd po usunięciu, które faktycznie doszło do skutku.
+  return withTransaction((current) => {
     const data = (current || {}) as RawAppData;
     const weeks = data.weeks || [];
 
     if (!weeks.some(w => w.id === weekId)) {
-      weekFound = false;
-      return data;
+      reject('Nie znaleziono sesji do usunięcia');
     }
 
     return { ...data, weeks: weeks.filter(w => w.id !== weekId) } as RawAppData;
   }, 'Nie udało się usunąć sesji');
-
-  if (result.success && !weekFound) {
-    return { success: false, error: 'Nie znaleziono sesji do usunięcia' };
-  }
-  return result;
 }

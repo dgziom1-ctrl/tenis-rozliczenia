@@ -72,12 +72,11 @@ function PlayerCard({
   const animatedAbs = useAnimatedValue(Math.abs(debt));
 
   useEffect(() => {
-    if (prevDebt.current !== debt) {
-      setFlash(true);
-      const t = setTimeout(() => setFlash(false), 750);
-      prevDebt.current = debt;
-      return () => clearTimeout(t);
-    }
+    if (prevDebt.current === debt) return undefined;
+    setFlash(true);
+    prevDebt.current = debt;
+    const t = setTimeout(() => setFlash(false), 750);
+    return () => clearTimeout(t);
   }, [debt]);
 
   const { lastPayment, secondsLeft, progressPct, startPaymentUndo, handleUndoPayment } =

@@ -21,13 +21,25 @@ export interface Payment {
   date: string;
 }
 
+/**
+ * Data (YYYY-MM-DD), od której gracz liczy się do frekwencji.
+ *
+ * Zastępuje `playerJoinWeek` — indeks w tablicy sesji, który przestawał się
+ * zgadzać, gdy ktoś usunął sesję albo dopisał ją z datą wsteczną. Data jest
+ * odporna na jedno i drugie. `playerJoinWeek` zostaje wyłącznie do ODCZYTU
+ * starych rekordów; nic już go nie zapisuje.
+ */
+export type PlayerJoinDates = Record<string, string>;
+
 export interface RawAppData {
   players: string[];
   weeks: Week[];
   payments: Record<string, Payment[]>;
   defaultMultiPlayers: string[];
   deletedPlayers: string[];
-  playerJoinWeek: Record<string, number>;
+  playerJoinDate: PlayerJoinDates;
+  /** @deprecated Format zaszłościowy, tylko do odczytu. Zapisujemy `playerJoinDate`. */
+  playerJoinWeek?: Record<string, number>;
   lastAddedSession?: { id: string; ts: number };
 }
 
@@ -37,7 +49,9 @@ export interface NormalizedData {
   payments: Record<string, Payment[]>;
   defaultMultiPlayers: string[];
   deletedPlayers: string[];
-  playerJoinWeek: Record<string, number>;
+  playerJoinDate: PlayerJoinDates;
+  /** @deprecated Format zaszłościowy, tylko do odczytu. */
+  playerJoinWeek?: Record<string, number>;
 }
 
 export interface TransactionResult {

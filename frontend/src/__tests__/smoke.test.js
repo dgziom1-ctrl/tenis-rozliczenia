@@ -34,10 +34,10 @@ describe('utils — eksporty modułów obliczeniowych', () => {
   it.each([
     ['../utils/money', ['roundToTwoDecimals', 'getPayingPlayers', 'allocateExact', 'splitEqually']],
     ['../utils/sessionCost', ['getSessionShares', 'getPlayerSessionCost', 'getSessionBaseCost']],
-    ['../utils/debt', ['calculateDebt', 'calculateDebtBreakdown', 'buildDebtDisplayData']],
+    ['../utils/debt', ['calculateDebt', 'buildDebtDisplayData']],
     ['../utils/rankings', ['calculatePlayerStats', 'assignRankingPlaces', 'computeRankingHistory']],
     ['../utils/sessions', ['groupSessionsByMonth', 'groupHistoryByMonth']],
-    ['../utils/achievements', ['getPlayerBadge', 'getPlayerAchievements']],
+    ['../utils/achievements', ['getPlayerAchievements']],
   ])('%s eksportuje oczekiwane funkcje', async (path, expected) => {
     const m = await import(/* @vite-ignore */ path);
     for (const fn of expected) {

@@ -36,8 +36,17 @@ export function computeWrappedStats(
     };
   }).filter(p => p.attended > 0);
 
-  const sorted = [...perPlayer].sort((a, b) => b.percentage - a.percentage || b.attended - a.attended);
-  sorted.forEach((p, i) => { p.place = i + 1; });
+  // Remisy dostają to samo miejsce — dokładnie jak w rankingu na zakładce
+  // Frekwencja. Bez tego ci sami dwaj gracze widzieliby 1 i 1 na jednym
+  // ekranie, a 1 i 2 na drugim.
+  const sorted = [...perPlayer].sort((a, b) =>
+    b.percentage - a.percentage || b.attended - a.attended || a.name.localeCompare(b.name, 'pl'),
+  );
+  let place = 1;
+  sorted.forEach((p, i) => {
+    if (i > 0 && p.percentage < sorted[i - 1].percentage) place = i + 1;
+    p.place = place;
+  });
 
   const avgPlayersPerSession = yearHistory.reduce((sum, s) => sum + s.presentPlayers.length, 0) / totalSessions;
 

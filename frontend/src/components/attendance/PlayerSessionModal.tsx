@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { RANKS, getRank, isCourtSport } from '@/constants';
@@ -14,40 +14,29 @@ import type { ExtendedPlayerStats, HistoryEntry } from '@/types/ui';
 interface PlayerSessionModalProps {
   player: ExtendedPlayerStats | null;
   history: HistoryEntry[];
-  totalWeeks: number;
   onClose: () => void;
 }
 
 // ─── Player Session Drill-Down Modal ─────────────────────────────
-export default function PlayerSessionModal({ player, history, totalWeeks, onClose }: PlayerSessionModalProps) {
+export default function PlayerSessionModal({ player, history, onClose }: PlayerSessionModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   useFocusTrap(overlayRef);
   useEffect(() => { overlayRef.current?.focus(); }, []);
 
   const { sessions, missedSessions } = useMemo(() => {
     if (!player) return { sessions: [], missedSessions: [] };
-    const sessions = history.filter(s => s.presentPlayers.includes(player.name));
-    const missedSessions = history.filter(s => !s.presentPlayers.includes(player.name));
-    return { sessions, missedSessions };
+    // Sesje sprzed dołączenia gracza nie są przez niego „opuszczone".
+    const eligible = player.joinDate
+      ? history.filter(s => s.datePlayed >= player.joinDate!)
+      : history;
+    return {
+      sessions: eligible.filter(s => s.presentPlayers.includes(player.name)),
+      missedSessions: eligible.filter(s => !s.presentPlayers.includes(player.name)),
+    };
   }, [history, player]);
-
-  const _avgCost = useMemo(() => {
-    if (!player) return '0.00';
-    return sessions.length > 0
-      ? (sessions.reduce((sum, s) => sum + getPlayerSessionCost(s, player.name), 0) / sessions.length).toFixed(2)
-      : '0.00';
-  }, [sessions, player]);
 
   const currentStreak = player?.currentStreak || 0;
-  const _longestStreak = useMemo(() => {
-    if (!player) return 0;
-    let max = 0, cur = 0;
-    for (const s of [...history].reverse()) {
-      if (s.presentPlayers.includes(player.name)) { cur++; max = Math.max(max, cur); }
-      else cur = 0;
-    }
-    return max;
-  }, [history, player]);
 
   const achievements = useMemo(() => {
     if (!player) return [];
@@ -67,6 +56,7 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
       onKeyDown={e => e.key === 'Escape' && onClose()}
       role="dialog"
       aria-modal="true"
+      aria-labelledby={titleId}
       style={{
         position: 'fixed', inset: 0, zIndex: 100,
         background: 'var(--co-overlay, rgba(0,0,0,0.85))',
@@ -104,11 +94,11 @@ export default function PlayerSessionModal({ player, history, totalWeeks, onClos
             </span>
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ ...FONT.display('1.4rem', '0.06em'), color: 'var(--co-text-hi)', margin: 0, lineHeight: 1 }}>
+            <p id={titleId} style={{ ...FONT.display('1.4rem', '0.06em'), color: 'var(--co-text-hi)', margin: 0, lineHeight: 1 }}>
               {player.name.toUpperCase()}
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: '3px 0 0', letterSpacing: '0.12em' }}>
-              {player.attendanceCount}/{totalWeeks} sesji · {player.attendancePercentage}% frekwencja
+              {player.attendanceCount}/{player.eligibleWeeks} sesji · {player.attendancePercentage}% frekwencja
             </p>
           </div>
           <button onClick={onClose} aria-label="Zamknij" className="modal-close-btn" style={{

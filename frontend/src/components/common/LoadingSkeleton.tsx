@@ -2,7 +2,7 @@
 export function InlineSpinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const px = size === 'sm' ? 12 : size === 'lg' ? 20 : 16;
   return (
-    <span style={{
+    <span aria-hidden="true" style={{
       display: 'inline-block',
       width: px, height: px,
       border: '1.5px solid rgba(0,229,255,0.2)',

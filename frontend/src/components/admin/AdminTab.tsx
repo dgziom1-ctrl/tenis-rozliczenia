@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useId } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap, Timer } from 'lucide-react';
 import { addSession } from '@/lib/firebase';
 import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, RACKET_PRICE, SQUASH_MAX_COURT_RACKETS, OVERTIME_DEFAULT_COST, isCourtSport } from '@/constants';
@@ -47,6 +47,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     overtimePlayers: string[]; overtimeCost: number; overtimePerPerson: number;
   } | null>(null);
   const [costTouched,       setCostTouched]       = useState(false);
+
+  const totalCostId      = useId();
+  const totalCostErrorId = useId();
+  const overtimeCostId   = useId();
+  const racketPriceId    = useId();
 
   const isSquash = isCourtSport(sport);
   const activeCosts = isSquash ? SQUASH_QUICK_COSTS : QUICK_COSTS;
@@ -174,7 +179,9 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
   return (
     <>
-      <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} />
+      {/* Montowany dopiero z danymi — inaczej pułapka fokusu i autofokus
+          uruchamiałyby się na pustym, jeszcze nieistniejącym oknie. */}
+      {savedSummary && <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} />}
 
       <div style={{ width: '100%', maxWidth: 680, margin: '0 auto', animation: 'slide-in-up 0.3s ease-out', display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)', padding: '20px 20px' }}>
@@ -205,9 +212,9 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             {/* Date */}
             <div>
               <FieldLabel>Data gry</FieldLabel>
-              <CyberDateInput value={datePlayed} onChange={setDatePlayed} />
+              <CyberDateInput label="Data gry" value={datePlayed} onChange={setDatePlayed} />
               {isDuplicateDate && (
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: '#f59e0b', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <p role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: '#f59e0b', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                   ⚠ SESJA Z TĄ DATĄ JUŻ ISTNIEJE
                 </p>
               )}
@@ -215,7 +222,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Cost */}
             <div>
-              <FieldLabel>{isSquash ? 'Koszt kortów (zł)' : 'Koszt całkowity (zł)'}</FieldLabel>
+              <FieldLabel htmlFor={totalCostId}>{isSquash ? 'Koszt kortów (zł)' : 'Koszt całkowity (zł)'}</FieldLabel>
               {/* Quick-cost buttons */}
               <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
                 {activeCosts.map(cost => {
@@ -239,15 +246,17 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                   );
                 })}
               </div>
-              <input type="text" inputMode="decimal" value={totalCost} onChange={e => setTotalCost(e.target.value)}
+              <input id={totalCostId} type="text" inputMode="decimal" value={totalCost} onChange={e => setTotalCost(e.target.value)}
                 onBlur={() => setCostTouched(true)}
                 placeholder="lub wpisz ręcznie..."
+                aria-invalid={costTouched && !isCostValid}
+                aria-describedby={costTouched && !isCostValid ? totalCostErrorId : undefined}
                 className="cyber-input"
                 style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
                 required
               />
               {costTouched && !isCostValid && (
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 8 }}>
+                <p id={totalCostErrorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 8 }}>
                   ⚠ {totalCostError}
                 </p>
               )}
@@ -301,10 +310,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
                 {/* Koszt dogrywki */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
+                  <label htmlFor={overtimeCostId} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
                     Koszt dogrywki:
-                  </span>
+                  </label>
                   <input
+                    id={overtimeCostId}
                     type="text"
                     inputMode="decimal"
                     value={overtimeCost}
@@ -363,10 +373,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
                 {/* Price per racket */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
+                  <label htmlFor={racketPriceId} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
                     Cena / szt.:
-                  </span>
+                  </label>
                   <input
+                    id={racketPriceId}
                     type="number"
                     min="0"
                     step="0.5"

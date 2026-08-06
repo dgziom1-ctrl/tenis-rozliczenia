@@ -62,8 +62,9 @@ export default function PlayerProfileCard({ player, index, onDelete, isOrganizer
           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.5)'; e.currentTarget.style.color = 'var(--co-rose)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = 'var(--co-dim)'; }}
           title="Usuń gracza"
+          aria-label={`Usuń gracza ${player.name}`}
         >
-          <Trash2 size={14} />
+          <Trash2 size={14} aria-hidden="true" />
         </button>
       ) : (
         <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.12em', color: 'var(--co-dim)', padding: '4px 8px', border: '1px solid var(--co-border)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>

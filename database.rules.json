@@ -5,33 +5,45 @@
 
     "appData": {
       ".read": true,
-      ".write": true,
+      ".write": "newData.exists()",
 
       "players": {
+        ".validate": "newData.hasChildren()",
         "$index": {
           ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
         }
       },
 
       "deletedPlayers": {
+        ".validate": "newData.hasChildren()",
         "$index": {
           ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
         }
       },
 
       "defaultMultiPlayers": {
+        ".validate": "newData.hasChildren()",
         "$index": {
           ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
         }
       },
 
+      "playerJoinDate": {
+        ".validate": "newData.hasChildren()",
+        "$playerName": {
+          ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+        }
+      },
+
       "playerJoinWeek": {
+        ".validate": "newData.hasChildren()",
         "$playerName": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
         }
       },
 
       "weeks": {
+        ".validate": "newData.hasChildren()",
         "$index": {
           ".validate": "newData.hasChildren(['id', 'date', 'cost', 'present'])",
 
@@ -48,12 +60,15 @@
             "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
           },
           "multiPlayers": {
+            ".validate": "newData.hasChildren()",
             "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
           },
           "ownRacketPlayers": {
+            ".validate": "newData.hasChildren()",
             "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
           },
           "overtimePlayers": {
+            ".validate": "newData.hasChildren()",
             "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
           },
 
@@ -65,7 +80,9 @@
       },
 
       "payments": {
+        ".validate": "newData.hasChildren()",
         "$playerName": {
+          ".validate": "newData.hasChildren()",
           "$index": {
             ".validate": "newData.hasChildren(['id', 'amount', 'date'])",
 
@@ -79,13 +96,17 @@
       },
 
       "lastAddedSession": {
-        "id": { ".validate": "newData.isString() && newData.val().length <= 64" },
+        ".validate": "newData.hasChildren()",
+        "id": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64" },
         "ts": { ".validate": "newData.isNumber()" },
         "$other": { ".validate": false }
       },
 
       "paidUntilWeek": {
-        "$playerName": { ".validate": "newData.isNumber() && newData.val() >= 0" }
+        ".validate": "newData.hasChildren()",
+        "$playerName": {
+          ".validate": "newData.isNumber() || (newData.isString() && newData.val().length <= 64)"
+        }
       },
 
       "$other": { ".validate": false }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import type { FormEvent } from 'react';
 import type { PlayerStats, SoundType } from '@/types/ui';
 import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Zap } from 'lucide-react';
@@ -24,17 +24,26 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
   const [pwModal,       setPwModal]       = useState<string | null>(null);
   const [isAddingPlayer, setIsAddingPlayer] = useState(false);
   const [processingPlayer, setProcessingPlayer] = useState<string | null>(null);
+  const newPlayerId = useId();
   const { showSuccess, showError } = useToast();
 
   const currentMulti = localMulti ?? (defaultMultiPlayers || []);
 
   const toggleDefaultMulti = async (name: string) => {
-    const next = currentMulti.includes(name) ? currentMulti.filter(p => p !== name) : [...currentMulti, name];
+    const previous = currentMulti;
+    const next = previous.includes(name) ? previous.filter(p => p !== name) : [...previous, name];
     setLocalMulti(next);
     setSavingMulti(true);
-    const result = await saveDefaultMulti(next);
-    setSavingMulti(false);
-    if (!result.success) { showError('Nie udało się zapisać'); setLocalMulti(currentMulti); }
+    try {
+      const result = await saveDefaultMulti(next);
+      if (!result.success) { showError(result.error || 'Nie udało się zapisać'); setLocalMulti(previous); }
+    } catch {
+      // Bez tego wyjątek zostawiał `savingMulti` na true i blokował całą listę.
+      showError('Nie udało się zapisać');
+      setLocalMulti(previous);
+    } finally {
+      setSavingMulti(false);
+    }
   };
 
   const handleAddPlayer = async (e: FormEvent<HTMLFormElement>) => {
@@ -96,7 +105,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
   return (
     <>
       {pwModal && (
-        <PasswordModal action={`Usuń gracza: ${pwModal}`} onConfirm={() => handleSoftDelete(pwModal)} onCancel={() => setPwModal(null)} playSound={playSound} />
+        <PasswordModal action={`Usuń gracza: ${pwModal}`} onConfirm={() => void handleSoftDelete(pwModal)} onCancel={() => setPwModal(null)} playSound={playSound} />
       )}
 
       <div className="cyber-box" style={{
@@ -126,7 +135,8 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         <div style={{ marginBottom: 28 }}>
           <SectionHeader icon={UserPlus} title="Dodaj nowego gracza" />
           <form onSubmit={handleAddPlayer} style={{ display: 'flex', gap: 8 }}>
-            <input type="text" value={newPlayerName} onChange={e => setNewPlayerName(e.target.value)}
+            <label htmlFor={newPlayerId} className="sr-only">Imię nowego gracza</label>
+            <input id={newPlayerId} type="text" value={newPlayerName} onChange={e => setNewPlayerName(e.target.value)}
               placeholder="Imię gracza..."
               className="cyber-input"
               style={{ flex: 1, padding: '10px 14px', fontSize: '0.85rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
@@ -180,7 +190,8 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
               {players.map(p => {
                 const active = currentMulti.includes(p.name);
                 return (
-                  <button key={p.name} onClick={() => toggleDefaultMulti(p.name)} disabled={savingMulti}
+                  <button key={p.name} onClick={() => void toggleDefaultMulti(p.name)} disabled={savingMulti}
+                    aria-pressed={active}
                     style={{
                       padding: '10px 14px', cursor: 'pointer', transition: 'all 0.15s',
                       display: 'flex', alignItems: 'center', gap: 8,
@@ -219,16 +230,18 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                       </p>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-text)', marginBottom: 12 }}>{name}</p>
                       <div style={{ display: 'flex', gap: 8 }}>
-                        <button onClick={() => handlePermanentDelete(name)} style={{
-                          flex: 1, padding: '8px', background: 'var(--co-rose)', color: '#000', border: 'none', cursor: 'pointer',
+                        {/* `disabled`, nie samo pointerEvents — inaczej Enter na
+                            zafokusowanym przycisku i tak wysyłał drugie żądanie. */}
+                        <button onClick={() => void handlePermanentDelete(name)} disabled={processingPlayer === name} style={{
+                          flex: 1, padding: '8px', background: 'var(--co-rose)', color: '#000', border: 'none',
+                          cursor: processingPlayer === name ? 'not-allowed' : 'pointer',
                           fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', fontWeight: 700,
                           clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                           opacity: processingPlayer === name ? 0.65 : 1,
-                          pointerEvents: processingPlayer === name ? 'none' : 'auto',
                         }}>
                           {processingPlayer === name ? <InlineSpinner size="sm" /> : 'POTWIERDŹ'}
                         </button>
-                        <button onClick={() => setConfirmDelete(null)} className="cyber-button-outline" style={{ flex: 1, padding: '8px' }}>
+                        <button onClick={() => setConfirmDelete(null)} disabled={processingPlayer === name} className="cyber-button-outline" style={{ flex: 1, padding: '8px' }}>
                           ANULUJ
                         </button>
                       </div>
@@ -243,17 +256,17 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                         <Cpu size={13} style={{ opacity: 0.3 }} /> {name}
                       </span>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => handleRestore(name)} style={{
-                          padding: '6px 8px', background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
+                        <button onClick={() => void handleRestore(name)} disabled={processingPlayer === name} style={{
+                          padding: '6px 8px', background: 'transparent', border: '1px solid var(--co-border)',
+                          cursor: processingPlayer === name ? 'not-allowed' : 'pointer',
                           color: 'var(--co-close-btn)', transition: 'all 0.15s',
                           clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                           opacity: processingPlayer === name ? 0.65 : 1,
-                          pointerEvents: processingPlayer === name ? 'none' : 'auto',
                         }}
                           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,229,255,0.4)'; e.currentTarget.style.color = 'var(--co-green)'; }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = ''; }}
-                          title="Przywróć">
-                          <RotateCcw size={13} />
+                          title="Przywróć" aria-label={`Przywróć gracza ${name}`}>
+                          <RotateCcw size={13} aria-hidden="true" />
                         </button>
                         <button onClick={() => setConfirmDelete(name)} style={{
                           padding: '6px 8px', background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
@@ -262,8 +275,8 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                         }}
                           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.4)'; e.currentTarget.style.color = 'var(--co-rose)'; }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = ''; }}
-                          title="Usuń na zawsze">
-                          <Trash2 size={13} />
+                          title="Usuń na zawsze" aria-label={`Usuń gracza ${name} na zawsze`}>
+                          <Trash2 size={13} aria-hidden="true" />
                         </button>
                       </div>
                     </div>

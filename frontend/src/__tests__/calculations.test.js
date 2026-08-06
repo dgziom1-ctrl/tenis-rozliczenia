@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { roundToTwoDecimals } from '../utils/money';
-import { calculateDebt, calculateDebtBreakdown } from '../utils/debt';
+import { calculateDebt, buildDebtDisplayData } from '../utils/debt';
 import { calculatePlayerStats, assignRankingPlaces } from '../utils/rankings';
 import { groupSessionsByMonth, groupHistoryByMonth } from '../utils/sessions';
-import { getPlayerBadge } from '../utils/achievements';
 
 // ─── roundToTwoDecimals ────────────────────────────────────────────────────────
 
@@ -59,35 +58,38 @@ describe('calculateDebt', () => {
   });
 });
 
-// ─── calculateDebtBreakdown ────────────────────────────────────────────────────
+// ─── buildDebtDisplayData ─────────────────────────────────────────────────────
 
-describe('calculateDebtBreakdown', () => {
+describe('buildDebtDisplayData', () => {
   const history = [
     { id: 'w3', datePlayed: '2025-01-20', sport: 'pingpong', totalCost: 60, costPerPerson: 30, presentPlayers: ['Alice', 'Bob'], multisportPlayers: [] },
     { id: 'w2', datePlayed: '2025-01-13', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'],        multisportPlayers: [] },
     { id: 'w1', datePlayed: '2025-01-06', sport: 'pingpong', totalCost: 30, costPerPerson: 15, presentPlayers: ['Alice', 'Bob'], multisportPlayers: [] },
   ];
+  const alice = { name: 'Alice', attendanceCount: 3, currentDebt: 65, eligibleWeeks: 3, joinDate: null };
 
-  it('returns empty array when debt is 0', () => {
-    expect(calculateDebtBreakdown('Alice', 0, history)).toEqual([]);
+  it('wypisuje sesje od najstarszej', () => {
+    const data = buildDebtDisplayData(alice, history, {});
+    expect(data.sessions.map(s => s.sessionId)).toEqual(['w1', 'w2', 'w3']);
   });
 
-  it('returns empty array when history is empty', () => {
-    expect(calculateDebtBreakdown('Alice', 50, [])).toEqual([]);
+  it('pomija sesje, w których gracza nie było', () => {
+    const carol = { name: 'Carol', attendanceCount: 0, currentDebt: 0, eligibleWeeks: 3, joinDate: null };
+    expect(buildDebtDisplayData(carol, history, {}).sessions).toHaveLength(0);
   });
 
-  it('builds breakdown oldest-first (w1→w2→w3)', () => {
-    const breakdown = calculateDebtBreakdown('Alice', 50, history);
-    // chronological: w1(15)+w2(20)+w3(30)=65 — stops once >= 50
-    expect(breakdown[0].sessionId).toBe('w1');
-    expect(breakdown[1].sessionId).toBe('w2');
-    expect(breakdown[2].sessionId).toBe('w3');
+  it('saldo to suma sesji minus suma wpłat', () => {
+    const payments = { Alice: [{ id: 'p1', amount: 25, date: '2025-01-21' }] };
+    const data = buildDebtDisplayData(alice, history, payments);
+    expect(data.totalSessions).toBe(65);
+    expect(data.totalPaid).toBe(25);
+    expect(data.balance).toBe(40);
   });
 
-  it('skips sessions where player was not present', () => {
-    // Carol is not in any session
-    const breakdown = calculateDebtBreakdown('Carol', 30, history);
-    expect(breakdown).toHaveLength(0);
+  it('radzi sobie z brakiem wpłat gracza', () => {
+    const data = buildDebtDisplayData(alice, history, {});
+    expect(data.payments).toEqual([]);
+    expect(data.totalPaid).toBe(0);
   });
 });
 
@@ -210,42 +212,3 @@ describe('groupHistoryByMonth', () => {
   });
 });
 
-// ─── getPlayerBadge ───────────────────────────────────────────────────────────
-
-describe('getPlayerBadge', () => {
-  const base = [
-    { name: 'A', currentStreak: 5, multisportCount: 2, attendanceCount: 20 },
-    { name: 'B', currentStreak: 2, multisportCount: 5, attendanceCount: 15 },
-    { name: 'C', currentStreak: 1, multisportCount: 1, attendanceCount: 5  },
-  ];
-
-  it('awards streak title to unique leader with streak >= 2', () => {
-    const title = getPlayerBadge(base[0], base);
-    expect(title?.icon).toBe('🔥');
-  });
-
-  it('awards Multi King to unique multisport leader', () => {
-    const title = getPlayerBadge(base[1], base);
-    expect(title?.label).toBe('Multi King');
-  });
-
-  it('awards attendance king', () => {
-    const title = getPlayerBadge(base[0], base);
-    // A has highest streak → streak takes priority
-    expect(title).not.toBeNull();
-  });
-
-  it('returns null when allPlayers is empty', () => {
-    expect(getPlayerBadge(base[0], [])).toBeNull();
-  });
-
-  it('no title when streak is tied', () => {
-    const tied = [
-      { name: 'A', currentStreak: 5, multisportCount: 1, attendanceCount: 10 },
-      { name: 'B', currentStreak: 5, multisportCount: 1, attendanceCount: 10 },
-    ];
-    // Neither A nor B is unique streak leader → no streak title
-    const title = getPlayerBadge(tied[0], tied);
-    expect(title?.icon).not.toBe('🔥');
-  });
-});

@@ -24,13 +24,25 @@ function isOffline(): boolean {
   return typeof navigator !== 'undefined' && navigator.onLine === false;
 }
 
+/**
+ * Usuwa z zapisu `paidUntilWeek` — kursor „rozliczony do sesji X" z dawnej
+ * wersji apki, który zerował koszt wcześniejszych sesji obok księgi wpłat.
+ * Apka już go nie czyta, ale mutacje przepisują cały węzeł `appData`, więc bez
+ * tego stary wpis przeżywałby każdy zapis i zostawał w bazie na zawsze.
+ * Transakcja podmienia całą wartość węzła, więc pominięcie klucza go kasuje.
+ */
+function withoutLegacyFields(next: RawAppData): RawAppData {
+  const { paidUntilWeek: _legacy, ...rest } = next as RawAppData & { paidUntilWeek?: unknown };
+  return rest as RawAppData;
+}
+
 export async function withTransaction(
   fn: (current: RawAppData | null) => RawAppData,
   fallbackErrorMsg: string,
 ): Promise<TransactionResult> {
   try {
     await Promise.race([
-      runTransaction(dataRef, fn),
+      runTransaction(dataRef, (current: RawAppData | null) => withoutLegacyFields(fn(current))),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error('__WRITE_TIMEOUT__')), WRITE_TIMEOUT_MS),
       ),

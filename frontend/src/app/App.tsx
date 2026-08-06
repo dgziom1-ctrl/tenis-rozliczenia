@@ -8,7 +8,7 @@ import { routes } from './routes';
 
 function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry?: () => void }) {
   return (
-    <div style={{
+    <div role="status" aria-busy="true" aria-label="Ładowanie danych" style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'var(--co-void)', flexDirection: 'column', gap: 28,
       fontFamily: 'var(--font-mono)',
@@ -25,7 +25,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'rgba(0,229,255,0.06)',
           boxShadow: '0 0 30px rgba(0,229,255,0.35), inset 0 0 20px rgba(0,229,255,0.05)',
-          animation: 'neon-orange 1.5s ease-in-out infinite',
+          animation: 'neon-cyan 1.5s ease-in-out infinite',
           position: 'relative', overflow: 'hidden',
         }}>
           <span style={{ fontSize: '1.9rem', position: 'relative', zIndex: 1 }}>🏓</span>
@@ -95,7 +95,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
 
 function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
   return (
-    <div style={{
+    <div role="alert" style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'var(--co-void)', padding: 24, flexDirection: 'column', gap: 20,
     }}>
@@ -109,7 +109,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
         clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px))',
         boxShadow: '0 0 40px rgba(200,0,30,0.18), inset 0 0 30px rgba(200,0,30,0.04)',
         position: 'relative', overflow: 'hidden',
-        animation: 'neon-yellow 2s ease-in-out infinite',
+        animation: 'neon-rose 2s ease-in-out infinite',
       }}>
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: '2.8rem', marginBottom: 14, filter: 'drop-shadow(0 0 8px rgba(200,0,30,0.5))' }}>☠</div>

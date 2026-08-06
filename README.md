@@ -117,8 +117,15 @@ npm test             # unit tests (Vitest)
 npm run test:watch   # tests in watch mode
 npm run typecheck    # TypeScript strict check (no emit)
 npm run lint         # ESLint
-npm run verify       # typecheck + lint + tests — run this before pushing
+npm run lint:css     # fails on unused classes / @keyframes in src/index.css
+npm run lint:orphans # fails on modules under src/ that nothing imports
+npm run verify       # everything above + tests — run this before pushing
 ```
+
+`lint:css` and `lint:orphans` cover the two blind spots the compiler has: an unused
+CSS rule and an unimported module both typecheck perfectly. A selector built at
+runtime (like `card-stagger-${n}`) has to be whitelisted in
+`frontend/scripts/find-unused-css.mjs`, otherwise it is reported as dead.
 
 ---
 

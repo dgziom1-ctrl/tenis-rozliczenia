@@ -24,10 +24,20 @@ function toArray(val) {
 }
 
 // ─── Tokeny FCM ───────────────────────────────────────────────────────────────
+/** Token z wpisu bazy — wpisy bywają puste albo w starym formacie (goły string). */
+function readToken(entry) {
+  if (typeof entry === 'string') return entry;
+  if (entry && typeof entry.token === 'string') return entry.token;
+  return '';
+}
+
 async function getAllTokens() {
   const snap = await getDatabase().ref('fcmTokens').get();
   if (!snap.exists()) return [];
-  return Object.values(snap.val() || {}).map(t => t.token).filter(Boolean);
+  // Ta sama przeglądarka potrafi zapisać się pod kilkoma kluczami (np. po
+  // reinstalacji PWA). Bez odsiania duplikatów dostaje tyle powiadomień,
+  // ile ma wpisów w bazie.
+  return [...new Set(Object.values(snap.val() || {}).map(readToken).filter(Boolean))];
 }
 
 const PERMANENT_INVALID_CODES = new Set([
@@ -39,9 +49,11 @@ async function removeDeadTokens(deadTokens) {
   if (!deadTokens.length) return;
   const snap = await getDatabase().ref('fcmTokens').get();
   if (!snap.exists()) return;
+  const dead = new Set(deadTokens);
   const removes = [];
   for (const [key, val] of Object.entries(snap.val() || {})) {
-    if (deadTokens.includes(val.token)) {
+    const token = readToken(val);
+    if (token && dead.has(token)) {
       removes.push(getDatabase().ref(`fcmTokens/${key}`).remove());
     }
   }

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getRank } from '@/constants';
-import { FONT, CLIP } from '../../constants/styles';
+import { FONT } from '../../constants/styles';
 import StreakBadge from './StreakBadge';
 import type { RankedPlayer } from '@/types/ui';
 
@@ -19,23 +18,23 @@ interface PlaceStyle {
   medal: string;
 }
 
+const PLACE_STYLES: Record<number, PlaceStyle> = {
+  1: { border: '#00FFFF', glow: 'rgba(0,255,255,0.5)',   bg: 'rgba(0,255,255,0.04)',   height: 130, label: '#1', medal: '🥇' },
+  2: { border: '#0080FF', glow: 'rgba(0,128,255,0.4)',   bg: 'rgba(0,128,255,0.03)',   height: 90,  label: '#2', medal: '🥈' },
+  3: { border: '#CC00FF', glow: 'rgba(204,0,255,0.35)',  bg: 'rgba(204,0,255,0.025)',  height: 62,  label: '#3', medal: '🥉' },
+};
+
 interface PodiumCardProps {
   podiumEntry: PodiumEntry;
-  totalWeeks: number;
   onSelect: (name: string) => void;
 }
 
 // ─── Podium Card ─────────────────────────────────────────────────
-export default function PodiumCard({ podiumEntry, totalWeeks, onSelect }: PodiumCardProps) {
+export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
   const players = podiumEntry.players;
   const exAequo = players.length > 1;
   const [shimmerKey, setShimmerKey] = useState(0);
 
-  const PLACE_STYLES: Record<number, PlaceStyle> = {
-    1: { border: '#00FFFF', glow: 'rgba(0,255,255,0.5)',   bg: 'rgba(0,255,255,0.04)',   height: 130, label: '#1', medal: '🥇' },
-    2: { border: '#0080FF', glow: 'rgba(0,128,255,0.4)',   bg: 'rgba(0,128,255,0.03)',   height: 90,  label: '#2', medal: '🥈' },
-    3: { border: '#CC00FF', glow: 'rgba(204,0,255,0.35)',  bg: 'rgba(204,0,255,0.025)',  height: 62,  label: '#3', medal: '🥉' },
-  };
   const s = PLACE_STYLES[podiumEntry.place] || PLACE_STYLES[3];
 
   useEffect(() => {
@@ -50,9 +49,7 @@ export default function PodiumCard({ podiumEntry, totalWeeks, onSelect }: Podium
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: 'min(100%, 190px)', minWidth: 0 }}>
-      {players.map(player => {
-        const _rank = getRank(player.attendancePercentage);
-        return (
+      {players.map(player => (
           <div key={player.name} role="button" tabIndex={0} onClick={() => onSelect(player.name)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(player.name); } }} style={{
             width: '100%', padding: '14px 10px', textAlign: 'center', cursor: 'pointer',
             background: s.bg,
@@ -93,13 +90,12 @@ export default function PodiumCard({ podiumEntry, totalWeeks, onSelect }: Podium
                 {player.attendancePercentage}%
               </div>
               <div style={{ ...FONT.monoSmall, marginTop: 3, marginBottom: 6, letterSpacing: '0.1em' }}>
-                {player.attendanceCount}/{totalWeeks} SESJI
+                {player.attendanceCount}/{player.eligibleWeeks} SESJI
               </div>
               {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
             </div>
           </div>
-        );
-      })}
+      ))}
       {exAequo && (
         <div style={{ textAlign: 'center', ...FONT.monoSmall, letterSpacing: '0.2em', marginBottom: 4 }}>
           EX AEQUO ×{players.length}
