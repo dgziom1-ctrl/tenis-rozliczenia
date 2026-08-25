@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useId } from 'react';
 import { CheckCircle2, Copy } from 'lucide-react';
-import { MULTISPORT_DISCOUNT, SPORT_EMOJI, SPORT_LABEL, hasRacketRental } from '@/constants';
+import { SPORT_EMOJI, SPORT_LABEL, hasRacketRental } from '@/constants';
 import { useToast } from '../common/Toast';
 import { formatDate, formatAmountShort } from '@/utils/format';
 import { buildGroupMessage } from '@/utils/message';
+import { getShareGroups } from '@/utils/sessionCost';
 import { copyToClipboard } from '@/utils/clipboard';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import type { Sport } from '@/types/domain';
@@ -11,9 +12,6 @@ import type { Sport } from '@/types/domain';
 interface SessionSummary {
   date: string;
   totalCost: number;
-  presentCount: number;
-  multisportCount: number;
-  perPerson: number;
   sport: Sport;
   presentPlayers: string[];
   multisportPlayers: string[];
@@ -40,12 +38,13 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
   useEffect(() => { overlayRef.current?.focus(); }, []);
   useEffect(() => () => { if (copiedTimer.current) clearTimeout(copiedTimer.current); }, []);
 
-  const { date, totalCost, presentCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers } = summary;
+  const { date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers } = summary;
   const withRackets = hasRacketRental(sport);
   const hasRackets = withRackets && racketCost > 0;
-  const racketShare = hasRackets
-    ? racketCost / Math.max(1, presentPlayers.filter(p => !ownRacketPlayers.includes(p)).length)
-    : 0;
+  const presentCount = presentPlayers.length;
+  // Te same grupy i stawki co w podglądzie oraz w wiadomości na grupę.
+  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers });
+  const headline = groups[0];
 
   const handleCopy = async () => {
     const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers });
@@ -111,7 +110,7 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
         </div>
 
         {/* Per-person */}
-        {presentCount > 0 && (
+        {headline && (
           <div style={{
             padding: '16px', marginBottom: 16, textAlign: 'center',
             background: 'rgba(0,229,255,0.04)',
@@ -122,18 +121,17 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
               PODZIAŁ KOSZTÓW
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
-              {formatAmountShort(perPerson + racketShare)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
+              {formatAmountShort(headline.perPerson)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
             </p>
-            {multisportCount > 0 && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)', marginTop: 4 }}>
-                ⚡ Cena z kartą: {formatAmountShort(Math.max(0, perPerson - MULTISPORT_DISCOUNT) + racketShare)} zł · {multisportCount} os.
+            {groups.slice(1).map(group => (
+              <p key={group.names.join()} style={{
+                fontFamily: 'var(--font-mono)', fontSize: '0.6rem', marginTop: 3,
+                color: group.hasCard ? 'var(--co-green)' : 'var(--co-amber)',
+              }}>
+                {group.hasCard ? '⚡' : SPORT_EMOJI[sport]} {group.names.join(', ')}
+                {group.ownRacket ? ' (własna rakietka)' : ''}: {formatAmountShort(group.perPerson)} zł
               </p>
-            )}
-            {hasRackets && ownRacketPlayers.some(p => presentPlayers.includes(p)) && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)', marginTop: 2 }}>
-                {SPORT_EMOJI[sport]} {ownRacketPlayers.filter(p => presentPlayers.includes(p)).join(', ')}: {formatAmountShort(perPerson)} zł (własna rakietka)
-              </p>
-            )}
+            ))}
             {hasRackets && (
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 2 }}>
                 Kort: {formatAmountShort(totalCost - racketCost)} zł · Rakiety: {formatAmountShort(racketCost)} zł

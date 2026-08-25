@@ -250,13 +250,25 @@ describe('buildUIData — integration', () => {
     expect(r.history[1].id).toBe('w1');
   });
 
-  it('costPerPerson to cena pełna, costPerPersonMulti — ta ze zniżką', () => {
+  it('costPerPerson to stawka bez karty, costPerPersonMulti — ta ze zniżką', () => {
+    const raw = {
+      players: ['Alice', 'Bob', 'Cyryl'],
+      weeks: [{ id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice', 'Bob', 'Cyryl'], multiPlayers: ['Alice'] }],    };
+    const entry = buildUIData(raw).history[0];
+    expect(entry.costPerPerson).toBe(25);      // (60 + 15)/3
+    expect(entry.costPerPersonMulti).toBe(10); // 25 - 15
+  });
+
+  // Obie stawki muszą być kwotami, które ktoś faktycznie płaci. Wcześniej
+  // `costPerPerson` pokazywało odtworzoną cenę pełną — przy komplecie kart
+  // nikt jej nie płacił, a liczba i tak trafiała do historii.
+  it('gdy wszyscy mają kartę, obie stawki to realnie zapłacona kwota', () => {
     const raw = {
       players: ['Alice', 'Bob'],
       weeks: [{ id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice', 'Bob'], multiPlayers: ['Alice', 'Bob'] }],    };
     const entry = buildUIData(raw).history[0];
-    expect(entry.costPerPerson).toBe(45);      // (60 + 2×15)/2
-    expect(entry.costPerPersonMulti).toBe(30); // 45 - 15
+    expect(entry.costPerPerson).toBe(30);
+    expect(entry.costPerPersonMulti).toBe(30);
   });
 
   it('stary koszt dogrywki dolicza się do kwoty sesji', () => {

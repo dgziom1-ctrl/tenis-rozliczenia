@@ -5,7 +5,6 @@ import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, 
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { parseAmount, isValidAmount } from '@/utils/format';
-import { getSessionBaseCost } from '@/utils/sessionCost';
 import type { Sport } from '@/types/domain';
 import type { HistoryEntry, SoundType } from '@/types/ui';
 
@@ -38,8 +37,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const [ownRacketPlayers,  setOwnRacketPlayers]  = useState<string[]>([]);
   const [isSaving,          setIsSaving]          = useState(false);
   const [savedSummary,      setSavedSummary]      = useState<{
-    date: string; totalCost: number; presentCount: number;
-    multisportCount: number; perPerson: number; sport: Sport;
+    date: string; totalCost: number; sport: Sport;
     presentPlayers: string[]; multisportPlayers: string[];
     racketCost: number; ownRacketPlayers: string[];
   } | null>(null);
@@ -104,15 +102,6 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     setIsSaving(true);
     const cost = parsedTotalCost;
     const totalWithRackets = cost + racketCost;
-    // Ten sam podział, którego użyje historia i saldo gracza — inaczej
-    // podsumowanie po zapisie pokazywałoby inną stawkę niż reszta aplikacji.
-    const perPerson = getSessionBaseCost({
-      sport,
-      cost: totalWithRackets,
-      racketCost,
-      present: presentPlayers,
-      multiPlayers: multisportPlayers,
-    });
     try {
       const ownRacketForSession = ownRacketPlayers.filter(p => presentPlayers.includes(p));
       const result = await addSession({
@@ -128,9 +117,6 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
       playSound(SOUND_TYPES.SUCCESS);
       setSavedSummary({
         date: datePlayed, totalCost: totalWithRackets,
-        presentCount: presentPlayers.length,
-        multisportCount: multisportPlayers.length,
-        perPerson,
         sport,
         presentPlayers: [...presentPlayers],
         multisportPlayers: [...multisportPlayers],

@@ -185,8 +185,33 @@ decision (it changes how members onboard), so it is left open rather than guesse
 `firebase.json` sets HSTS, `X-Content-Type-Options`, `Referrer-Policy`, a restrictive
 `Permissions-Policy`, and a Content-Security-Policy that allows only the origins the
 app actually uses (Google Fonts, gstatic for the messaging SDK, and Firebase
-endpoints). Hashed assets are cached immutably for a year; `index.html` and the
-service worker are never cached, so updates land immediately.
+endpoints).
+
+### Why a deploy never strands a browser
+
+Every build gives the JS and CSS new content-hashed names, and Hosting only serves
+the current release's files. A browser holding on to yesterday's `index.html` would
+therefore ask for chunks that no longer exist. Three things prevent that from
+turning into a "clear your cache" support request:
+
+- **The HTML shell is never cached.** The `Cache-Control` default lives on the `**`
+  header rule, not on `/index.html`. Hosting matches header globs against the
+  *original request path, before rewrites*, so a rule keyed to `/index.html` never
+  applies to `/`, `/history`, or any other route — which is exactly how the shell
+  ended up cached for an hour. Only `/assets/**` opts back into the year-long
+  `immutable` cache, and those names change whenever the bytes do.
+- **A missing chunk returns 404, not HTML.** The SPA rewrite is `!/assets/**`
+  rather than `**`. With a plain catch-all, a request for a deleted chunk gets
+  `200 text/html` — and because the header rule keys off the request path, the
+  browser stores that HTML *as* the chunk under `immutable`, poisoning the URL for
+  a year. Excluding the asset directory keeps misses honest.
+- **The app reloads itself if one still slips through.** `utils/staleBuild.ts`
+  recognises the browser-specific "failed to fetch dynamically imported module"
+  errors, clears any leftover Cache Storage, and reloads once — with a cooldown so
+  an unrelated crash can't turn into a reload loop, and an origin check so a
+  blocked Google font doesn't count. It is wired into both the root `ErrorBoundary`
+  and a global listener, the latter covering failures that happen before React
+  mounts and would otherwise leave a blank page.
 
 ---
 
@@ -346,6 +371,11 @@ A card is worth exactly 15 PLN to its holder, whatever the venue charges — so 
 odd court price (41 PLN with two cards → 11 PLN to settle) is split fairly instead
 of landing on whoever happened not to have a card.
 
+When the share is smaller than the discount, the card holder simply pays 0 and the
+unused part of the rebate is spread over everyone else, so the total still matches
+what was paid. The split reports this as `discountCapped`, and the add-session form
+warns about it — it usually means the amount entered is too low for that many cards.
+
 Racket rental (squash, badminton, padel) is carved out of the total first and split
 equally among the players who did **not** bring their own racket, outside the discount.
 
@@ -372,10 +402,13 @@ Rounding each share independently, as the app used to, would give `33.33 × 3 = 
 and quietly drop a grosz on every indivisible session.
 
 `utils/sessionCost.ts` is the only place this logic lives. `debt.ts`, the history
-view, and the Cloud Functions notification text all call into it, so a balance, a card,
-and a push notification can never disagree. (The Cloud Functions copy is a separate
-CommonJS file for packaging reasons; `functionsParity.test.js` fails the build if the
-two ever diverge.)
+view, the live preview, the group-chat message, and the Cloud Functions notification
+text all call into it — via `getSessionShares` for balances and `getShareGroups` for
+the per-group rates on screen — so a balance, a card, and a push notification can
+never disagree. Nothing outside that module re-derives a rate from the formula above:
+doing so used to make the preview quote a price nobody would actually pay. (The Cloud
+Functions copy is a separate CommonJS file for packaging reasons;
+`functionsParity.test.js` fails the build if the two ever diverge.)
 
 ### Writes are idempotent
 

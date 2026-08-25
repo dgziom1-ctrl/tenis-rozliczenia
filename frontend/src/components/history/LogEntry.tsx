@@ -1,6 +1,8 @@
 import { Pencil, Trash2 } from 'lucide-react';
-import { formatDate, formatAmount } from '@/utils/format';
+import { formatDate, formatAmount, formatAmountShort } from '@/utils/format';
 import { SPORT_EMOJI, SPORT_SHORT, hasRacketRental } from '@/constants';
+import { getShareGroups } from '@/utils/sessionCost';
+import ShareBreakdown from '../common/ShareBreakdown';
 import type { HistoryEntry } from '../../types/ui';
 
 interface LogEntryProps {
@@ -9,15 +11,30 @@ interface LogEntryProps {
   onDelete: (id: string) => void;
 }
 
+const labelStyle = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '0.8rem',
+  letterSpacing: '0.12em',
+  color: 'var(--co-dim)',
+  marginBottom: 4,
+  textTransform: 'uppercase',
+} as const;
+
 export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
   const isCourt = hasRacketRental(row.sport);
+  const sportEmoji = SPORT_EMOJI[row.sport] ?? '🏓';
+  const racketCost = row.racketCost ?? 0;
+  const ownRacketPlayers = row.ownRacketPlayers ?? [];
+  // Te same stawki, które widać w podglądzie przy dodawaniu i na grupie.
+  const groups = getShareGroups(row);
+
   return (
     <div className="scan-hover log-entry" style={{
       background: 'var(--co-dark)', border: '1px solid var(--co-border)',
       clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
       padding: '12px 14px', marginBottom: 4,
     }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {/* Top row: date + actions */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
@@ -36,7 +53,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               color: isCourt ? 'var(--co-green)' : 'var(--co-cyan)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
             }}>
-              {`${SPORT_EMOJI[row.sport] ?? '🏓'} ${SPORT_SHORT[row.sport] ?? 'PING'}`}
+              {`${sportEmoji} ${SPORT_SHORT[row.sport] ?? 'PING'}`}
             </span>
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
@@ -63,37 +80,46 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
           </div>
         </div>
 
-        {/* Data row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, paddingLeft: 16 }}>
+        {/* Koszt + podział na stawki */}
+        <div className="log-entry-grid" style={{ paddingLeft: 16 }}>
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 2, textTransform: 'uppercase' }}>KOSZT</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--co-cyan)', textShadow: '0 0 8px rgba(0,229,255,0.3)' }}>
+            <p style={labelStyle}>Koszt</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--co-cyan)', textShadow: '0 0 8px rgba(0,229,255,0.3)' }}>
               {formatAmount(row.totalCost)}
             </p>
-          </div>
-          <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 2, textTransform: 'uppercase' }}>NA OSOBĘ</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--co-cyan)' }}>
-              {formatAmount(row.costPerPerson)}
-            </p>
-            {row.multisportPlayers.length > 0 && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-green)', opacity: 0.7 }}>
-                ⚡ {formatAmount(row.costPerPersonMulti)}
+            {racketCost > 0 && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-dim)', marginTop: 2 }}>
+                kort {formatAmountShort(row.totalCost - racketCost)} · rakiety {formatAmountShort(racketCost)}
               </p>
             )}
           </div>
+
           <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 2, textTransform: 'uppercase' }}>
-              OBECNI ({row.presentPlayers.length})
-            </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {row.presentPlayers.join(', ')}
-            </p>
-            {row.multisportPlayers.length > 0 && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-green)', opacity: 0.7 }}>
-                ⚡ {row.multisportPlayers.join(', ')}
-              </p>
-            )}
+            <p style={labelStyle}>Na osobę</p>
+            <ShareBreakdown groups={groups} sportEmoji={sportEmoji} size="sm" />
+          </div>
+        </div>
+
+        {/* Obecni — karta i własna rakietka oznaczone przy nazwisku */}
+        <div style={{ paddingLeft: 16 }}>
+          <p style={labelStyle}>Obecni ({row.presentPlayers.length})</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {row.presentPlayers.map(name => {
+              const hasCard = row.multisportPlayers.includes(name);
+              const hasOwnRacket = racketCost > 0 && ownRacketPlayers.includes(name);
+              return (
+                <span key={name} style={{
+                  fontFamily: 'var(--font-mono)', fontSize: '0.62rem',
+                  padding: '2px 7px',
+                  color: hasCard ? 'var(--co-green)' : 'var(--co-text)',
+                  background: hasCard ? 'rgba(0,255,136,0.06)' : 'transparent',
+                  border: `1px solid ${hasCard ? 'rgba(0,255,136,0.25)' : 'var(--co-border)'}`,
+                  clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+                }}>
+                  {hasCard && '⚡'}{hasOwnRacket && sportEmoji}{(hasCard || hasOwnRacket) && ' '}{name}
+                </span>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -543,6 +543,20 @@ select option { background: #090F18; color: var(--co-text); }
   border-color: rgba(0,229,255,0.2) !important;
 }
 
+/* Koszt obok stawek na osobę; na wąskich ekranach jedno pod drugim, żeby
+   kwoty nigdy nie łamały się w połowie. */
+.log-entry-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+@media (min-width: 480px) {
+  .log-entry-grid {
+    grid-template-columns: minmax(110px, 0.75fr) minmax(0, 1.25fr);
+    gap: 18px;
+  }
+}
+
 /* ══ ICON BUTTON HOVER ══ */
 .icon-btn {
   transition: border-color 0.15s, color 0.15s;

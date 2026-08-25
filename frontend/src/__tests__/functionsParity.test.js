@@ -93,6 +93,13 @@ const SESSIONS = [
     label: 'squash, wszyscy z kartą — zniżka nie może zjeść całej kwoty',
     session: { sport: 'squash', cost: 10, present: ['A', 'B', 'C'], multiPlayers: ['A', 'B', 'C'] },
   },
+  {
+    label: 'ping-pong, zniżki za karty przewyższają rachunek',
+    session: {
+      sport: 'pingpong', cost: 1,
+      present: ['A', 'B', 'C', 'D', 'E', 'F'], multiPlayers: ['A', 'B', 'F'],
+    },
+  },
 ];
 
 describe('Cloud Functions liczą koszty identycznie jak aplikacja', () => {

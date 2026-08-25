@@ -1,4 +1,6 @@
-import { SPORT, MULTISPORT_DISCOUNT, SPORT_EMOJI, SPORT_ACCUSATIVE } from '@/constants';
+import { SPORT, SPORT_EMOJI, SPORT_ACCUSATIVE } from '@/constants';
+import { getShareGroups } from './sessionCost';
+import type { ShareGroup } from './sessionCost';
 import { formatDate, formatAmountShort } from './format';
 
 interface MessageParams {
@@ -11,18 +13,22 @@ interface MessageParams {
   ownRacketPlayers?: string[];
 }
 
-export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [] }: MessageParams): string {
-  const courtCost = totalCost - racketCost;
-  const multi = multisportPlayers.filter(p => presentPlayers.includes(p));
-  const hypothetical = courtCost + multi.length * MULTISPORT_DISCOUNT;
-  const base = presentPlayers.length > 0 ? hypothetical / presentPlayers.length : 0;
-  const discounted = Math.max(0, base - MULTISPORT_DISCOUNT);
+function describe(group: ShareGroup, sportEmoji: string): string {
+  if (group.ownRacket) {
+    return group.hasCard
+      ? `⚡${sportEmoji} ${group.names.join(', ')} (karta + własna rakietka)`
+      : `${sportEmoji} ${group.names.join(', ')} (własna rakietka)`;
+  }
+  return group.hasCard
+    ? `⚡ Cena z kartą (${group.names.join(', ')})`
+    : '💳 Bez karty';
+}
 
-  const ownRacketPresent = ownRacketPlayers.filter(p => presentPlayers.includes(p));
-  const rentingPlayers = presentPlayers.filter(p => !ownRacketPresent.includes(p));
-  const racketShare = racketCost > 0 && rentingPlayers.length > 0
-    ? racketCost / rentingPlayers.length
-    : 0;
+export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [] }: MessageParams): string {
+  // Stawki bierzemy z silnika rozliczeń, więc to, co ludzie przeczytają na
+  // grupie, zgadza się co do grosza z saldami w aplikacji.
+  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers });
+  const courtCost = totalCost - racketCost;
 
   const sportEmoji = SPORT_EMOJI[sport] ?? SPORT_EMOJI[SPORT.PINGPONG];
   const sportWord = SPORT_ACCUSATIVE[sport] ?? SPORT_ACCUSATIVE[SPORT.PINGPONG];
@@ -32,12 +38,8 @@ export function buildGroupMessage({ date, totalCost, presentPlayers, multisportP
   if (racketCost > 0) msg += ` + rakiety: ${formatAmountShort(racketCost)} zł`;
   msg += '\n';
   msg += `👥 Obecni (${presentPlayers.length}): ${presentPlayers.join(', ')}\n`;
-  msg += `💳 Bez karty: ${formatAmountShort(base + racketShare)} zł/os.\n`;
-  if (multi.length > 0) {
-    msg += `⚡ Cena z kartą (${multi.join(', ')}): ${formatAmountShort(discounted + racketShare)} zł/os.\n`;
-  }
-  if (racketCost > 0 && ownRacketPresent.length > 0) {
-    msg += `${sportEmoji} ${ownRacketPresent.join(', ')} (własna rakietka): ${formatAmountShort(base)} zł/os.\n`;
+  for (const group of groups) {
+    msg += `${describe(group, sportEmoji)}: ${formatAmountShort(group.perPerson)} zł/os.\n`;
   }
   return msg.trim();
 }

@@ -40,6 +40,9 @@ import App from '../app/App';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import Navigation from '../components/layout/Navigation';
 import UndoBar from '../components/common/UndoBar';
+import LogEntry from '../components/history/LogEntry';
+import LiveCostPreview from '../components/admin/LiveCostPreview';
+import { getShareGroups } from '../utils/sessionCost';
 import { TABS } from '../constants';
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -216,5 +219,90 @@ describe('UndoBar — wyświetlanie i interakcja', () => {
   it('pokazuje licznik sekund', () => {
     render(<UndoBar {...defaultProps} secondsLeft={4} />);
     expect(screen.getByText(/4/)).toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// Stawki na ekranie — muszą się zgadzać z podziałem, który trafia do sald
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('LogEntry — koszt i stawki w historii', () => {
+  // Kort 100 zł + rakiety 16 zł. Ada ma kartę i własną rakietkę, Bartek kartę
+  // i wypożycza, Celina z Dawidem płacą pełną stawkę z rakietką.
+  const row = {
+    id: 'sesja-1234',
+    datePlayed: '2026-08-25',
+    sport: 'badminton',
+    totalCost: 116,
+    racketCost: 16,
+    costPerPerson: 37.83,
+    costPerPersonMulti: 20.17,
+    presentPlayers: ['Ada', 'Bartek', 'Celina', 'Dawid'],
+    multisportPlayers: ['Ada', 'Bartek'],
+    ownRacketPlayers: ['Ada'],
+  };
+
+  const renderRow = () => render(<LogEntry row={row} onEdit={vi.fn()} onDelete={vi.fn()} />);
+
+  it('pokazuje koszt całkowity razem z rozbiciem na kort i rakiety', () => {
+    renderRow();
+    expect(screen.getByText('116,00 zł')).toBeInTheDocument();
+    expect(screen.getByText('kort 100,00 · rakiety 16,00')).toBeInTheDocument();
+  });
+
+  it('pokazuje stawkę i liczbę osób w każdej grupie', () => {
+    renderRow();
+    expect(screen.getByText('bez karty')).toBeInTheDocument();
+    expect(screen.getByText('37,83 zł')).toBeInTheDocument();
+    expect(screen.getByText('⚡ z kartą')).toBeInTheDocument();
+    expect(screen.getByText('22,84 zł')).toBeInTheDocument();
+    expect(screen.getByText('17,50 zł')).toBeInTheDocument();
+    expect(screen.getByText('· 2 os.')).toBeInTheDocument();
+  });
+
+  // 2 × 37,83 + 22,84 + 17,50 = 116,00 — dokładnie tyle, ile kosztowała sesja.
+  it('stawki razy liczba osób dają koszt całkowity', () => {
+    const groups = getShareGroups(row);
+    const collected = groups.reduce((acc, g) => acc + g.perPerson * g.names.length, 0);
+    expect(collected).toBeCloseTo(row.totalCost, 2);
+  });
+
+  it('oznacza posiadaczy karty przy nazwisku', () => {
+    renderRow();
+    expect(screen.getByText('⚡🏸 Ada')).toBeInTheDocument();
+    expect(screen.getByText('⚡ Bartek')).toBeInTheDocument();
+    expect(screen.getByText('Celina')).toBeInTheDocument();
+  });
+});
+
+describe('LiveCostPreview — podgląd nie może obiecać innej kwoty niż zapłacona', () => {
+  // Regresja: przy zniżkach większych niż rachunek podgląd pokazywał 7,67 zł
+  // od osoby, czyli 23 zł do zebrania z 1 zł zostawionego w recepcji.
+  const props = {
+    totalCost: '1',
+    presentPlayers: ['Rafał', 'Kamil', 'Przemek', 'Mariusz', 'Arek', 'Krzysiek'],
+    multisportPlayers: ['Rafał', 'Kamil', 'Krzysiek'],
+    sport: 'pingpong',
+  };
+
+  it('pokazuje stawki, które sumują się do wpisanej kwoty', () => {
+    render(<LiveCostPreview {...props} />);
+    expect(screen.getByText('0,33 zł')).toBeInTheDocument();
+    expect(screen.getByText('0,00 zł')).toBeInTheDocument();
+    expect(screen.queryByText('7,67 zł')).not.toBeInTheDocument();
+  });
+
+  it('ostrzega, że karty nie weszły w pełnej wysokości', () => {
+    render(<LiveCostPreview {...props} />);
+    expect(screen.getByRole('status')).toHaveTextContent(/Karty nie zbiły ceny o pełne 15 zł/);
+  });
+
+  // Kort 156 zł, trzy karty zbijają go do 111 zł: 156/6 = 26 zł pełnej stawki,
+  // 11 zł dla posiadaczy kart. 3 × 26 + 3 × 11 = 111.
+  it('przy normalnej kwocie nie ostrzega i daje pełne 15 zł różnicy', () => {
+    render(<LiveCostPreview {...props} totalCost="111" />);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByText('26,00 zł')).toBeInTheDocument();
+    expect(screen.getByText('11,00 zł')).toBeInTheDocument();
   });
 });

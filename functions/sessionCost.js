@@ -134,7 +134,7 @@ function parseSession(session) {
  */
 function getSessionShares(session) {
   if (!session || typeof session !== 'object') {
-    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, unallocated: 0 };
+    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, unallocated: 0 };
   }
 
   const { present, multi, totalGrosze, racketGrosze, ownRacket } = parseSession(session);
@@ -144,12 +144,9 @@ function getSessionShares(session) {
   let unallocatedGrosze = 0;
 
   const discount = toGrosze(MULTISPORT_DISCOUNT);
-  let baseCourtGrosze = 0;
-  let baseCourtMultiGrosze = 0;
-
   const courtGrosze = totalGrosze - racketGrosze;
   const renters = present.filter(p => !ownRacket.includes(p));
-  const racketPerPerson = renters.length > 0 ? racketGrosze / renters.length : 0;
+  let discountCapped = false;
 
   if (present.length === 0) {
     unallocatedGrosze += courtGrosze;
@@ -157,11 +154,11 @@ function getSessionShares(session) {
     const multiPresentCount = multi.filter(p => present.includes(p)).length;
     const base = (courtGrosze + multiPresentCount * discount) / present.length;
     const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
+    discountCapped = multiPresentCount > 0 && base < discount;
+    // Gdy zniżka jest większa niż udział, `allocateNonNegative` zeruje takiego
+    // gracza i rozdziela resztę na pozostałych — patrz sessionCost.ts.
     const allocated = allocateNonNegative(targets, courtGrosze);
     present.forEach((p, i) => court.set(p, allocated[i]));
-
-    baseCourtGrosze = Math.round(base + racketPerPerson);
-    baseCourtMultiGrosze = Math.round(Math.max(0, base - discount) + racketPerPerson);
   }
 
   if (renters.length === 0) {
@@ -182,10 +179,21 @@ function getSessionShares(session) {
     };
   }
 
+  // Stawki poglądowe biorą się z gotowego podziału — patrz sessionCost.ts.
+  const shareOf = name => (court.get(name) || 0) + (racket.get(name) || 0);
+  const average = names => names.reduce((sum, n) => sum + shareOf(n), 0) / names.length;
+  const withCard = present.filter(p => multi.includes(p));
+  const withoutCard = present.filter(p => !multi.includes(p));
+
+  const baseCourtGrosze = withoutCard.length > 0
+    ? average(withoutCard)
+    : (withCard.length > 0 ? average(withCard) : 0);
+
   return {
     byPlayer,
-    baseCourt: toZloty(baseCourtGrosze),
-    baseCourtMulti: toZloty(baseCourtMultiGrosze),
+    baseCourt: toZloty(Math.round(baseCourtGrosze)),
+    baseCourtMulti: toZloty(Math.round(withCard.length > 0 ? average(withCard) : baseCourtGrosze)),
+    discountCapped,
     unallocated: toZloty(unallocatedGrosze),
   };
 }

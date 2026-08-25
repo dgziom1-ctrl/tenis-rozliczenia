@@ -33,7 +33,7 @@ vi.mock('firebase/messaging', () => ({
 describe('utils — eksporty modułów obliczeniowych', () => {
   it.each([
     ['../utils/money', ['roundToTwoDecimals', 'allocateExact', 'splitEqually', 'allocateNonNegative']],
-    ['../utils/sessionCost', ['getSessionShares', 'getPlayerSessionCost', 'getSessionBaseCost']],
+    ['../utils/sessionCost', ['getSessionShares', 'getPlayerSessionCost', 'getShareGroups']],
     ['../utils/debt', ['calculateDebt', 'buildDebtDisplayData']],
     ['../utils/rankings', ['calculatePlayerStats', 'assignRankingPlaces', 'computeRankingHistory']],
     ['../utils/sessions', ['groupSessionsByMonth', 'groupHistoryByMonth']],

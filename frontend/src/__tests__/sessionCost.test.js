@@ -1,4 +1,4 @@
-import { getPlayerSessionCost, getSessionBaseCost, getSessionShares } from '../utils/sessionCost';
+import { getPlayerSessionCost, getSessionShares, getShareGroups } from '../utils/sessionCost';
 
 // Kwota sesji to zawsze tyle, ile organizator zapłacił w recepcji — czyli cena
 // kortu POMNIEJSZONA o 15 zł za każdą okazaną kartę Multisport. Rozliczenie
@@ -136,13 +136,77 @@ describe('zaszłość po dogrywce', () => {
   });
 });
 
-describe('getSessionBaseCost', () => {
-  it('zwraca cenę pełną — tę bez zniżki Multisport', () => {
+describe('stawki poglądowe pokrywają się z tym, co gracze faktycznie płacą', () => {
+  it('baseCourt i baseCourtMulti to realne udziały, nie osobny wzór', () => {
     const s = { totalCost: 85, presentPlayers: ['A', 'B', 'C', 'D'], multisportPlayers: ['A'], sport: 'squash' };
-    expect(getSessionBaseCost(s)).toBe(25); // (85 + 15)/4
+    const shares = getSessionShares(s);
+    expect(shares.baseCourt).toBe(getPlayerSessionCost(s, 'B'));
+    expect(shares.baseCourtMulti).toBe(getPlayerSessionCost(s, 'A'));
+    expect(shares.discountCapped).toBe(false);
   });
 
-  it('bez graczy zwraca 0', () => {
-    expect(getSessionBaseCost({ totalCost: 85, presentPlayers: [], multisportPlayers: [] })).toBe(0);
+  it('bez graczy zwraca zera', () => {
+    const shares = getSessionShares({ totalCost: 85, presentPlayers: [], multisportPlayers: [] });
+    expect(shares.baseCourt).toBe(0);
+    expect(shares.baseCourtMulti).toBe(0);
+  });
+
+  it('gdy wszyscy mają kartę, stawka „bez karty" pokazuje realnie płaconą kwotę', () => {
+    const s = { totalCost: 11, presentPlayers: ['A', 'B'], multisportPlayers: ['A', 'B'], sport: 'pingpong' };
+    const shares = getSessionShares(s);
+    expect(shares.baseCourt).toBe(5.5);
+    expect(shares.baseCourtMulti).toBe(5.5);
+  });
+
+  // Regresja: podgląd pokazywał 7,67 zł od trzech osób bez karty (razem 23 zł),
+  // choć w recepcji zostawiono 1 zł. Stawki muszą sumować się do kwoty sesji.
+  it('zniżki większe niż rachunek: stawki nadal sumują się do zapłaconej kwoty', () => {
+    const s = {
+      totalCost: 1, sport: 'pingpong',
+      presentPlayers: ['Rafał', 'Kamil', 'Przemek', 'Mariusz', 'Arek', 'Krzysiek'],
+      multisportPlayers: ['Rafał', 'Kamil', 'Krzysiek'],
+    };
+    const shares = getSessionShares(s);
+
+    expect(shares.discountCapped).toBe(true);
+    expect(shares.baseCourtMulti).toBe(0);
+    expect(shares.baseCourt).toBeLessThan(1);
+    expect(sum(s)).toBeCloseTo(1, 2);
+
+    const groups = getShareGroups(s);
+    const collected = groups.reduce((acc, g) => acc + g.perPerson * g.names.length, 0);
+    expect(collected).toBeCloseTo(1, 2);
+  });
+});
+
+describe('getShareGroups', () => {
+  it('grupuje po karcie i rakietce, a stawki bierze z podziału sesji', () => {
+    const s = {
+      totalCost: 90, racketCost: 10, sport: 'padel',
+      presentPlayers: ['A', 'B'], multisportPlayers: ['A'], ownRacketPlayers: ['A'],
+    };
+    expect(getShareGroups(s)).toEqual([
+      { names: ['B'], hasCard: false, ownRacket: false, perPerson: 57.5 },
+      { names: ['A'], hasCard: true, ownRacket: true, perPerson: 32.5 },
+    ]);
+  });
+
+  it('bez kosztu rakiet nie rozbija graczy na dwie identyczne stawki', () => {
+    const s = {
+      totalCost: 60, sport: 'squash',
+      presentPlayers: ['A', 'B', 'C'], multisportPlayers: [], ownRacketPlayers: ['A'],
+    };
+    expect(getShareGroups(s)).toEqual([
+      { names: ['A', 'B', 'C'], hasCard: false, ownRacket: false, perPerson: 20 },
+    ]);
+  });
+
+  it('każda grupa razy liczba osób daje kwotę sesji', () => {
+    const s = {
+      totalCost: 100, racketCost: 16, sport: 'badminton',
+      presentPlayers: ['A', 'B', 'C', 'D'], multisportPlayers: ['A', 'B'], ownRacketPlayers: ['A', 'C'],
+    };
+    const collected = getShareGroups(s).reduce((acc, g) => acc + g.perPerson * g.names.length, 0);
+    expect(collected).toBeCloseTo(100, 2);
   });
 });

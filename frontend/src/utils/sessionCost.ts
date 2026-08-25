@@ -30,10 +30,16 @@ interface PlayerShare {
 export interface SessionShares {
   /** Udział każdego obecnego gracza, klucz = imię. */
   byPlayer: Record<string, PlayerShare>;
-  /** Koszt kortu na osobę bez zniżki — wartość poglądowa do UI. */
+  /** Ile średnio płaci obecny gracz bez karty Multisport. */
   baseCourt: number;
-  /** Koszt kortu na osobę ze zniżką Multisport — wartość poglądowa do UI. */
+  /** Ile średnio płaci obecny gracz z kartą Multisport. */
   baseCourtMulti: number;
+  /**
+   * Zniżka za kartę nie zmieściła się w udziale gracza, więc rabat zadziałał
+   * słabiej niż `MULTISPORT_DISCOUNT`. Zwykle znak, że wpisana kwota jest
+   * niższa, niż powinna być przy tylu kartach.
+   */
+  discountCapped: boolean;
   /**
    * Kwota, której nie dało się przypisać nikomu (sesja bez obecnych graczy albo
    * rakiety, gdy każdy przyszedł z własną). Pokrywa ją organizator.
@@ -101,12 +107,9 @@ function computeShares(parsed: ParsedSession): SessionShares {
   let unallocatedGrosze = 0;
 
   const discount = toGrosze(MULTISPORT_DISCOUNT);
-  let baseCourtGrosze = 0;
-  let baseCourtMultiGrosze = 0;
-
   const courtGrosze = totalGrosze - racketGrosze;
   const renters = present.filter(p => !ownRacket.includes(p));
-  const racketPerPerson = renters.length > 0 ? racketGrosze / renters.length : 0;
+  let discountCapped = false;
 
   if (present.length === 0) {
     unallocatedGrosze += courtGrosze;
@@ -114,11 +117,12 @@ function computeShares(parsed: ParsedSession): SessionShares {
     const multiPresentCount = multi.filter(p => present.includes(p)).length;
     const base = (courtGrosze + multiPresentCount * discount) / present.length;
     const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
+    discountCapped = multiPresentCount > 0 && base < discount;
+    // Gdy zniżka jest większa niż udział, cel schodzi poniżej zera. Wtedy
+    // `allocateNonNegative` zeruje takiego gracza, a niewykorzystaną część
+    // rabatu rozdziela na pozostałych — suma wciąż daje zapłaconą kwotę.
     const allocated = allocateNonNegative(targets, courtGrosze);
     present.forEach((p, i) => court.set(p, allocated[i]));
-
-    baseCourtGrosze = Math.round(base + racketPerPerson);
-    baseCourtMultiGrosze = Math.round(Math.max(0, base - discount) + racketPerPerson);
   }
 
   if (renters.length === 0) {
@@ -139,10 +143,23 @@ function computeShares(parsed: ParsedSession): SessionShares {
     };
   }
 
+  // Stawki poglądowe czytamy z gotowego podziału zamiast liczyć drugim wzorem.
+  // Wzór `base - zniżka` potrafi wskazać kwotę, której nikt nie zapłaci — tak
+  // było, gdy zniżki za karty przewyższały to, co organizator wyłożył.
+  const shareOf = (name: string) => (court.get(name) ?? 0) + (racket.get(name) ?? 0);
+  const average = (names: string[]) => names.reduce((sum, n) => sum + shareOf(n), 0) / names.length;
+  const withCard = present.filter(p => multi.includes(p));
+  const withoutCard = present.filter(p => !multi.includes(p));
+
+  const baseCourtGrosze = withoutCard.length > 0 ? average(withoutCard)
+    : withCard.length > 0 ? average(withCard)
+    : 0;
+
   return {
     byPlayer,
-    baseCourt: toZloty(baseCourtGrosze),
-    baseCourtMulti: toZloty(baseCourtMultiGrosze),
+    baseCourt: toZloty(Math.round(baseCourtGrosze)),
+    baseCourtMulti: toZloty(Math.round(withCard.length > 0 ? average(withCard) : baseCourtGrosze)),
+    discountCapped,
     unallocated: toZloty(unallocatedGrosze),
   };
 }
@@ -159,7 +176,7 @@ const sharesCache = new WeakMap<SessionLike, SessionShares>();
  */
 export function getSessionShares(session: SessionLike): SessionShares {
   if (!session || typeof session !== 'object') {
-    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, unallocated: 0 };
+    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, unallocated: 0 };
   }
   const cached = sharesCache.get(session);
   if (cached) return cached;
@@ -178,13 +195,42 @@ export function getPlayerSessionCost(session: SessionLike, playerName: string): 
   return getPlayerShare(session, playerName).total;
 }
 
-/** Poglądowy koszt kortu na osobę, bez zniżki Multisport i bez rakiet. */
-export function getSessionBaseCost(session: SessionLike): number {
-  const { present, multi, totalGrosze, racketGrosze } = parseSession(session);
-  if (present.length === 0) return 0;
+/** Grupa graczy płacących w tej sesji tę samą stawkę. */
+export interface ShareGroup {
+  names: string[];
+  hasCard: boolean;
+  ownRacket: boolean;
+  /** Ile wypada na osobę w tej grupie — prosto z podziału sesji. */
+  perPerson: number;
+}
 
-  const discount = toGrosze(MULTISPORT_DISCOUNT);
-  const multiPresentCount = multi.filter(p => present.includes(p)).length;
-  const courtGrosze = totalGrosze - racketGrosze;
-  return toZloty(Math.round((courtGrosze + multiPresentCount * discount) / present.length));
+/**
+ * Rozbicie sesji na grupy o wspólnej stawce, w kolejności do pokazania.
+ *
+ * Podgląd, wiadomość na grupę i podsumowanie po zapisie mają dzięki temu jedno
+ * źródło liczb. Wcześniej każde z nich liczyło po swojemu i przy zniżce
+ * większej niż udział pokazywały stawki, które nie sumowały się do zapłaconej
+ * kwoty.
+ */
+export function getShareGroups(session: SessionLike): ShareGroup[] {
+  const { present, multi, ownRacket, racketGrosze } = parseSession(session);
+  const shares = getSessionShares(session);
+
+  const hasCard = (name: string) => multi.includes(name);
+  // Bez kosztu rakiet podział na własne i wypożyczone niczego nie zmienia,
+  // więc nie rozbijamy grup na dwie identyczne stawki.
+  const withOwnRacket = (name: string) => racketGrosze > 0 && ownRacket.includes(name);
+
+  return [
+    { hasCard: false, ownRacket: false },
+    { hasCard: true, ownRacket: false },
+    { hasCard: false, ownRacket: true },
+    { hasCard: true, ownRacket: true },
+  ]
+    .map(group => {
+      const names = present.filter(p => hasCard(p) === group.hasCard && withOwnRacket(p) === group.ownRacket);
+      const total = names.reduce((sum, n) => sum + (shares.byPlayer[n]?.total ?? 0), 0);
+      return { ...group, names, perPerson: names.length > 0 ? total / names.length : 0 };
+    })
+    .filter(group => group.names.length > 0);
 }

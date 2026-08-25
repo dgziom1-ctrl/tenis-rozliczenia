@@ -1,7 +1,11 @@
 import { useId } from 'react';
 import { Check, X, Zap, Users } from 'lucide-react';
 import { InlineSpinner } from '../common/LoadingSkeleton';
+import ShareBreakdown from '../common/ShareBreakdown';
 import CyberDateInput from '../admin/CyberDateInput';
+import { SPORT_EMOJI } from '@/constants';
+import { parseAmount, formatAmountShort } from '@/utils/format';
+import { getShareGroups } from '@/utils/sessionCost';
 import type { SessionEditForm } from '../../types/ui';
 
 interface EditSessionFormProps {
@@ -31,6 +35,21 @@ export default function EditSessionForm({
 }: EditSessionFormProps) {
   const costId = useId();
   const costErrorId = useId();
+
+  const racketCost = editForm.racketCost ?? 0;
+  const parsedCost = parseAmount(editForm.cost);
+  // Podgląd liczy tym samym silnikiem co zapisane salda, więc po zmianie kwoty
+  // od razu widać, ile faktycznie wyjdzie każdej grupie.
+  const previewGroups = isEditCostValid && editForm.present?.length > 0
+    ? getShareGroups({
+      totalCost: parsedCost,
+      racketCost,
+      presentPlayers: editForm.present,
+      multisportPlayers: editForm.multiPlayers ?? [],
+      ownRacketPlayers: editForm.ownRacketPlayers ?? [],
+    })
+    : [];
+
   return (
     <div style={{
       background: 'var(--co-dark)', border: '1px solid rgba(0,229,255,0.25)',
@@ -43,7 +62,9 @@ export default function EditSessionForm({
           <CyberDateInput compact label="Data sesji" value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
         </div>
         <div>
-          <label htmlFor={costId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>KOSZT</label>
+          <label htmlFor={costId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>
+            Koszt całkowity
+          </label>
           <input id={costId} type="text" inputMode="decimal" value={editForm.cost}
             onChange={e => setEditForm(p => ({ ...p, cost: e.target.value }))}
             aria-invalid={!isEditCostValid}
@@ -51,13 +72,28 @@ export default function EditSessionForm({
             className="cyber-input"
             style={{ width: '100%', padding: '10px 12px', fontSize: '0.8rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
           />
-          {!isEditCostValid && (
+          {!isEditCostValid ? (
             <p id={costErrorId} role="alert" style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)' }}>
               ⚠ {editCostError}
+            </p>
+          ) : (
+            <p style={{ margin: '6px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
+              {racketCost > 0
+                ? `> Zapłacone w recepcji, w tym rakiety ${formatAmountShort(racketCost)} zł`
+                : '> Zapłacone w recepcji, po odliczeniu kart Multisport'}
             </p>
           )}
         </div>
       </div>
+
+      {previewGroups.length > 0 && (
+        <div style={{ padding: '10px 12px', background: 'rgba(0,229,255,0.03)', border: '1px solid rgba(0,229,255,0.15)', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+            Po zmianie na osobę
+          </p>
+          <ShareBreakdown groups={previewGroups} sportEmoji={SPORT_EMOJI[editForm.sport] ?? '🏓'} size="sm" />
+        </div>
+      )}
       <div>
         <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--co-dim)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
           <Users size={11} /> OBECNI

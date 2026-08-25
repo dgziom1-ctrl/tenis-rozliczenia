@@ -1,6 +1,8 @@
 import { Calculator } from 'lucide-react';
 import { MULTISPORT_DISCOUNT, SPORT_LABEL, SPORT_EMOJI } from '@/constants';
 import { formatAmountShort, parseAmount } from '@/utils/format';
+import { getSessionShares, getShareGroups } from '@/utils/sessionCost';
+import ShareBreakdown from '../common/ShareBreakdown';
 import type { Sport } from '@/types/domain';
 
 interface LiveCostPreviewProps {
@@ -13,33 +15,23 @@ interface LiveCostPreviewProps {
   racketCount?: number;
 }
 
-function fmt(n: number) {
-  return (Math.round(n * 100) / 100).toFixed(2);
-}
-
 export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0 }: LiveCostPreviewProps) {
   const courtCost = parseAmount(totalCost);
   if (!totalCost || isNaN(courtCost) || courtCost <= 0 || presentPlayers.length === 0) return null;
 
-  const multiInPresent = multisportPlayers.filter(p => presentPlayers.includes(p));
-  const multiCount = multiInPresent.length;
-  const hypothetical = courtCost + multiCount * MULTISPORT_DISCOUNT;
-  const base = hypothetical / presentPlayers.length;
-  const discounted = Math.max(0, base - MULTISPORT_DISCOUNT);
-
-  const ownRacketPresent = ownRacketPlayers.filter(p => presentPlayers.includes(p));
-  const rentingPlayers = presentPlayers.filter(p => !ownRacketPresent.includes(p));
-  const racketShare = racketCost > 0 && rentingPlayers.length > 0
-    ? racketCost / rentingPlayers.length
-    : 0;
+  // Dokładnie ten sam podział, który trafi do bazy i sald graczy. Podgląd nie
+  // liczy własnym wzorem, bo wtedy potrafił pokazać stawki, które nie sumowały
+  // się do kwoty zapłaconej w recepcji.
+  const session = {
+    totalCost: courtCost + racketCost,
+    racketCost,
+    presentPlayers,
+    multisportPlayers,
+    ownRacketPlayers,
+  };
+  const { discountCapped } = getSessionShares(session);
+  const groups = getShareGroups(session);
   const hasRackets = racketCost > 0;
-
-  // 4 grupy: bez karty + wypożycza, z kartą + wypożycza, bez karty + własna, z kartą + własna
-  const nonMultiRenters = rentingPlayers.filter(p => !multisportPlayers.includes(p));
-  const multiRenters = rentingPlayers.filter(p => multisportPlayers.includes(p));
-  const nonMultiOwn = ownRacketPresent.filter(p => !multisportPlayers.includes(p));
-  const multiOwn = ownRacketPresent.filter(p => multisportPlayers.includes(p));
-
   const racketEmoji = SPORT_EMOJI[sport] ?? '🎾';
 
   return (
@@ -61,44 +53,10 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
         )}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {nonMultiRenters.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
-              Bez karty ({nonMultiRenters.length} os.)
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-cyan)' }}>
-              {fmt(base + racketShare)} ZŁ
-            </span>
-          </div>
-        )}
-        {multiRenters.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--co-green)', letterSpacing: '0.1em' }}>
-              ⚡ Cena z kartą ({multiRenters.length} os.)
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-green)' }}>
-              {fmt(discounted + racketShare)} ZŁ
-            </span>
-          </div>
-        )}
-        {nonMultiOwn.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--co-amber)', letterSpacing: '0.1em' }}>
-              {racketEmoji} {nonMultiOwn.join(', ')} — własna rakietka
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-amber)' }}>
-              {fmt(base)} ZŁ
-            </span>
-          </div>
-        )}
-        {multiOwn.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: 'var(--co-green)', letterSpacing: '0.1em' }}>
-              ⚡{racketEmoji} {multiOwn.join(', ')} — karta + własna
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: 'var(--co-green)' }}>
-              {fmt(discounted)} ZŁ
-            </span>
+        <ShareBreakdown groups={groups} sportEmoji={racketEmoji} />
+        {discountCapped && (
+          <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
+            {'>'} ⚠ Karty nie zbiły ceny o pełne {MULTISPORT_DISCOUNT} zł — udział na osobę wychodzi mniejszy niż zniżka. Sprawdź, czy kwota się zgadza.
           </div>
         )}
         {hasRackets && (

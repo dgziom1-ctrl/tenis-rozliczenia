@@ -65,12 +65,14 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     let url: string | undefined;
     try {
       const rows = [
-        ['Data', 'Sport', 'Koszt całkowity', 'Na osobę', 'Liczba graczy', 'Obecni', 'Multisport'],
+        ['Data', 'Sport', 'Koszt całkowity', 'Koszt rakiet', 'Bez karty (zł/os.)', 'Z kartą (zł/os.)', 'Liczba graczy', 'Obecni', 'Multisport'],
         ...filteredHistory.map(s => [
           s.datePlayed,
           (SPORT_LABEL[s.sport] ?? 'Ping-Pong').toLowerCase(),
           s.totalCost,
+          s.racketCost ?? 0,
           s.costPerPerson?.toFixed(2) ?? '',
+          s.costPerPersonMulti?.toFixed(2) ?? '',
           s.presentPlayers.length,
           s.presentPlayers.join('; '),
           s.multisportPlayers.join('; '),
