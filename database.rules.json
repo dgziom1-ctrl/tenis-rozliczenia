@@ -52,7 +52,7 @@
           "cost": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
 
           "sport": {
-            ".validate": "newData.isString() && (newData.val() === 'pingpong' || newData.val() === 'squash' || newData.val() === 'badminton')"
+            ".validate": "newData.isString() && (newData.val() === 'pingpong' || newData.val() === 'squash' || newData.val() === 'badminton' || newData.val() === 'padel')"
           },
 
           "present": {

@@ -2,9 +2,13 @@ const { onValueUpdated }  = require('firebase-functions/v2/database');
 const { initializeApp }   = require('firebase-admin/app');
 const { getMessaging }    = require('firebase-admin/messaging');
 const { getDatabase }     = require('firebase-admin/database');
-const { getSessionShares, isCourtSport } = require('./sessionCost');
+const { getSessionShares } = require('./sessionCost');
 
 initializeApp();
+
+// Trzymane osobno od `frontend/src/constants` — Cloud Functions to inny pakiet.
+const SPORT_EMOJI = { pingpong: '🏓', squash: '🎾', badminton: '🏸', padel: '🥎' };
+const SPORT_LABEL = { pingpong: 'Ping-pong', squash: 'Squash', badminton: 'Badminton', padel: 'Padel' };
 
 /** Kwota bez zbędnych zer na końcu: 42 → „42", 42.5 → „42,50". */
 function formatZl(amount) {
@@ -175,27 +179,19 @@ exports.onSessionAdded = onValueUpdated(
       present,
       multiPlayers: multi,
       ownRacketPlayers: toArray(newSession.ownRacketPlayers),
-      overtimePlayers: toArray(newSession.overtimePlayers),
     });
 
-    let notifBody;
-    if (isCourtSport(sport)) {
-      const multiCount = multi.filter(p => present.includes(p)).length;
+    const multiCount = multi.filter(p => present.includes(p)).length;
 
-      let costPart = multiCount > 0
-        ? `${formatZl(shares.baseCourt)} zł/os. (${formatZl(shares.baseCourtMulti)} zł z kartą)`
-        : `${formatZl(shares.baseCourt)} zł/os.`;
-      if (racketCost > 0) costPart += ` · rakiety: ${formatZl(racketCost)} zł`;
+    let costPart = multiCount > 0
+      ? `${formatZl(shares.baseCourt)} zł/os. (${formatZl(shares.baseCourtMulti)} zł z kartą)`
+      : `${formatZl(shares.baseCourt)} zł/os.`;
+    if (racketCost > 0) costPart += ` · rakiety: ${formatZl(racketCost)} zł`;
 
-      notifBody = `${date} · ${present.length} graczy · ${costPart}`;
-      console.log(`Nowa sesja (${sport === 'badminton' ? 'Badminton' : 'Squash'}): ${date}, ${present.length} graczy, ${formatZl(shares.baseCourt)} zł/os. (z kartą: ${formatZl(shares.baseCourtMulti)} zł, rakiety: ${formatZl(racketCost)} zł)`);
-    } else {
-      // Ping-pong: płacą tylko gracze bez karty Multisport.
-      notifBody = `${date} · ${present.length} graczy · ${formatZl(shares.baseCourt)} zł/os.`;
-      console.log(`Nowa sesja (Ping-pong): ${date}, ${present.length} graczy, ${formatZl(shares.baseCourt)} zł/os.`);
-    }
+    const notifBody = `${date} · ${present.length} graczy · ${costPart}`;
+    console.log(`Nowa sesja (${SPORT_LABEL[sport] || SPORT_LABEL.pingpong}): ${date}, ${present.length} graczy, ${formatZl(shares.baseCourt)} zł/os. (z kartą: ${formatZl(shares.baseCourtMulti)} zł, rakiety: ${formatZl(racketCost)} zł)`);
 
-    const sportEmoji = sport === 'squash' ? '🎾' : sport === 'badminton' ? '🏸' : '🏓';
+    const sportEmoji = SPORT_EMOJI[sport] || SPORT_EMOJI.pingpong;
 
     const tokens = await getAllTokens();
     console.log(`Tokenów FCM w bazie: ${tokens.length}`);

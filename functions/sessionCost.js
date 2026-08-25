@@ -7,11 +7,11 @@
 // zasady rozliczeń, zmień OBA pliki, inaczej test padnie.
 
 const GROSZE_PER_ZLOTY = 100;
-const SQUASH_MULTISPORT_DISCOUNT = 15;
-const COURT_SPORTS = new Set(['squash', 'badminton']);
+const MULTISPORT_DISCOUNT = 15;
+const RACKET_RENTAL_SPORTS = new Set(['squash', 'badminton', 'padel']);
 
-function isCourtSport(sport) {
-  return COURT_SPORTS.has(sport);
+function hasRacketRental(sport) {
+  return RACKET_RENTAL_SPORTS.has(sport);
 }
 
 /** Zaokrąglenie „w połowie od zera", odporne na szum IEEE-754 (patrz money.ts). */
@@ -114,18 +114,17 @@ function uniqueNames(names) {
 
 function parseSession(session) {
   const present = uniqueNames(session.presentPlayers || session.present);
-  const totalGrosze = Math.max(0, toGrosze(session.totalCost ?? session.cost ?? 0));
+  // `overtimeCost` to zaszłość po usuniętej dogrywce — patrz sessionCost.ts.
+  const totalGrosze = Math.max(0, toGrosze(session.totalCost ?? session.cost ?? 0))
+    + Math.max(0, toGrosze(session.overtimeCost ?? 0));
   const racketGrosze = Math.min(Math.max(0, toGrosze(session.racketCost ?? 0)), totalGrosze);
 
   return {
     present,
     multi: uniqueNames(session.multisportPlayers || session.multiPlayers),
     totalGrosze,
-    sport: session.sport || 'pingpong',
     racketGrosze,
     ownRacket: uniqueNames(session.ownRacketPlayers),
-    overtimeParticipants: uniqueNames(session.overtimePlayers).filter(p => present.includes(p)),
-    overtimeGrosze: Math.max(0, toGrosze(session.overtimeCost ?? 0)),
   };
 }
 
@@ -135,79 +134,51 @@ function parseSession(session) {
  */
 function getSessionShares(session) {
   if (!session || typeof session !== 'object') {
-    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, overtimePerPerson: 0, unallocated: 0 };
+    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, unallocated: 0 };
   }
 
-  const {
-    present, multi, totalGrosze, sport, racketGrosze,
-    ownRacket, overtimeParticipants, overtimeGrosze,
-  } = parseSession(session);
+  const { present, multi, totalGrosze, racketGrosze, ownRacket } = parseSession(session);
 
   const court = new Map();
   const racket = new Map();
-  const overtime = new Map();
   let unallocatedGrosze = 0;
 
-  const discount = toGrosze(SQUASH_MULTISPORT_DISCOUNT);
+  const discount = toGrosze(MULTISPORT_DISCOUNT);
   let baseCourtGrosze = 0;
   let baseCourtMultiGrosze = 0;
 
-  if (isCourtSport(sport)) {
-    const courtGrosze = totalGrosze - racketGrosze;
-    const renters = present.filter(p => !ownRacket.includes(p));
-    const racketPerPerson = renters.length > 0 ? racketGrosze / renters.length : 0;
+  const courtGrosze = totalGrosze - racketGrosze;
+  const renters = present.filter(p => !ownRacket.includes(p));
+  const racketPerPerson = renters.length > 0 ? racketGrosze / renters.length : 0;
 
-    if (present.length === 0) {
-      unallocatedGrosze += courtGrosze;
-    } else {
-      const multiPresentCount = multi.filter(p => present.includes(p)).length;
-      const base = (courtGrosze + multiPresentCount * discount) / present.length;
-      const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
-      const allocated = allocateNonNegative(targets, courtGrosze);
-      present.forEach((p, i) => court.set(p, allocated[i]));
-
-      baseCourtGrosze = Math.round(base + racketPerPerson);
-      baseCourtMultiGrosze = Math.round(Math.max(0, base - discount) + racketPerPerson);
-    }
-
-    if (renters.length === 0) {
-      unallocatedGrosze += racketGrosze;
-    } else {
-      const allocated = splitEqually(racketGrosze, renters.length);
-      renters.forEach((p, i) => racket.set(p, allocated[i]));
-    }
+  if (present.length === 0) {
+    unallocatedGrosze += courtGrosze;
   } else {
-    const paying = present.filter(p => !multi.includes(p));
-    if (paying.length === 0) {
-      unallocatedGrosze += totalGrosze;
-    } else {
-      const allocated = splitEqually(totalGrosze, paying.length);
-      paying.forEach((p, i) => court.set(p, allocated[i]));
-      baseCourtGrosze = Math.round(totalGrosze / paying.length);
-    }
+    const multiPresentCount = multi.filter(p => present.includes(p)).length;
+    const base = (courtGrosze + multiPresentCount * discount) / present.length;
+    const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
+    const allocated = allocateNonNegative(targets, courtGrosze);
+    present.forEach((p, i) => court.set(p, allocated[i]));
+
+    baseCourtGrosze = Math.round(base + racketPerPerson);
+    baseCourtMultiGrosze = Math.round(Math.max(0, base - discount) + racketPerPerson);
   }
 
-  let overtimePerPersonGrosze = 0;
-  if (overtimeGrosze > 0) {
-    if (overtimeParticipants.length === 0) {
-      unallocatedGrosze += overtimeGrosze;
-    } else {
-      const allocated = splitEqually(overtimeGrosze, overtimeParticipants.length);
-      overtimeParticipants.forEach((p, i) => overtime.set(p, allocated[i]));
-      overtimePerPersonGrosze = allocated[0];
-    }
+  if (renters.length === 0) {
+    unallocatedGrosze += racketGrosze;
+  } else {
+    const allocated = splitEqually(racketGrosze, renters.length);
+    renters.forEach((p, i) => racket.set(p, allocated[i]));
   }
 
   const byPlayer = {};
   for (const name of present) {
     const courtPart = court.get(name) || 0;
     const racketPart = racket.get(name) || 0;
-    const overtimePart = overtime.get(name) || 0;
     byPlayer[name] = {
       court: toZloty(courtPart),
       racket: toZloty(racketPart),
-      overtime: toZloty(overtimePart),
-      total: toZloty(courtPart + racketPart + overtimePart),
+      total: toZloty(courtPart + racketPart),
     };
   }
 
@@ -215,14 +186,13 @@ function getSessionShares(session) {
     byPlayer,
     baseCourt: toZloty(baseCourtGrosze),
     baseCourtMulti: toZloty(baseCourtMultiGrosze),
-    overtimePerPerson: toZloty(overtimePerPersonGrosze),
     unallocated: toZloty(unallocatedGrosze),
   };
 }
 
 module.exports = {
-  SQUASH_MULTISPORT_DISCOUNT,
-  isCourtSport,
+  MULTISPORT_DISCOUNT,
+  hasRacketRental,
   toGrosze,
   toZloty,
   allocateExact,

@@ -35,12 +35,6 @@ export interface HistoryEntry {
   multisportPlayers: string[];
   racketCost?: number;
   ownRacketPlayers?: string[];
-  /** Gracze, którzy zostali na dogrywkę. */
-  overtimePlayers?: string[];
-  /** Łączny koszt dogrywki. */
-  overtimeCost?: number;
-  /** Koszt dogrywki przypadający na jednego gracza dogrywki. */
-  overtimePerPerson?: number;
 }
 
 export interface Summary {
@@ -114,8 +108,6 @@ export interface SessionEditForm {
   sport: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
-  overtimePlayers?: string[];
-  overtimeCost?: string | number;
 }
 
 export interface MonthlySessionData {
@@ -190,6 +182,7 @@ export interface WrappedStats {
   pingpongSessions: number;
   squashSessions: number;
   badmintonSessions: number;
+  padelSessions: number;
   busiestMonthName: string | null;
   busiestMonthCount: number;
   bestPair: [string, string] | null;

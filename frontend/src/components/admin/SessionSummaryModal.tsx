@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useId } from 'react';
 import { CheckCircle2, Copy } from 'lucide-react';
-import { SQUASH_MULTISPORT_DISCOUNT, SPORT_EMOJI, SPORT_LABEL, isCourtSport } from '@/constants';
+import { MULTISPORT_DISCOUNT, SPORT_EMOJI, SPORT_LABEL, hasRacketRental } from '@/constants';
 import { useToast } from '../common/Toast';
 import { formatDate, formatAmountShort } from '@/utils/format';
 import { buildGroupMessage } from '@/utils/message';
@@ -12,7 +12,6 @@ interface SessionSummary {
   date: string;
   totalCost: number;
   presentCount: number;
-  payingCount: number;
   multisportCount: number;
   perPerson: number;
   sport: Sport;
@@ -20,9 +19,6 @@ interface SessionSummary {
   multisportPlayers: string[];
   racketCost: number;
   ownRacketPlayers: string[];
-  overtimePlayers: string[];
-  overtimeCost: number;
-  overtimePerPerson: number;
 }
 
 interface SessionSummaryModalProps {
@@ -44,13 +40,15 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
   useEffect(() => { overlayRef.current?.focus(); }, []);
   useEffect(() => () => { if (copiedTimer.current) clearTimeout(copiedTimer.current); }, []);
 
-  const { date, totalCost, presentCount, payingCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, overtimePlayers, overtimeCost, overtimePerPerson } = summary;
-  const isSquash = isCourtSport(sport);
-  const hasRackets = isSquash && racketCost > 0;
-  const hasOvertime = overtimeCost > 0 && overtimePlayers.length > 0;
+  const { date, totalCost, presentCount, multisportCount, perPerson, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers } = summary;
+  const withRackets = hasRacketRental(sport);
+  const hasRackets = withRackets && racketCost > 0;
+  const racketShare = hasRackets
+    ? racketCost / Math.max(1, presentPlayers.filter(p => !ownRacketPlayers.includes(p)).length)
+    : 0;
 
   const handleCopy = async () => {
-    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, perPerson, sport, racketCost, ownRacketPlayers, overtimePlayers, overtimeCost });
+    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers });
     if (await copyToClipboard(msg)) {
       setCopied(true);
       if (copiedTimer.current) clearTimeout(copiedTimer.current);
@@ -96,7 +94,7 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
         {/* Stats grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
           {[
-            { label: 'SPORT', value: `${SPORT_EMOJI[sport] ?? '🏓'} ${(SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase()}`, color: isSquash ? 'var(--co-green)' : 'var(--co-cyan)' },
+            { label: 'SPORT', value: `${SPORT_EMOJI[sport] ?? '🏓'} ${(SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase()}`, color: withRackets ? 'var(--co-green)' : 'var(--co-cyan)' },
             { label: 'DATA', value: formatDate(date), color: 'var(--co-text)' },
             { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
             { label: 'OBECNI', value: presentCount, color: 'var(--co-text)' },
@@ -120,49 +118,26 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
             border: '1px solid rgba(0,229,255,0.3)',
             clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
           }}>
-            {isSquash ? (
-              <>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
-                  PODZIAŁ KOSZTÓW
-                </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
-                  {formatAmountShort(perPerson + (hasRackets ? racketCost / Math.max(1, presentPlayers.filter(p => !ownRacketPlayers.includes(p)).length) : 0))}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
-                </p>
-                {multisportCount > 0 && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)', marginTop: 4 }}>
-                    ⚡ Cena z kartą: {formatAmountShort(Math.max(0, perPerson - SQUASH_MULTISPORT_DISCOUNT) + (hasRackets ? racketCost / Math.max(1, presentPlayers.filter(p => !ownRacketPlayers.includes(p)).length) : 0))} zł · {multisportCount} os.
-                  </p>
-                )}
-                {hasRackets && ownRacketPlayers.some(p => presentPlayers.includes(p)) && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)', marginTop: 2 }}>
-                    🎾 {ownRacketPlayers.filter(p => presentPlayers.includes(p)).join(', ')}: {formatAmountShort(perPerson)} zł (własna rakietka)
-                  </p>
-                )}
-                {hasRackets && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 2 }}>
-                    Kort: {formatAmountShort(totalCost - racketCost)} zł · Rakiety: {formatAmountShort(racketCost)} zł
-                  </p>
-                )}
-              </>
-            ) : (
-              <>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
-                  KAŻDY PŁACI
-                </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2.4rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
-                  {formatAmountShort(perPerson)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ</span>
-                </p>
-                {multisportCount > 0 && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 4 }}>
-                    {payingCount} os. płaci · {multisportCount} os. gratis
-                  </p>
-                )}
-                {hasOvertime && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)', marginTop: 4 }}>
-                    ⏱ Dogrywka: {formatAmountShort(overtimePerPerson)} zł/os. · {overtimePlayers.length} os.
-                  </p>
-                )}
-              </>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+              PODZIAŁ KOSZTÓW
+            </p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
+              {formatAmountShort(perPerson + racketShare)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
+            </p>
+            {multisportCount > 0 && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)', marginTop: 4 }}>
+                ⚡ Cena z kartą: {formatAmountShort(Math.max(0, perPerson - MULTISPORT_DISCOUNT) + racketShare)} zł · {multisportCount} os.
+              </p>
+            )}
+            {hasRackets && ownRacketPlayers.some(p => presentPlayers.includes(p)) && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)', marginTop: 2 }}>
+                {SPORT_EMOJI[sport]} {ownRacketPlayers.filter(p => presentPlayers.includes(p)).join(', ')}: {formatAmountShort(perPerson)} zł (własna rakietka)
+              </p>
+            )}
+            {hasRackets && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 2 }}>
+                Kort: {formatAmountShort(totalCost - racketCost)} zł · Rakiety: {formatAmountShort(racketCost)} zł
+              </p>
             )}
           </div>
         )}

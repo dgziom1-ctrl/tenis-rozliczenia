@@ -80,8 +80,13 @@ describe('calculateDebt — robustness', () => {
     expect(calculateDebt('Kamil', { weeks })).toBe(0);
   });
 
-  it('everyone on multisport → 0 debt', () => {
+  it('everyone on multisport → zapłaconą kwotę i tak dzielą po równo', () => {
     const weeks = [{ id: 'w1', cost: 60, present: ['Alice', 'Bob'], multiPlayers: ['Alice', 'Bob'] }];
+    expect(calculateDebt('Alice', { weeks })).toBe(30);
+  });
+
+  it('karty pokryły całą kwotę → nikt nic nie płaci', () => {
+    const weeks = [{ id: 'w1', cost: 0, present: ['Alice', 'Bob'], multiPlayers: ['Alice', 'Bob'] }];
     expect(calculateDebt('Alice', { weeks })).toBe(0);
   });
 
@@ -136,12 +141,14 @@ describe('calculateDebt — brute force floating point', () => {
     expect(Number.isFinite(calculateDebt('A', { weeks }))).toBe(true);
   });
 
-  it('alternating multisport — 10/20 sessions paying = 300', () => {
+  it('alternating multisport — 10 × 22,50 ze zniżką + 10 × 30 bez', () => {
     const weeks = Array.from({ length: 20 }, (_, i) => ({
       id: `w${i}`, cost: 60, present: ['Alice', 'Bob'],
       multiPlayers: i % 2 === 0 ? ['Alice'] : [],
     }));
-    expect(calculateDebt('Alice', { weeks })).toBe(300);
+    expect(calculateDebt('Alice', { weeks })).toBe(525);
+    // Bob dopłaca dokładnie tyle, ile Alice zaoszczędziła na karcie.
+    expect(calculateDebt('Bob', { weeks })).toBe(675);
   });
 });
 
@@ -177,14 +184,23 @@ describe('buildDebtDisplayData — kierunek i poprawność', () => {
     expect(buildDebtDisplayData(player('Alice'), h, {}).sessions.map(s => s.sessionId)).toEqual(['w1', 'w2']);
   });
 
-  it('pomija sesje opłacone kartą Multisport', () => {
+  it('pomija sesje, za które gracz nic nie płaci', () => {
     const h = [
-      { id: 'w2', datePlayed: '2025-02-01', sport: 'pingpong', totalCost: 30, costPerPerson: 30, presentPlayers: ['Alice'], multisportPlayers: ['Alice'] },
+      { id: 'w2', datePlayed: '2025-02-01', sport: 'pingpong', totalCost: 0, costPerPerson: 15, presentPlayers: ['Alice'], multisportPlayers: ['Alice'] },
       { id: 'w1', datePlayed: '2025-01-01', sport: 'pingpong', totalCost: 30, costPerPerson: 30, presentPlayers: ['Alice'], multisportPlayers: [] },
     ];
     const d = buildDebtDisplayData(player('Alice'), h, {});
     expect(d.sessions).toHaveLength(1);
     expect(d.sessions[0].sessionId).toBe('w1');
+  });
+
+  it('sesja ze zniżką Multisport nadal trafia do rozbicia', () => {
+    const h = [
+      { id: 'w1', datePlayed: '2025-01-01', sport: 'squash', totalCost: 70, costPerPerson: 21.25, presentPlayers: ['Alice', 'Bob'], multisportPlayers: ['Alice'] },
+    ];
+    const d = buildDebtDisplayData(player('Alice'), h, {});
+    expect(d.sessions).toHaveLength(1);
+    expect(d.sessions[0].amount).toBe(27.5); // (70 + 15)/2 - 15
   });
 
   it('gracz spoza historii ma puste rozbicie i zerowe saldo', () => {
@@ -234,11 +250,22 @@ describe('buildUIData — integration', () => {
     expect(r.history[1].id).toBe('w1');
   });
 
-  it('costPerPerson is 0 when everyone on multisport', () => {
+  it('costPerPerson to cena pełna, costPerPersonMulti — ta ze zniżką', () => {
     const raw = {
       players: ['Alice', 'Bob'],
       weeks: [{ id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice', 'Bob'], multiPlayers: ['Alice', 'Bob'] }],    };
-    expect(buildUIData(raw).history[0].costPerPerson).toBe(0);
+    const entry = buildUIData(raw).history[0];
+    expect(entry.costPerPerson).toBe(45);      // (60 + 2×15)/2
+    expect(entry.costPerPersonMulti).toBe(30); // 45 - 15
+  });
+
+  it('stary koszt dogrywki dolicza się do kwoty sesji', () => {
+    const raw = {
+      players: ['Alice'],
+      weeks: [{ id: 'w1', date: '2025-01-01', cost: 45, overtimeCost: 15, overtimePlayers: ['Alice'], present: ['Alice'], multiPlayers: [] }],    };
+    const r = buildUIData(raw);
+    expect(r.history[0].totalCost).toBe(60);
+    expect(r.players[0].currentDebt).toBe(60);
   });
 
   it('players sorted by debt descending', () => {
@@ -247,7 +274,7 @@ describe('buildUIData — integration', () => {
       weeks: [{ id: 'w1', date: '2025-01-01', cost: 90, present: ['Alice', 'Bob', 'Carol'], multiPlayers: ['Bob', 'Carol'] }],    };
     const r = buildUIData(raw);
     expect(r.players[0].name).toBe('Alice');
-    expect(r.players[0].currentDebt).toBe(90);
+    expect(r.players[0].currentDebt).toBe(40); // (90 + 2×15)/3
   });
 
   it('playerJoinWeek respected in attendanceCount', () => {

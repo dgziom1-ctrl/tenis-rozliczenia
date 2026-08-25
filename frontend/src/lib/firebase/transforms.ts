@@ -71,13 +71,13 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
     const shares = getSessionShares(w);
     const racketCost = w.racketCost ?? 0;
     const ownRacket = w.ownRacketPlayers ?? [];
-    const overtimePlayers = w.overtimePlayers ?? [];
-    const overtimeCost = w.overtimeCost ?? 0;
 
     return {
       id: w.id,
       datePlayed: w.date,
-      totalCost: w.cost,
+      // Zaszłość po dogrywce doliczamy do kwoty sesji, tak jak robi to podział
+      // kosztów — inaczej historia pokazywałaby mniej, niż gracze faktycznie płacą.
+      totalCost: w.cost + (w.overtimeCost ?? 0),
       sport: w.sport || SPORT.PINGPONG,
       costPerPerson: shares.baseCourt,
       costPerPersonMulti: shares.baseCourtMulti,
@@ -85,9 +85,6 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
       multisportPlayers: w.multiPlayers || [],
       racketCost: racketCost > 0 ? racketCost : undefined,
       ownRacketPlayers: ownRacket.length > 0 ? ownRacket : undefined,
-      overtimePlayers: overtimePlayers.length > 0 ? overtimePlayers : undefined,
-      overtimeCost: overtimeCost > 0 ? overtimeCost : undefined,
-      overtimePerPerson: shares.overtimePerPerson > 0 ? shares.overtimePerPerson : undefined,
     };
   });
 }

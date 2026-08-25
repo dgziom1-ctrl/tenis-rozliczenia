@@ -4,8 +4,8 @@ import { getPlayerSessionCost } from './sessionCost';
 import type { Week, Payment } from '@/types/domain';
 import type { HistoryEntry, DebtSession, DebtDisplayData, DebtDisplayPayment, PlayerStats } from '@/types/ui';
 
-// Re-eksport dla zgodności wstecznej — reszta kodu importuje te helpery z '@/utils/debt'.
-export { roundToTwoDecimals, getPayingPlayers } from './money';
+// Re-eksport dla zgodności wstecznej — reszta kodu importuje ten helper z '@/utils/debt'.
+export { roundToTwoDecimals } from './money';
 
 interface DebtCalcData {
   weeks: Week[];

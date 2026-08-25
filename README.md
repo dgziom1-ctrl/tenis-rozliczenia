@@ -1,6 +1,6 @@
 # 🕹️ Cyber-Ponk
 
-> A real-time debt tracker and attendance leaderboard for a private ping-pong & squash group. Who showed up, what they owe, who's on a streak — all in one place.
+> A real-time debt tracker and attendance leaderboard for a private ping-pong, squash, badminton & padel group. Who showed up, what they owe, who's on a streak — all in one place.
 
 ---
 
@@ -28,9 +28,10 @@
 - **Yearly Wrapped** — Spotify-style end-of-year summary for past seasons
 
 ### ⚙️ Add Session
-- Date picker with sport selector: **Ping-Pong** or **Squash**
-- Ping-pong quick-cost buttons: FREE / 15 / 30 / 45 / 60 PLN
-- Squash quick-cost buttons: 55 / 70 / 85 / 110 / 125 / 140 / 155 / 170 PLN (Multisport holders get a −15 PLN discount; non-Multisport players split the remaining cost equally)
+- Date picker with sport selector: **Ping-Pong**, **Squash**, **Badminton** or **Padel**
+- Cost field takes the amount actually paid at the reception desk, after Multisport cards
+- Multisport holders get a **−15 PLN discount** off their share, in every sport
+- Racket rental (squash, badminton, padel): count × price, split among players without their own racket
 - All players pre-selected; Multisport defaults loaded from settings
 - Live per-person cost preview before saving
 - Post-save summary modal with a one-tap **"copy to group chat"** message
@@ -215,7 +216,7 @@ tenis-rozliczenia/
 │       │   │   ├── LiveCostPreview.tsx     # Per-person cost preview
 │       │   │   ├── PlayerToggleGrid.tsx
 │       │   │   ├── SessionSummaryModal.tsx # Post-save summary + copy to chat
-│       │   │   └── SportSelector.tsx       # Ping-pong / Squash toggle
+│       │   │   └── SportSelector.tsx       # Ping-pong / Squash / Badminton / Padel toggle
 │       │   ├── attendance/
 │       │   │   ├── AchievementBadge.tsx
 │       │   │   ├── AttendanceTab.tsx       # Ranking, podium, history chart, player modal
@@ -328,13 +329,27 @@ tenis-rozliczenia/
 
 ## 🧮 How the debt calculation works
 
-### Ping-Pong
-Cost is split equally among players who **don't** have Multisport. Players with Multisport attend for free.
+### One rule for every sport
 
-### Squash
-Everyone pays. Players with Multisport receive a **−15 PLN discount** off the session's base cost; the remaining amount is split equally among all players (Multisport holders pay their share minus the discount).
+The amount you enter is **what you actually paid at the reception desk** — the court
+price minus 15 PLN for every Multisport card handed over. To give that rebate back to
+whoever brought the card, the split reconstructs the undiscounted price and subtracts a
+flat −15 PLN from each card holder:
 
-In both sports, the debt for a player is:
+```
+base       = (amountPaid + cardsPresent × 15) / playersPresent
+share(p)   = base − (p has Multisport ? 15 : 0)     // never below 0
+```
+
+Everyone present pays a share, and the shares always add up to the amount paid.
+A card is worth exactly 15 PLN to its holder, whatever the venue charges — so an
+odd court price (41 PLN with two cards → 11 PLN to settle) is split fairly instead
+of landing on whoever happened not to have a card.
+
+Racket rental (squash, badminton, padel) is carved out of the total first and split
+equally among the players who did **not** bring their own racket, outside the discount.
+
+The debt for a player is:
 
 ```
 debt = sum(costPerSession for every session the player attended)
@@ -400,7 +415,7 @@ Unit tests live in `src/__tests__/` and cover:
 | File | What it tests |
 |------|--------------|
 | `calculations.test.js` | Debt calculation, breakdown logic, edge cases (Multisport-only sessions, zero-cost weeks) |
-| `squash.test.js` | Squash-specific cost splitting and Multisport discount logic |
+| `sessionCost.test.js` | Cost splitting and the Multisport discount, across all four sports |
 | `format.test.js` | Date and currency formatting |
 | `robustness.test.js` | null/undefined/empty data guards, mutation validation, payment idempotency |
 | `functionsParity.test.js` | Cloud Functions and the app agree on every cost split, to the grosz |

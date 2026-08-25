@@ -52,7 +52,8 @@ export function computeWrappedStats(
 
   const squashSessions = yearHistory.filter(s => s.sport === SPORT.SQUASH).length;
   const badmintonSessions = yearHistory.filter(s => s.sport === SPORT.BADMINTON).length;
-  const pingpongSessions = totalSessions - squashSessions - badmintonSessions;
+  const padelSessions = yearHistory.filter(s => s.sport === SPORT.PADEL).length;
+  const pingpongSessions = totalSessions - squashSessions - badmintonSessions - padelSessions;
 
   const monthCounts: Record<string, number> = {};
   yearHistory.forEach(s => {
@@ -86,6 +87,7 @@ export function computeWrappedStats(
     pingpongSessions,
     squashSessions,
     badmintonSessions,
+    padelSessions,
     busiestMonthName,
     busiestMonthCount,
     bestPair,

@@ -1,4 +1,4 @@
-export type Sport = 'pingpong' | 'squash' | 'badminton';
+export type Sport = 'pingpong' | 'squash' | 'badminton' | 'padel';
 
 export interface Week {
   id: string;
@@ -9,10 +9,14 @@ export interface Week {
   multiPlayers: string[];
   racketCost?: number;
   ownRacketPlayers?: string[];
-  /** Gracze, którzy zostali na dogrywkę (dzielą overtimeCost po równo, bez zniżek). */
-  overtimePlayers?: string[];
-  /** Łączny koszt dogrywki (np. 15 zł za dodatkowy stół). */
+  /**
+   * @deprecated Zaszłość po usuniętej dogrywce. Tylko do ODCZYTU — rozliczenie
+   * dolicza tę kwotę do kosztu sesji, żeby stare rekordy nie zgubiły pieniędzy.
+   * Nic już jej nie zapisuje; edycja sesji scala ją z `cost`.
+   */
   overtimeCost?: number;
+  /** @deprecated Zaszłość po usuniętej dogrywce. Tylko do odczytu, bez wpływu na kwoty. */
+  overtimePlayers?: string[];
 }
 
 export interface Payment {

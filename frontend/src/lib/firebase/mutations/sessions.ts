@@ -12,8 +12,6 @@ interface SessionInput {
   sport?: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
-  overtimePlayers?: string[];
-  overtimeCost?: number;
 }
 
 interface NormalizedSession {
@@ -23,8 +21,6 @@ interface NormalizedSession {
   sport: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
-  overtimePlayers?: string[];
-  overtimeCost?: number;
 }
 
 /**
@@ -34,7 +30,7 @@ interface NormalizedSession {
  *
  * Zwraca komunikat błędu zamiast rzucać, żeby wywołujący mógł go pokazać.
  */
-const SPORTS: readonly Sport[] = ['pingpong', 'squash', 'badminton'];
+const SPORTS: readonly Sport[] = ['pingpong', 'squash', 'badminton', 'padel'];
 
 function isSport(value: unknown): value is Sport {
   return typeof value === 'string' && (SPORTS as readonly string[]).includes(value);
@@ -47,8 +43,8 @@ function normalizeSession(input: SessionInput): { session: NormalizedSession } |
     return { error: 'Koszt sesji musi być liczbą nieujemną' };
   }
 
-  // Reguły bazy przepuszczają tylko te trzy wartości. Bez sprawdzenia tutaj
-  // zapis wracałby jako „permission denied" bez czytelnego powodu.
+  // Reguły bazy przepuszczają tylko dyscypliny z tej listy. Bez sprawdzenia
+  // tutaj zapis wracałby jako „permission denied" bez czytelnego powodu.
   if (!isSport(sport)) {
     return { error: 'Nieznana dyscyplina sportu' };
   }
@@ -58,10 +54,9 @@ function normalizeSession(input: SessionInput): { session: NormalizedSession } |
     return { error: 'Zaznacz przynajmniej jednego obecnego gracza' };
   }
 
-  // Gracz spoza listy obecnych nie może mieć karty, rakiety ani dogrywki.
+  // Gracz spoza listy obecnych nie może mieć karty ani rakiety.
   const multiPlayers = normalizePlayerList(input.multisportPlayers).filter(p => present.includes(p));
   const ownRacketPlayers = normalizePlayerList(input.ownRacketPlayers).filter(p => present.includes(p));
-  const overtimePlayers = normalizePlayerList(input.overtimePlayers).filter(p => present.includes(p));
 
   const racketCost = input.racketCost;
   if (racketCost != null && !isValidMoney(racketCost)) {
@@ -71,13 +66,6 @@ function normalizeSession(input: SessionInput): { session: NormalizedSession } |
     return { error: 'Koszt rakiet nie może przekraczać kosztu sesji' };
   }
 
-  const overtimeCost = input.overtimeCost;
-  if (overtimeCost != null && !isValidMoney(overtimeCost)) {
-    return { error: 'Koszt dogrywki musi być liczbą nieujemną' };
-  }
-
-  const hasOvertime = overtimePlayers.length > 0 && overtimeCost != null && overtimeCost > 0;
-
   return {
     session: {
       cost: totalCost,
@@ -86,7 +74,6 @@ function normalizeSession(input: SessionInput): { session: NormalizedSession } |
       sport,
       ...(racketCost != null && racketCost > 0 ? { racketCost } : {}),
       ...(ownRacketPlayers.length > 0 ? { ownRacketPlayers } : {}),
-      ...(hasOvertime ? { overtimePlayers, overtimeCost } : {}),
     },
   };
 }

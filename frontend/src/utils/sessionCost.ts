@@ -1,4 +1,4 @@
-import { SPORT, SQUASH_MULTISPORT_DISCOUNT, isCourtSport } from '@/constants';
+import { MULTISPORT_DISCOUNT } from '@/constants';
 import { toGrosze, toZloty, allocateNonNegative, splitEqually } from './money';
 
 /**
@@ -16,7 +16,7 @@ export interface SessionLike {
   sport?: string;
   racketCost?: number;
   ownRacketPlayers?: string[];
-  overtimePlayers?: string[];
+  /** @deprecated Zaszłość po dogrywce — doliczana do kwoty sesji, patrz `parseSession`. */
   overtimeCost?: number;
 }
 
@@ -24,7 +24,6 @@ export interface SessionLike {
 interface PlayerShare {
   court: number;
   racket: number;
-  overtime: number;
   total: number;
 }
 
@@ -35,26 +34,21 @@ export interface SessionShares {
   baseCourt: number;
   /** Koszt kortu na osobę ze zniżką Multisport — wartość poglądowa do UI. */
   baseCourtMulti: number;
-  /** Koszt dogrywki na jednego jej uczestnika. */
-  overtimePerPerson: number;
   /**
-   * Kwota, której nie dało się przypisać nikomu (np. przy ping-pongu wszyscy
-   * obecni mają Multisport). Pokrywa ją organizator — UI może o tym ostrzec.
+   * Kwota, której nie dało się przypisać nikomu (sesja bez obecnych graczy albo
+   * rakiety, gdy każdy przyszedł z własną). Pokrywa ją organizator.
    */
   unallocated: number;
 }
 
-const EMPTY_SHARE: PlayerShare = { court: 0, racket: 0, overtime: 0, total: 0 };
+const EMPTY_SHARE: PlayerShare = { court: 0, racket: 0, total: 0 };
 
 interface ParsedSession {
   present: string[];
   multi: string[];
   totalGrosze: number;
-  sport: string;
   racketGrosze: number;
   ownRacket: string[];
-  overtimeParticipants: string[];
-  overtimeGrosze: number;
 }
 
 /**
@@ -76,7 +70,10 @@ function uniqueNames(names: readonly unknown[] | undefined): string[] {
 
 function parseSession(session: SessionLike): ParsedSession {
   const present = uniqueNames(session.presentPlayers ?? session.present);
-  const totalGrosze = Math.max(0, toGrosze(session.totalCost ?? session.cost ?? 0));
+  // `overtimeCost` to zaszłość po usuniętej dogrywce: doliczamy ją do kwoty
+  // sesji, żeby stare rekordy nie zgubiły pieniędzy z sald graczy.
+  const totalGrosze = Math.max(0, toGrosze(session.totalCost ?? session.cost ?? 0))
+    + Math.max(0, toGrosze(session.overtimeCost ?? 0));
   // Cena rakiet jest częścią kwoty sesji, więc nigdy nie może jej przekroczyć.
   const racketGrosze = Math.min(Math.max(0, toGrosze(session.racketCost ?? 0)), totalGrosze);
 
@@ -84,88 +81,61 @@ function parseSession(session: SessionLike): ParsedSession {
     present,
     multi: uniqueNames(session.multisportPlayers ?? session.multiPlayers),
     totalGrosze,
-    sport: session.sport || SPORT.PINGPONG,
     racketGrosze,
     ownRacket: uniqueNames(session.ownRacketPlayers),
-    // Gracz nieobecny na sesji nie może współdzielić dogrywki.
-    overtimeParticipants: uniqueNames(session.overtimePlayers).filter(p => present.includes(p)),
-    overtimeGrosze: Math.max(0, toGrosze(session.overtimeCost ?? 0)),
   };
 }
 
+/**
+ * Podział jest wspólny dla wszystkich dyscyplin: kwota sesji to tyle, ile
+ * organizator faktycznie zapłacił w recepcji — czyli cena kortu pomniejszona
+ * o zniżkę za każdą okazaną kartę Multisport. Żeby rabat trafił do tego, kto
+ * kartę przyniósł, odtwarzamy cenę „pełną" (`base`), a posiadaczom kart
+ * odejmujemy od niej stałą zniżkę. Suma udziałów nadal daje realny koszt.
+ */
 function computeShares(parsed: ParsedSession): SessionShares {
-  const {
-    present, multi, totalGrosze, sport, racketGrosze,
-    ownRacket, overtimeParticipants, overtimeGrosze,
-  } = parsed;
+  const { present, multi, totalGrosze, racketGrosze, ownRacket } = parsed;
 
   const court = new Map<string, number>();
   const racket = new Map<string, number>();
-  const overtime = new Map<string, number>();
   let unallocatedGrosze = 0;
 
-  const discount = toGrosze(SQUASH_MULTISPORT_DISCOUNT);
+  const discount = toGrosze(MULTISPORT_DISCOUNT);
   let baseCourtGrosze = 0;
   let baseCourtMultiGrosze = 0;
 
-  if (isCourtSport(sport)) {
-    const courtGrosze = totalGrosze - racketGrosze;
-    const renters = present.filter(p => !ownRacket.includes(p));
-    const racketPerPerson = renters.length > 0 ? racketGrosze / renters.length : 0;
+  const courtGrosze = totalGrosze - racketGrosze;
+  const renters = present.filter(p => !ownRacket.includes(p));
+  const racketPerPerson = renters.length > 0 ? racketGrosze / renters.length : 0;
 
-    if (present.length === 0) {
-      unallocatedGrosze += courtGrosze;
-    } else {
-      // Zniżka Multisport jest kwotowa: liczymy cenę „pełną", od której
-      // posiadacze kart odejmują stałą zniżkę. Suma nadal daje realny koszt.
-      const multiPresentCount = multi.filter(p => present.includes(p)).length;
-      const base = (courtGrosze + multiPresentCount * discount) / present.length;
-      const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
-      const allocated = allocateNonNegative(targets, courtGrosze);
-      present.forEach((p, i) => court.set(p, allocated[i]));
-
-      baseCourtGrosze = Math.round(base + racketPerPerson);
-      baseCourtMultiGrosze = Math.round(Math.max(0, base - discount) + racketPerPerson);
-    }
-
-    if (renters.length === 0) {
-      unallocatedGrosze += racketGrosze;
-    } else {
-      const allocated = splitEqually(racketGrosze, renters.length);
-      renters.forEach((p, i) => racket.set(p, allocated[i]));
-    }
+  if (present.length === 0) {
+    unallocatedGrosze += courtGrosze;
   } else {
-    const paying = present.filter(p => !multi.includes(p));
-    if (paying.length === 0) {
-      unallocatedGrosze += totalGrosze;
-    } else {
-      const allocated = splitEqually(totalGrosze, paying.length);
-      paying.forEach((p, i) => court.set(p, allocated[i]));
-      baseCourtGrosze = Math.round(totalGrosze / paying.length);
-    }
+    const multiPresentCount = multi.filter(p => present.includes(p)).length;
+    const base = (courtGrosze + multiPresentCount * discount) / present.length;
+    const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
+    const allocated = allocateNonNegative(targets, courtGrosze);
+    present.forEach((p, i) => court.set(p, allocated[i]));
+
+    baseCourtGrosze = Math.round(base + racketPerPerson);
+    baseCourtMultiGrosze = Math.round(Math.max(0, base - discount) + racketPerPerson);
   }
 
-  let overtimePerPersonGrosze = 0;
-  if (overtimeGrosze > 0) {
-    if (overtimeParticipants.length === 0) {
-      unallocatedGrosze += overtimeGrosze;
-    } else {
-      const allocated = splitEqually(overtimeGrosze, overtimeParticipants.length);
-      overtimeParticipants.forEach((p, i) => overtime.set(p, allocated[i]));
-      overtimePerPersonGrosze = allocated[0];
-    }
+  if (renters.length === 0) {
+    unallocatedGrosze += racketGrosze;
+  } else {
+    const allocated = splitEqually(racketGrosze, renters.length);
+    renters.forEach((p, i) => racket.set(p, allocated[i]));
   }
 
   const byPlayer: Record<string, PlayerShare> = {};
   for (const name of present) {
     const courtPart = court.get(name) ?? 0;
     const racketPart = racket.get(name) ?? 0;
-    const overtimePart = overtime.get(name) ?? 0;
     byPlayer[name] = {
       court: toZloty(courtPart),
       racket: toZloty(racketPart),
-      overtime: toZloty(overtimePart),
-      total: toZloty(courtPart + racketPart + overtimePart),
+      total: toZloty(courtPart + racketPart),
     };
   }
 
@@ -173,7 +143,6 @@ function computeShares(parsed: ParsedSession): SessionShares {
     byPlayer,
     baseCourt: toZloty(baseCourtGrosze),
     baseCourtMulti: toZloty(baseCourtMultiGrosze),
-    overtimePerPerson: toZloty(overtimePerPersonGrosze),
     unallocated: toZloty(unallocatedGrosze),
   };
 }
@@ -186,11 +155,11 @@ const sharesCache = new WeakMap<SessionLike, SessionShares>();
  * Jedyne źródło prawdy dla podziału kosztów sesji.
  *
  * Cała arytmetyka idzie na całkowitych groszach, więc suma udziałów graczy
- * plus `unallocated` jest zawsze dokładnie równa kwocie sesji (koszt + dogrywka).
+ * plus `unallocated` jest zawsze dokładnie równa kwocie sesji.
  */
 export function getSessionShares(session: SessionLike): SessionShares {
   if (!session || typeof session !== 'object') {
-    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, overtimePerPerson: 0, unallocated: 0 };
+    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, unallocated: 0 };
   }
   const cached = sharesCache.get(session);
   if (cached) return cached;
@@ -211,16 +180,11 @@ export function getPlayerSessionCost(session: SessionLike, playerName: string): 
 
 /** Poglądowy koszt kortu na osobę, bez zniżki Multisport i bez rakiet. */
 export function getSessionBaseCost(session: SessionLike): number {
-  const { present, multi, totalGrosze, sport, racketGrosze } = parseSession(session);
+  const { present, multi, totalGrosze, racketGrosze } = parseSession(session);
+  if (present.length === 0) return 0;
 
-  if (isCourtSport(sport)) {
-    if (present.length === 0) return 0;
-    const discount = toGrosze(SQUASH_MULTISPORT_DISCOUNT);
-    const multiPresentCount = multi.filter(p => present.includes(p)).length;
-    const courtGrosze = totalGrosze - racketGrosze;
-    return toZloty(Math.round((courtGrosze + multiPresentCount * discount) / present.length));
-  }
-
-  const paying = present.filter(p => !multi.includes(p));
-  return paying.length > 0 ? toZloty(Math.round(totalGrosze / paying.length)) : 0;
+  const discount = toGrosze(MULTISPORT_DISCOUNT);
+  const multiPresentCount = multi.filter(p => present.includes(p)).length;
+  const courtGrosze = totalGrosze - racketGrosze;
+  return toZloty(Math.round((courtGrosze + multiPresentCount * discount) / present.length));
 }

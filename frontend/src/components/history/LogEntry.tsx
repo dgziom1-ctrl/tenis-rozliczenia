@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import { formatDate, formatAmount } from '@/utils/format';
-import { SPORT_EMOJI, SPORT_SHORT, isCourtSport } from '@/constants';
+import { SPORT_EMOJI, SPORT_SHORT, hasRacketRental } from '@/constants';
 import type { HistoryEntry } from '../../types/ui';
 
 interface LogEntryProps {
@@ -10,7 +10,7 @@ interface LogEntryProps {
 }
 
 export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
-  const isSquash = isCourtSport(row.sport);
+  const isCourt = hasRacketRental(row.sport);
   return (
     <div className="scan-hover log-entry" style={{
       background: 'var(--co-dark)', border: '1px solid var(--co-border)',
@@ -31,9 +31,9 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
             <span style={{
               fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
               padding: '2px 6px',
-              background: isSquash ? 'rgba(0,255,136,0.08)' : 'rgba(0,229,255,0.06)',
-              border: `1px solid ${isSquash ? 'rgba(0,255,136,0.3)' : 'rgba(0,229,255,0.2)'}`,
-              color: isSquash ? 'var(--co-green)' : 'var(--co-cyan)',
+              background: isCourt ? 'rgba(0,255,136,0.08)' : 'rgba(0,229,255,0.06)',
+              border: `1px solid ${isCourt ? 'rgba(0,255,136,0.3)' : 'rgba(0,229,255,0.2)'}`,
+              color: isCourt ? 'var(--co-green)' : 'var(--co-cyan)',
               clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
             }}>
               {`${SPORT_EMOJI[row.sport] ?? '🏓'} ${SPORT_SHORT[row.sport] ?? 'PING'}`}
@@ -76,6 +76,11 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--co-cyan)' }}>
               {formatAmount(row.costPerPerson)}
             </p>
+            {row.multisportPlayers.length > 0 && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-green)', opacity: 0.7 }}>
+                ⚡ {formatAmount(row.costPerPersonMulti)}
+              </p>
+            )}
           </div>
           <div>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 2, textTransform: 'uppercase' }}>
@@ -91,21 +96,6 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
             )}
           </div>
         </div>
-
-        {/* Dogrywka */}
-        {row.overtimePlayers && row.overtimePlayers.length > 0 && (row.overtimeCost ?? 0) > 0 && (
-          <div style={{ paddingLeft: 16, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--co-amber)', textTransform: 'uppercase' }}>
-              ⏱ Dogrywka
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-amber)' }}>
-              {formatAmount(row.overtimeCost ?? 0)} ({formatAmount(row.overtimePerPerson ?? 0)} / os.)
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-dim)' }}>
-              {row.overtimePlayers.join(', ')}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );

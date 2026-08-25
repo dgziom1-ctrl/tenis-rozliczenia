@@ -101,6 +101,7 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
   const cPP        = useCountUp(stats.pingpongSessions, 1200, activeSlideId === 1);
   const cSQ        = useCountUp(stats.squashSessions,   1200, activeSlideId === 1);
   const cBM        = useCountUp(stats.badmintonSessions, 1200, activeSlideId === 1);
+  const cPD        = useCountUp(stats.padelSessions,    1200, activeSlideId === 1);
   const cAvg       = useCountUp(stats.avgPlayersPerSession, 1000, activeSlideId === 1);
   const cBusiest   = useCountUp(stats.busiestMonthCount, 1000, activeSlideId === 2);
   const cPairCount = useCountUp(stats.bestPairCount,    1200, activeSlideId === 3);
@@ -180,6 +181,13 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
                   <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🏸</div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-pink)' }}>{cBM}</div>
                   <div style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>BADMINTON</div>
+                </div>
+              )}
+              {stats.padelSessions > 0 && (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🥎</div>
+                  <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-amber)' }}>{cPD}</div>
+                  <div style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PADEL</div>
                 </div>
               )}
             </div>

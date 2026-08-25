@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 import { getSessionShares } from '../utils/sessionCost';
 import { allocateExact, allocateNonNegative, splitEqually, toGrosze } from '../utils/money';
-import { SQUASH_MULTISPORT_DISCOUNT, SPORT, isCourtSport } from '../constants';
+import { MULTISPORT_DISCOUNT, SPORT, hasRacketRental } from '../constants';
 
 const require = createRequire(import.meta.url);
 const fns = require('../../../functions/sessionCost.js');
@@ -26,8 +26,12 @@ const SESSIONS = [
     session: { sport: 'pingpong', cost: 100, present: ['A', 'B', 'C'], multiPlayers: ['B'] },
   },
   {
-    label: 'ping-pong, wszyscy z kartą — nikt nie płaci',
+    label: 'ping-pong, wszyscy z kartą — resztę dzielą po równo',
     session: { sport: 'pingpong', cost: 100, present: ['A', 'B'], multiPlayers: ['A', 'B'] },
+  },
+  {
+    label: 'ping-pong, karty pokryły całą kwotę',
+    session: { sport: 'pingpong', cost: 0, present: ['A', 'B'], multiPlayers: ['A', 'B'] },
   },
   {
     label: 'squash z kartami i rakietami',
@@ -41,9 +45,20 @@ const SESSIONS = [
     session: { sport: 'squash', cost: 20, present: ['A', 'B'], multiPlayers: ['A', 'B'] },
   },
   {
-    label: 'badminton z dogrywką',
+    label: 'badminton z kartą',
+    session: { sport: 'badminton', cost: 88, present: ['A', 'B', 'C'], multiPlayers: ['B'] },
+  },
+  {
+    label: 'padel z kartami i rakietami',
     session: {
-      sport: 'badminton', cost: 88, present: ['A', 'B', 'C'],
+      sport: 'padel', cost: 120.5, present: ['A', 'B', 'C', 'D'],
+      multiPlayers: ['B', 'D'], racketCost: 15, ownRacketPlayers: ['A'],
+    },
+  },
+  {
+    label: 'stary rekord z dogrywką — kwota dolicza się do sesji',
+    session: {
+      sport: 'pingpong', cost: 45, present: ['A', 'B', 'C'],
       multiPlayers: ['B'], overtimePlayers: ['A', 'C'], overtimeCost: 15,
     },
   },
@@ -102,13 +117,13 @@ describe('Cloud Functions liczą koszty identycznie jak aplikacja', () => {
 // gracza dopiero na produkcji — dlatego pilnujemy ich tutaj wprost.
 describe('Cloud Functions używają tych samych stałych co aplikacja', () => {
   it('zniżka Multisport jest identyczna', () => {
-    expect(fns.SQUASH_MULTISPORT_DISCOUNT).toBe(SQUASH_MULTISPORT_DISCOUNT);
+    expect(fns.MULTISPORT_DISCOUNT).toBe(MULTISPORT_DISCOUNT);
   });
 
-  it.each([SPORT.PINGPONG, SPORT.SQUASH, SPORT.BADMINTON, 'nieznany'])(
+  it.each([SPORT.PINGPONG, SPORT.SQUASH, SPORT.BADMINTON, SPORT.PADEL, 'nieznany'])(
     'klasyfikacja sportu „%s" jest identyczna',
     (sport) => {
-      expect(fns.isCourtSport(sport)).toBe(isCourtSport(sport));
+      expect(fns.hasRacketRental(sport)).toBe(hasRacketRental(sport));
     },
   );
 });

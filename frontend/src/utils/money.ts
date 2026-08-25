@@ -128,7 +128,3 @@ export function allocateNonNegative(targets: number[], totalGrosze: number): num
 
   return splitEqually(safeTotal, count);
 }
-
-export function getPayingPlayers(present: string[] = [], multisportPlayers: string[] = []): string[] {
-  return present.filter(p => !multisportPlayers.includes(p));
-}

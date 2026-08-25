@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useId } from 'react';
-import { CalendarPlus, CheckCircle2, Users, Zap, Timer } from 'lucide-react';
+import { CalendarPlus, CheckCircle2, Users, Zap } from 'lucide-react';
 import { addSession } from '@/lib/firebase';
-import { QUICK_COSTS, SQUASH_QUICK_COSTS, TABS, SOUND_TYPES, SPORT, RACKET_PRICE, SQUASH_MAX_COURT_RACKETS, OVERTIME_DEFAULT_COST, isCourtSport } from '@/constants';
+import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, MAX_RENTED_RACKETS, MULTISPORT_DISCOUNT, hasRacketRental } from '@/constants';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { parseAmount, isValidAmount } from '@/utils/format';
@@ -36,36 +36,25 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
   const [racketCount,       setRacketCount]       = useState(0);
   const [racketPrice,       setRacketPrice]       = useState(RACKET_PRICE);
   const [ownRacketPlayers,  setOwnRacketPlayers]  = useState<string[]>([]);
-  const [overtimePlayers,   setOvertimePlayers]   = useState<string[]>([]);
-  const [overtimeCost,      setOvertimeCost]      = useState(String(OVERTIME_DEFAULT_COST));
   const [isSaving,          setIsSaving]          = useState(false);
   const [savedSummary,      setSavedSummary]      = useState<{
-    date: string; totalCost: number; presentCount: number; payingCount: number;
+    date: string; totalCost: number; presentCount: number;
     multisportCount: number; perPerson: number; sport: Sport;
     presentPlayers: string[]; multisportPlayers: string[];
     racketCost: number; ownRacketPlayers: string[];
-    overtimePlayers: string[]; overtimeCost: number; overtimePerPerson: number;
   } | null>(null);
   const [costTouched,       setCostTouched]       = useState(false);
 
   const totalCostId      = useId();
   const totalCostErrorId = useId();
-  const overtimeCostId   = useId();
   const racketPriceId    = useId();
 
-  const isSquash = isCourtSport(sport);
-  const activeCosts = isSquash ? SQUASH_QUICK_COSTS : QUICK_COSTS;
-  const ownRacketPresentCount = isSquash ? ownRacketPlayers.filter(p => presentPlayers.includes(p)).length : 0;
-  const maxRackets = Math.max(0, Math.min(SQUASH_MAX_COURT_RACKETS, presentPlayers.length - ownRacketPresentCount));
+  const withRackets = hasRacketRental(sport);
+  const ownRacketPresentCount = withRackets ? ownRacketPlayers.filter(p => presentPlayers.includes(p)).length : 0;
+  const maxRackets = Math.max(0, Math.min(MAX_RENTED_RACKETS, presentPlayers.length - ownRacketPresentCount));
   const effectiveRacketCount = Math.min(racketCount, maxRackets);
   const parsedRacketPrice = racketPrice > 0 ? racketPrice : 0;
-  const racketCost = isSquash ? effectiveRacketCount * parsedRacketPrice : 0;
-
-  // Dogrywka (tylko ping-pong): dodatkowy stół dzielony po równo między wszystkich, bez zniżek.
-  const overtimeInPresent = overtimePlayers.filter(p => presentPlayers.includes(p));
-  const parsedOvertimeCost = parseAmount(overtimeCost);
-  const hasOvertime = !isSquash && overtimeInPresent.length > 0 && Number.isFinite(parsedOvertimeCost) && parsedOvertimeCost > 0;
-  const overtimePerPerson = hasOvertime ? parsedOvertimeCost / overtimeInPresent.length : 0;
+  const racketCost = withRackets ? effectiveRacketCount * parsedRacketPrice : 0;
 
   const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed);
   const parsedTotalCost = parseAmount(totalCost);
@@ -90,16 +79,10 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
       if (prev.includes(name)) {
         setMultisportPlayers(m => m.filter(p => p !== name));
         setOwnRacketPlayers(m => m.filter(p => p !== name));
-        setOvertimePlayers(m => m.filter(p => p !== name));
         return prev.filter(p => p !== name);
       }
       return [...prev, name];
     });
-  }, [playSound]);
-
-  const toggleOvertime = useCallback((name: string) => {
-    playSound(SOUND_TYPES.CLICK);
-    setOvertimePlayers(prev => prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name]);
   }, [playSound]);
 
   const toggleOwnRacket = useCallback((name: string) => {
@@ -130,10 +113,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
       present: presentPlayers,
       multiPlayers: multisportPlayers,
     });
-    const paying = presentPlayers.filter(p => !multisportPlayers.includes(p));
     try {
       const ownRacketForSession = ownRacketPlayers.filter(p => presentPlayers.includes(p));
-      const overtimeForSession = overtimePlayers.filter(p => presentPlayers.includes(p));
       const result = await addSession({
         datePlayed,
         totalCost: totalWithRackets,
@@ -142,14 +123,12 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         sport,
         ...(racketCost > 0 ? { racketCost } : {}),
         ...(ownRacketForSession.length > 0 ? { ownRacketPlayers: ownRacketForSession } : {}),
-        ...(hasOvertime ? { overtimePlayers: overtimeForSession, overtimeCost: parsedOvertimeCost } : {}),
       });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       playSound(SOUND_TYPES.SUCCESS);
       setSavedSummary({
         date: datePlayed, totalCost: totalWithRackets,
         presentCount: presentPlayers.length,
-        payingCount: paying.length,
         multisportCount: multisportPlayers.length,
         perPerson,
         sport,
@@ -157,21 +136,16 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         multisportPlayers: [...multisportPlayers],
         racketCost,
         ownRacketPlayers: [...ownRacketForSession],
-        overtimePlayers: hasOvertime ? [...overtimeForSession] : [],
-        overtimeCost: hasOvertime ? parsedOvertimeCost : 0,
-        overtimePerPerson: hasOvertime ? overtimePerPerson : 0,
       });
       setTotalCost('');
       setCostTouched(false);
       setRacketCount(0);
       setRacketPrice(RACKET_PRICE);
       setOwnRacketPlayers([]);
-      setOvertimePlayers([]);
-      setOvertimeCost(String(OVERTIME_DEFAULT_COST));
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, overtimePlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, racketCost, hasOvertime, parsedOvertimeCost, overtimePerPerson]);
+  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, racketCost]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
@@ -196,7 +170,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 Dodaj nową sesję
               </span>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
-                {sport === SPORT.SQUASH ? 'zapisz dzisiejszą grę squasha' : sport === SPORT.BADMINTON ? 'zapisz dzisiejszą grę badmintona' : 'zapisz dzisiejszą grę ping-ponga'}
+                zapisz dzisiejszą grę w {SPORT_ACCUSATIVE[sport] ?? SPORT_ACCUSATIVE[SPORT.PINGPONG]}
               </p>
             </div>
           </div>
@@ -206,7 +180,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             {/* Sport */}
             <div>
               <FieldLabel>Sport</FieldLabel>
-              <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); setRacketCount(0); setRacketPrice(RACKET_PRICE); setOwnRacketPlayers([]); setOvertimePlayers([]); setOvertimeCost(String(OVERTIME_DEFAULT_COST)); }} />
+              <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); setRacketCount(0); setRacketPrice(RACKET_PRICE); setOwnRacketPlayers([]); }} />
             </div>
 
             {/* Date */}
@@ -222,33 +196,13 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
 
             {/* Cost */}
             <div>
-              <FieldLabel htmlFor={totalCostId}>{isSquash ? 'Koszt kortów (zł)' : 'Koszt całkowity (zł)'}</FieldLabel>
-              {/* Quick-cost buttons */}
-              <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-                {activeCosts.map(cost => {
-                  const active = totalCost === String(cost);
-                  return (
-                    <button type="button" key={cost}
-                      onClick={() => { setTotalCost(String(cost)); playSound(SOUND_TYPES.CLICK); }}
-                      style={{
-                        flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
-                        fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-                        clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                        ...(active ? {
-                          background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.5)',
-                          color: 'var(--co-cyan)', boxShadow: '0 0 8px rgba(0,229,255,0.15)',
-                        } : {
-                          background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-                        }),
-                      }}>
-                      {cost === 0 ? 'FREE' : `${cost} zł`}
-                    </button>
-                  );
-                })}
-              </div>
+              <FieldLabel htmlFor={totalCostId}>Zapłacone w recepcji (zł)</FieldLabel>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '0 0 8px' }}>
+                {'>'} Kwota po odliczeniu kart Multisport — tyle, ile faktycznie wyszło z portfela
+              </p>
               <input id={totalCostId} type="text" inputMode="decimal" value={totalCost} onChange={e => setTotalCost(e.target.value)}
                 onBlur={() => setCostTouched(true)}
-                placeholder="lub wpisz ręcznie..."
+                placeholder="np. 41"
                 aria-invalid={costTouched && !isCostValid}
                 aria-describedby={costTouched && !isCostValid ? totalCostErrorId : undefined}
                 className="cyber-input"
@@ -284,7 +238,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
                   <Zap size={13} style={{ color: 'var(--co-green)' }} />
-                  {isSquash ? 'Kto miał Multisport? (zniżka -15 zł)' : 'Kto miał Multisport? (płaci 0 zł)'}
+                  Kto miał Multisport? (zniżka -{MULTISPORT_DISCOUNT} zł)
                   {multisportPlayers.length > 0 && (
                     <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>
                       ⚡{multisportPlayers.length}
@@ -295,57 +249,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               </div>
             )}
 
-            {/* Dogrywka — tylko ping-pong */}
-            {!isSquash && presentPlayers.length > 0 && (
+            {/* Own racket players — tylko sporty z wypożyczalnią */}
+            {withRackets && presentPlayers.length > 0 && (
               <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
-                  <Timer size={13} style={{ color: 'var(--co-amber)' }} />
-                  Dogrywka? (dzielona po równo, bez kart)
-                  {overtimeInPresent.length > 0 && (
-                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)' }}>
-                      ⏱{overtimeInPresent.length}
-                    </span>
-                  )}
-                </p>
-
-                {/* Koszt dogrywki */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <label htmlFor={overtimeCostId} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
-                    Koszt dogrywki:
-                  </label>
-                  <input
-                    id={overtimeCostId}
-                    type="text"
-                    inputMode="decimal"
-                    value={overtimeCost}
-                    onChange={e => setOvertimeCost(e.target.value)}
-                    className="cyber-input"
-                    style={{
-                      width: 80, padding: '5px 8px', fontSize: '0.8rem', textAlign: 'center',
-                      fontFamily: 'var(--font-mono)',
-                      clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                    }}
-                  />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>zł</span>
-                  {hasOvertime && (
-                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-amber)' }}>
-                      {overtimePerPerson.toFixed(2)} zł/os.
-                    </span>
-                  )}
-                </div>
-
-                <PlayerToggleGrid names={presentPlayers} selected={overtimeInPresent} onToggle={toggleOvertime} accent="amber" />
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 8 }}>
-                  {'>'} Zaznacz graczy, którzy zostali na dogrywkę — koszt dzielony po równo na wszystkich (karty nie liczą się)
-                </p>
-              </div>
-            )}
-
-            {/* Own racket players — squash only */}
-            {isSquash && presentPlayers.length > 0 && (
-              <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
-                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
-                  🎾 Własna rakietka
+                  {SPORT_EMOJI[sport]} Własna rakietka
                   {ownRacketPresentCount > 0 && (
                     <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)' }}>
                       {ownRacketPlayers.filter(p => presentPlayers.includes(p)).join(', ')}
@@ -359,11 +267,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               </div>
             )}
 
-            {/* Racket count — squash only */}
-            {isSquash && (
+            {/* Racket count — tylko sporty z wypożyczalnią */}
+            {withRackets && (
               <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
                 <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
-                  🎾 Wypożyczone rakiety
+                  {SPORT_EMOJI[sport]} Wypożyczone rakiety
                   {effectiveRacketCount > 0 && (
                     <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)' }}>
                       {effectiveRacketCount} × {parsedRacketPrice} = {racketCost} zł
@@ -438,7 +346,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             )}
 
             {/* Live preview */}
-            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} ownRacketPlayers={ownRacketPlayers} racketCount={effectiveRacketCount} overtimePlayers={overtimeInPresent} overtimeCost={hasOvertime ? parsedOvertimeCost : 0} />
+            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} ownRacketPlayers={ownRacketPlayers} racketCount={effectiveRacketCount} />
 
             {/* Submit */}
             <div>

@@ -1,7 +1,7 @@
 import { useMemo, useRef, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { RANKS, getRank, isCourtSport } from '@/constants';
+import { RANKS, getRank } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
 import { formatDate } from '@/utils/format';
 import { getPlayerColor } from '@/constants/colors';
@@ -205,14 +205,13 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
           {history.map((session, idx) => {
             const attended = session.presentPlayers.includes(player.name);
             const isMulti = session.multisportPlayers.includes(player.name);
-            const isSquashSession = isCourtSport(session.sport);
 
-            // For squash: everyone pays; multisport holders get -15 zł discount.
-            // For ping-pong: multisport players pay nothing.
+            // Każdy obecny płaci swój udział; posiadacze karty Multisport mają
+            // od niego stałą zniżkę, więc czasem wychodzi im dokładnie 0 zł.
             let costLabel = '—';
             if (attended) {
               const playerCost = getPlayerSessionCost(session, player.name);
-              costLabel = (isMulti && !isSquashSession && playerCost === 0) ? 'free' : `${playerCost.toFixed(2)} zł`;
+              costLabel = playerCost === 0 ? 'free' : `${playerCost.toFixed(2)} zł`;
             }
 
             return (
@@ -246,7 +245,7 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
                   </span>
                 )}
                 {/* Cost / absent */}
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: attended ? (isMulti && !isSquashSession ? 'var(--co-green)' : c.border) : 'var(--co-dim)', width: 55, textAlign: 'right', flexShrink: 0 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: attended ? (isMulti ? 'var(--co-green)' : c.border) : 'var(--co-dim)', width: 55, textAlign: 'right', flexShrink: 0 }}>
                   {costLabel}
                 </span>
               </div>

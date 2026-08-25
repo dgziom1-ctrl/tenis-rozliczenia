@@ -31,21 +31,26 @@ describe('calculateDebt', () => {
   });
 
   it('calculates full debt when no payment recorded', () => {
-    // w1: 60 / 3 paying = 20; w2: Alice pays full 60 (Bob has Multi); w3: 90 / 3 = 30
+    // w1: 60/3 = 20; w2: cena pełna (60 + 15)/2 = 37,50, Alice bez karty; w3: 90/3 = 30
     const debt = calculateDebt('Alice', { weeks });
-    expect(debt).toBe(roundToTwoDecimals(20 + 60 + 30));
+    expect(debt).toBe(roundToTwoDecimals(20 + 37.5 + 30));
   });
 
   it('subtracts recorded payments', () => {
     const payments = { Alice: [{ id: 'p1', amount: 80, date: '2025-01-14' }] };
-    expect(calculateDebt('Alice', { weeks, payments })).toBe(30); // 110 - 80
+    expect(calculateDebt('Alice', { weeks, payments })).toBe(7.5); // 87,50 - 80
   });
 
-  it('multisport player pays nothing for that week', () => {
-    // Bob has Multi in w2 → should not owe for w2
+  it('multisport player pays 15 zł less that week', () => {
+    // Bob ma kartę w w2 → 37,50 - 15 = 22,50
     const debt = calculateDebt('Bob', { weeks });
-    // w1: 60/3 paying = 20; w2: Bob is multi, pays 0; w3: 90/3 = 30
-    expect(debt).toBe(roundToTwoDecimals(20 + 0 + 30));
+    expect(debt).toBe(roundToTwoDecimals(20 + 22.5 + 30));
+  });
+
+  it('multisport discount does not change the session total', () => {
+    const w2 = [weeks[1]];
+    const total = ['Alice', 'Bob'].reduce((sum, p) => sum + calculateDebt(p, { weeks: w2 }), 0);
+    expect(total).toBe(60);
   });
 
   it('returns 0 when player was never present', () => {
@@ -53,7 +58,7 @@ describe('calculateDebt', () => {
   });
 
   it('returns 0 when payments cover everything', () => {
-    const payments = { Alice: [{ id: 'p1', amount: 110, date: '2025-01-21' }] };
+    const payments = { Alice: [{ id: 'p1', amount: 87.5, date: '2025-01-21' }] };
     expect(calculateDebt('Alice', { weeks, payments })).toBe(0);
   });
 });

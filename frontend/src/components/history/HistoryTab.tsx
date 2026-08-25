@@ -5,7 +5,7 @@ import { groupHistoryByMonth } from '@/utils/sessions';
 import { parseAmount, isValidAmount } from '@/utils/format';
 import { useToast } from '../common/Toast';
 import { PasswordModal } from '../common/SharedUI';
-import { SPORT, SPORT_LABEL, isCourtSport } from '@/constants';
+import { SPORT, SPORT_LABEL } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import type { HistoryEntry, SoundType, SessionEditForm } from '../../types/ui';
 import LogEntry from './LogEntry';
@@ -113,8 +113,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           sport: row.sport || SPORT.PINGPONG,
           racketCost: row.racketCost,
           ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [],
-          overtimePlayers: row.overtimePlayers ? [...row.overtimePlayers] : [],
-          overtimeCost: row.overtimeCost ?? '',
         },
       });
     } else {
@@ -143,9 +141,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     setIsSaving(true);
     const { id, form } = editing;
     try {
-      const overtimeInPresent = (form.overtimePlayers || []).filter(p => form.present.includes(p));
-      const parsedOvertimeCost = parseAmount(form.overtimeCost ?? '');
-      const hasOvertime = !isCourtSport(form.sport) && overtimeInPresent.length > 0 && parsedOvertimeCost > 0;
       const result = await updateWeek(id, {
         date: form.date,
         cost: parsedEditCost,
@@ -154,8 +149,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         sport: form.sport || SPORT.PINGPONG,
         racketCost: form.racketCost,
         ownRacketPlayers: form.ownRacketPlayers,
-        overtimePlayers: hasOvertime ? overtimeInPresent : [],
-        overtimeCost: hasOvertime ? parsedOvertimeCost : 0,
       });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       showSuccess('Sesja zaktualizowana');
@@ -174,7 +167,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         present: inList ? prev.present.filter(p => p !== name) : [...prev.present, name],
         multiPlayers: inList ? (prev.multiPlayers || []).filter(p => p !== name) : prev.multiPlayers,
         ownRacketPlayers: inList ? (prev.ownRacketPlayers || []).filter(p => p !== name) : prev.ownRacketPlayers,
-        overtimePlayers: inList ? (prev.overtimePlayers || []).filter(p => p !== name) : prev.overtimePlayers,
       };
     });
   }, [setEditForm]);
@@ -183,14 +175,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     setEditForm(prev => {
       const inList = (prev.multiPlayers || []).includes(name);
       return { ...prev, multiPlayers: inList ? prev.multiPlayers.filter(p => p !== name) : [...prev.multiPlayers, name] };
-    });
-  }, [setEditForm]);
-
-  const toggleOvertime = useCallback((name: string) => {
-    setEditForm(prev => {
-      const list = prev.overtimePlayers || [];
-      const inList = list.includes(name);
-      return { ...prev, overtimePlayers: inList ? list.filter(p => p !== name) : [...list, name] };
     });
   }, [setEditForm]);
 
@@ -443,7 +427,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                       onCancel={cancelEdit}
                       onTogglePresent={togglePresent}
                       onToggleMulti={toggleMulti}
-                      onToggleOvertime={toggleOvertime}
                     />
                   );
 
