@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useId, type MouseEvent } from 'react';
 import { RANKS } from '@/constants';
-import { FONT, CLIP, Z, TEXT, TRACK } from '../../constants/styles';
+import { FONT, CLIP } from '../../constants/styles';
 import type { Rank } from '@/types/ui';
 
 /** Jak długo wisi dymek z progiem następnej rangi. */
@@ -14,11 +14,7 @@ interface RankBadgeProps {
 
 // ── Rank badge ───────────────────────────────────────────────────
 export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
-  // Bez zapasowego `var(--co-dim)`: `col` jedzie dalej jako `${col}30`, a token
-  // z dopiskiem krycia daje `var(--co-dim)30` — deklarację nieprawidłową po
-  // podstawieniu zmiennej. `hex` jest wymagane w typie i ustawione w każdej
-  // randze, więc zapas był i tak martwy, a tylko czekał na wywrotkę.
-  const col = rank.hex;
+  const col = rank.hex || 'var(--co-dim)';
   const rankIdx = RANKS.findIndex(r => r.name === rank.name);
   const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
   const [visible, setVisible] = useState(false);
@@ -48,24 +44,24 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
         aria-label={`Ranga ${rank.name}, ${pct}% frekwencji — pokaż próg następnej rangi`}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
-          padding: '2px 6px 2px 4px',
+          padding: '2px 7px 2px 4px',
           background: `${col}10`, border: `1px solid ${col}30`,
           clipPath: CLIP.badge,
           cursor: 'pointer', userSelect: 'none',
         }}
       >
-        <span aria-hidden="true" style={{ fontSize: TEXT.tiny }}>{rank.emoji}</span>
-        <span style={{ ...FONT.display(TEXT.tiny, TRACK.tight), color: col }}>
+        <span aria-hidden="true" style={{ fontSize: '0.65rem' }}>{rank.emoji}</span>
+        <span style={{ ...FONT.display('0.75rem', '0.08em'), color: col }}>
           {rank.name}
         </span>
-        <span style={{ ...FONT.monoMicro, color: col, opacity: 0.75 }}>
+        <span style={{ ...FONT.monoTiny, color: col, opacity: 0.55 }}>
           {pct}%
         </span>
       </button>
       {/* Tap hint — visible "?" label until first tap */}
       {showHint && !tapped && (
         <span aria-hidden="true" style={{
-          fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+          fontFamily: 'var(--font-mono)', fontSize: '0.62rem',
           color: col, opacity: 0.7,
           letterSpacing: 0,
           lineHeight: 1,
@@ -75,29 +71,26 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
         </span>
       )}
       {visible && (
-        // W dół, nie w górę: odznaka siedzi ~60px od górnej krawędzi karty,
-        // a karta ma `overflow: hidden` — dymek otwierany do góry nie miał
-        // gdzie się zmieścić i był ucinany.
         <div id={tooltipId} role="status" style={{
-          position: 'absolute', top: 'calc(100% + 6px)', left: 0,
-          background: 'var(--co-panel)',
+          position: 'absolute', bottom: 'calc(100% + 6px)', left: 0,
+          background: 'var(--co-void)',
           border: `1px solid ${col}50`,
           padding: '6px 10px',
-          zIndex: Z.popover,
+          zIndex: 50,
           whiteSpace: 'nowrap',
           clipPath: CLIP.tag,
-          boxShadow: 'var(--glow-box-cyan)',
+          boxShadow: `0 0 12px ${col}30`,
           animation: 'slide-in-up 0.15s ease-out',
         }}>
-          <p style={{ ...FONT.display(TEXT.tiny, TRACK.tight), color: col, margin: 0 }}>
+          <p style={{ ...FONT.display('0.72rem', '0.08em'), color: col, margin: 0 }}>
             {rank.emoji} {rank.name} · {rank.min}%+
           </p>
           {nextRank ? (
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '3px 0 0' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '3px 0 0' }}>
               do {nextRank.emoji} {nextRank.name}: <span style={{ color: nextRank.hex }}>+{Math.max(0, nextRank.min - pct)}%</span>
             </p>
           ) : (
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: col, margin: '3px 0 0' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: col, margin: '3px 0 0' }}>
               ★ to jest max ranga
             </p>
           )}

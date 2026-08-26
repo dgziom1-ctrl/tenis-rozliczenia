@@ -4,7 +4,6 @@ import { InlineSpinner } from '../common/LoadingSkeleton';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { parseAmount, isValidAmount } from '@/utils/format';
 import type { PAYMENT_MODAL } from '@/constants';
-import { TEXT, CLIP } from '@/constants/styles';
 
 export type PaymentModalType = (typeof PAYMENT_MODAL)[keyof typeof PAYMENT_MODAL];
 
@@ -45,14 +44,14 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
     <div ref={panelRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onCancel()} role="dialog" aria-modal="true" aria-labelledby={titleId} style={{
       marginBottom: 12, padding: '16px 14px',
       background: 'var(--co-dark)',
-      border: '1px solid var(--co-tint-line)',
-      clipPath: CLIP.card,
-      boxShadow: 'var(--glow-box-cyan)',
+      border: '1px solid rgba(0,229,255,0.25)',
+      clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))',
+      boxShadow: '0 0 20px rgba(0,229,255,0.08)',
     }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <Zap size={12} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} />
-        <p id={titleId} style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', textTransform: 'uppercase', margin: 0 }}>
+        <p id={titleId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', textTransform: 'uppercase', margin: 0 }}>
           {hasCredit ? 'Ile chcesz dopłacić?' : 'Kwota przelewu BLIK'}
         </p>
       </div>
@@ -70,24 +69,26 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
         autoFocus
         aria-invalid={showError}
         aria-describedby={showError || errorMsg ? errorId : undefined}
-        className={`cyber-input ${showError ? 'input-error' : ''}`}
+        className="cyber-input"
         style={{
           width: '100%', padding: '12px 14px',
-          fontSize: TEXT.h3, textAlign: 'center',
+          fontSize: '1.3rem', textAlign: 'center',
           fontFamily: 'var(--font-mono)',
           marginBottom: showError ? 4 : 12,
-          clipPath: CLIP.tag,
+          border: `1px solid ${showError ? 'var(--co-rose)' : 'var(--co-border)'}`,
+          boxShadow: showError ? '0 0 10px rgba(255,32,144,0.2)' : 'none',
+          clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
         }}
       />
 
       {showError && (
-        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
+        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ {customAmt !== '' && parsedAmt > 0 && parsedAmt < 0.01 ? 'Minimalna kwota to 0.01 zł' : 'KWOTA MUSI BYĆ WIĘKSZA OD 0'}
         </p>
       )}
 
       {errorMsg && !showError && (
-        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
+        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ {errorMsg}
         </p>
       )}
@@ -100,10 +101,10 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
           style={{
             flex: 1, padding: '10px',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            fontSize: '0.75rem', letterSpacing: '0.1em',
+            fontSize: '0.62rem', letterSpacing: '0.1em',
             ...(!isValid || isSaving ? {
               background: 'var(--co-panel)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-              cursor: 'not-allowed', fontFamily: 'var(--font-display)', 
+              cursor: 'not-allowed', fontFamily: 'var(--font-display)', fontWeight: 700,
             } : {}),
           }}
         >

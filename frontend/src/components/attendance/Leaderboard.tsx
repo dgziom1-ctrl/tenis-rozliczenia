@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { getRank } from '@/constants';
-import { FONT, TEXT, TRACK, CLIP, PANEL } from '../../constants/styles';
+import { FONT, CLIP, PANEL } from '../../constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import StreakBadge from './StreakBadge';
 import Podium from './Podium';
@@ -22,13 +22,11 @@ function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
   return (
     <div
       className={`leaderboard-row ${isTop3 ? 'top3' : 'rest'}`}
-      // Tło żyje w `.leaderboard-row.top3` / `.rest` w index.css — inline
-      // przegrywało z nadpisaniem `!important` dla trybu jasnego, które
-      // zrównywało wszystkie wiersze i wyróżnienie podium znikało.
       style={{
         display: 'flex', alignItems: 'center', gap: 10,
-        minHeight: 44, padding: '10px 14px',
-        border: `1px solid ${isTop3 ? 'var(--co-tint-line)' : 'var(--co-border)'}`,
+        padding: '10px 14px',
+        background: isTop3 ? 'rgba(0,229,255,0.025)' : 'transparent',
+        border: `1px solid ${isTop3 ? 'rgba(0,229,255,0.18)' : 'var(--co-border)'}`,
         marginBottom: 3,
         clipPath: CLIP.card,
         cursor: 'pointer',
@@ -39,31 +37,28 @@ function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(); } }}
     >
       <span style={{
-        fontFamily: 'var(--font-mono)', fontSize: '0.8125rem',
+        fontFamily: 'var(--font-mono)', fontSize: '0.68rem',
         color: isTop3 ? 'var(--co-cyan)' : 'var(--co-text)',
         width: 28, flexShrink: 0,
       }}>
         {String(place).padStart(2, '0')}.
       </span>
-      <span aria-hidden="true" style={{ fontSize: '1rem', flexShrink: 0 }}>{rank.emoji}</span>
+      <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>{rank.emoji}</span>
       <span style={{
-        ...FONT.display(TEXT.lead, TRACK.tight), flex: 1, minWidth: 0,
+        ...FONT.display('0.95rem', '0.05em'), flex: 1, minWidth: 0,
         textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap',
         color: isTop3 ? 'var(--co-text-hi)' : 'var(--co-text)',
       }}>{player.name}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
           {player.attendanceCount}/{player.eligibleWeeks}
         </span>
-        {/* Frekwencja to najważniejsza liczba w rankingu — poza podium szła
-            w --co-dim, który miał 2:1 kontrastu i był najmniej czytelnym
-            elementem na ekranie. */}
         <span style={{
-          fontFamily: 'var(--font-display)', fontSize: '1.25rem',
-          color: isTop3 ? 'var(--co-cyan)' : 'var(--co-text-hi)',
-          minWidth: 56, textAlign: 'right',
-          textShadow: isTop3 ? 'var(--glow-cyan-md)' : 'none',
+          fontFamily: 'var(--font-display)', fontSize: '1.2rem',
+          color: isTop3 ? 'var(--co-cyan)' : 'var(--co-dim)',
+          width: 52, textAlign: 'right',
+          textShadow: isTop3 ? '0 0 10px rgba(0,229,255,0.4)' : 'none',
         }}>
           {player.attendancePercentage}%
         </span>
@@ -86,14 +81,11 @@ export default function Leaderboard({ ranked, podiumPlayers, onSelect }: Leaderb
       ...PANEL.cyberCut,
       overflow: 'hidden',
     }}>
-      {/* Background grid — siatka startowała od krawędzi panelu, a cała treść
-          jest wcięta o 24px z PANEL.cyberCut, więc linie nigdy nie pokrywały
-          się z żadną krawędzią i wyrównanie czytało się jak przypadek. */}
-      <div aria-hidden="true" style={{
+      {/* Background grid */}
+      <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
-        backgroundImage: `linear-gradient(var(--co-tint) 1px, transparent 1px), linear-gradient(90deg, var(--co-tint) 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px)`,
         backgroundSize: '40px 40px',
-        backgroundPosition: '24px 24px',
       }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
         <SectionHeader icon={TrendingUp} title="RANKING" sub="frekwencja · wszystkie sesje" />
@@ -106,7 +98,7 @@ export default function Leaderboard({ ranked, podiumPlayers, onSelect }: Leaderb
           </div>
         )}
         {ranked.length === 0 && (
-          <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>
+          <p style={{ ...FONT.mono('0.8rem'), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>
             {'>'} BRAK DANYCH — dodaj sesje żeby zobaczyć ranking_
           </p>
         )}

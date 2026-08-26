@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FONT, TEXT, TRACK, CLIP } from '../../constants/styles';
+import { FONT } from '../../constants/styles';
 import StreakBadge from './StreakBadge';
 import type { RankedPlayer } from '@/types/ui';
 
@@ -18,16 +18,10 @@ interface PlaceStyle {
   medal: string;
 }
 
-/**
- * Podium czytało z własnej palety neonów (`#00FFFF` — nawet nie z tego samego
- * cyanu co marka, bo ten to `#00E5FF`), więc w trybie jasnym wszystkie trzy
- * miejsca zostawały jaskrawe na białym tle. Teraz jadą tokenami, a kolejność
- * niesie znaczenie medalu: akcent → neutralne srebro → brąz.
- */
 const PLACE_STYLES: Record<number, PlaceStyle> = {
-  1: { border: 'var(--co-cyan)',    glow: 'var(--glow-box-cyan)', bg: 'var(--co-tint-hi)', height: 130, label: '#1', medal: '🥇' },
-  2: { border: 'var(--co-text-hi)', glow: 'none',                 bg: 'var(--co-tint)',    height: 90,  label: '#2', medal: '🥈' },
-  3: { border: 'var(--co-amber)',   glow: 'none',                 bg: 'var(--co-amber-dim)', height: 62, label: '#3', medal: '🥉' },
+  1: { border: '#00FFFF', glow: 'rgba(0,255,255,0.5)',   bg: 'rgba(0,255,255,0.04)',   height: 130, label: '#1', medal: '🥇' },
+  2: { border: '#0080FF', glow: 'rgba(0,128,255,0.4)',   bg: 'rgba(0,128,255,0.03)',   height: 90,  label: '#2', medal: '🥈' },
+  3: { border: '#CC00FF', glow: 'rgba(204,0,255,0.35)',  bg: 'rgba(204,0,255,0.025)',  height: 62,  label: '#3', medal: '🥉' },
 };
 
 interface PodiumCardProps {
@@ -59,81 +53,76 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
           <div key={player.name} role="button" tabIndex={0} onClick={() => onSelect(player.name)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(player.name); } }} style={{
             width: '100%', padding: '14px 10px', textAlign: 'center', cursor: 'pointer',
             background: s.bg,
-            border: `1px solid ${s.border}`,
+            border: `1px solid ${s.border}50`,
             marginBottom: 6,
-            clipPath: CLIP.smallCard,
+            clipPath: 'polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%)',
             position: 'relative', overflow: 'hidden',
-            boxShadow: s.glow,
+            boxShadow: podiumEntry.place === 1 ? `0 0 20px ${s.glow}, inset 0 0 16px ${s.glow}20` : 'none',
           }}>
-            {/* Top stripe */}
-            <div aria-hidden="true" style={{
+            {/* Top glow stripe */}
+            <div style={{
               position: 'absolute', top: 0, left: 0, right: 0, height: 2,
               background: s.border,
+              boxShadow: `0 0 10px ${s.glow}, 0 0 20px ${s.glow}`,
             }} />
             {/* Shimmer — synced to paddle hit for all 3 places */}
             <div
               key={shimmerKey}
-              aria-hidden="true"
               style={{
                 position: 'absolute', inset: 0, pointerEvents: 'none',
-                background: 'linear-gradient(105deg, transparent 20%, var(--co-tint-hi) 50%, transparent 80%)',
+                background: `linear-gradient(105deg, transparent 20%, ${s.border}18 50%, transparent 80%)`,
                 animation: shimmerKey > 0 ? 'gold-shimmer 3s ease-out forwards' : 'none',
               }}
             />
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <div aria-hidden="true" style={{ fontSize: TEXT.h2, marginBottom: 6 }}>{s.medal}</div>
-              {/* Nazwa nie miała żadnego zabezpieczenia przed przepełnieniem, a
-                  karta ma `overflow: hidden` — dłuższe imię było ucinane
-                  w połowie znaku, zamiast dostać wielokropek. */}
+              <div style={{ fontSize: '1.6rem', marginBottom: 6 }}>{s.medal}</div>
               <div style={{
-                ...FONT.display(TEXT.h3, TRACK.tight), color: s.border, marginBottom: 3,
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                ...FONT.display('1.3rem', '0.06em'), color: s.border, marginBottom: 3,
+                textShadow: podiumEntry.place === 1 ? `0 0 16px ${s.glow}` : 'none',
               }}>
                 {player.name}
               </div>
               <div style={{
-                ...FONT.display(TEXT.h2, TRACK.tight),
+                fontFamily: 'var(--font-display)', fontSize: '2rem',
                 color: s.border, lineHeight: 1,
-                textShadow: 'var(--glow-cyan-md)',
+                textShadow: `0 0 14px ${s.glow}`,
               }}>
                 {player.attendancePercentage}%
               </div>
-              <div style={{ ...FONT.monoSmall, marginTop: 4, marginBottom: 6, letterSpacing: TRACK.normal }}>
+              <div style={{ ...FONT.monoSmall, marginTop: 3, marginBottom: 6, letterSpacing: '0.1em' }}>
                 {player.attendanceCount}/{player.eligibleWeeks} SESJI
               </div>
               {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
             </div>
           </div>
       ))}
+      {exAequo && (
+        <div style={{ textAlign: 'center', ...FONT.monoSmall, letterSpacing: '0.2em', marginBottom: 4 }}>
+          EX AEQUO ×{players.length}
+        </div>
+      )}
+
       {/* Podium plinth */}
       <div style={{
         width: '100%', height: s.height,
-        background: s.bg,
-        border: `1px solid ${s.border}`,
+        background: `linear-gradient(to bottom, ${s.bg}, transparent)`,
+        border: `1px solid ${s.border}40`,
         borderBottom: `3px solid ${s.border}`,
-        boxShadow: s.glow,
+        boxShadow: `0 0 30px ${s.glow}, 0 8px 24px rgba(0,0,0,0.5), inset 0 0 20px ${s.glow}25`,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
         position: 'relative', overflow: 'hidden',
       }}>
         {/* Ambient scan */}
-        {podiumEntry.place === 1 && <div aria-hidden="true" style={{
+        {podiumEntry.place === 1 && <div style={{
           position: 'absolute', left: 0, right: 0, height: '1px',
           background: `linear-gradient(90deg, transparent, ${s.border}, transparent)`,
           animation: 'podium-scan 2.5s ease-in-out infinite',
           pointerEvents: 'none',
         }} />}
         <span style={{
-          ...FONT.display(TEXT.h2, TRACK.wide), color: s.border,
-          textShadow: 'var(--glow-cyan-md)',
+          ...FONT.display('2.2rem', '0.15em'), color: s.border,
+          textShadow: `0 0 16px ${s.glow}`,
         }}>{s.label}</span>
-        {/* Etykieta remisu siedziała między kartami a podestem, więc kolumna
-            z remisem rosła wyżej od pierwszego miejsca i podium wizualnie się
-            odwracało. Teraz jest w podeście, który ma stałą wysokość. */}
-        {exAequo && (
-          <span style={{ ...FONT.monoSmall, letterSpacing: TRACK.wide, textAlign: 'center' }}>
-            EX AEQUO ×{players.length}
-          </span>
-        )}
       </div>
     </div>
   );

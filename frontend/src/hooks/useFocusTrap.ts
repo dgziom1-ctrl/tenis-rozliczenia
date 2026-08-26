@@ -14,15 +14,6 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active = true) 
 
     const opener = document.activeElement;
 
-    // `autoFocus` na polu w środku okna zdąży ustawić fokus, zanim ten efekt
-    // się wykona. Przeniesienie go wtedy na kontener zabierało fokus polu:
-    // nie dało się nic wpisać, a na telefonie nie otwierała się klawiatura.
-    // Dlatego kontener przejmuje fokus tylko wtedy, gdy nic w środku go nie ma.
-    if (!el.contains(document.activeElement)) {
-      const firstFocusable = el.querySelector<HTMLElement>(FOCUSABLE);
-      (firstFocusable ?? el).focus();
-    }
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
 

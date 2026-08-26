@@ -1,8 +1,6 @@
-import { useEffect } from 'react';
 import { Trash2, X } from 'lucide-react';
 import { formatDate } from '@/utils/format';
 import { InlineSpinner } from '../common/LoadingSkeleton';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 import type { HistoryEntry } from '../../types/ui';
 
 interface DeleteConfirmationProps {
@@ -12,52 +10,37 @@ interface DeleteConfirmationProps {
   onCancel: () => void;
 }
 
-/**
- * Potwierdzenie rozwijane w miejscu wiersza, nie osobne okno — pytanie zostaje
- * przy sesji, której dotyczy. Escape mimo to zamyka, bo użytkownik oczekuje
- * tego od każdego potwierdzenia.
- */
 export default function DeleteConfirmation({ row, isDeleting, onConfirm, onCancel }: DeleteConfirmationProps) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !isDeleting) onCancel(); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onCancel, isDeleting]);
-
   return (
-    <div role="group" aria-label="Potwierdzenie usunięcia sesji" style={{
-      background: 'var(--co-tint-rose)',
-      border: '1px solid var(--co-rose)',
-      clipPath: CLIP.smallCard,
+    <div style={{
+      background: 'rgba(255,32,144,0.04)', border: '1px solid rgba(255,32,144,0.35)',
+      clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)',
       padding: 16, marginBottom: 4,
-      boxShadow: 'var(--glow-box-rose)',
+      boxShadow: '0 0 20px rgba(255,32,144,0.1)',
     }}>
-      {/* Pytanie było mniejsze (0.6rem) od własnego objaśnienia (0.65rem) —
-          odwrócona hierarchia na akcji nieodwracalnej. */}
-      <p style={{ ...FONT.display(TEXT.lead, TRACK.normal), color: 'var(--co-rose)', margin: '0 0 6px' }}>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em', color: 'var(--co-rose)', marginBottom: 4, textTransform: 'uppercase' }}>
         ⚠ Usunąć sesję z dnia {formatDate(row.datePlayed)}?
       </p>
-      <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-text)', margin: '0 0 14px' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', marginBottom: 14 }}>
         Tej operacji nie można cofnąć. Salda graczy zostaną przeliczone.
       </p>
       <div style={{ display: 'flex', gap: 10 }}>
-        <button
-          onClick={() => onConfirm(row.id)}
-          disabled={isDeleting}
-          className="cyber-button-danger"
-          style={{ flex: 1, minHeight: 44, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-        >
+        <button onClick={() => onConfirm(row.id)} disabled={isDeleting}
+          style={{
+            flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            background: isDeleting ? 'var(--co-panel)' : 'var(--co-rose)',
+            color: isDeleting ? 'var(--co-dim)' : '#000',
+            fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.12em',
+            border: 'none', cursor: isDeleting ? 'not-allowed' : 'pointer',
+            clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
+          }}>
           {isDeleting
-            ? <><InlineSpinner size="sm" /> USUWAM…</>
-            : <><Trash2 size={14} aria-hidden="true" /> USUŃ</>}
+            ? <><InlineSpinner size="sm" /> USUWAM...</>
+            : <><Trash2 size={14} /> POTWIERDŹ USUNIĘCIE</>}
         </button>
-        <button
-          onClick={onCancel}
-          disabled={isDeleting}
-          className="cyber-button-outline"
-          style={{ flex: 1, minHeight: 44, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-        >
-          <X size={14} aria-hidden="true" /> ANULUJ
+        <button onClick={onCancel} disabled={isDeleting}
+          className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, cursor: isDeleting ? 'not-allowed' : 'pointer' }}>
+          <X size={14} /> ANULUJ
         </button>
       </div>
     </div>

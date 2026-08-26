@@ -1,5 +1,4 @@
 import { Flame } from 'lucide-react';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 
 interface StreakBadgeProps {
   streak: number;
@@ -9,17 +8,15 @@ interface StreakBadgeProps {
 export default function StreakBadge({ streak }: StreakBadgeProps) {
   if (streak < 2) return null;
   return (
-    // Odznaka miała pomarańcz #FF6B35, którego nie ma w żadnej palecie, wpisany
-    // w cyanowy chip — dwa niepowiązane odcienie w elemencie wielkości 20px.
     <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      padding: '2px 6px',
-      background: 'var(--co-amber-dim)',
-      border: '1px solid var(--co-amber)',
-      clipPath: CLIP.badge,
+      display: 'inline-flex', alignItems: 'center', gap: 3,
+      padding: '2px 7px',
+      background: 'rgba(0,229,255,0.1)',
+      border: '1px solid rgba(0,229,255,0.4)',
+      clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
     }}>
-      <Flame size={11} style={{ color: 'var(--co-amber)' }} aria-hidden="true" />
-      <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-amber)' }}>
+      <Flame size={9} style={{ color: '#FF6B35' }} />
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.1em', color: '#FF6B35' }}>
         SERIA {streak}
       </span>
     </div>

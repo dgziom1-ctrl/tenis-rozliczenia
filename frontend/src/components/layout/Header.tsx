@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ArenaCanvas from './ArenaCanvas';
 import { copyToClipboard } from '@/utils/clipboard';
 import { useToast } from '@/components/common/Toast';
-import { TEXT, TRACK, CLIP } from '@/constants/styles';
 import type { StyleWithVars } from '@/types/css';
 
 
@@ -111,28 +110,28 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
       {chaosMode && (
         <div className="fixed inset-0 pointer-events-none" style={{ zIndex:49,
           animation:'chaosFlash 0.6s ease-out forwards',
-          background:'radial-gradient(ellipse at 50% 30%,var(--co-tint-hi) 0%,var(--co-tint) 60%,transparent 80%)' }}/>
+          background:'radial-gradient(ellipse at 50% 30%,rgba(0,229,255,0.12) 0%,rgba(0,229,255,0.04) 60%,transparent 80%)' }}/>
       )}
 
       <header style={{ position:'relative',overflow:'visible',
-        background:'linear-gradient(180deg, var(--co-void) 0%, var(--co-dark) 100%)',
+        background:'linear-gradient(180deg,#020408 0%,#050B10 100%)',
         borderBottom:'1px solid var(--co-border)' }}>
 
-        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
+        <div style={{ position:'absolute',top:0,left:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'0 0 10px rgba(0,229,255,.7)',zIndex:2 }}/>
+        <div style={{ position:'absolute',top:0,right:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'0 0 10px rgba(0,229,255,.7)',zIndex:2 }}/>
+        <div style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,rgba(0,229,255,0.9),transparent)',zIndex:2 }}/>
+        <div style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,rgba(0,229,255,0.6),transparent)',zIndex:2 }}/>
 
         <div style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
           <button onClick={handleCopy} style={{ display:'flex',alignItems:'center',gap:'8px',
-            background:'var(--co-dark)',border:'1px solid var(--co-border)',padding: '6px 12px',cursor:'pointer',
-            transition:'all .18s',clipPath:CLIP.tag }}>
+            background:'var(--co-dark)',border:'1px solid var(--co-border)',padding:'7px 12px',cursor:'pointer',
+            transition:'all .18s',clipPath:'polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)' }}>
             <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
-            <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.wide,color:'var(--co-cyan)',padding:'2px 6px',
-              background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>BLIK</span>
-            <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.base,letterSpacing:TRACK.tight,color:'var(--co-text)' }}>
+            <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
+              letterSpacing:'.18em',color:'var(--co-cyan)',padding:'2px 6px',
+              background:'rgba(0,229,255,0.07)',border:'1px solid rgba(0,229,255,.22)' }}>BLIK</span>
+            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.9rem',letterSpacing:'.06em',color:'var(--co-text)' }}>
               {blikNumber}
             </span>
             <div style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
@@ -143,10 +142,10 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
               aria-label={isMuted ? 'Włącz dźwięki' : 'Wycisz dźwięki'} aria-pressed={isMuted}
               style={{ display:'flex',alignItems:'center',
               justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
-              border:isMuted?'1px solid var(--co-rose)':'1px solid var(--co-border)',
-              color:isMuted?'var(--co-rose)':'var(--co-dim)',
-              background:isMuted?'var(--co-tint-rose)':'transparent',
-              clipPath:CLIP.badge }}>
+              border:isMuted?'1px solid rgba(255,32,144,.5)':'1px solid var(--co-border)',
+              color:isMuted?'#FF4444':'var(--co-dim)',
+              background:isMuted?'rgba(255,68,68,.08)':'transparent',
+              clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
               {isMuted ? <VolumeX size={17} aria-hidden="true"/> : <Volume2 size={17} aria-hidden="true"/>}
             </button>
             <button onClick={onToggleTheme}
@@ -154,34 +153,27 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
               style={{ display:'flex',alignItems:'center',
               justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
               border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
-              clipPath:CLIP.badge }}>
+              clipPath:'polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)' }}>
               {theme === 'light' ? <Moon size={17} aria-hidden="true"/> : <Sun size={17} aria-hidden="true"/>}
             </button>
           </div>
         </div>
 
-        <div style={{ position:'relative',zIndex:10,padding: '16px 16px 20px',
+        <div style={{ position:'relative',zIndex:10,padding:'18px 16px 22px',
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
           <div style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
-            <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to right,transparent,var(--co-tint-line))' }}/>
-            <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.wide,color:'var(--co-dim)',textTransform:'uppercase' }}>
+            <div style={{ height:1,width:36,background:'linear-gradient(to right,transparent,rgba(0,229,255,.4))' }}/>
+            <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
+              letterSpacing:'.28em',color:'rgba(0,229,255,0.45)',textTransform:'uppercase' }}>
               CENTRUM DOWODZENIA
             </span>
-            <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to left,transparent,var(--co-tint-line))' }}/>
+            <div style={{ height:1,width:36,background:'linear-gradient(to left,transparent,rgba(0,229,255,.4))' }}/>
           </div>
 
-          {/* Animacja jest renderowana w canvasie wprost na ciemnych barwach,
-              których CSS nie zmieni. Zamiast przepisywać cały render, arena
-              dostaje własną ramkę i czyta się jako wbudowany ekran — spójnie
-              w obu motywach, a nie jak granatowa plama na białym nagłówku. */}
           <div style={{ width:'100%',maxWidth:560,marginBottom:14,
-            background:'#030508',
-            border:'1px solid var(--co-border)',
-            clipPath:CLIP.smallCard,
-            overflow:'hidden',
-            filter:chaosMode?'none':'var(--glow-drop-cyan)' }}>
+            overflow:'visible',
+            filter:chaosMode?'none':'drop-shadow(0 0 20px rgba(0,229,255,.12))' }}>
             <ArenaCanvas chaosMode={chaosMode} onHit={handleHit}/>
           </div>
 
@@ -190,58 +182,53 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
             {!chaosMode && hitting && <span aria-hidden="true" style={{
               position:'absolute',inset:0,
-              display:'block',fontFamily:'var(--font-display)',
-              fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              display:'block',fontFamily:'var(--font-display)',fontWeight:900,
+              fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:'.06em',lineHeight:1,textAlign:'center',
               color:'transparent',pointerEvents:'none',userSelect:'none',
-              textShadow:'-4px 0 var(--co-rose), 4px 0 var(--co-cyan)',
+              textShadow:'-4px 0 #FF2090, 4px 0 var(--co-cyan)',
               clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
               opacity:1,
             }}>CYBER-PONK</span>}
-            {/* Main title — glitch on hit.
-                Kolor był zaszyty jako #B8E0EE (bladoniebieski): w trybie jasnym
-                nagłówek robi się prawie biały i napis znikał, a twardy czarny
-                cień zostawiał wokół niego dziwną obwódkę. */}
+            {/* Main title — glitch on hit */}
             <span style={{
-              display:'block',fontFamily:'var(--font-display)',
-              fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              display:'block',fontFamily:'var(--font-display)',fontWeight:900,
+              fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:'.06em',lineHeight:1,textAlign:'center',
               position:'relative',
               transition:'text-shadow 0.06s, transform 0.06s',
               ...(chaosMode
-                ? { color:'var(--co-cyan)',animation:'headerBounce .4s ease-in-out 3',
-                    textShadow:'var(--glow-cyan-lg)' }
+                ? { color:'#00E5FF',animation:'headerBounce .4s ease-in-out 3',
+                    textShadow:'0 0 30px rgba(0,229,255,.8),0 0 60px rgba(0,229,255,.3),2px 2px 0 rgba(0,0,0,.9)' }
                 : hitting
-                ? { color:'var(--co-cyan)',
-                    textShadow:'var(--glow-cyan-lg)',
+                ? { color:'#E0F4FF',
+                    textShadow:'0 0 28px rgba(0,229,255,.9),0 0 60px rgba(0,229,255,.4),3px 0 #FF2090,-3px 0 var(--co-cyan)',
                     transform:'translateX(1px)' }
-                : { color:'var(--co-text-hi)',
-                    textShadow:'var(--glow-cyan-sm)',
-                  }),
+                : { color:'#B8E0EE',
+                    textShadow:'0 0 20px rgba(0,229,255,.25),2px 2px 0 rgba(0,0,0,.98)',
+                }),
             }}>CYBER-PONK</span>
           </button>
 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
-            background:'linear-gradient(90deg,transparent,var(--co-tint-line) 40%,var(--co-tint-line) 60%,transparent)' }}/>
+            background:'linear-gradient(90deg,transparent,rgba(0,229,255,.25) 40%,rgba(0,229,255,.25) 60%,transparent)' }}/>
 
           {/* JACK IN — lights up exactly when ball hits paddle */}
-          <div style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
+          <div style={{ display:'flex',alignItems:'center',gap:'14px' }}>
             <span style={{
-              fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.wide,textTransform:'uppercase',
+              fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
+              letterSpacing:'.2em',textTransform:'uppercase',
               transition:'color .06s,text-shadow .06s',
-              // Wygaszony stan był cyanem na 8% krycia, czyli praktycznie
-              // niewidoczny w obu motywach.
-              color: hitting ? 'var(--co-cyan)' : 'var(--co-dim2)',
-              textShadow: hitting ? 'var(--glow-cyan-md)' : 'none',
+              color:    hitting ? 'var(--co-cyan)' : 'rgba(0,229,255,0.08)',
+              textShadow: hitting ? '0 0 12px rgba(0,229,255,.8)' : 'none',
             }}>⚡ JACK IN ⚡</span>
-            <span aria-hidden="true" style={{ color:'var(--co-border)' }}>│</span>
-            <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.normal,
-              color:isConnected?'var(--co-green)':'var(--co-rose)',
-              textShadow:isConnected?'var(--glow-green-md)':'var(--glow-rose-md)' }}>
+            <span style={{ color:'var(--co-border)' }}>│</span>
+            <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
+              letterSpacing:'.1em',
+              color:isConnected?'var(--co-green)':'#FF3333',
+              textShadow:isConnected?'0 0 8px rgba(0,255,136,0.5)':'0 0 8px rgba(255,50,50,0.5)' }}>
               {isConnected ? '● ONLINE' : '○ OFFLINE'}
             </span>
-            <span aria-hidden="true" style={{ color:'var(--co-border)' }}>│</span>
-            <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-dim)' }}>
+            <span style={{ color:'var(--co-border)' }}>│</span>
+            <span style={{ fontFamily:'var(--font-mono)',fontSize:'.68rem',color:'var(--co-dim)' }}>
               v2.0.77
             </span>
           </div>
@@ -254,37 +241,35 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
         <button onClick={handleCopy} style={{ background:'transparent',border:'none',padding:0,
           cursor:'pointer',display:'flex',alignItems:'center',gap:'6px' }}>
           <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
-          <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-            letterSpacing:TRACK.normal,color:'var(--co-cyan)',padding: '2px 4px',
-            background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>BLIK</span>
-          <span style={{ fontFamily:'var(--font-mono)',color:'var(--co-text)',fontSize:TEXT.small,letterSpacing:TRACK.tight }}>
+          <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
+            letterSpacing:'.15em',color:'var(--co-cyan)',padding:'2px 5px',
+            background:'rgba(0,229,255,0.1)',border:'1px solid rgba(0,229,255,.2)' }}>BLIK</span>
+          <span style={{ fontFamily:'var(--font-mono)',color:'var(--co-text)',fontSize:'.85rem',letterSpacing:'.06em' }}>
             {blikNumber}
           </span>
           {copied ? <Check size={12} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
         </button>
         <div style={{ display:'flex',alignItems:'center',gap:'10px' }}>
-          <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-            letterSpacing:TRACK.tight,color:isConnected?'var(--co-green)':'var(--co-rose)' }}>
+          <span style={{ fontFamily:'var(--font-display)',fontSize:'.7rem',fontWeight:400,
+            letterSpacing:'.08em',color:isConnected?'var(--co-green)':'#FF3333' }}>
             {isConnected ? '● ONLINE' : '○ OFFLINE'}
           </span>
           <button onClick={() => setIsMuted(!isMuted)}
             aria-label={isMuted ? 'Włącz dźwięki' : 'Wycisz dźwięki'} aria-pressed={isMuted}
             style={{ display:'flex',alignItems:'center',
-            border:isMuted?'1px solid var(--co-rose)':'1px solid var(--co-border)',
+            border:isMuted?'1px solid rgba(255,32,144,.4)':'1px solid var(--co-border)',
             color:isMuted?'var(--co-rose)':'var(--co-dim)',
-            background:'transparent',cursor:'pointer',
-            justifyContent:'center',width:40,height:40,
-            clipPath:CLIP.badge }}>
-            {isMuted ? <VolumeX size={16} aria-hidden="true"/> : <Volume2 size={16} aria-hidden="true"/>}
+            background:'transparent',padding:'4px 6px',cursor:'pointer',
+            clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
+            {isMuted ? <VolumeX size={15} aria-hidden="true"/> : <Volume2 size={15} aria-hidden="true"/>}
           </button>
           <button onClick={onToggleTheme}
             aria-label={theme === 'light' ? 'Włącz tryb ciemny' : 'Włącz tryb jasny'}
             style={{ display:'flex',alignItems:'center',
             border:'1px solid var(--co-border)',color:'var(--co-dim)',
-            background:'transparent',cursor:'pointer',
-            justifyContent:'center',width:40,height:40,
-            clipPath:CLIP.badge }}>
-            {theme === 'light' ? <Moon size={16} aria-hidden="true"/> : <Sun size={16} aria-hidden="true"/>}
+            background:'transparent',padding:'4px 6px',cursor:'pointer',
+            clipPath:'polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)' }}>
+            {theme === 'light' ? <Moon size={15} aria-hidden="true"/> : <Sun size={15} aria-hidden="true"/>}
           </button>
         </div>
       </div>

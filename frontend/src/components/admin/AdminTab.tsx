@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useId } from 'react';
-import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
-import { PanelHeader, FieldGroup } from '../common/SharedUI';
+import { CalendarPlus, CheckCircle2, Users, Zap } from 'lucide-react';
 import { addSession } from '@/lib/firebase';
 import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, MAX_RENTED_RACKETS, MULTISPORT_DISCOUNT, hasRacketRental } from '@/constants';
-import { CLIP, CONTENT_WIDTH } from '@/constants/styles';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { parseAmount, isValidAmount } from '@/utils/format';
@@ -145,14 +143,23 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
           uruchamiałyby się na pustym, jeszcze nieistniejącym oknie. */}
       {savedSummary && <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} />}
 
-      <div style={{ width: '100%', maxWidth: CONTENT_WIDTH.form, margin: '0 auto', animation: 'slide-in-up 0.3s ease-out', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div className="cyber-box" style={{ clipPath: CLIP.panel, padding: '20px 20px' }}>
+      <div style={{ width: '100%', maxWidth: 680, margin: '0 auto', animation: 'slide-in-up 0.3s ease-out', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="cyber-box" style={{ clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)', padding: '20px 20px' }}>
 
-          <PanelHeader
-            icon={CalendarPlus}
-            title="Dodaj nową sesję"
-            sub={`zapisz dzisiejszą grę w ${SPORT_ACCUSATIVE[sport] ?? SPORT_ACCUSATIVE[SPORT.PINGPONG]}`}
-          />
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 16, borderBottom: '1px solid var(--co-border)' }}>
+            <div style={{ padding: '7px 9px', background: 'rgba(0,229,255,0.07)', border: '1px solid rgba(0,229,255,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+              <CalendarPlus size={16} style={{ color: 'var(--co-cyan)', display: 'block' }} />
+            </div>
+            <div>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.22em', color: 'var(--co-cyan)', textTransform: 'uppercase' }}>
+                Dodaj nową sesję
+              </span>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
+                zapisz dzisiejszą grę w {SPORT_ACCUSATIVE[sport] ?? SPORT_ACCUSATIVE[SPORT.PINGPONG]}
+              </p>
+            </div>
+          </div>
 
           <form onSubmit={handleSaveSession} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
@@ -167,7 +174,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
               <FieldLabel>Data gry</FieldLabel>
               <CyberDateInput label="Data gry" value={datePlayed} onChange={setDatePlayed} />
               {isDuplicateDate && (
-                <p role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.18em', color: 'var(--co-amber)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <p role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: '#f59e0b', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                   ⚠ SESJA Z TĄ DATĄ JUŻ ISTNIEJE
                 </p>
               )}
@@ -176,7 +183,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
             {/* Cost */}
             <div>
               <FieldLabel htmlFor={totalCostId}>Zapłacone w recepcji (zł)</FieldLabel>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '0 0 8px' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '0 0 8px' }}>
                 {'>'} Kwota po odliczeniu kart Multisport — tyle, ile faktycznie wyszło z portfela
               </p>
               <input id={totalCostId} type="text" inputMode="decimal" value={totalCost} onChange={e => setTotalCost(e.target.value)}
@@ -185,68 +192,82 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 aria-invalid={costTouched && !isCostValid}
                 aria-describedby={costTouched && !isCostValid ? totalCostErrorId : undefined}
                 className="cyber-input"
-                style={{ width: '100%', padding: '10px 14px', clipPath: CLIP.tag }}
+                style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
                 required
               />
               {costTouched && !isCostValid && (
-                <p id={totalCostErrorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 8 }}>
+                <p id={totalCostErrorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 8 }}>
                   ⚠ {totalCostError}
                 </p>
               )}
             </div>
 
             {/* Present players */}
-            <FieldGroup
-              icon={Users}
-              label="Kto grał?"
-              counter={`[${presentPlayers.length}/${playerNames?.length || 0}]`}
-            >
+            <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+                <Users size={13} style={{ color: 'var(--co-cyan)' }} />
+                Kto grał?
+                <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)' }}>
+                  [{presentPlayers.length}/{playerNames?.length || 0}]
+                </span>
+              </p>
               <PlayerToggleGrid names={playerNames || []} selected={presentPlayers} onToggle={togglePresent} accent="yellow" />
               {!isPresentValid && (
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
                   ⚠ Wybierz przynajmniej jednego gracza
                 </p>
               )}
-            </FieldGroup>
+            </div>
 
             {/* Multisport */}
             {presentPlayers.length > 0 && (
-              <FieldGroup
-                icon={Zap}
-                label={`Kto miał Multisport? (zniżka -${MULTISPORT_DISCOUNT} zł)`}
-                counter={multisportPlayers.length > 0 ? `⚡${multisportPlayers.length}` : undefined}
-                counterColor="var(--co-green)"
-              >
+              <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+                  <Zap size={13} style={{ color: 'var(--co-green)' }} />
+                  Kto miał Multisport? (zniżka -{MULTISPORT_DISCOUNT} zł)
+                  {multisportPlayers.length > 0 && (
+                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-green)' }}>
+                      ⚡{multisportPlayers.length}
+                    </span>
+                  )}
+                </p>
                 <PlayerToggleGrid names={presentPlayers} selected={multisportPlayers} onToggle={toggleMulti} accent="green" />
-              </FieldGroup>
+              </div>
             )}
 
             {/* Own racket players — tylko sporty z wypożyczalnią */}
             {withRackets && presentPlayers.length > 0 && (
-              <FieldGroup
-                icon={Hand}
-                label={`${SPORT_EMOJI[sport]} Własna rakietka`}
-                counter={ownRacketPresentCount > 0 ? ownRacketPlayers.filter(p => presentPlayers.includes(p)).join(', ') : undefined}
-                counterColor="var(--co-amber)"
-              >
-                <PlayerToggleGrid names={presentPlayers} selected={ownRacketPlayers} onToggle={toggleOwnRacket} accent="amber" />
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
-                  {'>'} Zaznacz graczy, którzy przynieśli własną rakietkę — nie płacą za wypożyczenie
+              <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+                  {SPORT_EMOJI[sport]} Własna rakietka
+                  {ownRacketPresentCount > 0 && (
+                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)' }}>
+                      {ownRacketPlayers.filter(p => presentPlayers.includes(p)).join(', ')}
+                    </span>
+                  )}
                 </p>
-              </FieldGroup>
+                <PlayerToggleGrid names={presentPlayers} selected={ownRacketPlayers} onToggle={toggleOwnRacket} accent="amber" />
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 8 }}>
+                  {'>'} Zaznacz graczy którzy przynęśli własną rakietkę — nie płacą za wypożyczenie
+                </p>
+              </div>
             )}
 
             {/* Racket count — tylko sporty z wypożyczalnią */}
             {withRackets && (
-              <FieldGroup
-                icon={Hand}
-                label={`${SPORT_EMOJI[sport]} Wypożyczone rakiety`}
-                counter={effectiveRacketCount > 0 ? `${effectiveRacketCount} × ${parsedRacketPrice} = ${racketCost} zł` : undefined}
-              >
+              <div style={{ padding: '16px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+                  {SPORT_EMOJI[sport]} Wypożyczone rakiety
+                  {effectiveRacketCount > 0 && (
+                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)' }}>
+                      {effectiveRacketCount} × {parsedRacketPrice} = {racketCost} zł
+                    </span>
+                  )}
+                </p>
 
                 {/* Price per racket */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <label htmlFor={racketPriceId} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
+                  <label htmlFor={racketPriceId} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
                     Cena / szt.:
                   </label>
                   <input
@@ -258,20 +279,20 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                     onChange={e => setRacketPrice(parseAmount(e.target.value) || 0)}
                     className="cyber-input"
                     style={{
-                      width: 78, padding: '8px', textAlign: 'center',
+                      width: 72, padding: '5px 8px', fontSize: '0.8rem', textAlign: 'center',
                       fontFamily: 'var(--font-mono)',
-                      clipPath: CLIP.badge,
+                      clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                     }}
                   />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>zł</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>zł</span>
                   {parsedRacketPrice !== RACKET_PRICE && (
                     <button
                       type="button"
                       onClick={() => setRacketPrice(RACKET_PRICE)}
                       style={{
-                        fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)',
+                        fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)',
                         background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-                        padding: '2px 8px', clipPath: CLIP.badge,
+                        padding: '3px 8px', clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                       }}
                     >
                       reset ({RACKET_PRICE} zł)
@@ -288,11 +309,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                         onClick={() => { setRacketCount(n); playSound(SOUND_TYPES.CLICK); }}
                         style={{
                           flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
-                          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
-                          clipPath: CLIP.badge,
+                          fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
                           ...(active ? {
-                            background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
-                            color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
+                            background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.5)',
+                            color: 'var(--co-cyan)', boxShadow: '0 0 8px rgba(0,229,255,0.15)',
                           } : {
                             background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
                           }),
@@ -303,11 +324,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                   })}
                 </div>
                 {effectiveRacketCount > 0 && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 8 }}>
                     {'>'} Koszt {effectiveRacketCount} × {parsedRacketPrice} zł dzielony między graczy bez własnej rakietki
                   </p>
                 )}
-              </FieldGroup>
+              </div>
             )}
 
             {/* Live preview */}
@@ -320,9 +341,9 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                 style={{
                   width: '100%', padding: '14px 20px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  fontSize: '0.8125rem', letterSpacing: '0.1em',
+                  fontSize: '0.72rem', letterSpacing: '0.12em',
                   cursor: isDisabled ? 'not-allowed' : 'pointer',
-                  fontFamily: 'var(--font-display)', 
+                  fontFamily: 'var(--font-display)', fontWeight: 700,
                   ...(isDisabled ? {
                     background: 'var(--co-panel)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
                   } : {}),
@@ -332,7 +353,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
                   : <><CheckCircle2 size={16} /> ZAPISZ SESJĘ</>}
               </button>
               {!isSaving && isDisabled && (
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', textAlign: 'center', marginTop: 8 }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', textAlign: 'center', marginTop: 8 }}>
                   {'>'} {isDuplicateDate ? '⚠ Zmień datę — sesja już istnieje' : !isCostValid ? totalCostError : 'Zaznacz co najmniej jednego gracza'}
                 </p>
               )}

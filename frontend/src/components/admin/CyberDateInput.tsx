@@ -1,6 +1,5 @@
 import { CalendarDays } from 'lucide-react';
 import { formatDate } from '@/utils/format';
-import { CLIP } from '@/constants/styles';
 
 interface CyberDateInputProps {
   value: string;
@@ -25,8 +24,8 @@ export default function CyberDateInput({ value, onChange, label, compact = false
       <div aria-hidden="true" className="cyber-input" style={{
         width: '100%', padding: compact ? '10px 12px' : '10px 14px', display: 'flex',
         alignItems: 'center', justifyContent: 'space-between', gap: 10,
-        clipPath: CLIP.tag,
-        pointerEvents: 'none', fontFamily: 'var(--font-mono)',
+        clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+        pointerEvents: 'none', fontSize: compact ? '0.8rem' : '0.85rem', fontFamily: 'var(--font-mono)',
       }}>
         <span>{formatDate(value)}</span>
         <CalendarDays size={14} style={{ opacity: 0.4, flexShrink: 0 }} />

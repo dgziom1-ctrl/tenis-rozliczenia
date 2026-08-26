@@ -1,57 +1,46 @@
 import { getPlayerColor } from '@/constants/colors';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
-
-/**
- * Awatar gracza — inicjały w kolorze jego tożsamości.
- *
- * Ten element był zaimplementowany trzy razy, każdy raz z inną geometrią:
- * 60×60 bez ścięcia, 38×38 ze ścięciem *i* martwym `borderRadius`, oraz 42×42
- * z `CLIP.badge`. Teraz jest jeden komponent z parametrem rozmiaru.
- */
 
 interface PlayerAvatarProps {
   name: string;
-  index?: number;
-  size?: number;
-  /** Kropka statusu rozliczenia — tylko na karcie gracza. */
-  isPending?: boolean;
+  index: number;
+  isPending: boolean;
 }
 
-export function PlayerAvatar({ name, index, size = 60, isPending }: PlayerAvatarProps) {
+// ── Avatar ───────────────────────────────────────────────────────
+export function PlayerAvatar({ name, index, isPending }: PlayerAvatarProps) {
   const c = getPlayerColor(name, index);
   const initials = name.slice(0, 2).toUpperCase();
-  // Awatar zawsze nosi własny kolor gracza — nigdy nie zmienia go status długu.
-  const fontSize = size >= 56 ? TEXT.h3 : size >= 40 ? TEXT.lead : TEXT.base;
+  // Avatar always uses player's own color — never changes based on debt status
 
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>
       <div style={{
-        width: size, height: size,
+        width: 60, height: 60,
         background: c.bg,
         border: `1px solid ${c.border}`,
-        clipPath: CLIP.badge,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: 'var(--glow-box-cyan)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
+        boxShadow: `0 0 12px ${c.border}40, inset 0 0 6px ${c.border}08`,
         overflow: 'hidden', position: 'relative',
       }}>
-        <span style={{ ...FONT.display(fontSize, TRACK.tight), color: c.text, lineHeight: 1 }}>
-          {initials}
-        </span>
+        <span style={{
+          fontFamily: 'var(--font-display)', fontSize: '1.3rem',
+          color: c.text,
+          lineHeight: 1,
+          textShadow: `0 0 10px ${c.border}55`,
+        }}>{initials}</span>
       </div>
       {/* Status dot — only this element carries semantic color */}
-      {isPending !== undefined && (
-        <div
-          title={isPending ? 'Niezapłacone' : 'Rozliczone'}
-          style={{
-            position: 'absolute', bottom: -2, right: -2,
-            width: 10, height: 10,
-            background: isPending ? 'var(--co-rose)' : 'var(--co-green)',
-            border: '2px solid var(--co-void)',
-            boxShadow: isPending ? 'var(--glow-box-rose)' : 'var(--glow-box-cyan)',
-            borderRadius: '50%',
-          }}
-        />
-      )}
+      <div
+        title={isPending ? 'Niezapłacone' : 'Rozliczone'}
+        style={{
+          position: 'absolute', bottom: -2, right: -2,
+          width: 10, height: 10,
+          background: isPending ? 'var(--co-rose)' : 'var(--co-green)',
+          border: '2px solid var(--co-void)',
+          boxShadow: isPending ? '0 0 4px rgba(255,32,144,0.5)' : '0 0 4px rgba(0,255,102,0.5)',
+          borderRadius: '50%',
+        }}
+      />
     </div>
   );
 }

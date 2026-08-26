@@ -1,6 +1,5 @@
 import { SPORT, SPORT_EMOJI, SPORT_SHORT } from '@/constants';
 import type { Sport } from '@/types/domain';
-import { CLIP } from '@/constants/styles';
 
 const SPORTS: readonly Sport[] = [SPORT.PINGPONG, SPORT.SQUASH, SPORT.BADMINTON, SPORT.PADEL];
 
@@ -19,13 +18,13 @@ export default function SportSelector({ value, onChange }: SportSelectorProps) {
             key={sport} type="button"
             onClick={() => onChange(sport)}
             style={{
-              padding: '10px 6px', cursor: 'pointer', transition: 'all 0.15s',
-              fontFamily: 'var(--font-display)', fontSize: '0.8125rem', 
-              letterSpacing: '0.06em', textTransform: 'uppercase',
-              clipPath: CLIP.badge,
+              padding: '11px 6px', cursor: 'pointer', transition: 'all 0.15s',
+              fontFamily: 'var(--font-display)', fontSize: '0.72rem', fontWeight: 700,
+              letterSpacing: '0.04em', textTransform: 'uppercase',
+              clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
               ...(active ? {
-                background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
-                color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
+                background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.5)',
+                color: 'var(--co-cyan)', boxShadow: '0 0 10px rgba(0,229,255,0.1)',
               } : {
                 background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
               }),

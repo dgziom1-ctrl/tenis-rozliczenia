@@ -1,9 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { CSSProperties } from 'react';
-import { ChevronLeft } from 'lucide-react';
-import Modal from '../common/Modal';
-import { CornerBrackets } from '../dashboard/CornerBrackets';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import type { WrappedStats } from '@/types/ui';
 
 // ─── Count-up hook ───────────────────────────────────────────────
@@ -33,14 +30,32 @@ const MONTH_FULL: Record<string, string> = {
   WRZ: 'WRZESIEŃ', PAŹ: 'PAŹDZIERNIK', LIS: 'LISTOPAD', GRU: 'GRUDZIEŃ',
 };
 
+// ─── Keyframe CSS (injected once) ────────────────────────────────
+const STYLE_ID = 'wrapped-modal-keyframes';
+const KEYFRAMES = `
+@keyframes wm-fadeScale{0%{opacity:0;transform:scale(.88) translateY(24px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes wm-glow{0%,100%{text-shadow:0 0 10px currentColor,0 0 30px currentColor}50%{text-shadow:0 0 20px currentColor,0 0 60px currentColor,0 0 90px currentColor}}
+@keyframes wm-scanline{0%{top:-2px;opacity:.7}100%{top:100%;opacity:0}}
+@keyframes wm-pulse{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes wm-slideUp{0%{opacity:0;transform:translateY(40px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes wm-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+`;
+
+function injectKeyframes() {
+  if (document.getElementById(STYLE_ID)) return;
+  const el = document.createElement('style');
+  el.id = STYLE_ID;
+  el.textContent = KEYFRAMES;
+  document.head.appendChild(el);
+}
+
 // ─── Shared inline-style helpers ─────────────────────────────────
-// Cienkie nakładki na wspólne tokeny — plik miał wcześniej własną, równoległą
-// kopię FONT.display/FONT.mono z zaszytym na sztywno krojem i trackingiem.
 const display = (size: string, extra?: CSSProperties): CSSProperties => ({
-  ...FONT.display(size, TRACK.tight), lineHeight: 1.1, ...extra,
+  fontFamily: 'var(--font-display)', fontSize: size,
+  letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.1, ...extra,
 });
 const mono = (size: string, extra?: CSSProperties): CSSProperties => ({
-  ...FONT.mono(size), ...extra,
+  fontFamily: 'var(--font-mono)', fontSize: size, ...extra,
 });
 
 interface WrappedModalProps {
@@ -50,6 +65,7 @@ interface WrappedModalProps {
 
 // ─── WrappedModal ────────────────────────────────────────────────
 export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Build ordered slide list (skip bestPair slide when null)
@@ -61,6 +77,9 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
   }, [stats.bestPair]);
   const totalSlides = slideList.length;
   const activeSlideId = slideList[currentSlide] ?? 0;
+
+  useFocusTrap(overlayRef);
+  useEffect(() => { injectKeyframes(); overlayRef.current?.focus(); }, []);
 
   const advance = useCallback(() => {
     if (currentSlide >= totalSlides - 1) { onClose(); return; }
@@ -132,12 +151,12 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
             <div style={{
               ...display('clamp(4rem, 14vw, 8rem)'),
               color: 'var(--co-cyan)',
-              textShadow: 'var(--glow-cyan-lg)',
+              textShadow: '0 0 20px rgba(0,229,255,0.6), 0 0 60px rgba(0,229,255,0.3)',
             }}>
               {cSessions}
             </div>
             <div style={{
-              ...display('clamp(1rem, 3.5vw, 1.6rem)', { letterSpacing: '0.1em' }),
+              ...display('clamp(1rem, 3.5vw, 1.6rem)', { letterSpacing: '0.14em' }),
               color: 'var(--co-text-hi)', marginBottom: 32,
             }}>
               SESJI W {stats.year} ROKU
@@ -148,27 +167,27 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🏓</div>
                 <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-cyan)' }}>{cPP}</div>
-                <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PING PONG</div>
+                <div style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PING PONG</div>
               </div>
               {stats.squashSessions > 0 && (
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🎾</div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-green)' }}>{cSQ}</div>
-                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>SQUASH</div>
+                  <div style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>SQUASH</div>
                 </div>
               )}
               {stats.badmintonSessions > 0 && (
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🏸</div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-pink)' }}>{cBM}</div>
-                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>BADMINTON</div>
+                  <div style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>BADMINTON</div>
                 </div>
               )}
               {stats.padelSessions > 0 && (
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🥎</div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-amber)' }}>{cPD}</div>
-                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PADEL</div>
+                  <div style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PADEL</div>
                 </div>
               )}
             </div>
@@ -194,7 +213,7 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
             <div style={{
               ...display('clamp(1.8rem, 7vw, 3.5rem)'),
               color: 'var(--co-cyan)',
-              textShadow: 'var(--glow-cyan-md)',
+              textShadow: '0 0 16px rgba(0,229,255,0.5)',
               marginBottom: 8,
             }}>
               {(stats.busiestMonthName && MONTH_FULL[stats.busiestMonthName]) || stats.busiestMonthName}
@@ -227,7 +246,9 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
                 <div key={name} style={{
                   ...display('clamp(1.6rem, 6vw, 3rem)'),
                   color: i === 0 ? 'var(--co-cyan)' : 'var(--co-green)',
-                  textShadow: i === 0 ? 'var(--glow-cyan-md)' : 'var(--glow-green-md)',
+                  textShadow: i === 0
+                    ? '0 0 16px rgba(0,229,255,0.5), 0 0 40px rgba(0,229,255,0.2)'
+                    : '0 0 16px rgba(0,255,136,0.5), 0 0 40px rgba(0,255,136,0.2)',
                   animation: `wm-float 3s ease-in-out ${i * 0.5}s infinite`,
                 }}>
                   {name}
@@ -263,11 +284,6 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
         const rest = stats.players.slice(3);
         const medals = ['🥇', '🥈', '🥉'];
         const medalColors = ['var(--co-cyan)', 'var(--co-text)', 'var(--co-green)'];
-        // Osobne tokeny, nie `medalColors` z dopiskiem krycia: te wartości są
-        // już `var(...)`, więc `${medalColors[i]}08` dawało `var(--co-cyan)08` —
-        // po podstawieniu zmiennej deklaracja jest nieprawidłowa i karty
-        // podium zostawały bez wypełnienia. Malejąca moc washu = malejące miejsce.
-        const medalTints = ['var(--co-tint-hi)', 'var(--co-tint)', 'var(--co-tint-green)'];
 
         return (
           <div style={{ textAlign: 'center', maxWidth: 500, width: '100%' }}>
@@ -283,16 +299,16 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
               {top3.map((p, i) => (
                 <div key={p.name} style={{
                   flex: 1, maxWidth: 140, padding: 'clamp(10px, 3vw, 18px) 8px',
-                  background: medalTints[i],
-                  border: `1px solid ${i === 0 ? 'var(--co-tint-line)' : i === 2 ? 'var(--co-green)' : 'var(--co-border)'}`,
-                  clipPath: CLIP.card,
+                  background: `${medalColors[i]}08`,
+                  border: `1px solid ${i === 0 ? 'rgba(0,229,255,0.3)' : i === 2 ? 'rgba(0,255,136,0.2)' : 'rgba(208,232,245,0.12)'}`,
+                  clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
                   animation: `wm-slideUp 0.6s ease-out ${0.15 * i}s both`,
                 }}>
                   <div style={{ fontSize: 'clamp(1.2rem, 4vw, 1.8rem)', marginBottom: 6 }}>{medals[i]}</div>
                   <div style={{
                     ...display('clamp(0.9rem, 3vw, 1.4rem)'),
                     color: medalColors[i],
-                    textShadow: i === 0 ? 'var(--glow-cyan-sm)' : 'none',
+                    textShadow: i === 0 ? '0 0 8px rgba(0,229,255,0.4)' : 'none',
                     marginBottom: 6,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
@@ -301,7 +317,7 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
                   <div style={{ ...mono('clamp(0.65rem, 1.8vw, 0.75rem)'), color: 'var(--co-text)' }}>
                     {p.percentage}%
                   </div>
-                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', marginTop: 2 }}>
+                  <div style={{ ...mono('clamp(0.65rem, 1.4vw, 0.65rem)'), color: 'var(--co-dim)', marginTop: 2 }}>
                     {p.attended} sesji
                   </div>
                 </div>
@@ -312,26 +328,26 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
             {rest.length > 0 && (
               <div style={{
                 textAlign: 'left', padding: '10px 14px',
-                background: 'var(--co-surface-2)',
-                border: '1px solid var(--co-border)',
+                background: 'var(--co-separator)',
+                border: '1px solid var(--co-separator)',
                 maxHeight: 180, overflowY: 'auto',
               }}>
                 {rest.map((p) => (
                   <div key={p.name} style={{
                     display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '4px 0',
+                    padding: '5px 0',
                     borderBottom: '1px solid var(--co-separator)',
                   }}>
-                    <span style={{ ...mono(TEXT.small), color: 'var(--co-dim)', width: 24 }}>
+                    <span style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-dim)', width: 24 }}>
                       #{p.place}
                     </span>
                     <span style={{ ...mono('clamp(0.6rem, 2vw, 0.8rem)'), color: 'var(--co-text)', flex: 1 }}>
                       {p.name}
                     </span>
-                    <span style={{ ...mono(TEXT.small), color: 'var(--co-cyan)' }}>
+                    <span style={{ ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'), color: 'var(--co-cyan)' }}>
                       {p.percentage}%
                     </span>
-                    <span style={{ ...mono(TEXT.small), color: 'var(--co-dim)', width: 50, textAlign: 'right' }}>
+                    <span style={{ ...mono('clamp(0.65rem, 1.3vw, 0.65rem)'), color: 'var(--co-dim)', width: 50, textAlign: 'right' }}>
                       {p.attended} sesji
                     </span>
                   </div>
@@ -381,26 +397,42 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
               ].map(s => (
                 <div key={s.label} style={{
                   padding: 'clamp(8px, 2vw, 14px)',
-                  background: 'var(--co-surface-2)',
-                  border: '1px solid var(--co-border)',
-                  clipPath: CLIP.card,
+                  background: 'var(--co-separator)',
+                  border: '1px solid var(--co-separator)',
+                  clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))',
                 }}>
                   <div style={{ ...display('clamp(1rem, 3.5vw, 1.6rem)'), color: s.color }}>
                     {s.value}
                   </div>
-                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em', marginTop: 4 }}>
+                  <div style={{ ...mono('clamp(0.65rem, 1.2vw, 0.65rem)'), color: 'var(--co-dim)', letterSpacing: '0.1em', marginTop: 4 }}>
                     {s.label}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Close button — wspólna klasa zamiast ręcznych handlerów hover,
-                które na dotyku zostawały wciśnięte do kolejnego tapnięcia. */}
+            {/* Close button */}
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="cyber-button-outline"
-              style={{ padding: 'clamp(12px, 2.5vw, 16px) clamp(28px, 8vw, 56px)', minHeight: 44 }}
+              style={{
+                background: 'rgba(0,229,255,0.08)',
+                border: '1px solid rgba(0,229,255,0.35)',
+                color: 'var(--co-cyan)',
+                ...display('clamp(0.8rem, 2.5vw, 1.1rem)', { letterSpacing: '0.14em' }),
+                padding: 'clamp(10px, 2.5vw, 16px) clamp(28px, 8vw, 56px)',
+                cursor: 'pointer',
+                clipPath: 'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
+                transition: 'all 0.2s',
+                boxShadow: '0 0 20px rgba(0,229,255,0.15)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(0,229,255,0.18)';
+                e.currentTarget.style.boxShadow = '0 0 30px rgba(0,229,255,0.3)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(0,229,255,0.08)';
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(0,229,255,0.15)';
+              }}
             >
               ZAMKNIJ
             </button>
@@ -415,32 +447,54 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
 
   // ── Render ─────────────────────────────────────────────────────
   return (
-    // Pełny ekran z własnym układem, więc z prymitywu bierze samą nakładkę.
-    // Klik w tło przewija slajd, a nie zamyka — dlatego `closeOnBackdrop` off.
-    <Modal onClose={onClose} bare closeOnBackdrop={false} ariaLabel={`Podsumowanie roku ${stats.year}`}>
-      <div
-        onClick={advance}
-        onKeyDown={handleKey}
-        role="presentation"
-        style={{
-          position: 'absolute', inset: 0,
-          background: 'var(--co-void)',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          padding: 24,
-          cursor: 'pointer',
-          overflow: 'hidden',
-          userSelect: 'none',
-        }}
-      >
+    <div
+      ref={overlayRef}
+      onClick={advance}
+      onKeyDown={handleKey}
+      tabIndex={-1}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Podsumowanie roku ${stats.year}`}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 200,
+        background: 'rgba(3,5,8,0.94)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: 24,
+        cursor: 'pointer',
+        overflow: 'hidden',
+        userSelect: 'none',
+      }}
+    >
       {/* Scan-line overlay */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
-        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, var(--co-tint) 2px, var(--co-tint) 4px)',
+        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,0.015) 2px, rgba(0,229,255,0.015) 4px)',
       }} />
 
-      {/* Corner decorations — wspólny komponent zamiast 20-linijkowej kopii */}
-      <CornerBrackets color="var(--co-tint-line)" size={30} inset={20} />
+      {/* Corner decorations */}
+      {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(pos => {
+        const isTop = pos.includes('top');
+        const isLeft = pos.includes('left');
+        return (
+          <div key={pos} style={{
+            position: 'absolute',
+            [isTop ? 'top' : 'bottom']: 20,
+            [isLeft ? 'left' : 'right']: 20,
+            width: 30, height: 30,
+            borderColor: 'rgba(0,229,255,0.2)',
+            borderStyle: 'solid',
+            borderWidth: 0,
+            ...(isTop && isLeft && { borderTopWidth: 1, borderLeftWidth: 1 }),
+            ...(isTop && !isLeft && { borderTopWidth: 1, borderRightWidth: 1 }),
+            ...(!isTop && isLeft && { borderBottomWidth: 1, borderLeftWidth: 1 }),
+            ...(!isTop && !isLeft && { borderBottomWidth: 1, borderRightWidth: 1 }),
+            pointerEvents: 'none', zIndex: 2,
+          }} />
+        );
+      })}
 
       {/* Slide content */}
       <div
@@ -456,13 +510,11 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
         {slideContent(activeSlideId)}
       </div>
 
-      {/* Progress dots — czytelne jako pasek postępu, nie jako przyciski */}
-      <div role="progressbar" aria-valuenow={currentSlide + 1} aria-valuemin={1} aria-valuemax={totalSlides}
-        aria-label="Postęp podsumowania"
-        style={{
-          position: 'absolute', bottom: 'clamp(20px, 5vh, 40px)',
-          display: 'flex', gap: 8, zIndex: 4,
-        }}>
+      {/* Progress dots */}
+      <div style={{
+        position: 'absolute', bottom: 'clamp(20px, 5vh, 40px)',
+        display: 'flex', gap: 8, zIndex: 4,
+      }}>
         {slideList.map((_, i) => (
           <div
             key={i}
@@ -473,12 +525,10 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
               background: i === currentSlide
                 ? 'var(--co-cyan)'
                 : i < currentSlide
-                  ? 'var(--co-tint-line)'
-                  : 'var(--co-dot-empty)',
-              boxShadow: i === currentSlide ? 'var(--glow-box-cyan)' : 'none',
-              // Wskaźnik slajdu przełącza się przy każdej zmianie, więc 0.3s
-              // było odczuwalnie ospałe przy 0.15–0.2s w reszcie interfejsu.
-              transition: 'width 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
+                  ? 'rgba(0,229,255,0.35)'
+                  : 'rgba(255,255,255,0.12)',
+              boxShadow: i === currentSlide ? '0 0 8px rgba(0,229,255,0.5)' : 'none',
+              transition: 'all 0.3s ease',
             }}
           />
         ))}
@@ -487,35 +537,12 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
       {/* Slide counter */}
       <div style={{
         position: 'absolute', top: 20, right: 24,
-        ...mono(TEXT.small),
-        color: 'var(--co-dim)', letterSpacing: TRACK.normal,
+        ...mono('clamp(0.65rem, 1.5vw, 0.65rem)'),
+        color: 'var(--co-dim)', letterSpacing: '0.1em',
         zIndex: 4,
       }}>
         {currentSlide + 1}/{totalSlides}
       </div>
-
-      {/* Cofnięcie slajdu. Wcześniej jedynym sposobem była strzałka w lewo na
-          klawiaturze — a to okno otwiera się głównie na telefonie, gdzie
-          przypadkowe tapnięcie bezpowrotnie przeskakiwało slajd. */}
-      {currentSlide > 0 && (
-        <button
-          onClick={(e) => { e.stopPropagation(); goBack(); }}
-          aria-label="Poprzedni slajd"
-          className="icon-btn"
-          style={{
-            position: 'absolute', bottom: 'clamp(16px, 4vh, 32px)', left: 24, zIndex: 4,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            minHeight: 44, padding: '10px 14px',
-            background: 'transparent', border: '1px solid var(--co-border)',
-            color: 'var(--co-dim)', cursor: 'pointer',
-            clipPath: CLIP.badge,
-            ...display(TEXT.small),
-          }}
-        >
-          <ChevronLeft size={16} aria-hidden="true" /> Wstecz
-        </button>
-      )}
-      </div>
-    </Modal>
+    </div>
   );
 }

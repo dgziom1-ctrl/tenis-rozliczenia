@@ -15,8 +15,8 @@ export default function FieldLabel({ children, htmlFor }: FieldLabelProps) {
   return (
     <Tag htmlFor={htmlFor} style={{
       display: 'block',
-      fontFamily: 'var(--font-display)', fontSize: '1rem',
-      letterSpacing: '0.1em', textTransform: 'uppercase',
+      fontFamily: 'var(--font-display)', fontSize: '0.9rem',
+      letterSpacing: '0.12em', textTransform: 'uppercase',
       color: 'var(--co-dim)', marginBottom: 8,
     }}>
       {children}

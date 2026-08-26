@@ -1,7 +1,6 @@
 import { Component, Suspense } from 'react';
 import type { ComponentType, LazyExoticComponent, ReactNode } from 'react';
 import { isStaleBuildError, recoverFromStaleBuild } from '@/utils/bootRecovery';
-import { CLIP } from '@/constants/styles';
 
 // Pusty fallback zamiast spinnera: strony ładują się z tego samego bundla w
 // ułamku sekundy, a migający placeholder byłby bardziej widoczny niż samo
@@ -72,8 +71,8 @@ class RouteErrorBoundary extends Component<RouteErrorProps, RouteErrorState> {
       return (
         <p role="status" style={{
           padding: '24px 20px', textAlign: 'center', margin: 0,
-          fontFamily: 'var(--font-mono)', fontSize: '0.8125rem',
-          letterSpacing: '0.1em', color: 'var(--co-dim)',
+          fontFamily: 'var(--font-mono)', fontSize: '0.68rem',
+          letterSpacing: '0.08em', color: 'var(--co-dim)',
         }}>
           Naprawiam i przeładowuję...
         </p>
@@ -85,25 +84,25 @@ class RouteErrorBoundary extends Component<RouteErrorProps, RouteErrorState> {
     return (
       <div role="alert" style={{
         padding: '24px 20px', textAlign: 'center',
-        background: 'var(--co-tint-rose)', border: '1px solid var(--co-tint-rose-line)',
-        clipPath: CLIP.card,
+        background: 'rgba(200,0,30,0.05)', border: '1px solid rgba(200,0,30,0.28)',
+        clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
       }}>
         <p style={{
-          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.1em',
-          textTransform: 'uppercase', color: 'var(--co-rose)', fontSize: '1rem',
+          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.12em',
+          textTransform: 'uppercase', color: '#FF3333', fontSize: '0.9rem',
         }}>
           Nie udało się otworzyć tej zakładki
         </p>
         <p style={{
-          margin: '6px 0 16px', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-          color: 'var(--co-dim)', letterSpacing: '0.06em', lineHeight: 1.6,
+          margin: '6px 0 16px', fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
+          color: 'var(--co-dim)', letterSpacing: '0.04em', lineHeight: 1.6,
         }}>
           {offline
             ? 'Brak połączenia — tej zakładki nie ma jeszcze w pamięci offline.'
             : 'Pozostałe zakładki działają normalnie.'}
         </p>
         <button onClick={() => window.location.reload()} className="cyber-button-yellow"
-          style={{ padding: '10px 20px' }}>
+          style={{ padding: '11px 20px' }}>
           ↻ Odśwież
         </button>
       </div>

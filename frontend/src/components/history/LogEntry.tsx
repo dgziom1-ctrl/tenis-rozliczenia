@@ -4,7 +4,6 @@ import { SPORT_EMOJI, SPORT_SHORT, hasRacketRental } from '@/constants';
 import { getShareGroups } from '@/utils/sessionCost';
 import ShareBreakdown from '../common/ShareBreakdown';
 import type { HistoryEntry } from '../../types/ui';
-import { CLIP } from '@/constants/styles';
 
 interface LogEntryProps {
   row: HistoryEntry;
@@ -12,12 +11,10 @@ interface LogEntryProps {
   onDelete: (id: string) => void;
 }
 
-// Etykieta („Koszt", „Obecni") była większa od danych, które opisuje — nazwy
-// graczy pod nią renderowały się w 0.62rem, a sam nagłówek w 0.8rem.
 const labelStyle = {
   fontFamily: 'var(--font-display)',
-  fontSize: '0.75rem',
-  letterSpacing: '0.18em',
+  fontSize: '0.8rem',
+  letterSpacing: '0.12em',
   color: 'var(--co-dim)',
   marginBottom: 4,
   textTransform: 'uppercase',
@@ -34,27 +31,27 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
   return (
     <div className="scan-hover log-entry" style={{
       background: 'var(--co-dark)', border: '1px solid var(--co-border)',
-      clipPath: CLIP.card,
+      clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
       padding: '12px 14px', marginBottom: 4,
     }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {/* Top row: date + actions */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', opacity: 0.5 }}>{'>'}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-green)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)', opacity: 0.5 }}>{'>'}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--co-green)' }}>
               SESSION_{String(row.id).slice(-4).toUpperCase()}
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)' }}>
               {formatDate(row.datePlayed)}
             </span>
             <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+              fontFamily: 'var(--font-mono)', fontSize: '0.65rem',
               padding: '2px 6px',
-              background: isCourt ? 'var(--co-tint-green)' : 'var(--co-tint)',
-              border: `1px solid ${isCourt ? 'var(--co-green)' : 'var(--co-tint-line)'}`,
+              background: isCourt ? 'rgba(0,255,136,0.08)' : 'rgba(0,229,255,0.06)',
+              border: `1px solid ${isCourt ? 'rgba(0,255,136,0.3)' : 'rgba(0,229,255,0.2)'}`,
               color: isCourt ? 'var(--co-green)' : 'var(--co-cyan)',
-              clipPath: CLIP.badge,
+              clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
             }}>
               {`${sportEmoji} ${SPORT_SHORT[row.sport] ?? 'PING'}`}
             </span>
@@ -63,20 +60,20 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
             <button onClick={() => onEdit(row)} className="icon-btn" aria-label="Edytuj sesję" style={{
               minWidth: 38, minHeight: 38,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '8px 10px', background: 'transparent',
+              padding: '8px 11px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
               color: 'var(--co-dim)', touchAction: 'manipulation',
-              clipPath: CLIP.badge,
+              clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
             }}>
               <Pencil size={15} />
             </button>
             <button onClick={() => onDelete(row.id)} className="icon-btn danger" aria-label="Usuń sesję" style={{
               minWidth: 38, minHeight: 38,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '8px 10px', background: 'transparent',
+              padding: '8px 11px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
               color: 'var(--co-dim)', touchAction: 'manipulation',
-              clipPath: CLIP.badge,
+              clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
             }}>
               <Trash2 size={15} />
             </button>
@@ -87,11 +84,11 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
         <div className="log-entry-grid" style={{ paddingLeft: 16 }}>
           <div>
             <p style={labelStyle}>Koszt</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--co-cyan)', textShadow: 'var(--glow-cyan-sm)' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--co-cyan)', textShadow: '0 0 8px rgba(0,229,255,0.3)' }}>
               {formatAmount(row.totalCost)}
             </p>
             {racketCost > 0 && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 2 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-dim)', marginTop: 2 }}>
                 kort {formatAmountShort(row.totalCost - racketCost)} · rakiety {formatAmountShort(racketCost)}
               </p>
             )}
@@ -112,12 +109,12 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               const hasOwnRacket = racketCost > 0 && ownRacketPlayers.includes(name);
               return (
                 <span key={name} style={{
-                  fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-                  padding: '2px 6px',
+                  fontFamily: 'var(--font-mono)', fontSize: '0.62rem',
+                  padding: '2px 7px',
                   color: hasCard ? 'var(--co-green)' : 'var(--co-text)',
-                  background: hasCard ? 'var(--co-tint-green)' : 'transparent',
-                  border: `1px solid ${hasCard ? 'var(--co-green)' : 'var(--co-border)'}`,
-                  clipPath: CLIP.badge,
+                  background: hasCard ? 'rgba(0,255,136,0.06)' : 'transparent',
+                  border: `1px solid ${hasCard ? 'rgba(0,255,136,0.25)' : 'var(--co-border)'}`,
+                  clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
                 }}>
                   {hasCard && '⚡'}{hasOwnRacket && sportEmoji}{(hasCard || hasOwnRacket) && ' '}{name}
                 </span>

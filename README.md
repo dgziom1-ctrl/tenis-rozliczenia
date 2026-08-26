@@ -185,58 +185,216 @@ decision (it changes how members onboard), so it is left open rather than guesse
 `firebase.json` sets HSTS, `X-Content-Type-Options`, `Referrer-Policy`, a restrictive
 `Permissions-Policy`, and a Content-Security-Policy that allows only the origins the
 app actually uses (Google Fonts, gstatic for the messaging SDK, and Firebase
-endpoints, including the database hosts needed for the long-polling fallback below).
+endpoints).
 
-`boot-guard.js` is a separate file rather than an inline script because `script-src`
-has no `'unsafe-inline'`.
+Note that `boot-guard.js` is a separate file rather than an inline script precisely
+because `script-src` has no `'unsafe-inline'`; if you ever add inline scripts, that
+directive is what will block them.
 
-### PWA reliability
+### Why the app never needs "clear site data"
 
-The app is designed so a bad deploy or a bad network moment can never require the
-user to clear site data. Summary of the mechanisms, in the order they kick in:
+Every build gives the JS and CSS new content-hashed names, and Hosting only serves
+the current release's files. That combination has exactly one catastrophic failure
+mode: if the browser ends up with a bad response stored under a hashed URL, or with
+an `index.html` naming chunks that no longer exist, the app stops loading and stays
+broken across reloads *and* across browsers. Five independent layers make that
+unrecoverable state impossible. Order matters — each one catches what the previous
+one missed.
 
-- **Cache-Control defaults to `no-cache, must-revalidate`.** Only `/assets/**`
-  (content-hashed, 1 year, **not** `immutable`) and images (1 day) opt back into
-  caching. Header rules are last-match-wins in `firebase.json` (unlike rewrites,
-  which are first-match-wins) — the specific rules must stay last.
-- **Missing chunks 404 instead of returning HTML.** The SPA rewrite excludes
-  `/assets/**`, so a deleted chunk can't get cached as if it were valid JS.
-- **Service Worker** (`public/firebase-messaging-sw.js`) handles push + app-shell
-  caching. Only `200` responses are cached, content-type is checked (a 200 HTML
-  response from the SPA fallback is not a valid script/asset), navigation is
-  network-first with a cache fallback for *offline*, all fetches use
-  `cache: 'reload'` to bypass/heal a poisoned HTTP cache entry, cache names carry a
-  build id, and the worker never intercepts its own script or `/version.json`.
-  Install only precaches the shell (2 files) so an update always completes even on
-  a weak connection; the full asset list is warmed after activation.
-- **`public/boot-guard.js`**, loaded synchronously outside the bundle (so it still
-  runs if the entry chunk itself fails to load). Watches for the app to render and,
-  if it doesn't, escalates: refetch with `cache: 'reload'` → unregister worker +
-  clear caches → wipe storage → a rescue screen with a one-click reset. A running
-  app can only trigger the first (cheapest) step, so one flaky chunk offline can't
-  wipe local data.
-- **`utils/buildVersion.ts`** compares the build id compiled into the bundle against
-  `/version.json`. If a device is still running an old release from the Service
-  Worker's cache, this notices independently of the worker and force-updates
-  (unregister + clear caches + reload) with a 10-minute cooldown against loop.
-- **`lib/firebase/snapshotCache.ts`** keeps the last successfully-parsed data in
-  `localStorage` so a cold start with no connection shows real content instead of
-  empty lists.
-- **`lib/firebase/transport.ts`** clears the SDK's own
-  `firebase:previous_websocket_failure` flag on every start. Left alone, one
-  network drop mid-handshake pins the connection to long-polling forever (that flag
-  persists across restarts) — the CSP change above is what makes the fallback
-  actually work if it's ever needed.
-- **Offline writes fail fast.** `withTransaction` refuses immediately when
-  `navigator.onLine` is `false`, instead of leaving a transaction hanging in the SDK
-  that would otherwise block server updates from reaching the client.
-- **No manual reconnect supervision.** A `goOffline`/`goOnline` "kick" on connection
-  loss was tried and made things worse — it fired before the SDK finished its own
-  handshake and broke connectivity entirely. `connectionResilience.test.js` fails
-  the build if `goOffline` reappears anywhere in `src/`.
+**1. Nothing is reusable without revalidation by default; only hashed assets and
+icons opt back in.** The `**` rule sets `no-cache, must-revalidate`, and just two
+later rules grant caching: images get a day, `/assets/**` gets a year. This ordering
+is deliberate, because overlapping header rules in `firebase.json` follow **last
+match wins** (unlike rewrites, which are first match wins). Inverting the default
+this way covers every HTML route — present, future, any depth — without a pattern
+that has to enumerate routes, and `no-cache` forbids reusing a stored response
+without checking it with the server, which removes the "old shell asks for deleted
+chunks" scenario at the source. `no-store` would give the same freshness guarantee
+but also disqualifies the page from the back/forward cache, making every back
+navigation re-run the whole boot sequence, so `no-cache` is the better trade.
+Note that the Hosting **emulator does not apply `headers` at all** (verified: it
+returns neither `Cache-Control` nor CSP), so this config cannot be checked locally
+— which is why it sticks to glob syntax already proven in this project rather than
+anything exotic.
 
-Covered by `bootGuard.test.js`, `serviceWorker.test.js`, `buildVersion.test.js`,
-`connectionResilience.test.js`, and `appDataProvider.test.jsx`.
+**2. Hashed assets are cacheable, but not `immutable`.** Hosting applies header
+rules by request path, including to `404` responses, so a request that races a
+deploy can store a 404 under a content-hashed name. With `immutable` the browser
+refuses to revalidate that entry even on an explicit reload, and because Vite hashes
+by content the same filename reappears in later deploys — the poisoned entry then
+shadows a file that exists again. This was the actual cause of the "only clearing
+site data helps" reports, and it explains why every browser on a device broke
+separately: each keeps its own HTTP cache. Dropping `immutable` is what lets a
+reload heal it — but only that, so do not mistake it for the whole fix. Chrome
+revalidates only the main resource on a normal reload, and an installed iOS PWA has
+no reload affordance at all, so on the two platforms where this hurt most the
+header change alone is not enough. Layers 4 and 5 are what actually close it, both
+by fetching with `cache: 'reload'`, which is the one mode that bypasses a poisoned
+entry *and* overwrites it.
+
+**3. A missing chunk returns 404, not HTML.** The SPA rewrite is `!/assets/**`
+rather than `**`. With a plain catch-all, a request for a deleted chunk gets
+`200 text/html`, and the browser stores that HTML *as* the chunk. Excluding the
+asset directory keeps misses honest.
+
+**4. The Service Worker never caches a failure.** `public/firebase-messaging-sw.js`
+handles both push and app-shell caching — one worker, because only one can own the
+`/` scope and two registrations would evict each other. Its invariants are covered
+by `src/__tests__/serviceWorker.test.js`, which runs the deployed file in a stubbed
+worker scope: only `200` responses are ever written to a cache, navigations are
+network-first so a fresh `index.html` always wins, every network call has a timeout
+so a hung request can't block a start that a cached copy could serve, cache names
+carry a build id so shell and chunks never mix across releases, and the worker never
+intercepts its own script — otherwise it could persist a broken version of itself
+and cut off the only route to a fix. Every fetch it makes uses `cache: 'reload'`, so
+a poisoned HTTP entry can neither be copied into the worker's cache nor survive the
+request. One subtlety worth keeping: a 200 is not enough to trust a response,
+because the SPA rewrite answers any missing path outside `/assets/` with
+`index.html`. Caching that under a script or icon URL would be the same permanent
+wrong-content failure as caching a 404, so content type is checked too.
+
+Install is deliberately cheap — it stores only `index.html` and `boot-guard.js`. The
+full release (from the asset list the plugin injects, because `index.html` only
+names the chunks needed immediately) is warmed **after** activation instead. This
+ordering was learned the hard way: precaching twenty-odd files during install meant
+that on a short session over a weak connection the install never finished, so a new
+worker never took over and the device kept booting the previous release from cache —
+even after a fix had been deployed. A worker that updates matters more than a
+complete offline store, so install must be small enough that it always completes.
+
+**6. The app can escape a stuck release on its own.** This is the last line of
+defence and it exists because everything above it failed once: a device kept running
+a broken release from the worker's cache, and the only cure was clearing browser
+data. The worker can serve a complete, self-consistent old release — shell plus
+matching chunks, fully offline-capable — so until it notices its own update, nothing
+in the app can help. `utils/buildVersion.ts` therefore does not rely on the worker at
+all: the build id is compiled into the bundle, and it is compared against
+`/version.json`, which the worker is forbidden to intercept. On a mismatch the app
+unregisters the worker, drops the caches and reloads, which is exactly what a user
+would otherwise do by hand in browser settings. User data is untouched — this
+replaces a release, it does not reset the app — and a 10-minute cooldown stops an
+unfixable mismatch from turning into a reload loop.
+
+Two related choices follow from the same incident. A new worker taking over now
+reloads the page **immediately** rather than waiting for the tab to be hidden;
+losing a half-typed form once per deploy is cheap, while a device pinned to a broken
+release is not. And the cached shell is a fallback for being *offline*, not a
+shortcut for being *slow*: the navigation handler waits up to 20 s for a fresh
+document when a connection exists, because a short race let the old shell win on
+mobile cold starts and drag the whole previous release back in with it.
+
+**5. A boot guard outside the bundle.** `public/boot-guard.js` is loaded
+synchronously from `index.html`. It lives outside the bundle on purpose: when the
+failing file *is* the entry chunk, nothing inside the bundle can run, and the
+previous recovery code — which shipped inside that chunk — could never fire. It is
+also a separate file rather than an inline script because the CSP has no
+`'unsafe-inline'` in `script-src`. It watches for a `ready()` signal from `App.tsx`
+and, if the app doesn't start or a chunk fails to load, walks an escalating ladder:
+refetch every file of the release with `cache: 'reload'` (the only thing that
+actually overwrites a poisoned HTTP cache entry) → unregister the worker and drop
+all caches → wipe `localStorage`, `sessionStorage` and IndexedDB. If all of that
+fails it draws a rescue screen from bare DOM with a one-click full reset, so a user
+is never left on a blank page. Two details are load-bearing and both have regression
+tests in `src/__tests__/bootGuard.test.js`: the attempt counter lives in
+`localStorage` (`sessionStorage` is wiped on every PWA launch) and survives both a
+successful start and the storage wipe of its own final rung — otherwise the ladder
+resets to the first rung every cycle and the browser reloads a blank page forever
+instead of ever reaching the rescue screen.
+
+Two rules keep layer 5 from becoming its own problem, because "failed to fetch
+dynamically imported module" is the *same* message a momentary network drop
+produces, and `navigator.onLine` still reports "online" inside a tunnel. First, the
+rescue screen only ever appears when the app has *not* started; if it is already on
+screen the ladder declines and `LazyPage` reports the failure in place, so an
+overlay never buries a working UI over one file. Second, a running app may only
+reach rung 1 — refetch and reload, once. Unregistering the worker and wiping
+storage are reserved for a start that failed outright, and an attempt that could not
+run at all (offline, or ladder exhausted) does not consume a rung, so a few
+trips through a dead zone can't spend the budget before a real failure needs it.
+
+Two smaller guards sit alongside these. `AppDataProvider` releases the render gate
+after 15 s and shows the UI plus an offline banner, because Firebase `onValue` never
+reports an error when the socket simply can't be established — the loading screen
+would otherwise hang forever behind a Retry button that re-armed the same hang. And
+`LazyPage` wraps each route in its own error boundary, so one failed chunk breaks a
+single tab instead of the whole app, and it reports the failure in place whenever
+automatic recovery declined to run.
+
+### The one that caused all the "only clearing site data helps" reports
+
+If you read one section here, read this one. It is the actual root cause behind the
+long-running complaint that the app would go offline and never come back, on iOS
+and desktop alike, surviving app restarts, curable only by clearing browser data.
+It is not a caching bug and not an app bug — it is a two-part trap in the Firebase
+Realtime Database SDK combined with our own CSP.
+
+`WebSocketConnection.open()` in `@firebase/database` writes
+`firebase:previous_websocket_failure` into **localStorage before every attempt**,
+commented "Assume failure until proven otherwise", and clears it only once the
+connection proves healthy. So if the network drops mid-handshake, or the OS kills
+the app while connecting, that flag is left behind — and localStorage outlives the
+app. On the next launch `TransportManager.previouslyFailed()` sees it and picks
+**long polling** instead of a WebSocket.
+
+Long polling is where it becomes fatal. `FirebaseIFrameScriptHolder` implements it
+by injecting `<script src="https://<host>.firebasedatabase.app/.lp?…">` tags. Our
+`script-src` listed only `'self'` and gstatic, so the browser blocked every one of
+them. The result is a dead end: the flag permanently selects a transport that CSP
+forbids, restarting the app changes nothing because the flag persists, and clearing
+site data "fixes" it only because that deletes the flag. The same trap explains why
+private mode was affected too — with localStorage unavailable the SDK treats storage
+as in-memory, `previouslyFailed()` returns `true` unconditionally, and long polling
+is chosen from the very first attempt.
+
+Both halves are now closed. `script-src` allows the Firebase database hosts, so long
+polling actually works as the fallback it was meant to be, and
+`lib/firebase/transport.ts` clears the stale flag before `getDatabase()` on every
+start, so one flaky moment cannot permanently downgrade the transport. Both are
+guarded by tests, including one that reads `firebase.json` and fails if `script-src`
+ever loses those hosts — a requirement that is invisible from the application code
+and would otherwise be trivially removed by someone tightening the policy.
+
+### Why losing the network never strands the app
+
+Loading the code is only half the problem; the app also has to survive losing the
+database. A reported failure made that concrete: with the phone offline a user
+settled a player, turned the network back on, and the app then sat on "CONNECTING TO
+FIREBASE" before falling through to an empty screen. Two fixes and one hard-won
+prohibition came out of it, all covered by
+`src/__tests__/connectionResilience.test.js` and
+`src/__tests__/appDataProvider.test.jsx`.
+
+**A write started offline poisons reads.** `runTransaction` called with no
+connection never settles — it parks in the SDK as an outstanding transaction, and
+while one is outstanding Firebase withholds server updates for that node. The write
+"failing" in the UI did not undo it, so after reconnecting the listener received
+nothing and the app stayed empty. Worse, such a transaction can commit much later,
+long after the user was told it failed. `withTransaction` now refuses up front when
+`navigator.onLine` is false, which leaves no pending state behind. (`onLine` is
+unreliable for proving you *are* online, but a `false` is trustworthy, which is
+exactly the direction this guard needs.)
+
+**Do not fight the SDK for the connection.** This one is a warning, not a feature.
+The SDK ignores the browser's network events and retries with a growing delay, so
+the tempting fix is to force a reconnect with a `goOffline`/`goOnline` pair. That
+was tried and it was much worse than the problem: at startup there is no connection
+yet, so the supervisor fired immediately and cut the SDK off mid-handshake, and
+because it repeated faster than a phone can complete one, the app stopped connecting
+at all — on every device, including a freshly cleared profile and private mode. The
+supervisor is gone; `src/__tests__/connectionResilience.test.js` fails if any source
+file calls `goOffline` again. Left alone, the SDK reconnects within tens of seconds,
+and until it does the app shows the remembered data with a banner and a retry
+button. Slower, but it cannot leave the app unable to start.
+
+**A cold start had nothing to show.** Every launch began from zero and waited for
+the database, so with no signal the user got empty lists and reasonably concluded
+the app was broken. The last snapshot that parsed cleanly is now kept in
+`localStorage` (`snapshotCache.ts`) and restored at startup, so the app opens with
+real content and the banner explains it may be stale. It is a cache, never a source
+of truth: any snapshot from the database overwrites it, it is only written after
+`buildUIData` succeeded so malformed data can never enter it, and it is validated
+and version-checked on read — a corrupt entry is ignored rather than becoming a new
+way to break startup.
 
 ---
 
@@ -486,12 +644,6 @@ Unit tests live in `src/__tests__/` and cover:
 | `components.test.jsx` | Basic component rendering |
 | `hooks.test.js` | Custom hook behaviour |
 | `smoke.test.js` | App-level smoke tests |
-| `serviceWorker.test.js` | App-shell caching, network-first navigation, cache poisoning guards |
-| `bootGuard.test.js` | Escalating recovery ladder, attempt counter persistence |
-| `bootRecovery.test.js` | React bridge to the boot guard |
-| `buildVersion.test.js` | Stale-build detection against `/version.json` |
-| `connectionResilience.test.js` | Offline write guard, no manual `goOffline`/`goOnline` |
-| `appDataProvider.test.jsx` | Boot gate timeout, snapshot cache fallback |
 
 ```bash
 npm test             # run all tests once

@@ -78,6 +78,9 @@ export interface Rank {
   min: number;
   emoji: string;
   name: string;
+  color: string;
+  bg: string;
+  border: string;
   hex: string;
 }
 
@@ -131,6 +134,36 @@ export interface PlayerColor {
 export type SoundType = 'tab' | 'click' | 'success' | 'delete' | 'coin' | 'rank1' | 'error';
 export type Theme = 'dark' | 'light';
 export type TabId = 'dashboard' | 'attendance' | 'admin' | 'history' | 'players';
+
+export interface ThemeTokens {
+  confirmBg: string;
+  confirmBorder: string;
+  confirmText: string;
+  accentBorder: string;
+  accentText: string;
+  accentBg: string;
+  accentColor: string;
+  cancelBorder: string;
+  cancelText: string;
+  overlayBg: string;
+  modalBg: string;
+  modalRadius: string;
+  modalShadow: string;
+  inputBg: string;
+  inputBorder: string;
+  inputText: string;
+  cellBg: string;
+  cellBorder: string;
+  cellLabelText: string;
+  bodyText: string;
+  mutedText: string;
+  undoBg: string;
+  undoBorder: string;
+  undoText: string;
+  undoProgressBg: string;
+  fontFamily: string;
+  fontSize: string;
+}
 
 export interface WrappedPlayerStats {
   name: string;

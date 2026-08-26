@@ -1,4 +1,4 @@
-import { CLIP, FONT, TEXT, TRACK } from '../../constants/styles';
+import { CLIP, FONT } from '../../constants/styles';
 
 const ALL_TIME = null;
 
@@ -18,14 +18,16 @@ export default function SeasonSelector({ seasons, selected, onChange }: SeasonSe
   const options = [{ label: 'WSZYSTKIE', value: ALL_TIME }, ...seasons.map(y => ({ label: String(y), value: y }))];
 
   return (
-    // Odstęp bierze rodzic (gap 20 w AttendanceTab) — własny marginBottom 16
-    // dawał pod tym paskiem inny rytm niż pod każdym innym elementem zakładki.
     <div style={{
       display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap',
+      marginBottom: 16,
     }}>
-      {/* Etykieta była mono, a przyciski obok display — dwa kroje w jednym
-          pasku kontrolek. */}
-      <span style={{ ...FONT.display(TEXT.tiny, TRACK.wide), color: 'var(--co-dim)', marginRight: 4 }}>
+      <span style={{
+        ...FONT.mono('0.65rem'),
+        color: 'var(--co-dim)',
+        letterSpacing: '0.15em',
+        marginRight: 4,
+      }}>
         SEZON:
       </span>
       {options.map(opt => {
@@ -36,15 +38,17 @@ export default function SeasonSelector({ seasons, selected, onChange }: SeasonSe
             onClick={() => onChange(opt.value)}
             aria-pressed={active}
             style={{
-              minHeight: 36, padding: '6px 12px',
-              ...FONT.display(TEXT.base, TRACK.normal),
-              background: active ? 'var(--co-tint-hi)' : 'transparent',
-              border: `1px solid ${active ? 'var(--co-tint-line)' : 'var(--co-border)'}`,
-              color: active ? 'var(--co-cyan)' : 'var(--co-text)',
+              padding: '4px 12px',
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.8rem',
+              letterSpacing: '0.1em',
+              background: active ? 'rgba(0,229,255,0.12)' : 'transparent',
+              border: `1px solid ${active ? 'rgba(0,229,255,0.5)' : 'var(--co-border)'}`,
+              color: active ? 'var(--co-cyan)' : 'var(--co-dim)',
               clipPath: CLIP.badge,
               cursor: 'pointer',
               transition: 'all 0.15s',
-              textShadow: active ? 'var(--glow-cyan-sm)' : 'none',
+              textShadow: active ? '0 0 8px rgba(0,229,255,0.4)' : 'none',
             }}
           >
             {opt.label}
