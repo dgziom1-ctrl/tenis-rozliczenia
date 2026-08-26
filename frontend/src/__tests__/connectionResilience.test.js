@@ -25,6 +25,7 @@ vi.mock('../lib/firebase/config', () => ({ database: {}, dataRef: {} }));
 
 const { withTransaction } = await import('../lib/firebase/transaction');
 const { saveSnapshot, loadSnapshot, clearSnapshot } = await import('../lib/firebase/snapshotCache');
+const { clearStaleTransportPreference } = await import('../lib/firebase/transport');
 
 function setOnline(value) {
   Object.defineProperty(navigator, 'onLine', { configurable: true, value });
@@ -135,6 +136,69 @@ describe('pamięć ostatnich danych', () => {
     });
 
     expect(() => saveSnapshot(SAMPLE)).not.toThrow();
+  });
+});
+
+/**
+ * TRWAŁE ZEJŚCIE BAZY W TRYB OFFLINE
+ *
+ * SDK Firebase zapisuje `firebase:previous_websocket_failure` w `localStorage`
+ * PRZED każdą próbą połączenia WebSocketem („zakładamy porażkę, dopóki nie okaże
+ * się inaczej”) i usuwa dopiero po udanym połączeniu. Zniknięcie sieci w trakcie
+ * łączenia zostawiało tę flagę na stałe, a przy kolejnym starcie SDK wybierało
+ * długie odpytywanie — które działa przez wstrzykiwanie znaczników `<script>`
+ * z hostów Firebase i było blokowane przez naszą politykę bezpieczeństwa.
+ *
+ * Efekt: aplikacja wpadała w tryb offline i nie wychodziła z niego nawet po
+ * zamknięciu. Pomagało tylko wyczyszczenie danych przeglądarki, bo usuwało flagę.
+ */
+describe('transport bazy', () => {
+  it('kasuje zapisaną informację o nieudanym WebSockecie', () => {
+    localStorage.setItem('firebase:previous_websocket_failure', 'true');
+
+    clearStaleTransportPreference();
+
+    expect(localStorage.getItem('firebase:previous_websocket_failure')).toBeNull();
+  });
+
+  it('nie rusza pozostałych wpisów Firebase', () => {
+    localStorage.setItem('firebase:host:tenis', 'jakis-host');
+
+    clearStaleTransportPreference();
+
+    expect(localStorage.getItem('firebase:host:tenis')).toBe('jakis-host');
+  });
+
+  it('brak magazynu nie wywraca startu', () => {
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      throw new Error('SecurityError');
+    });
+
+    expect(() => clearStaleTransportPreference()).not.toThrow();
+  });
+
+  /**
+   * Wymóg niewidoczny w kodzie aplikacji, dlatego pilnowany testem. Gdy SDK
+   * przełączy się na długie odpytywanie (samo, albo bo `localStorage` jest
+   * niedostępny w trybie prywatnym), ładuje dane znacznikami `<script>` z hostów
+   * Firebase. Bez nich w `script-src` przeglądarka je blokuje i baza nie łączy się
+   * już nigdy — a to jest awaria nie do naprawienia z wnętrza aplikacji.
+   */
+  it('polityka bezpieczeństwa dopuszcza skrypty z hostów Firebase', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+
+    const config = JSON.parse(fs.readFileSync(
+      path.resolve(import.meta.dirname, '../../../firebase.json'), 'utf8',
+    ));
+    const csp = config.hosting.headers
+      .flatMap((rule) => rule.headers)
+      .find((header) => header.key === 'Content-Security-Policy').value;
+
+    const scriptSrc = csp.split(';').map(s => s.trim()).find(s => s.startsWith('script-src'));
+
+    expect(scriptSrc).toContain('https://*.firebasedatabase.app');
+    expect(scriptSrc).toContain('https://*.firebaseio.com');
   });
 });
 

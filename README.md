@@ -320,6 +320,40 @@ would otherwise hang forever behind a Retry button that re-armed the same hang. 
 single tab instead of the whole app, and it reports the failure in place whenever
 automatic recovery declined to run.
 
+### The one that caused all the "only clearing site data helps" reports
+
+If you read one section here, read this one. It is the actual root cause behind the
+long-running complaint that the app would go offline and never come back, on iOS
+and desktop alike, surviving app restarts, curable only by clearing browser data.
+It is not a caching bug and not an app bug — it is a two-part trap in the Firebase
+Realtime Database SDK combined with our own CSP.
+
+`WebSocketConnection.open()` in `@firebase/database` writes
+`firebase:previous_websocket_failure` into **localStorage before every attempt**,
+commented "Assume failure until proven otherwise", and clears it only once the
+connection proves healthy. So if the network drops mid-handshake, or the OS kills
+the app while connecting, that flag is left behind — and localStorage outlives the
+app. On the next launch `TransportManager.previouslyFailed()` sees it and picks
+**long polling** instead of a WebSocket.
+
+Long polling is where it becomes fatal. `FirebaseIFrameScriptHolder` implements it
+by injecting `<script src="https://<host>.firebasedatabase.app/.lp?…">` tags. Our
+`script-src` listed only `'self'` and gstatic, so the browser blocked every one of
+them. The result is a dead end: the flag permanently selects a transport that CSP
+forbids, restarting the app changes nothing because the flag persists, and clearing
+site data "fixes" it only because that deletes the flag. The same trap explains why
+private mode was affected too — with localStorage unavailable the SDK treats storage
+as in-memory, `previouslyFailed()` returns `true` unconditionally, and long polling
+is chosen from the very first attempt.
+
+Both halves are now closed. `script-src` allows the Firebase database hosts, so long
+polling actually works as the fallback it was meant to be, and
+`lib/firebase/transport.ts` clears the stale flag before `getDatabase()` on every
+start, so one flaky moment cannot permanently downgrade the transport. Both are
+guarded by tests, including one that reads `firebase.json` and fails if `script-src`
+ever loses those hosts — a requirement that is invisible from the application code
+and would otherwise be trivially removed by someone tightening the policy.
+
 ### Why losing the network never strands the app
 
 Loading the code is only half the problem; the app also has to survive losing the
@@ -465,10 +499,12 @@ tenis-rozliczenia/
 │       │       │   ├── payments.ts         # Add / remove payments
 │       │       │   ├── players.ts          # Add, soft-delete, restore, permanent-delete
 │       │       │   └── sessions.ts         # Add, update, delete sessions
+│       │       ├── snapshotCache.ts         # Last good data, so a cold start is never empty
 │       │       ├── state.ts                # Current data snapshot reference
 │       │       ├── subscribe.ts            # onValue listener + UI data builder
 │       │       ├── transaction.ts          # withTransaction helper
-│       │       └── transforms.ts           # Raw RTDB → UI data shape
+│       │       ├── transforms.ts           # Raw RTDB → UI data shape
+│       │       └── transport.ts            # Clears the stale WebSocket-failure flag
 │       ├── types/
 │       │   ├── domain.ts                   # Firebase/data domain types
 │       │   └── ui.ts                       # UI-layer types (ranks, stats, etc.)
