@@ -9,10 +9,8 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const { runTransactionMock, goOfflineMock, goOnlineMock } = vi.hoisted(() => ({
+const { runTransactionMock } = vi.hoisted(() => ({
   runTransactionMock: vi.fn(),
-  goOfflineMock: vi.fn(),
-  goOnlineMock: vi.fn(),
 }));
 
 vi.mock('firebase/app', () => ({ initializeApp: vi.fn(() => ({})) }));
@@ -22,14 +20,11 @@ vi.mock('firebase/database', () => ({
   onValue: vi.fn(),
   set: vi.fn(),
   runTransaction: runTransactionMock,
-  goOffline: goOfflineMock,
-  goOnline: goOnlineMock,
 }));
 vi.mock('../lib/firebase/config', () => ({ database: {}, dataRef: {} }));
 
 const { withTransaction } = await import('../lib/firebase/transaction');
 const { saveSnapshot, loadSnapshot, clearSnapshot } = await import('../lib/firebase/snapshotCache');
-const { forceReconnect, resetReconnectCooldown } = await import('../lib/firebase/connection');
 
 function setOnline(value) {
   Object.defineProperty(navigator, 'onLine', { configurable: true, value });
@@ -47,9 +42,6 @@ const SAMPLE = {
 beforeEach(() => {
   localStorage.clear();
   runTransactionMock.mockReset();
-  goOfflineMock.mockReset();
-  goOnlineMock.mockReset();
-  resetReconnectCooldown();
   setOnline(true);
 });
 
@@ -146,35 +138,41 @@ describe('pamięć ostatnich danych', () => {
   });
 });
 
-describe('wznawianie połączenia', () => {
-  /**
-   * SDK Firebase ponawia próby z coraz dłuższym odstępem i nie słucha zdarzeń
-   * sieciowych przeglądarki. Po przełączeniu internetu w telefonie potrafi czekać
-   * kilkadziesiąt sekund, mimo że sieć już działa.
-   */
-  it('zamyka i otwiera połączenie od nowa', () => {
-    expect(forceReconnect()).toBe(true);
+/**
+ * Aplikacja nie ma prawa sama zamykać połączenia z bazą.
+ *
+ * Ten test istnieje po konkretnej awarii. Był tu nadzór, który przy braku
+ * połączenia wołał `goOffline` + `goOnline`, żeby obudzić SDK po powrocie sieci.
+ * Przy starcie połączenia jeszcze nie ma, więc uruchamiał się natychmiast i
+ * przerywał SDK dokładnie w chwili uzgadniania łącza — a ponawiany co kilka
+ * sekund nie dawał mu nigdy dojść do końca. Apka przestała się łączyć na każdym
+ * urządzeniu, również po wyczyszczeniu danych i w trybie prywatnym.
+ *
+ * Gdyby ktoś kiedyś chciał wrócić do tego pomysłu: wolno to zrobić najwyżej po
+ * długiej karencji od startu i tylko wtedy, gdy połączenie wcześniej działało.
+ */
+describe('nietykalność połączenia', () => {
+  it('kod aplikacji nigdzie nie zamyka połączenia z bazą', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
 
-    expect(goOfflineMock).toHaveBeenCalledTimes(1);
-    expect(goOnlineMock).toHaveBeenCalledTimes(1);
-  });
+    const sources = [];
+    (function walk(dir) {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (/\.tsx?$/.test(entry.name) && !full.includes('__tests__')) {
+          sources.push([full, fs.readFileSync(full, 'utf8')]);
+        }
+      }
+    })(path.resolve(import.meta.dirname, '..'));
 
-  // Nadzór woła to co kilka sekund i przy każdym zdarzeniu sieciowym — bez
-  // odstępu zrywalibyśmy własne, właśnie nawiązywane połączenie.
-  it('nie zrywa połączenia częściej niż co kilka sekund', () => {
-    forceReconnect();
+    // Szukamy wywołania, nie samej nazwy: komentarz w `AppDataProvider`
+    // celowo opisuje, dlaczego tego nie robimy.
+    const offenders = sources
+      .filter(([, code]) => /\bgoOffline\s*\(/.test(code))
+      .map(([file]) => file);
 
-    expect(forceReconnect()).toBe(false);
-    expect(goOfflineMock).toHaveBeenCalledTimes(1);
-  });
-
-  // Nadzór woła to z efektu Reacta — wyjątek stąd wywróciłby cały interfejs.
-  it('błąd SDK nie wywraca aplikacji', () => {
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
-    goOfflineMock.mockImplementation(() => { throw new Error('SDK padło'); });
-
-    let result;
-    expect(() => { result = forceReconnect(); }).not.toThrow();
-    expect(result).toBe(false);
+    expect(offenders).toEqual([]);
   });
 });

@@ -1,6 +1,5 @@
 export { subscribeToData } from './subscribe';
 export { database } from './config';
-export { forceReconnect } from './connection';
 export { loadSnapshot, clearSnapshot } from './snapshotCache';
 export { buildUIData } from './transforms';
 export { setCurrentData } from './state';

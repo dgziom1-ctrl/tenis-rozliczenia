@@ -1,14 +1,11 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { onValue, ref } from 'firebase/database';
-import { subscribeToData, database, forceReconnect, loadSnapshot, buildUIData, setCurrentData } from '@/lib/firebase';
+import { subscribeToData, database, loadSnapshot, buildUIData, setCurrentData } from '@/lib/firebase';
 import { useToast } from '@/components/common/Toast';
 import type { UIData } from '@/types/ui';
 import { AppDataContext, INITIAL_APP_DATA, type AppDataContextValue } from './appDataContext';
 
 const SLOW_LOADING_AFTER_MS = 8000;
-
-/** Jak często nadzór próbuje odzyskać połączenie, dopóki nie ma danych. */
-const RECOVERY_INTERVAL_MS = 8000;
 
 /**
  * Ostatnie znane dane, odczytane z pamięci urządzenia.
@@ -115,48 +112,20 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
-   * Nadzór nad połączeniem: dopóki baza nie odpowiada, sam próbuje ją odzyskać.
+   * O połączenie NIE walczymy na siłę — i to jest decyzja, nie przeoczenie.
    *
-   * SDK Firebase po zerwaniu łącza ponawia próby z coraz dłuższym odstępem
-   * i nie reaguje na powrót internetu w telefonie. Bez tego użytkownik siedzi
-   * przed pustą apką i musi trafić w przycisk „Ponów”, żeby cokolwiek się ruszyło
-   * — a przecież sieć już działa. Nadzór wygasa sam, gdy tylko połączenie wróci.
-   */
-  useEffect(() => {
-    if (isConnected) return undefined;
-
-    const attempt = () => {
-      // Karta w tle nic nie zyska na wznawianiu połączenia, a na telefonie
-      // kosztowałoby to baterię.
-      if (document.visibilityState !== 'visible') return;
-      forceReconnect();
-    };
-
-    const timer = setInterval(attempt, RECOVERY_INTERVAL_MS);
-    // Zdarzenia mówią o powrocie sieci szybciej niż kolejny obieg zegara.
-    window.addEventListener('online', attempt);
-    document.addEventListener('visibilitychange', attempt);
-    attempt();
-
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('online', attempt);
-      document.removeEventListener('visibilitychange', attempt);
-    };
-  }, [isConnected]);
-
-  /**
-   * Połączenie wróciło, ale danych nadal nie ma.
+   * Była tu warstwa, która przy braku połączenia sama zamykała je i otwierała od
+   * nowa (`goOffline` + `goOnline`), żeby obudzić SDK po powrocie sieci. Skutek
+   * był odwrotny do zamierzonego: przy starcie połączenia jeszcze nie ma, więc
+   * mechanizm uruchamiał się od razu i przerywał SDK dokładnie w chwili
+   * uzgadniania łącza. Na telefonie, gdzie uzgadnianie trwa dłużej niż odstęp
+   * między próbami, aplikacja nie łączyła się już nigdy — na żadnym urządzeniu,
+   * także po wyczyszczeniu danych.
    *
-   * Zdarza się, gdy nasłuch został założony w czasie awarii i utknął. Świeży
-   * nasłuch na odzyskanym połączeniu dostaje dane od razu.
+   * SDK samo ponawia próby i po powrocie sieci połączy się w ciągu kilkudziesięciu
+   * sekund. Do tego czasu widać ostatnie znane dane i baner z przyciskiem
+   * ponowienia. Wolniej, ale bez ryzyka, że aplikacja nie wstanie wcale.
    */
-  useEffect(() => {
-    if (!isConnected || hasData) return undefined;
-
-    const timer = setTimeout(retry, RECOVERY_INTERVAL_MS);
-    return () => clearTimeout(timer);
-  }, [isConnected, hasData, retry, retryNonce]);
 
   const value = useMemo<AppDataContextValue>(() => ({
     appData, hasData, isConnected, isLoading, slowLoading, bootTimedOut, subscriptionError, retry,

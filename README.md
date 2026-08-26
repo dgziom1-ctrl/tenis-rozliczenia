@@ -296,8 +296,9 @@ automatic recovery declined to run.
 Loading the code is only half the problem; the app also has to survive losing the
 database. A reported failure made that concrete: with the phone offline a user
 settled a player, turned the network back on, and the app then sat on "CONNECTING TO
-FIREBASE" before falling through to an empty screen. Three separate causes, all
-fixed, all covered by `src/__tests__/connectionResilience.test.js` and
+FIREBASE" before falling through to an empty screen. Two fixes and one hard-won
+prohibition came out of it, all covered by
+`src/__tests__/connectionResilience.test.js` and
 `src/__tests__/appDataProvider.test.jsx`.
 
 **A write started offline poisons reads.** `runTransaction` called with no
@@ -310,13 +311,17 @@ long after the user was told it failed. `withTransaction` now refuses up front w
 unreliable for proving you *are* online, but a `false` is trustworthy, which is
 exactly the direction this guard needs.)
 
-**The SDK does not notice the network coming back.** It retries with a growing
-delay, up to tens of seconds, and ignores the browser's network events — so a phone
-switching between Wi-Fi and mobile data can sit disconnected long after the network
-is fine. `AppDataProvider` supervises this: while `.info/connected` is false and the
-page is visible, it calls `forceReconnect()` (a `goOffline`/`goOnline` pair, the only
-lever the SDK offers) on every network event and every few seconds, and stops as
-soon as the connection is back. No button to press.
+**Do not fight the SDK for the connection.** This one is a warning, not a feature.
+The SDK ignores the browser's network events and retries with a growing delay, so
+the tempting fix is to force a reconnect with a `goOffline`/`goOnline` pair. That
+was tried and it was much worse than the problem: at startup there is no connection
+yet, so the supervisor fired immediately and cut the SDK off mid-handshake, and
+because it repeated faster than a phone can complete one, the app stopped connecting
+at all — on every device, including a freshly cleared profile and private mode. The
+supervisor is gone; `src/__tests__/connectionResilience.test.js` fails if any source
+file calls `goOffline` again. Left alone, the SDK reconnects within tens of seconds,
+and until it does the app shows the remembered data with a banner and a retry
+button. Slower, but it cannot leave the app unable to start.
 
 **A cold start had nothing to show.** Every launch began from zero and waited for
 the database, so with no signal the user got empty lists and reasonably concluded
@@ -347,7 +352,7 @@ tenis-rozliczenia/
 │       │   ├── Layout.tsx              # Shell — header, nav, theme, FCM listener
 │       │   ├── routes.tsx              # Route definitions
 │       │   └── providers/
-│       │       ├── AppDataProvider.tsx # Firebase subscription + connection supervisor
+│       │       ├── AppDataProvider.tsx # Firebase subscription + remembered-data startup
 │       │       ├── themeContext.ts     # Theme tokens + context (no component)
 │       │       └── ThemeProvider.tsx   # Dark/light toggle persisted to localStorage
 │       ├── components/
