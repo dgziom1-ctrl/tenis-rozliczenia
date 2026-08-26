@@ -36,10 +36,28 @@ function withoutLegacyFields(next: RawAppData): RawAppData {
   return rest as RawAppData;
 }
 
+/** Komunikat po odmowie zapisu bez sieci — jeden, żeby nie rozjechał się między ścieżkami. */
+const OFFLINE_MESSAGE =
+  'Brak połączenia z internetem — zmiana nie została zapisana. Spróbuj ponownie, gdy wróci sieć.';
+
 export async function withTransaction(
   fn: (current: RawAppData | null) => RawAppData,
   fallbackErrorMsg: string,
 ): Promise<TransactionResult> {
+  /**
+   * Bez sieci nie zaczynamy transakcji w ogóle.
+   *
+   * `runTransaction` wywołane offline nie kończy się, tylko zostaje w SDK jako
+   * transakcja oczekująca. Dopóki wisi, Firebase wstrzymuje dla tego węzła dane
+   * z serwera — po powrocie internetu aplikacja przestaje dostawać cokolwiek
+   * i zostaje na pustym ekranie. Do tego taka transakcja potrafi zatwierdzić się
+   * później, długo po tym, jak użytkownik zobaczył komunikat o niepowodzeniu.
+   * Odmowa z góry jest uczciwsza i nie zostawia po sobie żadnego stanu.
+   */
+  if (isOffline()) {
+    return { success: false, error: OFFLINE_MESSAGE };
+  }
+
   try {
     await Promise.race([
       runTransaction(dataRef, (current: RawAppData | null) => withoutLegacyFields(fn(current))),
@@ -54,13 +72,10 @@ export async function withTransaction(
     }
     console.error(error);
 
-    // Brak sieci — najczęstsza przyczyna, gdy zapis wisi. Transakcja nie
-    // dotarła do serwera, więc ponowienie jest bezpieczne.
+    // Sieć zniknęła już w trakcie zapisu. Transakcja nie dotarła do serwera,
+    // więc ponowienie jest bezpieczne.
     if (isOffline()) {
-      return {
-        success: false,
-        error: 'Brak połączenia z internetem — zmiana nie została zapisana. Spróbuj ponownie, gdy wróci sieć.',
-      };
+      return { success: false, error: OFFLINE_MESSAGE };
     }
 
     // Przekroczony limit czasu NIE oznacza, że zapis się nie udał — przestajemy

@@ -284,12 +284,49 @@ run at all (offline, or ladder exhausted) does not consume a rung, so a few
 trips through a dead zone can't spend the budget before a real failure needs it.
 
 Two smaller guards sit alongside these. `AppDataProvider` releases the render gate
-after 15 s and shows the UI with empty data plus an offline banner, because Firebase
-`onValue` never reports an error when the socket simply can't be established — the
-loading screen would otherwise hang forever behind a Retry button that re-armed the
-same hang. And `LazyPage` wraps each route in its own error boundary, so one failed
-chunk breaks a single tab instead of the whole app, and it reports the failure in
-place whenever automatic recovery declined to run.
+after 15 s and shows the UI plus an offline banner, because Firebase `onValue` never
+reports an error when the socket simply can't be established — the loading screen
+would otherwise hang forever behind a Retry button that re-armed the same hang. And
+`LazyPage` wraps each route in its own error boundary, so one failed chunk breaks a
+single tab instead of the whole app, and it reports the failure in place whenever
+automatic recovery declined to run.
+
+### Why losing the network never strands the app
+
+Loading the code is only half the problem; the app also has to survive losing the
+database. A reported failure made that concrete: with the phone offline a user
+settled a player, turned the network back on, and the app then sat on "CONNECTING TO
+FIREBASE" before falling through to an empty screen. Three separate causes, all
+fixed, all covered by `src/__tests__/connectionResilience.test.js` and
+`src/__tests__/appDataProvider.test.jsx`.
+
+**A write started offline poisons reads.** `runTransaction` called with no
+connection never settles — it parks in the SDK as an outstanding transaction, and
+while one is outstanding Firebase withholds server updates for that node. The write
+"failing" in the UI did not undo it, so after reconnecting the listener received
+nothing and the app stayed empty. Worse, such a transaction can commit much later,
+long after the user was told it failed. `withTransaction` now refuses up front when
+`navigator.onLine` is false, which leaves no pending state behind. (`onLine` is
+unreliable for proving you *are* online, but a `false` is trustworthy, which is
+exactly the direction this guard needs.)
+
+**The SDK does not notice the network coming back.** It retries with a growing
+delay, up to tens of seconds, and ignores the browser's network events — so a phone
+switching between Wi-Fi and mobile data can sit disconnected long after the network
+is fine. `AppDataProvider` supervises this: while `.info/connected` is false and the
+page is visible, it calls `forceReconnect()` (a `goOffline`/`goOnline` pair, the only
+lever the SDK offers) on every network event and every few seconds, and stops as
+soon as the connection is back. No button to press.
+
+**A cold start had nothing to show.** Every launch began from zero and waited for
+the database, so with no signal the user got empty lists and reasonably concluded
+the app was broken. The last snapshot that parsed cleanly is now kept in
+`localStorage` (`snapshotCache.ts`) and restored at startup, so the app opens with
+real content and the banner explains it may be stale. It is a cache, never a source
+of truth: any snapshot from the database overwrites it, it is only written after
+`buildUIData` succeeded so malformed data can never enter it, and it is validated
+and version-checked on read — a corrupt entry is ignored rather than becoming a new
+way to break startup.
 
 ---
 
@@ -310,7 +347,7 @@ tenis-rozliczenia/
 │       │   ├── Layout.tsx              # Shell — header, nav, theme, FCM listener
 │       │   ├── routes.tsx              # Route definitions
 │       │   └── providers/
-│       │       ├── AppDataProvider.tsx # Firebase subscription + data context
+│       │       ├── AppDataProvider.tsx # Firebase subscription + connection supervisor
 │       │       ├── themeContext.ts     # Theme tokens + context (no component)
 │       │       └── ThemeProvider.tsx   # Dark/light toggle persisted to localStorage
 │       ├── components/
