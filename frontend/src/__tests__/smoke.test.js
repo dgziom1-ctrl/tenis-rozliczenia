@@ -214,21 +214,39 @@ describe('lib/firebase/index.ts — eksporty', () => {
 // ════════════════════════════════════════════════════════════════════════════
 
 describe('app/providers/themeContext.ts — eksporty', () => {
-  it('eksportuje ThemeContext, useThemeTokens i getThemeTokens', async () => {
+  it('eksportuje ThemeContext i useThemeContext', async () => {
     const m = await import('../app/providers/themeContext');
     expect(m.ThemeContext).toBeDefined();
-    expect(m.useThemeTokens).toBeTypeOf('function');
-    expect(m.getThemeTokens).toBeTypeOf('function');
+    expect(m.useThemeContext).toBeTypeOf('function');
   });
 
-  it('oba zestawy tokenów mają identyczny zbiór kluczy', async () => {
-    const { CYBER_TOKENS, LIGHT_TOKENS } = await import('../app/providers/themeContext');
-    expect(Object.keys(LIGHT_TOKENS).sort()).toEqual(Object.keys(CYBER_TOKENS).sort());
+  // Kolory motywu żyją wyłącznie w zmiennych CSS. Równoległy zestaw tokenów
+  // w TypeScripcie został usunięty: z 27 pól realnie czytane były 4, a te,
+  // które miały ujednolicić modale, nie były używane w ogóle. Test pilnuje,
+  // żeby duplikat nie wrócił.
+  it('nie eksportuje już równoległego systemu tokenów', async () => {
+    const m = await import('../app/providers/themeContext');
+    expect(m.CYBER_TOKENS).toBeUndefined();
+    expect(m.LIGHT_TOKENS).toBeUndefined();
+    expect(m.getThemeTokens).toBeUndefined();
+    expect(m.useThemeTokens).toBeUndefined();
+  });
+});
+
+describe('constants/styles.ts — skala', () => {
+  it('skala warstw pokrywa się z kolejnością z index.css', async () => {
+    const { Z } = await import('../constants/styles');
+    expect(Z.header).toBeLessThan(Z.nav);
+    expect(Z.nav).toBeLessThan(Z.banner);
+    // Ziarno filmowe malowało się wcześniej nad każdym dialogiem (1001 vs 200).
+    expect(Z.grain).toBeLessThan(Z.modal);
+    expect(Z.popover).toBeLessThan(Z.modal);
+    expect(Z.modal).toBeLessThan(Z.toast);
   });
 
-  it('getThemeTokens wybiera zestaw na podstawie motywu', async () => {
-    const { getThemeTokens, CYBER_TOKENS, LIGHT_TOKENS } = await import('../app/providers/themeContext');
-    expect(getThemeTokens('light')).toBe(LIGHT_TOKENS);
-    expect(getThemeTokens('dark')).toBe(CYBER_TOKENS);
+  it('najmniejszy stopień typografii nie schodzi poniżej czytelności', async () => {
+    const { TEXT } = await import('../constants/styles');
+    // 0.7rem = 11.2px. Wcześniej `monoMicro` miało 0.42rem, czyli ~6.7px.
+    expect(parseFloat(TEXT.micro)).toBeGreaterThanOrEqual(0.7);
   });
 });

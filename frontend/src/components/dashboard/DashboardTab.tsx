@@ -7,6 +7,7 @@ import PlayerCard from './PlayerCard';
 import { Zap, ChevronDown } from 'lucide-react';
 import PushPermissionBanner from '../common/PushPermissionBanner';
 import type { UIData, HistoryEntry, PlayerStats, SoundType } from '@/types/ui';
+import { CLIP } from '@/constants/styles';
 
 interface DashboardTabProps {
   data: Pick<UIData, 'summary' | 'players' | 'payments'>;
@@ -73,7 +74,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
           background: 'var(--co-panel)',
           border: '1px solid var(--co-border)',
           borderLeft: '3px solid var(--co-cyan)',
-          clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)',
+          clipPath: CLIP.smallCard,
           padding: '40px 32px', textAlign: 'center',
           position: 'relative', overflow: 'hidden',
         }}>
@@ -83,14 +84,14 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
             background: 'linear-gradient(90deg, transparent, var(--co-cyan), transparent)',
             animation: 'podium-scan 3s ease-in-out infinite',
           }} />
-          <div style={{ fontSize: '2.4rem', marginBottom: 16, filter: 'drop-shadow(0 0 8px rgba(0,229,255,0.4))' }}>🏓</div>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', marginBottom: 10 }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: 16, filter: 'drop-shadow(0 0 8px var(--co-cyan))' }}>🏓</div>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', marginBottom: 10 }}>
             BRAK ROZGRYWEK
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--co-dim)', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.7 }}>
             {'>'} System gotowy.<br/>
             {'>'} Dodaj pierwszą sesję w zakładce{' '}
-            <span style={{ color: 'var(--co-cyan)', borderBottom: '1px solid rgba(0,229,255,0.3)' }}>DODAJ</span>
+            <span style={{ color: 'var(--co-cyan)', borderBottom: '1px solid var(--co-tint-line)' }}>DODAJ</span>
             <span className="terminal-cursor" />
           </p>
         </div>
@@ -100,14 +101,14 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: -4 }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6,
-          padding: '3px 10px',
-          background: 'rgba(0,229,255,0.04)',
-          border: '1px solid rgba(0,229,255,0.12)',
-          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+          padding: '2px 10px',
+          background: 'var(--co-tint)',
+          border: '1px solid var(--co-tint-hi)',
+          clipPath: CLIP.badge,
         }}>
-          <Zap size={9} style={{ color: 'rgba(0,229,255,0.5)' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
-            sesji: <span style={{ color: 'rgba(0,229,255,0.75)' }}>{totalWeeks}</span>
+          <Zap size={9} style={{ color: 'var(--co-cyan)' }} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
+            sesji: <span style={{ color: 'var(--co-cyan)' }}>{totalWeeks}</span>
           </span>
         </div>
       </div>
@@ -145,7 +146,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
 
       {/* ── Collapsible rank guide — only show when there's data ── */}
       {totalWeeks > 0 && (
-        <div style={{ background: 'var(--co-panel)', border: '1px solid var(--co-border)', clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)' }}>
+        <div style={{ background: 'var(--co-panel)', border: '1px solid var(--co-border)', clipPath: CLIP.smallCard }}>
           <button
             onClick={() => setShowRankGuide(v => !v)}
             style={{
@@ -153,10 +154,10 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
             }}
           >
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.15em' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.18em' }}>
               {RANKS.map(r => r.emoji).join(' ')}
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.78rem', letterSpacing: '0.12em', color: 'var(--co-dim)', textTransform: 'uppercase', flex: 1, textAlign: 'left' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-dim)', textTransform: 'uppercase', flex: 1, textAlign: 'left' }}>
               Co oznaczają rangi?
             </span>
             <ChevronDown size={13} style={{ color: 'var(--co-dim)', transform: showRankGuide ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
@@ -167,13 +168,13 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 <div key={r.name} style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
                   background: `${r.hex}06`, border: `1px solid ${r.hex}20`,
-                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                  clipPath: CLIP.badge,
                   marginTop: 6,
                 }}>
-                  <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{r.emoji}</span>
+                  <span aria-hidden="true" style={{ fontSize: '1.25rem', flexShrink: 0 }}>{r.emoji}</span>
                   <div>
-                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', color: r.hex, margin: 0, letterSpacing: '0.08em' }}>{r.name}</p>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: 0 }}>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', color: r.hex, margin: 0, letterSpacing: '0.1em' }}>{r.name}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: 0 }}>
                       {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
                     </p>
                   </div>

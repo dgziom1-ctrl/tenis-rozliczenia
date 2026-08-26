@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { CheckCircle2, AlertCircle, X, Terminal } from 'lucide-react';
+import { CLIP } from '@/constants/styles';
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -93,17 +94,7 @@ interface ToastContainerProps {
 function ToastContainer({ toasts, removeToast }: ToastContainerProps) {
   if (toasts.length === 0) return null;
   return (
-    <div
-      style={{
-        position: 'fixed',
-        bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
-        left: 8, right: 8,
-        zIndex: 9000,
-        display: 'flex', flexDirection: 'column', gap: 8,
-        maxWidth: 400,
-      }}
-      className="sm:bottom-auto sm:top-4 sm:left-auto sm:right-4"
-    >
+    <div className="toast-stack">
       {toasts.map(toast => (
         <Toast key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />
       ))}
@@ -116,6 +107,13 @@ interface ToastStyle {
   border: string;
   shadow: string;
   accent: string;
+  /**
+   * Wypełnienie odznaki z prefiksem. Musi być osobnym tokenem, a nie `accent`
+   * z dopiskiem krycia: `accent` to już `var(...)`, więc `${accent}12` dawało
+   * `var(--co-green)12` — deklarację nieprawidłową po podstawieniu zmiennej,
+   * którą przeglądarka odrzucała i odznaka zostawała bez tła.
+   */
+  tint: string;
   icon: ReactNode;
   prefix: string;
 }
@@ -125,25 +123,28 @@ const ICON_STYLE: CSSProperties = { flexShrink: 0 };
 const STYLES: Record<ToastType, ToastStyle> = {
   success: {
     bg:       'var(--co-toast-success)',
-    border:   'rgba(0,255,102,0.3)',
-    shadow:   '0 0 18px rgba(0,255,102,0.08)',
+    border: 'var(--co-green)',
+    shadow:   '0 0 18px var(--co-tint-green)',
     accent:   'var(--co-green)',
+    tint:     'var(--co-tint-green)',
     icon:     <CheckCircle2 size={16} style={{ ...ICON_STYLE, color: 'var(--co-green)' }} />,
     prefix:   'OK',
   },
   error: {
     bg:       'var(--co-toast-error)',
-    border:   'rgba(255,32,144,0.4)',
-    shadow:   '0 0 20px rgba(255,32,144,0.12)',
+    border: 'var(--co-rose)',
+    shadow:   '0 0 20px var(--co-tint-rose)',
     accent:   'var(--co-rose)',
+    tint:     'var(--co-tint-rose)',
     icon:     <AlertCircle size={16} style={{ ...ICON_STYLE, color: 'var(--co-rose)' }} />,
     prefix:   'ERR',
   },
   info: {
     bg:       'var(--co-toast-info)',
-    border:   'rgba(0,229,255,0.25)',
-    shadow:   '0 0 16px rgba(0,229,255,0.06)',
+    border: 'var(--co-tint-line)',
+    shadow:   '0 0 16px var(--co-tint)',
     accent:   'var(--co-cyan)',
+    tint:     'var(--co-tint)',
     icon:     <Terminal size={16} style={{ ...ICON_STYLE, color: 'var(--co-cyan)' }} />,
     prefix:   'SYS',
   },
@@ -152,28 +153,24 @@ const STYLES: Record<ToastType, ToastStyle> = {
 function Toast({ toast, onClose }: { toast: ToastItem; onClose: () => void }) {
   const s = STYLES[toast.type] ?? STYLES.info;
   return (
-    <div role="alert" style={{
+    <div role="alert" className="accent-top" style={{
       background: s.bg,
       border: `1px solid ${s.border}`,
       boxShadow: s.shadow,
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
-      clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
+      clipPath: CLIP.card,
       overflow: 'hidden',
-      position: 'relative',
     }}>
-      {/* Top accent line */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: s.accent, opacity: 0.5 }} />
-
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px' }}>
         {/* Prefix badge */}
         <div style={{
           flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
-          padding: '2px 6px', background: `${s.accent}12`, border: `1px solid ${s.border}`,
-          clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+          padding: '2px 6px', background: s.tint, border: `1px solid ${s.border}`,
+          clipPath: CLIP.badge,
         }}>
           {s.icon}
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.18em', color: s.accent, textTransform: 'uppercase' }}>
+          {/* Etykieta była większa (0.82rem) od samej treści (0.75rem) —
+              odwrócona hierarchia w komunikacie. */}
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: '0.18em', color: s.accent, textTransform: 'uppercase' }}>
             {s.prefix}
           </span>
         </div>
@@ -181,23 +178,22 @@ function Toast({ toast, onClose }: { toast: ToastItem; onClose: () => void }) {
         {/* Message */}
         <p style={{
           flex: 1, margin: 0,
-          fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
           color: 'var(--co-toast-text)', lineHeight: 1.5,
         }}>
           {toast.message}
         </p>
 
-        {/* Close */}
-        <button onClick={onClose} style={{
+        {/* Close — cel dotykowy miał ok. 20×20px */}
+        <button onClick={onClose} className="icon-btn" style={{
           background: 'transparent', border: 'none',
           color: 'var(--co-close-btn)', cursor: 'pointer',
-          padding: '2px', flexShrink: 0, transition: 'color 0.15s',
+          width: 44, height: 44, marginTop: -10, marginRight: -8, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
-          onMouseEnter={e => { e.currentTarget.style.color = s.accent; }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--co-close-btn)'; }}
           aria-label="Zamknij"
         >
-          <X size={16} />
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
     </div>

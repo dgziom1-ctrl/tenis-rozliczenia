@@ -1,13 +1,13 @@
-import { useMemo, useRef, useEffect, useId } from 'react';
-import { createPortal } from 'react-dom';
+import { useMemo, useState, useId } from 'react';
 import { X } from 'lucide-react';
 import { RANKS, getRank } from '@/constants';
-import { FONT, CLIP } from '../../constants/styles';
+import { FONT, TEXT, TRACK, CLIP } from '../../constants/styles';
 import { formatDate } from '@/utils/format';
 import { getPlayerColor } from '@/constants/colors';
 import { getPlayerAchievements } from '@/utils/achievements';
 import { getPlayerSessionCost } from '@/utils/sessionCost';
-import { useFocusTrap } from '@/hooks/useFocusTrap';
+import Modal from '../common/Modal';
+import { PlayerAvatar } from '../dashboard/PlayerAvatar';
 import AchievementBadge from './AchievementBadge';
 import type { ExtendedPlayerStats, HistoryEntry } from '@/types/ui';
 
@@ -19,10 +19,8 @@ interface PlayerSessionModalProps {
 
 // ─── Player Session Drill-Down Modal ─────────────────────────────
 export default function PlayerSessionModal({ player, history, onClose }: PlayerSessionModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
-  useFocusTrap(overlayRef);
-  useEffect(() => { overlayRef.current?.focus(); }, []);
+  const [showMissed, setShowMissed] = useState(false);
 
   const { sessions, missedSessions } = useMemo(() => {
     if (!player) return { sessions: [], missedSessions: [] };
@@ -43,74 +41,49 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
     return getPlayerAchievements(player, history);
   }, [player, history]);
 
+  // Domyślnie tylko sesje z obecnością. Nieobecności są na żądanie, bo przy
+  // długiej historii dominowały widok i mnożyły węzły w DOM-ie.
+  const visibleSessions = useMemo(
+    () => (showMissed ? history : history.filter(s => s.presentPlayers.includes(player?.name ?? ''))),
+    [history, showMissed, player],
+  );
+
   if (!player) return null;
 
   const c = getPlayerColor(player.name);
 
-  return createPortal(
-    <div
-      ref={overlayRef}
-      className="modal-overlay"
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      tabIndex={-1}
-      onKeyDown={e => e.key === 'Escape' && onClose()}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 100,
-        background: 'var(--co-overlay, rgba(0,0,0,0.85))',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 'max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))',
-      }}
-    >
-      <div className="bottom-sheet-enter" style={{
-        width: '100%', maxWidth: 520,
-        maxHeight: 'calc(100vh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom)))',
-        background: 'var(--co-panel)',
-        border: `1px solid ${c.border}40`,
-        borderRadius: '12px',
-        display: 'flex', flexDirection: 'column',
-        boxShadow: `0 8px 40px rgba(0,0,0,0.8), 0 0 40px ${c.border}15`,
-        overflow: 'hidden',
-      }}>
+  return (
+    // `bare` — okno ma własną szapkę z awatarem i sekcje na całą szerokość,
+    // więc bierze z prymitywu tylko nakładkę: blokadę przewijania, pułapkę
+    // fokusu, Escape, klik w tło, portal i rozmycie na `::before`.
+    <Modal onClose={onClose} bare ariaLabel={`Szczegóły gracza ${player.name}`}>
+      <div
+        className="modal-panel cut-corners modal-enter"
+        role="document"
+        aria-labelledby={titleId}
+        style={{ maxWidth: 520, borderColor: `${c.border}40` }}
+      >
         {/* Header */}
-        <div style={{
-          padding: '8px 18px 14px',
-          borderBottom: `1px solid ${c.border}20`,
-          display: 'flex', alignItems: 'center', gap: 12,
+        <div className="modal-head" style={{
+          borderBottomColor: `${c.border}20`,
           background: `${c.border}07`,
         }}>
-          {/* Mini avatar */}
-          <div style={{
-            width: 42, height: 42, flexShrink: 0,
-            background: c.bg, border: `1px solid ${c.border}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            clipPath: CLIP.badge,
-            boxShadow: `0 0 10px ${c.border}40`,
-          }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: c.text }}>
-              {player.name.slice(0,2).toUpperCase()}
-            </span>
-          </div>
-          <div style={{ flex: 1 }}>
-            <p id={titleId} style={{ ...FONT.display('1.4rem', '0.06em'), color: 'var(--co-text-hi)', margin: 0, lineHeight: 1 }}>
+          <PlayerAvatar name={player.name} size={44} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p id={titleId} style={{ ...FONT.display(TEXT.h3, TRACK.tight), color: 'var(--co-text-hi)', margin: 0, lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {player.name.toUpperCase()}
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: '3px 0 0', letterSpacing: '0.12em' }}>
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: TRACK.normal }}>
               {player.attendanceCount}/{player.eligibleWeeks} sesji · {player.attendancePercentage}% frekwencja
             </p>
           </div>
-          <button onClick={onClose} aria-label="Zamknij" className="modal-close-btn" style={{
-            background: 'transparent', border: '1px solid var(--co-border)',
+          <button onClick={onClose} aria-label="Zamknij" className="modal-close-btn icon-btn" style={{
+            background: 'transparent', border: 'none',
             color: 'var(--co-dim)', cursor: 'pointer',
-            minWidth: 40, minHeight: 40, padding: '8px', flexShrink: 0,
-            position: 'relative', zIndex: 1,
+            width: 44, height: 44, marginRight: -10, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            clipPath: CLIP.badge, touchAction: 'manipulation',
-            transition: 'color 0.15s, border-color 0.15s',
           }}>
-            <X size={18} style={{ pointerEvents: 'none' }} />
+            <X size={18} style={{ pointerEvents: 'none' }} aria-hidden="true" />
           </button>
         </div>
 
@@ -126,10 +99,10 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
             { label: 'Seria', value: currentStreak, color: currentStreak > 2 ? 'var(--co-cyan)' : 'var(--co-dim)' },
           ].map(stat => (
             <div key={stat.label} style={{ padding: '12px 8px', textAlign: 'center', background: 'var(--co-panel)' }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: stat.color, margin: 0, lineHeight: 1, textShadow: stat.color !== 'var(--co-dim)' ? `0 0 10px ${stat.color}40` : 'none' }}>
+              <p style={{ ...FONT.display(TEXT.h2, TRACK.tight), color: stat.color, margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-sm)' }}>
                 {stat.value}
               </p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <p style={{ ...FONT.monoLabel, margin: '4px 0 0' }}>
                 {stat.label}
               </p>
             </div>
@@ -145,7 +118,7 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
           return (
             <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15`, background: `${currentRank.hex}04` }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', color: currentRank.hex, letterSpacing: '0.08em' }}>
+                <span style={{ ...FONT.display(TEXT.base, TRACK.tight), color: currentRank.hex }}>
                   {currentRank.emoji} {currentRank.name}
                 </span>
                 {nextRank ? (
@@ -153,7 +126,7 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
                     do {nextRank.emoji} {nextRank.name}: <span style={{ color: nextRank.hex }}>{Math.max(0, nextRank.min - pct)}%</span>
                   </span>
                 ) : (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: currentRank.hex }}>
+                  <span style={{ ...FONT.mono(TEXT.small), color: currentRank.hex }}>
                     ★ max ranga
                   </span>
                 )}
@@ -165,14 +138,14 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
                   background: nextRank
                     ? `linear-gradient(90deg, ${currentRank.hex}, ${nextRank.hex})`
                     : currentRank.hex,
-                  boxShadow: `0 0 6px ${currentRank.hex}80`,
+                  boxShadow: 'var(--glow-box-cyan)',
                   transition: 'width 0.6s ease',
                 }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-                <span style={{ ...FONT.monoTiny }}>0%</span>
-                <span style={{ ...FONT.mono('0.65rem'), color: currentRank.hex, fontWeight: 500 }}>{pct}%</span>
-                <span style={{ ...FONT.monoTiny }}>100%</span>
+                <span style={{ ...FONT.monoMicro }}>0%</span>
+                <span style={{ ...FONT.mono(TEXT.small), color: currentRank.hex }}>{pct}%</span>
+                <span style={{ ...FONT.monoMicro }}>100%</span>
               </div>
             </div>
           );
@@ -181,7 +154,7 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
         {/* Achievements */}
         {achievements.length > 0 && (
             <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15` }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
+              <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>
                 // osiągnięcia — {achievements.length}
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -194,17 +167,40 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
 
         {/* Session log */}
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
-          <p style={{ ...FONT.monoSmall, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
-            // session log — {sessions.length} attended
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <p style={{ ...FONT.monoLabel, margin: 0, flex: 1 }}>
+              // historia sesji — obecny na {sessions.length} z {history.length}
+            </p>
+            {/* Lista renderowała całą historię, w tym wszystkie nieobecności —
+                przy długiej historii okno było w większości wyszarzonymi
+                wierszami, a w DOM-ie lądowały setki węzłów. */}
+            <button
+              type="button"
+              onClick={() => setShowMissed(v => !v)}
+              aria-pressed={showMissed}
+              className="icon-btn"
+              style={{
+                minHeight: 32, padding: '4px 10px', flexShrink: 0,
+                background: 'transparent', border: '1px solid var(--co-border)',
+                color: showMissed ? 'var(--co-cyan)' : 'var(--co-dim)',
+                cursor: 'pointer', clipPath: CLIP.badge,
+                ...FONT.mono(TEXT.tiny),
+              }}
+            >
+              {showMissed ? 'Ukryj nieobecne' : `Pokaż nieobecne (${missedSessions.length})`}
+            </button>
+          </div>
           {history.length === 0 && (
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)', textAlign: 'center', padding: '24px 0' }}>
+            <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>
               Brak danych sesji
             </p>
           )}
-          {history.map((session, idx) => {
+          {visibleSessions.map((session) => {
             const attended = session.presentPlayers.includes(player.name);
             const isMulti = session.multisportPlayers.includes(player.name);
+            // Numer liczony z pozycji w pełnej historii, nie w przefiltrowanej
+            // liście — inaczej po ukryciu nieobecności numeracja by się przesuwała.
+            const sessionNo = history.length - history.indexOf(session);
 
             // Każdy obecny płaci swój udział; posiadacze karty Multisport mają
             // od niego stałą zniżkę, więc czasem wychodzi im dokładnie 0 zł.
@@ -219,33 +215,34 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '8px 10px', marginBottom: 3,
                 background: attended ? `${c.border}08` : 'transparent',
-                border: `1px solid ${attended ? c.border + '25' : 'var(--co-separator)'}`,
-                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))',
-                opacity: attended ? 1 : 0.45,
+                border: `1px solid ${attended ? c.border + '25' : 'var(--co-border)'}`,
+                clipPath: CLIP.card,
+                // 0.45 na tekście w --co-dim dawało ok. 1,3:1 — wiersze
+                // nieobecności były praktycznie niewidoczne.
+                opacity: attended ? 1 : 0.75,
                 transition: 'opacity 0.15s',
               }}>
                 {/* Session number */}
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', width: 24, flexShrink: 0 }}>
-                  #{String(history.length - idx).padStart(2,'0')}
+                <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', minWidth: 34, flexShrink: 0 }}>
+                  #{String(sessionNo).padStart(2,'0')}
                 </span>
                 {/* Status dot */}
-                <div style={{
+                <div aria-hidden="true" style={{
                   width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
                   background: attended ? c.border : 'var(--co-dim)',
-                  boxShadow: attended ? `0 0 4px ${c.border}` : 'none',
                 }} />
                 {/* Date */}
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: attended ? 'var(--co-text)' : 'var(--co-dim)', flex: 1 }}>
+                <span style={{ ...FONT.mono(TEXT.small), color: attended ? 'var(--co-text)' : 'var(--co-dim)', flex: 1 }}>
                   {formatDate(session.datePlayed)}
                 </span>
                 {/* Multi badge */}
                 {isMulti && (
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.1em', color: 'var(--co-green)', padding: '1px 5px', border: '1px solid rgba(0,255,136,0.3)', background: 'rgba(0,255,136,0.05)' }}>
+                  <span title="Multisport" style={{ ...FONT.display(TEXT.micro, TRACK.normal), color: 'var(--co-green)', padding: '1px 4px', border: '1px solid var(--co-green)', background: 'var(--co-tint-green)' }}>
                     M+
                   </span>
                 )}
                 {/* Cost / absent */}
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: attended ? (isMulti ? 'var(--co-green)' : c.border) : 'var(--co-dim)', width: 55, textAlign: 'right', flexShrink: 0 }}>
+                <span style={{ ...FONT.mono(TEXT.small), color: attended ? (isMulti ? 'var(--co-green)' : c.border) : 'var(--co-dim)', minWidth: 64, textAlign: 'right', flexShrink: 0 }}>
                   {costLabel}
                 </span>
               </div>
@@ -253,6 +250,6 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
           })}
         </div>
       </div>
-    </div>
-  , document.body);
+    </Modal>
+  );
 }

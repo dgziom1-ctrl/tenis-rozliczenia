@@ -4,7 +4,7 @@ import { updateWeek, deleteWeek } from '@/lib/firebase';
 import { groupHistoryByMonth } from '@/utils/sessions';
 import { parseAmount, isValidAmount } from '@/utils/format';
 import { useToast } from '../common/Toast';
-import { PasswordModal } from '../common/SharedUI';
+import { PasswordModal, PanelHeader } from '../common/SharedUI';
 import { SPORT, SPORT_LABEL } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import type { HistoryEntry, SoundType, SessionEditForm } from '../../types/ui';
@@ -13,6 +13,7 @@ import AttendanceTrendChart from './AttendanceTrendChart';
 import EditSessionForm from './EditSessionForm';
 import DeleteConfirmation from './DeleteConfirmation';
 import PlayerFilterSheet from './PlayerFilterSheet';
+import { CLIP } from '@/constants/styles';
 
 /** Ile sesji pokazujemy, zanim użytkownik poprosi o pełną listę. */
 const INITIAL_VISIBLE_SESSIONS = 50;
@@ -221,28 +222,27 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
       />
 
       <div className="cyber-box" style={{
-        clipPath: 'polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%)',
-        padding: '20px 18px',
+        clipPath: CLIP.panel,
+        padding: '20px 16px',
         animation: 'slide-in-up 0.3s ease-out',
       }}>
 
         {/* ── 1. HEADER ─────────────────────────────────────────────── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, paddingBottom: 14, borderBottom: '1px solid var(--co-border)' }}>
-          <div style={{ padding: '6px 8px', background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.25)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
-            <Terminal size={14} style={{ color: 'var(--co-green)', display: 'block' }} />
-          </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.2rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-green)' }}>
-            HISTORIA
-          </span>
-          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,229,255,0.2), transparent)' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
-            {history.length} REKORDÓW
-          </span>
-        </div>
+        <PanelHeader
+          icon={Terminal}
+          title="Historia"
+          accent="var(--co-green)"
+          aside={
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+              {history.length} REKORDÓW
+            </span>
+          }
+        />
 
         {/* ── 2. BOOT TEXT ──────────────────────────────────────────── */}
-        <div style={{ marginBottom: 20, padding: '10px 14px', background: 'var(--co-dark)', border: '1px solid var(--co-border)' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--co-green)', lineHeight: 1.6, opacity: 0.7 }}>
+        {/* Zieleń przy 70% krycia schodziła w trybie jasnym do ~2,6:1. */}
+        <div style={{ marginBottom: 20, padding: '10px 14px', background: 'var(--co-surface-2)', border: '1px solid var(--co-border)' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', lineHeight: 1.6 }}>
             {'>'} System OK
             <br />
             {'>'} {history.length} rekordów znaleziono
@@ -261,9 +261,9 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
 
             {/* Etykieta filtra */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'rgba(0,229,255,0.04)', border: '1px solid rgba(0,229,255,0.12)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'var(--co-tint)', border: '1px solid var(--co-tint-hi)', clipPath: CLIP.badge, flexShrink: 0 }}>
               <Search size={11} style={{ color: 'var(--co-dim)' }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>FILTR</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>FILTR</span>
             </div>
 
             {isMobile ? (
@@ -272,15 +272,15 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                   onClick={() => setIsFilterOpen(true)}
                   style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.08em',
+                    fontSize: '0.8125rem',
+                    letterSpacing: '0.1em',
                     padding: '6px 10px',
                     cursor: 'pointer',
                     border: '1px solid',
                     borderColor: 'var(--co-border)',
                     color: filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
                     background: 'transparent',
-                    clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                    clipPath: CLIP.badge,
                     transition: 'all 0.15s',
                     flexShrink: 0,
                   }}
@@ -289,7 +289,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 </button>
 
                 {filterPlayer && (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
                     {filteredHistory.length} sesji
                   </span>
                 )}
@@ -300,15 +300,15 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                   onClick={() => setFilterPlayer('')}
                   style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.08em',
+                    fontSize: '0.8125rem',
+                    letterSpacing: '0.1em',
                     padding: '4px 10px',
                     cursor: 'pointer',
                     border: '1px solid',
                     borderColor: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-border)',
                     color: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
-                    background: !filterPlayer ? 'rgba(0,229,255,0.08)' : 'transparent',
-                    clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                    background: !filterPlayer ? 'var(--co-tint-hi)' : 'transparent',
+                    clipPath: CLIP.badge,
                     transition: 'all 0.15s',
                   }}
                 >
@@ -320,15 +320,15 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                     onClick={() => setFilterPlayer(prev => prev === name ? '' : name)}
                     style={{
                       fontFamily: 'var(--font-display)',
-                      fontSize: '0.7rem',
-                      letterSpacing: '0.08em',
+                      fontSize: '0.8125rem',
+                      letterSpacing: '0.1em',
                       padding: '4px 10px',
                       cursor: 'pointer',
                       border: '1px solid',
                       borderColor: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-border)',
                       color: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-dim)',
-                      background: filterPlayer === name ? 'rgba(0,229,255,0.08)' : 'transparent',
-                      clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                      background: filterPlayer === name ? 'var(--co-tint-hi)' : 'transparent',
+                      clipPath: CLIP.badge,
                       transition: 'all 0.15s',
                     }}
                   >
@@ -337,32 +337,37 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 ))}
 
                 {filterPlayer && (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
                     {filteredHistory.length} sesji
                   </span>
                 )}
               </>
             )}
 
-            <div style={{ flex: 1 }} />
-            <div style={{ width: 1, height: 18, background: 'var(--co-border)', flexShrink: 0 }} />
+            {/* Rozpychacz i separator były zwykłymi elementami zawijanego
+                kontenera: gdy chipy graczy przechodziły do drugiej linii,
+                rozpychacz spadał do własnego rzędu, a kreska zostawała sama
+                na początku linii. Akcje mają teraz osobną, nierozdzielną grupę. */}
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <div aria-hidden="true" style={{ width: 1, height: 18, background: 'var(--co-border)' }} />
 
             {/* Sort */}
             <button
               onClick={() => setSortOrder(o => o === 'desc' ? 'asc' : 'desc')}
               title={sortOrder === 'desc' ? 'Najnowsze pierwsze' : 'Najstarsze pierwsze'}
               aria-label="Zmień kolejność"
+              className="icon-btn"
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
-                padding: '4px 8px', cursor: 'pointer',
+                minHeight: 36, padding: '6px 10px', cursor: 'pointer',
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
-                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.08em',
-                transition: 'all 0.15s', flexShrink: 0,
+                clipPath: CLIP.badge,
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em',
+                flexShrink: 0,
               }}
             >
-              <ArrowUpDown size={10} />
+              <ArrowUpDown size={12} aria-hidden="true" />
               {sortOrder === 'desc' ? 'NOWE' : 'STARE'}
             </button>
 
@@ -371,19 +376,21 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
               onClick={handleExportCSV}
               title="Pobierz CSV"
               aria-label="Eksportuj CSV"
+              className="icon-btn"
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
-                padding: '4px 8px', cursor: 'pointer',
+                minHeight: 36, padding: '6px 10px', cursor: 'pointer',
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
-                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-                fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.08em',
-                transition: 'all 0.15s', flexShrink: 0,
+                clipPath: CLIP.badge,
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em',
+                flexShrink: 0,
               }}
             >
-              <Download size={10} />
+              <Download size={12} aria-hidden="true" />
               CSV
             </button>
+            </div>
           </div>
         )}
 
@@ -391,10 +398,10 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         {history.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
             <CalendarDays style={{ margin: '0 auto 16px', color: 'var(--co-dim)' }} size={40} />
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.2em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
               BRAK DANYCH
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)', marginTop: 8 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', marginTop: 8 }}>
               {'>'} Dodaj pierwszą sesję w zakładce DODAJ_
             </p>
           </div>
@@ -406,11 +413,11 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
             <div key={label}>
               {/* Month header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-cyan)' }}>{label}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--co-dim)' }}>[{rows.length}x]</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: CLIP.tag }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-cyan)' }}>{label}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>[{rows.length}x]</span>
                 </div>
-                <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, rgba(0,229,255,0.25), transparent)' }} />
+                <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, var(--co-tint-line), transparent)' }} />
               </div>
 
               {/* Log entries */}
@@ -450,20 +457,13 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
             </div>
           ))}
         </div>
+        {/* Hover przez klasę, nie przez handlery JS — na dotyku `mouseenter`
+            wypalał się przy tapnięciu i stan zostawał do kolejnego kliknięcia. */}
         {!showAll && filteredHistory.length > INITIAL_VISIBLE_SESSIONS && (
           <button
             onClick={() => setShowAll(true)}
-            style={{
-              display: 'block', width: '100%', marginTop: 16, padding: '12px',
-              fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.1em',
-              textTransform: 'uppercase', color: 'var(--co-cyan)',
-              background: 'rgba(0,229,255,0.05)', border: '1px solid rgba(0,229,255,0.3)',
-              cursor: 'pointer',
-              clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
-              transition: 'background 0.15s, border-color 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,229,255,0.12)'; e.currentTarget.style.borderColor = 'rgba(0,229,255,0.6)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,229,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(0,229,255,0.3)'; }}
+            className="cyber-button-outline"
+            style={{ display: 'block', width: '100%', marginTop: 16, minHeight: 44, padding: '12px' }}
           >
             Pokaż wszystkie ({filteredHistory.length} sesji)
           </button>

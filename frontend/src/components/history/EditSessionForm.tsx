@@ -4,6 +4,7 @@ import { InlineSpinner } from '../common/LoadingSkeleton';
 import ShareBreakdown from '../common/ShareBreakdown';
 import CyberDateInput from '../admin/CyberDateInput';
 import { SPORT_EMOJI } from '@/constants';
+import { CLIP } from '@/constants/styles';
 import { parseAmount, formatAmountShort } from '@/utils/format';
 import { getShareGroups } from '@/utils/sessionCost';
 import type { SessionEditForm } from '../../types/ui';
@@ -52,17 +53,17 @@ export default function EditSessionForm({
 
   return (
     <div style={{
-      background: 'var(--co-dark)', border: '1px solid rgba(0,229,255,0.25)',
-      clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
+      background: 'var(--co-dark)', border: '1px solid var(--co-tint-line)',
+      clipPath: CLIP.smallCard,
       padding: 16, marginBottom: 4, display: 'flex', flexDirection: 'column', gap: 14,
     }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="field-pair">
         <div>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</span>
           <CyberDateInput compact label="Data sesji" value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
         </div>
         <div>
-          <label htmlFor={costId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>
+          <label htmlFor={costId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>
             Koszt całkowity
           </label>
           <input id={costId} type="text" inputMode="decimal" value={editForm.cost}
@@ -70,14 +71,14 @@ export default function EditSessionForm({
             aria-invalid={!isEditCostValid}
             aria-describedby={isEditCostValid ? undefined : costErrorId}
             className="cyber-input"
-            style={{ width: '100%', padding: '10px 12px', fontSize: '0.8rem', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}
+            style={{ width: '100%', padding: '10px 12px', clipPath: CLIP.tag }}
           />
           {!isEditCostValid ? (
-            <p id={costErrorId} role="alert" style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--co-rose)' }}>
+            <p id={costErrorId} role="alert" style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-rose)' }}>
               ⚠ {editCostError}
             </p>
           ) : (
-            <p style={{ margin: '6px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)' }}>
+            <p style={{ margin: '6px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
               {racketCost > 0
                 ? `> Zapłacone w recepcji, w tym rakiety ${formatAmountShort(racketCost)} zł`
                 : '> Zapłacone w recepcji, po odliczeniu kart Multisport'}
@@ -87,27 +88,27 @@ export default function EditSessionForm({
       </div>
 
       {previewGroups.length > 0 && (
-        <div style={{ padding: '10px 12px', background: 'rgba(0,229,255,0.03)', border: '1px solid rgba(0,229,255,0.15)', clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)' }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+        <div style={{ padding: '10px 12px', background: 'var(--co-tint)', border: '1px solid var(--co-tint-line)', clipPath: CLIP.tag }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
             Po zmianie na osobę
           </p>
           <ShareBreakdown groups={previewGroups} sportEmoji={SPORT_EMOJI[editForm.sport] ?? '🏓'} size="sm" />
         </div>
       )}
       <div>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--co-dim)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.18em', color: 'var(--co-dim)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
           <Users size={11} /> OBECNI
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+        <div className="player-grid">
           {playerNames.map(name => (
             <button type="button" key={name} onClick={() => onTogglePresent(name)}
               style={{
-                padding: '7px 8px', fontSize: '0.65rem', fontFamily: 'var(--font-display)', fontWeight: 600,
+                padding: '6px 8px', fontSize: '0.75rem', fontFamily: 'var(--font-display)', 
                 letterSpacing: '0.06em', cursor: 'pointer', border: '1px solid',
-                clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                clipPath: CLIP.badge,
                 transition: 'all 0.15s',
                 ...(editForm.present?.includes(name) ? {
-                  borderColor: 'rgba(0,229,255,0.5)', background: 'rgba(0,229,255,0.08)', color: 'var(--co-cyan)',
+                  borderColor: 'var(--co-tint-line)', background: 'var(--co-tint-hi)', color: 'var(--co-cyan)',
                 } : {
                   borderColor: 'var(--co-border)', background: 'transparent', color: 'var(--co-dim)',
                 }),
@@ -119,19 +120,19 @@ export default function EditSessionForm({
       </div>
       {editForm.present?.length > 0 && (
         <div>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.15em', color: 'var(--co-green)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.18em', color: 'var(--co-green)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
             <Zap size={11} /> MULTISPORT
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+          <div className="player-grid">
             {editForm.present.map(name => (
               <button type="button" key={name} onClick={() => onToggleMulti(name)}
                 style={{
-                  padding: '7px 8px', fontSize: '0.65rem', fontFamily: 'var(--font-display)', fontWeight: 600,
+                  padding: '6px 8px', fontSize: '0.75rem', fontFamily: 'var(--font-display)', 
                   letterSpacing: '0.06em', cursor: 'pointer', border: '1px solid',
-                  clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                  clipPath: CLIP.badge,
                   transition: 'all 0.15s',
                   ...(editForm.multiPlayers?.includes(name) ? {
-                    borderColor: 'rgba(0,229,255,0.5)', background: 'rgba(0,229,255,0.07)', color: 'var(--co-green)',
+                    borderColor: 'var(--co-tint-line)', background: 'var(--co-tint)', color: 'var(--co-green)',
                   } : {
                     borderColor: 'var(--co-border)', background: 'transparent', color: 'var(--co-dim)',
                   }),

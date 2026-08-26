@@ -3,6 +3,7 @@ import { SOUND_TYPES } from '@/constants';
 import { calculatePlayerStats, assignRankingPlaces, calculateSeasonPlayerStats } from '@/utils/rankings';
 import { groupSessionsByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
 import { computeWrappedStats } from '@/utils/wrapped';
+import { Film } from 'lucide-react';
 import Leaderboard from './Leaderboard';
 import RankingHistoryChart from './RankingHistoryChart';
 import MonthlyReport from './MonthlyReport';
@@ -108,26 +109,22 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'slide-in-up 0.3s ease-out' }}>
       <SeasonSelector seasons={seasons} selected={selectedSeason} onChange={setSelectedSeason} />
 
-      {/* Wrapped button — show when a past season is selected */}
+      {/* Wrapped button — show when a past season is selected.
+          Był jedynym magentowym elementem na stronie, jedynym przyciskiem na
+          całą szerokość i jedynym z emoji w etykiecie — czytał się jak wklejona
+          reklama, nie jak część interfejsu. Teraz zwykły przycisk akcji. */}
       {selectedSeason && selectedSeason < currentYear && (
         <button
           onClick={() => setWrappedYear(selectedSeason)}
+          className="cyber-button-outline"
           style={{
-            padding: '12px 20px',
-            background: 'linear-gradient(135deg, rgba(204,0,255,0.1), rgba(0,229,255,0.1))',
-            border: '1px solid rgba(204,0,255,0.3)',
-            color: 'var(--co-text-hi)',
-            fontFamily: 'var(--font-display)',
-            fontSize: '1rem',
-            letterSpacing: '0.12em',
-            clipPath: 'polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%)',
-            cursor: 'pointer',
-            textAlign: 'center',
-            transition: 'all 0.2s',
-            textShadow: '0 0 10px rgba(204,0,255,0.4)',
+            alignSelf: 'flex-start',
+            display: 'flex', alignItems: 'center', gap: 8,
+            minHeight: 44, padding: '10px 20px',
           }}
         >
-          🎬 PODSUMOWANIE ROKU {selectedSeason}
+          <Film size={14} aria-hidden="true" />
+          Podsumowanie roku {selectedSeason}
         </button>
       )}
 
