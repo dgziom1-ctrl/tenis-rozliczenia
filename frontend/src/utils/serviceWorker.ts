@@ -20,31 +20,24 @@ let registrationPromise: Promise<ServiceWorkerRegistration | null> | null = null
 /**
  * Nowy worker przejął stronę, a ta działa jeszcze na plikach starego wydania.
  *
- * Nazwy paczek zawierają hash treści, więc te wczytywane leniwie (osobne
- * zakładki) po wdrożeniu już nie istnieją — pierwsze przejście na inną zakładkę
- * skończyłoby się błędem. Przeładowanie to naprawia, ale nie robimy tego pod
- * palcami użytkownika: w tej apce wypełnia się formularze sesji i wpłat, a nagły
- * restart wyczyściłby wpisane dane. Czekamy więc, aż karta zejdzie z ekranu.
- * Gdyby w tym czasie zabrakło jakiejś paczki, zajmie się tym straż startu.
+ * Przeładowujemy natychmiast i to jest zmiana wymuszona przez awarię. Wcześniej
+ * odkładaliśmy to do momentu, gdy karta zejdzie z ekranu, żeby nie zabrać
+ * użytkownikowi wpisanego formularza. Skutek był znacznie gorszy: telefon, na
+ * którym wdrożono zepsute wydanie, dalej uruchamiał je z pamięci workera —
+ * restart apki nie pomagał, bo strona nigdy nie doczekała się przeładowania.
+ * Utrata wpisanego formularza raz na wdrożenie jest tania. Urządzenie
+ * przyszpilone do zepsutej wersji nie jest.
  */
-function reloadWhenHiddenOnControllerChange(): void {
+function reloadOnControllerChange(): void {
   // Brak kontrolera przy starcie oznacza pierwszą w życiu rejestrację. Wtedy
   // `controllerchange` to nie aktualizacja, tylko normalne przejęcie strony.
   if (!navigator.serviceWorker.controller) return;
 
-  let pending = false;
-
-  const reloadIfHidden = () => {
-    if (!pending || document.visibilityState !== 'hidden') return;
-    document.removeEventListener('visibilitychange', reloadIfHidden);
-    window.location.reload();
-  };
-
+  let reloading = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (pending) return;
-    pending = true;
-    document.addEventListener('visibilitychange', reloadIfHidden);
-    reloadIfHidden();
+    if (reloading) return;
+    reloading = true;
+    window.location.reload();
   });
 }
 
@@ -84,7 +77,7 @@ export function registerServiceWorker(): Promise<ServiceWorkerRegistration | nul
 
   registrationPromise = (async () => {
     try {
-      reloadWhenHiddenOnControllerChange();
+      reloadOnControllerChange();
       const registration = await navigator.serviceWorker.register(SW_URL, {
         // Bez tego przeglądarka może podać skrypt workera ze swojego cache
         // i poprawka do samego workera nie dotarłaby do użytkownika.

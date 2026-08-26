@@ -49,15 +49,20 @@ const RELEASE_ASSETS = ['__CP_RELEASE_ASSETS__'].filter((path) => path.startsWit
 /** Ekran otwierany, gdy powiadomienie nie wskazuje własnego adresu. */
 const DEFAULT_TARGET = '/?tab=dashboard';
 
-/** Wolna sieć nie może blokować startu, gdy w cache leży sprawna kopia. */
-const NAVIGATION_TIMEOUT_MS = 6000;
+/**
+ * Ostateczny limit na dokument. Nie służy do przyspieszania startu, a wyłącznie
+ * do tego, żeby zerwane połączenie nie zawiesiło go na zawsze — dlatego jest
+ * dużo dłuższy niż czas potrzebny na pobranie kilku kilobajtów HTML.
+ */
+const NAVIGATION_TIMEOUT_MS = 20000;
 const ASSET_TIMEOUT_MS = 15000;
 
 /**
  * Adresy, których worker nie tyka. Własny skrypt musi zawsze pochodzić z sieci,
- * żeby dało się wypuścić poprawkę do samego workera.
+ * żeby dało się wypuścić poprawkę do samego workera; `version.json` musi być
+ * świeży, bo to po nim aplikacja rozpoznaje, że działa na starym wydaniu.
  */
-const NEVER_INTERCEPT = ['/firebase-messaging-sw.js'];
+const NEVER_INTERCEPT = ['/firebase-messaging-sw.js', '/version.json'];
 
 function noop() {}
 
@@ -149,17 +154,21 @@ async function warmCache(cache, paths) {
 }
 
 /**
- * Zapisuje komplet plików wydania.
+ * Instalacja pobiera TYLKO powłokę — dwa małe pliki.
  *
- * Robimy to na etapie instalacji, bo wtedy sieć na pewno działa (przeglądarka
- * właśnie ściągnęła ten plik). Dzięki temu `activate` może bez ryzyka usunąć
- * cache poprzedniego wydania — nowe ma już wszystko, czego potrzebuje, także
- * paczki zakładek, w które użytkownik jeszcze nie wchodził.
+ * Wcześniej zapisywała tu całe wydanie, wszystkie dwadzieścia parę plików. Przy
+ * krótkiej sesji na słabej sieci instalacja nie zdążała się skończyć, więc nowa
+ * wersja workera nie wchodziła w życie i telefon dalej uruchamiał starą z pamięci
+ * — nawet po wdrożeniu poprawki. Aktualizacja workera jest ważniejsza od pełnego
+ * zapasu offline, dlatego instalacja musi być tak tania, żeby zawsze się udała.
  */
 async function precacheShell() {
   const shellCache = await caches.open(SHELL_CACHE);
   await warmCache(shellCache, [SHELL_KEY, BOOT_GUARD_KEY]);
+}
 
+/** Resztę wydania dobieramy już po aktywacji, nie wstrzymując jej. */
+async function warmReleaseAssets() {
   const assetCache = await caches.open(ASSET_CACHE);
   await warmCache(assetCache, RELEASE_ASSETS);
 }
@@ -177,6 +186,11 @@ self.addEventListener('activate', (event) => {
       .filter((key) => key.startsWith('cp-') && !CURRENT_CACHES.includes(key))
       .map((key) => caches.delete(key)));
     await self.clients.claim();
+
+    // Bez `await`: pełny zapas offline nie może opóźniać przejęcia strony.
+    // Gdyby worker został wcześniej uśpiony, brakujące pliki i tak dobiorą się
+    // przy pierwszym żądaniu.
+    warmReleaseAssets().catch(noop);
   })());
 });
 
@@ -218,10 +232,20 @@ async function handleNavigation(event) {
 
   if (!cached) return (await fresh) ?? offlineShell();
 
-  // Świeży dokument wygrywa, ale nie czekamy na niego bez końca. Limit wewnątrz
-  // `fetchWithTimeout` liczy się tylko do nagłówków, a zerwane połączenie potrafi
-  // przysłać nagłówki i zamilknąć — start wisiałby wtedy mimo sprawnej kopii.
-  // Po tym czasie podajemy kopię, a świeża wersja dojdzie do cache w tle.
+  // Bez sieci nie ma po co czekać — kopia jest jedyną odpowiedzią.
+  if (navigator.onLine === false) return (await Promise.race([fresh, timeoutAfter(0)])) ?? cached;
+
+  /**
+   * Z siecią czekamy na świeży dokument naprawdę długo i to jest celowe.
+   *
+   * Krótki limit wydawał się rozsądny („po sekundach oddaj kopię, nie każ czekać”),
+   * ale przy starcie na telefonie radio potrafi nie być gotowe przez kilka sekund.
+   * Kopia wygrywała wtedy wyścig, a razem z nią wracały paczki starego wydania
+   * z cache — urządzenie uruchamiało poprzednią wersję aplikacji przy każdym
+   * otwarciu, także po wdrożeniu poprawki. Kopia jest ratunkiem na brak sieci,
+   * nie skrótem na wolną sieć. Limit istnieje tylko po to, żeby zerwane
+   * połączenie, które przysłało nagłówki i zamilkło, nie zawiesiło startu.
+   */
   const winner = await Promise.race([fresh, timeoutAfter(NAVIGATION_TIMEOUT_MS)]);
   return winner ?? cached;
 }

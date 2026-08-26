@@ -1,6 +1,5 @@
 import { defineConfig, type Plugin, type ResolvedConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -8,19 +7,29 @@ const BUILD_ID_PLACEHOLDER = '__CP_BUILD_ID__';
 const RELEASE_ASSETS_PLACEHOLDER = '__CP_RELEASE_ASSETS__';
 
 /**
- * Uzupełnia Service Workera danymi, które znane są dopiero po zbudowaniu:
- * identyfikatorem wydania i listą jego paczek.
+ * Identyfikator wydania, wspólny dla aplikacji, Service Workera i `version.json`.
+ *
+ * Liczony ze znacznika czasu, a nie z zawartości plików. Zawartość byłaby
+ * ładniejsza (wdrożenie tego samego kodu nie unieważniałoby cache), ale musi być
+ * znana już przy wczytaniu konfiguracji, żeby dało się ją wstrzyknąć do bundla —
+ * a przy okazji gwarantuje, że każde wdrożenie jest rozpoznawalne jako nowe.
+ * Zbędne unieważnienie cache jest tanie. Urządzenie, które nie zauważyło
+ * aktualizacji, nie jest.
+ */
+const BUILD_ID = Date.now().toString(36);
+
+/**
+ * Uzupełnia Service Workera danymi znanymi dopiero po zbudowaniu i wystawia
+ * `version.json`, po którym aplikacja rozpoznaje, że działa na starym wydaniu.
  *
  * Identyfikator nazywa cache workera, a `activate` usuwa wszystkie pozostałe.
  * Bez stempla nazwa byłaby stała, więc po wdrożeniu w cache zostałby
- * `index.html` z jednego wydania i paczki z drugiego — dokładnie ta niespójność,
- * po której pomaga tylko czyszczenie danych strony. Wyliczamy go z nazw plików,
- * a nie ze znacznika czasu: wdrożenie tego samego kodu nie unieważnia wtedy
- * cache'u bez powodu.
+ * `index.html` z jednego wydania i paczki z drugiego — niespójność, po której
+ * pomaga tylko czyszczenie danych strony.
  *
- * Lista paczek pozwala workerowi zapisać całe wydanie już przy instalacji.
- * Sam `index.html` wymienia tylko paczki potrzebne od razu, więc offline
- * pierwsze wejście w osobno doładowywaną zakładkę kończyłoby się błędem.
+ * Lista paczek pozwala workerowi zapisać całe wydanie do pracy offline. Sam
+ * `index.html` wymienia tylko paczki potrzebne od razu, więc offline pierwsze
+ * wejście w osobno doładowywaną zakładkę kończyłoby się błędem.
  */
 function prepareServiceWorker(): Plugin {
   const SW_FILE = 'firebase-messaging-sw.js';
@@ -32,6 +41,14 @@ function prepareServiceWorker(): Plugin {
 
     configResolved(config) {
       resolved = config;
+    },
+
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: `${JSON.stringify({ buildId: BUILD_ID }, null, 2)}\n`,
+      });
     },
 
     // `closeBundle` jest pierwszym momentem, w którym Vite ma już skopiowane
@@ -56,23 +73,8 @@ function prepareServiceWorker(): Plugin {
       const assets = fs.readdirSync(assetsDir).sort()
         .map((name) => `/${resolved.build.assetsDir}/${name}`);
 
-      // Same nazwy paczek nie wystarczą: poprawka w `boot-guard.js` albo
-      // `index.html` nie zmienia ich hashy, więc worker zostałby bajt w bajt taki
-      // sam, przeglądarka nie zauważyłaby aktualizacji i zapas w cache nigdy by
-      // się nie odświeżył. Dlatego do stempla wchodzi też treść plików powłoki.
-      const shellFiles = ['index.html', 'boot-guard.js']
-        .map((name) => path.join(outDir, name))
-        .filter((file) => fs.existsSync(file))
-        .map((file) => fs.readFileSync(file));
-
-      const buildId = createHash('sha256')
-        .update(assets.join('|'))
-        .update(Buffer.concat(shellFiles))
-        .digest('hex')
-        .slice(0, 12);
-
       const prepared = source
-        .split(BUILD_ID_PLACEHOLDER).join(buildId)
+        .split(BUILD_ID_PLACEHOLDER).join(BUILD_ID)
         // Znacznik stoi w kodzie w cudzysłowach, więc podstawiamy elementy bez
         // nawiasów tablicy — dzięki temu plik jest poprawnym JS-em przed i po.
         .split(`'${RELEASE_ASSETS_PLACEHOLDER}'`).join(assets.map((p) => JSON.stringify(p)).join(', '));
@@ -84,6 +86,10 @@ function prepareServiceWorker(): Plugin {
 
 export default defineConfig({
   plugins: [react(), prepareServiceWorker()],
+  define: {
+    // Aplikacja musi znać własne wydanie, żeby porównać je z `version.json`.
+    __CP_APP_BUILD__: JSON.stringify(BUILD_ID),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

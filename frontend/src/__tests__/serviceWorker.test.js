@@ -148,7 +148,13 @@ beforeEach(() => {
 });
 
 describe('instalacja', () => {
-  it('zapisuje powłokę i komplet paczek wydania', async () => {
+  /**
+   * Instalacja musi być tania. Gdy pobierała tu całe wydanie, przy krótkiej sesji
+   * na słabej sieci nie zdążała się skończyć — nowa wersja workera nie wchodziła
+   * w życie i telefon dalej uruchamiał starą z pamięci, także po wdrożeniu
+   * poprawki. Aktualizacja workera jest ważniejsza niż pełny zapas offline.
+   */
+  it('pobiera tylko powłokę, nie całe wydanie', async () => {
     serveRelease();
 
     await sw.lifecycle('install');
@@ -159,12 +165,21 @@ describe('instalacja', () => {
       `${ORIGIN}/boot-guard.js`,
       `${ORIGIN}/index.html`,
     ]);
-    // Cała lista, nie tylko to, co wymienia `index.html`: inaczej offline
-    // pierwsze wejście w osobno doładowywaną zakładkę kończy się błędem.
+    expect(caches.entries(ASSET_CACHE)).toEqual([]);
+    expect(sw.self.skipWaiting).toHaveBeenCalled();
+  });
+
+  // Zapas offline nadal powstaje, tylko po aktywacji — żeby nie opóźniał
+  // przejęcia strony przez nową wersję workera.
+  it('komplet paczek dobiera po aktywacji', async () => {
+    serveRelease();
+
+    await sw.lifecycle('activate');
+    await vi.waitFor(() => expect(caches.entries(ASSET_CACHE).length).toBe(RELEASE_ASSETS.length));
+
     expect(caches.entries(ASSET_CACHE).sort()).toEqual(
       RELEASE_ASSETS.map((p) => `${ORIGIN}${p}`).sort(),
     );
-    expect(sw.self.skipWaiting).toHaveBeenCalled();
   });
 
   // Cache HTTP przeglądarki potrafi trzymać zapisaną odpowiedź 404 pod adresem
@@ -207,7 +222,9 @@ describe('aktywacja', () => {
 
     await sw.lifecycle('activate');
 
-    expect(caches.names()).toEqual([SHELL_CACHE, 'inna-apka-na-tym-origin']);
+    // `cp-assets-testbuild` dochodzi, bo po aktywacji worker zaczyna dobierać
+    // zapas offline dla bieżącego wydania.
+    expect(caches.names().sort()).toEqual([ASSET_CACHE, SHELL_CACHE, 'inna-apka-na-tym-origin'].sort());
     expect(sw.self.clients.claim).toHaveBeenCalled();
   });
 });
@@ -308,6 +325,14 @@ describe('czego worker nie tyka', () => {
   // wersję i odciąć jedyną drogę wypuszczenia poprawki.
   it('własnego skryptu', () => {
     const event = sw.request('/firebase-messaging-sw.js');
+    expect(event.respondWith).not.toHaveBeenCalled();
+  });
+
+  // Po tym pliku aplikacja rozpoznaje, że działa na starym wydaniu. Podany
+  // z cache workera potwierdzałby wersję, którą sam serwuje — i zacięcie
+  // trwałoby dalej.
+  it('pliku z numerem wersji', () => {
+    const event = sw.request('/version.json');
     expect(event.respondWith).not.toHaveBeenCalled();
   });
 

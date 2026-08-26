@@ -187,6 +187,10 @@ decision (it changes how members onboard), so it is left open rather than guesse
 app actually uses (Google Fonts, gstatic for the messaging SDK, and Firebase
 endpoints).
 
+Note that `boot-guard.js` is a separate file rather than an inline script precisely
+because `script-src` has no `'unsafe-inline'`; if you ever add inline scripts, that
+directive is what will block them.
+
 ### Why the app never needs "clear site data"
 
 Every build gives the JS and CSS new content-hashed names, and Hosting only serves
@@ -249,10 +253,35 @@ because the SPA rewrite answers any missing path outside `/assets/` with
 `index.html`. Caching that under a script or icon URL would be the same permanent
 wrong-content failure as caching a 404, so content type is checked too.
 
-At install time it stores the whole release, using the asset list injected by the
-plugin in `vite.config.ts`. Reading that list from `index.html` is not enough: the
-document only names the chunks needed immediately, so offline the first visit to a
-lazily-loaded tab would fail. As a result the app now opens offline on every tab.
+Install is deliberately cheap — it stores only `index.html` and `boot-guard.js`. The
+full release (from the asset list the plugin injects, because `index.html` only
+names the chunks needed immediately) is warmed **after** activation instead. This
+ordering was learned the hard way: precaching twenty-odd files during install meant
+that on a short session over a weak connection the install never finished, so a new
+worker never took over and the device kept booting the previous release from cache —
+even after a fix had been deployed. A worker that updates matters more than a
+complete offline store, so install must be small enough that it always completes.
+
+**6. The app can escape a stuck release on its own.** This is the last line of
+defence and it exists because everything above it failed once: a device kept running
+a broken release from the worker's cache, and the only cure was clearing browser
+data. The worker can serve a complete, self-consistent old release — shell plus
+matching chunks, fully offline-capable — so until it notices its own update, nothing
+in the app can help. `utils/buildVersion.ts` therefore does not rely on the worker at
+all: the build id is compiled into the bundle, and it is compared against
+`/version.json`, which the worker is forbidden to intercept. On a mismatch the app
+unregisters the worker, drops the caches and reloads, which is exactly what a user
+would otherwise do by hand in browser settings. User data is untouched — this
+replaces a release, it does not reset the app — and a 10-minute cooldown stops an
+unfixable mismatch from turning into a reload loop.
+
+Two related choices follow from the same incident. A new worker taking over now
+reloads the page **immediately** rather than waiting for the tab to be hidden;
+losing a half-typed form once per deploy is cheap, while a device pinned to a broken
+release is not. And the cached shell is a fallback for being *offline*, not a
+shortcut for being *slow*: the navigation handler waits up to 20 s for a fresh
+document when a connection exists, because a short race let the old shell win on
+mobile cold starts and drag the whole previous release back in with it.
 
 **5. A boot guard outside the bundle.** `public/boot-guard.js` is loaded
 synchronously from `index.html`. It lives outside the bundle on purpose: when the
@@ -446,6 +475,7 @@ tenis-rozliczenia/
 │       └── utils/
 │           ├── achievements.ts             # Achievement + badge logic
 │           ├── bootRecovery.ts             # Bridge to public/boot-guard.js
+│           ├── buildVersion.ts             # Escapes a stale release the worker keeps serving
 │           ├── debt.ts                     # Balance = session costs − payments
 │           ├── format.ts                   # Date and currency formatting
 │           ├── id.ts                       # Collision-resistant ID generator
