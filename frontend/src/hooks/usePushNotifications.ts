@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getMessaging, getToken } from 'firebase/messaging';
 import { ref, set } from 'firebase/database';
 import { database } from '@/lib/firebase/config';
+import { registerServiceWorker } from '@/utils/serviceWorker';
 import { MAX_PLAYER_NAME_LENGTH } from '@/utils/validation';
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
@@ -30,6 +31,17 @@ function errorField(err: unknown, field: 'message' | 'code'): string {
   if (typeof err !== 'object' || err === null) return '';
   const value = (err as Record<string, unknown>)[field];
   return typeof value === 'string' ? value : '';
+}
+
+/** Ile najdłużej czekamy na aktywację workera, zanim uznamy to za awarię. */
+const ACTIVATION_TIMEOUT_MS = 10_000;
+
+/** `navigator.serviceWorker.ready` bez gwarancji, że kiedykolwiek się rozstrzygnie. */
+function waitForActivation(): Promise<boolean> {
+  return Promise.race([
+    navigator.serviceWorker.ready.then(() => true),
+    new Promise<boolean>((resolve) => setTimeout(() => resolve(false), ACTIVATION_TIMEOUT_MS)),
+  ]);
 }
 
 function friendlyPushError(err: unknown): string {
@@ -68,18 +80,25 @@ export function usePushNotifications() {
     }
     setIsRegistering(true);
     try {
-      const existingRegs = await navigator.serviceWorker.getRegistrations();
-      for (const reg of existingRegs) {
-        if (reg.active?.scriptURL?.includes('firebase-messaging-sw')) {
-          await reg.unregister();
-        }
-      }
-      const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      await navigator.serviceWorker.ready;
-
+      // Zgoda przed czymkolwiek innym: Safari (w tym PWA na iOS) wymaga, by
+      // `requestPermission` padło jeszcze w oknie interakcji użytkownika. Każde
+      // wcześniejsze `await` może to okno zamknąć i przeglądarka odrzuca prośbę
+      // błędem, który wygląda jak zupełnie inna awaria.
       const perm = await Notification.requestPermission();
       setPermission(perm);
       if (perm !== 'granted') return { success: false, error: 'Brak zgody na powiadomienia' };
+
+      // Korzystamy z workera zarejestrowanego przy starcie aplikacji. Poprzednia
+      // wersja wyrejestrowywała go i zakładała od nowa — to gubiło cache powłoki
+      // i na moment zostawiało apkę bez obsługi żądań. Dodatkowo sprawdzała samo
+      // `reg.active`, więc rejestrację w trakcie instalacji po cichu pomijała.
+      const swReg = await registerServiceWorker();
+      if (!swReg) return { success: false, error: 'Service Worker niedostępny w tej przeglądarce.' };
+
+      // `ready` czeka na aktywację i potrafi nie rozstrzygnąć się nigdy. Bez
+      // limitu przycisk kręciłby się bez końca, bez błędu i bez wyjścia.
+      const activated = await waitForActivation();
+      if (!activated) return { success: false, error: 'Service Worker nie uruchomił się w oczekiwanym czasie. Odśwież stronę.' };
 
       const messaging = getMessaging();
       const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });

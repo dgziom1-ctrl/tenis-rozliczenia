@@ -187,31 +187,109 @@ decision (it changes how members onboard), so it is left open rather than guesse
 app actually uses (Google Fonts, gstatic for the messaging SDK, and Firebase
 endpoints).
 
-### Why a deploy never strands a browser
+### Why the app never needs "clear site data"
 
 Every build gives the JS and CSS new content-hashed names, and Hosting only serves
-the current release's files. A browser holding on to yesterday's `index.html` would
-therefore ask for chunks that no longer exist. Three things prevent that from
-turning into a "clear your cache" support request:
+the current release's files. That combination has exactly one catastrophic failure
+mode: if the browser ends up with a bad response stored under a hashed URL, or with
+an `index.html` naming chunks that no longer exist, the app stops loading and stays
+broken across reloads *and* across browsers. Five independent layers make that
+unrecoverable state impossible. Order matters — each one catches what the previous
+one missed.
 
-- **The HTML shell is never cached.** The `Cache-Control` default lives on the `**`
-  header rule, not on `/index.html`. Hosting matches header globs against the
-  *original request path, before rewrites*, so a rule keyed to `/index.html` never
-  applies to `/`, `/history`, or any other route — which is exactly how the shell
-  ended up cached for an hour. Only `/assets/**` opts back into the year-long
-  `immutable` cache, and those names change whenever the bytes do.
-- **A missing chunk returns 404, not HTML.** The SPA rewrite is `!/assets/**`
-  rather than `**`. With a plain catch-all, a request for a deleted chunk gets
-  `200 text/html` — and because the header rule keys off the request path, the
-  browser stores that HTML *as* the chunk under `immutable`, poisoning the URL for
-  a year. Excluding the asset directory keeps misses honest.
-- **The app reloads itself if one still slips through.** `utils/staleBuild.ts`
-  recognises the browser-specific "failed to fetch dynamically imported module"
-  errors, clears any leftover Cache Storage, and reloads once — with a cooldown so
-  an unrelated crash can't turn into a reload loop, and an origin check so a
-  blocked Google font doesn't count. It is wired into both the root `ErrorBoundary`
-  and a global listener, the latter covering failures that happen before React
-  mounts and would otherwise leave a blank page.
+**1. Nothing is reusable without revalidation by default; only hashed assets and
+icons opt back in.** The `**` rule sets `no-cache, must-revalidate`, and just two
+later rules grant caching: images get a day, `/assets/**` gets a year. This ordering
+is deliberate, because overlapping header rules in `firebase.json` follow **last
+match wins** (unlike rewrites, which are first match wins). Inverting the default
+this way covers every HTML route — present, future, any depth — without a pattern
+that has to enumerate routes, and `no-cache` forbids reusing a stored response
+without checking it with the server, which removes the "old shell asks for deleted
+chunks" scenario at the source. `no-store` would give the same freshness guarantee
+but also disqualifies the page from the back/forward cache, making every back
+navigation re-run the whole boot sequence, so `no-cache` is the better trade.
+Note that the Hosting **emulator does not apply `headers` at all** (verified: it
+returns neither `Cache-Control` nor CSP), so this config cannot be checked locally
+— which is why it sticks to glob syntax already proven in this project rather than
+anything exotic.
+
+**2. Hashed assets are cacheable, but not `immutable`.** Hosting applies header
+rules by request path, including to `404` responses, so a request that races a
+deploy can store a 404 under a content-hashed name. With `immutable` the browser
+refuses to revalidate that entry even on an explicit reload, and because Vite hashes
+by content the same filename reappears in later deploys — the poisoned entry then
+shadows a file that exists again. This was the actual cause of the "only clearing
+site data helps" reports, and it explains why every browser on a device broke
+separately: each keeps its own HTTP cache. Dropping `immutable` is what lets a
+reload heal it — but only that, so do not mistake it for the whole fix. Chrome
+revalidates only the main resource on a normal reload, and an installed iOS PWA has
+no reload affordance at all, so on the two platforms where this hurt most the
+header change alone is not enough. Layers 4 and 5 are what actually close it, both
+by fetching with `cache: 'reload'`, which is the one mode that bypasses a poisoned
+entry *and* overwrites it.
+
+**3. A missing chunk returns 404, not HTML.** The SPA rewrite is `!/assets/**`
+rather than `**`. With a plain catch-all, a request for a deleted chunk gets
+`200 text/html`, and the browser stores that HTML *as* the chunk. Excluding the
+asset directory keeps misses honest.
+
+**4. The Service Worker never caches a failure.** `public/firebase-messaging-sw.js`
+handles both push and app-shell caching — one worker, because only one can own the
+`/` scope and two registrations would evict each other. Its invariants are covered
+by `src/__tests__/serviceWorker.test.js`, which runs the deployed file in a stubbed
+worker scope: only `200` responses are ever written to a cache, navigations are
+network-first so a fresh `index.html` always wins, every network call has a timeout
+so a hung request can't block a start that a cached copy could serve, cache names
+carry a build id so shell and chunks never mix across releases, and the worker never
+intercepts its own script — otherwise it could persist a broken version of itself
+and cut off the only route to a fix. Every fetch it makes uses `cache: 'reload'`, so
+a poisoned HTTP entry can neither be copied into the worker's cache nor survive the
+request. One subtlety worth keeping: a 200 is not enough to trust a response,
+because the SPA rewrite answers any missing path outside `/assets/` with
+`index.html`. Caching that under a script or icon URL would be the same permanent
+wrong-content failure as caching a 404, so content type is checked too.
+
+At install time it stores the whole release, using the asset list injected by the
+plugin in `vite.config.ts`. Reading that list from `index.html` is not enough: the
+document only names the chunks needed immediately, so offline the first visit to a
+lazily-loaded tab would fail. As a result the app now opens offline on every tab.
+
+**5. A boot guard outside the bundle.** `public/boot-guard.js` is loaded
+synchronously from `index.html`. It lives outside the bundle on purpose: when the
+failing file *is* the entry chunk, nothing inside the bundle can run, and the
+previous recovery code — which shipped inside that chunk — could never fire. It is
+also a separate file rather than an inline script because the CSP has no
+`'unsafe-inline'` in `script-src`. It watches for a `ready()` signal from `App.tsx`
+and, if the app doesn't start or a chunk fails to load, walks an escalating ladder:
+refetch every file of the release with `cache: 'reload'` (the only thing that
+actually overwrites a poisoned HTTP cache entry) → unregister the worker and drop
+all caches → wipe `localStorage`, `sessionStorage` and IndexedDB. If all of that
+fails it draws a rescue screen from bare DOM with a one-click full reset, so a user
+is never left on a blank page. Two details are load-bearing and both have regression
+tests in `src/__tests__/bootGuard.test.js`: the attempt counter lives in
+`localStorage` (`sessionStorage` is wiped on every PWA launch) and survives both a
+successful start and the storage wipe of its own final rung — otherwise the ladder
+resets to the first rung every cycle and the browser reloads a blank page forever
+instead of ever reaching the rescue screen.
+
+Two rules keep layer 5 from becoming its own problem, because "failed to fetch
+dynamically imported module" is the *same* message a momentary network drop
+produces, and `navigator.onLine` still reports "online" inside a tunnel. First, the
+rescue screen only ever appears when the app has *not* started; if it is already on
+screen the ladder declines and `LazyPage` reports the failure in place, so an
+overlay never buries a working UI over one file. Second, a running app may only
+reach rung 1 — refetch and reload, once. Unregistering the worker and wiping
+storage are reserved for a start that failed outright, and an attempt that could not
+run at all (offline, or ladder exhausted) does not consume a rung, so a few
+trips through a dead zone can't spend the budget before a real failure needs it.
+
+Two smaller guards sit alongside these. `AppDataProvider` releases the render gate
+after 15 s and shows the UI with empty data plus an offline banner, because Firebase
+`onValue` never reports an error when the socket simply can't be established — the
+loading screen would otherwise hang forever behind a Retry button that re-armed the
+same hang. And `LazyPage` wraps each route in its own error boundary, so one failed
+chunk breaks a single tab instead of the whole app, and it reports the failure in
+place whenever automatic recovery declined to run.
 
 ---
 
@@ -221,7 +299,8 @@ turning into a "clear your cache" support request:
 tenis-rozliczenia/
 ├── frontend/
 │   ├── public/
-│   │   ├── firebase-messaging-sw.js    # FCM Service Worker (background notifications)
+│   │   ├── boot-guard.js               # Self-repair outside the bundle (see resilience section)
+│   │   ├── firebase-messaging-sw.js    # Service Worker — app-shell cache + push
 │   │   ├── manifest.json               # PWA config
 │   │   ├── icon-192v2.png
 │   │   └── icon-512v2.png
@@ -324,12 +403,14 @@ tenis-rozliczenia/
 │       │   └── ui.ts                       # UI-layer types (ranks, stats, etc.)
 │       └── utils/
 │           ├── achievements.ts             # Achievement + badge logic
+│           ├── bootRecovery.ts             # Bridge to public/boot-guard.js
 │           ├── debt.ts                     # Balance = session costs − payments
 │           ├── format.ts                   # Date and currency formatting
 │           ├── id.ts                       # Collision-resistant ID generator
 │           ├── message.ts                  # Group chat message formatter
 │           ├── money.ts                    # Integer-grosz arithmetic + exact allocation
 │           ├── rankings.ts                 # Player stat aggregation + ranking
+│           ├── serviceWorker.ts            # Worker registration + update checks
 │           ├── sessionCost.ts              # Single source of truth for cost splitting
 │           ├── sessions.ts                 # Session grouping + season helpers
 │           ├── validation.ts               # Input guards for everything written to the DB

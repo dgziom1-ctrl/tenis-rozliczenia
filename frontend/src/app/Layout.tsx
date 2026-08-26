@@ -39,7 +39,7 @@ export default function Layout() {
   const [isMuted, setIsMuted] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isConnected } = useConnectionStatus();
+  const { isConnected, hasData, bootTimedOut, retry } = useConnectionStatus();
   const { theme, toggle: toggleTheme } = useThemeContext();
   const scrolled = useScrolled();
   const { playSound } = useAudio(isMuted);
@@ -132,7 +132,12 @@ export default function Layout() {
           onToggleTheme={toggleTheme}
         />
         <Navigation activeTab={activeTab} setActiveTab={switchTab} />
-        {!isConnected && <OfflineBanner />}
+        {/* Także przy pozornie sprawnym połączeniu: baza potrafi zgłaszać
+            „połączono”, a mimo to nie przysłać żadnych danych. Bez tego
+            użytkownik zostaje z pustymi listami, bez wyjaśnienia i bez przycisku. */}
+        {(!isConnected || (bootTimedOut && !hasData)) && (
+          <OfflineBanner hasData={hasData} onRetry={retry} />
+        )}
         <main className="main-content page-enter" key={location.pathname}>
           <Outlet context={{ playSound }} />
         </main>
@@ -142,7 +147,15 @@ export default function Layout() {
   );
 }
 
-function OfflineBanner() {
+/**
+ * Baner braku połączenia.
+ *
+ * Rozróżnia dwa przypadki, bo mylą się użytkownikom: „mam dane, ale nie zapiszę
+ * zmian” to zupełnie inna sytuacja niż „nie mam żadnych danych i patrzę na puste
+ * listy”. W drugiej dokładamy przycisk ponowienia, bo interfejs wpuszcza tu po
+ * przekroczeniu terminu oczekiwania i bez niego nie byłoby jak spróbować dalej.
+ */
+function OfflineBanner({ hasData, onRetry }: { hasData: boolean; onRetry: () => void }) {
   return (
     <div
       role="status"
@@ -156,7 +169,7 @@ function OfflineBanner() {
       }}
     >
       <span style={{ fontSize: '1rem', lineHeight: 1 }}>⚠</span>
-      <div>
+      <div style={{ flex: 1 }}>
         <p style={{
           margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.12em',
           textTransform: 'uppercase', color: 'var(--co-amber)', fontSize: '0.72rem',
@@ -167,9 +180,17 @@ function OfflineBanner() {
           margin: '2px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.62rem',
           color: 'var(--co-dim)', letterSpacing: '0.04em', lineHeight: 1.5,
         }}>
-          Pracujesz na ostatnich danych. Zmiany (wpłaty, sesje) nie zapiszą się, dopóki nie wróci sieć.
+          {hasData
+            ? 'Pracujesz na ostatnich danych. Zmiany (wpłaty, sesje) nie zapiszą się, dopóki nie wróci sieć.'
+            : 'Nie udało się pobrać danych. Apka działa, ale listy będą puste do powrotu sieci.'}
         </p>
       </div>
+      {!hasData && (
+        <button onClick={onRetry} className="cyber-button-yellow"
+          style={{ padding: '8px 12px', fontSize: '0.62rem', whiteSpace: 'nowrap' }}>
+          ↻ Ponów
+        </button>
+      )}
     </div>
   );
 }

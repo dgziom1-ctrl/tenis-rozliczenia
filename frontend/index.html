@@ -14,6 +14,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Rajdhani:wght@400;500;600;700&display=swap">
     <title>Cyber Ponk</title>
+    <!--
+      Straż startu musi działać także wtedy, gdy paczki aplikacji się nie wczytają,
+      więc jest ładowana synchronicznie i spoza bundla. Stały adres bez hasha
+      i `no-cache` z `firebase.json` gwarantują, że zawsze jest osiągalna i świeża.
+    -->
+    <script src="/boot-guard.js"></script>
   </head>
   <body>
     <div id="root"></div>

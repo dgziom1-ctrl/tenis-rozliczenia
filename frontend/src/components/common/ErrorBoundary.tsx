@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { isStaleBuildError, recoverFromStaleBuild } from '@/utils/staleBuild';
+import { hardResetApp, isStaleBuildError, recoverFromStaleBuild, signalAppReady } from '@/utils/bootRecovery';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -28,7 +28,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     // Aplikacja została wdrożona na nowo, a przeglądarka trzyma stary
     // `index.html` i szuka paczek, których już nie ma. Świeży start naprawia to
     // sam, więc nie zawracamy tym głowy użytkownikowi.
-    if (isStaleBuildError(error) && recoverFromStaleBuild()) return;
+    if (isStaleBuildError(error) && recoverFromStaleBuild(error)) return;
+
+    // Zwykły bug w kodzie. Ten ekran jest widoczny i ma przyciski, więc start
+    // się udał — bez tego sygnału straż startu przeładowałaby go po kilkunastu
+    // sekundach i użytkownik nigdy nie zobaczyłby, co się stało.
+    signalAppReady();
   }
 
   handleReset = (): void => {
@@ -73,6 +78,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           >
             <RefreshCw size={18} />
             Odśwież stronę
+          </button>
+
+          {/* Gdy odświeżenie nie pomaga, to niemal zawsze zepsuty cache.
+              Ten przycisk robi to samo, co „wyczyść dane strony” w ustawieniach. */}
+          <button
+            onClick={hardResetApp}
+            className="w-full mt-3 py-2 px-6 rounded-xl border border-rose-900 text-rose-400/70 text-xs font-mono uppercase tracking-wider hover:text-rose-300 transition-all"
+          >
+            Wyczyść cache i uruchom od nowa
           </button>
         </div>
       </div>

@@ -21,6 +21,8 @@ export interface AppDataContextValue {
   isConnected: boolean;
   isLoading: boolean;
   slowLoading: boolean;
+  /** Baza nie odpowiedziała w wyznaczonym czasie — pokazujemy interfejs bez danych. */
+  bootTimedOut: boolean;
   subscriptionError: Error | null;
   retry: () => void;
 }
@@ -44,6 +46,7 @@ export function useConnectionStatus() {
     isConnected: ctx.isConnected,
     isLoading: ctx.isLoading,
     slowLoading: ctx.slowLoading,
+    bootTimedOut: ctx.bootTimedOut,
     subscriptionError: ctx.subscriptionError,
     retry: ctx.retry,
   };

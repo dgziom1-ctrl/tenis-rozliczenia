@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { AppDataProvider } from './providers/AppDataProvider';
 import { useConnectionStatus } from './providers/appDataContext';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { ToastProvider } from '@/components/common/Toast';
+import { hardResetApp, signalAppReady } from '@/utils/bootRecovery';
 import Layout from './Layout';
 import { routes } from './routes';
 
@@ -136,6 +138,17 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
             className="cyber-button-yellow" style={{ padding: '13px 24px', width: '100%' }}>
             ⚡ RESTART SYSTEMU
           </button>
+          {/* Ostatnia furtka, żeby nikt nie musiał szukać „wyczyść dane strony”
+              w ustawieniach przeglądarki. */}
+          <button onClick={hardResetApp}
+            style={{
+              marginTop: 10, padding: '10px 16px', width: '100%', cursor: 'pointer',
+              background: 'transparent', border: '1px solid rgba(200,0,30,0.3)',
+              color: 'var(--co-dim)', fontFamily: 'var(--font-mono)',
+              fontSize: '0.62rem', letterSpacing: '0.08em', textTransform: 'uppercase',
+            }}>
+            Wyczyść cache i uruchom od nowa
+          </button>
         </div>
       </div>
     </div>
@@ -143,7 +156,12 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
 }
 
 function AppShell() {
-  const { isLoading, slowLoading, subscriptionError, hasData, retry } = useConnectionStatus();
+  const { isLoading, slowLoading, bootTimedOut, subscriptionError, hasData, retry } = useConnectionStatus();
+
+  // Straż startu z `public/boot-guard.js` czeka na ten sygnał. Wysyłamy go po
+  // pierwszym renderze — także wtedy, gdy na ekranie jest dopiero ładowanie albo
+  // błąd połączenia, bo aplikacja jako taka wystartowała poprawnie.
+  useEffect(() => { signalAppReady(); }, []);
 
   // Pełny ekran błędu tylko, gdy naprawdę nie mamy żadnych danych do pokazania.
   // Jeśli dane już raz się załadowały, utrata połączenia nie kasuje aplikacji —
@@ -152,7 +170,9 @@ function AppShell() {
     return <CyberErrorScreen onRetry={retry} />;
   }
 
-  if (isLoading && !hasData) {
+  // `bootTimedOut` przepuszcza interfejs bez danych. Puste listy z banerem
+  // o braku połączenia są dużo lepsze niż ekran startowy, który nigdy nie mija.
+  if (isLoading && !hasData && !bootTimedOut) {
     return <CyberLoadingScreen slow={slowLoading} onRetry={retry} />;
   }
 
