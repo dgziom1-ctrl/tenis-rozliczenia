@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { FONT, TEXT, TRACK, CLIP, Z } from '@/constants/styles';
 import type { Achievement } from '@/types/ui';
 
 interface AchievementBadgeProps {
@@ -27,36 +28,40 @@ export default function AchievementBadge({ achievement: a, accentColor }: Achiev
         onClick={handleTap}
         aria-label={a.label + ': ' + a.desc}
         style={{
-          display: 'flex', alignItems: 'center', gap: 5,
-          padding: '4px 8px',
+          display: 'flex', alignItems: 'center', gap: 6,
+          minHeight: 36, padding: '6px 10px',
+          cursor: 'pointer',
           background: `${accentColor}10`,
-          border: `1px solid ${accentColor}${visible ? '70' : '30'}`,
-          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+          border: `1px solid ${accentColor}${visible ? '' : '30'}`,
+          clipPath: CLIP.badge,
           userSelect: 'none',
           transition: 'border-color 0.15s',
         }}
       >
-        <span style={{ fontSize: '0.85rem' }}>{a.emoji}</span>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.68rem', color: accentColor, letterSpacing: '0.06em' }}>
+        <span aria-hidden="true" style={{ fontSize: TEXT.base }}>{a.emoji}</span>
+        <span style={{ ...FONT.display(TEXT.small, TRACK.tight), color: accentColor }}>
           {a.label}
         </span>
       </button>
       {visible && (
+        // W dół i z zawijaniem: dymek otwierany do góry z `whiteSpace: nowrap`
+        // był ucinany przez `overflow: hidden` okna gracza, a przy dłuższym
+        // opisie wychodził poza jego prawą krawędź.
         <div style={{
-          position: 'absolute', bottom: 'calc(100% + 5px)', left: 0,
-          background: 'var(--co-void)',
-          border: `1px solid ${accentColor}50`,
-          padding: '6px 10px',
-          zIndex: 50,
-          whiteSpace: 'nowrap',
-          clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-          boxShadow: `0 0 12px ${accentColor}25`,
+          position: 'absolute', top: 'calc(100% + 5px)', left: 0,
+          minWidth: 180, maxWidth: 260,
+          background: 'var(--co-panel)',
+          border: `1px solid ${accentColor}`,
+          padding: '8px 10px',
+          zIndex: Z.popover,
+          clipPath: CLIP.tag,
+          boxShadow: 'var(--glow-box-cyan)',
           animation: 'slide-in-up 0.15s ease-out',
         }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: accentColor, margin: 0 }}>
+          <p style={{ ...FONT.mono(TEXT.small), color: accentColor, margin: 0 }}>
             {a.emoji} {a.label}
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', margin: '3px 0 0' }}>
+          <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-text)', margin: '4px 0 0', lineHeight: 1.4 }}>
             {a.desc}
           </p>
         </div>

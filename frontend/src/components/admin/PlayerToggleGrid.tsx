@@ -1,3 +1,4 @@
+import { CLIP } from '@/constants/styles';
 interface PlayerToggleGridProps {
   names: string[];
   selected: string[];
@@ -12,31 +13,31 @@ export default function PlayerToggleGrid({ names, selected, onToggle, accent = '
     ? 'var(--co-amber)'
     : 'var(--co-cyan)';
   const accentAlpha = accent === 'green'
-    ? 'rgba(0,255,136,0.08)'
+    ? 'var(--co-tint-green)'
     : accent === 'amber'
-    ? 'rgba(251,191,36,0.08)'
-    : 'rgba(0,229,255,0.08)';
+    ? 'var(--co-amber-dim)'
+    : 'var(--co-tint-hi)';
   const accentBorder = accent === 'green'
-    ? 'rgba(0,255,136,0.4)'
+    ? 'var(--co-green)'
     : accent === 'amber'
-    ? 'rgba(251,191,36,0.4)'
-    : 'rgba(0,229,255,0.4)';
+    ? 'var(--co-amber)'
+    : 'var(--co-cyan)';
   const accentGlow = accent === 'green'
-    ? 'rgba(0,255,136,0.1)'
+    ? 'var(--co-tint-green)'
     : accent === 'amber'
-    ? 'rgba(251,191,36,0.1)'
-    : 'rgba(0,229,255,0.1)';
+    ? 'var(--co-amber-dim)'
+    : 'var(--co-tint-hi)';
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+    <div className="player-grid">
       {names.map(name => {
         const active = selected.includes(name);
         return (
           <button type="button" key={name} onClick={() => onToggle(name)} style={{
             padding: '10px 12px', cursor: 'pointer', transition: 'all 0.15s',
-            fontFamily: 'var(--font-display)', fontSize: '0.82rem', fontWeight: 700,
-            letterSpacing: '0.08em', textTransform: 'uppercase',
-            clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
+            fontFamily: 'var(--font-display)', fontSize: '0.875rem', 
+            letterSpacing: '0.1em', textTransform: 'uppercase',
+            clipPath: CLIP.badge,
             ...(active ? {
               background: accentAlpha, border: `1px solid ${accentBorder}`, color: accentColor,
               boxShadow: `0 0 10px ${accentGlow}`,

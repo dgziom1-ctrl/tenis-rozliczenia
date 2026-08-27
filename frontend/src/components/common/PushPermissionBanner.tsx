@@ -4,6 +4,7 @@ import { Bell, X, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { ref, get } from 'firebase/database';
 import { database } from '@/lib/firebase/config';
+import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 
 const DISMISS_KEY   = 'push-banner-dismissed';
 const PLAYER_KEY    = 'push-registered-player';
@@ -61,8 +62,6 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
     return () => { cancelled = true; };
   }, [permission, isSupported]);
 
-  if (!isSupported) return null;
-
   // Baner jest widoczny w trzech sytuacjach:
   // 1. permission === 'default' i nie był zamknięty → normalny onboarding
   // 2. permission === 'granted' ale token zniknął z bazy → re-rejestracja
@@ -72,8 +71,16 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
   // even if the push token is missing.
   const showReregister   = permission === 'granted' && tokenMissing && !dismissed;
   const showManual       = status === 'reregister';
+  const isVisible = isSupported && (showOnboarding || showReregister || showManual);
 
-  if (!showOnboarding && !showReregister && !showManual) return null;
+  // Znacznik na <body>, żeby baner instalacji PWA nie wjechał na ten sam
+  // fragment ekranu. Oba są przyklejone do dołu i potrafiły się nałożyć.
+  useEffect(() => {
+    document.body.classList.toggle('has-push-banner', isVisible);
+    return () => document.body.classList.remove('has-push-banner');
+  }, [isVisible]);
+
+  if (!isVisible) return null;
 
   const dismiss = () => {
     setDismissed(true);
@@ -102,60 +109,62 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
     }
   };
 
+  // Pozycjonowanie bierze klasa `.bottom-banner`, wspólna z banerem instalacji
+  // PWA. Wcześniej oba pliki liczyły odstęp od nawigacji osobno (56 i 72px),
+  // a ten miał z-index 38 — czyli poniżej samej nawigacji (40) — i chował się
+  // za nią na telefonie.
   const bannerStyle: CSSProperties = {
-    position: 'fixed',
-    bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))',
     left: 0,
     right: 0,
-    zIndex: 38,
-    background: 'rgba(4,8,14,0.97)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    borderTop: `2px solid ${showReregister || showManual ? 'rgba(255,160,0,0.5)' : 'rgba(0,229,255,0.35)'}`,
-    padding: '14px 16px 18px',
+    background: 'var(--co-panel)',
+    borderTop: `2px solid ${showReregister || showManual ? 'var(--co-amber)' : 'var(--co-tint-line)'}`,
+    padding: '14px 16px 16px',
     animation: 'sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both',
   };
 
-  const accentColor = showReregister || showManual ? 'rgba(255,160,0,0.8)' : 'var(--co-cyan)';
+  // Był tu #FFA000 — trzeci odcień amber w aplikacji, obok --co-amber (#F59E0B)
+  // i #FBBF24 z siatki graczy.
+  const accentColor = showReregister || showManual ? 'var(--co-amber)' : 'var(--co-cyan)';
 
   return (
-    <div style={bannerStyle} className="push-banner-sheet">
+    <div style={bannerStyle} className="push-banner-sheet bottom-banner">
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
         <div style={{
           padding: '8px', flexShrink: 0,
-          background: `${accentColor}15`,
-          border: `1px solid ${accentColor}40`,
-          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+          background: 'var(--co-tint)',
+          border: `1px solid ${accentColor}`,
+          clipPath: CLIP.badge,
         }}>
           {status === 'success'
-            ? <CheckCircle2 size={16} style={{ color: 'var(--co-green)', display: 'block' }} />
+            ? <CheckCircle2 size={16} style={{ color: 'var(--co-green)', display: 'block' }} aria-hidden="true" />
             : showReregister
-              ? <RefreshCw size={16} style={{ color: 'orange', display: 'block' }} />
-              : <Bell size={16} style={{ color: accentColor, display: 'block' }} />
+              ? <RefreshCw size={16} style={{ color: accentColor, display: 'block' }} aria-hidden="true" />
+              : <Bell size={16} style={{ color: accentColor, display: 'block' }} aria-hidden="true" />
           }
         </div>
 
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           {status === 'success' ? (
-            <p role="status" style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--co-green)', letterSpacing: '0.08em' }}>
+            <p role="status" style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-green)', margin: 0 }}>
               ✓ Powiadomienia włączone!
             </p>
           ) : (
             <>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.08em', color: 'var(--co-text-hi)', margin: '0 0 4px' }}>
+              <p style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-text-hi)', margin: '0 0 4px' }}>
                 {showReregister ? '⚠ Rejestracja wygasła — odnów' : 'Włącz powiadomienia'}
               </p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '0 0 10px', lineHeight: 1.5 }}>
+              {/* Cały opis banera miał 0.6rem, czyli 9,6px. */}
+              <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-text)', margin: '0 0 10px', lineHeight: 1.5 }}>
                 {showReregister
-                  ? 'Twój token powiadomień zniknął z bazy. Kliknij "Odnów" żeby ponownie się zarejestrować.'
-                  : 'Dostaniesz ping gdy ktoś doda sesję lub gracz zrobi serię 5, 10, 20…'
+                  ? 'Twój token powiadomień zniknął z bazy. Kliknij „Odnów", żeby zarejestrować się ponownie.'
+                  : 'Dostaniesz ping, gdy ktoś doda sesję lub gracz zrobi serię 5, 10, 20…'
                 }
               </p>
 
               {/* Player selector */}
               {playerNames && playerNames.length > 0 && (
                 <div style={{ marginBottom: 10 }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--co-dim)', letterSpacing: '0.1em', marginBottom: 6 }}>
+                  <p style={{ ...FONT.monoLabel, marginBottom: 6 }}>
                     KIM JESTEŚ?
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -165,13 +174,13 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
                         onClick={() => setSelectedPlayer(name)}
                         aria-pressed={selectedPlayer === name}
                         style={{
-                          fontFamily: 'var(--font-display)', fontSize: '0.72rem',
-                          letterSpacing: '0.08em', padding: '4px 10px',
+                          ...FONT.display(TEXT.small, TRACK.tight),
+                          minHeight: 44, padding: '4px 12px',
                           border: `1px solid ${selectedPlayer === name ? 'var(--co-cyan)' : 'var(--co-border)'}`,
-                          color: selectedPlayer === name ? 'var(--co-cyan)' : 'var(--co-dim)',
-                          background: selectedPlayer === name ? 'rgba(0,229,255,0.08)' : 'transparent',
+                          color: selectedPlayer === name ? 'var(--co-cyan)' : 'var(--co-text)',
+                          background: selectedPlayer === name ? 'var(--co-tint-hi)' : 'transparent',
                           cursor: 'pointer',
-                          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+                          clipPath: CLIP.badge,
                           transition: 'all 0.15s',
                         }}
                       >
@@ -183,7 +192,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
               )}
 
               {status === 'error' && (
-                <p role="alert" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-rose)', marginBottom: 8 }}>
+                <p role="alert" style={{ ...FONT.mono(TEXT.small), color: 'var(--co-rose)', marginBottom: 8 }}>
                   ⚠ {errorMsg || 'Nie udało się włączyć. Sprawdź ustawienia przeglądarki.'}
                 </p>
               )}
@@ -193,14 +202,14 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
                   onClick={() => void handleEnable()}
                   disabled={isRegistering}
                   className="cyber-button-yellow"
-                  style={{ padding: '8px 16px', fontSize: '0.78rem' }}
+                  style={{ minHeight: 44, padding: '10px 16px' }}
                 >
-                  {isRegistering ? 'Rejestruję...' : showReregister ? '🔄 Odnów' : '⚡ Włącz'}
+                  {isRegistering ? 'Rejestruję…' : showReregister ? '🔄 Odnów' : '⚡ Włącz'}
                 </button>
                 <button
                   onClick={dismiss}
                   className="cyber-button-outline"
-                  style={{ padding: '8px 14px', fontSize: '0.78rem' }}
+                  style={{ minHeight: 44, padding: '10px 14px' }}
                 >
                   {showReregister ? 'Ignoruj' : 'Nie teraz'}
                 </button>
@@ -209,11 +218,13 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
           )}
         </div>
 
-        <button onClick={dismiss} aria-label="Zamknij" style={{
+        <button onClick={dismiss} aria-label="Zamknij" className="icon-btn" style={{
           background: 'transparent', border: 'none', cursor: 'pointer',
-          color: 'var(--co-dim)', padding: 4, flexShrink: 0,
+          color: 'var(--co-dim)', width: 44, height: 44, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginTop: -8, marginRight: -8,
         }}>
-          <X size={14} />
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
     </div>

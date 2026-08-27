@@ -1,6 +1,6 @@
 import { CalendarDays } from 'lucide-react';
 import { getPlayerColor } from '@/constants/colors';
-import { FONT, CLIP, PANEL } from '../../constants/styles';
+import { FONT, CLIP, PANEL, TEXT, TRACK } from '../../constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import type { MonthlySessionData, PlayerStats } from '@/types/ui';
@@ -20,7 +20,7 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
     }}>
       <SectionHeader icon={CalendarDays} title="DANE MIESIĘCZNE" sub="obecność według miesiąca" />
       {monthlyStats.length === 0 ? (
-        <p style={{ ...FONT.mono('0.8rem'), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>
+        <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>
           {'>'} Brak danych — dodaj pierwszą sesję_
         </p>
       ) : (
@@ -47,10 +47,10 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 10 }}>
-                    <span style={{ ...FONT.display('0.95rem', '0.12em'), color: 'var(--co-text-hi)', whiteSpace: 'nowrap' }}>
+                    <span style={{ ...FONT.display(TEXT.lead, TRACK.normal), color: 'var(--co-text-hi)', whiteSpace: 'nowrap' }}>
                       {month}
                     </span>
-                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)' }}>
+                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: 'var(--co-cyan)' }}>
                       SESJE: {rowData.total}
                     </span>
                   </div>
@@ -68,11 +68,11 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                               alignItems: 'center',
                               gap: 8,
                               padding: '6px 10px',
-                              background: isMax ? 'rgba(0,255,136,0.06)' : `${c.border}10`,
-                              border: `1px solid ${isMax ? 'rgba(0,255,136,0.35)' : `${c.border}40`}`,
+                              background: isMax ? 'var(--co-tint-green)' : `${c.border}10`,
+                              border: `1px solid ${isMax ? 'var(--co-green)' : `${c.border}40`}`,
                               clipPath: CLIP.tag,
                               fontFamily: 'var(--font-mono)',
-                              fontSize: '0.72rem',
+                              fontSize: '0.8125rem',
                               color: isMax ? 'var(--co-green)' : 'var(--co-cyan)',
                               whiteSpace: 'nowrap',
                             }}
@@ -85,7 +85,7 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                         );
                       })
                     ) : (
-                      <span style={{ ...FONT.mono('0.7rem'), color: 'var(--co-dim)' }}>
+                      <span style={{ ...FONT.mono(TEXT.micro), color: 'var(--co-dim)' }}>
                         Brak obecności
                       </span>
                     )}
@@ -96,27 +96,30 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
           </div>
         ) : (
           <div style={{ position: 'relative' }}>
-            {/* Scroll fade hint on mobile */}
-            <div style={{
+            {/* Gradient sugerujący, że tabela przewija się w prawo.
+                Miał z-index 2 — tyle samo co przyklejony nagłówek i więcej niż
+                przyklejone komórki (1), więc przy prawej krawędzi malował się
+                na nich. Teraz siedzi nad treścią, ale pod przyklejoną kolumną. */}
+            <div aria-hidden="true" style={{
               position: 'absolute', top: 0, right: 0, bottom: 0, width: 32,
               background: 'linear-gradient(to right, transparent, var(--co-panel))',
-              pointerEvents: 'none', zIndex: 2,
+              pointerEvents: 'none', zIndex: 0,
             }} />
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400, fontFamily: 'var(--font-mono)' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--co-border-hi)' }}>
-                    <th style={{ padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', fontWeight: 400, textTransform: 'uppercase', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 2, borderRight: '1px solid rgba(0,229,255,0.08)' }}>
+                    <th style={{ padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', textTransform: 'uppercase', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 3, borderRight: '1px solid var(--co-border)' }}>
                       MIESIĄC
                     </th>
-                    <th style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-cyan)', fontWeight: 400, textTransform: 'uppercase' }}>
+                    <th style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', fontWeight: 400, textTransform: 'uppercase' }}>
                       SESJE
                     </th>
                     {players?.map(p => {
                       const c = getPlayerColor(p.name);
                       return (
-                        <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 400 }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                        <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 400 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                             <div style={{ width: '100%', height: 2, background: c.border, borderRadius: 1, opacity: 0.7 }} />
                             <span style={{ color: c.border, whiteSpace: 'nowrap' }}>{p.name}</span>
                           </div>
@@ -128,19 +131,22 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                 <tbody>
                   {monthlyStats.map(([month, rowData]) => (
                     <tr key={month} style={{ borderBottom: '1px solid var(--co-separator)' }}>
-                      <td style={{ padding: '10px 12px', fontSize: '0.8rem', color: 'var(--co-text)', fontFamily: 'var(--font-display)', letterSpacing: '0.08em', whiteSpace: 'nowrap', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 1, borderRight: '1px solid rgba(0,229,255,0.08)' }}>{month}</td>
-                      <td style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.9rem', color: 'var(--co-cyan)', textAlign: 'center' }}>{rowData.total}</td>
+                      {/* Przyklejona kolumna musi być nad gradientem i nad
+                          własnym obramowaniem wiersza, inaczej wygląda, jakby
+                          unosiła się nad tabelą. */}
+                      <td style={{ padding: '10px 12px', fontSize: '0.875rem', color: 'var(--co-text)', fontFamily: 'var(--font-display)', letterSpacing: '0.1em', whiteSpace: 'nowrap', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 2, borderRight: '1px solid var(--co-border)', borderBottom: '1px solid var(--co-separator)' }}>{month}</td>
+                      <td style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-cyan)', textAlign: 'center' }}>{rowData.total}</td>
                       {players?.map(p => {
                         const presence = rowData.players[p.name] || 0;
                         const isMax = presence === rowData.total;
                         return (
                           <td key={p.name} style={{ padding: '8px 12px', textAlign: 'center' }}>
                             <span style={{
-                              display: 'inline-block', padding: '2px 7px',
-                              fontFamily: 'var(--font-mono)', fontSize: '0.72rem',
+                              display: 'inline-block', padding: '2px 6px',
+                              fontFamily: 'var(--font-mono)', fontSize: '0.8125rem',
                               ...(isMax ? {
-                                background: 'rgba(0,229,255,0.08)',
-                                border: '1px solid rgba(0,229,255,0.3)',
+                                background: 'var(--co-tint-hi)',
+                                border: '1px solid var(--co-tint-line)',
                                 color: 'var(--co-green)',
                               } : presence > 0 ? {
                                 color: 'var(--co-cyan)',

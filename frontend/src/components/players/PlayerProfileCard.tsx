@@ -1,5 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { getPlayerColor } from '@/constants/colors';
+import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { PlayerAvatar } from '../dashboard/PlayerAvatar';
 
 interface PlayerProfileCardProps {
   player: { name: string };
@@ -11,63 +13,53 @@ interface PlayerProfileCardProps {
 
 export default function PlayerProfileCard({ player, index, onDelete, isOrganizer, disabled = false }: PlayerProfileCardProps) {
   const c = getPlayerColor(player.name, index);
-  const initials = player.name.slice(0, 2).toUpperCase();
+  const accent = isOrganizer ? 'var(--co-cyan)' : c.border;
 
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-      background: 'var(--co-dark)', border: `1px solid ${isOrganizer ? 'rgba(0,229,255,0.3)' : c.border + '35'}`,
-      clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
+      background: 'var(--co-surface-2)',
+      border: `1px solid ${isOrganizer ? 'var(--co-tint-line)' : c.border + '35'}`,
+      clipPath: CLIP.smallCard,
       transition: 'border-color 0.2s',
-      boxShadow: `inset 0 0 10px ${isOrganizer ? 'rgba(0,229,255,0.03)' : c.border + '08'}`,
+      boxShadow: 'var(--glow-box-cyan)',
     }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = isOrganizer ? 'rgba(0,229,255,0.5)' : c.border + '60'}
-      onMouseLeave={e => e.currentTarget.style.borderColor = isOrganizer ? 'rgba(0,229,255,0.3)' : c.border + '35'}
+      onMouseEnter={e => e.currentTarget.style.borderColor = accent}
+      onMouseLeave={e => e.currentTarget.style.borderColor = isOrganizer ? 'var(--co-tint-line)' : c.border + '35'}
     >
-      {/* Avatar */}
-      <div style={{
-        width: 38, height: 38, flexShrink: 0,
-        background: c.bg, border: `1px solid ${c.border}55`,
-        boxShadow: `0 0 8px ${c.border}30`,
-        borderRadius: '2px',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-      }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, color: c.text }}>{initials}</span>
-      </div>
+      <PlayerAvatar name={player.name} index={index} size={40} />
 
-      {/* Name + class */}
+      {/* Name */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 400, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--co-text-hi)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-text-hi)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {player.name}
         </p>
-
       </div>
 
-      {/* Action */}
+      {/* Action — hover przez klasę `.icon-btn.danger`, nie przez handlery JS,
+          które na dotyku zostawały aktywne do kolejnego tapnięcia. */}
       {!isOrganizer ? (
         <button
           onClick={() => onDelete(player.name)}
           disabled={disabled}
+          className="icon-btn danger"
           style={{
-          padding: '7px 10px', background: 'transparent',
-          border: '1px solid var(--co-border)',
-          color: 'var(--co-dim)',
-          clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-          transition: 'all 0.15s',
-          flexShrink: 0,
-          opacity: disabled ? 0.55 : 1,
-          cursor: disabled ? 'not-allowed' : 'pointer',
-        }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,32,144,0.5)'; e.currentTarget.style.color = 'var(--co-rose)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--co-border)'; e.currentTarget.style.color = 'var(--co-dim)'; }}
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 44, height: 44, flexShrink: 0,
+            background: 'transparent',
+            border: '1px solid var(--co-border)',
+            color: 'var(--co-dim)',
+            clipPath: CLIP.badge,
+            opacity: disabled ? 0.55 : 1,
+            cursor: disabled ? 'not-allowed' : 'pointer',
+          }}
           title="Usuń gracza"
           aria-label={`Usuń gracza ${player.name}`}
         >
-          <Trash2 size={14} aria-hidden="true" />
+          <Trash2 size={16} aria-hidden="true" />
         </button>
       ) : (
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', letterSpacing: '0.12em', color: 'var(--co-dim)', padding: '4px 8px', border: '1px solid var(--co-border)', clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)' }}>
+        <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)', padding: '4px 8px', border: '1px solid var(--co-border)', clipPath: CLIP.badge }}>
           HQ
         </span>
       )}

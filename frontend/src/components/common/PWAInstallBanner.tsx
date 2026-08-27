@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import { Download, Share, X } from 'lucide-react';
+import { TEXT, CLIP } from '@/constants/styles';
 
 /** Ile czekamy na iOS, zanim pokażemy podpowiedź instalacji. */
 const IOS_BANNER_DELAY_MS = 2000;
@@ -69,56 +70,52 @@ export default function PWAInstallBanner() {
 
   if (!show) return null;
 
+  // Pozycjonowanie (fixed, odstęp od nawigacji, warstwa, rozmycie) bierze klasa
+  // `.bottom-banner`, wspólna z banerem powiadomień.
   const bannerStyle: CSSProperties = {
-    position: 'fixed',
-    bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
     left: 10, right: 10,
-    zIndex: 45,
-    background: 'var(--co-dark)',
-    border: '1px solid rgba(0,229,255,0.35)',
-    clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
-    boxShadow: '0 0 24px rgba(0,229,255,0.12), 0 4px 30px rgba(0,0,0,0.9)',
+    background: 'var(--co-panel)',
+    border: '1px solid var(--co-tint-line)',
+    clipPath: CLIP.card,
+    boxShadow: 'var(--glow-box-panel)',
     animation: 'pwaSlideUp 0.3s ease-out',
     overflow: 'hidden',
   };
 
   if (!isIOS) {
     return (
-      <div style={bannerStyle}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, var(--co-cyan), transparent)', opacity: 0.6 }} />
+      <div style={bannerStyle} className="pwa-banner bottom-banner accent-top">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
           <div style={{
             width: 36, height: 36, flexShrink: 0,
-            background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.3)',
-            clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+            background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
+            clipPath: CLIP.badge,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <span style={{ fontSize: '1.2rem' }}>🕹️</span>
+            <span style={{ fontSize: '1.25rem' }}>🕹️</span>
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.16em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
               DODAJ DO EKRANU GŁÓWNEGO
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
               Otwieraj jak natywna aplikacja
             </p>
           </div>
-          <button onClick={() => void handleInstall()} style={{
-            flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5,
-            padding: '7px 12px',
-            background: 'var(--co-cyan)', color: '#000',
-            border: 'none', cursor: 'pointer',
-            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.12em',
-            clipPath: 'polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)',
+          {/* Wspólna klasa: kolor tekstu na wypełnieniu akcentem zależy od
+              motywu (czerń na cyanie, biel na morskim), a hover jest CSS-owy. */}
+          <button onClick={() => void handleInstall()} className="cyber-button-yellow" style={{
+            flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+            minHeight: 44, padding: '10px 14px',
             whiteSpace: 'nowrap',
           }}>
-            <Download size={12} /> DODAJ
+            <Download size={13} aria-hidden="true" /> DODAJ
           </button>
-          <button onClick={dismiss} aria-label="Zamknij" style={{ background: 'transparent', border: 'none', color: 'var(--co-close-btn)', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0, transition: 'color 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.color = 'var(--co-cyan)'}
-            onMouseLeave={e => e.currentTarget.style.color = 'var(--co-close-btn)'}
-          >
-            <X size={15} />
+          <button onClick={dismiss} aria-label="Zamknij" className="icon-btn" style={{
+            background: 'transparent', border: 'none', color: 'var(--co-dim)', cursor: 'pointer',
+            width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -133,25 +130,24 @@ export default function PWAInstallBanner() {
   ];
 
   return (
-    <div style={bannerStyle}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, var(--co-cyan), transparent)', opacity: 0.6 }} />
+    <div style={bannerStyle} className="pwa-banner bottom-banner accent-top">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px 10px' }}>
-        <div style={{ width: 32, height: 32, flexShrink: 0, background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.25)', clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, flexShrink: 0, background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)', clipPath: CLIP.badge, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ fontSize: '1rem' }}>🕹️</span>
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.16em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
             DODAJ DO EKRANU GŁÓWNEGO
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
             Działa jak natywna aplikacja
           </p>
         </div>
-        <button onClick={dismiss} aria-label="Zamknij" style={{ background: 'transparent', border: 'none', color: 'var(--co-close-btn)', cursor: 'pointer', padding: 4, flexShrink: 0, transition: 'color 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.color = 'var(--co-cyan)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'var(--co-close-btn)'}
-        >
-          <X size={15} />
+        <button onClick={dismiss} aria-label="Zamknij" className="icon-btn" style={{
+          background: 'transparent', border: 'none', color: 'var(--co-dim)', cursor: 'pointer',
+          width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
       <div style={{ borderTop: '1px solid var(--co-border)', padding: '10px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -159,19 +155,19 @@ export default function PWAInstallBanner() {
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 22, height: 22, flexShrink: 0,
-              border: '1px solid rgba(0,229,255,0.25)',
-              clipPath: 'polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)',
+              border: '1px solid var(--co-tint-line)',
+              clipPath: CLIP.badge,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,229,255,0.04)',
+              background: 'var(--co-tint)',
             }}>
-              <span style={{ fontFamily: 'var(--font-display)', color: 'var(--co-cyan)', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.05em' }}>{step.n}</span>
+              <span style={{ fontFamily: 'var(--font-display)', color: 'var(--co-cyan)', fontSize: '0.875rem', letterSpacing: '0.06em' }}>{step.n}</span>
             </div>
-            <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--co-dim)', lineHeight: 1.4 }}>{step.content}</p>
+            <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.4 }}>{step.content}</p>
           </div>
         ))}
       </div>
       <div style={{ textAlign: 'center', paddingBottom: 8, marginTop: -4 }}>
-        <span style={{ color: 'rgba(0,229,255,0.25)', fontSize: '0.8rem' }}>↓</span>
+        <span aria-hidden="true" style={{ color: 'var(--co-dim)', fontSize: TEXT.small }}>↓</span>
       </div>
     </div>
   );

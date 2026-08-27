@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useId } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Copy } from 'lucide-react';
 import { SPORT_EMOJI, SPORT_LABEL, hasRacketRental } from '@/constants';
 import { useToast } from '../common/Toast';
@@ -6,7 +6,8 @@ import { formatDate, formatAmountShort } from '@/utils/format';
 import { buildGroupMessage } from '@/utils/message';
 import { getShareGroups } from '@/utils/sessionCost';
 import { copyToClipboard } from '@/utils/clipboard';
-import { useFocusTrap } from '@/hooks/useFocusTrap';
+import Modal from '../common/Modal';
+import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 import type { Sport } from '@/types/domain';
 
 interface SessionSummary {
@@ -30,12 +31,8 @@ const COPIED_RESET_MS = 2500;
 export default function SessionSummaryModal({ summary, onClose }: SessionSummaryModalProps) {
   const [copied, setCopied] = useState(false);
   const { showError } = useToast();
-  const overlayRef = useRef<HTMLDivElement>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const titleId = useId();
 
-  useFocusTrap(overlayRef);
-  useEffect(() => { overlayRef.current?.focus(); }, []);
   useEffect(() => () => { if (copiedTimer.current) clearTimeout(copiedTimer.current); }, []);
 
   const { date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers } = summary;
@@ -58,109 +55,77 @@ export default function SessionSummaryModal({ summary, onClose }: SessionSummary
   };
 
   return (
-    <div ref={overlayRef} tabIndex={-1} onKeyDown={e => e.key === 'Escape' && onClose()} role="dialog" aria-modal="true" aria-labelledby={titleId}
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ background: 'var(--co-overlay, rgba(0,0,0,0.95))', backdropFilter: 'blur(6px)' }}
-      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="modal-enter" style={{
-        background: 'var(--co-dark)',
-        border: '1px solid rgba(0,229,255,0.4)',
-        clipPath: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))',
-        boxShadow: '0 0 60px rgba(0,229,255,0.15), 0 4px 60px rgba(0,0,0,0.95)',
-        padding: '28px 24px', width: '100%', maxWidth: 400,
-      }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
-          <div style={{
-            width: 40, height: 40,
-            background: 'rgba(0,229,255,0.08)',
-            border: '1px solid rgba(0,229,255,0.35)',
-            clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <CheckCircle2 size={20} style={{ color: 'var(--co-green)' }} />
-          </div>
-          <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '0.1em', color: 'var(--co-green)', marginBottom: 3, textTransform: 'uppercase' }}>
-              Zapisano!
-            </p>
-            <h3 id={titleId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.06em', color: 'var(--co-text-hi)', margin: 0 }}>
-              Sesja zapisana!
-            </h3>
-          </div>
-        </div>
-
-        {/* Stats grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
-          {[
-            { label: 'SPORT', value: `${SPORT_EMOJI[sport] ?? '🏓'} ${(SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase()}`, color: withRackets ? 'var(--co-green)' : 'var(--co-cyan)' },
-            { label: 'DATA', value: formatDate(date), color: 'var(--co-text)' },
-            { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
-            { label: 'OBECNI', value: presentCount, color: 'var(--co-text)' },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{
-              padding: '10px 12px', background: 'var(--co-dark)',
-              border: '1px solid var(--co-border)',
-              clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-            }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 4, textTransform: 'uppercase' }}>{label}</p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color, margin: 0 }}>{value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Per-person */}
-        {headline && (
-          <div style={{
-            padding: '16px', marginBottom: 16, textAlign: 'center',
-            background: 'rgba(0,229,255,0.04)',
-            border: '1px solid rgba(0,229,255,0.3)',
-            clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
-          }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', letterSpacing: '0.12em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
-              PODZIAŁ KOSZTÓW
-            </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '2rem', color: 'var(--co-cyan)', textShadow: '0 0 20px rgba(0,229,255,0.5)', margin: 0 }}>
-              {formatAmountShort(headline.perPerson)}<span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4 }}>ZŁ / OS.</span>
-            </p>
-            {groups.slice(1).map(group => (
-              <p key={group.names.join()} style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.6rem', marginTop: 3,
-                color: group.hasCard ? 'var(--co-green)' : 'var(--co-amber)',
-              }}>
-                {group.hasCard ? '⚡' : SPORT_EMOJI[sport]} {group.names.join(', ')}
-                {group.ownRacket ? ' (własna rakietka)' : ''}: {formatAmountShort(group.perPerson)} zł
-              </p>
-            ))}
-            {hasRackets && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', marginTop: 2 }}>
-                Kort: {formatAmountShort(totalCost - racketCost)} zł · Rakiety: {formatAmountShort(racketCost)} zł
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Copy & close */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <button onClick={handleCopy} style={{
-            width: '100%', padding: '12px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.12em',
-            cursor: 'pointer', transition: 'all 0.18s',
-            ...(copied ? {
-              background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.4)', color: 'var(--co-green)',
-            } : {
-              background: 'transparent', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-            }),
-            clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
-          }}>
-            {copied ? <><CheckCircle2 size={14} /> Skopiowano!</> : <><Copy size={14} /> Kopiuj na grupkę</>}
+    <Modal
+      onClose={onClose}
+      title="Sesja zapisana"
+      icon={CheckCircle2}
+      accent="var(--co-green)"
+      maxWidth={420}
+      footer={
+        <>
+          <button
+            onClick={handleCopy}
+            aria-live="polite"
+            className={copied ? 'cyber-button-yellow' : 'cyber-button-outline'}
+            style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            {copied ? <><CheckCircle2 size={14} aria-hidden="true" /> Skopiowano!</> : <><Copy size={14} aria-hidden="true" /> Kopiuj na grupkę</>}
           </button>
-          <button onClick={onClose} className="cyber-button-yellow" style={{ width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: '0.65rem' }}>
-            <CheckCircle2 size={14} /> OK — Powrót do bazy
+          <button onClick={onClose} className="cyber-button-yellow" style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            OK
           </button>
-        </div>
+        </>
+      }
+    >
+      {/* Stats grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+        {[
+          { label: 'SPORT', value: `${SPORT_EMOJI[sport] ?? '🏓'} ${(SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase()}`, color: withRackets ? 'var(--co-green)' : 'var(--co-cyan)' },
+          { label: 'DATA', value: formatDate(date), color: 'var(--co-text)' },
+          { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
+          { label: 'OBECNI', value: presentCount, color: 'var(--co-text)' },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{
+            padding: '10px 12px', background: 'var(--co-surface-2)',
+            border: '1px solid var(--co-border)',
+            clipPath: CLIP.badge,
+          }}>
+            <p style={{ ...FONT.monoLabel, marginBottom: 4 }}>{label}</p>
+            <p style={{ ...FONT.mono(TEXT.base), color, margin: 0 }}>{value}</p>
+          </div>
+        ))}
       </div>
-    </div>
+
+      {/* Per-person */}
+      {headline && (
+        <div style={{
+          padding: '16px', textAlign: 'center',
+          background: 'var(--co-tint)',
+          border: '1px solid var(--co-tint-line)',
+          clipPath: CLIP.smallCard,
+        }}>
+          <p style={{ ...FONT.monoLabel, marginBottom: 6 }}>PODZIAŁ KOSZTÓW</p>
+          <p style={{ ...FONT.mono(TEXT.h2), color: 'var(--co-cyan)', textShadow: 'var(--glow-cyan-lg)', margin: 0 }}>
+            {formatAmountShort(headline.perPerson)}
+            <span style={{ fontSize: TEXT.base, opacity: 0.5, marginLeft: 4 }}>ZŁ / OS.</span>
+          </p>
+          {/* Kwoty, które ktoś ma realnie zapłacić — wcześniej 9,6px. */}
+          {groups.slice(1).map(group => (
+            <p key={group.names.join()} style={{
+              ...FONT.mono(TEXT.small), marginTop: 4,
+              color: group.hasCard ? 'var(--co-green)' : 'var(--co-amber)',
+            }}>
+              {group.hasCard ? '⚡' : SPORT_EMOJI[sport]} {group.names.join(', ')}
+              {group.ownRacket ? ' (własna rakietka)' : ''}: {formatAmountShort(group.perPerson)} zł
+            </p>
+          ))}
+          {hasRackets && (
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6, letterSpacing: TRACK.tight }}>
+              Kort: {formatAmountShort(totalCost - racketCost)} zł · Rakiety: {formatAmountShort(racketCost)} zł
+            </p>
+          )}
+        </div>
+      )}
+    </Modal>
   );
 }

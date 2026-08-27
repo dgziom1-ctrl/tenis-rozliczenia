@@ -1,4 +1,5 @@
 import { formatAmount } from '@/utils/format';
+import { TEXT, TRACK } from '@/constants/styles';
 import type { ShareGroup } from '@/utils/sessionCost';
 
 interface ShareBreakdownProps {
@@ -33,16 +34,20 @@ export default function ShareBreakdown({ groups, sportEmoji, size = 'md' }: Shar
         return (
           <div key={label} title={group.names.join(', ')}
             style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
+            {/* Rozmiary jadą skalą TEXT. Wcześniej ten komponent — którego
+                zadaniem jest, żeby te same dane nie wyglądały na trzy różne
+                sposoby — wprowadzał cztery stopnie (0.72/0.8/0.85/1.1rem)
+                nieistniejące nigdzie indziej w aplikacji. */}
             <span style={{
-              fontFamily: 'var(--font-display)', letterSpacing: '0.08em', color,
-              fontSize: isSmall ? '0.72rem' : '0.8rem', minWidth: 0,
+              fontFamily: 'var(--font-display)', letterSpacing: TRACK.normal, color,
+              fontSize: isSmall ? TEXT.micro : TEXT.small, minWidth: 0,
             }}>
               {label}
               <span style={{ color: 'var(--co-dim)' }}> · {group.names.length} os.</span>
             </span>
             <span style={{
               fontFamily: 'var(--font-mono)', color, whiteSpace: 'nowrap',
-              fontSize: isSmall ? '0.85rem' : '1.1rem',
+              fontSize: isSmall ? TEXT.base : TEXT.lead,
             }}>
               {formatAmount(group.perPerson)}
             </span>

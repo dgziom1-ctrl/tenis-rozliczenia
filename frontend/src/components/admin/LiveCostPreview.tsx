@@ -4,6 +4,7 @@ import { formatAmountShort, parseAmount } from '@/utils/format';
 import { getSessionShares, getShareGroups } from '@/utils/sessionCost';
 import ShareBreakdown from '../common/ShareBreakdown';
 import type { Sport } from '@/types/domain';
+import { CLIP } from '@/constants/styles';
 
 interface LiveCostPreviewProps {
   totalCost: string;
@@ -37,17 +38,17 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
   return (
     <div style={{
       padding: '12px 16px',
-      background: 'rgba(0,229,255,0.03)',
-      border: '1px solid rgba(0,229,255,0.2)',
-      clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+      background: 'var(--co-tint)',
+      border: '1px solid var(--co-tint-line)',
+      clipPath: CLIP.tag,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <Calculator size={14} style={{ color: 'var(--co-dim)' }} />
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.88rem', letterSpacing: '0.15em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
           Podział kosztów · {SPORT_LABEL[sport] ?? 'Ping-Pong'}
         </span>
         {hasRackets && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-cyan)', marginLeft: 'auto' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', marginLeft: 'auto' }}>
             Σ {formatAmountShort(courtCost + racketCost)} zł
           </span>
         )}
@@ -55,12 +56,12 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <ShareBreakdown groups={groups} sportEmoji={racketEmoji} />
         {discountCapped && (
-          <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
+          <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
             {'>'} ⚠ Karty nie zbiły ceny o pełne {MULTISPORT_DISCOUNT} zł — udział na osobę wychodzi mniejszy niż zniżka. Sprawdź, czy kwota się zgadza.
           </div>
         )}
         {hasRackets && (
-          <div style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--co-dim)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
+          <div style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
             {'>'} Kort: {formatAmountShort(courtCost)} zł · Rakiety ({racketCount} szt.): {formatAmountShort(racketCost)} zł
           </div>
         )}

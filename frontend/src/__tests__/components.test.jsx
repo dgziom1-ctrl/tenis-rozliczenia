@@ -42,6 +42,7 @@ import Navigation from '../components/layout/Navigation';
 import UndoBar from '../components/common/UndoBar';
 import LogEntry from '../components/history/LogEntry';
 import LiveCostPreview from '../components/admin/LiveCostPreview';
+import { PasswordModal } from '../components/common/SharedUI';
 import { getShareGroups } from '../utils/sessionCost';
 import { TABS } from '../constants';
 
@@ -272,6 +273,49 @@ describe('LogEntry — koszt i stawki w historii', () => {
     expect(screen.getByText('⚡🏸 Ada')).toBeInTheDocument();
     expect(screen.getByText('⚡ Bartek')).toBeInTheDocument();
     expect(screen.getByText('Celina')).toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PasswordModal — regresja: nie dało się nic wpisać
+// Pułapka fokusu przenosiła fokus na kontener okna JUŻ PO tym, jak autoFocus
+// ustawił go na polu hasła. Pole traciło fokus, klawiatura na telefonie się
+// nie otwierała, a wpisywanie nic nie dawało. Dotyczyło edycji sesji,
+// usuwania sesji i usuwania gracza — wszystkich miejsc z tym oknem.
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('PasswordModal — pole hasła musi trzymać fokus', () => {
+  it('po otwarciu fokus jest na polu hasła, a nie na kontenerze', () => {
+    render(<PasswordModal action="Test" onConfirm={vi.fn()} onCancel={vi.fn()} />);
+
+    const input = screen.getByLabelText('Hasło admina');
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('da się wpisać tekst i trafia on do pola', async () => {
+    const user = userEvent.setup();
+    render(<PasswordModal action="Test" onConfirm={vi.fn()} onCancel={vi.fn()} />);
+
+    // Bez click() — piszemy od razu, bo fokus ma już być na polu.
+    await user.keyboard('sekret');
+
+    expect(screen.getByLabelText('Hasło admina')).toHaveValue('sekret');
+  });
+
+  it('Escape zamyka okno, mimo że fokus jest w polu', async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+    render(<PasswordModal action="Test" onConfirm={vi.fn()} onCancel={onCancel} />);
+
+    await user.keyboard('{Escape}');
+    expect(onCancel).toHaveBeenCalled();
+  });
+
+  it('blokuje przewijanie strony pod otwartym oknem', () => {
+    const { unmount } = render(<PasswordModal onConfirm={vi.fn()} onCancel={vi.fn()} />);
+    expect(document.body.style.overflow).toBe('hidden');
+    unmount();
+    expect(document.body.style.overflow).not.toBe('hidden');
   });
 });
 

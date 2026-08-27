@@ -9,6 +9,7 @@ import { useThemeContext } from './providers/themeContext';
 import { useAudio } from '@/hooks/useAudio';
 import { useScrolled } from '@/hooks/useScrolled';
 import { SOUND_TYPES, TAB_PATHS, PATH_TO_TAB } from '@/constants';
+import { CLIP } from '@/constants/styles';
 
 /**
  * `NotificationOptions` z lib.dom nie zna pól obsługiwanych tylko przez
@@ -163,22 +164,22 @@ function OfflineBanner({ hasData, onRetry }: { hasData: boolean; onRetry: () => 
         margin: '0 0 16px',
         padding: '10px 14px',
         display: 'flex', alignItems: 'center', gap: 10,
-        background: 'rgba(251,191,36,0.06)',
-        border: '1px solid rgba(251,191,36,0.35)',
-        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
+        background: 'var(--co-amber-dim)',
+        border: '1px solid var(--co-amber)',
+        clipPath: CLIP.smallCard,
       }}
     >
       <span style={{ fontSize: '1rem', lineHeight: 1 }}>⚠</span>
       <div style={{ flex: 1 }}>
         <p style={{
-          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.12em',
-          textTransform: 'uppercase', color: 'var(--co-amber)', fontSize: '0.72rem',
+          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.1em',
+          textTransform: 'uppercase', color: 'var(--co-amber)', fontSize: '0.8125rem',
         }}>
           Brak połączenia
         </p>
         <p style={{
-          margin: '2px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.62rem',
-          color: 'var(--co-dim)', letterSpacing: '0.04em', lineHeight: 1.5,
+          margin: '2px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+          color: 'var(--co-dim)', letterSpacing: '0.06em', lineHeight: 1.5,
         }}>
           {hasData
             ? 'Pracujesz na ostatnich danych. Zmiany (wpłaty, sesje) nie zapiszą się, dopóki nie wróci sieć.'
@@ -187,7 +188,7 @@ function OfflineBanner({ hasData, onRetry }: { hasData: boolean; onRetry: () => 
       </div>
       {!hasData && (
         <button onClick={onRetry} className="cyber-button-yellow"
-          style={{ padding: '8px 12px', fontSize: '0.62rem', whiteSpace: 'nowrap' }}>
+          style={{ padding: '8px 12px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
           ↻ Ponów
         </button>
       )}
@@ -203,34 +204,34 @@ function CyberBackground() {
       <div style={{
         position: 'absolute', top: '-15%', left: '50%', transform: 'translateX(-50%)',
         width: '90vw', height: '70vh',
-        background: 'radial-gradient(ellipse at center top, rgba(0,229,255,0.08) 0%, rgba(180,55,0,0.03) 45%, transparent 72%)',
+        background: 'radial-gradient(ellipse at center top, var(--co-tint-hi) 0%, var(--co-tint) 45%, transparent 72%)',
       }} />
       <div style={{
         position: 'absolute', bottom: '-10%', left: '-5%',
         width: '55vw', height: '55vh',
-        background: 'radial-gradient(ellipse at bottom left, rgba(0,180,216,0.04) 0%, transparent 65%)',
+        background: 'radial-gradient(ellipse at bottom left, var(--co-tint) 0%, transparent 65%)',
       }} />
       <div style={{
         position: 'absolute', top: '40%', right: '-5%',
         width: '35vw', height: '40vh',
-        background: 'radial-gradient(ellipse at right center, rgba(0,229,255,0.02) 0%, transparent 60%)',
+        background: 'radial-gradient(ellipse at right center, var(--co-tint) 0%, transparent 60%)',
       }} />
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: 'radial-gradient(circle at 1px 1px, var(--dot-color, rgba(0,229,255,0.07)) 1px, transparent 0)',
+        backgroundImage: 'radial-gradient(circle at 1px 1px, var(--dot-color, var(--co-tint)) 1px, transparent 0)',
         backgroundSize: '28px 28px',
       }} />
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: '30vh',
-        background: 'linear-gradient(to top, rgba(0,229,255,0.03) 0%, transparent 100%)',
+        background: 'linear-gradient(to top, var(--co-tint) 0%, transparent 100%)',
       }} />
       <div style={{
         position: 'absolute', top: 0, bottom: 0, left: 0, width: '1px',
-        background: 'linear-gradient(to bottom, rgba(0,229,255,0.15) 0%, transparent 40%)',
+        background: 'linear-gradient(to bottom, var(--co-tint-line) 0%, transparent 40%)',
       }} />
       <div style={{
         position: 'absolute', top: 0, bottom: 0, right: 0, width: '1px',
-        background: 'linear-gradient(to bottom, rgba(0,229,255,0.15) 0%, transparent 40%)',
+        background: 'linear-gradient(to bottom, var(--co-tint-line) 0%, transparent 40%)',
       }} />
     </div>
   );
