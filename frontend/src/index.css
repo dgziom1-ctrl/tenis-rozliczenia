@@ -38,6 +38,17 @@
   --co-amber-mid:#D97706;
   --co-amber-dim:#1A1200;
 
+  /* ── Medal podium — gold / silver / bronze (nie cyan na #1) ── */
+  --co-gold:     #B8860B;
+  --co-gold-mid: #9A7209;
+  --co-gold-dim: #1A1400;
+  --co-silver:   #C0C8D4;
+  --co-bronze:   #CD7F32;
+  --co-tint-gold: rgba(184,134,11,0.10);
+  --co-tint-bronze: rgba(205,127,50,0.10);
+  --glow-gold-md:  0 0 14px rgba(184,134,11,0.45);
+  --glow-box-gold: 0 0 16px rgba(184,134,11,0.22);
+
   /* ── Positive — Matrix Green ── */
   --co-green:    #00FF88;   /* settled / positive */
   --co-green-dim:#003320;   /* green bg tint */
@@ -84,6 +95,10 @@
      nagłówku potrzebuje własnego tokenu. */
   --glow-drop-cyan: drop-shadow(0 0 20px rgba(0,229,255,0.12));
   --glow-drop-rose: drop-shadow(0 0 8px rgba(255,32,144,0.50));
+  /* Poświata marki w nagłówku — żyje w trybie jasnym, gdy reszta neonu gaśnie. */
+  --glow-brand-sm: 0 0 8px rgba(0,229,255,0.30);
+  --glow-brand-md: 0 0 14px rgba(0,229,255,0.40);
+  --glow-brand-lg: 0 0 20px rgba(0,229,255,0.50);
 
   /* ── Layer scale ──
      Was an ad-hoc ladder of 38/39/40/45/49/50/70/100/200/1000/1001/9000, with
@@ -256,10 +271,10 @@ body.theme-switching *::after {
 /* ── Wrapped (podsumowanie sezonu) ──
    Były wstrzykiwane do <head> w runtime i zostawały tam po odmontowaniu okna.
    Poświata jedzie tokenami, więc w trybie jasnym animacja jest pustym przebiegiem. */
-@keyframes wm-fadeScale { 0% { opacity: 0; transform: scale(.88) translateY(24px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes wm-fadeScale { 0% { transform: scale(.88) translateY(24px); } 100% { transform: scale(1) translateY(0); } }
 @keyframes wm-glow      { 0%, 100% { text-shadow: var(--glow-cyan-sm); } 50% { text-shadow: var(--glow-cyan-lg); } }
 @keyframes wm-pulse     { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
-@keyframes wm-slideUp   { 0% { opacity: 0; transform: translateY(40px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes wm-slideUp   { 0% { transform: translateY(40px); } 100% { transform: translateY(0); } }
 @keyframes wm-float     { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
 /* ══ UTILITIES ═══════════════════════════════════════════════════ */
@@ -461,6 +476,24 @@ body.theme-switching *::after {
 }
 .modal-overlay.align-center { align-items: center; }
 .modal-overlay.align-bottom { align-items: flex-end; padding-bottom: 0; }
+
+/* Pełnoekranowe okna (Wrapped) — bez paddingu flex i półprzezroczystego tła,
+   które zostawiały tylko „puste” tło bez treści slajdu. */
+.modal-overlay.modal-bare {
+  display: block;
+  padding: 0;
+  background: transparent;
+}
+.modal-overlay.modal-bare::before {
+  display: none;
+}
+.modal-bare-fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
 
 /* Panel dialogu — wspólne tło, krawędź, cień i zawijanie przewijania. */
 .modal-panel {
@@ -854,6 +887,16 @@ body.theme-light {
   --co-amber-mid: #B45309;
   --co-amber-dim: #FEF3C7;
 
+  --co-gold:      #9A7209;
+  --co-gold-mid:  #7A5A07;
+  --co-gold-dim:  #FEF9E7;
+  --co-silver:    #64748B;
+  --co-bronze:    #B87333;
+  --co-tint-gold: rgba(154,114,9,0.12);
+  --co-tint-bronze: rgba(184,115,51,0.10);
+  --glow-gold-md: none;
+  --glow-box-gold: 0 1px 3px rgba(0,0,0,0.08);
+
   /* ── Positive — Leafy green ── */
   --co-green:     #16A34A;
   --co-green-dim: #DCFCE7;
@@ -900,8 +943,11 @@ body.theme-light {
   --glow-box-cyan:  0 1px 3px rgba(0,0,0,0.08);
   --glow-box-rose:  0 1px 3px rgba(0,0,0,0.08);
   --glow-box-panel: 0 4px 24px rgba(0,0,0,0.12);
-  --glow-drop-cyan: none;
+  --glow-drop-cyan: drop-shadow(0 0 12px rgba(13,148,136,0.12));
   --glow-drop-rose: none;
+  --glow-brand-sm: 0 0 10px rgba(13,148,136,0.35);
+  --glow-brand-md: 0 0 14px rgba(13,148,136,0.45);
+  --glow-brand-lg: 0 0 20px rgba(13,148,136,0.55);
 
   --modal-radius: 12px;
   --modal-bg:     #FFFFFF;

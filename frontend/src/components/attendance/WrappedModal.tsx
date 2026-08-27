@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import Modal from '../common/Modal';
 import { CornerBrackets } from '../dashboard/CornerBrackets';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, TRACK, CLIP, Z } from '@/constants/styles';
 import type { WrappedStats } from '@/types/ui';
 
 // ─── Count-up hook ───────────────────────────────────────────────
@@ -46,10 +46,12 @@ const mono = (size: string, extra?: CSSProperties): CSSProperties => ({
 interface WrappedModalProps {
   stats: WrappedStats;
   onClose: () => void;
+  /** Podgląd dev: pełny ekran bez portalu Modala. */
+  embedded?: boolean;
 }
 
 // ─── WrappedModal ────────────────────────────────────────────────
-export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
+export default function WrappedModal({ stats, onClose, embedded = false }: WrappedModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Build ordered slide list (skip bestPair slide when null)
@@ -262,12 +264,9 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
         const top3 = stats.players.slice(0, 3);
         const rest = stats.players.slice(3);
         const medals = ['🥇', '🥈', '🥉'];
-        const medalColors = ['var(--co-cyan)', 'var(--co-text)', 'var(--co-green)'];
-        // Osobne tokeny, nie `medalColors` z dopiskiem krycia: te wartości są
-        // już `var(...)`, więc `${medalColors[i]}08` dawało `var(--co-cyan)08` —
-        // po podstawieniu zmiennej deklaracja jest nieprawidłowa i karty
-        // podium zostawały bez wypełnienia. Malejąca moc washu = malejące miejsce.
-        const medalTints = ['var(--co-tint-hi)', 'var(--co-tint)', 'var(--co-tint-green)'];
+        const medalColors = ['var(--co-gold)', 'var(--co-silver)', 'var(--co-bronze)'];
+        const medalTints = ['var(--co-tint-gold)', 'var(--co-tint)', 'var(--co-tint-bronze)'];
+        const medalBorders = ['var(--co-gold)', 'var(--co-silver)', 'var(--co-bronze)'];
 
         return (
           <div style={{ textAlign: 'center', maxWidth: 500, width: '100%' }}>
@@ -284,7 +283,7 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
                 <div key={p.name} style={{
                   flex: 1, maxWidth: 140, padding: 'clamp(10px, 3vw, 18px) 8px',
                   background: medalTints[i],
-                  border: `1px solid ${i === 0 ? 'var(--co-tint-line)' : i === 2 ? 'var(--co-green)' : 'var(--co-border)'}`,
+                  border: `1px solid ${medalBorders[i]}`,
                   clipPath: CLIP.card,
                   animation: `wm-slideUp 0.6s ease-out ${0.15 * i}s both`,
                 }}>
@@ -292,7 +291,7 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
                   <div style={{
                     ...display('clamp(0.9rem, 3vw, 1.4rem)'),
                     color: medalColors[i],
-                    textShadow: i === 0 ? 'var(--glow-cyan-sm)' : 'none',
+                    textShadow: i === 0 ? 'var(--glow-gold-md)' : 'none',
                     marginBottom: 6,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
@@ -414,16 +413,18 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
   };
 
   // ── Render ─────────────────────────────────────────────────────
-  return (
-    // Pełny ekran z własnym układem, więc z prymitywu bierze samą nakładkę.
-    // Klik w tło przewija slajd, a nie zamyka — dlatego `closeOnBackdrop` off.
-    <Modal onClose={onClose} bare closeOnBackdrop={false} ariaLabel={`Podsumowanie roku ${stats.year}`}>
+  const shell = (
       <div
         onClick={advance}
         onKeyDown={handleKey}
         role="presentation"
+        tabIndex={embedded ? 0 : undefined}
+        aria-label={embedded ? `Podsumowanie roku ${stats.year}` : undefined}
         style={{
-          position: 'absolute', inset: 0,
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          minHeight: embedded ? '100vh' : '100%',
           background: 'var(--co-void)',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
@@ -516,6 +517,21 @@ export default function WrappedModal({ stats, onClose }: WrappedModalProps) {
         </button>
       )}
       </div>
+  );
+
+  if (embedded) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: Z.modal }}>
+        {shell}
+      </div>
+    );
+  }
+
+  return (
+  // Pełny ekran z własnym układem, więc z prymitywu bierze samą nakładkę.
+  // Klik w tło przewija slajd, a nie zamyka — dlatego `closeOnBackdrop` off.
+    <Modal onClose={onClose} bare closeOnBackdrop={false} ariaLabel={`Podsumowanie roku ${stats.year}`}>
+      {shell}
     </Modal>
   );
 }

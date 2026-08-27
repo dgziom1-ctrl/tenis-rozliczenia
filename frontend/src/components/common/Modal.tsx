@@ -72,7 +72,7 @@ export default function Modal({
   const overlay = (
     <div
       ref={overlayRef}
-      className={`modal-overlay ${alignClass}`}
+      className={`modal-overlay ${alignClass}${bare ? ' modal-bare' : ''}`}
       tabIndex={-1}
       role="dialog"
       aria-modal="true"
@@ -81,7 +81,9 @@ export default function Modal({
       onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); onClose(); } }}
       onClick={closeOnBackdrop ? e => { if (e.target === e.currentTarget) onClose(); } : undefined}
     >
-      {bare ? children : (
+      {bare ? (
+        <div className="modal-bare-fill">{children}</div>
+      ) : (
         <div
           className={`modal-panel cut-corners ${align === 'bottom' ? 'sheet bottom-sheet-enter' : 'modal-enter'}`}
           style={{ maxWidth }}

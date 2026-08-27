@@ -172,17 +172,9 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to left,transparent,var(--co-tint-line))' }}/>
           </div>
 
-          {/* Animacja jest renderowana w canvasie wprost na ciemnych barwach,
-              których CSS nie zmieni. Zamiast przepisywać cały render, arena
-              dostaje własną ramkę i czyta się jako wbudowany ekran — spójnie
-              w obu motywach, a nie jak granatowa plama na białym nagłówku. */}
           <div style={{ width:'100%',maxWidth:560,marginBottom:14,
-            background:'#030508',
-            border:'1px solid var(--co-border)',
-            clipPath:CLIP.smallCard,
-            overflow:'hidden',
             filter:chaosMode?'none':'var(--glow-drop-cyan)' }}>
-            <ArenaCanvas chaosMode={chaosMode} onHit={handleHit}/>
+            <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit}/>
           </div>
 
           <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
@@ -197,10 +189,6 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
               clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
               opacity:1,
             }}>CYBER-PONK</span>}
-            {/* Main title — glitch on hit.
-                Kolor był zaszyty jako #B8E0EE (bladoniebieski): w trybie jasnym
-                nagłówek robi się prawie biały i napis znikał, a twardy czarny
-                cień zostawiał wokół niego dziwną obwódkę. */}
             <span style={{
               display:'block',fontFamily:'var(--font-display)',
               fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
@@ -208,13 +196,13 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
               transition:'text-shadow 0.06s, transform 0.06s',
               ...(chaosMode
                 ? { color:'var(--co-cyan)',animation:'headerBounce .4s ease-in-out 3',
-                    textShadow:'var(--glow-cyan-lg)' }
+                    textShadow:'var(--glow-brand-lg)' }
                 : hitting
                 ? { color:'var(--co-cyan)',
-                    textShadow:'var(--glow-cyan-lg)',
+                    textShadow:'var(--glow-brand-lg)',
                     transform:'translateX(1px)' }
-                : { color:'var(--co-text-hi)',
-                    textShadow:'var(--glow-cyan-sm)',
+                : { color:'var(--co-cyan)',
+                    textShadow:'var(--glow-brand-sm)',
                   }),
             }}>CYBER-PONK</span>
           </button>

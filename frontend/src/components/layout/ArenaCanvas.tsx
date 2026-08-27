@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react';
 
 interface ArenaCanvasProps {
   chaosMode: boolean;
+  lightMode?: boolean;
   onHit?: (hitting: boolean) => void;
 }
 
@@ -11,7 +12,7 @@ type Projected = [number, number, number];
 /** Funkcje rysujące czytają wyłącznie X i Y, więc przyjmują też punkty rzutowane. */
 type ScreenPoint = readonly [number, number, ...number[]];
 
-export default function ArenaCanvas({ chaosMode, onHit }: ArenaCanvasProps) {
+export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: ArenaCanvasProps) {
   const ref = useRef<HTMLCanvasElement>(null);
   const raf = useRef<number | null>(null);
   const t0  = useRef<number | null>(null);
@@ -113,63 +114,87 @@ export default function ArenaCanvas({ chaosMode, onHit }: ArenaCanvasProps) {
       };
 
       sg.clearRect(0, 0, W, H);
+      if (lightMode) {
+        sg.fillStyle = '#F8FAFC';
+        sg.fillRect(0, 0, W, H);
+      }
 
       /* Table (static) */
       const FL = proj(-TX, 0, -TZ), FR = proj(TX, 0, -TZ);
       const BR = proj(TX, 0, TZ), BL = proj(-TX, 0, TZ);
       const tg = sg.createLinearGradient(BL[0], BL[1], FL[0], FL[1]);
-      tg.addColorStop(0, '#020810'); tg.addColorStop(1, '#041828');
+      if (lightMode) {
+        tg.addColorStop(0, '#F1F5F9'); tg.addColorStop(1, '#E2E8F0');
+      } else {
+        tg.addColorStop(0, '#020810'); tg.addColorStop(1, '#041828');
+      }
       quadS([FL, FR, BR, BL], tg);
+      const gridA = lightMode ? 0.06 : 0.03;
+      const gridB = lightMode ? 0.10 : 0.04;
+      const gridRgb = lightMode ? '13,148,136' : '0,180,255';
       for (let i = 1; i < 4; i++) {
         const wz = -TZ + (i / 4) * TZ * 2;
-        segS(proj(-TX, 0, wz), proj(TX, 0, wz), `rgba(0,180,255,${0.03 + i * 0.012})`, 0.8);
+        segS(proj(-TX, 0, wz), proj(TX, 0, wz), `rgba(${gridRgb},${gridA + i * 0.012})`, 0.8);
       }
       for (let i = 1; i < 5; i++) {
         const wx = -TX + (i / 5) * TX * 2;
-        segS(proj(wx, 0, -TZ), proj(wx, 0, TZ), 'rgba(0,160,255,0.04)', 0.7);
+        segS(proj(wx, 0, -TZ), proj(wx, 0, TZ), `rgba(${gridRgb},${gridB})`, 0.7);
       }
-      segS(BL, FL, 'rgba(0,200,255,0.55)', 1.5);
-      segS(BR, FR, 'rgba(0,200,255,0.55)', 1.5);
-      segS(BL, BR, 'rgba(0,160,255,0.18)', 1.0);
-      segS(proj(0, 0, -TZ), proj(0, 0, TZ), 'rgba(0,229,255,0.10)', 1);
+      const edgeRgb = lightMode ? '13,148,136' : '0,200,255';
+      segS(BL, FL, `rgba(${edgeRgb},${lightMode ? 0.45 : 0.55})`, 1.5);
+      segS(BR, FR, `rgba(${edgeRgb},${lightMode ? 0.45 : 0.55})`, 1.5);
+      segS(BL, BR, `rgba(${gridRgb},${lightMode ? 0.22 : 0.18})`, 1.0);
+      segS(proj(0, 0, -TZ), proj(0, 0, TZ), `rgba(${edgeRgb},${lightMode ? 0.14 : 0.10})`, 1);
 
       /* Table front face (static) */
       const FL2 = proj(-TX, TH, -TZ), FR2 = proj(TX, TH, -TZ);
       const fg = sg.createLinearGradient(0, FL[1], 0, FL2[1]);
-      fg.addColorStop(0, 'rgba(0,140,220,0.35)'); fg.addColorStop(1, 'rgba(0,80,160,0.04)');
+      if (lightMode) {
+        fg.addColorStop(0, 'rgba(13,148,136,0.18)'); fg.addColorStop(1, 'rgba(13,148,136,0.04)');
+      } else {
+        fg.addColorStop(0, 'rgba(0,140,220,0.35)'); fg.addColorStop(1, 'rgba(0,80,160,0.04)');
+      }
       quadS([FL, FR, FR2, FL2], fg);
       sg.save();
-      sg.shadowBlur = 5;
-      sg.shadowColor = 'rgba(0,229,255,0.50)';
-      segS(FL, FR, 'rgba(0,229,255,0.80)', 1.8);
+      sg.shadowBlur = lightMode ? 3 : 5;
+      sg.shadowColor = lightMode ? 'rgba(13,148,136,0.35)' : 'rgba(0,229,255,0.50)';
+      segS(FL, FR, lightMode ? 'rgba(13,148,136,0.65)' : 'rgba(0,229,255,0.80)', 1.8);
       sg.restore();
 
       /* Net (static) */
       const nBN = proj(0, 0, -TZ), nBF = proj(0, 0, TZ);
       const nTN = proj(0, -NH, -TZ), nTF = proj(0, -NH, TZ);
       const ng = sg.createLinearGradient(nTN[0], nTN[1], nBN[0], nBN[1]);
-      ng.addColorStop(0, 'rgba(0,200,255,0.18)'); ng.addColorStop(1, 'rgba(0,100,200,0.03)');
+      if (lightMode) {
+        ng.addColorStop(0, 'rgba(13,148,136,0.14)'); ng.addColorStop(1, 'rgba(13,148,136,0.03)');
+      } else {
+        ng.addColorStop(0, 'rgba(0,200,255,0.18)'); ng.addColorStop(1, 'rgba(0,100,200,0.03)');
+      }
       quadS([nBN, nBF, nTF, nTN], ng);
       for (let r = 0; r <= 4; r++) {
         const ny = -NH * (1 - r / 4);
-        segS(proj(0, ny, -TZ), proj(0, ny, TZ), `rgba(0,200,255,${0.05 + r * 0.02})`, 0.85);
+        segS(proj(0, ny, -TZ), proj(0, ny, TZ), `rgba(${edgeRgb},${lightMode ? 0.08 + r * 0.02 : 0.05 + r * 0.02})`, 0.85);
       }
       for (let c = 0; c <= 8; c++) {
         const wz = -TZ + (c / 8) * TZ * 2;
-        segS(proj(0, 0, wz), proj(0, -NH, wz), 'rgba(0,180,255,0.07)', 0.8);
+        segS(proj(0, 0, wz), proj(0, -NH, wz), `rgba(${gridRgb},${lightMode ? 0.10 : 0.07})`, 0.8);
       }
-      segS(nBN, nTN, 'rgba(0,229,255,0.75)', 2.2);
-      segS(nBF, nTF, 'rgba(0,200,255,0.38)', 1.4);
+      segS(nBN, nTN, `rgba(${edgeRgb},${lightMode ? 0.55 : 0.75})`, 2.2);
+      segS(nBF, nTF, `rgba(${edgeRgb},${lightMode ? 0.30 : 0.38})`, 1.4);
       sg.save();
-      sg.shadowBlur = 7;
-      sg.shadowColor = 'rgba(0,229,255,0.95)';
-      segS(nTN, nTF, 'rgba(200,248,255,0.95)', 2.5);
+      sg.shadowBlur = lightMode ? 4 : 7;
+      sg.shadowColor = lightMode ? 'rgba(13,148,136,0.45)' : 'rgba(0,229,255,0.95)';
+      segS(nTN, nTF, lightMode ? 'rgba(13,148,136,0.75)' : 'rgba(200,248,255,0.95)', 2.5);
       sg.restore();
     }
 
     /* ── DRAW FRAME ── */
     const draw = (progress: number, nowTs: number) => {
       g.clearRect(0, 0, W, H);
+      if (lightMode) {
+        g.fillStyle = '#F8FAFC';
+        g.fillRect(0, 0, W, H);
+      }
 
       const leftHitT  = Math.min(progress, 1-progress) * 2;
       const rightHitT = Math.abs(progress - 0.5) * 2;
@@ -379,7 +404,7 @@ export default function ArenaCanvas({ chaosMode, onHit }: ArenaCanvasProps) {
       stopLoop();
       t0.current = null;
     };
-  }, [chaosMode, onHit]);
+  }, [chaosMode, lightMode, onHit]);
 
   return (
     <canvas ref={ref} width={560} height={180} aria-hidden="true"

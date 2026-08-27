@@ -71,6 +71,11 @@ node_modules/
 
 # Vite build output
 frontend/dist/
+frontend/.vite/
+
+# ESLint cache
+.eslintcache
+**/.eslintcache
 
 # Lokalne zrzuty bazy (zawierają dane graczy)
 backup_appData_*.json

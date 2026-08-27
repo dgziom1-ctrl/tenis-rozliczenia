@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router';
+import WrappedPreviewPage from '@/dev/WrappedPreviewPage';
 import { AppDataProvider } from './providers/AppDataProvider';
 import { useConnectionStatus } from './providers/appDataContext';
 import { ThemeProvider } from './providers/ThemeProvider';
@@ -8,6 +9,24 @@ import { hardResetApp, signalAppReady } from '@/utils/bootRecovery';
 import { Z, CLIP } from '@/constants/styles';
 import Layout from './Layout';
 import { routes } from './routes';
+
+function DevWrappedPreview() {
+  useEffect(() => { signalAppReady(); }, []);
+  return <WrappedPreviewPage />;
+}
+
+/** Dev podgląd Wrapped — bez AppDataProvider, więc bez importu Firebase. */
+function AppRoutes() {
+  const location = useLocation();
+  if (import.meta.env.DEV && location.pathname === '/dev/wrapped') {
+    return <DevWrappedPreview />;
+  }
+  return (
+    <AppDataProvider>
+      <AppShell />
+    </AppDataProvider>
+  );
+}
 
 function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry?: () => void }) {
   return (
@@ -159,9 +178,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
 function AppShell() {
   const { isLoading, slowLoading, bootTimedOut, subscriptionError, hasData, retry } = useConnectionStatus();
 
-  // Straż startu z `public/boot-guard.js` czeka na ten sygnał. Wysyłamy go po
-  // pierwszym renderze — także wtedy, gdy na ekranie jest dopiero ładowanie albo
-  // błąd połączenia, bo aplikacja jako taka wystartowała poprawnie.
+  // Straż startu z `public/boot-guard.js` czeka na ten sygnał.
   useEffect(() => { signalAppReady(); }, []);
 
   // Pełny ekran błędu tylko, gdy naprawdę nie mamy żadnych danych do pokazania.
@@ -193,9 +210,7 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <ToastProvider>
-          <AppDataProvider>
-            <AppShell />
-          </AppDataProvider>
+          <AppRoutes />
         </ToastProvider>
       </ThemeProvider>
     </BrowserRouter>

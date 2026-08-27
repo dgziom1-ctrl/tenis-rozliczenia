@@ -15,9 +15,17 @@ interface LeaderboardRowProps {
 }
 
 // ─── Leaderboard row ─────────────────────────────────────────────
+function placeAccent(place: number): { color: string; glow: string } {
+  if (place === 1) return { color: 'var(--co-gold)', glow: 'var(--glow-gold-md)' };
+  if (place === 2) return { color: 'var(--co-silver)', glow: 'none' };
+  if (place === 3) return { color: 'var(--co-bronze)', glow: 'none' };
+  return { color: 'var(--co-text)', glow: 'none' };
+}
+
 function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
   const rank = getRank(player.attendancePercentage);
   const isTop3 = place <= 3;
+  const accent = placeAccent(place);
 
   return (
     <div
@@ -40,7 +48,7 @@ function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
     >
       <span style={{
         fontFamily: 'var(--font-mono)', fontSize: '0.8125rem',
-        color: isTop3 ? 'var(--co-cyan)' : 'var(--co-text)',
+        color: isTop3 ? accent.color : 'var(--co-text)',
         width: 28, flexShrink: 0,
       }}>
         {String(place).padStart(2, '0')}.
@@ -61,9 +69,9 @@ function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
             elementem na ekranie. */}
         <span style={{
           fontFamily: 'var(--font-display)', fontSize: '1.25rem',
-          color: isTop3 ? 'var(--co-cyan)' : 'var(--co-text-hi)',
+          color: isTop3 ? accent.color : 'var(--co-text-hi)',
           minWidth: 56, textAlign: 'right',
-          textShadow: isTop3 ? 'var(--glow-cyan-md)' : 'none',
+          textShadow: isTop3 ? accent.glow : 'none',
         }}>
           {player.attendancePercentage}%
         </span>

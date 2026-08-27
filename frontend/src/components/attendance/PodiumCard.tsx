@@ -19,15 +19,12 @@ interface PlaceStyle {
 }
 
 /**
- * Podium czytało z własnej palety neonów (`#00FFFF` — nawet nie z tego samego
- * cyanu co marka, bo ten to `#00E5FF`), więc w trybie jasnym wszystkie trzy
- * miejsca zostawały jaskrawe na białym tle. Teraz jadą tokenami, a kolejność
- * niesie znaczenie medalu: akcent → neutralne srebro → brąz.
+ * Kolory medalów: złoto / srebro / brąz — nie cyan na pierwszym miejscu.
  */
 const PLACE_STYLES: Record<number, PlaceStyle> = {
-  1: { border: 'var(--co-cyan)',    glow: 'var(--glow-box-cyan)', bg: 'var(--co-tint-hi)', height: 130, label: '#1', medal: '🥇' },
-  2: { border: 'var(--co-text-hi)', glow: 'none',                 bg: 'var(--co-tint)',    height: 90,  label: '#2', medal: '🥈' },
-  3: { border: 'var(--co-amber)',   glow: 'none',                 bg: 'var(--co-amber-dim)', height: 62, label: '#3', medal: '🥉' },
+  1: { border: 'var(--co-gold)',    glow: 'var(--glow-box-gold)', bg: 'var(--co-gold-dim)',    height: 130, label: '#1', medal: '🥇' },
+  2: { border: 'var(--co-silver)',  glow: 'none',                 bg: 'var(--co-tint)',        height: 90,  label: '#2', medal: '🥈' },
+  3: { border: 'var(--co-bronze)',  glow: 'none',                 bg: 'var(--co-tint-bronze)', height: 62, label: '#3', medal: '🥉' },
 };
 
 interface PodiumCardProps {
@@ -94,7 +91,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
               <div style={{
                 ...FONT.display(TEXT.h2, TRACK.tight),
                 color: s.border, lineHeight: 1,
-                textShadow: 'var(--glow-cyan-md)',
+                textShadow: podiumEntry.place === 1 ? 'var(--glow-gold-md)' : 'none',
               }}>
                 {player.attendancePercentage}%
               </div>
@@ -124,7 +121,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
         }} />}
         <span style={{
           ...FONT.display(TEXT.h2, TRACK.wide), color: s.border,
-          textShadow: 'var(--glow-cyan-md)',
+          textShadow: podiumEntry.place === 1 ? 'var(--glow-gold-md)' : 'none',
         }}>{s.label}</span>
         {/* Etykieta remisu siedziała między kartami a podestem, więc kolumna
             z remisem rosła wyżej od pierwszego miejsca i podium wizualnie się
