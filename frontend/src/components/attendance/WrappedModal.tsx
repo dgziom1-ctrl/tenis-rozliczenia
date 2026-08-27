@@ -521,7 +521,14 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
 
   if (embedded) {
     return (
-      <div style={{ position: 'fixed', inset: 0, zIndex: Z.modal }}>
+      <div style={{
+        position: 'fixed',
+        top: 'max(16px, env(safe-area-inset-top, 0px))',
+        right: 'max(16px, env(safe-area-inset-right, 0px))',
+        bottom: 'max(16px, env(safe-area-inset-bottom, 0px))',
+        left: 'max(16px, env(safe-area-inset-left, 0px))',
+        zIndex: Z.modal,
+      }}>
         {shell}
       </div>
     );
