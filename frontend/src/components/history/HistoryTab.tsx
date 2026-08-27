@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Terminal, CalendarDays, Search, Download, ArrowUpDown } from 'lucide-react';
 import { updateWeek, deleteWeek } from '@/lib/firebase';
-import { groupHistoryByMonth } from '@/utils/sessions';
+import { groupHistoryByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
+import SeasonSelector from '../attendance/SeasonSelector';
 import { parseAmount, isValidAmount } from '@/utils/format';
 import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
@@ -37,6 +38,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const [isDeleting,   setIsDeleting]   = useState(false);
   const [pwModal,      setPwModal]      = useState<{ type: 'edit'; row: HistoryEntry } | { type: 'delete'; rowId: string } | null>(null);
   const [filterPlayer, setFilterPlayer] = useState('');
+  const [chosenSeason, setChosenSeason] = useState<number | null | undefined>(undefined);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortOrder,    setSortOrder]    = useState<'desc' | 'asc'>('desc');
   const [showAll,      setShowAll]      = useState(false);
@@ -55,12 +57,19 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     ? null
     : (editForm?.cost === '' ? 'Wpisz koszt sesji' : 'Koszt musi być liczbą >= 0');
 
-  const filteredHistory = useMemo(() => {
-    const h = !filterPlayer ? history : history.filter(s => s.presentPlayers.includes(filterPlayer));
-    return sortOrder === 'asc' ? [...h].reverse() : h;
-  }, [history, filterPlayer, sortOrder]);
+  const seasons = useMemo(() => getAvailableSeasons(history), [history]);
+  const selectedSeason = chosenSeason === undefined ? null : chosenSeason;
+  const seasonHistory = useMemo(
+    () => filterHistoryByYear(history, selectedSeason),
+    [history, selectedSeason],
+  );
 
-  useEffect(() => { setShowAll(false); }, [filterPlayer, sortOrder]);
+  const filteredHistory = useMemo(() => {
+    const h = !filterPlayer ? seasonHistory : seasonHistory.filter(s => s.presentPlayers.includes(filterPlayer));
+    return sortOrder === 'asc' ? [...h].reverse() : h;
+  }, [seasonHistory, filterPlayer, sortOrder]);
+
+  useEffect(() => { setShowAll(false); }, [filterPlayer, sortOrder, selectedSeason]);
 
   const handleExportCSV = () => {
     let url: string | undefined;
@@ -234,7 +243,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           accent="var(--co-green)"
           aside={
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
-              {history.length} REKORDÓW
+              {filteredHistory.length}{selectedSeason || filterPlayer ? ` / ${history.length}` : ''} REKORDÓW
             </span>
           }
         />
@@ -245,15 +254,19 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', lineHeight: 1.6 }}>
             {'>'} System OK
             <br />
-            {'>'} {history.length} rekordów znaleziono
+            {'>'} {filteredHistory.length}{selectedSeason || filterPlayer ? ` z ${history.length}` : ''} rekordów znaleziono
             <br />
             {'>'} Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--co-green)' }}>▮</span>
           </p>
         </div>
 
         {/* ── 3. WYKRES TRENDU ──────────────────────────────────────── */}
-        {history.length >= 2 && (
-          <AttendanceTrendChart history={history} />
+        {seasonHistory.length >= 2 && (
+          <AttendanceTrendChart history={seasonHistory} />
+        )}
+
+        {seasons.length > 1 && (
+          <SeasonSelector seasons={seasons} selected={selectedSeason} onChange={setChosenSeason} />
         )}
 
         {/* ── 4. PASEK KONTROLEK (filtr + sort + CSV) ─────────────── */}
@@ -403,6 +416,14 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', marginTop: 8 }}>
               {'>'} Dodaj pierwszą sesję w zakładce DODAJ_
+            </p>
+          </div>
+        )}
+
+        {history.length > 0 && filteredHistory.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>
+              {'>'} Brak sesji dla wybranych filtrów_
             </p>
           </div>
         )}

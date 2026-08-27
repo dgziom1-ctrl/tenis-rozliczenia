@@ -46,6 +46,36 @@ export function getAvailableSeasons(history: HistoryEntry[]): number[] {
   return [...years].sort((a, b) => b - a);
 }
 
+/**
+ * Rok, dla którego proponujemy Wrapped — albo `null`, gdy nie ma czego podsumować.
+ *
+ * Zwykle to po prostu wybrany, zakończony sezon. Ale po przełomie roku
+ * podsumowanie ma się przypomnieć samo, bo inaczej nie pokazałoby się nigdy:
+ * przy jednym sezonie w danych filtr sezonów jest ukryty, a po pierwszej sesji
+ * nowego roku domyślnym sezonem jest już ten nowy.
+ *
+ * Propozycja gaśnie sama z pierwszą sesją nowego roku — na tym samym progu,
+ * który przestawia domyślny sezon i bilans otwarcia w rozliczeniach.
+ */
+export function getWrappedSeason(
+  seasons: number[],
+  selectedSeason: number | null,
+  currentYear: number,
+): number | null {
+  if (!seasons.length) return null;
+  const latest = seasons[0];
+
+  // Wybrany sezon starszy niż najnowszy w danych — gotowe podsumowanie.
+  // Porównujemy z danymi, nie z kalendarzem: inaczej w sierpniu 2026, gdy w
+  // bazie są już sesje z „2027", Wrapped dla 2026 nigdy by się nie pokazał.
+  if (selectedSeason && selectedSeason < latest) return selectedSeason;
+
+  // 1 stycznia: w kalendarzu już nowy rok, w danych jeszcze tylko stary sezon.
+  const previous = currentYear - 1;
+  const seasonJustEnded = !seasons.includes(currentYear) && seasons.includes(previous);
+  return seasonJustEnded ? previous : null;
+}
+
 export function filterHistoryByYear(history: HistoryEntry[], year: number | null): HistoryEntry[] {
   if (!year) return history;
   const prefix = String(year);

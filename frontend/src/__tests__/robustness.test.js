@@ -678,12 +678,28 @@ describe('getPlayerAchievements — edge cases', () => {
   });
 
   it('perfekcyjny miesiąc wymaga minimum 3 sesji', () => {
-    const p = { name: 'A', attendanceCount: 2, multisportCount: 0, currentStreak: 2 };
+    const p = { name: 'A', attendanceCount: 2, currentStreak: 2 };
     const twoOfTwo = [session('w1', '2025-01-01', ['A']), session('w2', '2025-01-08', ['A'])];
     expect(getPlayerAchievements(p, twoOfTwo).map(a => a.id)).not.toContain('perfect_month');
 
     const threeOfThree = [...twoOfTwo, session('w3', '2025-01-15', ['A'])];
     expect(getPlayerAchievements(p, threeOfThree).map(a => a.id)).toContain('perfect_month');
+  });
+
+  it('kilka perfekcyjnych miesięcy daje odznaki ×5, ×10…', () => {
+    const p = { name: 'A', attendanceCount: 45, currentStreak: 0 };
+    const history = [];
+    for (let m = 1; m <= 10; m++) {
+      const month = String(m).padStart(2, '0');
+      for (let w = 0; w < 3; w++) {
+        history.push(session(`w-${m}-${w}`, `2025-${month}-${String(1 + w * 7).padStart(2, '0')}`, ['A']));
+      }
+    }
+    const ids = getPlayerAchievements(p, history).map(a => a.id);
+    expect(ids).toContain('perfect_month');
+    expect(ids).toContain('perfect_month_5');
+    expect(ids).toContain('perfect_month_10');
+    expect(ids).not.toContain('perfect_month_15');
   });
 
   it('seria liczy się z najdłuższego ciągu, nie z bieżącego', () => {

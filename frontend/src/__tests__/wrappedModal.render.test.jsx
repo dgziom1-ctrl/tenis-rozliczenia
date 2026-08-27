@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import WrappedModal from '../components/attendance/WrappedModal';
-import { WRAPPED_DEMO_STATS } from '../dev/wrappedDemoStats';
+import { WRAPPED_DEMO_STATS } from './fixtures/wrappedDemoStats';
 
 describe('WrappedModal render', () => {
   it('renders slide intro text in portal', () => {

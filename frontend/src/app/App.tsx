@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router';
-import WrappedPreviewPage from '@/dev/WrappedPreviewPage';
+import { BrowserRouter, Routes, Route } from 'react-router';
 import { AppDataProvider } from './providers/AppDataProvider';
 import { useConnectionStatus } from './providers/appDataContext';
 import { ThemeProvider } from './providers/ThemeProvider';
@@ -9,24 +8,6 @@ import { hardResetApp, signalAppReady } from '@/utils/bootRecovery';
 import { Z, CLIP } from '@/constants/styles';
 import Layout from './Layout';
 import { routes } from './routes';
-
-function DevWrappedPreview() {
-  useEffect(() => { signalAppReady(); }, []);
-  return <WrappedPreviewPage />;
-}
-
-/** Dev podgląd Wrapped — bez AppDataProvider, więc bez importu Firebase. */
-function AppRoutes() {
-  const location = useLocation();
-  if (import.meta.env.DEV && location.pathname === '/dev/wrapped') {
-    return <DevWrappedPreview />;
-  }
-  return (
-    <AppDataProvider>
-      <AppShell />
-    </AppDataProvider>
-  );
-}
 
 function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry?: () => void }) {
   return (
@@ -158,8 +139,6 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
             className="cyber-button-yellow" style={{ padding: '12px 24px', width: '100%' }}>
             ⚡ RESTART SYSTEMU
           </button>
-          {/* Ostatnia furtka, żeby nikt nie musiał szukać „wyczyść dane strony”
-              w ustawieniach przeglądarki. */}
           <button onClick={hardResetApp}
             style={{
               marginTop: 10, padding: '10px 16px', width: '100%', cursor: 'pointer',
@@ -178,18 +157,12 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
 function AppShell() {
   const { isLoading, slowLoading, bootTimedOut, subscriptionError, hasData, retry } = useConnectionStatus();
 
-  // Straż startu z `public/boot-guard.js` czeka na ten sygnał.
   useEffect(() => { signalAppReady(); }, []);
 
-  // Pełny ekran błędu tylko, gdy naprawdę nie mamy żadnych danych do pokazania.
-  // Jeśli dane już raz się załadowały, utrata połączenia nie kasuje aplikacji —
-  // pracujemy dalej na ostatnim stanie, a baner offline informuje o sytuacji.
   if (subscriptionError && !hasData) {
     return <CyberErrorScreen onRetry={retry} />;
   }
 
-  // `bootTimedOut` przepuszcza interfejs bez danych. Puste listy z banerem
-  // o braku połączenia są dużo lepsze niż ekran startowy, który nigdy nie mija.
   if (isLoading && !hasData && !bootTimedOut) {
     return <CyberLoadingScreen slow={slowLoading} onRetry={retry} />;
   }
@@ -210,7 +183,9 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <ToastProvider>
-          <AppRoutes />
+          <AppDataProvider>
+            <AppShell />
+          </AppDataProvider>
         </ToastProvider>
       </ThemeProvider>
     </BrowserRouter>

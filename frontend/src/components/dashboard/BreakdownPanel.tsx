@@ -1,8 +1,82 @@
+import { useState } from 'react';
 import { formatDate, formatAmountShort } from '@/utils/format';
 import { FONT, TEXT, TRACK } from '@/constants/styles';
 import { TerminalPanel, TerminalSectionHeader, TerminalRow, TerminalFooter } from './TerminalPanel';
-import type { DebtDisplayData } from '@/types/ui';
+import type { DebtCarryOver, DebtDisplayData } from '@/types/ui';
 import type { TransactionResult } from '@/types/domain';
+
+/**
+ * Bilans zamknięcia poprzednich sezonów jako jeden wiersz.
+ *
+ * Wypisanie wszystkich sesji od początku istnienia grupy zrobiłoby z panelu
+ * listę bez końca, a zwykłe pominięcie ich kazałoby uwierzyć, że kwota wzięła
+ * się znikąd. Dlatego jedna pozycja, którą da się rozwinąć do pełnej listy.
+ */
+function CarryOverSection({ carryOver }: { carryOver: DebtCarryOver }) {
+  const [open, setOpen] = useState(false);
+
+  const { amount, fromYear, toYear } = carryOver;
+  const years = fromYear === toYear ? String(fromYear) : `${fromYear}–${toYear}`;
+  const detailCount = carryOver.sessions.length + carryOver.payments.length;
+
+  const owed = amount > 0.01;
+  const overpaid = amount < -0.01;
+  const label = owed ? `Zaległość z ${years}` : overpaid ? `Nadpłata z ${years}` : `Sezon ${years} rozliczony`;
+  const color = owed ? 'var(--co-rose)' : overpaid ? 'var(--co-cyan)' : 'var(--co-green)';
+  const value = owed
+    ? `-${formatAmountShort(amount)} ZŁ`
+    : overpaid
+      ? `+${formatAmountShort(Math.abs(amount))} ZŁ`
+      : '✓';
+
+  return (
+    <>
+      <TerminalSectionHeader label="Poprzednie sezony" />
+      <TerminalRow highlight={owed ? 'var(--co-tint-rose)' : undefined}>
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          aria-expanded={open}
+          className="icon-btn"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            minHeight: 32, padding: '2px 0', flex: 1, textAlign: 'left',
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            ...FONT.mono(TEXT.small), color: 'var(--co-dim)',
+          }}
+        >
+          <span aria-hidden="true" style={{ color: 'var(--co-green)' }}>{open ? '−' : '+'}</span>
+          {label}
+          <span style={{ ...FONT.monoMicro }}>({detailCount})</span>
+        </button>
+        <span style={{ ...FONT.mono(TEXT.small), color }}>{value}</span>
+      </TerminalRow>
+
+      {open && carryOver.sessions.map(item => (
+        <TerminalRow key={item.sessionId}>
+          <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', paddingLeft: 14 }}>
+            {formatDate(item.date)}
+          </span>
+          <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-rose)' }}>
+            -{formatAmountShort(item.amount)} ZŁ
+          </span>
+        </TerminalRow>
+      ))}
+      {open && carryOver.payments.map(item => (
+        <TerminalRow key={item.id}>
+          <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', paddingLeft: 14 }}>
+            {item.id === '__legacy_settled__'
+              ? (item.date ? `Rozliczono ${formatDate(item.date)}` : 'Rozliczono')
+              : `Wpłata ${formatDate(item.date)}`}
+          </span>
+          <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-cyan)' }}>
+            +{formatAmountShort(item.amount)} ZŁ
+          </span>
+        </TerminalRow>
+      ))}
+    </>
+  );
+}
 
 interface BreakdownPanelProps {
   playerName: string;
@@ -14,7 +88,9 @@ interface BreakdownPanelProps {
 }
 
 export default function BreakdownPanel({ playerName, open, onToggle, breakdown, adminMode, onRemovePayment }: BreakdownPanelProps) {
-  const sessionCount = breakdown?.sessions?.length ?? 0;
+  // Licznik obejmuje też sesje zwinięte do bilansu otwarcia — inaczej po
+  // przełomie roku przycisk obiecywałby dwie sesje, a saldo liczyło pięćdziesiąt.
+  const sessionCount = (breakdown?.sessions?.length ?? 0) + (breakdown?.carryOver?.sessions.length ?? 0);
   const toggleLabel  = open
     ? 'Zwiń szczegóły'
     : sessionCount > 0
@@ -42,10 +118,12 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
       toggleLabel={toggleLabel}
       footer={<TerminalFooter label="SALDO" value={balanceLabel} valueColor={balanceColor} />}
     >
+      {breakdown.carryOver && <CarryOverSection carryOver={breakdown.carryOver} />}
+
       {/* Sessions */}
       {breakdown.sessions.length > 0 ? (
         <>
-          <TerminalSectionHeader label="Sesje" />
+          <TerminalSectionHeader label={breakdown.carryOver ? 'Sesje — bieżący sezon' : 'Sesje'} />
           {breakdown.sessions.map((item, idx) => (
             <TerminalRow key={idx}>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)' }}>{formatDate(item.date)}</span>
@@ -63,7 +141,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
             </TerminalRow>
           )}
         </>
-      ) : (
+      ) : !breakdown.carryOver && (
         <TerminalRow>
           <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)' }}>Brak niezapłaconych sesji</span>
           <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-green)' }}>✓</span>
@@ -73,7 +151,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
       {/* Payments */}
       {breakdown.payments.length > 0 && (
         <>
-          <TerminalSectionHeader label="Wpłaty" />
+          <TerminalSectionHeader label={breakdown.carryOver ? 'Wpłaty — bieżący sezon' : 'Wpłaty'} />
           {breakdown.payments.map((item, idx) => (
             <TerminalRow key={idx}>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)' }}>

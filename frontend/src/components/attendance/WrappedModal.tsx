@@ -369,14 +369,13 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
 
             {/* Stats grid */}
             <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
+              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
               gap: 10, marginBottom: 28,
             }}>
               {[
                 { label: 'SESJE', value: `${ch.attended}`, color: 'var(--co-cyan)' },
                 { label: 'FREKWENCJA', value: `${ch.percentage}%`, color: 'var(--co-green)' },
                 { label: 'NAJDŁUŻSZA SERIA', value: `${ch.longestStreak}`, color: 'var(--co-pink)' },
-                { label: 'SESJE MULTISPORT', value: `${ch.multiSessions}`, color: 'var(--co-text-hi)' },
               ].map(s => (
                 <div key={s.label} style={{
                   padding: 'clamp(8px, 2vw, 14px)',
@@ -521,7 +520,14 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
 
   if (embedded) {
     return (
-      <div style={{ position: 'fixed', inset: 0, zIndex: Z.modal }}>
+      <div style={{
+        position: 'fixed',
+        top: 'max(16px, env(safe-area-inset-top, 0px))',
+        right: 'max(16px, env(safe-area-inset-right, 0px))',
+        bottom: 'max(16px, env(safe-area-inset-bottom, 0px))',
+        left: 'max(16px, env(safe-area-inset-left, 0px))',
+        zIndex: Z.modal,
+      }}>
         {shell}
       </div>
     );

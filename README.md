@@ -18,12 +18,12 @@
 - Olympic podium (🥇🥈🥉) with ex-aequo support
 - Full leaderboard sorted by attendance percentage
 - Player ranks: **LEGENDA / MISTRZ / WETERAN / STAŁY / GOŚĆ / DUCH**
-- Special title badges: 👑 Król frekwencji · 🔥 Streak · ⚡ Multi King · 💀 Rzadki gość
+- Special title badges: 👑 Król frekwencji · 🔥 Streak · 💀 Rzadki gość
 - Active streak counter shown on each leaderboard row
 - **Ranking history chart** — each player's position plotted over time
 - **Season selector** — filter all stats by calendar year
 - **Per-player modal** — full session drill-down, rank progression bar, and earned achievements
-- Achievements: Debiut · Perfekcyjny miesiąc · 10/25/50 sesji · Multisport x5 · Streak milestones (5/10/20/30/50/100)
+- Achievements: Debiut · Perfekcyjny miesiąc (×1, ×5, ×10…) · 10/25/50 sesji · Streak milestones (5/10/20/30/50/100)
 - Monthly attendance table
 - **Yearly Wrapped** — Spotify-style end-of-year summary for past seasons
 

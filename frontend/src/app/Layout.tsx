@@ -133,9 +133,6 @@ export default function Layout() {
           onToggleTheme={toggleTheme}
         />
         <Navigation activeTab={activeTab} setActiveTab={switchTab} />
-        {/* Także przy pozornie sprawnym połączeniu: baza potrafi zgłaszać
-            „połączono”, a mimo to nie przysłać żadnych danych. Bez tego
-            użytkownik zostaje z pustymi listami, bez wyjaśnienia i bez przycisku. */}
         {(!isConnected || (bootTimedOut && !hasData)) && (
           <OfflineBanner hasData={hasData} onRetry={retry} />
         )}

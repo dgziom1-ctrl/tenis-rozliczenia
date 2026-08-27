@@ -14,13 +14,25 @@ import type { ExtendedPlayerStats, HistoryEntry } from '@/types/ui';
 interface PlayerSessionModalProps {
   player: ExtendedPlayerStats | null;
   history: HistoryEntry[];
+  /**
+   * Dorobek liczony przez całą historię — odznaki i ranga nie mogą zależeć od
+   * wybranego sezonu, bo po przełączeniu na styczniowy filtr wszystkim
+   * znikałyby „10/25/50 sesji" i wszystkie serie.
+   */
+  lifetime?: ExtendedPlayerStats | null;
+  lifetimeHistory?: HistoryEntry[];
+  /** Rok wybranego sezonu albo `null`, gdy oglądamy wszystkie lata naraz. */
+  seasonLabel?: string | null;
   onClose: () => void;
 }
 
 // ─── Player Session Drill-Down Modal ─────────────────────────────
-export default function PlayerSessionModal({ player, history, onClose }: PlayerSessionModalProps) {
+export default function PlayerSessionModal({ player, history, lifetime, lifetimeHistory, seasonLabel, onClose }: PlayerSessionModalProps) {
   const titleId = useId();
   const [showMissed, setShowMissed] = useState(false);
+
+  const career = lifetime ?? player;
+  const careerHistory = lifetimeHistory ?? history;
 
   const { sessions, missedSessions } = useMemo(() => {
     if (!player) return { sessions: [], missedSessions: [] };
@@ -37,9 +49,9 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
   const currentStreak = player?.currentStreak || 0;
 
   const achievements = useMemo(() => {
-    if (!player) return [];
-    return getPlayerAchievements(player, history);
-  }, [player, history]);
+    if (!career) return [];
+    return getPlayerAchievements(career, careerHistory);
+  }, [career, careerHistory]);
 
   // Domyślnie tylko sesje z obecnością. Nieobecności są na żądanie, bo przy
   // długiej historii dominowały widok i mnożyły węzły w DOM-ie.
@@ -74,7 +86,7 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
               {player.name.toUpperCase()}
             </p>
             <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: TRACK.normal }}>
-              {player.attendanceCount}/{player.eligibleWeeks} sesji · {player.attendancePercentage}% frekwencja
+              {seasonLabel ? `${seasonLabel} · ` : ''}{player.attendanceCount}/{player.eligibleWeeks} sesji · {player.attendancePercentage}% frekwencja
             </p>
           </div>
           <button onClick={onClose} aria-label="Zamknij" className="modal-close-btn icon-btn" style={{
@@ -111,7 +123,10 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
 
         {/* Rank progression */}
         {(() => {
-          const pct = player.attendancePercentage;
+          // Ranga idzie z całej kariery, nie z wybranego sezonu: w styczniu
+          // procent sezonowy to 100 albo 0 po jednej sesji, więc każdy byłby
+          // albo mistrzem, albo nikim.
+          const pct = career?.attendancePercentage ?? 0;
           const currentRank = getRank(pct);
           const rankIdx = RANKS.findIndex(r => r.name === currentRank.name);
           const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
@@ -120,6 +135,11 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <span style={{ ...FONT.display(TEXT.base, TRACK.tight), color: currentRank.hex }}>
                   {currentRank.emoji} {currentRank.name}
+                  {seasonLabel && (
+                    <span style={{ ...FONT.monoMicro, color: 'var(--co-dim)', marginLeft: 6 }}>
+                      wszystkie sezony
+                    </span>
+                  )}
                 </span>
                 {nextRank ? (
                   <span style={{ ...FONT.monoSmall }}>
@@ -155,7 +175,7 @@ export default function PlayerSessionModal({ player, history, onClose }: PlayerS
         {achievements.length > 0 && (
             <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15` }}>
               <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>
-                // osiągnięcia — {achievements.length}
+                // osiągnięcia{seasonLabel ? ' · wszystkie sezony' : ''} — {achievements.length}
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {achievements.map(a => (

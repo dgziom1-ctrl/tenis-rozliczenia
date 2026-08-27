@@ -17,7 +17,6 @@ export interface PlayerStats {
 export interface ExtendedPlayerStats extends PlayerStats {
   attendancePercentage: number;
   currentStreak: number;
-  multisportCount: number;
 }
 
 export interface RankedPlayer extends ExtendedPlayerStats {
@@ -66,9 +65,29 @@ export interface DebtDisplayPayment {
   date: string;
 }
 
-export interface DebtDisplayData {
+/**
+ * Zwinięte rozliczenie sezonów sprzed bieżącego.
+ *
+ * `amount` to saldo zamknięcia tamtych lat: koszty minus wpłaty. Dodatnie
+ * znaczy zaległość, ujemne nadpłatę, zero — rok zamknięty na czysto.
+ */
+export interface DebtCarryOver {
+  amount: number;
+  fromYear: number;
+  toYear: number;
   sessions: DebtSession[];
   payments: DebtDisplayPayment[];
+  totalSessions: number;
+  totalPaid: number;
+}
+
+export interface DebtDisplayData {
+  /** Sesje bieżącego sezonu. Starsze siedzą w `carryOver`. */
+  sessions: DebtSession[];
+  /** Wpłaty bieżącego sezonu. Starsze siedzą w `carryOver`. */
+  payments: DebtDisplayPayment[];
+  /** `null`, gdy cała historia gracza mieści się w bieżącym sezonie. */
+  carryOver: DebtCarryOver | null;
   totalSessions: number;
   totalPaid: number;
   balance: number;
@@ -138,7 +157,6 @@ export interface WrappedPlayerStats {
   missed: number;
   percentage: number;
   longestStreak: number;
-  multiSessions: number;
   place?: number;
 }
 

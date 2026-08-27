@@ -18,18 +18,6 @@ function currentStreakOf(name: string, history: HistoryEntry[]): number {
   return streak;
 }
 
-/**
- * Ile razy gracz zagrał na karcie Multisport.
- *
- * Liczymy tylko sesje, na których faktycznie był — sama obecność imienia na
- * liście kart bez obecności to ślad po niespójnym rekordzie, nie rozegrana gra.
- */
-function multisportCountOf(name: string, history: HistoryEntry[]): number {
-  return history.filter(s =>
-    s.presentPlayers.includes(name) && s.multisportPlayers.includes(name),
-  ).length;
-}
-
 export function calculatePlayerStats(
   players: PlayerStats[],
   history: HistoryEntry[],
@@ -44,7 +32,6 @@ export function calculatePlayerStats(
     // ani jednej gry, miałby 50% zamiast 100%.
     attendancePercentage: percentage(player.attendanceCount, player.eligibleWeeks ?? totalWeeks),
     currentStreak: currentStreakOf(player.name, history),
-    multisportCount: multisportCountOf(player.name, history),
   }));
 }
 
@@ -62,9 +49,17 @@ export function assignRankingPlaces(sortedPlayers: ExtendedPlayerStats[]): Ranke
   });
 }
 
+/**
+ * Statystyki w obrębie jednego sezonu.
+ *
+ * `fullHistory` służy tylko do serii: „ile sesji z rzędu" jest z natury ciągłe
+ * i ucinanie go 1 stycznia zerowałoby serię komuś, kto nie opuścił ani jednej
+ * gry przez przerwę świąteczną. Frekwencja i liczba sesji zostają sezonowe.
+ */
 export function calculateSeasonPlayerStats(
   players: PlayerStats[],
   seasonHistory: HistoryEntry[],
+  fullHistory: HistoryEntry[] = seasonHistory,
 ): ExtendedPlayerStats[] {
   if (!players || !seasonHistory) return [];
 
@@ -81,8 +76,7 @@ export function calculateSeasonPlayerStats(
       attendanceCount,
       eligibleWeeks: eligible.length,
       attendancePercentage: percentage(attendanceCount, eligible.length),
-      currentStreak: currentStreakOf(player.name, eligible),
-      multisportCount: multisportCountOf(player.name, eligible),
+      currentStreak: currentStreakOf(player.name, fullHistory),
     };
   }).filter(p => p.attendanceCount > 0);
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { SOUND_TYPES } from '@/constants';
 import { calculatePlayerStats, assignRankingPlaces, calculateSeasonPlayerStats } from '@/utils/rankings';
-import { groupSessionsByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
+import { groupSessionsByMonth, getAvailableSeasons, filterHistoryByYear, getWrappedSeason } from '@/utils/sessions';
 import { computeWrappedStats } from '@/utils/wrapped';
 import { Film } from 'lucide-react';
 import Leaderboard from './Leaderboard';
@@ -25,7 +25,10 @@ interface AttendanceTabProps {
 export default function AttendanceTab({ players, history, summary, playSound, initialPlayer, onInitialPlayerConsumed }: AttendanceTabProps) {
   const totalWeeks = summary?.totalWeeks || 0;
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
-  const [selectedSeason, setSelectedSeason] = useState<number | null>(null); // null = all time
+  // `undefined` = użytkownik jeszcze nie wybierał, więc obowiązuje domyślny sezon.
+  // Zwykły stan startowy tu nie wystarcza: przy pierwszym renderze historia bywa
+  // pusta (dane dochodzą z bazy), a wtedy wybór zamarzłby na „wszystkie".
+  const [chosenSeason, setChosenSeason] = useState<number | null | undefined>(undefined);
   const [wrappedYear, setWrappedYear] = useState<number | null>(null);
 
   // Auto-otwórz modal gracza gdy przyszło powiadomienie push o serii
@@ -38,19 +41,37 @@ export default function AttendanceTab({ players, history, summary, playSound, in
   const seasons = useMemo(() => getAvailableSeasons(history), [history]);
   const currentYear = new Date().getFullYear();
 
+  // Nowy rok ma zaczynać nową rywalizację, więc domyślnie pokazujemy bieżący
+  // sezon zamiast sumy wszystkich lat — inaczej w styczniu ranking to zamrożona
+  // tabela z grudnia, której jedna nowa sesja w mianowniku pięćdziesięciu nie ruszy.
+  //
+  // „Bieżący" bierzemy z danych (najnowszy rok z sesjami), nie z zegara: 1 stycznia,
+  // zanim padnie pierwsza sesja, nie ma jeszcze czego pokazywać. Przy jednym sezonie
+  // w historii filtr jest ukryty, więc domyślnie zostaje widok pełny.
+  const defaultSeason = seasons.length > 1 ? seasons[0] : null;
+  const selectedSeason = chosenSeason === undefined ? defaultSeason : chosenSeason;
+
   // Filter history by selected season
   const seasonHistory = useMemo(
     () => selectedSeason ? filterHistoryByYear(history, selectedSeason) : history,
     [history, selectedSeason]
   );
 
+  // Dorobek liczony przez całą historię. Ranking jest sezonowy, ale odznaki,
+  // ranga i seria nie mogą znikać po przełączeniu filtra — „50 sesji" znaczy
+  // 50 sesji w życiu, nie 50 w tym roku.
+  const lifetimeStats = useMemo(
+    () => calculatePlayerStats(players, history, totalWeeks),
+    [players, history, totalWeeks],
+  );
+
   // Use season-aware stats when filtering, global stats for all-time
   const stats = useMemo(() => {
     if (selectedSeason) {
-      return calculateSeasonPlayerStats(players, seasonHistory);
+      return calculateSeasonPlayerStats(players, seasonHistory, history);
     }
-    return calculatePlayerStats(players, history, totalWeeks);
-  }, [players, history, seasonHistory, totalWeeks, selectedSeason]);
+    return lifetimeStats;
+  }, [players, history, seasonHistory, lifetimeStats, selectedSeason]);
 
   const ranked = useMemo(() => {
     const sorted = [...stats].sort((a, b) => {
@@ -85,11 +106,21 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     return ranked.find(p => p.name === selectedPlayer);
   }, [selectedPlayer, ranked]);
 
+  const selectedLifetime = useMemo(() => {
+    if (!selectedPlayer) return null;
+    return lifetimeStats.find(p => p.name === selectedPlayer) ?? null;
+  }, [selectedPlayer, lifetimeStats]);
+
   // Wrapped stats for the selected past year
   const wrappedStats = useMemo(() => {
     if (!wrappedYear) return null;
     return computeWrappedStats(history, players, wrappedYear);
   }, [wrappedYear, history, players]);
+
+  const wrappedSeason = useMemo(
+    () => getWrappedSeason(seasons, selectedSeason, currentYear),
+    [seasons, selectedSeason, currentYear],
+  );
 
   const handleCloseModal = useCallback(() => setSelectedPlayer(null), []);
   const handleCloseWrapped = useCallback(() => setWrappedYear(null), []);
@@ -100,6 +131,9 @@ export default function AttendanceTab({ players, history, summary, playSound, in
       <PlayerSessionModal
         player={selectedStats}
         history={seasonHistory}
+        lifetime={selectedLifetime}
+        lifetimeHistory={history}
+        seasonLabel={selectedSeason ? String(selectedSeason) : null}
         onClose={handleCloseModal}
       />
     )}
@@ -107,15 +141,16 @@ export default function AttendanceTab({ players, history, summary, playSound, in
       <WrappedModal stats={wrappedStats} onClose={handleCloseWrapped} />
     )}
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'slide-in-up 0.3s ease-out' }}>
-      <SeasonSelector seasons={seasons} selected={selectedSeason} onChange={setSelectedSeason} />
+      <SeasonSelector seasons={seasons} selected={selectedSeason} onChange={setChosenSeason} />
 
-      {/* Wrapped button — show when a past season is selected.
+      {/* Wrapped button — wybrany zakończony sezon albo rok, który właśnie się
+          skończył.
           Był jedynym magentowym elementem na stronie, jedynym przyciskiem na
           całą szerokość i jedynym z emoji w etykiecie — czytał się jak wklejona
           reklama, nie jak część interfejsu. Teraz zwykły przycisk akcji. */}
-      {selectedSeason && selectedSeason < currentYear && (
+      {wrappedSeason && (
         <button
-          onClick={() => setWrappedYear(selectedSeason)}
+          onClick={() => setWrappedYear(wrappedSeason)}
           className="cyber-button-outline"
           style={{
             alignSelf: 'flex-start',
@@ -124,7 +159,7 @@ export default function AttendanceTab({ players, history, summary, playSound, in
           }}
         >
           <Film size={14} aria-hidden="true" />
-          Podsumowanie roku {selectedSeason}
+          Podsumowanie roku {wrappedSeason}
         </button>
       )}
 

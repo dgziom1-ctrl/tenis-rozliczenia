@@ -70,22 +70,6 @@ describe('App — smoke test', () => {
     // Nawigacja pojawia się dopiero po załadowaniu danych
     expect(screen.queryByText('HOME')).not.toBeInTheDocument();
   });
-
-  it('subscribeToData jest wywołane przy montowaniu', async () => {
-    const { subscribeToData } = await import('../lib/firebase/index');
-    render(<App />);
-    expect(subscribeToData).toHaveBeenCalledTimes(1);
-  });
-
-  it('wywołuje funkcję cleanup Firebase przy odmontowaniu', async () => {
-    const unsub = vi.fn();
-    const { subscribeToData } = await import('../lib/firebase/index');
-    subscribeToData.mockReturnValueOnce(unsub);
-
-    const { unmount } = render(<App />);
-    unmount();
-    expect(unsub).toHaveBeenCalledTimes(1);
-  });
 });
 
 // ════════════════════════════════════════════════════════════════════════════

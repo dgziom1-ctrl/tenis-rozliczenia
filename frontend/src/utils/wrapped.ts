@@ -24,15 +24,12 @@ export function computeWrappedStats(
       else cur = 0;
     }
 
-    const multiSessions = attended.filter(s => s.multisportPlayers.includes(name)).length;
-
     return {
       name,
       attended: attended.length,
       missed,
       percentage: totalSessions > 0 ? Math.round((attended.length / totalSessions) * 100) : 0,
       longestStreak: maxStreak,
-      multiSessions,
     };
   }).filter(p => p.attended > 0);
 

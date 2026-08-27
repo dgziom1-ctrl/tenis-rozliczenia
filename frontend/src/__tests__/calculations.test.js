@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { roundToTwoDecimals } from '../utils/money';
 import { calculateDebt, buildDebtDisplayData } from '../utils/debt';
-import { calculatePlayerStats, assignRankingPlaces } from '../utils/rankings';
-import { groupSessionsByMonth, groupHistoryByMonth } from '../utils/sessions';
+import { calculatePlayerStats, assignRankingPlaces, calculateSeasonPlayerStats } from '../utils/rankings';
+import { groupSessionsByMonth, groupHistoryByMonth, getWrappedSeason } from '../utils/sessions';
 
 // ─── roundToTwoDecimals ────────────────────────────────────────────────────────
 
@@ -96,6 +96,146 @@ describe('buildDebtDisplayData', () => {
     expect(data.payments).toEqual([]);
     expect(data.totalPaid).toBe(0);
   });
+
+  it('bez starszych sezonów nie ma bilansu otwarcia', () => {
+    expect(buildDebtDisplayData(alice, history, {}).carryOver).toBeNull();
+  });
+});
+
+// ─── buildDebtDisplayData — przełom sezonu ────────────────────────────────────
+
+describe('buildDebtDisplayData na przełomie roku', () => {
+  // history jest od najnowszej sesji, tak jak zwraca buildHistory
+  const history = [
+    { id: 'n1', datePlayed: '2027-01-08', sport: 'pingpong', totalCost: 40, costPerPerson: 40, presentPlayers: ['Alice'], multisportPlayers: [] },
+    { id: 'o2', datePlayed: '2026-12-18', sport: 'pingpong', totalCost: 30, costPerPerson: 30, presentPlayers: ['Alice'], multisportPlayers: [] },
+    { id: 'o1', datePlayed: '2026-12-11', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'], multisportPlayers: [] },
+  ];
+  const alice = { name: 'Alice', attendanceCount: 3, currentDebt: 90, eligibleWeeks: 3, joinDate: null };
+
+  it('zwija sesje poprzedniego sezonu do jednej kwoty', () => {
+    const data = buildDebtDisplayData(alice, history, {});
+    expect(data.sessions.map(s => s.sessionId)).toEqual(['n1']);
+    expect(data.carryOver.sessions.map(s => s.sessionId)).toEqual(['o1', 'o2']);
+    expect(data.carryOver.amount).toBe(50);
+    expect(data.carryOver.fromYear).toBe(2026);
+    expect(data.carryOver.toYear).toBe(2026);
+  });
+
+  it('saldo zostaje ciągłe — kwota otwarcia plus sezon daje to samo co przedtem', () => {
+    const data = buildDebtDisplayData(alice, history, {});
+    expect(data.carryOver.amount + data.totalSessions - data.totalPaid).toBe(data.balance);
+    expect(data.balance).toBe(90);
+  });
+
+  it('wpłaty rozdziela po dacie: stare do otwarcia, nowe do sezonu', () => {
+    const payments = {
+      Alice: [
+        { id: 'p1', amount: 20, date: '2026-12-20' },
+        { id: 'p2', amount: 15, date: '2027-01-09' },
+      ],
+    };
+    const data = buildDebtDisplayData(alice, history, payments);
+    expect(data.carryOver.amount).toBe(30);
+    expect(data.payments.map(p => p.id)).toEqual(['p2']);
+    expect(data.totalPaid).toBe(15);
+    expect(data.balance).toBe(55);
+  });
+
+  it('zamknięty na czysto rok daje bilans otwarcia zero, ale wciąż widoczny', () => {
+    const payments = { Alice: [{ id: 'p1', amount: 50, date: '2026-12-30' }] };
+    const data = buildDebtDisplayData(alice, history, payments);
+    expect(data.carryOver.amount).toBe(0);
+    expect(data.balance).toBe(40);
+  });
+
+  it('nadpłata z poprzedniego roku wchodzi jako kwota ujemna', () => {
+    const payments = { Alice: [{ id: 'p1', amount: 70, date: '2026-12-30' }] };
+    const data = buildDebtDisplayData(alice, history, payments);
+    expect(data.carryOver.amount).toBe(-20);
+    expect(data.balance).toBe(20);
+  });
+
+  it('dopóki nie ma sesji z nowego roku, nic się nie zwija', () => {
+    const onlyOld = history.slice(1);
+    expect(buildDebtDisplayData(alice, onlyOld, {}).carryOver).toBeNull();
+  });
+
+  it('kilka starszych lat opisuje zakres, nie pojedynczy rok', () => {
+    const longer = [
+      ...history,
+      { id: 'x1', datePlayed: '2025-11-05', sport: 'pingpong', totalCost: 10, costPerPerson: 10, presentPlayers: ['Alice'], multisportPlayers: [] },
+    ];
+    const carry = buildDebtDisplayData(alice, longer, {}).carryOver;
+    expect(carry.fromYear).toBe(2025);
+    expect(carry.toYear).toBe(2026);
+    expect(carry.amount).toBe(60);
+  });
+});
+
+// ─── getWrappedSeason ─────────────────────────────────────────────────────────
+
+describe('getWrappedSeason', () => {
+  it('w trakcie sezonu nie proponuje niczego', () => {
+    expect(getWrappedSeason([2026], null, 2026)).toBeNull();
+    expect(getWrappedSeason([2026, 2025], 2026, 2026)).toBeNull();
+  });
+
+  it('po przełomie roku sam proponuje miniony sezon, choć filtr jest ukryty', () => {
+    expect(getWrappedSeason([2026], null, 2027)).toBe(2026);
+  });
+
+  it('pierwsza sesja nowego roku wygasza propozycję', () => {
+    expect(getWrappedSeason([2027, 2026], 2027, 2027)).toBeNull();
+  });
+
+  it('wybrany starszy sezon niż najnowszy w danych dostaje Wrapped', () => {
+    expect(getWrappedSeason([2027, 2026], 2026, 2026)).toBe(2026);
+  });
+
+  it('wybrany zakończony sezon wygrywa z propozycją', () => {
+    expect(getWrappedSeason([2027, 2026, 2025], 2025, 2027)).toBe(2025);
+  });
+
+  it('nie proponuje roku, w którym nikt nie grał', () => {
+    expect(getWrappedSeason([2025], null, 2027)).toBeNull();
+    expect(getWrappedSeason([], null, 2027)).toBeNull();
+  });
+});
+
+// ─── calculateSeasonPlayerStats ───────────────────────────────────────────────
+
+describe('calculateSeasonPlayerStats na przełomie roku', () => {
+  const fullHistory = [
+    { id: 'n2', datePlayed: '2027-01-15', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'],        multisportPlayers: [] },
+    { id: 'n1', datePlayed: '2027-01-08', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice', 'Bob'], multisportPlayers: [] },
+    { id: 'o2', datePlayed: '2026-12-18', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'],        multisportPlayers: [] },
+    { id: 'o1', datePlayed: '2026-12-11', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'],        multisportPlayers: [] },
+  ];
+  const seasonHistory = fullHistory.filter(s => s.datePlayed.startsWith('2027'));
+  const players = [
+    { name: 'Alice', attendanceCount: 4, currentDebt: 0, eligibleWeeks: 4, joinDate: null },
+    { name: 'Bob',   attendanceCount: 1, currentDebt: 0, eligibleWeeks: 4, joinDate: null },
+  ];
+
+  const statsOf = (name, stats) => stats.find(p => p.name === name);
+
+  it('frekwencja liczy się tylko z sezonu', () => {
+    const stats = calculateSeasonPlayerStats(players, seasonHistory, fullHistory);
+    expect(statsOf('Alice', stats).attendanceCount).toBe(2);
+    expect(statsOf('Alice', stats).eligibleWeeks).toBe(2);
+    expect(statsOf('Bob', stats).attendancePercentage).toBe(50);
+  });
+
+  it('seria przechodzi przez granicę roku, nie zeruje się 1 stycznia', () => {
+    const stats = calculateSeasonPlayerStats(players, seasonHistory, fullHistory);
+    expect(statsOf('Alice', stats).currentStreak).toBe(4);
+  });
+
+  it('bez pełnej historii seria zostaje w obrębie sezonu', () => {
+    const stats = calculateSeasonPlayerStats(players, seasonHistory);
+    expect(statsOf('Alice', stats).currentStreak).toBe(2);
+  });
 });
 
 // ─── calculatePlayerStats ─────────────────────────────────────────────────────
@@ -124,12 +264,6 @@ describe('calculatePlayerStats', () => {
     expect(alice.currentStreak).toBe(3); // present in all 3 most recent
     const bob = stats.find(p => p.name === 'Bob');
     expect(bob.currentStreak).toBe(1);   // present only in w3 (most recent)
-  });
-
-  it('counts multisport appearances', () => {
-    const stats = calculatePlayerStats(players, history, 3);
-    const alice = stats.find(p => p.name === 'Alice');
-    expect(alice.multisportCount).toBe(1); // only w2
   });
 
   it('handles empty history', () => {
