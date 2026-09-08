@@ -1,17 +1,22 @@
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
+import type { MouseEvent } from 'react';
 import { getPlayerColor } from '@/constants/colors';
-import { getRank, ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '@/constants';
+import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, SOUND_TYPES, SPORT_EMOJI, SPORT_LABEL } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
 import { formatAmountShort } from '@/utils/format';
 import { makeId } from '@/utils/id';
+import { RARITY_CARD_CLASS, RARITY_FOIL_CLASS, RARITY_LABEL } from '@/utils/playerCard';
 import { usePaymentUndo } from '@/hooks/usePaymentUndo';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import BreakdownPanel from './BreakdownPanel';
 import PaymentModal, { type PaymentModalType } from './PaymentModal';
 import UndoBar from '../common/UndoBar';
 import TreasurerPanel from './TreasurerPanel';
-import type { DebtDisplayData, HistoryEntry, PlayerStats } from '@/types/ui';
+import ConfettiBurst from '../common/ConfettiBurst';
+import StreakBadge from '../attendance/StreakBadge';
+import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerStats, SoundType } from '@/types/ui';
 import type { AddPaymentResult, TransactionResult } from '@/types/domain';
+import type { StyleWithVars } from '@/types/css';
 import { useAnimatedValue } from './useAnimatedValue';
 import { Barcode } from './Barcode';
 import { CornerBrackets } from './CornerBrackets';
@@ -22,6 +27,7 @@ interface PlayerCardProps {
   player: PlayerStats;
   totalWeeks: number;
   history: HistoryEntry[];
+  meta: PlayerCardMeta;
   openDetails: boolean;
   onToggleDetails: (playerName: string) => void;
   breakdown: DebtDisplayData | null;
@@ -29,27 +35,28 @@ interface PlayerCardProps {
   onRemovePayment: (playerName: string, paymentId: string) => Promise<TransactionResult>;
   onPin: (playerName: string) => void;
   onUnpin: () => void;
+  playSound: (type: SoundType) => void;
   playerIndex?: number;
   /** Podawane tylko dla skarbnika — zasila panel „kto ile winien”. */
   allPlayers?: PlayerStats[];
 }
 
-// ── Main Component ───────────────────────────────────────────────
 function PlayerCard({
-  player, totalWeeks, history,
+  player, totalWeeks, history, meta,
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment, onPin, onUnpin,
+  playSound,
   playerIndex = 0,
   allPlayers,
 }: PlayerCardProps) {
   const isMobile = useIsMobile();
   const isOrganizer = player.name === ORGANIZER_NAME;
   const debt        = player.currentDebt;
-  const isPending   = debt > SETTLED_THRESHOLD;    // "Do rozliczenia" – neutralny
+  const isPending   = debt > SETTLED_THRESHOLD;
   const hasCredit   = debt < -SETTLED_THRESHOLD;
   const isSettled   = !isPending && !hasCredit;
-  const pct         = totalWeeks > 0 ? Math.round((player.attendanceCount / totalWeeks) * 100) : 0;
-  const rank        = getRank(pct);
+  const pct         = meta.attendancePercentage;
+  const rank        = meta.rank;
   const c           = getPlayerColor(player.name, playerIndex);
 
   const [modal,     setModal]     = useState<PaymentModalType | null>(null);
@@ -58,6 +65,9 @@ function PlayerCard({
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [adminMode, setAdminMode] = useState(false);
   const [flash,     setFlash]     = useState(false);
+  const [justCleared, setJustCleared] = useState(false);
+  const [showBurst, setShowBurst] = useState(false);
+  const [foil, setFoil] = useState({ x: 50, y: 22 });
 
   const clickCount = useRef(0);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -75,6 +85,12 @@ function PlayerCard({
     const t = setTimeout(() => setFlash(false), 750);
     return () => clearTimeout(t);
   }, [debt]);
+
+  useEffect(() => {
+    if (!justCleared) return undefined;
+    const t = setTimeout(() => setJustCleared(false), 2800);
+    return () => clearTimeout(t);
+  }, [justCleared]);
 
   const { lastPayment, secondsLeft, progressPct, startPaymentUndo, handleUndoPayment } =
     usePaymentUndo({ playerName: player.name, onPin, onUnpin, onRemovePayment });
@@ -95,14 +111,9 @@ function PlayerCard({
   }, []);
 
   const savePayment = useCallback(async (amount: number) => {
-    // `isSaving` to stan, więc dwa szybkie kliknięcia w tym samym ticku
-    // zdążyłyby wysłać dwie wpłaty. Ref blokuje je natychmiast.
     if (savingRef.current) return;
     savingRef.current = true;
 
-    // Jedno id na całą próbę wpłaty: jeśli pierwszy zapis się nie powiedzie
-    // (albo utknie), ponowienie użyje tego samego klucza i nie policzy
-    // wpłaty drugi raz.
     const paymentId = pendingPaymentIdRef.current ?? makeId();
     pendingPaymentIdRef.current = paymentId;
 
@@ -115,6 +126,11 @@ function PlayerCard({
       if (result?.paymentId && result?.success !== false) {
         pendingPaymentIdRef.current = null;
         startPaymentUndo({ id: result.paymentId, amount });
+        if (debt > SETTLED_THRESHOLD && debt - amount <= SETTLED_THRESHOLD) {
+          setJustCleared(true);
+          setShowBurst(true);
+          playSound(SOUND_TYPES.SUCCESS);
+        }
         setTimeout(() => cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
         cancelModal();
       } else {
@@ -129,47 +145,62 @@ function PlayerCard({
       savingRef.current = false;
       setIsSaving(false);
     }
-  }, [player.name, onAddPayment, onPin, onUnpin, startPaymentUndo, cancelModal]);
+  }, [player.name, debt, onAddPayment, onPin, onUnpin, startPaymentUndo, cancelModal, playSound]);
 
-  // Card color logic — neutralny dla pending
-  const accentColor = c.border;   // always player's own color
-
-  // Settled cards get a very subtle green tint on top of player color
+  const accentColor = c.border;
   const cardBorder = isSettled && !isOrganizer
     ? `${c.border}25`
     : `${c.border}30`;
-
   const playerId = `P${String((player.name.charCodeAt(0) * 31 + playerIndex * 17) % 9000 + 1000)}`;
+
+  const handleCardMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (isMobile) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setFoil({ x: x * 100, y: y * 100 });
+    e.currentTarget.style.transform = `perspective(920px) rotateX(${(0.5 - y) * 7}deg) rotateY(${(x - 0.5) * 9}deg)`;
+    e.currentTarget.style.borderColor = `${c.border}70`;
+    e.currentTarget.style.boxShadow = isPending && !isOrganizer
+      ? 'var(--glow-box-rose)'
+      : 'var(--glow-box-cyan)';
+  };
+
+  const handleCardLeave = (e: MouseEvent<HTMLDivElement>) => {
+    setFoil({ x: 50, y: 22 });
+    e.currentTarget.style.transform = 'none';
+    e.currentTarget.style.borderColor = cardBorder;
+    e.currentTarget.style.boxShadow = isPending && !isOrganizer ? 'var(--glow-box-rose)' : 'none';
+  };
+
+  const foilStyle: StyleWithVars = {
+    '--foil-x': `${foil.x}%`,
+    '--foil-y': `${foil.y}%`,
+    '--foil-tint': `${rank.hex}99`,
+  };
 
   return (
     <div
       ref={cardRef}
-      className="crt-card glass-card"
+      className={`crt-card glass-card ${RARITY_CARD_CLASS[meta.rarity]}`}
       style={{
         position: 'relative',
         border: `1px solid ${cardBorder}`,
         display: 'flex', flexDirection: 'column',
         animation: 'none',
         overflow: 'hidden',
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-        // Poświaty jadą tokenami, więc tryb jasny wygasza je sam i nie trzeba
-        // już rozgałęziać każdego cienia na dwa warianty w JS.
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease, transform 0.18s ease',
+        transformStyle: 'preserve-3d',
         boxShadow: isPending && !isOrganizer ? 'var(--glow-box-rose)' : 'none',
       }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = `${c.border}70`;
-        e.currentTarget.style.boxShadow = isPending && !isOrganizer
-          ? 'var(--glow-box-rose)'
-          : 'var(--glow-box-cyan)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = cardBorder;
-        e.currentTarget.style.boxShadow = isPending && !isOrganizer ? 'var(--glow-box-rose)' : 'none';
-      }}
+      onMouseMove={handleCardMove}
+      onMouseLeave={handleCardLeave}
     >
+      <div className={RARITY_FOIL_CLASS[meta.rarity]} style={foilStyle} aria-hidden="true" />
       <CornerBrackets color={accentColor} size={14} thickness={1} />
+      {showBurst && <ConfettiBurst onDone={() => setShowBurst(false)} />}
 
-      {/* ── Header strip ── */}
       <div style={{
         padding: '4px 12px',
         background: (!isOrganizer && isPending)
@@ -178,13 +209,13 @@ function PlayerCard({
           : 'var(--co-tint)',
         borderBottom: '1px solid var(--co-border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        position: 'relative', zIndex: 1,
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
           color: (!isOrganizer && isPending) ? `${c.border}99` : hasCredit ? 'var(--co-green)' : 'var(--co-dim)',
           letterSpacing: '0.18em', textTransform: 'uppercase',
         }}>
-          {/* Neutralne etykiety – żadnych wykrzykników, żadnego "dłużnik" */}
           {isOrganizer
             ? (hasCredit ? '↑ Do zebrania' : isPending ? '↕ Saldo' : '✓ Skarbnik')
             : isPending ? 'Do wpłaty'
@@ -192,18 +223,21 @@ function PlayerCard({
             : '↑ Nadpłata'}
         </span>
         <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-          color: 'var(--co-dim)', letterSpacing: '0.1em',
-        }}>{playerId}</span>
+          fontFamily: 'var(--font-display)', fontSize: '0.75rem',
+          color: rank.hex, letterSpacing: '0.18em',
+        }}>{RARITY_LABEL[meta.rarity]}</span>
       </div>
 
-      {/* ── Identity block ── */}
-      <div style={{ padding: '12px 14px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <PlayerAvatar
-          name={player.name}
-          index={playerIndex}
-          isPending={isPending}
-        />
+      <div style={{ padding: '12px 14px', display: 'flex', gap: 12, alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+          <span className="card-ovr" style={{ color: rank.hex }}>{meta.overall}</span>
+          <span style={{ ...FONT.monoMicro, letterSpacing: '0.14em', color: rank.hex }}>OVR</span>
+          <PlayerAvatar
+            name={player.name}
+            index={playerIndex}
+            isPending={isOrganizer ? undefined : isPending}
+          />
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <h3 style={{
             fontFamily: 'var(--font-display)',
@@ -214,18 +248,50 @@ function PlayerCard({
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>{player.name}</h3>
 
-          <div style={{ marginTop: 4, marginBottom: 8 }}>
+          <div style={{ marginTop: 4, marginBottom: 8, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
             <RankBadge rank={rank} pct={pct} showHint={!isMobile} />
+            {meta.currentStreak >= 2 && <StreakBadge streak={meta.currentStreak} />}
           </div>
 
-          {/* Attendance bar */}
+          {meta.sports.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+              {meta.sports.map(row => (
+                <span
+                  key={row.sport}
+                  title={`${SPORT_LABEL[row.sport] ?? row.sport} ×${row.count}`}
+                  style={{
+                    ...FONT.monoMicro,
+                    letterSpacing: '0.08em',
+                    color: 'var(--co-text)',
+                    padding: '1px 6px',
+                    border: '1px solid var(--co-border)',
+                    background: 'var(--co-tint)',
+                    clipPath: CLIP.badge,
+                  }}
+                >
+                  {SPORT_EMOJI[row.sport] ?? '🏓'} {row.count}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {!isMobile && meta.topAchievements.length > 0 && (
+            <div style={{ display: 'flex', gap: 4, marginBottom: 8 }} aria-label="Osiągnięcia">
+              {meta.topAchievements.map(a => (
+                <span key={a.id} title={`${a.label}: ${a.desc}`} style={{ fontSize: '0.95rem', lineHeight: 1 }}>
+                  {a.emoji}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
               <span style={{ ...FONT.monoLabel }}>
                 Obecność
               </span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
-                {player.attendanceCount}/{totalWeeks}
+                {player.attendanceCount}/{player.eligibleWeeks || totalWeeks}
               </span>
             </div>
             <div style={{ height: 2, background: 'var(--co-bar-track)', position: 'relative', overflow: 'hidden' }}>
@@ -239,7 +305,6 @@ function PlayerCard({
                 transition: 'width 0.8s ease',
               }} />
             </div>
-            {/* Session dots — last 10 sessions */}
             {history && history.length > 0 && (
               <div
                 title={`Ostatnie ${[...history].slice(0, isMobile ? 6 : 10).length} sesji`}
@@ -266,11 +331,9 @@ function PlayerCard({
         </div>
       </div>
 
-      {/* ── Balance + actions (nie-organizatorzy) ── */}
       {!isOrganizer && (
-        <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
 
-          {/* Balance display */}
           <div
             className={flash ? 'debt-flash' : ''}
             onClick={handleAmountClick}
@@ -292,6 +355,11 @@ function PlayerCard({
               transition: 'background 0.2s ease, border-color 0.2s ease',
             }}
           >
+            {justCleared && (
+              <div className="cleared-stamp" aria-hidden="true">
+                ROZLICZONY
+              </div>
+            )}
 
             {hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
@@ -323,7 +391,6 @@ function PlayerCard({
             )}
           </div>
 
-          {/* Breakdown */}
           <BreakdownPanel
             playerName={player.name}
             open={openDetails}
@@ -333,7 +400,6 @@ function PlayerCard({
             onRemovePayment={onRemovePayment}
           />
 
-          {/* Undo bar */}
           {lastPayment && (
             <div style={{ marginBottom: 10 }}>
               <UndoBar
@@ -347,7 +413,6 @@ function PlayerCard({
             </div>
           )}
 
-          {/* Payment modal */}
           <PaymentModal
             type={modal} hasCredit={hasCredit}
             customAmt={customAmt} onAmtChange={setCustomAmt}
@@ -356,7 +421,6 @@ function PlayerCard({
             errorMsg={paymentError}
           />
 
-          {/* Action buttons */}
           {modal === null && (
             <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {isPending && (
@@ -397,7 +461,6 @@ function PlayerCard({
             </div>
           )}
 
-          {/* Barcode footer */}
           {!isMobile && (
             <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
               <Barcode name={player.name} color={accentColor} />
@@ -414,11 +477,9 @@ function PlayerCard({
         </div>
       )}
 
-      {/* ── Skarbnik section (Kamil only) ── */}
       {isOrganizer && (
-        <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
 
-          {/* Do odzyskania balance block */}
           <div
             className={flash ? 'debt-flash' : ''}
             style={{
@@ -466,7 +527,6 @@ function PlayerCard({
             )}
           </div>
 
-          {/* Who owes what */}
           {allPlayers && (
             <TreasurerPanel
               players={allPlayers}
@@ -475,7 +535,6 @@ function PlayerCard({
             />
           )}
 
-          {/* Barcode footer */}
           {!isMobile && (
             <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
               <Barcode name={player.name} color={c.border} />

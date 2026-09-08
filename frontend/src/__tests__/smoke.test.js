@@ -102,7 +102,7 @@ describe('constants/index.js — struktura', () => {
   it('SOUND_TYPES ma wszystkie typy dźwięków', async () => {
     const { SOUND_TYPES } = await import('../constants/index');
     expect(Object.keys(SOUND_TYPES)).toEqual(
-      expect.arrayContaining(['TAB', 'CLICK', 'SUCCESS', 'DELETE', 'COIN', 'ERROR'])
+      expect.arrayContaining(['TAB', 'CLICK', 'SUCCESS', 'DELETE', 'COIN', 'ERROR', 'RANK1', 'STREAK'])
     );
   });
 

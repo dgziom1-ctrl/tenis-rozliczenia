@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback } from 'react';
 import { addPayment, removePayment } from '@/lib/firebase';
 import { SOUND_TYPES, ORGANIZER_NAME, RANKS } from '@/constants';
 import { buildDebtDisplayData } from '@/utils/debt';
+import { calculatePlayerStats } from '@/utils/rankings';
+import { buildPlayerCardMeta } from '@/utils/playerCard';
 import { useToast } from '../common/Toast';
 import PlayerCard from './PlayerCard';
 import { Zap, ChevronDown } from 'lucide-react';
@@ -23,6 +25,11 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
   const { showError } = useToast();
 
   const totalWeeks = data.summary?.totalWeeks ?? 0;
+
+  const cardMeta = useMemo(() => {
+    const stats = calculatePlayerStats(data.players ?? [], history, totalWeeks);
+    return new Map(stats.map(p => [p.name, buildPlayerCardMeta(p, history)]));
+  }, [data.players, history, totalWeeks]);
 
   const handleAddPayment = useCallback(async (playerName: string, amount: number, paymentId: string) => {
     playSound(SOUND_TYPES.COIN);
@@ -129,6 +136,11 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 player={player}
                 totalWeeks={totalWeeks}
                 history={history}
+                meta={cardMeta.get(player.name) ?? buildPlayerCardMeta({
+                  ...player,
+                  attendancePercentage: 0,
+                  currentStreak: 0,
+                }, history)}
                 openDetails={showBreakdown}
                 onToggleDetails={toggleDetails}
                 breakdown={(!isOrg && showBreakdown) ? getBreakdown(player) : null}
@@ -136,6 +148,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 onRemovePayment={handleRemovePayment}
                 onPin={setPinnedPlayer}
                 onUnpin={() => setPinnedPlayer(null)}
+                playSound={playSound}
                 playerIndex={idx}
                 allPlayers={isOrg ? data.players : undefined}
               />

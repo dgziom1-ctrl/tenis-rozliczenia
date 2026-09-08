@@ -103,6 +103,21 @@ export function useAudio(isMuted: boolean) {
           });
           break;
         }
+        case SOUND_TYPES.STREAK: {
+          const freqs = [392, 523, 659, 784, 1047];
+          freqs.forEach((freq, i) => {
+            const o = ctx.createOscillator();
+            const g2 = ctx.createGain();
+            o.connect(g2); g2.connect(ctx.destination);
+            o.type = 'square';
+            o.frequency.setValueAtTime(freq, now + i * 0.08);
+            g2.gain.setValueAtTime(0.11, now + i * 0.08);
+            g2.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.22);
+            o.start(now + i * 0.08);
+            o.stop(now + i * 0.08 + 0.22);
+          });
+          break;
+        }
         case SOUND_TYPES.ERROR: {
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(220, now);
@@ -125,6 +140,7 @@ export function useAudio(isMuted: boolean) {
     switch (type) {
       case SOUND_TYPES.COIN: navigator.vibrate([60, 40, 120]); break;
       case SOUND_TYPES.SUCCESS: navigator.vibrate([50, 30, 50, 30, 100]); break;
+      case SOUND_TYPES.STREAK: navigator.vibrate([40, 30, 40, 30, 80, 40, 120]); break;
       case SOUND_TYPES.DELETE: navigator.vibrate([180]); break;
       case SOUND_TYPES.CLICK: navigator.vibrate([20]); break;
       case SOUND_TYPES.TAB: navigator.vibrate([15]); break;

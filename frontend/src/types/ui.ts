@@ -147,7 +147,32 @@ export interface PlayerColor {
   text: string;
 }
 
-export type SoundType = 'tab' | 'click' | 'success' | 'delete' | 'coin' | 'rank1' | 'error';
+export type SoundType = 'tab' | 'click' | 'success' | 'delete' | 'coin' | 'rank1' | 'error' | 'streak';
+
+export type CardRarity = 'legend' | 'elite' | 'epic' | 'rare' | 'common' | 'ghost';
+
+export interface SportCount {
+  sport: Sport;
+  count: number;
+}
+
+export interface PlayerCardMeta {
+  overall: number;
+  rank: Rank;
+  rarity: CardRarity;
+  sports: SportCount[];
+  currentStreak: number;
+  attendancePercentage: number;
+  topAchievements: Achievement[];
+}
+
+export type SessionHighlightKind = 'debut' | 'streak' | 'rankup';
+
+export interface SessionHighlight {
+  name: string;
+  kind: SessionHighlightKind;
+  label: string;
+}
 export type Theme = 'dark' | 'light';
 export type TabId = 'dashboard' | 'attendance' | 'admin' | 'history' | 'players';
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useId } from 'react';
+import type { FormEvent } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
 import { PanelHeader, FieldGroup } from '../common/SharedUI';
 import { addSession } from '@/lib/firebase';
@@ -8,8 +9,9 @@ import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { parseAmount, isValidAmount } from '@/utils/format';
 import type { Sport } from '@/types/domain';
-import type { HistoryEntry, SoundType } from '@/types/ui';
+import type { HistoryEntry, PlayerStats, SessionHighlight, SoundType } from '@/types/ui';
 
+import { detectSessionHighlights } from '@/utils/celebrations';
 import SessionSummaryModal from './SessionSummaryModal';
 import LiveCostPreview from './LiveCostPreview';
 import PlayerToggleGrid from './PlayerToggleGrid';
@@ -21,11 +23,12 @@ interface AdminTabProps {
   playerNames: string[];
   defaultMultiPlayers: string[];
   history: HistoryEntry[];
+  players: PlayerStats[];
   setActiveTab: (id: string) => void;
   playSound: (type: SoundType) => void;
 }
 
-export default function AdminTab({ playerNames, defaultMultiPlayers, history, setActiveTab, playSound }: AdminTabProps) {
+export default function AdminTab({ playerNames, defaultMultiPlayers, history, players, setActiveTab, playSound }: AdminTabProps) {
   const { showError } = useToast();
 
   const today = new Date().toISOString().split('T')[0];
@@ -42,6 +45,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     date: string; totalCost: number; sport: Sport;
     presentPlayers: string[]; multisportPlayers: string[];
     racketCost: number; ownRacketPlayers: string[];
+    highlights: SessionHighlight[];
   } | null>(null);
   const [costTouched,       setCostTouched]       = useState(false);
 
@@ -95,7 +99,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     setMultisportPlayers(prev => prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name]);
   }, [playSound]);
 
-  const handleSaveSession = useCallback(async (e: React.FormEvent) => {
+  const handleSaveSession = useCallback(async (e: FormEvent) => {
     e.preventDefault();
     if (isSaving) return;
     if (!isPresentValid) { showError('Zaznacz co najmniej jednego gracza'); return; }
@@ -116,7 +120,22 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         ...(ownRacketForSession.length > 0 ? { ownRacketPlayers: ownRacketForSession } : {}),
       });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
-      playSound(SOUND_TYPES.SUCCESS);
+      const added = {
+        id: 'just-added',
+        datePlayed,
+        totalCost: totalWithRackets,
+        sport,
+        costPerPerson: 0,
+        costPerPersonMulti: 0,
+        presentPlayers: [...presentPlayers],
+        multisportPlayers: [...multisportPlayers],
+        racketCost: racketCost > 0 ? racketCost : undefined,
+        ownRacketPlayers: ownRacketForSession.length > 0 ? ownRacketForSession : undefined,
+      };
+      const highlights = detectSessionHighlights(players, history, added);
+      const hasStreak = highlights.some(h => h.kind === 'streak');
+      const hasRankUp = highlights.some(h => h.kind === 'rankup');
+      playSound(hasStreak ? SOUND_TYPES.STREAK : hasRankUp ? SOUND_TYPES.RANK1 : SOUND_TYPES.SUCCESS);
       setSavedSummary({
         date: datePlayed, totalCost: totalWithRackets,
         sport,
@@ -124,6 +143,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
         multisportPlayers: [...multisportPlayers],
         racketCost,
         ownRacketPlayers: [...ownRacketForSession],
+        highlights,
       });
       setTotalCost('');
       setCostTouched(false);
@@ -133,7 +153,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, racketCost]);
+  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, racketCost, players, history]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
@@ -143,7 +163,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, se
     <>
       {/* Montowany dopiero z danymi — inaczej pułapka fokusu i autofokus
           uruchamiałyby się na pustym, jeszcze nieistniejącym oknie. */}
-      {savedSummary && <SessionSummaryModal summary={savedSummary} onClose={handleSummaryClose} />}
+      {savedSummary && <SessionSummaryModal summary={savedSummary} highlights={savedSummary.highlights} onClose={handleSummaryClose} />}
 
       <div style={{ width: '100%', maxWidth: CONTENT_WIDTH.form, margin: '0 auto', animation: 'slide-in-up 0.3s ease-out', display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div className="cyber-box" style={{ clipPath: CLIP.panel, padding: '20px 20px' }}>

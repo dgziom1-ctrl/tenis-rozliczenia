@@ -7,7 +7,7 @@ import type { SoundType } from '@/types/ui';
 
 export default function AdminPage() {
   const { playSound } = useOutletContext<{ playSound: (type: SoundType) => void }>();
-  const { playerNames, defaultMultiPlayers, history } = useAdminData();
+  const { playerNames, defaultMultiPlayers, history, players } = useAdminData();
   const navigate = useNavigate();
 
   const setActiveTab = useCallback((id: string) => {
@@ -19,6 +19,7 @@ export default function AdminPage() {
       playerNames={playerNames}
       defaultMultiPlayers={defaultMultiPlayers}
       history={history}
+      players={players}
       setActiveTab={setActiveTab}
       playSound={playSound}
     />

@@ -89,7 +89,8 @@ export function useAdminData() {
     playerNames: data.playerNames,
     defaultMultiPlayers: data.defaultMultiPlayers,
     history: data.history,
-  }), [data.playerNames, data.defaultMultiPlayers, data.history]);
+    players: data.players,
+  }), [data.playerNames, data.defaultMultiPlayers, data.history, data.players]);
 }
 
 export function useAttendanceData() {

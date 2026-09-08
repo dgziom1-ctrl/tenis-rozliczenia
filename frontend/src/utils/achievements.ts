@@ -1,7 +1,11 @@
 import type { ExtendedPlayerStats, Achievement, HistoryEntry } from '@/types/ui';
 
-const STREAK_MILESTONES = [5, 10, 15, 20, 25, 30, 40, 50];
+export const STREAK_MILESTONES: readonly number[] = [5, 10, 15, 20, 25, 30, 40, 50];
 const PERFECT_MONTH_MILESTONES = [5, 10, 15, 20, 25, 30, 40, 50];
+
+export function isStreakMilestone(n: number): boolean {
+  return STREAK_MILESTONES.includes(n);
+}
 
 interface AchievementDef {
   id: string;

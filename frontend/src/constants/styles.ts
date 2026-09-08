@@ -86,6 +86,8 @@ export const Z = {
   grain: 50,
   popover: 60,
   modal: 100,
+  /** Cząsteczki nad modalem, pod toastem — `pointer-events: none`. */
+  confetti: 110,
   boot: 1000,
   toast: 9000,
 } as const;

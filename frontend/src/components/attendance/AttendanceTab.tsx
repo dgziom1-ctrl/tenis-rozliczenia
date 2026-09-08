@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { SOUND_TYPES } from '@/constants';
 import { calculatePlayerStats, assignRankingPlaces, calculateSeasonPlayerStats } from '@/utils/rankings';
-import { groupSessionsByMonth, getAvailableSeasons, filterHistoryByYear, getWrappedSeason } from '@/utils/sessions';
+import { groupSessionsByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
 import { computeWrappedStats } from '@/utils/wrapped';
 import { Film } from 'lucide-react';
 import Leaderboard from './Leaderboard';
@@ -39,7 +39,6 @@ export default function AttendanceTab({ players, history, summary, playSound, in
   }, [initialPlayer, onInitialPlayerConsumed]);
 
   const seasons = useMemo(() => getAvailableSeasons(history), [history]);
-  const currentYear = new Date().getFullYear();
 
   // Nowy rok ma zaczynać nową rywalizację, więc domyślnie pokazujemy bieżący
   // sezon zamiast sumy wszystkich lat — inaczej w styczniu ranking to zamrożona
@@ -117,10 +116,7 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     return computeWrappedStats(history, players, wrappedYear);
   }, [wrappedYear, history, players]);
 
-  const wrappedSeason = useMemo(
-    () => getWrappedSeason(seasons, selectedSeason, currentYear),
-    [seasons, selectedSeason, currentYear],
-  );
+  const recapYear = selectedSeason ?? seasons[0] ?? null;
 
   const handleCloseModal = useCallback(() => setSelectedPlayer(null), []);
   const handleCloseWrapped = useCallback(() => setWrappedYear(null), []);
@@ -143,14 +139,9 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'slide-in-up 0.3s ease-out' }}>
       <SeasonSelector seasons={seasons} selected={selectedSeason} onChange={setChosenSeason} />
 
-      {/* Wrapped button — wybrany zakończony sezon albo rok, który właśnie się
-          skończył.
-          Był jedynym magentowym elementem na stronie, jedynym przyciskiem na
-          całą szerokość i jedynym z emoji w etykiecie — czytał się jak wklejona
-          reklama, nie jak część interfejsu. Teraz zwykły przycisk akcji. */}
-      {wrappedSeason && (
+      {recapYear && (
         <button
-          onClick={() => setWrappedYear(wrappedSeason)}
+          onClick={() => setWrappedYear(recapYear)}
           className="cyber-button-outline"
           style={{
             alignSelf: 'flex-start',
@@ -159,7 +150,7 @@ export default function AttendanceTab({ players, history, summary, playSound, in
           }}
         >
           <Film size={14} aria-hidden="true" />
-          Podsumowanie roku {wrappedSeason}
+          Podsumowanie {recapYear}
         </button>
       )}
 

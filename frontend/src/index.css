@@ -109,6 +109,7 @@
   --z-grain:  50;
   --z-popover:60;
   --z-modal:  100;
+  --z-confetti: 110;
   --z-boot:   1000;
   --z-toast:  9000;
 
@@ -444,6 +445,114 @@ body.theme-switching *::after {
   0%   { transform: translateX(-120%); opacity: 1; }
   100% { transform: translateX(220%);  opacity: 0; }
 }
+
+/* ── FIFA-style player cards ── */
+@keyframes foil-shift {
+  0%, 100% { background-position: 0 0, 0% 40%; }
+  50%      { background-position: 0 0, 100% 60%; }
+}
+@keyframes stamp-pop {
+  0%   { transform: scale(1.55) rotate(-14deg); opacity: 0; }
+  65%  { transform: scale(0.96) rotate(-8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-8deg); opacity: 1; }
+}
+
+.fifa-card { position: relative; }
+.fifa-card-legend { background-image: linear-gradient(165deg, rgba(184,134,11,0.20) 0%, transparent 44%); }
+.fifa-card-elite  { background-image: linear-gradient(165deg, rgba(224,25,122,0.16) 0%, transparent 44%); }
+.fifa-card-epic   { background-image: linear-gradient(165deg, rgba(155,77,224,0.16) 0%, transparent 44%); }
+.fifa-card-rare   { background-image: linear-gradient(165deg, rgba(20,138,156,0.14) 0%, transparent 44%); }
+.fifa-card-common { background-image: linear-gradient(165deg, rgba(100,116,139,0.10) 0%, transparent 44%); }
+.fifa-card-ghost  { background-image: linear-gradient(165deg, rgba(85,102,119,0.10) 0%, transparent 44%); }
+
+.card-foil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.28;
+  mix-blend-mode: color-dodge;
+  background:
+    radial-gradient(circle at var(--foil-x, 50%) var(--foil-y, 22%), rgba(255,255,255,0.32) 0%, transparent 42%),
+    linear-gradient(115deg, transparent 18%, rgba(255,255,255,0.14) 42%, var(--foil-tint, rgba(0,229,255,0.22)) 52%, transparent 72%);
+  background-size: 100% 100%, 220% 220%;
+  animation: foil-shift 8s ease-in-out infinite;
+}
+.card-foil-legend { opacity: 0.48; }
+.card-foil-elite  { opacity: 0.40; }
+.card-foil-epic   { opacity: 0.34; }
+.card-foil-rare   { opacity: 0.26; }
+.card-foil-common { opacity: 0.18; }
+.card-foil-ghost  { opacity: 0.12; }
+
+.card-ovr {
+  font-family: var(--font-display);
+  font-size: 2.15rem;
+  line-height: 0.85;
+  letter-spacing: 0.04em;
+  text-shadow: var(--glow-cyan-md);
+}
+
+.cleared-stamp {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  letter-spacing: 0.18em;
+  color: var(--co-green);
+  text-shadow: var(--glow-green-md);
+  border: 2px solid var(--co-green);
+  margin: 10px 16px;
+  background: var(--co-panel);
+  animation: stamp-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.confetti-layer {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-confetti);
+  pointer-events: none;
+}
+
+.matchday-hero {
+  text-align: center;
+  padding: 8px 0 16px;
+}
+.matchday-kicker {
+  font-family: var(--font-display);
+  letter-spacing: 0.22em;
+  color: var(--co-cyan);
+  font-size: 0.75rem;
+  text-shadow: var(--glow-cyan-sm);
+}
+.matchday-highlight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  background: var(--co-tint);
+  border: 1px solid var(--co-tint-line);
+}
+
+body.theme-light .card-foil {
+  mix-blend-mode: multiply;
+  opacity: 0.14;
+}
+body.theme-light .fifa-card-legend { background-image: linear-gradient(165deg, rgba(154,114,9,0.14) 0%, transparent 44%); }
+body.theme-light .fifa-card-elite  { background-image: linear-gradient(165deg, rgba(190,24,93,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-epic   { background-image: linear-gradient(165deg, rgba(155,77,224,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-rare   { background-image: linear-gradient(165deg, rgba(13,148,136,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-common { background-image: none; }
+body.theme-light .fifa-card-ghost  { background-image: none; }
 
 /* ── Modal overlay ──
    Cały układ nakładki mieszka tutaj, a nie w siedmiu komponentach. Wcześniej
@@ -1012,8 +1121,17 @@ body.theme-light .player-card-wrap > div {
   -webkit-backdrop-filter: blur(12px) !important;
   box-shadow: 0 1px 8px rgba(0,0,0,0.06), 0 0 0 1px var(--co-border) !important;
 }
-body.theme-light .player-card-wrap:hover > div {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 0 0 1px var(--co-border-hi) !important;
+body.theme-light .player-card-wrap > .fifa-card-legend {
+  background-image: linear-gradient(165deg, rgba(154,114,9,0.14) 0%, transparent 44%) !important;
+}
+body.theme-light .player-card-wrap > .fifa-card-elite {
+  background-image: linear-gradient(165deg, rgba(190,24,93,0.10) 0%, transparent 44%) !important;
+}
+body.theme-light .player-card-wrap > .fifa-card-epic {
+  background-image: linear-gradient(165deg, rgba(155,77,224,0.10) 0%, transparent 44%) !important;
+}
+body.theme-light .player-card-wrap > .fifa-card-rare {
+  background-image: linear-gradient(165deg, rgba(13,148,136,0.10) 0%, transparent 44%) !important;
 }
 
 /* Header */

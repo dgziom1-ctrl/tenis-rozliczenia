@@ -34,7 +34,7 @@ export const SPORT_ACCUSATIVE: Record<string, string> = { pingpong: 'ping-ponga'
 export const MULTISPORT_DISCOUNT = 15;
 export const RACKET_PRICE = 5;
 export const MAX_RENTED_RACKETS = 4; // 2 korty × 2 rakietki — nigdy nie potrzeba więcej
-export const SOUND_TYPES = { TAB: 'tab', CLICK: 'click', SUCCESS: 'success', DELETE: 'delete', COIN: 'coin', RANK1: 'rank1', ERROR: 'error' } as const;
+export const SOUND_TYPES = { TAB: 'tab', CLICK: 'click', SUCCESS: 'success', DELETE: 'delete', COIN: 'coin', RANK1: 'rank1', ERROR: 'error', STREAK: 'streak' } as const;
 export const TABS = { DASHBOARD: 'dashboard', ATTENDANCE: 'attendance', ADMIN: 'admin', HISTORY: 'history', PLAYERS: 'players' } as const;
 
 /** Jedyne odwzorowanie zakładka ↔ adres. Trzymane w jednym miejscu, żeby nawigacja z różnych ekranów nie mogła się rozjechać. */

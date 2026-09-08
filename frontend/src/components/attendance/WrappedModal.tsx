@@ -109,7 +109,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               color: 'var(--co-text-hi)',
               marginBottom: 40,
             }}>
-              PODSUMOWANIE ROKU
+              {stats.year === new Date().getFullYear() ? 'SEZON NA ŻYWO' : 'PODSUMOWANIE ROKU'}
             </div>
             <div style={{
               ...mono('clamp(0.6rem, 2vw, 0.8rem)'),
