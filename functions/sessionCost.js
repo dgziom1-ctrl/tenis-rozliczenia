@@ -138,9 +138,11 @@ function parseSession(session) {
     totalGrosze,
     racketGrosze,
     ownRacket: uniqueNames(session.ownRacketPlayers),
-    courtCount: Math.max(1, session.courtCount || 1),
-    durationHours: Math.max(1, session.durationHours || 1),
-    sport: session.sport || 'pingpong',
+    // Stare sesje bez tych pól: courtCount/durationHours = undefined,
+    // co oznacza "nie aplikuj limitów" (backward compatible).
+    courtCount: session.courtCount != null ? Math.max(1, session.courtCount) : undefined,
+    durationHours: session.durationHours != null ? Math.max(1, session.durationHours) : undefined,
+    sport: session.sport,
   };
 }
 
@@ -166,7 +168,10 @@ function getSessionShares(session) {
   let multiCapped = false;
 
   // Limit kart MultiSport: korty × godziny × limit/sport.
-  const maxMulti = getMaxMulti(sport, courtCount, durationHours);
+  // Stare sesje bez courtCount/durationHours: nie aplikujemy limitów (backward compatible).
+  const maxMulti = (courtCount !== undefined && durationHours !== undefined && sport !== undefined)
+    ? getMaxMulti(sport, courtCount, durationHours)
+    : Infinity;
   let effectiveCards = 0;
 
   if (present.length === 0) {
