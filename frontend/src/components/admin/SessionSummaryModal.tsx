@@ -20,6 +20,8 @@ interface SessionSummary {
   multisportPlayers: string[];
   racketCost: number;
   ownRacketPlayers: string[];
+  courtCount: number;
+  durationHours: number;
 }
 
 interface SessionSummaryModalProps {
@@ -45,15 +47,15 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
 
   useEffect(() => () => { if (copiedTimer.current) clearTimeout(copiedTimer.current); }, []);
 
-  const { date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers } = summary;
+  const { date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, courtCount, durationHours } = summary;
   const withRackets = hasRacketRental(sport);
   const hasRackets = withRackets && racketCost > 0;
   const presentCount = presentPlayers.length;
-  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers });
+  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers, courtCount, durationHours, sport });
   const headline = groups[0];
 
   const handleCopy = async () => {
-    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers });
+    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, courtCount, durationHours });
     if (await copyToClipboard(msg)) {
       setCopied(true);
       if (copiedTimer.current) clearTimeout(copiedTimer.current);

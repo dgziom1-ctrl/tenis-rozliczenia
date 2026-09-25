@@ -10,6 +10,16 @@ export interface Week {
   racketCost?: number;
   ownRacketPlayers?: string[];
   /**
+   * Liczba zarezerwowanych kortów/stołów. Domyślnie 1 (stare sesje).
+   * Wpływa na limit kart MultiSport honorowanych w recepcji.
+   */
+  courtCount?: number;
+  /**
+   * Czas trwania sesji w godzinach. Domyślnie 1 (stare sesje).
+   * Każda godzina ma osobny limit kart MultiSport.
+   */
+  durationHours?: number;
+  /**
    * @deprecated Zaszłość po usuniętej dogrywce. Tylko do ODCZYTU — rozliczenie
    * dolicza tę kwotę do kosztu sesji, żeby stare rekordy nie zgubiły pieniędzy.
    * Nic już jej nie zapisuje; edycja sesji scala ją z `cost`.

@@ -125,6 +125,8 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           sport: row.sport || SPORT.PINGPONG,
           racketCost: row.racketCost,
           ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [],
+          courtCount: row.courtCount ?? 1,
+          durationHours: row.durationHours ?? 1,
         },
       });
     } else {
@@ -161,6 +163,8 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         sport: form.sport || SPORT.PINGPONG,
         racketCost: form.racketCost,
         ownRacketPlayers: form.ownRacketPlayers,
+        courtCount: form.courtCount ?? 1,
+        durationHours: form.durationHours ?? 1,
       });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       showSuccess('Sesja zaktualizowana');

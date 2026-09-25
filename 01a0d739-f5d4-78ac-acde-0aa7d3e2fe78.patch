@@ -1,0 +1,839 @@
+diff --git a/frontend/src/__tests__/components.test.jsx b/frontend/src/__tests__/components.test.jsx
+index b438eab..566a208 100644
+--- a/frontend/src/__tests__/components.test.jsx
++++ b/frontend/src/__tests__/components.test.jsx
+@@ -310,7 +310,7 @@ describe('LiveCostPreview — podgląd nie może obiecać innej kwoty niż zapł
+     totalCost: '1',
+     presentPlayers: ['Rafał', 'Kamil', 'Przemek', 'Mariusz', 'Arek', 'Krzysiek'],
+     multisportPlayers: ['Rafał', 'Kamil', 'Krzysiek'],
+-    sport: 'pingpong',
++    sport: 'badminton',
+   };
+ 
+   it('pokazuje stawki, które sumują się do wpisanej kwoty', () => {
+diff --git a/frontend/src/__tests__/sessionCost.test.js b/frontend/src/__tests__/sessionCost.test.js
+index fd607f6..0cbf3a2 100644
+--- a/frontend/src/__tests__/sessionCost.test.js
++++ b/frontend/src/__tests__/sessionCost.test.js
+@@ -210,3 +210,114 @@ describe('getShareGroups', () => {
+     expect(collected).toBeCloseTo(100, 2);
+   });
+ });
++
++describe('limit kart MultiSport', () => {
++  // Domyślne limity: pingpong/squash = 2, badminton/padel = 4 (na kort/godzinę).
++
++  it('bez courtCount/durationHours brak limitów (backward compatible)', () => {
++    // Stare sesje bez courtCount/durationHours nie mają limitów.
++    const s = { totalCost: 100, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D'], multisportPlayers: ['A', 'B', 'C'] };
++    const shares = getSessionShares(s);
++    expect(shares.multiCapped).toBe(false);
++    expect(shares.maxMulti).toBe(Infinity);
++    expect(shares.effectiveCards).toBe(3);
++    // Pełna zniżka 15 zł na kartę.
++    expect(getPlayerSessionCost(s, 'A')).toBe(getPlayerSessionCost(s, 'D') - 15);
++  });
++
++  it('z courtCount/durationHours limity działają', () => {
++    // Nowe sesje z courtCount/durationHours mają limity.
++    const s = { totalCost: 100, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D'], multisportPlayers: ['A', 'B', 'C'], courtCount: 1, durationHours: 1 };
++    const shares = getSessionShares(s);
++    expect(shares.multiCapped).toBe(false);
++    expect(shares.maxMulti).toBe(4);
++    expect(shares.effectiveCards).toBe(3);
++    // Pełna zniżka 15 zł na kartę (3 mieści się w limicie 4).
++    expect(getPlayerSessionCost(s, 'A')).toBe(getPlayerSessionCost(s, 'D') - 15);
++  });
++
++  it('przekroczenie limitu — zniżka proporcjonalnie podzielona', () => {
++    // Badminton 1 kort × 1 godzina = limit 4 karty. 5 graczy z kartą.
++    // Zapłacono: 145 − 4×15 = 85 zł (bo tylko 4 karty zadziałały).
++    const s = { totalCost: 85, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 1 };
++    const shares = getSessionShares(s);
++    expect(shares.multiCapped).toBe(true);
++    expect(shares.maxMulti).toBe(4);
++    expect(shares.effectiveCards).toBe(4);
++    // Każda karta dostaje 4/5 × 15 = 12 zł zniżki.
++    // Base = (85 + 4×15) / 5 = 145/5 = 29 zł.
++    // Każdy z kartą płaci: 29 − 12 = 17 zł.
++    expect(getPlayerSessionCost(s, 'A')).toBe(17);
++    expect(getPlayerSessionCost(s, 'E')).toBe(17);
++    expect(sum(s)).toBeCloseTo(85, 2);
++  });
++
++  it('przekroczenie limitu z graczami bez karty', () => {
++    // Badminton 1 kort × 1 godzina = limit 4. 5 z kartą + 1 bez = 6 graczy.
++    // Zapłacono: 174 − 4×15 = 114 zł.
++    const s = { totalCost: 114, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E', 'F'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 1 };
++    const shares = getSessionShares(s);
++    expect(shares.multiCapped).toBe(true);
++    expect(shares.effectiveCards).toBe(4);
++    // Base = (114 + 60) / 6 = 174/6 = 29 zł.
++    // Zniżka per karta: 60/5 = 12 zł.
++    // Z kartą: 29 − 12 = 17 zł.
++    // Bez karty: 29 zł.
++    expect(getPlayerSessionCost(s, 'A')).toBe(17);
++    expect(getPlayerSessionCost(s, 'F')).toBe(29);
++    expect(sum(s)).toBeCloseTo(114, 2);
++  });
++
++  it('2 godziny podwajają limit', () => {
++    // Badminton 1 kort × 2 godziny = limit 8 kart.
++    const s = { totalCost: 100, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 2 };
++    const shares = getSessionShares(s);
++    expect(shares.multiCapped).toBe(false);
++    expect(shares.maxMulti).toBe(8);
++    expect(shares.effectiveCards).toBe(5);
++    // Wszystkie 5 kart mieści się w limicie — pełna zniżka 15 zł.
++    expect(getPlayerSessionCost(s, 'A')).toBe(getPlayerSessionCost(s, 'E'));
++  });
++
++  it('2 korty × 2 godziny = limit 16 dla badmintona', () => {
++    const s = { totalCost: 200, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E', 'F'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 2, durationHours: 2 };
++    const shares = getSessionShares(s);
++    expect(shares.multiCapped).toBe(false);
++    expect(shares.maxMulti).toBe(16);
++  });
++
++  it('squash ma limit 2 karty/kort/godzinę', () => {
++    // Squash 1 kort × 1 godzina = limit 2. 3 graczy z kartą.
++    const s = { totalCost: 60, sport: 'squash', presentPlayers: ['A', 'B', 'C'], multisportPlayers: ['A', 'B', 'C'], courtCount: 1, durationHours: 1 };
++    const shares = getSessionShares(s);
++    expect(shares.multiCapped).toBe(true);
++    expect(shares.maxMulti).toBe(2);
++    expect(shares.effectiveCards).toBe(2);
++    // Base = (60 + 2×15) / 3 = 90/3 = 30 zł.
++    // Zniżka per karta: 30/3 = 10 zł.
++    // Każdy z kartą: 30 − 10 = 20 zł.
++    expect(getPlayerSessionCost(s, 'A')).toBe(20);
++    expect(sum(s)).toBeCloseTo(60, 2);
++  });
++
++  it('pingpong ma limit 2 karty/stół/godzinę', () => {
++    const s = { totalCost: 20, sport: 'pingpong', presentPlayers: ['A', 'B', 'C', 'D'], multisportPlayers: ['A', 'B', 'C'], courtCount: 1, durationHours: 1 };
++    const shares = getSessionShares(s);
++    expect(shares.multiCapped).toBe(true);
++    expect(shares.maxMulti).toBe(2);
++    expect(shares.effectiveCards).toBe(2);
++  });
++
++  it('suma udziałów zawsze równa kwocie sesji przy przekroczonym limicie', () => {
++    // Różne kombinacje — suma musi się zgadzać co do grosza.
++    const cases = [
++      { totalCost: 85, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 1 },
++      { totalCost: 114, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E', 'F'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 1 },
++      { totalCost: 60, sport: 'squash', presentPlayers: ['A', 'B', 'C'], multisportPlayers: ['A', 'B', 'C'], courtCount: 1, durationHours: 1 },
++      { totalCost: 33, sport: 'pingpong', presentPlayers: ['A', 'B', 'C', 'D', 'E'], multisportPlayers: ['A', 'B', 'C', 'D'], courtCount: 1, durationHours: 1 },
++    ];
++    for (const s of cases) {
++      expect(sum(s)).toBeCloseTo(s.totalCost, 2);
++    }
++  });
++});
+diff --git a/frontend/src/components/admin/AdminTab.tsx b/frontend/src/components/admin/AdminTab.tsx
+index 5b9ec2b..d0374f5 100644
+--- a/frontend/src/components/admin/AdminTab.tsx
++++ b/frontend/src/components/admin/AdminTab.tsx
+@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
+ import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
+ import { PanelHeader, FieldGroup } from '../common/SharedUI';
+ import { addSession } from '@/lib/firebase';
+-import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, MAX_RENTED_RACKETS, MULTISPORT_DISCOUNT, hasRacketRental } from '@/constants';
++import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, MAX_RENTED_RACKETS, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
+ import { CLIP, CONTENT_WIDTH } from '@/constants/styles';
+ import { useToast } from '../common/Toast';
+ import { InlineSpinner } from '../common/LoadingSkeleton';
+@@ -40,11 +40,14 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
+   const [racketCount,       setRacketCount]       = useState(0);
+   const [racketPrice,       setRacketPrice]       = useState(RACKET_PRICE);
+   const [ownRacketPlayers,  setOwnRacketPlayers]  = useState<string[]>([]);
++  const [courtCount,        setCourtCount]        = useState(1);
++  const [durationHours,     setDurationHours]     = useState(1);
+   const [isSaving,          setIsSaving]          = useState(false);
+   const [savedSummary,      setSavedSummary]      = useState<{
+     date: string; totalCost: number; sport: Sport;
+     presentPlayers: string[]; multisportPlayers: string[];
+     racketCost: number; ownRacketPlayers: string[];
++    courtCount: number; durationHours: number;
+     highlights: SessionHighlight[];
+   } | null>(null);
+   const [costTouched,       setCostTouched]       = useState(false);
+@@ -68,6 +71,12 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
+     ? null
+     : (totalCost === '' ? 'Wpisz koszt sesji żeby kontynuować' : 'Koszt musi być liczbą >= 0');
+ 
++  // Limit kart MultiSport: korty × godziny × limit/sport.
++  const perCourtHour = MULTISPORT_PER_COURT_HOUR[sport] ?? MULTISPORT_PER_COURT_HOUR[SPORT.PINGPONG];
++  const maxMulti = courtCount * durationHours * perCourtHour;
++  const multiPresentCount = multisportPlayers.filter(p => presentPlayers.includes(p)).length;
++  const multiOverLimit = multiPresentCount > maxMulti && multiPresentCount > 0;
++
+   const initializedRef = useRef(false);
+   useEffect(() => {
+     if (!playerNames?.length) return;
+@@ -116,6 +125,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
+         presentPlayers,
+         multisportPlayers,
+         sport,
++        courtCount,
++        durationHours,
+         ...(racketCost > 0 ? { racketCost } : {}),
+         ...(ownRacketForSession.length > 0 ? { ownRacketPlayers: ownRacketForSession } : {}),
+       });
+@@ -143,6 +154,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
+         multisportPlayers: [...multisportPlayers],
+         racketCost,
+         ownRacketPlayers: [...ownRacketForSession],
++        courtCount,
++        durationHours,
+         highlights,
+       });
+       setTotalCost('');
+@@ -150,10 +163,12 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
+       setRacketCount(0);
+       setRacketPrice(RACKET_PRICE);
+       setOwnRacketPlayers([]);
++      setCourtCount(1);
++      setDurationHours(1);
+       setPresentPlayers([...playerNames]);
+       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
+     } finally { setIsSaving(false); }
+-  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, racketCost, players, history]);
++  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, racketCost, players, history, courtCount, durationHours]);
+ 
+   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
+ 
+@@ -182,6 +197,66 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
+               <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); setRacketCount(0); setRacketPrice(RACKET_PRICE); setOwnRacketPlayers([]); }} />
+             </div>
+ 
++            {/* Korty + godziny */}
++            <div style={{ display: 'flex', gap: 12 }}>
++              <div style={{ flex: 1 }}>
++                <FieldLabel>Korty / stoły</FieldLabel>
++                <div style={{ display: 'flex', gap: 6 }}>
++                  {[1, 2, 3].map(n => {
++                    const active = courtCount === n;
++                    return (
++                      <button type="button" key={n}
++                        onClick={() => { setCourtCount(n); playSound(SOUND_TYPES.CLICK); }}
++                        style={{
++                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
++                          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
++                          clipPath: CLIP.badge,
++                          ...(active ? {
++                            background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
++                            color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
++                          } : {
++                            background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
++                          }),
++                        }}>
++                        {n}
++                      </button>
++                    );
++                  })}
++                </div>
++                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
++                  {'>'} Limit kart: {maxMulti} ({perCourtHour}/kort/h)
++                </p>
++              </div>
++              <div style={{ flex: 1 }}>
++                <FieldLabel>Godziny</FieldLabel>
++                <div style={{ display: 'flex', gap: 6 }}>
++                  {[1, 2, 3].map(n => {
++                    const active = durationHours === n;
++                    return (
++                      <button type="button" key={n}
++                        onClick={() => { setDurationHours(n); playSound(SOUND_TYPES.CLICK); }}
++                        style={{
++                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
++                          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
++                          clipPath: CLIP.badge,
++                          ...(active ? {
++                            background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
++                            color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
++                          } : {
++                            background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
++                          }),
++                        }}>
++                        {n}h
++                      </button>
++                    );
++                  })}
++                </div>
++                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
++                  {'>'} {durationHours > 1 ? `${durationHours}h × ` : ''}{perCourtHour}/kort/h = {maxMulti} kart
++                </p>
++              </div>
++            </div>
++
+             {/* Date */}
+             <div>
+               <FieldLabel>Data gry</FieldLabel>
+@@ -238,6 +313,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
+                 counterColor="var(--co-green)"
+               >
+                 <PlayerToggleGrid names={presentPlayers} selected={multisportPlayers} onToggle={toggleMulti} accent="green" />
++                {multiOverLimit && (
++                  <p role="alert" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
++                    ⚠ Limit {maxMulti} kart przekroczony — zniżka zostanie proporcjonalnie podzielona na {multiPresentCount} osób ({Math.floor(maxMulti * MULTISPORT_DISCOUNT / multiPresentCount)} zł/os. zamiast {MULTISPORT_DISCOUNT} zł)
++                  </p>
++                )}
+               </FieldGroup>
+             )}
+ 
+@@ -331,7 +411,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
+             )}
+ 
+             {/* Live preview */}
+-            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} ownRacketPlayers={ownRacketPlayers} racketCount={effectiveRacketCount} />
++            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} ownRacketPlayers={ownRacketPlayers} racketCount={effectiveRacketCount} courtCount={courtCount} durationHours={durationHours} />
+ 
+             {/* Submit */}
+             <div>
+diff --git a/frontend/src/components/admin/LiveCostPreview.tsx b/frontend/src/components/admin/LiveCostPreview.tsx
+index 0ce5e3e..ff979b0 100644
+--- a/frontend/src/components/admin/LiveCostPreview.tsx
++++ b/frontend/src/components/admin/LiveCostPreview.tsx
+@@ -14,9 +14,11 @@ interface LiveCostPreviewProps {
+   racketCost?: number;
+   ownRacketPlayers?: string[];
+   racketCount?: number;
++  courtCount?: number;
++  durationHours?: number;
+ }
+ 
+-export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0 }: LiveCostPreviewProps) {
++export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0, courtCount = 1, durationHours = 1 }: LiveCostPreviewProps) {
+   const courtCost = parseAmount(totalCost);
+   if (!totalCost || isNaN(courtCost) || courtCost <= 0 || presentPlayers.length === 0) return null;
+ 
+@@ -29,8 +31,11 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
+     presentPlayers,
+     multisportPlayers,
+     ownRacketPlayers,
++    courtCount,
++    durationHours,
++    sport,
+   };
+-  const { discountCapped } = getSessionShares(session);
++  const { discountCapped, multiCapped, maxMulti, effectiveCards } = getSessionShares(session);
+   const groups = getShareGroups(session);
+   const hasRackets = racketCost > 0;
+   const racketEmoji = SPORT_EMOJI[sport] ?? '🎾';
+@@ -55,7 +60,12 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+         <ShareBreakdown groups={groups} sportEmoji={racketEmoji} />
+-        {discountCapped && (
++        {multiCapped && (
++          <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
++            {'>'} ⚠ Limit {maxMulti} kart — zadziałało {effectiveCards}, zniżka proporcjonalnie podzielona
++          </div>
++        )}
++        {discountCapped && !multiCapped && (
+           <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
+             {'>'} ⚠ Karty nie zbiły ceny o pełne {MULTISPORT_DISCOUNT} zł — udział na osobę wychodzi mniejszy niż zniżka. Sprawdź, czy kwota się zgadza.
+           </div>
+diff --git a/frontend/src/components/admin/SessionSummaryModal.tsx b/frontend/src/components/admin/SessionSummaryModal.tsx
+index b779fb8..8ed170d 100644
+--- a/frontend/src/components/admin/SessionSummaryModal.tsx
++++ b/frontend/src/components/admin/SessionSummaryModal.tsx
+@@ -20,6 +20,8 @@ interface SessionSummary {
+   multisportPlayers: string[];
+   racketCost: number;
+   ownRacketPlayers: string[];
++  courtCount: number;
++  durationHours: number;
+ }
+ 
+ interface SessionSummaryModalProps {
+@@ -45,15 +47,15 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose
+ 
+   useEffect(() => () => { if (copiedTimer.current) clearTimeout(copiedTimer.current); }, []);
+ 
+-  const { date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers } = summary;
++  const { date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, courtCount, durationHours } = summary;
+   const withRackets = hasRacketRental(sport);
+   const hasRackets = withRackets && racketCost > 0;
+   const presentCount = presentPlayers.length;
+-  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers });
++  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers, courtCount, durationHours, sport });
+   const headline = groups[0];
+ 
+   const handleCopy = async () => {
+-    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers });
++    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, courtCount, durationHours });
+     if (await copyToClipboard(msg)) {
+       setCopied(true);
+       if (copiedTimer.current) clearTimeout(copiedTimer.current);
+diff --git a/frontend/src/components/history/EditSessionForm.tsx b/frontend/src/components/history/EditSessionForm.tsx
+index 63ea45a..82b4979 100644
+--- a/frontend/src/components/history/EditSessionForm.tsx
++++ b/frontend/src/components/history/EditSessionForm.tsx
+@@ -48,6 +48,9 @@ export default function EditSessionForm({
+       presentPlayers: editForm.present,
+       multisportPlayers: editForm.multiPlayers ?? [],
+       ownRacketPlayers: editForm.ownRacketPlayers ?? [],
++      courtCount: editForm.courtCount ?? 1,
++      durationHours: editForm.durationHours ?? 1,
++      sport: editForm.sport,
+     })
+     : [];
+ 
+diff --git a/frontend/src/components/history/HistoryTab.tsx b/frontend/src/components/history/HistoryTab.tsx
+index 9d1ad1b..89ae82a 100644
+--- a/frontend/src/components/history/HistoryTab.tsx
++++ b/frontend/src/components/history/HistoryTab.tsx
+@@ -125,6 +125,8 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
+           sport: row.sport || SPORT.PINGPONG,
+           racketCost: row.racketCost,
+           ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [],
++          courtCount: row.courtCount ?? 1,
++          durationHours: row.durationHours ?? 1,
+         },
+       });
+     } else {
+@@ -161,6 +163,8 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
+         sport: form.sport || SPORT.PINGPONG,
+         racketCost: form.racketCost,
+         ownRacketPlayers: form.ownRacketPlayers,
++        courtCount: form.courtCount ?? 1,
++        durationHours: form.durationHours ?? 1,
+       });
+       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
+       showSuccess('Sesja zaktualizowana');
+diff --git a/frontend/src/constants/index.ts b/frontend/src/constants/index.ts
+index face53d..0f11c0c 100644
+--- a/frontend/src/constants/index.ts
++++ b/frontend/src/constants/index.ts
+@@ -32,6 +32,18 @@ export const SPORT_ACCUSATIVE: Record<string, string> = { pingpong: 'ping-ponga'
+  * do rozliczenia jako rabat dla jej posiadacza (patrz `utils/sessionCost`).
+  */
+ export const MULTISPORT_DISCOUNT = 15;
++
++/**
++ * Maksymalna liczba kart MultiSport honorowanych przez obiekt na 1 kort/stół
++ * na 1 godzinę. Przy sesjach wielogodzinnych limit obowiązuje per godzina —
++ * np. badminton 1 kort × 2 godziny = 2 × 4 = 8 kart łącznie.
++ */
++export const MULTISPORT_PER_COURT_HOUR: Record<string, number> = {
++  pingpong: 2,
++  squash: 2,
++  badminton: 4,
++  padel: 4,
++};
+ export const RACKET_PRICE = 5;
+ export const MAX_RENTED_RACKETS = 4; // 2 korty × 2 rakietki — nigdy nie potrzeba więcej
+ export const SOUND_TYPES = { TAB: 'tab', CLICK: 'click', SUCCESS: 'success', DELETE: 'delete', COIN: 'coin', RANK1: 'rank1', ERROR: 'error', STREAK: 'streak' } as const;
+diff --git a/frontend/src/lib/firebase/mutations/sessions.ts b/frontend/src/lib/firebase/mutations/sessions.ts
+index fff365c..506fb8b 100644
+--- a/frontend/src/lib/firebase/mutations/sessions.ts
++++ b/frontend/src/lib/firebase/mutations/sessions.ts
+@@ -12,6 +12,8 @@ interface SessionInput {
+   sport?: Sport;
+   racketCost?: number;
+   ownRacketPlayers?: string[];
++  courtCount?: number;
++  durationHours?: number;
+ }
+ 
+ interface NormalizedSession {
+@@ -21,6 +23,8 @@ interface NormalizedSession {
+   sport: Sport;
+   racketCost?: number;
+   ownRacketPlayers?: string[];
++  courtCount: number;
++  durationHours: number;
+ }
+ 
+ /**
+@@ -66,12 +70,18 @@ function normalizeSession(input: SessionInput): { session: NormalizedSession } |
+     return { error: 'Koszt rakiet nie może przekraczać kosztu sesji' };
+   }
+ 
++  // Liczba kortów i godzin — domyślnie 1 (stare sesje i backward compatibility).
++  const courtCount = Math.max(1, input.courtCount ?? 1);
++  const durationHours = Math.max(1, input.durationHours ?? 1);
++
+   return {
+     session: {
+       cost: totalCost,
+       present,
+       multiPlayers,
+       sport,
++      courtCount,
++      durationHours,
+       ...(racketCost != null && racketCost > 0 ? { racketCost } : {}),
+       ...(ownRacketPlayers.length > 0 ? { ownRacketPlayers } : {}),
+     },
+diff --git a/frontend/src/lib/firebase/transforms.ts b/frontend/src/lib/firebase/transforms.ts
+index 13866d9..c1cd765 100644
+--- a/frontend/src/lib/firebase/transforms.ts
++++ b/frontend/src/lib/firebase/transforms.ts
+@@ -85,6 +85,8 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
+       multisportPlayers: w.multiPlayers || [],
+       racketCost: racketCost > 0 ? racketCost : undefined,
+       ownRacketPlayers: ownRacket.length > 0 ? ownRacket : undefined,
++      courtCount: w.courtCount,
++      durationHours: w.durationHours,
+     };
+   });
+ }
+diff --git a/frontend/src/types/domain.ts b/frontend/src/types/domain.ts
+index 90912b5..e4ebcac 100644
+--- a/frontend/src/types/domain.ts
++++ b/frontend/src/types/domain.ts
+@@ -9,6 +9,16 @@ export interface Week {
+   multiPlayers: string[];
+   racketCost?: number;
+   ownRacketPlayers?: string[];
++  /**
++   * Liczba zarezerwowanych kortów/stołów. Domyślnie 1 (stare sesje).
++   * Wpływa na limit kart MultiSport honorowanych w recepcji.
++   */
++  courtCount?: number;
++  /**
++   * Czas trwania sesji w godzinach. Domyślnie 1 (stare sesje).
++   * Każda godzina ma osobny limit kart MultiSport.
++   */
++  durationHours?: number;
+   /**
+    * @deprecated Zaszłość po usuniętej dogrywce. Tylko do ODCZYTU — rozliczenie
+    * dolicza tę kwotę do kosztu sesji, żeby stare rekordy nie zgubiły pieniędzy.
+diff --git a/frontend/src/types/ui.ts b/frontend/src/types/ui.ts
+index fc15377..660ae4a 100644
+--- a/frontend/src/types/ui.ts
++++ b/frontend/src/types/ui.ts
+@@ -34,6 +34,8 @@ export interface HistoryEntry {
+   multisportPlayers: string[];
+   racketCost?: number;
+   ownRacketPlayers?: string[];
++  courtCount?: number;
++  durationHours?: number;
+ }
+ 
+ export interface Summary {
+@@ -124,6 +126,8 @@ export interface SessionEditForm {
+   sport: Sport;
+   racketCost?: number;
+   ownRacketPlayers?: string[];
++  courtCount?: number;
++  durationHours?: number;
+ }
+ 
+ export interface MonthlySessionData {
+diff --git a/frontend/src/utils/message.ts b/frontend/src/utils/message.ts
+index 195dc4f..78a836b 100644
+--- a/frontend/src/utils/message.ts
++++ b/frontend/src/utils/message.ts
+@@ -11,6 +11,8 @@ interface MessageParams {
+   sport: string;
+   racketCost?: number;
+   ownRacketPlayers?: string[];
++  courtCount?: number;
++  durationHours?: number;
+ }
+ 
+ function describe(group: ShareGroup, sportEmoji: string): string {
+@@ -24,10 +26,10 @@ function describe(group: ShareGroup, sportEmoji: string): string {
+     : '💳 Bez karty';
+ }
+ 
+-export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [] }: MessageParams): string {
++export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], courtCount = 1, durationHours = 1 }: MessageParams): string {
+   // Stawki bierzemy z silnika rozliczeń, więc to, co ludzie przeczytają na
+   // grupie, zgadza się co do grosza z saldami w aplikacji.
+-  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers });
++  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers, courtCount, durationHours, sport });
+   const courtCost = totalCost - racketCost;
+ 
+   const sportEmoji = SPORT_EMOJI[sport] ?? SPORT_EMOJI[SPORT.PINGPONG];
+diff --git a/frontend/src/utils/sessionCost.ts b/frontend/src/utils/sessionCost.ts
+index b2fafbb..a5ac4ab 100644
+--- a/frontend/src/utils/sessionCost.ts
++++ b/frontend/src/utils/sessionCost.ts
+@@ -1,4 +1,4 @@
+-import { MULTISPORT_DISCOUNT } from '@/constants';
++import { MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR } from '@/constants';
+ import { toGrosze, toZloty, allocateNonNegative, splitEqually } from './money';
+ 
+ /**
+@@ -16,6 +16,10 @@ export interface SessionLike {
+   sport?: string;
+   racketCost?: number;
+   ownRacketPlayers?: string[];
++  /** Liczba kortów/stołów. Domyślnie 1 (stare sesje). */
++  courtCount?: number;
++  /** Czas trwania sesji w godzinach. Domyślnie 1 (stare sesje). */
++  durationHours?: number;
+   /** @deprecated Zaszłość po dogrywce — doliczana do kwoty sesji, patrz `parseSession`. */
+   overtimeCost?: number;
+ }
+@@ -40,6 +44,15 @@ export interface SessionShares {
+    * niższa, niż powinna być przy tylu kartach.
+    */
+   discountCapped: boolean;
++  /**
++   * Liczba zaznaczonych kart przekroczyła limit obiektu (korty × godziny × limit/sport).
++   * Zniżka została proporcjonalnie podzielona na wszystkich posiadaczy kart.
++   */
++  multiCapped: boolean;
++  /** Maksymalna liczba kart honorowanych przez obiekt w tej sesji. */
++  maxMulti: number;
++  /** Ile kart faktycznie zadziałało (≤ multiPresentCount, ≤ maxMulti). */
++  effectiveCards: number;
+   /**
+    * Kwota, której nie dało się przypisać nikomu (sesja bez obecnych graczy albo
+    * rakiety, gdy każdy przyszedł z własną). Pokrywa ją organizator.
+@@ -55,6 +68,9 @@ interface ParsedSession {
+   totalGrosze: number;
+   racketGrosze: number;
+   ownRacket: string[];
++  courtCount?: number;
++  durationHours?: number;
++  sport?: string;
+ }
+ 
+ /**
+@@ -89,18 +105,34 @@ function parseSession(session: SessionLike): ParsedSession {
+     totalGrosze,
+     racketGrosze,
+     ownRacket: uniqueNames(session.ownRacketPlayers),
++    // Stare sesje bez tych pól: courtCount/durationHours = undefined,
++    // co oznacza "nie aplikuj limitów" (backward compatible).
++    courtCount: session.courtCount,
++    durationHours: session.durationHours,
++    sport: session.sport,
+   };
+ }
+ 
++/**
++ * Oblicza maksymalną liczbę kart MultiSport honorowanych w danej sesji
++ * na podstawie liczby kortów, godzin i limitu per sport.
++ */
++export function getMaxMulti(sport: string, courtCount: number, durationHours: number): number {
++  const perCourtHour = MULTISPORT_PER_COURT_HOUR[sport] ?? MULTISPORT_PER_COURT_HOUR['pingpong'];
++  return courtCount * durationHours * perCourtHour;
++}
++
+ /**
+  * Podział jest wspólny dla wszystkich dyscyplin: kwota sesji to tyle, ile
+  * organizator faktycznie zapłacił w recepcji — czyli cena kortu pomniejszona
+  * o zniżkę za każdą okazaną kartę Multisport. Żeby rabat trafił do tego, kto
+  * kartę przyniósł, odtwarzamy cenę „pełną" (`base`), a posiadaczom kart
+- * odejmujemy od niej stałą zniżkę. Suma udziałów nadal daje realny koszt.
++ * odejmujemy od niej zniżkę. Gdy kart jest więcej niż limit obiektu, łączna
++ * zniżka jest ograniczona do `effectiveCards × MULTISPORT_DISCOUNT` i dzielona
++ * proporcjonalnie na wszystkich posiadaczy kart.
+  */
+ function computeShares(parsed: ParsedSession): SessionShares {
+-  const { present, multi, totalGrosze, racketGrosze, ownRacket } = parsed;
++  const { present, multi, totalGrosze, racketGrosze, ownRacket, courtCount, durationHours, sport } = parsed;
+ 
+   const court = new Map<string, number>();
+   const racket = new Map<string, number>();
+@@ -110,14 +142,47 @@ function computeShares(parsed: ParsedSession): SessionShares {
+   const courtGrosze = totalGrosze - racketGrosze;
+   const renters = present.filter(p => !ownRacket.includes(p));
+   let discountCapped = false;
++  let multiCapped = false;
++
++  // Limit kart MultiSport: korty × godziny × limit/sport.
++  // Stare sesje bez courtCount/durationHours: nie aplikujemy limitów (backward compatible).
++  const maxMulti = (courtCount !== undefined && durationHours !== undefined && sport !== undefined)
++    ? getMaxMulti(sport, courtCount, durationHours)
++    : Infinity;
++  const multiPresentCount = multi.filter(p => present.includes(p)).length;
++  const effectiveCards = Math.min(multiPresentCount, maxMulti);
+ 
+   if (present.length === 0) {
+     unallocatedGrosze += courtGrosze;
+   } else {
+-    const multiPresentCount = multi.filter(p => present.includes(p)).length;
+-    const base = (courtGrosze + multiPresentCount * discount) / present.length;
+-    const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
+-    discountCapped = multiPresentCount > 0 && base < discount;
++    multiCapped = multiPresentCount > maxMulti && multiPresentCount > 0;
++
++    // Odtwarzamy cenę pełną: zapłacone + efektywna zniżka (nie więcej niż limit).
++    const base = (courtGrosze + effectiveCards * discount) / present.length;
++
++    // Gdy kart jest więcej niż limit, zniżka per karta jest proporcjonalnie mniejsza.
++    // Np. 5 kart, limit 4: każda dostaje 4/5 × 15 = 12 zł zamiast 15 zł.
++    const discountPerCard = multiPresentCount > 0
++      ? Math.floor(effectiveCards * discount / multiPresentCount)
++      : 0;
++    const remainderGrosze = effectiveCards * discount - discountPerCard * multiPresentCount;
++
++    let targets: number[];
++    if (multiPresentCount > 0 && multiPresentCount > maxMulti) {
++      // Proporcjonalne dzielenie: każda karta dostaje discountPerCard,
++      // a pierwszych `remainderGrosze` kart dostaje jeszcze +1 grosz.
++      let cardIndex = 0;
++      targets = present.map(p => {
++        if (!multi.includes(p)) return base;
++        const extra = cardIndex < remainderGrosze ? 1 : 0;
++        cardIndex++;
++        return base - discountPerCard - extra;
++      });
++    } else {
++      targets = present.map(p => base - (multi.includes(p) ? discount : 0));
++    }
++
++    discountCapped = multiPresentCount > 0 && base < (multiPresentCount > maxMulti ? discountPerCard : discount);
+     // Gdy zniżka jest większa niż udział, cel schodzi poniżej zera. Wtedy
+     // `allocateNonNegative` zeruje takiego gracza, a niewykorzystaną część
+     // rabatu rozdziela na pozostałych — suma wciąż daje zapłaconą kwotę.
+@@ -160,6 +225,9 @@ function computeShares(parsed: ParsedSession): SessionShares {
+     baseCourt: toZloty(Math.round(baseCourtGrosze)),
+     baseCourtMulti: toZloty(Math.round(withCard.length > 0 ? average(withCard) : baseCourtGrosze)),
+     discountCapped,
++    multiCapped,
++    maxMulti,
++    effectiveCards,
+     unallocated: toZloty(unallocatedGrosze),
+   };
+ }
+@@ -176,7 +244,7 @@ const sharesCache = new WeakMap<SessionLike, SessionShares>();
+  */
+ export function getSessionShares(session: SessionLike): SessionShares {
+   if (!session || typeof session !== 'object') {
+-    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, unallocated: 0 };
++    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, multiCapped: false, maxMulti: 0, effectiveCards: 0, unallocated: 0 };
+   }
+   const cached = sharesCache.get(session);
+   if (cached) return cached;
+diff --git a/frontend/vite.config.ts b/frontend/vite.config.ts
+index 9fdb5ae..6d86d88 100644
+--- a/frontend/vite.config.ts
++++ b/frontend/vite.config.ts
+@@ -90,6 +90,9 @@ export default defineConfig({
+     // Aplikacja musi znać własne wydanie, żeby porównać je z `version.json`.
+     __CP_APP_BUILD__: JSON.stringify(BUILD_ID),
+   },
++  server: {
++    allowedHosts: true,
++  },
+   resolve: {
+     alias: {
+       '@': path.resolve(__dirname, 'src'),
+diff --git a/functions/sessionCost.js b/functions/sessionCost.js
+index 7149681..edc13b3 100644
+--- a/functions/sessionCost.js
++++ b/functions/sessionCost.js
+@@ -10,6 +10,19 @@ const GROSZE_PER_ZLOTY = 100;
+ const MULTISPORT_DISCOUNT = 15;
+ const RACKET_RENTAL_SPORTS = new Set(['squash', 'badminton', 'padel']);
+ 
++// Limit kart MultiSport na kort × godzinę per sport — patrz constants/index.ts.
++const MULTISPORT_PER_COURT_HOUR = {
++  pingpong: 2,
++  squash: 2,
++  badminton: 4,
++  padel: 4,
++};
++
++function getMaxMulti(sport, courtCount, durationHours) {
++  const perCourtHour = MULTISPORT_PER_COURT_HOUR[sport] || MULTISPORT_PER_COURT_HOUR.pingpong;
++  return (courtCount || 1) * (durationHours || 1) * perCourtHour;
++}
++
+ function hasRacketRental(sport) {
+   return RACKET_RENTAL_SPORTS.has(sport);
+ }
+@@ -125,6 +138,11 @@ function parseSession(session) {
+     totalGrosze,
+     racketGrosze,
+     ownRacket: uniqueNames(session.ownRacketPlayers),
++    // Stare sesje bez tych pól: courtCount/durationHours = undefined,
++    // co oznacza "nie aplikuj limitów" (backward compatible).
++    courtCount: session.courtCount,
++    durationHours: session.durationHours,
++    sport: session.sport,
+   };
+ }
+ 
+@@ -134,10 +152,10 @@ function parseSession(session) {
+  */
+ function getSessionShares(session) {
+   if (!session || typeof session !== 'object') {
+-    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, unallocated: 0 };
++    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, multiCapped: false, maxMulti: 0, effectiveCards: 0, unallocated: 0 };
+   }
+ 
+-  const { present, multi, totalGrosze, racketGrosze, ownRacket } = parseSession(session);
++  const { present, multi, totalGrosze, racketGrosze, ownRacket, courtCount, durationHours, sport } = parseSession(session);
+ 
+   const court = new Map();
+   const racket = new Map();
+@@ -147,16 +165,45 @@ function getSessionShares(session) {
+   const courtGrosze = totalGrosze - racketGrosze;
+   const renters = present.filter(p => !ownRacket.includes(p));
+   let discountCapped = false;
++  let multiCapped = false;
++
++  // Limit kart MultiSport: korty × godziny × limit/sport.
++  // Stare sesje bez courtCount/durationHours: nie aplikujemy limitów (backward compatible).
++  const maxMulti = (courtCount !== undefined && durationHours !== undefined && sport !== undefined)
++    ? getMaxMulti(sport, courtCount, durationHours)
++    : Infinity;
++  let effectiveCards = 0;
+ 
+   if (present.length === 0) {
+     unallocatedGrosze += courtGrosze;
+   } else {
+     const multiPresentCount = multi.filter(p => present.includes(p)).length;
+-    const base = (courtGrosze + multiPresentCount * discount) / present.length;
+-    const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
+-    discountCapped = multiPresentCount > 0 && base < discount;
+-    // Gdy zniżka jest większa niż udział, `allocateNonNegative` zeruje takiego
+-    // gracza i rozdziela resztę na pozostałych — patrz sessionCost.ts.
++    effectiveCards = Math.min(multiPresentCount, maxMulti);
++    multiCapped = multiPresentCount > maxMulti && multiPresentCount > 0;
++
++    // Odtwarzamy cenę pełną: zapłacone + efektywna zniżka (nie więcej niż limit).
++    const base = (courtGrosze + effectiveCards * discount) / present.length;
++
++    // Gdy kart jest więcej niż limit, zniżka per karta jest proporcjonalnie mniejsza.
++    const discountPerCard = multiPresentCount > 0
++      ? Math.floor(effectiveCards * discount / multiPresentCount)
++      : 0;
++    const remainderGrosze = effectiveCards * discount - discountPerCard * multiPresentCount;
++
++    let targets;
++    if (multiPresentCount > 0 && multiPresentCount > maxMulti) {
++      let cardIndex = 0;
++      targets = present.map(p => {
++        if (!multi.includes(p)) return base;
++        const extra = cardIndex < remainderGrosze ? 1 : 0;
++        cardIndex++;
++        return base - discountPerCard - extra;
++      });
++    } else {
++      targets = present.map(p => base - (multi.includes(p) ? discount : 0));
++    }
++
++    discountCapped = multiPresentCount > 0 && base < (multiPresentCount > maxMulti ? discountPerCard : discount);
+     const allocated = allocateNonNegative(targets, courtGrosze);
+     present.forEach((p, i) => court.set(p, allocated[i]));
+   }
+@@ -194,13 +241,18 @@ function getSessionShares(session) {
+     baseCourt: toZloty(Math.round(baseCourtGrosze)),
+     baseCourtMulti: toZloty(Math.round(withCard.length > 0 ? average(withCard) : baseCourtGrosze)),
+     discountCapped,
++    multiCapped,
++    maxMulti,
++    effectiveCards,
+     unallocated: toZloty(unallocatedGrosze),
+   };
+ }
+ 
+ module.exports = {
+   MULTISPORT_DISCOUNT,
++  MULTISPORT_PER_COURT_HOUR,
+   hasRacketRental,
++  getMaxMulti,
+   toGrosze,
+   toZloty,
+   allocateExact,
