@@ -85,6 +85,8 @@ function buildHistory(weeks: Week[]): HistoryEntry[] {
       multisportPlayers: w.multiPlayers || [],
       racketCost: racketCost > 0 ? racketCost : undefined,
       ownRacketPlayers: ownRacket.length > 0 ? ownRacket : undefined,
+      courtCount: w.courtCount,
+      durationHours: w.durationHours,
     };
   });
 }

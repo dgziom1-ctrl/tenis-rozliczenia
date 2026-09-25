@@ -210,3 +210,103 @@ describe('getShareGroups', () => {
     expect(collected).toBeCloseTo(100, 2);
   });
 });
+
+describe('limit kart MultiSport', () => {
+  // Domyślne limity: pingpong/squash = 2, badminton/padel = 4 (na kort/godzinę).
+
+  it('bez courtCount/durationHours domyślnie 1 kort × 1 godzina', () => {
+    // Badminton, limit 4 karty. 3 graczy z kartą mieści się w limicie.
+    const s = { totalCost: 100, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D'], multisportPlayers: ['A', 'B', 'C'] };
+    const shares = getSessionShares(s);
+    expect(shares.multiCapped).toBe(false);
+    expect(shares.maxMulti).toBe(4);
+    expect(shares.effectiveCards).toBe(3);
+    // Pełna zniżka 15 zł na kartę.
+    expect(getPlayerSessionCost(s, 'A')).toBe(getPlayerSessionCost(s, 'D') - 15);
+  });
+
+  it('przekroczenie limitu — zniżka proporcjonalnie podzielona', () => {
+    // Badminton 1 kort × 1 godzina = limit 4 karty. 5 graczy z kartą.
+    // Zapłacono: 145 − 4×15 = 85 zł (bo tylko 4 karty zadziałały).
+    const s = { totalCost: 85, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 1 };
+    const shares = getSessionShares(s);
+    expect(shares.multiCapped).toBe(true);
+    expect(shares.maxMulti).toBe(4);
+    expect(shares.effectiveCards).toBe(4);
+    // Każda karta dostaje 4/5 × 15 = 12 zł zniżki.
+    // Base = (85 + 4×15) / 5 = 145/5 = 29 zł.
+    // Każdy z kartą płaci: 29 − 12 = 17 zł.
+    expect(getPlayerSessionCost(s, 'A')).toBe(17);
+    expect(getPlayerSessionCost(s, 'E')).toBe(17);
+    expect(sum(s)).toBeCloseTo(85, 2);
+  });
+
+  it('przekroczenie limitu z graczami bez karty', () => {
+    // Badminton 1 kort × 1 godzina = limit 4. 5 z kartą + 1 bez = 6 graczy.
+    // Zapłacono: 174 − 4×15 = 114 zł.
+    const s = { totalCost: 114, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E', 'F'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 1 };
+    const shares = getSessionShares(s);
+    expect(shares.multiCapped).toBe(true);
+    expect(shares.effectiveCards).toBe(4);
+    // Base = (114 + 60) / 6 = 174/6 = 29 zł.
+    // Zniżka per karta: 60/5 = 12 zł.
+    // Z kartą: 29 − 12 = 17 zł.
+    // Bez karty: 29 zł.
+    expect(getPlayerSessionCost(s, 'A')).toBe(17);
+    expect(getPlayerSessionCost(s, 'F')).toBe(29);
+    expect(sum(s)).toBeCloseTo(114, 2);
+  });
+
+  it('2 godziny podwajają limit', () => {
+    // Badminton 1 kort × 2 godziny = limit 8 kart.
+    const s = { totalCost: 100, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 2 };
+    const shares = getSessionShares(s);
+    expect(shares.multiCapped).toBe(false);
+    expect(shares.maxMulti).toBe(8);
+    expect(shares.effectiveCards).toBe(5);
+    // Wszystkie 5 kart mieści się w limicie — pełna zniżka 15 zł.
+    expect(getPlayerSessionCost(s, 'A')).toBe(getPlayerSessionCost(s, 'E'));
+  });
+
+  it('2 korty × 2 godziny = limit 16 dla badmintona', () => {
+    const s = { totalCost: 200, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E', 'F'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 2, durationHours: 2 };
+    const shares = getSessionShares(s);
+    expect(shares.multiCapped).toBe(false);
+    expect(shares.maxMulti).toBe(16);
+  });
+
+  it('squash ma limit 2 karty/kort/godzinę', () => {
+    // Squash 1 kort × 1 godzina = limit 2. 3 graczy z kartą.
+    const s = { totalCost: 60, sport: 'squash', presentPlayers: ['A', 'B', 'C'], multisportPlayers: ['A', 'B', 'C'], courtCount: 1, durationHours: 1 };
+    const shares = getSessionShares(s);
+    expect(shares.multiCapped).toBe(true);
+    expect(shares.maxMulti).toBe(2);
+    expect(shares.effectiveCards).toBe(2);
+    // Base = (60 + 2×15) / 3 = 90/3 = 30 zł.
+    // Zniżka per karta: 30/3 = 10 zł.
+    // Każdy z kartą: 30 − 10 = 20 zł.
+    expect(getPlayerSessionCost(s, 'A')).toBe(20);
+    expect(sum(s)).toBeCloseTo(60, 2);
+  });
+
+  it('pingpong ma limit 2 karty/stół/godzinę', () => {
+    const s = { totalCost: 20, sport: 'pingpong', presentPlayers: ['A', 'B', 'C', 'D'], multisportPlayers: ['A', 'B', 'C'], courtCount: 1, durationHours: 1 };
+    const shares = getSessionShares(s);
+    expect(shares.multiCapped).toBe(true);
+    expect(shares.maxMulti).toBe(2);
+    expect(shares.effectiveCards).toBe(2);
+  });
+
+  it('suma udziałów zawsze równa kwocie sesji przy przekroczonym limicie', () => {
+    // Różne kombinacje — suma musi się zgadzać co do grosza.
+    const cases = [
+      { totalCost: 85, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 1 },
+      { totalCost: 114, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E', 'F'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'], courtCount: 1, durationHours: 1 },
+      { totalCost: 60, sport: 'squash', presentPlayers: ['A', 'B', 'C'], multisportPlayers: ['A', 'B', 'C'], courtCount: 1, durationHours: 1 },
+      { totalCost: 33, sport: 'pingpong', presentPlayers: ['A', 'B', 'C', 'D', 'E'], multisportPlayers: ['A', 'B', 'C', 'D'], courtCount: 1, durationHours: 1 },
+    ];
+    for (const s of cases) {
+      expect(sum(s)).toBeCloseTo(s.totalCost, 2);
+    }
+  });
+});

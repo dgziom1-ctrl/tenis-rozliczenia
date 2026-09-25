@@ -12,6 +12,8 @@ interface SessionInput {
   sport?: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  courtCount?: number;
+  durationHours?: number;
 }
 
 interface NormalizedSession {
@@ -21,6 +23,8 @@ interface NormalizedSession {
   sport: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  courtCount: number;
+  durationHours: number;
 }
 
 /**
@@ -66,12 +70,18 @@ function normalizeSession(input: SessionInput): { session: NormalizedSession } |
     return { error: 'Koszt rakiet nie może przekraczać kosztu sesji' };
   }
 
+  // Liczba kortów i godzin — domyślnie 1 (stare sesje i backward compatibility).
+  const courtCount = Math.max(1, input.courtCount ?? 1);
+  const durationHours = Math.max(1, input.durationHours ?? 1);
+
   return {
     session: {
       cost: totalCost,
       present,
       multiPlayers,
       sport,
+      courtCount,
+      durationHours,
       ...(racketCost != null && racketCost > 0 ? { racketCost } : {}),
       ...(ownRacketPlayers.length > 0 ? { ownRacketPlayers } : {}),
     },

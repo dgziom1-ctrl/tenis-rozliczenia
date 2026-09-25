@@ -10,6 +10,19 @@ const GROSZE_PER_ZLOTY = 100;
 const MULTISPORT_DISCOUNT = 15;
 const RACKET_RENTAL_SPORTS = new Set(['squash', 'badminton', 'padel']);
 
+// Limit kart MultiSport na kort × godzinę per sport — patrz constants/index.ts.
+const MULTISPORT_PER_COURT_HOUR = {
+  pingpong: 2,
+  squash: 2,
+  badminton: 4,
+  padel: 4,
+};
+
+function getMaxMulti(sport, courtCount, durationHours) {
+  const perCourtHour = MULTISPORT_PER_COURT_HOUR[sport] || MULTISPORT_PER_COURT_HOUR.pingpong;
+  return (courtCount || 1) * (durationHours || 1) * perCourtHour;
+}
+
 function hasRacketRental(sport) {
   return RACKET_RENTAL_SPORTS.has(sport);
 }
@@ -125,6 +138,9 @@ function parseSession(session) {
     totalGrosze,
     racketGrosze,
     ownRacket: uniqueNames(session.ownRacketPlayers),
+    courtCount: Math.max(1, session.courtCount || 1),
+    durationHours: Math.max(1, session.durationHours || 1),
+    sport: session.sport || 'pingpong',
   };
 }
 
@@ -134,10 +150,10 @@ function parseSession(session) {
  */
 function getSessionShares(session) {
   if (!session || typeof session !== 'object') {
-    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, unallocated: 0 };
+    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, multiCapped: false, maxMulti: 0, effectiveCards: 0, unallocated: 0 };
   }
 
-  const { present, multi, totalGrosze, racketGrosze, ownRacket } = parseSession(session);
+  const { present, multi, totalGrosze, racketGrosze, ownRacket, courtCount, durationHours, sport } = parseSession(session);
 
   const court = new Map();
   const racket = new Map();
@@ -147,16 +163,42 @@ function getSessionShares(session) {
   const courtGrosze = totalGrosze - racketGrosze;
   const renters = present.filter(p => !ownRacket.includes(p));
   let discountCapped = false;
+  let multiCapped = false;
+
+  // Limit kart MultiSport: korty × godziny × limit/sport.
+  const maxMulti = getMaxMulti(sport, courtCount, durationHours);
+  let effectiveCards = 0;
 
   if (present.length === 0) {
     unallocatedGrosze += courtGrosze;
   } else {
     const multiPresentCount = multi.filter(p => present.includes(p)).length;
-    const base = (courtGrosze + multiPresentCount * discount) / present.length;
-    const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
-    discountCapped = multiPresentCount > 0 && base < discount;
-    // Gdy zniżka jest większa niż udział, `allocateNonNegative` zeruje takiego
-    // gracza i rozdziela resztę na pozostałych — patrz sessionCost.ts.
+    effectiveCards = Math.min(multiPresentCount, maxMulti);
+    multiCapped = multiPresentCount > maxMulti && multiPresentCount > 0;
+
+    // Odtwarzamy cenę pełną: zapłacone + efektywna zniżka (nie więcej niż limit).
+    const base = (courtGrosze + effectiveCards * discount) / present.length;
+
+    // Gdy kart jest więcej niż limit, zniżka per karta jest proporcjonalnie mniejsza.
+    const discountPerCard = multiPresentCount > 0
+      ? Math.floor(effectiveCards * discount / multiPresentCount)
+      : 0;
+    const remainderGrosze = effectiveCards * discount - discountPerCard * multiPresentCount;
+
+    let targets;
+    if (multiPresentCount > 0 && multiPresentCount > maxMulti) {
+      let cardIndex = 0;
+      targets = present.map(p => {
+        if (!multi.includes(p)) return base;
+        const extra = cardIndex < remainderGrosze ? 1 : 0;
+        cardIndex++;
+        return base - discountPerCard - extra;
+      });
+    } else {
+      targets = present.map(p => base - (multi.includes(p) ? discount : 0));
+    }
+
+    discountCapped = multiPresentCount > 0 && base < (multiPresentCount > maxMulti ? discountPerCard : discount);
     const allocated = allocateNonNegative(targets, courtGrosze);
     present.forEach((p, i) => court.set(p, allocated[i]));
   }
@@ -194,13 +236,18 @@ function getSessionShares(session) {
     baseCourt: toZloty(Math.round(baseCourtGrosze)),
     baseCourtMulti: toZloty(Math.round(withCard.length > 0 ? average(withCard) : baseCourtGrosze)),
     discountCapped,
+    multiCapped,
+    maxMulti,
+    effectiveCards,
     unallocated: toZloty(unallocatedGrosze),
   };
 }
 
 module.exports = {
   MULTISPORT_DISCOUNT,
+  MULTISPORT_PER_COURT_HOUR,
   hasRacketRental,
+  getMaxMulti,
   toGrosze,
   toZloty,
   allocateExact,

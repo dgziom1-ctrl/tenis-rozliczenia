@@ -34,6 +34,8 @@ export interface HistoryEntry {
   multisportPlayers: string[];
   racketCost?: number;
   ownRacketPlayers?: string[];
+  courtCount?: number;
+  durationHours?: number;
 }
 
 export interface Summary {
@@ -124,6 +126,8 @@ export interface SessionEditForm {
   sport: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  courtCount?: number;
+  durationHours?: number;
 }
 
 export interface MonthlySessionData {

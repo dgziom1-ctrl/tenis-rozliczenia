@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
 import { PanelHeader, FieldGroup } from '../common/SharedUI';
 import { addSession } from '@/lib/firebase';
-import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, MAX_RENTED_RACKETS, MULTISPORT_DISCOUNT, hasRacketRental } from '@/constants';
+import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, MAX_RENTED_RACKETS, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
 import { CLIP, CONTENT_WIDTH } from '@/constants/styles';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
@@ -40,11 +40,14 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
   const [racketCount,       setRacketCount]       = useState(0);
   const [racketPrice,       setRacketPrice]       = useState(RACKET_PRICE);
   const [ownRacketPlayers,  setOwnRacketPlayers]  = useState<string[]>([]);
+  const [courtCount,        setCourtCount]        = useState(1);
+  const [durationHours,     setDurationHours]     = useState(1);
   const [isSaving,          setIsSaving]          = useState(false);
   const [savedSummary,      setSavedSummary]      = useState<{
     date: string; totalCost: number; sport: Sport;
     presentPlayers: string[]; multisportPlayers: string[];
     racketCost: number; ownRacketPlayers: string[];
+    courtCount: number; durationHours: number;
     highlights: SessionHighlight[];
   } | null>(null);
   const [costTouched,       setCostTouched]       = useState(false);
@@ -67,6 +70,12 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
   const totalCostError = isCostValid
     ? null
     : (totalCost === '' ? 'Wpisz koszt sesji żeby kontynuować' : 'Koszt musi być liczbą >= 0');
+
+  // Limit kart MultiSport: korty × godziny × limit/sport.
+  const perCourtHour = MULTISPORT_PER_COURT_HOUR[sport] ?? MULTISPORT_PER_COURT_HOUR[SPORT.PINGPONG];
+  const maxMulti = courtCount * durationHours * perCourtHour;
+  const multiPresentCount = multisportPlayers.filter(p => presentPlayers.includes(p)).length;
+  const multiOverLimit = multiPresentCount > maxMulti && multiPresentCount > 0;
 
   const initializedRef = useRef(false);
   useEffect(() => {
@@ -116,6 +125,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
         presentPlayers,
         multisportPlayers,
         sport,
+        courtCount,
+        durationHours,
         ...(racketCost > 0 ? { racketCost } : {}),
         ...(ownRacketForSession.length > 0 ? { ownRacketPlayers: ownRacketForSession } : {}),
       });
@@ -143,6 +154,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
         multisportPlayers: [...multisportPlayers],
         racketCost,
         ownRacketPlayers: [...ownRacketForSession],
+        courtCount,
+        durationHours,
         highlights,
       });
       setTotalCost('');
@@ -150,10 +163,12 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
       setRacketCount(0);
       setRacketPrice(RACKET_PRICE);
       setOwnRacketPlayers([]);
+      setCourtCount(1);
+      setDurationHours(1);
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, racketCost, players, history]);
+  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, racketCost, players, history, courtCount, durationHours]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
@@ -180,6 +195,66 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
             <div>
               <FieldLabel>Sport</FieldLabel>
               <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); setRacketCount(0); setRacketPrice(RACKET_PRICE); setOwnRacketPlayers([]); }} />
+            </div>
+
+            {/* Korty + godziny */}
+            <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ flex: 1 }}>
+                <FieldLabel>Korty / stoły</FieldLabel>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {[1, 2, 3].map(n => {
+                    const active = courtCount === n;
+                    return (
+                      <button type="button" key={n}
+                        onClick={() => { setCourtCount(n); playSound(SOUND_TYPES.CLICK); }}
+                        style={{
+                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
+                          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
+                          clipPath: CLIP.badge,
+                          ...(active ? {
+                            background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
+                            color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
+                          } : {
+                            background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
+                          }),
+                        }}>
+                        {n}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
+                  {'>'} Limit kart: {maxMulti} ({perCourtHour}/kort/h)
+                </p>
+              </div>
+              <div style={{ flex: 1 }}>
+                <FieldLabel>Godziny</FieldLabel>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {[1, 2, 3].map(n => {
+                    const active = durationHours === n;
+                    return (
+                      <button type="button" key={n}
+                        onClick={() => { setDurationHours(n); playSound(SOUND_TYPES.CLICK); }}
+                        style={{
+                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
+                          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
+                          clipPath: CLIP.badge,
+                          ...(active ? {
+                            background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
+                            color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
+                          } : {
+                            background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
+                          }),
+                        }}>
+                        {n}h
+                      </button>
+                    );
+                  })}
+                </div>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
+                  {'>'} {durationHours > 1 ? `${durationHours}h × ` : ''}{perCourtHour}/kort/h = {maxMulti} kart
+                </p>
+              </div>
             </div>
 
             {/* Date */}
@@ -238,6 +313,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                 counterColor="var(--co-green)"
               >
                 <PlayerToggleGrid names={presentPlayers} selected={multisportPlayers} onToggle={toggleMulti} accent="green" />
+                {multiOverLimit && (
+                  <p role="alert" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    ⚠ Limit {maxMulti} kart przekroczony — zniżka zostanie proporcjonalnie podzielona na {multiPresentCount} osób ({Math.floor(maxMulti * MULTISPORT_DISCOUNT / multiPresentCount)} zł/os. zamiast {MULTISPORT_DISCOUNT} zł)
+                  </p>
+                )}
               </FieldGroup>
             )}
 
@@ -331,7 +411,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
             )}
 
             {/* Live preview */}
-            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} ownRacketPlayers={ownRacketPlayers} racketCount={effectiveRacketCount} />
+            <LiveCostPreview totalCost={totalCost} presentPlayers={presentPlayers} multisportPlayers={multisportPlayers} sport={sport} racketCost={racketCost} ownRacketPlayers={ownRacketPlayers} racketCount={effectiveRacketCount} courtCount={courtCount} durationHours={durationHours} />
 
             {/* Submit */}
             <div>

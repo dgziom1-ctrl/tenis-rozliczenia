@@ -48,6 +48,9 @@ export default function EditSessionForm({
       presentPlayers: editForm.present,
       multisportPlayers: editForm.multiPlayers ?? [],
       ownRacketPlayers: editForm.ownRacketPlayers ?? [],
+      courtCount: editForm.courtCount ?? 1,
+      durationHours: editForm.durationHours ?? 1,
+      sport: editForm.sport,
     })
     : [];
 

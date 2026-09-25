@@ -1,4 +1,4 @@
-import { MULTISPORT_DISCOUNT } from '@/constants';
+import { MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR } from '@/constants';
 import { toGrosze, toZloty, allocateNonNegative, splitEqually } from './money';
 
 /**
@@ -16,6 +16,10 @@ export interface SessionLike {
   sport?: string;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  /** Liczba kortów/stołów. Domyślnie 1 (stare sesje). */
+  courtCount?: number;
+  /** Czas trwania sesji w godzinach. Domyślnie 1 (stare sesje). */
+  durationHours?: number;
   /** @deprecated Zaszłość po dogrywce — doliczana do kwoty sesji, patrz `parseSession`. */
   overtimeCost?: number;
 }
@@ -41,6 +45,15 @@ export interface SessionShares {
    */
   discountCapped: boolean;
   /**
+   * Liczba zaznaczonych kart przekroczyła limit obiektu (korty × godziny × limit/sport).
+   * Zniżka została proporcjonalnie podzielona na wszystkich posiadaczy kart.
+   */
+  multiCapped: boolean;
+  /** Maksymalna liczba kart honorowanych przez obiekt w tej sesji. */
+  maxMulti: number;
+  /** Ile kart faktycznie zadziałało (≤ multiPresentCount, ≤ maxMulti). */
+  effectiveCards: number;
+  /**
    * Kwota, której nie dało się przypisać nikomu (sesja bez obecnych graczy albo
    * rakiety, gdy każdy przyszedł z własną). Pokrywa ją organizator.
    */
@@ -55,6 +68,9 @@ interface ParsedSession {
   totalGrosze: number;
   racketGrosze: number;
   ownRacket: string[];
+  courtCount: number;
+  durationHours: number;
+  sport: string;
 }
 
 /**
@@ -89,7 +105,20 @@ function parseSession(session: SessionLike): ParsedSession {
     totalGrosze,
     racketGrosze,
     ownRacket: uniqueNames(session.ownRacketPlayers),
+    // Stare sesje bez tych pól dostają domyślne wartości — backward compatible.
+    courtCount: Math.max(1, session.courtCount ?? 1),
+    durationHours: Math.max(1, session.durationHours ?? 1),
+    sport: session.sport ?? 'pingpong',
   };
+}
+
+/**
+ * Oblicza maksymalną liczbę kart MultiSport honorowanych w danej sesji
+ * na podstawie liczby kortów, godzin i limitu per sport.
+ */
+export function getMaxMulti(sport: string, courtCount: number, durationHours: number): number {
+  const perCourtHour = MULTISPORT_PER_COURT_HOUR[sport] ?? MULTISPORT_PER_COURT_HOUR['pingpong'];
+  return courtCount * durationHours * perCourtHour;
 }
 
 /**
@@ -97,10 +126,12 @@ function parseSession(session: SessionLike): ParsedSession {
  * organizator faktycznie zapłacił w recepcji — czyli cena kortu pomniejszona
  * o zniżkę za każdą okazaną kartę Multisport. Żeby rabat trafił do tego, kto
  * kartę przyniósł, odtwarzamy cenę „pełną" (`base`), a posiadaczom kart
- * odejmujemy od niej stałą zniżkę. Suma udziałów nadal daje realny koszt.
+ * odejmujemy od niej zniżkę. Gdy kart jest więcej niż limit obiektu, łączna
+ * zniżka jest ograniczona do `effectiveCards × MULTISPORT_DISCOUNT` i dzielona
+ * proporcjonalnie na wszystkich posiadaczy kart.
  */
 function computeShares(parsed: ParsedSession): SessionShares {
-  const { present, multi, totalGrosze, racketGrosze, ownRacket } = parsed;
+  const { present, multi, totalGrosze, racketGrosze, ownRacket, courtCount, durationHours, sport } = parsed;
 
   const court = new Map<string, number>();
   const racket = new Map<string, number>();
@@ -110,14 +141,44 @@ function computeShares(parsed: ParsedSession): SessionShares {
   const courtGrosze = totalGrosze - racketGrosze;
   const renters = present.filter(p => !ownRacket.includes(p));
   let discountCapped = false;
+  let multiCapped = false;
+
+  // Limit kart MultiSport: korty × godziny × limit/sport.
+  const maxMulti = getMaxMulti(sport, courtCount, durationHours);
+  const multiPresentCount = multi.filter(p => present.includes(p)).length;
+  const effectiveCards = Math.min(multiPresentCount, maxMulti);
 
   if (present.length === 0) {
     unallocatedGrosze += courtGrosze;
   } else {
-    const multiPresentCount = multi.filter(p => present.includes(p)).length;
-    const base = (courtGrosze + multiPresentCount * discount) / present.length;
-    const targets = present.map(p => base - (multi.includes(p) ? discount : 0));
-    discountCapped = multiPresentCount > 0 && base < discount;
+    multiCapped = multiPresentCount > maxMulti && multiPresentCount > 0;
+
+    // Odtwarzamy cenę pełną: zapłacone + efektywna zniżka (nie więcej niż limit).
+    const base = (courtGrosze + effectiveCards * discount) / present.length;
+
+    // Gdy kart jest więcej niż limit, zniżka per karta jest proporcjonalnie mniejsza.
+    // Np. 5 kart, limit 4: każda dostaje 4/5 × 15 = 12 zł zamiast 15 zł.
+    const discountPerCard = multiPresentCount > 0
+      ? Math.floor(effectiveCards * discount / multiPresentCount)
+      : 0;
+    const remainderGrosze = effectiveCards * discount - discountPerCard * multiPresentCount;
+
+    let targets: number[];
+    if (multiPresentCount > 0 && multiPresentCount > maxMulti) {
+      // Proporcjonalne dzielenie: każda karta dostaje discountPerCard,
+      // a pierwszych `remainderGrosze` kart dostaje jeszcze +1 grosz.
+      let cardIndex = 0;
+      targets = present.map(p => {
+        if (!multi.includes(p)) return base;
+        const extra = cardIndex < remainderGrosze ? 1 : 0;
+        cardIndex++;
+        return base - discountPerCard - extra;
+      });
+    } else {
+      targets = present.map(p => base - (multi.includes(p) ? discount : 0));
+    }
+
+    discountCapped = multiPresentCount > 0 && base < (multiPresentCount > maxMulti ? discountPerCard : discount);
     // Gdy zniżka jest większa niż udział, cel schodzi poniżej zera. Wtedy
     // `allocateNonNegative` zeruje takiego gracza, a niewykorzystaną część
     // rabatu rozdziela na pozostałych — suma wciąż daje zapłaconą kwotę.
@@ -160,6 +221,9 @@ function computeShares(parsed: ParsedSession): SessionShares {
     baseCourt: toZloty(Math.round(baseCourtGrosze)),
     baseCourtMulti: toZloty(Math.round(withCard.length > 0 ? average(withCard) : baseCourtGrosze)),
     discountCapped,
+    multiCapped,
+    maxMulti,
+    effectiveCards,
     unallocated: toZloty(unallocatedGrosze),
   };
 }
@@ -176,7 +240,7 @@ const sharesCache = new WeakMap<SessionLike, SessionShares>();
  */
 export function getSessionShares(session: SessionLike): SessionShares {
   if (!session || typeof session !== 'object') {
-    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, unallocated: 0 };
+    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, discountCapped: false, multiCapped: false, maxMulti: 0, effectiveCards: 0, unallocated: 0 };
   }
   const cached = sharesCache.get(session);
   if (cached) return cached;

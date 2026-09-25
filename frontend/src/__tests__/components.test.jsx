@@ -310,7 +310,7 @@ describe('LiveCostPreview — podgląd nie może obiecać innej kwoty niż zapł
     totalCost: '1',
     presentPlayers: ['Rafał', 'Kamil', 'Przemek', 'Mariusz', 'Arek', 'Krzysiek'],
     multisportPlayers: ['Rafał', 'Kamil', 'Krzysiek'],
-    sport: 'pingpong',
+    sport: 'badminton',
   };
 
   it('pokazuje stawki, które sumują się do wpisanej kwoty', () => {
