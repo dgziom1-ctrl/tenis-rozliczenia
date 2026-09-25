@@ -145,13 +145,12 @@ function computeShares(parsed: ParsedSession): SessionShares {
 
   // Limit kart MultiSport: korty × godziny × limit/sport.
   const maxMulti = getMaxMulti(sport, courtCount, durationHours);
+  const multiPresentCount = multi.filter(p => present.includes(p)).length;
+  const effectiveCards = Math.min(multiPresentCount, maxMulti);
 
   if (present.length === 0) {
     unallocatedGrosze += courtGrosze;
   } else {
-    const multiPresentCount = multi.filter(p => present.includes(p)).length;
-    // Ile kart faktycznie zadziałało w recepcji.
-    const effectiveCards = Math.min(multiPresentCount, maxMulti);
     multiCapped = multiPresentCount > maxMulti && multiPresentCount > 0;
 
     // Odtwarzamy cenę pełną: zapłacone + efektywna zniżka (nie więcej niż limit).
@@ -185,9 +184,6 @@ function computeShares(parsed: ParsedSession): SessionShares {
     // rabatu rozdziela na pozostałych — suma wciąż daje zapłaconą kwotę.
     const allocated = allocateNonNegative(targets, courtGrosze);
     present.forEach((p, i) => court.set(p, allocated[i]));
-
-    // Zapamiętaj effectiveCards do zwrócenia w SessionShares.
-    (parsed as any)._effectiveCards = effectiveCards;
   }
 
   if (renters.length === 0) {
@@ -219,11 +215,6 @@ function computeShares(parsed: ParsedSession): SessionShares {
   const baseCourtGrosze = withoutCard.length > 0 ? average(withoutCard)
     : withCard.length > 0 ? average(withCard)
     : 0;
-
-  const effectiveCards = (parsed as any)._effectiveCards ?? Math.min(
-    multi.filter(p => present.includes(p)).length,
-    maxMulti,
-  );
 
   return {
     byPlayer,
