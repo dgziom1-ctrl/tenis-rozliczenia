@@ -68,9 +68,9 @@ interface ParsedSession {
   totalGrosze: number;
   racketGrosze: number;
   ownRacket: string[];
-  courtCount: number;
-  durationHours: number;
-  sport: string;
+  courtCount?: number;
+  durationHours?: number;
+  sport?: string;
 }
 
 /**
@@ -105,10 +105,11 @@ function parseSession(session: SessionLike): ParsedSession {
     totalGrosze,
     racketGrosze,
     ownRacket: uniqueNames(session.ownRacketPlayers),
-    // Stare sesje bez tych pól dostają domyślne wartości — backward compatible.
-    courtCount: Math.max(1, session.courtCount ?? 1),
-    durationHours: Math.max(1, session.durationHours ?? 1),
-    sport: session.sport ?? 'pingpong',
+    // Stare sesje bez tych pól: courtCount/durationHours = undefined,
+    // co oznacza "nie aplikuj limitów" (backward compatible).
+    courtCount: session.courtCount != null ? Math.max(1, session.courtCount) : undefined,
+    durationHours: session.durationHours != null ? Math.max(1, session.durationHours) : undefined,
+    sport: session.sport,
   };
 }
 
@@ -144,7 +145,10 @@ function computeShares(parsed: ParsedSession): SessionShares {
   let multiCapped = false;
 
   // Limit kart MultiSport: korty × godziny × limit/sport.
-  const maxMulti = getMaxMulti(sport, courtCount, durationHours);
+  // Stare sesje bez courtCount/durationHours: nie aplikujemy limitów (backward compatible).
+  const maxMulti = (courtCount !== undefined && durationHours !== undefined && sport !== undefined)
+    ? getMaxMulti(sport, courtCount, durationHours)
+    : Infinity;
   const multiPresentCount = multi.filter(p => present.includes(p)).length;
   const effectiveCards = Math.min(multiPresentCount, maxMulti);
 

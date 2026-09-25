@@ -214,14 +214,38 @@ describe('getShareGroups', () => {
 describe('limit kart MultiSport', () => {
   // Domyślne limity: pingpong/squash = 2, badminton/padel = 4 (na kort/godzinę).
 
-  it('bez courtCount/durationHours domyślnie 1 kort × 1 godzina', () => {
-    // Badminton, limit 4 karty. 3 graczy z kartą mieści się w limicie.
+  it('bez courtCount/durationHours brak limitów (backward compatible)', () => {
+    // Stare sesje bez courtCount/durationHours nie mają limitów.
     const s = { totalCost: 100, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D'], multisportPlayers: ['A', 'B', 'C'] };
+    const shares = getSessionShares(s);
+    expect(shares.multiCapped).toBe(false);
+    expect(shares.maxMulti).toBe(Infinity);
+    expect(shares.effectiveCards).toBe(3);
+    // Pełna zniżka 15 zł na kartę.
+    expect(getPlayerSessionCost(s, 'A')).toBe(getPlayerSessionCost(s, 'D') - 15);
+  });
+
+  it('stare sesje bez limitów nie obcinają kart nawet przy >4 kartach', () => {
+    // 5 graczy z kartą w badmintonie, bez courtCount/durationHours:
+    // stara sesja — każda karta dostaje pełne 15 zł zniżki, brak proporcjonalnego dzielenia.
+    const s = { totalCost: 70, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D', 'E'], multisportPlayers: ['A', 'B', 'C', 'D', 'E'] };
+    const shares = getSessionShares(s);
+    expect(shares.multiCapped).toBe(false);
+    expect(shares.maxMulti).toBe(Infinity);
+    expect(shares.effectiveCards).toBe(5);
+    // Koszt pełny = 70 + 5*15 = 145 zł. Na osobę = 29 zł. Z kartą: 29 - 15 = 14 zł.
+    expect(getPlayerSessionCost(s, 'A')).toBe(14);
+    expect(getPlayerSessionCost(s, 'E')).toBe(14);
+  });
+
+  it('z courtCount/durationHours limity działają', () => {
+    // Nowe sesje z courtCount/durationHours mają limity.
+    const s = { totalCost: 100, sport: 'badminton', presentPlayers: ['A', 'B', 'C', 'D'], multisportPlayers: ['A', 'B', 'C'], courtCount: 1, durationHours: 1 };
     const shares = getSessionShares(s);
     expect(shares.multiCapped).toBe(false);
     expect(shares.maxMulti).toBe(4);
     expect(shares.effectiveCards).toBe(3);
-    // Pełna zniżka 15 zł na kartę.
+    // Pełna zniżka 15 zł na kartę (3 mieści się w limicie 4).
     expect(getPlayerSessionCost(s, 'A')).toBe(getPlayerSessionCost(s, 'D') - 15);
   });
 

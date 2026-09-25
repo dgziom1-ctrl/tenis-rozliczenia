@@ -100,6 +100,22 @@ const SESSIONS = [
       present: ['A', 'B', 'C', 'D', 'E', 'F'], multiPlayers: ['A', 'B', 'F'],
     },
   },
+  {
+    label: 'nowa sesja z limitami — badminton przekroczenie limitu (5 kart na 1 kort/h)',
+    session: {
+      sport: 'badminton', cost: 85,
+      present: ['A', 'B', 'C', 'D', 'E'], multiPlayers: ['A', 'B', 'C', 'D', 'E'],
+      courtCount: 1, durationHours: 1,
+    },
+  },
+  {
+    label: 'nowa sesja z limitami — squash w limicie (2 karty na 1 kort/h)',
+    session: {
+      sport: 'squash', cost: 60,
+      present: ['A', 'B', 'C'], multiPlayers: ['A', 'B'],
+      courtCount: 1, durationHours: 1,
+    },
+  },
 ];
 
 describe('Cloud Functions liczą koszty identycznie jak aplikacja', () => {
