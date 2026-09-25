@@ -11,6 +11,8 @@ interface MessageParams {
   sport: string;
   racketCost?: number;
   ownRacketPlayers?: string[];
+  courtCount?: number;
+  durationHours?: number;
 }
 
 function describe(group: ShareGroup, sportEmoji: string): string {
@@ -24,10 +26,10 @@ function describe(group: ShareGroup, sportEmoji: string): string {
     : '💳 Bez karty';
 }
 
-export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [] }: MessageParams): string {
+export function buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], courtCount = 1, durationHours = 1 }: MessageParams): string {
   // Stawki bierzemy z silnika rozliczeń, więc to, co ludzie przeczytają na
   // grupie, zgadza się co do grosza z saldami w aplikacji.
-  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers });
+  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers, courtCount, durationHours, sport });
   const courtCost = totalCost - racketCost;
 
   const sportEmoji = SPORT_EMOJI[sport] ?? SPORT_EMOJI[SPORT.PINGPONG];

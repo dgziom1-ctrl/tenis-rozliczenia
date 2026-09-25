@@ -32,6 +32,18 @@ export const SPORT_ACCUSATIVE: Record<string, string> = { pingpong: 'ping-ponga'
  * do rozliczenia jako rabat dla jej posiadacza (patrz `utils/sessionCost`).
  */
 export const MULTISPORT_DISCOUNT = 15;
+
+/**
+ * Maksymalna liczba kart MultiSport honorowanych przez obiekt na 1 kort/stół
+ * na 1 godzinę. Przy sesjach wielogodzinnych limit obowiązuje per godzina —
+ * np. badminton 1 kort × 2 godziny = 2 × 4 = 8 kart łącznie.
+ */
+export const MULTISPORT_PER_COURT_HOUR: Record<string, number> = {
+  pingpong: 2,
+  squash: 2,
+  badminton: 4,
+  padel: 4,
+};
 export const RACKET_PRICE = 5;
 export const MAX_RENTED_RACKETS = 4; // 2 korty × 2 rakietki — nigdy nie potrzeba więcej
 export const SOUND_TYPES = { TAB: 'tab', CLICK: 'click', SUCCESS: 'success', DELETE: 'delete', COIN: 'coin', RANK1: 'rank1', ERROR: 'error', STREAK: 'streak' } as const;

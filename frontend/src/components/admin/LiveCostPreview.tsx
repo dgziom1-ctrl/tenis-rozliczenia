@@ -14,9 +14,11 @@ interface LiveCostPreviewProps {
   racketCost?: number;
   ownRacketPlayers?: string[];
   racketCount?: number;
+  courtCount?: number;
+  durationHours?: number;
 }
 
-export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0 }: LiveCostPreviewProps) {
+export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0, courtCount = 1, durationHours = 1 }: LiveCostPreviewProps) {
   const courtCost = parseAmount(totalCost);
   if (!totalCost || isNaN(courtCost) || courtCost <= 0 || presentPlayers.length === 0) return null;
 
@@ -29,8 +31,11 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
     presentPlayers,
     multisportPlayers,
     ownRacketPlayers,
+    courtCount,
+    durationHours,
+    sport,
   };
-  const { discountCapped } = getSessionShares(session);
+  const { discountCapped, multiCapped, maxMulti, effectiveCards } = getSessionShares(session);
   const groups = getShareGroups(session);
   const hasRackets = racketCost > 0;
   const racketEmoji = SPORT_EMOJI[sport] ?? '🎾';
@@ -55,7 +60,12 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <ShareBreakdown groups={groups} sportEmoji={racketEmoji} />
-        {discountCapped && (
+        {multiCapped && (
+          <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
+            {'>'} ⚠ Limit {maxMulti} kart — zadziałało {effectiveCards}, zniżka proporcjonalnie podzielona
+          </div>
+        )}
+        {discountCapped && !multiCapped && (
           <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
             {'>'} ⚠ Karty nie zbiły ceny o pełne {MULTISPORT_DISCOUNT} zł — udział na osobę wychodzi mniejszy niż zniżka. Sprawdź, czy kwota się zgadza.
           </div>

@@ -90,6 +90,9 @@ export default defineConfig({
     // Aplikacja musi znać własne wydanie, żeby porównać je z `version.json`.
     __CP_APP_BUILD__: JSON.stringify(BUILD_ID),
   },
+  server: {
+    allowedHosts: true,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
