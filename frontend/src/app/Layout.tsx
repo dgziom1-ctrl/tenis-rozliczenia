@@ -8,6 +8,7 @@ import { useConnectionStatus } from './providers/appDataContext';
 import { useThemeContext } from './providers/themeContext';
 import { useAudio } from '@/hooks/useAudio';
 import { useScrolled } from '@/hooks/useScrolled';
+import { useSettledFlag } from '@/hooks/useSettledFlag';
 import { SOUND_TYPES, TAB_PATHS, PATH_TO_TAB } from '@/constants';
 import { CLIP } from '@/constants/styles';
 
@@ -36,11 +37,18 @@ function isNotificationClick(data: unknown): data is NotificationClickMessage {
   return message.type === 'NOTIFICATION_CLICK' && typeof message.url === 'string';
 }
 
+/**
+ * Tyle musi trwać brak połączenia z bazą, zanim pokażemy o nim baner. Na starcie
+ * łącze zestawia się zwykle w 1–2 s; bez zwłoki baner mignął przy każdym wejściu.
+ */
+const OFFLINE_NOTICE_DELAY_MS = 4000;
+
 export default function Layout() {
   const [isMuted, setIsMuted] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { isConnected, hasData, bootTimedOut, retry } = useConnectionStatus();
+  const isOffline = useSettledFlag(!isConnected, OFFLINE_NOTICE_DELAY_MS);
   const { theme, toggle: toggleTheme } = useThemeContext();
   const scrolled = useScrolled();
   const { playSound } = useAudio(isMuted);
@@ -127,13 +135,13 @@ export default function Layout() {
         <Header
           isMuted={isMuted}
           setIsMuted={setIsMuted}
-          isConnected={isConnected}
+          isConnected={!isOffline}
           scrolled={scrolled}
           theme={theme}
           onToggleTheme={toggleTheme}
         />
         <Navigation activeTab={activeTab} setActiveTab={switchTab} />
-        {(!isConnected || (bootTimedOut && !hasData)) && (
+        {(isOffline || (bootTimedOut && !hasData)) && (
           <OfflineBanner hasData={hasData} onRetry={retry} />
         )}
         <main className="main-content page-enter" key={location.pathname}>
