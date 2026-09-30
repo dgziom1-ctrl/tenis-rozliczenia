@@ -55,6 +55,13 @@
             ".validate": "newData.isString() && (newData.val() === 'pingpong' || newData.val() === 'squash' || newData.val() === 'badminton' || newData.val() === 'padel')"
           },
 
+          "courtCount": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 12 && newData.val() % 1 === 0"
+          },
+          "durationHours": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 12 && newData.val() % 1 === 0"
+          },
+
           "present": {
             ".validate": "newData.hasChildren()",
             "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }

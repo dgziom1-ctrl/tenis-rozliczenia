@@ -40,6 +40,27 @@ function withoutLegacyFields(next: RawAppData): RawAppData {
 const OFFLINE_MESSAGE =
   'Brak połączenia z internetem — zmiana nie została zapisana. Spróbuj ponownie, gdy wróci sieć.';
 
+/**
+ * Komunikat po odrzuceniu zapisu przez reguły bazy („Permission denied”).
+ *
+ * Reguły walidują CAŁY węzeł `appData`, a każda mutacja przepisuje go w całości
+ * w jednej transakcji. Jedno pole, którego reguły nie znają, albo jedna wartość
+ * spoza ich zakresu, blokuje więc nie jedną akcję, a wszystkie naraz — a SDK
+ * zwraca wtedy surowe, angielskie „PERMISSION_DENIED: Permission denied”, które
+ * nic nie mówi o przyczynie. Podmieniamy je na zdanie po polsku i logujemy
+ * oryginał, żeby dalo się ustalić, o które pole chodziło.
+ */
+const PERMISSION_DENIED_MESSAGE =
+  'Baza odrzuciła ten zapis (brak uprawnień) — reguły bezpieczeństwa nie zgadzają się z danymi, które zapisuje aplikacja. Zgłoś to administratorowi; odświeżenie strony nie pomoże.';
+
+/** Czy błąd to odmowa zapisu przez reguły bazy (kod `PERMISSION_DENIED`). */
+function isPermissionDenied(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false;
+  const { code, message } = error as { code?: unknown; message?: unknown };
+  return code === 'PERMISSION_DENIED'
+    || (typeof message === 'string' && /permission[ _]?denied/i.test(message));
+}
+
 export async function withTransaction(
   fn: (current: RawAppData | null) => RawAppData,
   fallbackErrorMsg: string,
@@ -70,6 +91,14 @@ export async function withTransaction(
     if (error instanceof MutationError) {
       return { success: false, error: error.message };
     }
+
+    // Odmowa reguł bazy: pokazujemy zdanie po polsku, a oryginał (z nazwą
+    // odrzuconego pola, jeśli SDK ją poda) zostaje w konsoli dla administratora.
+    if (isPermissionDenied(error)) {
+      console.error('Zapis odrzucony przez reguły bazy:', error);
+      return { success: false, error: PERMISSION_DENIED_MESSAGE };
+    }
+
     console.error(error);
 
     // Sieć zniknęła już w trakcie zapisu. Transakcja nie dotarła do serwera,
