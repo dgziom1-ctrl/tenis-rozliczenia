@@ -140,6 +140,48 @@ describe('pamięć ostatnich danych', () => {
 });
 
 /**
+ * ODMOWA REGUŁ BAZY
+ *
+ * Zgłoszona awaria: „jak chcę dodać sesję, mam permission denied". Reguły bazy
+ * odrzuciły zapis, bo apka wysyłała pola (`courtCount`, `durationHours`), których
+ * one nie znały — a każda mutacja przepisuje cały `appData`, więc odmowa dotyczyła
+ * każdego zapisu, nie tylko dodawania sesji. Firebase podaje wtedy samo
+ * „Permission denied", bez wskazówki, co jest nie tak.
+ */
+describe('odmowa reguł bazy', () => {
+  it('tłumaczy „Permission denied" na zdanie po polsku', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    runTransactionMock.mockRejectedValue(new Error('Firebase: Permission denied'));
+
+    const result = await withTransaction((current) => current, 'Nie udało się');
+
+    expect(result.success).toBe(false);
+    expect(result.error).not.toMatch(/^Firebase:/);
+    expect(result.error).toMatch(/reguły bezpieczeństwa/i);
+  });
+
+  it('rozpoznaje odmowę też po kodzie błędu', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    runTransactionMock.mockRejectedValue(
+      Object.assign(new Error('set'), { code: 'PERMISSION_DENIED' }),
+    );
+
+    const result = await withTransaction((current) => current, 'Nie udało się');
+
+    expect(result.error).toMatch(/reguły bezpieczeństwa/i);
+  });
+
+  it('inne błędy zachowują swój komunikat', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    runTransactionMock.mockRejectedValue(new Error('DisconnEcted'));
+
+    const result = await withTransaction((current) => current, 'Nie udało się');
+
+    expect(result.error).toBe('DisconnEcted');
+  });
+});
+
+/**
  * TRWAŁE ZEJŚCIE BAZY W TRYB OFFLINE
  *
  * SDK Firebase zapisuje `firebase:previous_websocket_failure` w `localStorage`
