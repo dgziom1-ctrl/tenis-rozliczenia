@@ -159,8 +159,17 @@ contains real names and payment amounts.
 - **Locks the shape of the data.** Every field is validated on write: costs and
   payment amounts must be finite numbers within `0 … 100 000`, dates must match
   `YYYY-MM-DD`, player names are capped at 40 characters, `sport` must be one of the
-  three known values, and any unknown key is rejected outright. A malformed or
-  malicious write cannot corrupt the ledger.
+  four known values, `courtCount` and `durationHours` must be integers within
+  `1 … 12`, and any unknown key is rejected outright. A malformed or malicious write
+  cannot corrupt the ledger.
+
+  Because unknown keys are rejected and every mutation rewrites the whole `appData`
+  node in one transaction, a single field the rules do not know about blocks *all*
+  writes — not just the one that introduced it. `rulesParity.test.js` runs the real
+  mutations against a stubbed transaction and pushes every resulting payload through
+  the rules from `database.rules.json`, so a drift like that fails in CI instead of
+  on a member's phone. (That is exactly how `courtCount`/`durationHours` were caught:
+  they were written for two weeks while the deployed rules still rejected them.)
 - **Stops the FCM token list from being enumerated.** Individual `fcmTokens/{key}`
   entries are readable and writable (a device needs to register its own), but the
   parent node is not listable, so nobody can dump every push token and user agent.
@@ -483,6 +492,7 @@ Unit tests live in `src/__tests__/` and cover:
 | `format.test.js` | Date and currency formatting |
 | `robustness.test.js` | null/undefined/empty data guards, mutation validation, payment idempotency |
 | `functionsParity.test.js` | Cloud Functions and the app agree on every cost split, to the grosz |
+| `rulesParity.test.js` | Every field the app writes passes `database.rules.json` (a mismatch means `PERMISSION_DENIED` on all writes) |
 | `components.test.jsx` | Basic component rendering |
 | `hooks.test.js` | Custom hook behaviour |
 | `smoke.test.js` | App-level smoke tests |

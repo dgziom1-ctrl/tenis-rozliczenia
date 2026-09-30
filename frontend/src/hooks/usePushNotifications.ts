@@ -3,7 +3,7 @@ import { getMessaging, getToken } from 'firebase/messaging';
 import { ref, set } from 'firebase/database';
 import { database } from '@/lib/firebase/config';
 import { registerServiceWorker } from '@/utils/serviceWorker';
-import { MAX_PLAYER_NAME_LENGTH } from '@/utils/validation';
+import { buildTokenEntry } from '@/utils/pushToken';
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
@@ -54,6 +54,10 @@ function friendlyPushError(err: unknown): string {
     return 'Błąd rejestracji Service Worker. Odśwież stronę i spróbuj ponownie.';
   if (msg.includes('network') || msg.includes('fetch'))
     return 'Brak połączenia z internetem. Sprawdź sieć i spróbuj ponownie.';
+  // Odmowa reguł bazy wygląda jak odmowa uprawnień przeglądarki (oba niosą
+  // „permission denied”), a leczy się je zupełnie inaczej — dlatego osobno.
+  if (code === 'PERMISSION_DENIED')
+    return 'Baza odrzuciła rejestrację powiadomień — reguły bezpieczeństwa nie zgadzają się z zapisywanymi danymi. Zgłoś to administratorowi.';
   if (msg.includes('permission') || msg.includes('denied'))
     return 'Brak uprawnień do powiadomień. Sprawdź ustawienia przeglądarki.';
   if (msg.includes('vapid') || msg.includes('applicationserverkey'))
@@ -105,14 +109,13 @@ export function usePushNotifications() {
       if (!token) return { success: false, error: 'Nie udało się pobrać tokenu FCM' };
 
       const tokenKey = hashToken(token);
-      await set(ref(database, `fcmTokens/${tokenKey}`), {
+      // Kształt wpisu (i przycięcie długości, których wymagają reguły bazy)
+      // siedzi w `utils/pushToken` — sprawdza go test `rulesParity`.
+      await set(ref(database, `fcmTokens/${tokenKey}`), buildTokenEntry({
         token,
-        // Reguły bazy odrzucają dłuższe wartości — przycinamy tutaj, żeby
-        // zapis nie padał z niezrozumiałym błędem uprawnień.
-        playerName: (playerName || 'unknown').slice(0, MAX_PLAYER_NAME_LENGTH),
-        updatedAt: Date.now(),
-        ua: navigator.userAgent.slice(0, 100),
-      });
+        playerName,
+        ua: navigator.userAgent,
+      }));
 
       try { localStorage.setItem('push-token-key', tokenKey); } catch { /* */ }
       return { success: true };
