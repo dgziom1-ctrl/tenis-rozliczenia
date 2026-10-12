@@ -1,6 +1,7 @@
 import { ORGANIZER_NAME } from '@/constants';
 import { toGrosze, toZloty } from './money';
 import { getPlayerSessionCost } from './sessionCost';
+import { getCurrentSeason } from './sessions';
 import type { Week, Payment } from '@/types/domain';
 import type { HistoryEntry, DebtSession, DebtCarryOver, DebtDisplayData, DebtDisplayPayment, PlayerStats } from '@/types/ui';
 
@@ -35,22 +36,6 @@ export function calculateDebt(playerName: string, data: DebtCalcData): number {
 
 function yearOf(isoDate: string): number {
   return parseInt(String(isoDate).slice(0, 4), 10);
-}
-
-/**
- * Rok bieżącego sezonu — najnowszy rok, w którym rozegrano sesję.
- *
- * Bierzemy go z danych, a nie z zegara urządzenia: sezon zaczyna się pierwszą
- * rozegraną sesją, więc 1 stycznia, zanim ona padnie, rozliczenie ma dalej
- * wyglądać jak przez cały grudzień.
- */
-function currentSeasonOf(history: HistoryEntry[]): number | null {
-  let latest: number | null = null;
-  for (const session of history || []) {
-    const year = yearOf(session.datePlayed);
-    if (Number.isFinite(year) && (latest === null || year > latest)) latest = year;
-  }
-  return latest;
 }
 
 /**
@@ -111,7 +96,8 @@ export function buildDebtDisplayData(
     id: p.id,
   }));
 
-  const currentSeason = currentSeasonOf(history);
+  // Ten sam próg co na dashboardzie: sezon zaczyna się pierwszą sesją nowego roku.
+  const currentSeason = getCurrentSeason(history);
   // Daty, której nie da się odczytać, nie chowamy pod zbiorczą kwotą — pozycja,
   // której nie umiemy zaszufladkować, ma zostać widoczna.
   const isCurrentSeason = (date: string): boolean => {

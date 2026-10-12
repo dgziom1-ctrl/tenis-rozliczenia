@@ -2,8 +2,9 @@ import { useState, useMemo, useCallback } from 'react';
 import { addPayment, removePayment } from '@/lib/firebase';
 import { SOUND_TYPES, ORGANIZER_NAME, RANKS } from '@/constants';
 import { buildDebtDisplayData } from '@/utils/debt';
-import { calculatePlayerStats } from '@/utils/rankings';
+import { calculateSeasonCardStats } from '@/utils/rankings';
 import { buildPlayerCardMeta } from '@/utils/playerCard';
+import { getCurrentSeason, filterHistoryByYear } from '@/utils/sessions';
 import { useToast } from '../common/Toast';
 import PlayerCard from './PlayerCard';
 import { Zap, ChevronDown } from 'lucide-react';
@@ -26,10 +27,24 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
 
   const totalWeeks = data.summary?.totalWeeks ?? 0;
 
+  // Dashboard to „tu i teraz": bez przełącznika sezonów, zawsze bieżący sezon.
+  // Ten sam próg co w rozliczeniach (bilans otwarcia) — sezon zaczyna się
+  // pierwszą sesją nowego roku, a nie 1 stycznia na zegarku.
+  const currentSeason = useMemo(() => getCurrentSeason(history), [history]);
+  const seasonHistory = useMemo(
+    () => filterHistoryByYear(history, currentSeason),
+    [history, currentSeason],
+  );
+
+  // Nowy sezon, czysta karta: OVR, obecność, sporty, odznaki, ranga i seria
+  // liczą się tylko z sesji rozegranych w bieżącym sezonie. Gracz, który w
+  // tym sezonie jeszcze nie grał, dostaje zera (ranga DUCH), a nie dorobek
+  // z poprzednich lat — saldo i tak zostaje ciągłe, bo pieniądze nie zerują
+  // się razem z sezonem.
   const cardMeta = useMemo(() => {
-    const stats = calculatePlayerStats(data.players ?? [], history, totalWeeks);
-    return new Map(stats.map(p => [p.name, buildPlayerCardMeta(p, history)]));
-  }, [data.players, history, totalWeeks]);
+    const stats = calculateSeasonCardStats(data.players ?? [], seasonHistory);
+    return new Map(stats.map(p => [p.name, buildPlayerCardMeta(p, seasonHistory)]));
+  }, [data.players, seasonHistory]);
 
   const handleAddPayment = useCallback(async (playerName: string, amount: number, paymentId: string) => {
     playSound(SOUND_TYPES.COIN);
@@ -115,7 +130,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
         }}>
           <Zap size={9} style={{ color: 'var(--co-cyan)' }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
-            sesji: <span style={{ color: 'var(--co-cyan)' }}>{totalWeeks}</span>
+            sesji{currentSeason ? ` ${currentSeason}` : ''}: <span style={{ color: 'var(--co-cyan)' }}>{seasonHistory.length}</span>
           </span>
         </div>
       </div>
@@ -134,13 +149,14 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
             <div key={player.name} className={`player-card-wrap ${stagger}`}>
               <PlayerCard
                 player={player}
-                totalWeeks={totalWeeks}
-                history={history}
+                history={seasonHistory}
                 meta={cardMeta.get(player.name) ?? buildPlayerCardMeta({
                   ...player,
+                  attendanceCount: 0,
+                  eligibleWeeks: 0,
                   attendancePercentage: 0,
                   currentStreak: 0,
-                }, history)}
+                }, seasonHistory)}
                 openDetails={showBreakdown}
                 onToggleDetails={toggleDetails}
                 breakdown={(!isOrg && showBreakdown) ? getBreakdown(player) : null}

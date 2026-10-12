@@ -50,16 +50,20 @@ export function assignRankingPlaces(sortedPlayers: ExtendedPlayerStats[]): Ranke
 }
 
 /**
- * Statystyki w obrębie jednego sezonu.
+ * Statystyki w obrębie jednego sezonu, dla każdego gracza z listy.
  *
- * `fullHistory` służy tylko do serii: „ile sesji z rzędu" jest z natury ciągłe
- * i ucinanie go 1 stycznia zerowałoby serię komuś, kto nie opuścił ani jednej
- * gry przez przerwę świąteczną. Frekwencja i liczba sesji zostają sezonowe.
+ * Nowy sezon to czysta karta: liczą się wyłącznie sesje z danego roku —
+ * frekwencja, liczba sesji, sporty, odznaki, ranga i OVR. Seria też jest tu
+ * ucinana na granicy sezonu, tak jak wszystko inne: 1 stycznia każdy zaczyna
+ * od zera. (Powiadomienia o serii liczą ją dalej w czasie rzeczywistym — to
+ * osobna kalkulacja, zob. `utils/celebrations`.)
+ *
+ * Widok „wszystkie sezony" dostaje po prostu pełną historię, więc działa na
+ * tych samych regułach co sezon.
  */
-export function calculateSeasonPlayerStats(
+function seasonStatsOf(
   players: PlayerStats[],
   seasonHistory: HistoryEntry[],
-  fullHistory: HistoryEntry[] = seasonHistory,
 ): ExtendedPlayerStats[] {
   if (!players || !seasonHistory) return [];
 
@@ -76,9 +80,35 @@ export function calculateSeasonPlayerStats(
       attendanceCount,
       eligibleWeeks: eligible.length,
       attendancePercentage: percentage(attendanceCount, eligible.length),
-      currentStreak: currentStreakOf(player.name, fullHistory),
+      currentStreak: currentStreakOf(player.name, seasonHistory),
     };
-  }).filter(p => p.attendanceCount > 0);
+  });
+}
+
+/**
+ * Statystyki sezonowe do rankingu: tylko gracze, którzy w sezonie zagrali.
+ * Ktoś, kto nie był ani razu, nie ma z czego mieć frekwencji, więc nie
+ * zajmuje miejsca w tabeli.
+ */
+export function calculateSeasonPlayerStats(
+  players: PlayerStats[],
+  seasonHistory: HistoryEntry[],
+): ExtendedPlayerStats[] {
+  return seasonStatsOf(players, seasonHistory).filter(p => p.attendanceCount > 0);
+}
+
+/**
+ * Statystyki sezonowe do kafelków na dashboardzie — tu zostają wszyscy.
+ *
+ * Karta gracza musi się pokazać także wtedy, gdy w bieżącym sezonie nie zagrał
+ * ani razu: wisi mu przecież saldo z poprzedniego sezonu. Dostaje więc zera
+ * sezonu (0% → ranga DUCH, OVR na podłodze, bez odznak), a nie dane z kariery.
+ */
+export function calculateSeasonCardStats(
+  players: PlayerStats[],
+  seasonHistory: HistoryEntry[],
+): ExtendedPlayerStats[] {
+  return seasonStatsOf(players, seasonHistory);
 }
 
 export function computeRankingHistory(

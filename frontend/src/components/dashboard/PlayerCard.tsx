@@ -25,7 +25,7 @@ import { RankBadge } from './RankBadge';
 
 interface PlayerCardProps {
   player: PlayerStats;
-  totalWeeks: number;
+  /** Sesje bieżącego sezonu — ostatnie kropki i licznik obecności. */
   history: HistoryEntry[];
   meta: PlayerCardMeta;
   openDetails: boolean;
@@ -42,7 +42,7 @@ interface PlayerCardProps {
 }
 
 function PlayerCard({
-  player, totalWeeks, history, meta,
+  player, history, meta,
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment, onPin, onUnpin,
   playSound,
@@ -291,7 +291,7 @@ function PlayerCard({
                 Obecność
               </span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
-                {player.attendanceCount}/{player.eligibleWeeks || totalWeeks}
+                {meta.attendanceCount}/{meta.eligibleWeeks}
               </span>
             </div>
             <div style={{ height: 2, background: 'var(--co-bar-track)', position: 'relative', overflow: 'hidden' }}>
