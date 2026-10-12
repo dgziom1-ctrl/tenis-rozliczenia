@@ -43,6 +43,7 @@ import UndoBar from '../components/common/UndoBar';
 import LogEntry from '../components/history/LogEntry';
 import LiveCostPreview from '../components/admin/LiveCostPreview';
 import { PasswordModal } from '../components/common/SharedUI';
+import PlayerSessionModal from '../components/attendance/PlayerSessionModal';
 import { getShareGroups } from '../utils/sessionCost';
 import { TABS } from '../constants';
 
@@ -332,5 +333,68 @@ describe('LiveCostPreview — podgląd nie może obiecać innej kwoty niż zapł
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.getByText('26,00 zł')).toBeInTheDocument();
     expect(screen.getByText('11,00 zł')).toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PlayerSessionModal — dane zgodne z wybranym sezonem
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
+  const session = (id, datePlayed) => ({
+    id, datePlayed,
+    sport: 'pingpong',
+    totalCost: 30, costPerPerson: 30, costPerPersonMulti: 15,
+    presentPlayers: ['Ala'], multisportPlayers: [],
+  });
+
+  // 5 grudniowych sesji 2026 (Ala na każdej) + jedna w 2027.
+  const fullHistory = [
+    session('s6', '2027-01-12'),
+    session('s5', '2026-12-15'),
+    session('s4', '2026-12-08'),
+    session('s3', '2026-12-01'),
+    session('s2', '2026-11-24'),
+    session('s1', '2026-11-17'),
+  ];
+  const season2027 = fullHistory.filter(s => s.datePlayed.startsWith('2027'));
+
+  const basePlayer = {
+    name: 'Ala', currentDebt: 0, joinDate: null,
+    attendanceCount: 6, eligibleWeeks: 6, attendancePercentage: 100, currentStreak: 6,
+  };
+
+  it('sezon 2027: sesje, odznaki i seria tylko z 2027', () => {
+    render(
+      <PlayerSessionModal
+        player={{ ...basePlayer, attendanceCount: 1, eligibleWeeks: 1, currentStreak: 1 }}
+        history={season2027}
+        seasonLabel="2027"
+        onClose={() => {}}
+      />,
+    );
+
+    expect(screen.getByText(/2027 · 1\/1 sesji/)).toBeInTheDocument();
+    // Debiut odblokowuje się w każdym sezonie, w którym gracz zagrał...
+    expect(screen.getByLabelText(/Debiut/)).toBeInTheDocument();
+    // ...ale seria 5 z grudnia do stycznia nie przechodzi.
+    expect(screen.queryByLabelText(/Seria 5/)).not.toBeInTheDocument();
+    expect(screen.getByText(/osiągnięcia · 2027/)).toBeInTheDocument();
+  });
+
+  it('wszystkie sezony: pełen dorobek z kariery', () => {
+    render(
+      <PlayerSessionModal
+        player={basePlayer}
+        history={fullHistory}
+        seasonLabel={null}
+        onClose={() => {}}
+      />,
+    );
+
+    expect(screen.getByText(/wszystkie sezony · 6\/6 sesji/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Debiut/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Seria 5/)).toBeInTheDocument();
+    expect(screen.getByText(/osiągnięcia · wszystkie sezony/)).toBeInTheDocument();
   });
 });

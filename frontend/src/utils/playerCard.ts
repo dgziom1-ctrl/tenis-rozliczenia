@@ -83,6 +83,13 @@ export function playerSportMix(playerName: string, history: HistoryEntry[]): Spo
     .filter(row => row.count > 0);
 }
 
+/**
+ * Składa kafel gracza z jednego zakresu danych.
+ *
+ * `player` i `history` muszą pochodzić z tego samego wycinka — sezonu albo
+ * całej kariery. Mieszanie (dorobek z kariery + historia sezonu) dawałoby
+ * kafel, na którym OVR i odznaki mówią o czym innym niż sporty i seria.
+ */
 export function buildPlayerCardMeta(
   player: ExtendedPlayerStats,
   history: HistoryEntry[],
@@ -96,6 +103,8 @@ export function buildPlayerCardMeta(
     sports: playerSportMix(player.name, history),
     currentStreak: player.currentStreak,
     attendancePercentage: player.attendancePercentage,
+    attendanceCount: player.attendanceCount,
+    eligibleWeeks: player.eligibleWeeks,
     topAchievements: achievements.slice(0, 4),
   };
 }

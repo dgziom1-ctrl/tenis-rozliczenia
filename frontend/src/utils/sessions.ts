@@ -81,3 +81,17 @@ export function filterHistoryByYear(history: HistoryEntry[], year: number | null
   const prefix = String(year);
   return history.filter(s => s.datePlayed?.startsWith(prefix));
 }
+
+/**
+ * Rok bieżącego sezonu — najnowszy rok, w którym rozegrano choć jedną sesję.
+ *
+ * Bierzemy go z danych, a nie z zegara: sezon zaczyna się pierwszą rozegraną
+ * sesją, więc 1 stycznia, zanim ona padnie, apka wygląda dalej jak w grudniu.
+ *
+ * To jedno źródło prawdy dla wszystkich miejsc, które pokazują „tu i teraz" —
+ * dashboard i rozliczenia (bilans otwarcia) nie mogą się rozjechać w ocenie
+ * tego, który sezon właśnie trwa.
+ */
+export function getCurrentSeason(history: HistoryEntry[]): number | null {
+  return getAvailableSeasons(history)[0] ?? null;
+}

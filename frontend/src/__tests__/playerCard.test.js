@@ -87,3 +87,57 @@ describe('buildPlayerCardMeta', () => {
     expect(meta.topAchievements.length).toBeLessThanOrEqual(4);
   });
 });
+
+describe('buildPlayerCardMeta — zakres sezonu', () => {
+  const session = (id, datePlayed, sport) => ({
+    id, datePlayed, sport,
+    totalCost: 30, costPerPerson: 30, costPerPersonMulti: 15,
+    presentPlayers: ['Ala'],
+    multisportPlayers: [],
+  });
+
+  const careerHistory = [
+    session('s4', '2027-01-05', 'squash'),
+    session('s3', '2026-03-15', 'pingpong'),
+    session('s2', '2026-03-08', 'pingpong'),
+    session('s1', '2026-03-01', 'pingpong'),
+  ];
+  const seasonHistory = careerHistory.filter(s => s.datePlayed.startsWith('2027'));
+
+  // Ten sam gracz, dwa zakresy: sezon 2027 i cała kariera.
+  const seasonPlayer = {
+    name: 'Ala', currentDebt: 0, joinDate: null,
+    attendanceCount: 1, eligibleWeeks: 1, attendancePercentage: 100, currentStreak: 1,
+  };
+  const careerPlayer = {
+    ...seasonPlayer,
+    attendanceCount: 4, eligibleWeeks: 4, currentStreak: 4,
+  };
+
+  it('kafel z sezonu nie dziedziczy sportów i odznak z poprzednich lat', () => {
+    const meta = buildPlayerCardMeta(seasonPlayer, seasonHistory);
+    expect(meta.attendanceCount).toBe(1);
+    expect(meta.eligibleWeeks).toBe(1);
+    expect(meta.sports).toEqual([{ sport: 'squash', count: 1 }]);
+    expect(meta.topAchievements.map(a => a.id)).toEqual(['first_session']);
+  });
+
+  it('OVR z sezonu jest niższy niż z kariery (seria i staż startują od zera)', () => {
+    const season = buildPlayerCardMeta(seasonPlayer, seasonHistory);
+    const career = buildPlayerCardMeta(careerPlayer, careerHistory);
+    expect(season.overall).toBe(89);   // 40 + 100% × 0,48 + 1 × 0,6 + 1 × 0,2
+    expect(career.overall).toBe(91);   // 40 + 48 + 4 × 0,6 + 4 × 0,2
+    expect(season.overall).toBeLessThan(career.overall);
+  });
+
+  it('kafel z kariery dalej pokazuje wszystkie sporty i odznaki', () => {
+    const meta = buildPlayerCardMeta(careerPlayer, careerHistory);
+    // Kolejność sportów jest stała (ping-pong, squash, badminton, padel),
+    // nie zależy od tego, czym grano najczęściej.
+    expect(meta.sports).toEqual([
+      { sport: 'pingpong', count: 3 },
+      { sport: 'squash', count: 1 },
+    ]);
+    expect(meta.topAchievements.map(a => a.id)).toContain('first_session');
+  });
+});

@@ -167,6 +167,10 @@ export interface PlayerCardMeta {
   sports: SportCount[];
   currentStreak: number;
   attendancePercentage: number;
+  /** Sesje z obecnością w tym samym zakresie, z którego jest `history`. */
+  attendanceCount: number;
+  /** Ile sesji w ogóle mogło się policzyć — mianownik „Obecność”. */
+  eligibleWeeks: number;
   topAchievements: Achievement[];
 }
 

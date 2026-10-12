@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { roundToTwoDecimals } from '../utils/money';
 import { calculateDebt, buildDebtDisplayData } from '../utils/debt';
-import { calculatePlayerStats, assignRankingPlaces, calculateSeasonPlayerStats } from '../utils/rankings';
-import { groupSessionsByMonth, groupHistoryByMonth, getWrappedSeason } from '../utils/sessions';
+import { calculatePlayerStats, assignRankingPlaces, calculateSeasonPlayerStats, calculateSeasonCardStats } from '../utils/rankings';
+import { groupSessionsByMonth, groupHistoryByMonth, getWrappedSeason, getCurrentSeason } from '../utils/sessions';
 
 // ─── roundToTwoDecimals ────────────────────────────────────────────────────────
 
@@ -221,20 +221,94 @@ describe('calculateSeasonPlayerStats na przełomie roku', () => {
   const statsOf = (name, stats) => stats.find(p => p.name === name);
 
   it('frekwencja liczy się tylko z sezonu', () => {
-    const stats = calculateSeasonPlayerStats(players, seasonHistory, fullHistory);
+    const stats = calculateSeasonPlayerStats(players, seasonHistory);
     expect(statsOf('Alice', stats).attendanceCount).toBe(2);
     expect(statsOf('Alice', stats).eligibleWeeks).toBe(2);
     expect(statsOf('Bob', stats).attendancePercentage).toBe(50);
   });
 
-  it('seria przechodzi przez granicę roku, nie zeruje się 1 stycznia', () => {
-    const stats = calculateSeasonPlayerStats(players, seasonHistory, fullHistory);
-    expect(statsOf('Alice', stats).currentStreak).toBe(4);
-  });
-
-  it('bez pełnej historii seria zostaje w obrębie sezonu', () => {
+  // Nowy sezon to czysta karta — seria też. Kto grał nieprzerwanie od grudnia,
+  // w styczniu ma serię liczoną od pierwszej sesji nowego roku, nie od grudnia.
+  it('seria startuje od zera na granicy sezonu', () => {
     const stats = calculateSeasonPlayerStats(players, seasonHistory);
     expect(statsOf('Alice', stats).currentStreak).toBe(2);
+    // Dla porównania: w widoku „wszystkie sezony" seria jest ciągła.
+    const all = calculatePlayerStats(players, fullHistory, fullHistory.length);
+    expect(statsOf('Alice', all).currentStreak).toBe(4);
+  });
+
+  it('seria liczy się od najnowszej sesji sezonu', () => {
+    const withGap = [
+      fullHistory[0], // 2027-01-15 — Alice
+      { id: 'n0', datePlayed: '2027-01-01', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Bob'], multisportPlayers: [] },
+    ];
+    const stats = calculateSeasonPlayerStats(players, withGap);
+    expect(statsOf('Alice', stats).currentStreak).toBe(1); // nie była na 2027-01-01
+    expect(statsOf('Bob', stats).currentStreak).toBe(0);   // najnowszej sesji nie było
+  });
+
+  it('ranking pomija graczy, którzy w sezonie nie zagrali', () => {
+    const benchwarmers = [...players, { name: 'Cara', attendanceCount: 0, currentDebt: 0, eligibleWeeks: 4, joinDate: null }];
+    const stats = calculateSeasonPlayerStats(benchwarmers, seasonHistory);
+    expect(stats.map(p => p.name)).not.toContain('Cara');
+  });
+});
+
+// ─── calculateSeasonCardStats ─────────────────────────────────────────────────
+
+describe('calculateSeasonCardStats — kafelki na dashboardzie', () => {
+  const seasonHistory = [
+    { id: 'n2', datePlayed: '2027-01-15', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'], multisportPlayers: [] },
+    { id: 'n1', datePlayed: '2027-01-08', sport: 'squash',   totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice', 'Bob'], multisportPlayers: [] },
+  ];
+  const players = [
+    { name: 'Alice', attendanceCount: 40, currentDebt: 0, eligibleWeeks: 52, joinDate: null },
+    { name: 'Bob',   attendanceCount: 12, currentDebt: 0, eligibleWeeks: 52, joinDate: null },
+    // Zawodnik z poprzedniego sezonu, który w 2027 jeszcze nie zagrał.
+    { name: 'Cara',  attendanceCount: 9,  currentDebt: 30, eligibleWeeks: 52, joinDate: null },
+  ];
+
+  const statsOf = (name, stats) => stats.find(p => p.name === name);
+
+  it('zostawia wszystkich graczy, także bez sesji w sezonie', () => {
+    const stats = calculateSeasonCardStats(players, seasonHistory);
+    expect(stats).toHaveLength(3);
+    const cara = statsOf('Cara', stats);
+    expect(cara.attendanceCount).toBe(0);
+    expect(cara.attendancePercentage).toBe(0);
+    expect(cara.currentStreak).toBe(0);
+  });
+
+  it('OVR, obecność i seria biorą się z sezonu, nie z kariery', () => {
+    const stats = calculateSeasonCardStats(players, seasonHistory);
+    const alice = statsOf('Alice', stats);
+    expect(alice.attendanceCount).toBe(2);
+    expect(alice.eligibleWeeks).toBe(2);
+    expect(alice.attendancePercentage).toBe(100);
+    expect(alice.currentStreak).toBe(2);
+  });
+
+  it('pusty sezon daje wszystkim zera', () => {
+    const stats = calculateSeasonCardStats(players, []);
+    expect(stats.every(p => p.attendanceCount === 0 && p.attendancePercentage === 0)).toBe(true);
+  });
+});
+
+// ─── getCurrentSeason ─────────────────────────────────────────────────────────
+
+describe('getCurrentSeason', () => {
+  const session = (id, datePlayed) => ({
+    id, datePlayed, sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: [], multisportPlayers: [],
+  });
+
+  it('bierze najnowszy rok z danych, nie z zegara', () => {
+    const history = [session('b', '2027-01-08'), session('a', '2026-12-18')];
+    expect(getCurrentSeason(history)).toBe(2027);
+  });
+
+  it('bez sesji nie ma sezonu', () => {
+    expect(getCurrentSeason([])).toBeNull();
+    expect(getCurrentSeason([{ datePlayed: '' }])).toBeNull();
   });
 });
 

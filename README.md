@@ -13,6 +13,7 @@
 - Detailed debt breakdown — which sessions contributed, how much each cost
 - Quick BLIK payment button with the exact amount pre-filled
 - Session dot history (last 6 on mobile, last 10 on desktop)
+- **Card stats are seasonal** — OVR, attendance %, rank, sport mix, badges and streak all restart in a new season (see [Seasons](#-seasons))
 
 ### 📊 Ranking
 - Olympic podium (🥇🥈🥉) with ex-aequo support
@@ -22,7 +23,7 @@
 - Active streak counter shown on each leaderboard row
 - **Ranking history chart** — each player's position plotted over time
 - **Season selector** — filter all stats by calendar year
-- **Per-player modal** — full session drill-down, rank progression bar, and earned achievements
+- **Per-player modal** — full session drill-down, rank progression bar, and earned achievements, all from the selected season
 - Achievements: Debiut · Perfekcyjny miesiąc (×1, ×5, ×10…) · 10/25/50 sesji · Streak milestones (5/10/20/30/50/100)
 - Monthly attendance table
 - **Yearly Wrapped** — Spotify-style end-of-year summary for past seasons
@@ -61,6 +62,18 @@ Powered by Firebase Cloud Messaging. Automatic triggers:
 - Tapping a **streak notification** navigates to Ranking and opens that player's modal directly
 - Works in background (Service Worker) and foreground (active app)
 - Per-device opt-in from the Dashboard banner; token stored in Firebase under `fcmTokens/`
+
+### 🗓️ Seasons
+A season is a calendar year, and it starts with the first session actually played
+in that year — never on 1 January itself. Until the group plays again, the app
+keeps showing December's numbers.
+
+| Where | What the season does |
+|-------|----------------------|
+| Dashboard | Always the **current** season, no selector. New season = clean slate: OVR, attendance, rank, sport mix, badges and streak all start from zero. Players keep their cards (their balance certainly doesn't reset) — they just show season zeros until they play. |
+| Ranking | Season selector at the top. `WSZYSTKIE` = career totals, `2027` = only 2027 — leaderboard, podium, history chart, monthly table and the per-player modal. |
+| Streaks | Cut at the season boundary, like everything else. Push notifications still count a streak continuously, in real time. |
+| Money | **Never resets.** Debts carry over: the breakdown collapses every previous season into one opening balance, so the total stays the same to the grosz. |
 
 ### 🎨 Theme
 Two themes switchable from the header: **Cyber** (dark, default) · **Light** — persisted in `localStorage`.

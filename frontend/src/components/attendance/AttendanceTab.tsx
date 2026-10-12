@@ -56,9 +56,9 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     [history, selectedSeason]
   );
 
-  // Dorobek liczony przez całą historię. Ranking jest sezonowy, ale odznaki,
-  // ranga i seria nie mogą znikać po przełączeniu filtra — „50 sesji" znaczy
-  // 50 sesji w życiu, nie 50 w tym roku.
+  // Dorobek liczony przez całą historię — zasila widok „WSZYSTKIE".
+  // Gdy wybrany jest konkretny sezon, nie dokłada się do niczego: wtedy
+  // wszystko, co widać (frekwencja, seria, ranga, odznaki), liczy się z sezonu.
   const lifetimeStats = useMemo(
     () => calculatePlayerStats(players, history, totalWeeks),
     [players, history, totalWeeks],
@@ -67,10 +67,10 @@ export default function AttendanceTab({ players, history, summary, playSound, in
   // Use season-aware stats when filtering, global stats for all-time
   const stats = useMemo(() => {
     if (selectedSeason) {
-      return calculateSeasonPlayerStats(players, seasonHistory, history);
+      return calculateSeasonPlayerStats(players, seasonHistory);
     }
     return lifetimeStats;
-  }, [players, history, seasonHistory, lifetimeStats, selectedSeason]);
+  }, [players, seasonHistory, lifetimeStats, selectedSeason]);
 
   const ranked = useMemo(() => {
     const sorted = [...stats].sort((a, b) => {
@@ -105,11 +105,6 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     return ranked.find(p => p.name === selectedPlayer);
   }, [selectedPlayer, ranked]);
 
-  const selectedLifetime = useMemo(() => {
-    if (!selectedPlayer) return null;
-    return lifetimeStats.find(p => p.name === selectedPlayer) ?? null;
-  }, [selectedPlayer, lifetimeStats]);
-
   // Wrapped stats for the selected past year
   const wrappedStats = useMemo(() => {
     if (!wrappedYear) return null;
@@ -121,14 +116,15 @@ export default function AttendanceTab({ players, history, summary, playSound, in
   const handleCloseModal = useCallback(() => setSelectedPlayer(null), []);
   const handleCloseWrapped = useCallback(() => setWrappedYear(null), []);
 
+  // Modal dostaje dokładnie ten zakres, który jest wybrany: sezon albo całą
+  // karierę. Bez dokładki „życiowej" — inaczej odznaki i ranga mówiłyby o czym
+  // innym niż sesje wypisane niżej.
   return (
     <>
     {selectedStats && (
       <PlayerSessionModal
         player={selectedStats}
         history={seasonHistory}
-        lifetime={selectedLifetime}
-        lifetimeHistory={history}
         seasonLabel={selectedSeason ? String(selectedSeason) : null}
         onClose={handleCloseModal}
       />
