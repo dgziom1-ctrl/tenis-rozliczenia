@@ -14,7 +14,7 @@ import UndoBar from '../common/UndoBar';
 import TreasurerPanel from './TreasurerPanel';
 import ConfettiBurst from '../common/ConfettiBurst';
 import StreakBadge from '../attendance/StreakBadge';
-import type { DebtDisplayData, PlayerCardMeta, PlayerStats, SoundType } from '@/types/ui';
+import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerStats, SoundType } from '@/types/ui';
 import type { AddPaymentResult, TransactionResult } from '@/types/domain';
 import type { StyleWithVars } from '@/types/css';
 import { useAnimatedValue } from './useAnimatedValue';
@@ -25,6 +25,8 @@ import { RankBadge } from './RankBadge';
 
 interface PlayerCardProps {
   player: PlayerStats;
+  /** Sesje bieżącego sezonu — ostatnie kropki i licznik obecności. */
+  history: HistoryEntry[];
   meta: PlayerCardMeta;
   openDetails: boolean;
   onToggleDetails: (playerName: string) => void;
@@ -40,7 +42,7 @@ interface PlayerCardProps {
 }
 
 function PlayerCard({
-  player, meta,
+  player, history, meta,
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment, onPin, onUnpin,
   playSound,
@@ -186,6 +188,7 @@ function PlayerCard({
         position: 'relative',
         border: `1px solid ${cardBorder}`,
         display: 'flex', flexDirection: 'column',
+        flex: 1, height: '100%',
         animation: 'none',
         overflow: 'hidden',
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease, transform 0.18s ease',
@@ -200,7 +203,7 @@ function PlayerCard({
       {showBurst && <ConfettiBurst onDone={() => setShowBurst(false)} />}
 
       <div style={{
-        padding: '4px 12px',
+        padding: '6px 14px',
         background: (!isOrganizer && isPending)
           ? 'var(--co-tint-rose)'
           : hasCredit ? 'var(--co-tint-green)'
@@ -226,42 +229,103 @@ function PlayerCard({
         }}>{RARITY_LABEL[meta.rarity]}</span>
       </div>
 
-      <div style={{ padding: '12px 14px', display: 'flex', gap: 12, alignItems: 'center', position: 'relative', zIndex: 2 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-          <span className="card-ovr" style={{ color: rank.hex }}>{meta.overall}</span>
-          <span style={{ ...FONT.monoMicro, letterSpacing: '0.14em', color: rank.hex }}>OVR</span>
+      <div style={{
+        padding: '14px',
+        borderBottom: '1px solid var(--co-separator)',
+        display: 'flex', gap: 14, alignItems: 'stretch',
+        position: 'relative', zIndex: 2,
+      }}>
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'space-between', gap: 6, flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <span className="card-ovr" style={{ color: rank.hex }}>{meta.overall}</span>
+            <span style={{ ...FONT.monoMicro, letterSpacing: '0.14em', color: rank.hex, lineHeight: 1 }}>OVR</span>
+          </div>
           <PlayerAvatar
             name={player.name}
             index={playerIndex}
             isPending={isOrganizer ? undefined : isPending}
           />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(1.5rem, 5vw, 1.85rem)',
-            letterSpacing: '0.06em', textTransform: 'uppercase',
-            color: 'var(--co-text-hi)',
-            margin: 0, lineHeight: 1,
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>{player.name}</h3>
+        <div style={{
+          flex: 1, minWidth: 0,
+          display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 8,
+        }}>
+          <div>
+            <h3 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(1.5rem, 5vw, 1.85rem)',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+              color: 'var(--co-text-hi)',
+              margin: 0, lineHeight: 1,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>{player.name}</h3>
 
-          <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
-            <RankBadge rank={rank} pct={pct} showHint={!isMobile} />
-            {meta.currentStreak >= 2 && <StreakBadge streak={meta.currentStreak} />}
+            <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+              <RankBadge rank={rank} pct={pct} showHint={!isMobile} />
+              {meta.currentStreak >= 2 && <StreakBadge streak={meta.currentStreak} />}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+              <span style={{ ...FONT.monoLabel }}>
+                Obecność
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+                {meta.attendanceCount}/{meta.eligibleWeeks}
+              </span>
+            </div>
+            <div style={{ height: 2, background: 'var(--co-bar-track)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{
+                position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`,
+                background: pct >= 75
+                  ? 'linear-gradient(90deg, var(--co-cyan), var(--co-green))'
+                  : pct >= 45
+                  ? 'linear-gradient(90deg, var(--co-green), var(--co-cyan))'
+                  : `linear-gradient(90deg, ${c.border}CC, ${c.border}66)`,
+                transition: 'width 0.8s ease',
+              }} />
+            </div>
+            {history && history.length > 0 && (
+              <div
+                title={`Ostatnie ${[...history].slice(0, isMobile ? 6 : 10).length} sesji`}
+                style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                {[...history].slice(0, isMobile ? 6 : 10).reverse().map((session, i) => {
+                  const attended = session.presentPlayers.includes(player.name);
+                  return (
+                    <div
+                      key={session.id || i}
+                      title={session.datePlayed}
+                      style={{
+                        width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+                        background: attended ? c.border : 'transparent',
+                        border: `1px solid ${attended ? c.border : 'var(--co-dot-empty)'}`,
+                        boxShadow: attended ? `0 0 4px ${c.border}80` : 'none',
+                        transition: 'all 0.2s',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {!isOrganizer && (
-        <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '14px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
 
           <div
             className={flash ? 'debt-flash' : ''}
             onClick={handleAmountClick}
             style={{
+              minHeight: 84,
               padding: '12px',
               marginBottom: 10,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               background: isPending
                 ? 'var(--co-tint-rose)'
                 : hasCredit ? 'var(--co-tint-green)'
@@ -374,17 +438,15 @@ function PlayerCard({
                 </button>
               )}
               {isSettled && (
-                <div style={{ padding: '4px 0' }}>
-                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '6px 12px', width: '100%', opacity: 0.45 }}>
-                    + Wpłać na zapas
-                  </button>
-                </div>
+                <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', opacity: 0.45 }}>
+                  + Wpłać na zapas
+                </button>
               )}
             </div>
           )}
 
           {!isMobile && (
-            <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
+            <div style={{ marginTop: modal === null ? 12 : 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
               <Barcode name={player.name} color={accentColor} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
                 <span style={{ ...FONT.monoMicro, letterSpacing: '0.1em' }}>
@@ -400,12 +462,15 @@ function PlayerCard({
       )}
 
       {isOrganizer && (
-        <div style={{ padding: '0 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10, position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '14px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
 
           <div
             className={flash ? 'debt-flash' : ''}
             style={{
+              minHeight: 84,
               padding: '12px',
+              marginBottom: 10,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               background: hasCredit ? 'var(--co-tint-green)' : 'var(--co-tint)',
               border: `1px solid ${hasCredit ? 'var(--co-green)' : 'var(--co-tint-line)'}`,
               clipPath: CLIP.tag,

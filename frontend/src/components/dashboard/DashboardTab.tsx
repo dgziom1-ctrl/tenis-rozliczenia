@@ -149,6 +149,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
             <div key={player.name} className={`player-card-wrap ${stagger}`}>
               <PlayerCard
                 player={player}
+                history={seasonHistory}
                 meta={cardMeta.get(player.name) ?? buildPlayerCardMeta({
                   ...player,
                   attendanceCount: 0,
