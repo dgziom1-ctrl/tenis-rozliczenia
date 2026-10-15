@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { CSSProperties } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import Modal from '../common/Modal';
+import { useModalExit } from '@/hooks/useModalExit';
 import { CornerBrackets } from '../dashboard/CornerBrackets';
 import { FONT, TEXT, TRACK, CLIP, Z } from '@/constants/styles';
 import type { WrappedStats } from '@/types/ui';
@@ -9,8 +11,10 @@ import type { WrappedStats } from '@/types/ui';
 // ─── Count-up hook ───────────────────────────────────────────────
 function useCountUp(target: number, duration = 1200, active = false) {
   const [value, setValue] = useState(0);
+  const reducedMotion = useReducedMotion();
   useEffect(() => {
     if (!active) { setValue(0); return; }
+    if (reducedMotion) { setValue(target); return; }
     const isFloat = target % 1 !== 0;
     const steps = Math.min(Math.ceil(duration / 16), 80);
     let step = 0;
@@ -22,7 +26,7 @@ function useCountUp(target: number, duration = 1200, active = false) {
       if (step >= steps) { setValue(target); clearInterval(timer); }
     }, duration / steps);
     return () => clearInterval(timer);
-  }, [target, duration, active]);
+  }, [target, duration, active, reducedMotion]);
   return value;
 }
 
@@ -53,6 +57,11 @@ interface WrappedModalProps {
 // ─── WrappedModal ────────────────────────────────────────────────
 export default function WrappedModal({ stats, onClose, embedded = false }: WrappedModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { open: modalOpen, close: closeWithExit } = useModalExit(onClose);
+  const close = useCallback(() => {
+    if (embedded) onClose();
+    else closeWithExit();
+  }, [embedded, onClose, closeWithExit]);
 
   // Build ordered slide list (skip bestPair slide when null)
   const slideList = useMemo(() => {
@@ -65,19 +74,23 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
   const activeSlideId = slideList[currentSlide] ?? 0;
 
   const advance = useCallback(() => {
-    if (currentSlide >= totalSlides - 1) { onClose(); return; }
+    if (currentSlide >= totalSlides - 1) { close(); return; }
     setCurrentSlide(s => s + 1);
-  }, [currentSlide, totalSlides, onClose]);
+  }, [currentSlide, totalSlides, close]);
 
   const goBack = useCallback(() => {
     setCurrentSlide(s => Math.max(0, s - 1));
   }, []);
 
   const handleKey = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Escape') { onClose(); return; }
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      close();
+      return;
+    }
     if (e.key === 'ArrowRight' || e.key === ' ') { advance(); e.preventDefault(); }
     if (e.key === 'ArrowLeft') { goBack(); e.preventDefault(); }
-  }, [advance, goBack, onClose]);
+  }, [advance, goBack, close]);
 
   // Count-up values
   const cSessions  = useCountUp(stats.totalSessions,   1400, activeSlideId === 1);
@@ -396,7 +409,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
             {/* Close button — wspólna klasa zamiast ręcznych handlerów hover,
                 które na dotyku zostawały wciśnięte do kolejnego tapnięcia. */}
             <button
-              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              onClick={(e) => { e.stopPropagation(); close(); }}
               className="cyber-button-outline"
               style={{ padding: 'clamp(12px, 2.5vw, 16px) clamp(28px, 8vw, 56px)', minHeight: 44 }}
             >
@@ -536,7 +549,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
   return (
   // Pełny ekran z własnym układem, więc z prymitywu bierze samą nakładkę.
   // Klik w tło przewija slajd, a nie zamyka — dlatego `closeOnBackdrop` off.
-    <Modal onClose={onClose} bare closeOnBackdrop={false} ariaLabel={`Podsumowanie roku ${stats.year}`}>
+    <Modal open={modalOpen} onClose={onClose} bare closeOnBackdrop={false} ariaLabel={`Podsumowanie roku ${stats.year}`}>
       {shell}
     </Modal>
   );

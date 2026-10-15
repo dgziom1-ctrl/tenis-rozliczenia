@@ -43,7 +43,6 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
           <p style={{
             fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.18em',
             color: 'var(--co-cyan)', textTransform: 'uppercase', marginTop: 4,
-            animation: 'flicker 2s infinite',
           }}>INITIALIZING SYSTEM...</p>
         </div>
         <div style={{
@@ -57,7 +56,6 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
               fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
               color: i < 2 ? 'var(--co-green)' : 'var(--co-cyan)',
               letterSpacing: '0.1em', margin: '2px 0',
-              animation: i === 2 ? 'flicker 1.5s infinite' : 'none',
             }}>{line}</p>
           ))}
         </div>

@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // ─── Mocki Firebase (muszą być przed importami komponentów) ─────────────────
@@ -295,7 +295,18 @@ describe('PasswordModal — pole hasła musi trzymać fokus', () => {
     render(<PasswordModal action="Test" onConfirm={vi.fn()} onCancel={onCancel} />);
 
     await user.keyboard('{Escape}');
-    expect(onCancel).toHaveBeenCalled();
+    await waitFor(() => expect(onCancel).toHaveBeenCalled(), { timeout: 600 });
+  });
+
+  it('przycisk ANULUJ uruchamia animację wyjścia przed callbackiem', async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+    render(<PasswordModal action="Test" onConfirm={vi.fn()} onCancel={onCancel} />);
+
+    await waitFor(() => expect(document.body.querySelector('.modal-overlay')).toHaveClass('is-open'));
+    await user.click(screen.getByRole('button', { name: /ANULUJ/i }));
+    expect(onCancel).not.toHaveBeenCalled();
+    await waitFor(() => expect(onCancel).toHaveBeenCalled(), { timeout: 600 });
   });
 
   it('blokuje przewijanie strony pod otwartym oknem', () => {

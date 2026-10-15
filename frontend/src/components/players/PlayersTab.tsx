@@ -178,7 +178,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                   <button key={p.name} onClick={() => void toggleDefaultMulti(p.name)} disabled={savingMulti}
                     aria-pressed={active}
                     style={{
-                      padding: '10px 14px', cursor: 'pointer', transition: 'all 0.15s',
+                      padding: '10px 14px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                       display: 'flex', alignItems: 'center', gap: 8,
                       fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase',
                       clipPath: CLIP.badge,

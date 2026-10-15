@@ -148,15 +148,38 @@ describe('usePushNotifications — ochrona przed brakiem API', () => {
 // ════════════════════════════════════════════════════════════════════════════
 
 describe('useTheme — localStorage i klasy body', () => {
+  let originalMatchMedia;
   beforeEach(() => {
+    originalMatchMedia = globalThis.matchMedia;
     localStorage.clear();
     document.body.className = '';
   });
+  afterEach(() => { globalThis.matchMedia = originalMatchMedia; });
 
-  it('domyślnie zwraca motyw "dark"', async () => {
+  it('domyślnie zwraca motyw "dark" przy systemowym ustawieniu ciemnym', async () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
     expect(result.current.theme).toBe('dark');
+  });
+
+  it('na pierwszym uruchomieniu szanuje systemowy motyw jasny, ale go nie zapisuje', async () => {
+    let systemLight = true;
+    const listeners = new Set();
+    globalThis.matchMedia = vi.fn(query => ({
+      get matches() { return query === '(prefers-color-scheme: light)' && systemLight; },
+      addEventListener: (_type, listener) => listeners.add(listener),
+      removeEventListener: (_type, listener) => listeners.delete(listener),
+    }));
+
+    const { useTheme } = await import('../hooks/useTheme');
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe('light');
+    expect(localStorage.getItem('cyber-ponk-theme')).toBeNull();
+
+    systemLight = false;
+    act(() => listeners.forEach(listener => listener()));
+    expect(result.current.theme).toBe('dark');
+    expect(localStorage.getItem('cyber-ponk-theme')).toBeNull();
   });
 
   it('toggle przełącza z dark na light', async () => {

@@ -7,6 +7,7 @@ import { buildGroupMessage } from '@/utils/message';
 import { getShareGroups } from '@/utils/sessionCost';
 import { copyToClipboard } from '@/utils/clipboard';
 import Modal from '../common/Modal';
+import { useModalExit } from '@/hooks/useModalExit';
 import ConfettiBurst from '../common/ConfettiBurst';
 import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 import type { Sport } from '@/types/domain';
@@ -42,6 +43,7 @@ function highlightIcon(kind: SessionHighlight['kind']) {
 export default function SessionSummaryModal({ summary, highlights = [], onClose }: SessionSummaryModalProps) {
   const [copied, setCopied] = useState(false);
   const [burst, setBurst] = useState(true);
+  const { open, close } = useModalExit(onClose);
   const { showError } = useToast();
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -67,6 +69,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
 
   return (
     <Modal
+      open={open}
       onClose={onClose}
       title="MATCHDAY"
       icon={CheckCircle2}
@@ -82,7 +85,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
           >
             {copied ? <><CheckCircle2 size={14} aria-hidden="true" /> Skopiowano!</> : <><Copy size={14} aria-hidden="true" /> Kopiuj na grupkę</>}
           </button>
-          <button onClick={onClose} className="cyber-button-yellow" style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <button onClick={close} className="cyber-button-yellow" style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             OK
           </button>
         </>

@@ -11,6 +11,8 @@ export const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? '';
 export const isAdminPasswordConfigured = (): boolean => ADMIN_PASSWORD.length > 0;
 export const SETTLED_THRESHOLD = 0.01;
 export const UNDO_TIMEOUT_SECONDS = 8;
+export const MODAL_EXIT_MS = 280;
+export const REDUCED_MOTION_MODAL_EXIT_MS = 180;
 export const SPORT = { PINGPONG: 'pingpong', SQUASH: 'squash', BADMINTON: 'badminton', PADEL: 'padel' } as const;
 
 /**

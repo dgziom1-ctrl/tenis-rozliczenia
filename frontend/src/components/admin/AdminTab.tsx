@@ -208,7 +208,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                       <button type="button" key={n}
                         onClick={() => { setCourtCount(n); playSound(SOUND_TYPES.CLICK); }}
                         style={{
-                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
+                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                           fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
                           clipPath: CLIP.badge,
                           ...(active ? {
@@ -236,7 +236,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                       <button type="button" key={n}
                         onClick={() => { setDurationHours(n); playSound(SOUND_TYPES.CLICK); }}
                         style={{
-                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
+                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                           fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
                           clipPath: CLIP.badge,
                           ...(active ? {
@@ -387,7 +387,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                       <button type="button" key={n}
                         onClick={() => { setRacketCount(n); playSound(SOUND_TYPES.CLICK); }}
                         style={{
-                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'all 0.15s',
+                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                           fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
                           clipPath: CLIP.badge,
                           ...(active ? {

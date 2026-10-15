@@ -109,7 +109,7 @@ export default function EditSessionForm({
                 padding: '6px 8px', fontSize: '0.75rem', fontFamily: 'var(--font-display)', 
                 letterSpacing: '0.06em', cursor: 'pointer', border: '1px solid',
                 clipPath: CLIP.badge,
-                transition: 'all 0.15s',
+                transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                 ...(editForm.present?.includes(name) ? {
                   borderColor: 'var(--co-tint-line)', background: 'var(--co-tint-hi)', color: 'var(--co-cyan)',
                 } : {
@@ -133,7 +133,7 @@ export default function EditSessionForm({
                   padding: '6px 8px', fontSize: '0.75rem', fontFamily: 'var(--font-display)', 
                   letterSpacing: '0.06em', cursor: 'pointer', border: '1px solid',
                   clipPath: CLIP.badge,
-                  transition: 'all 0.15s',
+                  transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                   ...(editForm.multiPlayers?.includes(name) ? {
                     borderColor: 'var(--co-tint-line)', background: 'var(--co-tint)', color: 'var(--co-green)',
                   } : {

@@ -5,6 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import { ADMIN_PASSWORD, isAdminPasswordConfigured, SOUND_TYPES } from '@/constants';
 import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 import Modal from './Modal';
+import { useModalExit } from '@/hooks/useModalExit';
 import type { SoundType } from '@/types/ui';
 
 /** Jak długo świeci komunikat o złym haśle. */
@@ -24,6 +25,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
   const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputId = useId();
   const errorId = useId();
+  const { open, close } = useModalExit(onCancel);
   const configured = isAdminPasswordConfigured();
 
   useEffect(() => () => { if (errorTimer.current) clearTimeout(errorTimer.current); }, []);
@@ -46,6 +48,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
   return (
     // Kliknięcie w tło nie zamyka: hasło łatwo wpisać do połowy i zgubić.
     <Modal
+      open={open}
       onClose={onCancel}
       title="Podaj hasło admina"
       icon={Lock}
@@ -85,7 +88,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
           <button type="submit" className="cyber-button-yellow" style={{ flex: 1, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             <Check size={14} aria-hidden="true" /> POTWIERDŹ
           </button>
-          <button type="button" onClick={onCancel} className="cyber-button-outline" style={{ flex: 1, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <button type="button" onClick={close} className="cyber-button-outline" style={{ flex: 1, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             <X size={14} aria-hidden="true" /> ANULUJ
           </button>
         </div>

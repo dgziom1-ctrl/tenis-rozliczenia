@@ -7,6 +7,7 @@ import { getPlayerColor } from '@/constants/colors';
 import { getPlayerAchievements } from '@/utils/achievements';
 import { getPlayerSessionCost } from '@/utils/sessionCost';
 import Modal from '../common/Modal';
+import { useModalExit } from '@/hooks/useModalExit';
 import { PlayerAvatar } from '../dashboard/PlayerAvatar';
 import AchievementBadge from './AchievementBadge';
 import type { ExtendedPlayerStats, HistoryEntry } from '@/types/ui';
@@ -29,6 +30,7 @@ interface PlayerSessionModalProps {
 export default function PlayerSessionModal({ player, history, seasonLabel, onClose }: PlayerSessionModalProps) {
   const titleId = useId();
   const [showMissed, setShowMissed] = useState(false);
+  const { open, close } = useModalExit(onClose);
 
   const { sessions, missedSessions } = useMemo(() => {
     if (!player) return { sessions: [], missedSessions: [] };
@@ -66,9 +68,9 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
     // `bare` — okno ma własną szapkę z awatarem i sekcje na całą szerokość,
     // więc bierze z prymitywu tylko nakładkę: blokadę przewijania, pułapkę
     // fokusu, Escape, klik w tło, portal i rozmycie na `::before`.
-    <Modal onClose={onClose} bare ariaLabel={`Szczegóły gracza ${player.name}`}>
+    <Modal open={open} onClose={onClose} bare ariaLabel={`Szczegóły gracza ${player.name}`}>
       <div
-        className="modal-panel cut-corners modal-enter"
+        className="modal-panel cut-corners"
         role="document"
         aria-labelledby={titleId}
         style={{ maxWidth: 520, borderColor: `${c.border}40` }}
@@ -87,7 +89,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
               {scopeLabel} · {player.attendanceCount}/{player.eligibleWeeks} sesji · {player.attendancePercentage}% frekwencja
             </p>
           </div>
-          <button onClick={onClose} aria-label="Zamknij" className="modal-close-btn icon-btn" style={{
+          <button onClick={close} aria-label="Zamknij" className="modal-close-btn icon-btn" style={{
             background: 'transparent', border: 'none',
             color: 'var(--co-dim)', cursor: 'pointer',
             width: 44, height: 44, marginRight: -10, flexShrink: 0,

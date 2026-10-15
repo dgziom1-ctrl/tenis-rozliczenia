@@ -1,18 +1,20 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Terminal, CalendarDays, Search, Download, ArrowUpDown } from 'lucide-react';
-import { updateWeek, deleteWeek } from '@/lib/firebase';
+import { updateWeek, deleteWeekWithSnapshot, restoreWeek } from '@/lib/firebase';
 import { groupHistoryByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
 import SeasonSelector from '../attendance/SeasonSelector';
-import { parseAmount, isValidAmount } from '@/utils/format';
+import { parseAmount, isValidAmount, formatDate } from '@/utils/format';
 import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
-import { SPORT, SPORT_LABEL } from '@/constants';
+import UndoBar from '../common/UndoBar';
+import { SOUND_TYPES, SPORT, SPORT_LABEL, UNDO_TIMEOUT_SECONDS } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useUndoTimer } from '@/hooks/useUndoTimer';
+import type { Week } from '@/types/domain';
 import type { HistoryEntry, SoundType, SessionEditForm } from '../../types/ui';
 import LogEntry from './LogEntry';
 import AttendanceTrendChart from './AttendanceTrendChart';
 import EditSessionForm from './EditSessionForm';
-import DeleteConfirmation from './DeleteConfirmation';
 import PlayerFilterSheet from './PlayerFilterSheet';
 import { CLIP } from '@/constants/styles';
 
@@ -25,6 +27,11 @@ interface EditState {
   form: SessionEditForm;
 }
 
+interface PendingDeletedWeek {
+  week: Week;
+  token: number;
+}
+
 interface HistoryTabProps {
   history: HistoryEntry[];
   playerNames: string[];
@@ -33,9 +40,7 @@ interface HistoryTabProps {
 
 export default function HistoryTab({ history, playerNames, playSound }: HistoryTabProps) {
   const [editing,      setEditing]      = useState<EditState | null>(null);
-  const [deletingId,   setDeletingId]   = useState<string | null>(null);
   const [isSaving,     setIsSaving]     = useState(false);
-  const [isDeleting,   setIsDeleting]   = useState(false);
   const [pwModal,      setPwModal]      = useState<{ type: 'edit'; row: HistoryEntry } | { type: 'delete'; rowId: string } | null>(null);
   const [filterPlayer, setFilterPlayer] = useState('');
   const [chosenSeason, setChosenSeason] = useState<number | null | undefined>(undefined);
@@ -43,12 +48,16 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const [sortOrder,    setSortOrder]    = useState<'desc' | 'asc'>('desc');
   const [showAll,      setShowAll]      = useState(false);
   const { showError, showSuccess } = useToast();
+  const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer<PendingDeletedWeek>();
   const isMobile = useIsMobile();
 
-  // Stan blokuje dopiero po przerysowaniu, więc dwa kliknięcia w tym samym
-  // ticku zdążyłyby wysłać dwa zapisy. Ref blokuje je natychmiast.
-  const savingRef  = useRef(false);
+  // Ref blokują zapis, zanim stan zdąży się przerysować — chroni przed dwoma
+  // szybkimi kliknięciami w ten sam przycisk.
+  const savingRef = useRef(false);
   const deletingRef = useRef(false);
+  const undoingRef = useRef(false);
+  const undoSequenceRef = useRef(0);
+  const activeUndoTokenRef = useRef<number | null>(null);
 
   const editForm = editing?.form;
   const parsedEditCost = parseAmount(editForm?.cost ?? '');
@@ -111,6 +120,55 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const requestEdit   = useCallback((row: HistoryEntry) => setPwModal({ type: 'edit', row }), []);
   const requestDelete = useCallback((id: string) => setPwModal({ type: 'delete', rowId: id }), []);
 
+  const handleDelete = useCallback(async (id: string) => {
+    if (deletingRef.current) return;
+    deletingRef.current = true;
+    try {
+      const result = await deleteWeekWithSnapshot(id);
+      if (!result.success) {
+        playSound(SOUND_TYPES.ERROR);
+        showError(result.error || 'Nie udało się usunąć sesji');
+        return;
+      }
+      if (result.deletedWeek) {
+        const token = ++undoSequenceRef.current;
+        activeUndoTokenRef.current = token;
+        startUndo({ week: result.deletedWeek, token });
+      }
+      playSound(SOUND_TYPES.DELETE);
+    } catch {
+      playSound(SOUND_TYPES.ERROR);
+      showError('Nie udało się usunąć sesji');
+    } finally {
+      deletingRef.current = false;
+    }
+  }, [playSound, showError, startUndo]);
+
+  const handleUndoDelete = useCallback(async () => {
+    if (!undoToast || undoingRef.current) return;
+    undoingRef.current = true;
+    try {
+      const { week, token } = undoToast.payload;
+      const result = await restoreWeek(week);
+      if (!result.success) {
+        playSound(SOUND_TYPES.ERROR);
+        showError(result.error || 'Nie udało się przywrócić sesji');
+        return;
+      }
+      if (activeUndoTokenRef.current === token) {
+        activeUndoTokenRef.current = null;
+        dismissUndo();
+      }
+      playSound(SOUND_TYPES.SUCCESS);
+      showSuccess('Sesja przywrócona');
+    } catch {
+      playSound(SOUND_TYPES.ERROR);
+      showError('Nie udało się przywrócić sesji');
+    } finally {
+      undoingRef.current = false;
+    }
+  }, [undoToast, dismissUndo, playSound, showError, showSuccess]);
+
   const handlePasswordConfirm = () => {
     if (!pwModal) return;
     if (pwModal.type === 'edit') {
@@ -130,7 +188,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         },
       });
     } else {
-      setDeletingId(pwModal.rowId);
+      void handleDelete(pwModal.rowId);
     }
     setPwModal(null);
   };
@@ -194,24 +252,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     });
   }, [setEditForm]);
 
-  const handleDelete = async (id: string) => {
-    // Usunięcie jest nieodwracalne — potwierdzenie znika dopiero PO zapisie,
-    // a ref blokuje drugie kliknięcie, zanim stan zdąży się odświeżyć.
-    if (deletingRef.current) return;
-    deletingRef.current = true;
-    setIsDeleting(true);
-    try {
-      const result = await deleteWeek(id);
-      if (!result.success) { showError(result.error || 'Nie udało się usunąć sesji'); return; }
-      showSuccess('Sesja usunięta');
-      setDeletingId(null);
-    } catch { showError('Nie udało się usunąć sesji'); }
-    finally {
-      deletingRef.current = false;
-      setIsDeleting(false);
-    }
-  };
-
   const visibleHistory = showAll ? filteredHistory : filteredHistory.slice(0, INITIAL_VISIBLE_SESSIONS);
   const grouped = groupHistoryByMonth(visibleHistory);
 
@@ -219,7 +259,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     <>
       {pwModal && (
         <PasswordModal
-          action={pwModal.type === 'edit' ? 'Podaj kod dostępu aby edytować sesję.' : 'Podaj kod dostępu aby usunąć sesję. Uwaga: usunięcie przeliczy salda wszystkich graczy.'}
+          action={pwModal.type === 'edit' ? 'Podaj kod dostępu aby edytować sesję.' : `Podaj kod dostępu, aby usunąć sesję. Przez ${UNDO_TIMEOUT_SECONDS} s można ją cofnąć.`}
           onConfirm={handlePasswordConfirm}
           onCancel={() => setPwModal(null)}
           playSound={playSound}
@@ -233,6 +273,18 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         filterPlayer={filterPlayer}
         onSelect={setFilterPlayer}
       />
+
+      {undoToast && (
+        <div style={{ marginBottom: 12 }}>
+          <UndoBar
+            message={<>Sesja z {formatDate(undoToast.payload.week.date)} usunięta</>}
+            secondsLeft={undoToast.secondsLeft}
+            progressPct={progressPct}
+            onUndo={() => { void handleUndoDelete(); }}
+            buttonLabel="cofnij"
+          />
+        </div>
+      )}
 
       <div className="cyber-box" style={{
         clipPath: CLIP.panel,
@@ -298,7 +350,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                     color: filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
                     background: 'transparent',
                     clipPath: CLIP.badge,
-                    transition: 'all 0.15s',
+                    transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                     flexShrink: 0,
                   }}
                 >
@@ -326,7 +378,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                     color: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
                     background: !filterPlayer ? 'var(--co-tint-hi)' : 'transparent',
                     clipPath: CLIP.badge,
-                    transition: 'all 0.15s',
+                    transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                   }}
                 >
                   WSZYSCY
@@ -346,7 +398,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                       color: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-dim)',
                       background: filterPlayer === name ? 'var(--co-tint-hi)' : 'transparent',
                       clipPath: CLIP.badge,
-                      transition: 'all 0.15s',
+                      transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                     }}
                   >
                     {name}
@@ -461,16 +513,6 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                       onCancel={cancelEdit}
                       onTogglePresent={togglePresent}
                       onToggleMulti={toggleMulti}
-                    />
-                  );
-
-                  if (deletingId === row.id) return (
-                    <DeleteConfirmation
-                      key={row.id}
-                      row={row}
-                      isDeleting={isDeleting}
-                      onConfirm={handleDelete}
-                      onCancel={() => setDeletingId(null)}
                     />
                   );
 

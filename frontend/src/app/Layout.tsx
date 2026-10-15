@@ -54,6 +54,23 @@ export default function Layout() {
   const { playSound } = useAudio(isMuted);
 
   const activeTab = PATH_TO_TAB[location.pathname] ?? 'dashboard';
+  const tabOrder: Record<string, number> = {
+    dashboard: 0, attendance: 1, admin: 2, history: 3, players: 4,
+  };
+  const [navigation, setNavigation] = useState<{
+    tab: string;
+    direction: 'forward' | 'backward';
+  }>(() => ({
+    tab: activeTab,
+    direction: 'forward',
+  }));
+  if (navigation.tab !== activeTab) {
+    setNavigation({
+      tab: activeTab,
+      direction: tabOrder[activeTab] >= tabOrder[navigation.tab] ? 'forward' : 'backward',
+    });
+  }
+  const pageDirection = navigation.tab === activeTab ? navigation.direction : 'forward';
 
   const switchTab = useCallback((id: string) => {
     playSound(SOUND_TYPES.TAB);
@@ -144,7 +161,10 @@ export default function Layout() {
         {(isOffline || (bootTimedOut && !hasData)) && (
           <OfflineBanner hasData={hasData} onRetry={retry} />
         )}
-        <main className="main-content page-enter" key={location.pathname}>
+        <main
+          className={`main-content ${pageDirection === 'forward' ? 'page-enter-forward' : 'page-enter-backward'}`}
+          key={location.pathname}
+        >
           <Outlet context={{ playSound }} />
         </main>
       </div>
