@@ -402,10 +402,10 @@ describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
 });
 
 // ════════════════════════════════════════════════════════════════════════════
-// PlayerCard — czysta karta FIFA (Wariant A)
+// PlayerCard — karta FIFA z paskiem obecności i kropkami sesji
 // ════════════════════════════════════════════════════════════════════════════
 
-describe('PlayerCard — Wariant A (czysta karta FIFA)', () => {
+describe('PlayerCard — karta gracza z obecnością i kropkami sesji', () => {
   const player = {
     name: 'Ala',
     currentDebt: 45,
@@ -429,10 +429,11 @@ describe('PlayerCard — Wariant A (czysta karta FIFA)', () => {
   ];
   const meta = buildPlayerCardMeta(player, history);
 
-  it('pokazuje OVR, imię, rangę z procentem i serię, bez paska obecności, sportów i odznak', () => {
+  it('pokazuje OVR, imię, rangę, serię oraz pasek i kropki obecności (bez sportów i odznak)', () => {
     render(
       <PlayerCard
         player={player}
+        history={history}
         meta={meta}
         openDetails={false}
         onToggleDetails={vi.fn()}
@@ -450,10 +451,11 @@ describe('PlayerCard — Wariant A (czysta karta FIFA)', () => {
     expect(screen.getByText('Ala')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Ranga MISTRZ, 83% frekwencji/ })).toBeInTheDocument();
     expect(screen.getByText(/SERIA 3/i)).toBeInTheDocument();
+    expect(screen.getByText('Obecność')).toBeInTheDocument();
+    expect(screen.getByText('5/6')).toBeInTheDocument();
+    expect(screen.getByTitle('2026-03-01')).toBeInTheDocument();
 
-    // Usunięte elementy nie zaśmiecają karty
-    expect(screen.queryByText('Obecność')).not.toBeInTheDocument();
-    expect(screen.queryByText('5/6')).not.toBeInTheDocument();
+    // Usunięte sporty i odznaki nie zaśmiecają karty
     expect(screen.queryByLabelText('Osiągnięcia')).not.toBeInTheDocument();
   });
 });
