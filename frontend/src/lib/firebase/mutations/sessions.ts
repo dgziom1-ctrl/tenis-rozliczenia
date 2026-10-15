@@ -174,20 +174,68 @@ export async function updateWeek(
   }, 'Nie udało się zaktualizować sesji');
 }
 
-export async function deleteWeek(weekId: string): Promise<TransactionResult> {
+export interface DeleteWeekSnapshotResult extends TransactionResult {
+  /** Pełny rekord z transakcji — potrzebny, by przywrócić sesję bez utraty pól legacy. */
+  deletedWeek?: Week;
+}
+
+export async function deleteWeekWithSnapshot(weekId: string): Promise<DeleteWeekSnapshotResult> {
   if (!weekId) return { success: false, error: 'Brak identyfikatora sesji' };
 
-  // „Nie znaleziono" zgłaszamy przerwaniem transakcji, a nie flagą na zewnątrz —
-  // flaga z próby, która się nie zatwierdziła, przeżywała ponowienie i potrafiła
-  // zgłosić błąd po usunięciu, które faktycznie doszło do skutku.
+  let deletedWeek: Week | undefined;
+  const result = await withTransaction((current) => {
+    const data = (current || {}) as RawAppData;
+    const weeks = data.weeks || [];
+    const found = weeks.find(w => w.id === weekId);
+
+    if (!found) reject('Nie znaleziono sesji do usunięcia');
+    // Zapisujemy rekord z bieżącej próby transakcji. Przy ponowieniu Firebase
+    // nadpisze snapshot wartością z wersji, która faktycznie się zatwierdzi.
+    deletedWeek = found;
+    return { ...data, weeks: weeks.filter(w => w.id !== weekId) } as RawAppData;
+  }, 'Nie udało się usunąć sesji');
+
+  return result.success && deletedWeek ? { ...result, deletedWeek } : result;
+}
+
+/** Wariant bez snapshotu zachowuje dotychczasowy kontrakt dla pozostałych wywołań. */
+export async function deleteWeek(weekId: string): Promise<TransactionResult> {
+  const result = await deleteWeekWithSnapshot(weekId);
+  return {
+    success: result.success,
+    ...(result.error ? { error: result.error } : {}),
+    ...(result.indeterminate ? { indeterminate: true } : {}),
+  };
+}
+
+/** Przywraca dokładnie usunięty rekord; kolizja daty chroni przed nadpisaniem nowszej sesji. */
+export async function restoreWeek(week: Week): Promise<TransactionResult> {
+  if (!week || typeof week !== 'object'
+    || typeof week.id !== 'string' || week.id.length === 0 || week.id.length > 64
+    || !isValidISODate(week.date)) {
+    return { success: false, error: 'Nieprawidłowe dane sesji do przywrócenia' };
+  }
+
+  const normalized = normalizeSession({
+    totalCost: week.cost,
+    presentPlayers: week.present,
+    multisportPlayers: week.multiPlayers,
+    sport: week.sport,
+    racketCost: week.racketCost,
+    ownRacketPlayers: week.ownRacketPlayers,
+    courtCount: week.courtCount,
+    durationHours: week.durationHours,
+  });
+  if ('error' in normalized) return { success: false, error: normalized.error };
+
   return withTransaction((current) => {
     const data = (current || {}) as RawAppData;
     const weeks = data.weeks || [];
-
-    if (!weeks.some(w => w.id === weekId)) {
-      reject('Nie znaleziono sesji do usunięcia');
+    if (weeks.some(existing => existing.id === week.id)) return data;
+    if (weeks.some(existing => existing.date === week.date)) {
+      reject('Nie można przywrócić sesji — istnieje już inna sesja z tą datą');
     }
 
-    return { ...data, weeks: weeks.filter(w => w.id !== weekId) } as RawAppData;
-  }, 'Nie udało się usunąć sesji');
+    return { ...data, weeks: sortWeeksByDate([...weeks, week]) } as RawAppData;
+  }, 'Nie udało się przywrócić sesji');
 }

@@ -136,21 +136,26 @@ export function useAudio(isMuted: boolean) {
   }, []);
 
   const vibrate = useCallback((type: SoundType) => {
-    if (!navigator.vibrate) return;
-    switch (type) {
-      case SOUND_TYPES.COIN: navigator.vibrate([60, 40, 120]); break;
-      case SOUND_TYPES.SUCCESS: navigator.vibrate([50, 30, 50, 30, 100]); break;
-      case SOUND_TYPES.STREAK: navigator.vibrate([40, 30, 40, 30, 80, 40, 120]); break;
-      case SOUND_TYPES.DELETE: navigator.vibrate([180]); break;
-      case SOUND_TYPES.CLICK: navigator.vibrate([20]); break;
-      case SOUND_TYPES.TAB: navigator.vibrate([15]); break;
-      default: break;
-    }
+    if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
+    try {
+      switch (type) {
+        // Haptyka tylko dla zdarzeń z konsekwencją: zapis, błąd, usunięcie
+        // i osiągnięcie. Tapnięcia oraz zmiana zakładki nie wibrują.
+        case SOUND_TYPES.COIN: navigator.vibrate([60, 40, 120]); break;
+        case SOUND_TYPES.SUCCESS: navigator.vibrate([50, 30, 50, 30, 100]); break;
+        case SOUND_TYPES.STREAK: navigator.vibrate([40, 30, 40, 30, 80, 40, 120]); break;
+        case SOUND_TYPES.RANK1: navigator.vibrate([45, 35, 90]); break;
+        case SOUND_TYPES.DELETE: navigator.vibrate([180]); break;
+        case SOUND_TYPES.ERROR: navigator.vibrate([90, 45, 90]); break;
+        default: break;
+      }
+    } catch { /* ograniczenia przeglądarki nie mogą przerwać zapisanej akcji */ }
   }, []);
 
   const playSound = useCallback((type: SoundType) => {
-    if (isMuted) return;
+    // Wyciszenie dotyczy dźwięku; haptyka pozostaje sprzężona ze znaczącą akcją.
     vibrate(type);
+    if (isMuted) return;
     const ctx = getOrCreateContext();
     if (!ctx) return;
     if (ctx.state === 'suspended') {

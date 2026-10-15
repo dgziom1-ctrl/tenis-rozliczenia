@@ -19,7 +19,7 @@ export default function SportSelector({ value, onChange }: SportSelectorProps) {
             key={sport} type="button"
             onClick={() => onChange(sport)}
             style={{
-              padding: '10px 6px', cursor: 'pointer', transition: 'all 0.15s',
+              padding: '10px 6px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
               fontFamily: 'var(--font-display)', fontSize: '0.8125rem', 
               letterSpacing: '0.06em', textTransform: 'uppercase',
               clipPath: CLIP.badge,

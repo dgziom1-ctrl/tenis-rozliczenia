@@ -43,7 +43,7 @@ export default function SeasonSelector({ seasons, selected, onChange }: SeasonSe
               color: active ? 'var(--co-cyan)' : 'var(--co-text)',
               clipPath: CLIP.badge,
               cursor: 'pointer',
-              transition: 'all 0.15s',
+              transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
               textShadow: active ? 'var(--glow-cyan-sm)' : 'none',
             }}
           >

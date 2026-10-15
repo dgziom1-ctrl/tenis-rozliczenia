@@ -92,11 +92,21 @@ export const Z = {
   toast: 9000,
 } as const;
 
+function displayTracking(size: string): string {
+  const numeric = Number.parseFloat(size);
+  const pixels = size.endsWith('rem') ? numeric * 16 : size.endsWith('px') ? numeric : NaN;
+  if (!Number.isFinite(pixels)) return TRACK.normal;
+  if (pixels <= 13) return TRACK.wide;
+  if (pixels >= 32) return '0.02em';
+  if (pixels >= 20) return TRACK.tight;
+  return TRACK.normal;
+}
+
 export const FONT = {
-  display: (size: string = TEXT.lead, spacing: string = TRACK.normal): CSSProperties => ({
+  display: (size: string = TEXT.lead, spacing?: string): CSSProperties => ({
     fontFamily: 'var(--font-display)',
     fontSize: size,
-    letterSpacing: spacing,
+    letterSpacing: spacing ?? displayTracking(size),
     textTransform: 'uppercase',
   }),
   mono: (size: string = TEXT.small): CSSProperties => ({

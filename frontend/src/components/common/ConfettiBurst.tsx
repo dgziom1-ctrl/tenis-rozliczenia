@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 const DEFAULT_PALETTE = ['#00E5FF', '#00FF88', '#FF2090', '#B8860B', '#9B4DE0'];
 
@@ -22,11 +23,6 @@ interface ConfettiBurstProps {
   onDone?: () => void;
 }
 
-function prefersReducedMotion(): boolean {
-  return typeof window !== 'undefined'
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
 /**
  * Neonowe cząsteczki na pełnym ekranie. Nie przechwytuje kliknięć —
  * celebracja nie może zablokować cofnięcia wpłaty ani kopiowania na grupę.
@@ -40,6 +36,7 @@ export default function ConfettiBurst({
   const paletteRef = useRef(palette);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const onDoneRef = useRef(onDone);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     paletteRef.current = palette;
@@ -47,7 +44,7 @@ export default function ConfettiBurst({
   }, [palette, onDone]);
 
   useEffect(() => {
-    if (prefersReducedMotion()) {
+    if (reducedMotion) {
       onDoneRef.current?.();
       return undefined;
     }
@@ -117,7 +114,7 @@ export default function ConfettiBurst({
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
     };
-  }, [origin.x, origin.y, durationMs]);
+  }, [origin.x, origin.y, durationMs, reducedMotion]);
 
   if (typeof document === 'undefined') return null;
 

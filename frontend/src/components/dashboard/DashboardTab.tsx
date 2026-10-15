@@ -47,16 +47,22 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
   }, [data.players, seasonHistory]);
 
   const handleAddPayment = useCallback(async (playerName: string, amount: number, paymentId: string) => {
-    playSound(SOUND_TYPES.COIN);
     const result = await addPayment(playerName, amount, paymentId);
-    if (!result.success) showError(result.error || 'Nie udało się zapisać wpłaty');
+    if (result.success) playSound(SOUND_TYPES.COIN);
+    else {
+      playSound(SOUND_TYPES.ERROR);
+      showError(result.error || 'Nie udało się zapisać wpłaty');
+    }
     return result;
   }, [playSound, showError]);
 
   const handleRemovePayment = useCallback(async (playerName: string, paymentId: string) => {
-    playSound(SOUND_TYPES.CLICK);
     const result = await removePayment(playerName, paymentId);
-    if (!result.success) showError(result.error || 'Nie udało się cofnąć wpłaty');
+    if (result.success) playSound(SOUND_TYPES.DELETE);
+    else {
+      playSound(SOUND_TYPES.ERROR);
+      showError(result.error || 'Nie udało się cofnąć wpłaty');
+    }
     return result;
   }, [playSound, showError]);
 

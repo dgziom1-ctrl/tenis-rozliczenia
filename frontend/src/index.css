@@ -91,6 +91,9 @@
   --glow-box-cyan:  0 0 16px rgba(0,229,255,0.20);
   --glow-box-rose:  0 0 18px rgba(255,32,144,0.13);
   --glow-box-panel: 0 8px 40px rgba(0,0,0,0.80);
+  /* Filter rysuje cień poza clip-path, w przeciwieństwie do box-shadow. */
+  --glow-drop-panel: drop-shadow(0 8px 40px rgba(0,0,0,0.80));
+  --modal-blur: 8px;
   /* `filter` nie przyjmuje wartości box-shadow, więc poświata canvasu w
      nagłówku potrzebuje własnego tokenu. */
   --glow-drop-cyan: drop-shadow(0 0 20px rgba(0,229,255,0.12));
@@ -228,10 +231,6 @@ body.theme-switching *::after {
 @keyframes blink-cursor {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
-}
-@keyframes flicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
-  20%, 24%, 55% { opacity: 0.25; }
 }
 @keyframes slide-in-up {
   from { transform: translateY(14px); opacity: 0; }
@@ -393,7 +392,7 @@ body.theme-switching *::after {
     font-family: var(--font-display); font-size: 0.875rem;
     letter-spacing: 0.1em; text-transform: uppercase;
     border: 1px solid var(--co-tint-line); cursor: pointer;
-    transition: all 0.18s;
+    transition: color 0.18s, background-color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.1s;
     clip-path: var(--clip-tag);
   }
   .cyber-button-outline:hover {
@@ -416,7 +415,6 @@ body.theme-switching *::after {
   .terminal-cursor::after { content: '▮'; animation: blink-cursor 1s step-end infinite; color: var(--co-cyan); margin-left: 2px; }
 
   .debt-flash   { animation: pending-flash 0.75s ease-out; }
-  .flicker      { animation: flicker 3s infinite; }
 
   button:active:not(:disabled) { transform: scale(0.97); transition: transform 0.08s ease !important; }
 }
@@ -447,10 +445,6 @@ body.theme-switching *::after {
 }
 
 /* ── FIFA-style player cards ── */
-@keyframes foil-shift {
-  0%, 100% { background-position: 0 0, 0% 40%; }
-  50%      { background-position: 0 0, 100% 60%; }
-}
 @keyframes stamp-pop {
   0%   { transform: scale(1.55) rotate(-14deg); opacity: 0; }
   65%  { transform: scale(0.96) rotate(-8deg); opacity: 1; }
@@ -476,7 +470,6 @@ body.theme-switching *::after {
     radial-gradient(circle at var(--foil-x, 50%) var(--foil-y, 22%), rgba(255,255,255,0.32) 0%, transparent 42%),
     linear-gradient(115deg, transparent 18%, rgba(255,255,255,0.14) 42%, var(--foil-tint, rgba(0,229,255,0.22)) 52%, transparent 72%);
   background-size: 100% 100%, 220% 220%;
-  animation: foil-shift 8s ease-in-out infinite;
 }
 .card-foil-legend { opacity: 0.48; }
 .card-foil-elite  { opacity: 0.40; }
@@ -555,48 +548,47 @@ body.theme-light .fifa-card-common { background-image: none; }
 body.theme-light .fifa-card-ghost  { background-image: none; }
 
 /* ── Modal overlay ──
-   Cały układ nakładki mieszka tutaj, a nie w siedmiu komponentach. Wcześniej
-   klasa dawała wyłącznie `isolation`, więc każdy dialog wymyślał od nowa
-   pozycję, tło, z-index, wyśrodkowanie i rozmycie — i każdy inaczej. */
+   Scrim i blur żyją na nieinteraktywnym pseudoelemencie. Ich opacity zmienia się
+   razem z panelem, a nie pojawia się przed nim. */
 .modal-overlay {
-  /* NOTE: backdrop-filter must NOT be applied directly to this fixed-position
-     overlay — on iOS Safari that makes child buttons (close / confirm) untappable.
-     The blur is rendered on a non-interactive ::before layer instead. */
   isolation: isolate;
   position: fixed;
   inset: 0;
   z-index: var(--z-modal);
   display: flex;
   justify-content: center;
-  background: var(--co-overlay);
   padding: max(16px, env(safe-area-inset-top, 0px))
            max(16px, env(safe-area-inset-right, 0px))
            max(16px, env(safe-area-inset-bottom, 0px))
            max(16px, env(safe-area-inset-left, 0px));
+  --scrim-progress: 0;
+  --modal-motion-duration: 280ms;
 }
 .modal-overlay::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--co-overlay);
+  opacity: var(--scrim-progress);
+  backdrop-filter: blur(var(--modal-blur));
+  -webkit-backdrop-filter: blur(var(--modal-blur));
+  transition: opacity var(--modal-motion-duration) ease-out;
   pointer-events: none;
 }
+.modal-overlay.is-open { --scrim-progress: 1; }
+.modal-overlay.is-open { pointer-events: auto; }
+.modal-overlay.is-closing { pointer-events: none; }
 .modal-overlay.align-center { align-items: center; }
 .modal-overlay.align-bottom { align-items: flex-end; padding-bottom: 0; }
 
-/* Pełnoekranowe okna (Wrapped, szczegóły gracza) — bez półprzezroczystego tła,
-   ale z safe-area: wcześniej padding:0 sprawiał, że X na iOS lądował pod
-   paskiem statusu (bateria, zasięg). */
+/* Pełnoekranowe okna (Wrapped, szczegóły gracza) — bez scrimu, ale z fade'em. */
 .modal-overlay.modal-bare {
   display: block;
   padding: 0;
   background: transparent;
 }
-.modal-overlay.modal-bare::before {
-  display: none;
-}
+.modal-overlay.modal-bare::before { display: none; }
 .modal-bare-fill {
   position: absolute;
   top: max(16px, env(safe-area-inset-top, 0px));
@@ -608,9 +600,12 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
   justify-content: center;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+  opacity: 0;
+  transition: opacity 220ms ease-out;
 }
+.modal-overlay.is-open .modal-bare-fill { opacity: 1; }
 
-/* Panel dialogu — wspólne tło, krawędź, cień i zawijanie przewijania. */
+/* Panel dialogu — cień jako drop-shadow, bo box-shadow był ucinany przez clip-path. */
 .modal-panel {
   width: 100%;
   display: flex;
@@ -618,17 +613,45 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
   background: var(--modal-bg);
   border: 1px solid var(--co-border);
   border-radius: var(--modal-radius);
-  box-shadow: var(--glow-box-panel);
-  /* Żaden dialog nie blokował przewijania strony ani nie ograniczał własnej
-     wysokości — długa treść wypychała przyciski poza ekran. */
+  box-shadow: none;
+  filter: var(--glow-drop-panel);
   max-height: 100%;
   overflow: hidden;
+  opacity: 0;
+  transform: scale(0.97) translateY(8px);
+  transition: opacity 220ms ease-out, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.modal-overlay.is-open .modal-panel {
+  opacity: 1;
+  transform: none;
 }
 .modal-panel.cut-corners { clip-path: var(--clip-panel); }
 .modal-panel.sheet {
   border-bottom: none;
   border-radius: var(--modal-radius) var(--modal-radius) 0 0;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  transform: translate3d(0, 100%, 0);
+  transition: opacity 220ms ease-out, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.modal-overlay.is-open .modal-panel.sheet { transform: translate3d(0, 0, 0); }
+.sheet-drag-handle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 28px;
+  flex: 0 0 28px;
+  touch-action: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+.sheet-drag-handle:active { cursor: grabbing; }
+.sheet-drag-handle > span {
+  display: block;
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--co-dim);
+  opacity: 0.62;
 }
 
 .modal-head {
@@ -658,23 +681,6 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
   pointer-events: none;
 }
 
-/* ── Bottom sheet slide up ── */
-@keyframes sheet-up {
-  0%   { transform: translateY(100%); opacity: 0; }
-  60%  { opacity: 1; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-@keyframes modal-pop {
-  0%   { transform: scale(0.95) translateY(8px); opacity: 0; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
-}
-.bottom-sheet-enter {
-  animation: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.modal-enter {
-  animation: modal-pop 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
 /* ── Stagger helpers (applied dynamically as `card-stagger-${n}`) ── */
 /* Wszystkie stopnie mają ten sam czas trwania — pierwszy szedł 0.45s przy 0.4s
    pozostałych, więc karta bez opóźnienia kończyła wejście po sąsiadce. */
@@ -692,13 +698,20 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
   .main-content { padding-bottom: calc(var(--nav-height) + 1rem + env(safe-area-inset-bottom, 16px)); }
 }
 
-/* Page enter animation for route transitions */
-@keyframes page-enter {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* Kierunek zakładki określa, z której strony nowa treść wchodzi w układ. */
+@keyframes page-enter-forward {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
-.page-enter {
-  animation: page-enter 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+@keyframes page-enter-backward {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.page-enter-forward {
+  animation: page-enter-forward 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.page-enter-backward {
+  animation: page-enter-backward 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* ══ NAVIGATION ══════════════════════════════════════════════════ */
@@ -715,7 +728,8 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
   padding: 10px 8px;
   font-family: var(--font-display); font-size: 0.875rem !important; letter-spacing: 0.1em;
-  border: 1px solid transparent; cursor: pointer; transition: all 0.15s;
+  border: 1px solid transparent; cursor: pointer;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
   white-space: nowrap; background: transparent; color: var(--co-dim);
   text-transform: uppercase; position: relative; overflow: hidden;
   clip-path: var(--clip-badge);
@@ -739,11 +753,20 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
 .mobile-nav {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--z-nav);
   display: flex; align-items: stretch;
-  border-top: 1px solid var(--co-border);
+  border-top: 0;
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  background: linear-gradient(180deg, rgba(3,5,8,0.92) 0%, rgba(3,5,8,0.98) 100%);
+  background: linear-gradient(180deg, rgba(3,5,8,0.62) 0%, rgba(3,5,8,0.72) 100%);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.98), 0 -1px 0 var(--co-border-hi);
+  box-shadow: 0 -8px 28px rgba(0,0,0,0.28);
+}
+.mobile-nav::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--co-border-hi), transparent);
+  opacity: 0.65;
+  pointer-events: none;
 }
 .mobile-nav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center;
@@ -776,7 +799,7 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
 }
 .mobile-nav-btn:active { transform: scale(0.95); }
 .mobile-nav-label {
-  font-size: 0.62rem !important; letter-spacing: 0.1em; line-height: 1;
+  font-size: 0.75rem; letter-spacing: 0.08em; line-height: 1;
   margin-top: 1px; font-family: var(--font-display); text-transform: uppercase;
 }
 
@@ -872,6 +895,22 @@ body.has-push-banner .pwa-banner { display: none; }
    2px to minimum z WCAG 2.4.13; kolor bierzemy z tokenu, żeby w trybie jasnym
    pierścień był stonowaną zielenią morską, a nie elektrycznym cyanem. */
 *:focus-visible { outline: 2px solid var(--co-cyan); outline-offset: 2px; }
+
+/* Outline jest obcinany przez clip-path. Drop-shadow śledzi widoczny kształt,
+   więc działa na przyciskach, polach i wierszach filtra z ciętymi narożnikami. */
+.cyber-button-yellow:focus-visible,
+.cyber-button-danger:focus-visible,
+.cyber-button-outline:focus-visible,
+.desktop-tab:focus-visible,
+.filter-player-option:focus-visible,
+:focus-visible[style*="clip-path"] {
+  outline: none;
+  filter: drop-shadow(0 0 1px var(--co-cyan)) drop-shadow(0 0 3px var(--co-cyan));
+}
+.modal-panel.cut-corners:focus-visible {
+  outline: none;
+  filter: var(--glow-drop-panel) drop-shadow(0 0 1px var(--co-cyan)) drop-shadow(0 0 3px var(--co-cyan));
+}
 
 /* ══ CARD HOVER GLOW ════════════════════════════════════════════ */
 .player-card-wrap {
@@ -1060,6 +1099,8 @@ body.theme-light {
   --glow-box-cyan:  0 1px 3px rgba(0,0,0,0.08);
   --glow-box-rose:  0 1px 3px rgba(0,0,0,0.08);
   --glow-box-panel: 0 4px 24px rgba(0,0,0,0.12);
+  --glow-drop-panel: drop-shadow(0 4px 24px rgba(0,0,0,0.12));
+  --modal-blur: 10px;
   --glow-drop-cyan: drop-shadow(0 0 12px rgba(13,148,136,0.12));
   --glow-drop-rose: none;
   --glow-brand-sm: 0 0 10px rgba(13,148,136,0.35);
@@ -1096,12 +1137,6 @@ body.theme-light {
 body.theme-light .cyber-box,
 body.theme-light .cyber-input {
   background: var(--co-panel);
-}
-
-/* Modal overlays */
-body.theme-light .modal-overlay::before {
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
 }
 
 /* Cards — warm white, layered shadow */
@@ -1152,9 +1187,12 @@ body.theme-light .desktop-nav {
 }
 /* ── Mobile nav ── */
 body.theme-light .mobile-nav {
-  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.98) 100%);
-  border-top-color: var(--co-border);
-  box-shadow: 0 -1px 6px rgba(0,0,0,0.06);
+  background: linear-gradient(180deg, rgba(248,250,252,0.64) 0%, rgba(248,250,252,0.76) 100%);
+  border-top: 0;
+  box-shadow: 0 -8px 28px rgba(15,23,42,0.08);
+}
+body.theme-light .mobile-nav::before {
+  background: linear-gradient(90deg, transparent, var(--co-border), transparent);
 }
 /* Compact header (scrolled) */
 body.theme-light .compact-header {
@@ -1206,7 +1244,8 @@ body.theme-light .min-h-screen {
 }
 
 /* ══ REDUCED MOTION ═══════════════════════════════════════════════
-   Respect user preference for reduced motion (accessibility)
+   Ruch przestrzenny zastępujemy krótkim crossfade'em; preferencja obejmuje
+   również rAF w hookach i canvasie, nie tylko CSS keyframes.
    ═════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1214,5 +1253,92 @@ body.theme-light .min-h-screen {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .modal-overlay::before { transition-duration: 180ms !important; }
+  .modal-overlay .modal-panel,
+  .modal-overlay .modal-bare-fill {
+    transition-property: opacity !important;
+    transition-duration: 180ms !important;
+    transform: none;
+  }
+}
+
+/* Nie używaj blur/translucency, gdy system prosi o ograniczenie przezroczystości. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-card,
+  .cyber-box {
+    background: var(--co-panel) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .modal-overlay::before {
+    background: #030508;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .mobile-nav,
+  .compact-header,
+  .bottom-banner {
+    background: var(--co-panel) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  body.theme-light .modal-overlay::before { background: #0F172A; }
+  body.theme-light .mobile-nav,
+  body.theme-light .compact-header,
+  body.theme-light .bottom-banner,
+  body.theme-light .glass-card,
+  body.theme-light .cyber-box {
+    background: #FFFFFF !important;
+  }
+  body.theme-light .player-card-wrap > div {
+    background: #FFFFFF !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Dodatkowy kontrast dla granic kontrolek i tekstów pomocniczych. */
+@media (prefers-contrast: more) {
+  :root {
+    --co-dim: #A8C4D4;
+    --co-border: #49657C;
+    --co-border-hi: #7895AA;
+    --co-tint-line: rgba(0,229,255,0.62);
+  }
+  body.theme-light {
+    --co-dim: #334155;
+    --co-border: #64748B;
+    --co-border-hi: #475569;
+    --co-tint-line: rgba(13,148,136,0.68);
+  }
+  .cyber-button-outline { border-width: 2px; }
+  .modal-panel { border-width: 2px; }
+  *:focus-visible { outline-width: 3px; }
+
+  .glass-card,
+  .cyber-box,
+  .mobile-nav,
+  .compact-header,
+  .bottom-banner {
+    background: var(--co-panel) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .modal-overlay::before {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  body.theme-light .glass-card,
+  body.theme-light .cyber-box,
+  body.theme-light .mobile-nav,
+  body.theme-light .compact-header,
+  body.theme-light .bottom-banner,
+  body.theme-light .player-card-wrap > div {
+    background: #FFFFFF !important;
+  }
+  body.theme-light .player-card-wrap > div {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }

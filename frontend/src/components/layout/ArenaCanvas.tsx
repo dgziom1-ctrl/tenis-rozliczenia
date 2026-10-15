@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface ArenaCanvasProps {
   chaosMode: boolean;
@@ -16,9 +17,14 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
   const ref = useRef<HTMLCanvasElement>(null);
   const raf = useRef<number | null>(null);
   const t0  = useRef<number | null>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (chaosMode) { cancelAnimationFrame(raf.current!); return; }
+    if (chaosMode) {
+      if (raf.current !== null) cancelAnimationFrame(raf.current);
+      raf.current = null;
+      return undefined;
+    }
     const canvas = ref.current;
     if (!canvas) return;
     const g = canvas.getContext('2d')!;
@@ -381,30 +387,37 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
     };
 
     const startLoop = () => {
-      if (raf.current) return;
+      if (raf.current !== null) return;
       raf.current = requestAnimationFrame(loop);
     };
 
     const stopLoop = () => {
-      if (!raf.current) return;
+      if (raf.current === null) return;
       cancelAnimationFrame(raf.current);
       raf.current = null;
     };
 
+    const drawStaticFrame = () => {
+      stopLoop();
+      draw(0.25, performance.now());
+    };
+
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') stopLoop();
+      else if (reducedMotion) drawStaticFrame();
       else startLoop();
     };
 
     document.addEventListener('visibilitychange', onVisibility);
-    startLoop();
+    if (reducedMotion) drawStaticFrame();
+    else startLoop();
 
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
       stopLoop();
       t0.current = null;
     };
-  }, [chaosMode, lightMode, onHit]);
+  }, [chaosMode, lightMode, onHit, reducedMotion]);
 
   return (
     <canvas ref={ref} width={560} height={180} aria-hidden="true"

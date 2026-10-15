@@ -43,7 +43,7 @@ vi.mock('firebase/database', () => ({
 vi.mock('../lib/firebase/config', () => ({ database: {}, dataRef: {} }));
 
 // ─── Import Firebase modules AFTER mocks ─────────────────────────────────────
-const { addSession, deleteWeek, updateWeek } = await import('../lib/firebase/mutations/sessions');
+const { addSession, deleteWeek, deleteWeekWithSnapshot, restoreWeek, updateWeek } = await import('../lib/firebase/mutations/sessions');
 const { addPlayer, softDeletePlayer, restorePlayer } = await import('../lib/firebase/mutations/players');
 const { addPayment, removePayment } = await import('../lib/firebase/mutations/payments');
 
@@ -381,6 +381,35 @@ describe('deleteWeek', () => {
     const result = await deleteWeek('FAKE_ID');
     expect(result.success).toBe(false);
     expect(result.error).toBeTruthy();
+  });
+
+  it('snapshot przywraca ten sam rekord razem z polami legacy', async () => {
+    const week = {
+      id: 'w1', date: '2025-01-01', cost: 45, sport: 'pingpong',
+      present: ['Alice'], multiPlayers: [], overtimeCost: 15, overtimePlayers: ['Alice'],
+    };
+    seed({ weeks: [week] });
+
+    const removed = await deleteWeekWithSnapshot('w1');
+    expect(removed.success).toBe(true);
+    expect(removed.deletedWeek).toEqual(week);
+    expect(stateModule.getCurrentData().weeks).toEqual([]);
+
+    const restored = await restoreWeek(removed.deletedWeek);
+    expect(restored.success).toBe(true);
+    expect(stateModule.getCurrentData().weeks).toEqual([week]);
+  });
+
+  it('przywrócenie nie nadpisuje nowej sesji z tą samą datą', async () => {
+    const snapshot = {
+      id: 'w-old', date: '2025-01-01', cost: 45, sport: 'pingpong',
+      present: ['Alice'], multiPlayers: [],
+    };
+    seed({ weeks: [{ ...snapshot, id: 'w-new' }] });
+
+    const result = await restoreWeek(snapshot);
+    expect(result.success).toBe(false);
+    expect(stateModule.getCurrentData().weeks.map(week => week.id)).toEqual(['w-new']);
   });
 });
 

@@ -11,18 +11,17 @@ interface PlayerFilterSheetProps {
 }
 
 export default function PlayerFilterSheet({ isOpen, onClose, playerNames, filterPlayer, onSelect }: PlayerFilterSheetProps) {
-  if (!isOpen) return null;
-
   const rows = ['', ...(playerNames ?? [])];
 
   return (
-    <Modal onClose={onClose} title="Filtr gracza" icon={Filter} align="bottom" maxWidth={520}>
+    <Modal open={isOpen} onClose={onClose} title="Filtr gracza" icon={Filter} align="bottom" maxWidth={520}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {rows.map(name => {
           const selected = filterPlayer === name;
           return (
             <button
               key={name || '__all__'}
+              className="filter-player-option"
               onClick={() => { onSelect(name); onClose(); }}
               aria-pressed={selected}
               style={{

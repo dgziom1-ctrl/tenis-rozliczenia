@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import type { Theme } from '@/types/ui';
 
 const STORAGE_KEY = 'cyber-ponk-theme';
@@ -6,26 +6,42 @@ const STORAGE_KEY = 'cyber-ponk-theme';
 /** Musi odpowiadać `transition-duration` reguły `body.theme-switching` w index.css. */
 const THEME_TRANSITION_MS = 400;
 
-export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    try { return (localStorage.getItem(STORAGE_KEY) as Theme) || 'dark'; } catch { return 'dark'; }
-  });
+function readSavedTheme(): Theme | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved === 'light' || saved === 'dark' ? saved : null;
+  } catch {
+    return null;
+  }
+}
 
-  const isFirstRun = useRef(true);
+function readSystemTheme(): Theme {
+  return typeof window !== 'undefined'
+    && typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-color-scheme: light)').matches
+    ? 'light'
+    : 'dark';
+}
+
+export function useTheme() {
+  const [preference, setPreference] = useState(() => {
+    const saved = readSavedTheme();
+    return { theme: saved ?? readSystemTheme(), hasExplicitChoice: saved !== null };
+  });
+  const { theme } = preference;
+
+  const previousTheme = useRef(theme);
   const switchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
+  // Zastosuj systemowy motyw przed pierwszym malowaniem, bez zapisywania go jako
+  // świadomego wyboru. Dzięki temu następne uruchomienie nadal może podążyć za OS.
+  useLayoutEffect(() => {
     document.body.classList.toggle('theme-light', theme === 'light');
-    try { localStorage.setItem(STORAGE_KEY, theme); } catch { /* prywatny tryb przeglądarki */ }
+    document.body.dataset.theme = theme;
 
-    // Interpolacja kolorów jest włączona tylko na czas przejścia. Trzymana na
-    // stałe (tak było wcześniej) dawała 400 ms opóźnienia każdemu hoverowi
-    // w aplikacji. Pierwsze uruchomienie pomijamy, żeby motyw zapisany
-    // w localStorage nie przepływał w kadrze przy wejściu na stronę.
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return undefined;
-    }
+    const themeChanged = previousTheme.current !== theme;
+    previousTheme.current = theme;
+    if (!themeChanged) return undefined;
 
     document.body.classList.add('theme-switching');
     if (switchTimer.current) clearTimeout(switchTimer.current);
@@ -36,9 +52,31 @@ export function useTheme() {
     return () => { if (switchTimer.current) clearTimeout(switchTimer.current); };
   }, [theme]);
 
-  const toggle = useCallback(() => {
-    setTheme(t => t === 'dark' ? 'light' : 'dark');
+  // Dopóki użytkownik sam nie przełączy motywu, reagujemy na zmianę ustawień
+  // systemowych. Po pierwszym świadomym wyborze localStorage staje się źródłem prawdy.
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return undefined;
+    const media = window.matchMedia('(prefers-color-scheme: light)');
+    const syncWithSystem = () => {
+      setPreference(current => current.hasExplicitChoice
+        ? current
+        : { ...current, theme: media.matches ? 'light' : 'dark' });
+    };
+
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', syncWithSystem);
+      return () => media.removeEventListener('change', syncWithSystem);
+    }
+
+    media.addListener(syncWithSystem);
+    return () => media.removeListener(syncWithSystem);
   }, []);
+
+  const toggle = useCallback(() => {
+    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem(STORAGE_KEY, next); } catch { /* prywatny tryb przeglądarki */ }
+    setPreference({ theme: next, hasExplicitChoice: true });
+  }, [theme]);
 
   return { theme, toggle };
 }

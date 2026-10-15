@@ -119,7 +119,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
     background: 'var(--co-panel)',
     borderTop: `2px solid ${showReregister || showManual ? 'var(--co-amber)' : 'var(--co-tint-line)'}`,
     padding: '14px 16px 16px',
-    animation: 'sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both',
+    animation: 'slide-in-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both',
   };
 
   // Był tu #FFA000 — trzeci odcień amber w aplikacji, obok --co-amber (#F59E0B)
@@ -181,7 +181,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
                           background: selectedPlayer === name ? 'var(--co-tint-hi)' : 'transparent',
                           cursor: 'pointer',
                           clipPath: CLIP.badge,
-                          transition: 'all 0.15s',
+                          transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                         }}
                       >
                         {name}

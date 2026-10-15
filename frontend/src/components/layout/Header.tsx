@@ -127,7 +127,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
           <button onClick={handleCopy} style={{ display:'flex',alignItems:'center',gap:'8px',
             background:'var(--co-dark)',border:'1px solid var(--co-border)',padding: '6px 12px',cursor:'pointer',
-            transition:'all .18s',clipPath:CLIP.tag }}>
+            transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
             <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,color:'var(--co-cyan)',padding:'2px 6px',
@@ -142,7 +142,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             <button onClick={() => setIsMuted(!isMuted)}
               aria-label={isMuted ? 'Włącz dźwięki' : 'Wycisz dźwięki'} aria-pressed={isMuted}
               style={{ display:'flex',alignItems:'center',
-              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
+              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',
               border:isMuted?'1px solid var(--co-rose)':'1px solid var(--co-border)',
               color:isMuted?'var(--co-rose)':'var(--co-dim)',
               background:isMuted?'var(--co-tint-rose)':'transparent',
@@ -152,7 +152,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             <button onClick={onToggleTheme}
               aria-label={theme === 'light' ? 'Włącz tryb ciemny' : 'Włącz tryb jasny'}
               style={{ display:'flex',alignItems:'center',
-              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'all .18s',
+              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',
               border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
               clipPath:CLIP.badge }}>
               {theme === 'light' ? <Moon size={17} aria-hidden="true"/> : <Sun size={17} aria-hidden="true"/>}
