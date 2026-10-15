@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
 import type { MouseEvent } from 'react';
 import { getPlayerColor } from '@/constants/colors';
-import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, SOUND_TYPES, SPORT_EMOJI, SPORT_LABEL } from '@/constants';
+import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, SOUND_TYPES } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
 import { formatAmountShort } from '@/utils/format';
 import { makeId } from '@/utils/id';
@@ -14,7 +14,7 @@ import UndoBar from '../common/UndoBar';
 import TreasurerPanel from './TreasurerPanel';
 import ConfettiBurst from '../common/ConfettiBurst';
 import StreakBadge from '../attendance/StreakBadge';
-import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerStats, SoundType } from '@/types/ui';
+import type { DebtDisplayData, PlayerCardMeta, PlayerStats, SoundType } from '@/types/ui';
 import type { AddPaymentResult, TransactionResult } from '@/types/domain';
 import type { StyleWithVars } from '@/types/css';
 import { useAnimatedValue } from './useAnimatedValue';
@@ -25,8 +25,6 @@ import { RankBadge } from './RankBadge';
 
 interface PlayerCardProps {
   player: PlayerStats;
-  /** Sesje bieżącego sezonu — ostatnie kropki i licznik obecności. */
-  history: HistoryEntry[];
   meta: PlayerCardMeta;
   openDetails: boolean;
   onToggleDetails: (playerName: string) => void;
@@ -42,7 +40,7 @@ interface PlayerCardProps {
 }
 
 function PlayerCard({
-  player, history, meta,
+  player, meta,
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment, onPin, onUnpin,
   playSound,
@@ -228,7 +226,7 @@ function PlayerCard({
         }}>{RARITY_LABEL[meta.rarity]}</span>
       </div>
 
-      <div style={{ padding: '12px 14px', display: 'flex', gap: 12, alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+      <div style={{ padding: '12px 14px', display: 'flex', gap: 12, alignItems: 'center', position: 'relative', zIndex: 2 }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
           <span className="card-ovr" style={{ color: rank.hex }}>{meta.overall}</span>
           <span style={{ ...FONT.monoMicro, letterSpacing: '0.14em', color: rank.hex }}>OVR</span>
@@ -248,85 +246,9 @@ function PlayerCard({
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>{player.name}</h3>
 
-          <div style={{ marginTop: 4, marginBottom: 8, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+          <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
             <RankBadge rank={rank} pct={pct} showHint={!isMobile} />
             {meta.currentStreak >= 2 && <StreakBadge streak={meta.currentStreak} />}
-          </div>
-
-          {meta.sports.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-              {meta.sports.map(row => (
-                <span
-                  key={row.sport}
-                  title={`${SPORT_LABEL[row.sport] ?? row.sport} ×${row.count}`}
-                  style={{
-                    ...FONT.monoMicro,
-                    letterSpacing: '0.08em',
-                    color: 'var(--co-text)',
-                    padding: '1px 6px',
-                    border: '1px solid var(--co-border)',
-                    background: 'var(--co-tint)',
-                    clipPath: CLIP.badge,
-                  }}
-                >
-                  {SPORT_EMOJI[row.sport] ?? '🏓'} {row.count}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {!isMobile && meta.topAchievements.length > 0 && (
-            <div style={{ display: 'flex', gap: 4, marginBottom: 8 }} aria-label="Osiągnięcia">
-              {meta.topAchievements.map(a => (
-                <span key={a.id} title={`${a.label}: ${a.desc}`} style={{ fontSize: '0.95rem', lineHeight: 1 }}>
-                  {a.emoji}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-              <span style={{ ...FONT.monoLabel }}>
-                Obecność
-              </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
-                {meta.attendanceCount}/{meta.eligibleWeeks}
-              </span>
-            </div>
-            <div style={{ height: 2, background: 'var(--co-bar-track)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{
-                position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`,
-                background: pct >= 75
-                  ? 'linear-gradient(90deg, var(--co-cyan), var(--co-green))'
-                  : pct >= 45
-                  ? 'linear-gradient(90deg, var(--co-green), var(--co-cyan))'
-                  : `linear-gradient(90deg, ${c.border}CC, ${c.border}66)`,
-                transition: 'width 0.8s ease',
-              }} />
-            </div>
-            {history && history.length > 0 && (
-              <div
-                title={`Ostatnie ${[...history].slice(0, isMobile ? 6 : 10).length} sesji`}
-                style={{ display: 'flex', gap: 2, marginTop: 6, flexWrap: 'wrap' }}>
-                {[...history].slice(0, isMobile ? 6 : 10).reverse().map((session, i) => {
-                  const attended = session.presentPlayers.includes(player.name);
-                  return (
-                    <div
-                      key={session.id || i}
-                      title={session.datePlayed}
-                      style={{
-                        width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-                        background: attended ? c.border : 'transparent',
-                        border: `1px solid ${attended ? c.border : 'var(--co-dot-empty)'}`,
-                        boxShadow: attended ? `0 0 4px ${c.border}80` : 'none',
-                        transition: 'all 0.2s',
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            )}
           </div>
         </div>
       </div>

@@ -44,6 +44,8 @@ import LogEntry from '../components/history/LogEntry';
 import LiveCostPreview from '../components/admin/LiveCostPreview';
 import { PasswordModal } from '../components/common/SharedUI';
 import PlayerSessionModal from '../components/attendance/PlayerSessionModal';
+import PlayerCard from '../components/dashboard/PlayerCard';
+import { buildPlayerCardMeta } from '../utils/playerCard';
 import { getShareGroups } from '../utils/sessionCost';
 import { TABS } from '../constants';
 
@@ -398,3 +400,61 @@ describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
     expect(screen.getByText(/osiągnięcia · wszystkie sezony/)).toBeInTheDocument();
   });
 });
+
+// ════════════════════════════════════════════════════════════════════════════
+// PlayerCard — czysta karta FIFA (Wariant A)
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('PlayerCard — Wariant A (czysta karta FIFA)', () => {
+  const player = {
+    name: 'Ala',
+    currentDebt: 45,
+    joinDate: null,
+    attendanceCount: 5,
+    eligibleWeeks: 6,
+    attendancePercentage: 83,
+    currentStreak: 3,
+  };
+  const history = [
+    {
+      id: 's1',
+      datePlayed: '2026-03-01',
+      sport: 'pingpong',
+      totalCost: 60,
+      costPerPerson: 30,
+      costPerPersonMulti: 15,
+      presentPlayers: ['Ala'],
+      multisportPlayers: [],
+    },
+  ];
+  const meta = buildPlayerCardMeta(player, history);
+
+  it('pokazuje OVR, imię, rangę z procentem i serię, bez paska obecności, sportów i odznak', () => {
+    render(
+      <PlayerCard
+        player={player}
+        meta={meta}
+        openDetails={false}
+        onToggleDetails={vi.fn()}
+        breakdown={null}
+        onAddPayment={vi.fn()}
+        onRemovePayment={vi.fn()}
+        onPin={vi.fn()}
+        onUnpin={vi.fn()}
+        playSound={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(String(meta.overall))).toBeInTheDocument();
+    expect(screen.getByText('OVR')).toBeInTheDocument();
+    expect(screen.getByText('Ala')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Ranga MISTRZ, 83% frekwencji/ })).toBeInTheDocument();
+    expect(screen.getByText(/SERIA 3/i)).toBeInTheDocument();
+
+    // Usunięte elementy nie zaśmiecają karty
+    expect(screen.queryByText('Obecność')).not.toBeInTheDocument();
+    expect(screen.queryByText('5/6')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Osiągnięcia')).not.toBeInTheDocument();
+  });
+});
+
