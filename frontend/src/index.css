@@ -90,9 +90,9 @@
   --glow-green-md:  0 0 14px rgba(0,255,136,0.40);
   --glow-box-cyan:  0 0 16px rgba(0,229,255,0.20);
   --glow-box-rose:  0 0 18px rgba(255,32,144,0.13);
-  --glow-box-panel: 0 8px 40px rgba(0,0,0,0.80);
+  --glow-box-panel: 0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 70px -30px rgba(0,0,0,0.92), 0 6px 18px -8px rgba(0,0,0,0.70);
   /* Filter rysuje cień poza clip-path, w przeciwieństwie do box-shadow. */
-  --glow-drop-panel: drop-shadow(0 8px 40px rgba(0,0,0,0.80));
+  --glow-drop-panel: drop-shadow(0 30px 60px rgba(0,0,0,0.70));
   --modal-blur: 8px;
   /* `filter` nie przyjmuje wartości box-shadow, więc poświata canvasu w
      nagłówku potrzebuje własnego tokenu. */
@@ -120,7 +120,7 @@
      Ciemny motyw jest kanciasty (ścięte narożniki), jasny — zaokrąglony.
      Wcześniej dwa modale wpisywały `12px` na sztywno w obu motywach. */
   --modal-radius: 0px;
-  --modal-bg:     var(--co-panel);
+  --modal-bg:     var(--co-glass-hi);
   /* ── Kształty ścięć ──
      Muszą odpowiadać `CLIP` w constants/styles.ts — TypeScript nie czyta
      zmiennych CSS, więc te same kształty muszą żyć w obu miejscach.
@@ -146,6 +146,26 @@
   /* Powierzchnia wewnętrzna — --co-separator to hairline i użyty jako tło
      dawał pudełka bez widocznej krawędzi (to samo 5% na tle i obramowaniu). */
   --co-surface-2:    #0C1420;
+
+  /* ── Glass surfaces (glassmorphism) ──
+     Panele są półprzezroczyste i rozmywają tło pod sobą. Trzy stopnie krycia:
+     `--co-glass` na duże panele, `--co-glass-hi` na dialogi (czytelność tekstu
+     nad rozmytym tłem), `--co-glass-chip` na małe kontrolki (pola, chipy).
+     `--glass-sheen` to delikatny refleks światła na górnej krawędzi szkła. */
+  --co-glass:      rgba(9,15,24,0.55);
+  --co-glass-hi:   rgba(9,15,24,0.74);
+  --co-glass-chip: rgba(9,15,24,0.42);
+  --glass-blur:    16px;
+  --glass-sat:     150%;
+  --glass-hi-line: rgba(255,255,255,0.06);
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0) 46%);
+  /* Wgłębienie pola tekstowego — jasny motyw ma własną, jasną wersję. */
+  --input-inset:   inset 0 1px 2px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.02);
+  /* Cień szkła: refleks na górnej krawędzi + głęboki, miękki cień pod panelem. */
+  --glass-shadow:
+    0 1px 0 var(--glass-hi-line) inset,
+    0 20px 50px -26px rgba(0,0,0,0.90),
+    0 2px 8px -4px rgba(0,0,0,0.60);
 
   /* ── Fonts ── */
   --font-display: 'Bebas Neue', monospace;
@@ -178,12 +198,13 @@ body {
   letter-spacing: 0.02em;
   transition: background-color 0.4s ease, color 0.4s ease, background-image 0.4s ease;
 
-  /* Cold operator background: deep cyan top bloom + fine grid */
+  /* Cold operator background: cyan top bloom + rose/blue depth below + fine grid */
   background-image:
-    radial-gradient(ellipse 75% 45% at 50% -8%, rgba(0,229,255,0.08) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 30% at 50% 110%, rgba(0,180,216,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 75% 45% at 50% -8%, rgba(0,229,255,0.10) 0%, transparent 65%),
+    radial-gradient(ellipse 52% 42% at 84% 110%, rgba(255,32,144,0.055) 0%, transparent 62%),
+    radial-gradient(ellipse 44% 34% at 10% 104%, rgba(0,180,216,0.05) 0%, transparent 60%),
     radial-gradient(circle at 1px 1px, rgba(0,229,255,0.055) 1px, transparent 0);
-  background-size: 100% 100%, 100% 100%, 28px 28px;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
   background-attachment: fixed;
 }
 
@@ -297,36 +318,59 @@ body.theme-switching *::after {
   .scan-hover:hover::before { animation: scan-sweep 0.5s ease-out forwards; }
 
   .glass-card {
-    background: rgba(6, 12, 18, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background-color: var(--co-glass);
+    background-image: var(--glass-sheen);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
     border: 1px solid var(--co-border);
     box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 var(--co-tint);
+      var(--glass-shadow),
+      inset 0 0 0 1px rgba(0,229,255,0.03);
   }
 
   .cyber-box {
-    background: rgba(6, 12, 18, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background-color: var(--co-glass);
+    background-image: var(--glass-sheen);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
     border: 1px solid var(--co-border);
     box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(0, 229, 255, 0.06);
+      var(--glass-shadow),
+      inset 0 0 0 1px rgba(0,229,255,0.03);
     position: relative; overflow: hidden;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  /* Neonowa kreska na górnej krawędzi szkła — sygnatura „premium cyber". */
+  .cyber-box::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--co-tint-line), transparent);
+    pointer-events: none;
+  }
+
+  /* Panel szklany w treści zakładek — te same właściwości co `.cyber-box`,
+     ale bez własnego nagłówka i `overflow: hidden`. */
+  .glass-panel {
+    background-color: var(--co-glass);
+    background-image: var(--glass-sheen);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    border: 1px solid var(--co-border);
+    box-shadow: var(--glass-shadow);
   }
 
   .cyber-input {
-    background: rgba(3,5,8,0.9);
+    background: var(--co-glass-chip);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
     border: 1px solid var(--co-border-hi);
     color: var(--co-text);
     font-family: var(--font-mono);
     /* 16px to podłoga, poniżej której iOS Safari przybliża stronę przy
        tapnięciu w pole. Komponenty nie nadpisują już tego inline. */
     font-size: 16px;
-    transition: border-color 0.18s, box-shadow 0.18s;
+    box-shadow: var(--input-inset);
+    transition: border-color 0.18s, box-shadow 0.18s, background-color 0.18s;
   }
   .cyber-input:focus {
     border-color: var(--co-cyan);
@@ -350,6 +394,7 @@ body.theme-switching *::after {
     font-family: var(--font-display);
     font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase;
     border: none; cursor: pointer; position: relative; overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), var(--glow-brand-sm);
     transition: box-shadow 0.18s, transform 0.1s;
     clip-path: var(--clip-tag);
   }
@@ -362,7 +407,7 @@ body.theme-switching *::after {
     transform: translateX(-100%); transition: transform 0.25s ease;
   }
   .cyber-button-yellow:hover {
-    box-shadow: 0 0 20px rgba(0,229,255,0.5), 0 0 44px rgba(0,229,255,0.18);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.40), var(--glow-brand-md), var(--glow-brand-lg);
   }
   .cyber-button-yellow:hover::before { transform: translateX(100%); }
   .cyber-button-yellow:active { transform: scale(0.96); }
@@ -376,6 +421,7 @@ body.theme-switching *::after {
     font-family: var(--font-display);
     font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase;
     border: none; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.20), var(--glow-rose-md);
     transition: box-shadow 0.18s, transform 0.1s;
     clip-path: var(--clip-tag);
   }
@@ -388,16 +434,19 @@ body.theme-switching *::after {
 
   /* Outline button */
   .cyber-button-outline {
-    background: transparent; color: var(--co-cyan);
+    background: var(--co-glass-chip); color: var(--co-cyan);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     font-family: var(--font-display); font-size: 0.875rem;
     letter-spacing: 0.1em; text-transform: uppercase;
     border: 1px solid var(--co-tint-line); cursor: pointer;
+    box-shadow: inset 0 1px 0 var(--glass-hi-line);
     transition: color 0.18s, background-color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.1s;
     clip-path: var(--clip-tag);
   }
   .cyber-button-outline:hover {
     background: var(--co-tint); border-color: var(--co-cyan);
-    box-shadow: var(--glow-box-cyan);
+    box-shadow: inset 0 1px 0 var(--glass-hi-line), var(--glow-box-cyan);
   }
 
   /* Wspólny stan wyłączony. Bez tego komponenty zdejmowały klasę warunkowo,
@@ -605,13 +654,16 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
 }
 .modal-overlay.is-open .modal-bare-fill { opacity: 1; }
 
-/* Panel dialogu — cień jako drop-shadow, bo box-shadow był ucinany przez clip-path. */
+/* Panel dialogu — cień jako drop-shadow, bo box-shadow był ucinany przez clip-path.
+   Tło jest półprzezroczyste: scrim pod spodem już rozmywa tło, więc panel
+   czyta się jak szkło bez własnego `backdrop-filter` (który gryzłby się z `filter`). */
 .modal-panel {
   width: 100%;
   display: flex;
   flex-direction: column;
   background: var(--modal-bg);
-  border: 1px solid var(--co-border);
+  background-image: var(--glass-sheen);
+  border: 1px solid var(--co-tint-line);
   border-radius: var(--modal-radius);
   box-shadow: none;
   filter: var(--glow-drop-panel);
@@ -719,10 +771,13 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
 .desktop-nav-inner {
   display: flex; align-items: center; gap: 3px; padding: 5px;
   margin-bottom: 2.5rem;
-  background: var(--co-dark);
+  background-color: var(--co-glass);
+  background-image: var(--glass-sheen);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   border: 1px solid var(--co-border); border-top: none;
   clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 10px 100%);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.95), inset 0 1px 0 var(--co-border-hi);
+  box-shadow: var(--glass-shadow), inset 0 0 0 1px rgba(0,229,255,0.03);
 }
 .desktop-tab {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
@@ -754,10 +809,10 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
   position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--z-nav);
   display: flex; align-items: stretch;
   border-top: 0;
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  background: linear-gradient(180deg, rgba(3,5,8,0.62) 0%, rgba(3,5,8,0.72) 100%);
+  backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+  background: linear-gradient(180deg, rgba(3,5,8,0.52) 0%, rgba(3,5,8,0.80) 100%);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -8px 28px rgba(0,0,0,0.28);
+  box-shadow: 0 -8px 28px rgba(0,0,0,0.35), inset 0 1px 0 var(--glass-hi-line);
 }
 .mobile-nav::before {
   content: '';
@@ -868,10 +923,10 @@ body.has-push-banner .pwa-banner { display: none; }
     align-items: center; justify-content: space-between;
     padding-left: 16px; padding-right: 16px;
     padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px;
-    border-bottom: 1px solid var(--co-border);
-    background: rgba(3,5,8,0.97);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 2px 20px rgba(0,0,0,0.9);
+    border-bottom: 1px solid var(--co-tint-line);
+    background: rgba(3,5,8,0.82);
+    backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
+    box-shadow: 0 1px 0 var(--glass-hi-line) inset, 0 2px 20px rgba(0,0,0,0.9);
     transition: transform 0.25s ease, opacity 0.25s ease;
   }
   .compact-header.hidden-bar  { transform: translateY(-100%); opacity: 0; }
@@ -1080,6 +1135,12 @@ body.theme-light {
   --co-separator:    rgba(0,60,100,0.08);
   --co-surface-2:    #F1F5F9;
 
+  /* ── Glass — jasny wariant ──
+     Chipy w ciemnym motywie są granatowe; na jasnym tle muszą być białawe,
+     inaczej np. przycisk konturowy robi się ciemną plamą. */
+  --co-glass-chip: rgba(255,255,255,0.55);
+  --input-inset:   inset 0 1px 2px rgba(15,23,42,0.05), inset 0 0 0 1px rgba(15,23,42,0.02);
+
   /* ── Accent tints — teal, matching --co-cyan above ── */
   --co-tint:      rgba(13,148,136,0.05);
   --co-tint-hi:   rgba(13,148,136,0.10);
@@ -1202,20 +1263,22 @@ body.theme-light .compact-header {
 }
 
 /* ── Glass card & Cyber box ── */
-body.theme-light .glass-card {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+body.theme-light .glass-card,
+body.theme-light .glass-panel {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.70) inset, 0 10px 30px -18px rgba(15,23,42,0.28), 0 1px 3px rgba(0,0,0,0.05);
 }
 body.theme-light .cyber-box {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
   border-color: var(--co-border);
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.70) inset, 0 10px 30px -18px rgba(15,23,42,0.28), 0 1px 3px rgba(0,0,0,0.05);
 }
+body.theme-light .modal-panel { background-image: none; }
 
 /* ── Cyber input ──
    Tło jest jedyną rzeczą, której token nie załatwia: bazowa reguła ma
@@ -1266,7 +1329,21 @@ body.theme-light .min-h-screen {
 /* Nie używaj blur/translucency, gdy system prosi o ograniczenie przezroczystości. */
 @media (prefers-reduced-transparency: reduce) {
   .glass-card,
+  .glass-panel,
   .cyber-box {
+    background: var(--co-panel) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  /* Pola i przycisk konturowy też używają szkła — bez tego zostawał blur,
+     mimo że reszta interfejsu już z niego rezygnuje. Nagłówek dodatkowo
+     wraca do pełnego krycia (jego tło jest wpisane inline). */
+  .cyber-input,
+  .cyber-button-outline {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  header {
     background: var(--co-panel) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -1288,6 +1365,7 @@ body.theme-light .min-h-screen {
   body.theme-light .compact-header,
   body.theme-light .bottom-banner,
   body.theme-light .glass-card,
+  body.theme-light .glass-panel,
   body.theme-light .cyber-box {
     background: #FFFFFF !important;
   }
@@ -1317,10 +1395,21 @@ body.theme-light .min-h-screen {
   *:focus-visible { outline-width: 3px; }
 
   .glass-card,
+  .glass-panel,
   .cyber-box,
   .mobile-nav,
   .compact-header,
   .bottom-banner {
+    background: var(--co-panel) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .cyber-input,
+  .cyber-button-outline {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  header {
     background: var(--co-panel) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -1330,6 +1419,7 @@ body.theme-light .min-h-screen {
     -webkit-backdrop-filter: none;
   }
   body.theme-light .glass-card,
+  body.theme-light .glass-panel,
   body.theme-light .cyber-box,
   body.theme-light .mobile-nav,
   body.theme-light .compact-header,

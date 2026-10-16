@@ -149,10 +149,8 @@ export interface FieldGroupProps {
  */
 export function FieldGroup({ icon: Icon, label, counter, counterColor = 'var(--co-cyan)', children }: FieldGroupProps) {
   return (
-    <div style={{
+    <div className="glass-panel" style={{
       padding: '16px',
-      background: 'var(--co-surface-2)',
-      border: '1px solid var(--co-border)',
       clipPath: CLIP.smallCard,
     }}>
       <p style={{

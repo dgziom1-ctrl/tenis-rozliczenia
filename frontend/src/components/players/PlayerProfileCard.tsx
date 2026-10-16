@@ -16,13 +16,11 @@ export default function PlayerProfileCard({ player, index, onDelete, isOrganizer
   const accent = isOrganizer ? 'var(--co-cyan)' : c.border;
 
   return (
-    <div style={{
+    <div className="glass-panel" style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-      background: 'var(--co-surface-2)',
       border: `1px solid ${isOrganizer ? 'var(--co-tint-line)' : c.border + '35'}`,
       clipPath: CLIP.smallCard,
       transition: 'border-color 0.2s',
-      boxShadow: 'var(--glow-box-cyan)',
     }}
       onMouseEnter={e => e.currentTarget.style.borderColor = accent}
       onMouseLeave={e => e.currentTarget.style.borderColor = isOrganizer ? 'var(--co-tint-line)' : c.border + '35'}

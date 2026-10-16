@@ -242,6 +242,15 @@ function CyberBackground() {
         background: 'radial-gradient(ellipse at right center, var(--co-tint) 0%, transparent 60%)',
       }} />
       <div style={{
+        position: 'absolute', bottom: '-6%', right: '6%',
+        width: '48vw', height: '46vh',
+        background: 'radial-gradient(ellipse at bottom right, rgba(255,32,144,0.06) 0%, transparent 62%)',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse 120% 100% at 50% 38%, transparent 52%, rgba(0,0,0,0.42) 100%)',
+      }} />
+      <div style={{
         position: 'absolute', inset: 0,
         backgroundImage: 'radial-gradient(circle at 1px 1px, var(--dot-color, var(--co-tint)) 1px, transparent 0)',
         backgroundSize: '28px 28px',

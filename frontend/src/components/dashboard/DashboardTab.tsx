@@ -98,9 +98,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
 
       {/* Empty state */}
       {totalWeeks === 0 && (
-        <div style={{
-          background: 'var(--co-panel)',
-          border: '1px solid var(--co-border)',
+        <div className="glass-panel" style={{
           borderLeft: '3px solid var(--co-cyan)',
           clipPath: CLIP.smallCard,
           padding: '40px 32px', textAlign: 'center',
@@ -181,7 +179,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
 
       {/* ── Collapsible rank guide — only show when there's data ── */}
       {totalWeeks > 0 && (
-        <div style={{ background: 'var(--co-panel)', border: '1px solid var(--co-border)', clipPath: CLIP.smallCard }}>
+        <div className="glass-panel" style={{ clipPath: CLIP.smallCard }}>
           <button
             onClick={() => setShowRankGuide(v => !v)}
             style={{

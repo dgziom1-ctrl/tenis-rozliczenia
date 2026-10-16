@@ -306,7 +306,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
 
         {/* ── 2. BOOT TEXT ──────────────────────────────────────────── */}
         {/* Zieleń przy 70% krycia schodziła w trybie jasnym do ~2,6:1. */}
-        <div style={{ marginBottom: 20, padding: '10px 14px', background: 'var(--co-surface-2)', border: '1px solid var(--co-border)' }}>
+        <div className="glass-panel" style={{ marginBottom: 20, padding: '10px 14px' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', lineHeight: 1.6 }}>
             {'>'} System OK
             <br />
