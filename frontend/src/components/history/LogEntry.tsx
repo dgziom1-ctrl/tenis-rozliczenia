@@ -41,8 +41,9 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
         {/* Top row: date + actions */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', opacity: 0.5 }}>{'>'}</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-green)' }}>
-              #{String(row.id).slice(-4).toUpperCase()}
+              SESSION_{String(row.id).slice(-4).toUpperCase()}
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>
               {formatDate(row.datePlayed)}

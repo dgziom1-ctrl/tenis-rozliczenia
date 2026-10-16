@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { ScrollText, CalendarDays, Search, Download, ArrowUpDown } from 'lucide-react';
+import { Terminal, CalendarDays, Search, Download, ArrowUpDown } from 'lucide-react';
 import { updateWeek, deleteWeekWithSnapshot, restoreWeek } from '@/lib/firebase';
 import { groupHistoryByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
 import SeasonSelector from '../attendance/SeasonSelector';
@@ -294,7 +294,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
 
         {/* ── 1. HEADER ─────────────────────────────────────────────── */}
         <PanelHeader
-          icon={ScrollText}
+          icon={Terminal}
           title="Historia"
           accent="var(--co-green)"
           aside={
@@ -304,12 +304,15 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           }
         />
 
-        {/* ── 2. PODSUMOWANIE ───────────────────────────────────────── */}
+        {/* ── 2. BOOT TEXT ──────────────────────────────────────────── */}
         {/* Zieleń przy 70% krycia schodziła w trybie jasnym do ~2,6:1. */}
-        <div style={{ marginBottom: 20, padding: '12px 14px', background: 'var(--co-surface-2)', border: '1px solid var(--co-border)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--co-green)', boxShadow: 'var(--glow-green-md)', flexShrink: 0 }} />
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', lineHeight: 1.5, margin: 0, letterSpacing: '0.04em' }}>
-            {filteredHistory.length}{selectedSeason || filterPlayer ? ` z ${history.length}` : ''} {filteredHistory.length === 1 ? 'rekord' : 'rekordów'}
+        <div style={{ marginBottom: 20, padding: '10px 14px', background: 'var(--co-surface-2)', border: '1px solid var(--co-border)' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', lineHeight: 1.6 }}>
+            {'>'} System OK
+            <br />
+            {'>'} {filteredHistory.length}{selectedSeason || filterPlayer ? ` z ${history.length}` : ''} rekordów znaleziono
+            <br />
+            {'>'} Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--co-green)' }}>▮</span>
           </p>
         </div>
 
@@ -468,7 +471,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
               BRAK DANYCH
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', marginTop: 8 }}>
-              Dodaj pierwszą sesję w zakładce DODAJ
+              {'>'} Dodaj pierwszą sesję w zakładce DODAJ_
             </p>
           </div>
         )}
@@ -476,7 +479,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         {history.length > 0 && filteredHistory.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>
-              Brak sesji dla wybranych filtrów
+              {'>'} Brak sesji dla wybranych filtrów_
             </p>
           </div>
         )}

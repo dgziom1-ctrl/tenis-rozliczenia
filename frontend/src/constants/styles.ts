@@ -1,21 +1,11 @@
 import type { CSSProperties } from 'react';
 
-/**
- * Kształty elementów.
- *
- * Zestaw nazw zostaje (używa go 90+ miejsc), ale wszystkie ścięcia zniknęły —
- * interfejs przeszedł z kanciastego cyber do miękkich, zaokrąglonych paneli.
- * Za promienie odpowiada `border-radius` w klasach CSS; tu wystarczy `none`,
- * żeby żaden inline nie obcinał już narożnika. Selektor
- * `[style*="clip-path"]` w index.css dokłada promień elementom, które mają
- * tylko styl inline.
- */
 export const CLIP = {
-  panel: 'none',
-  card: 'none',
-  badge: 'none',
-  smallCard: 'none',
-  tag: 'none',
+  panel: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)',
+  card: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
+  badge: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+  smallCard: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
+  tag: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
 } as const;
 
 /**
@@ -30,19 +20,19 @@ export const TEXT = {
   micro: '0.75rem',   // 12px — etykiety pól, znaczniki (podłoga czytelności)
   tiny: '0.75rem',    // 12px — alias dla czytelności wywołań
   small: '0.8125rem', // 13px — treść drugorzędna
-  base: '0.9375rem',  // 15px — treść podstawowa
-  lead: '1.0625rem',  // 17px — wyróżnienie, tytuł sekcji
-  h3: '1.375rem',     // 22px
-  h2: '1.625rem',     // 26px
-  h1: '2.125rem',     // 34px
-  hero: '2.75rem',    // 44px — kwoty i liczby-bohaterowie
+  base: '0.875rem',   // 14px — treść podstawowa
+  lead: '1rem',       // 16px — wyróżnienie, tytuł sekcji
+  h3: '1.25rem',      // 20px
+  h2: '1.5rem',       // 24px
+  h1: '2rem',         // 32px
+  hero: '2.5rem',     // 40px — kwoty i liczby-bohaterowie
 } as const;
 
 /** Odstępy literowe — trzy stopnie zamiast dwudziestu. */
 export const TRACK = {
-  tight: '0.02em',
-  normal: '0.06em',
-  wide: '0.14em',
+  tight: '0.06em',
+  normal: '0.1em',
+  wide: '0.18em',
 } as const;
 
 /**
@@ -116,7 +106,6 @@ export const FONT = {
   display: (size: string = TEXT.lead, spacing?: string): CSSProperties => ({
     fontFamily: 'var(--font-display)',
     fontSize: size,
-    fontWeight: 500,
     letterSpacing: spacing ?? displayTracking(size),
     textTransform: 'uppercase',
   }),
@@ -150,7 +139,7 @@ export const PANEL = {
   cyberCut: {
     background: 'var(--co-panel)',
     border: '1px solid var(--co-border)',
-    borderRadius: '18px',
+    clipPath: CLIP.panel,
     padding: 24,
     position: 'relative',
   } as CSSProperties,

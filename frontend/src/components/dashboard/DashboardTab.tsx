@@ -7,7 +7,7 @@ import { buildPlayerCardMeta } from '@/utils/playerCard';
 import { getCurrentSeason, filterHistoryByYear } from '@/utils/sessions';
 import { useToast } from '../common/Toast';
 import PlayerCard from './PlayerCard';
-import { CalendarDays, ChevronDown } from 'lucide-react';
+import { Zap, ChevronDown } from 'lucide-react';
 import PushPermissionBanner from '../common/PushPermissionBanner';
 import type { UIData, HistoryEntry, PlayerStats, SoundType } from '@/types/ui';
 import { CLIP } from '@/constants/styles';
@@ -98,17 +98,27 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
 
       {/* Empty state */}
       {totalWeeks === 0 && (
-        <div className="glass-card" style={{
+        <div style={{
+          background: 'var(--co-panel)',
+          border: '1px solid var(--co-border)',
           borderLeft: '3px solid var(--co-cyan)',
-          padding: '48px 32px', textAlign: 'center',
+          clipPath: CLIP.smallCard,
+          padding: '40px 32px', textAlign: 'center',
           position: 'relative', overflow: 'hidden',
         }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: 18, filter: 'drop-shadow(0 8px 20px rgba(212,182,120,0.35))' }}>🏓</div>
-          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '1.5rem', letterSpacing: '0.06em', color: 'var(--co-text-hi)', marginBottom: 10, textTransform: 'uppercase' }}>
-            Brak rozgrywek
+          {/* Ambient scan line */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+            background: 'linear-gradient(90deg, transparent, var(--co-cyan), transparent)',
+            animation: 'podium-scan 3s ease-in-out infinite',
+          }} />
+          <div style={{ fontSize: '2.5rem', marginBottom: 16, filter: 'drop-shadow(0 0 8px var(--co-cyan))' }}>🏓</div>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', marginBottom: 10 }}>
+            BRAK ROZGRYWEK
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.8 }}>
-            Nowy sezon czeka. Dodaj pierwszą sesję w zakładce{' '}
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.7 }}>
+            {'>'} System gotowy.<br/>
+            {'>'} Dodaj pierwszą sesję w zakładce{' '}
             <span style={{ color: 'var(--co-cyan)', borderBottom: '1px solid var(--co-tint-line)' }}>DODAJ</span>
             <span className="terminal-cursor" />
           </p>
@@ -124,7 +134,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
           border: '1px solid var(--co-tint-hi)',
           clipPath: CLIP.badge,
         }}>
-          <CalendarDays size={11} style={{ color: 'var(--co-cyan)' }} />
+          <Zap size={9} style={{ color: 'var(--co-cyan)' }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
             sesji{currentSeason ? ` ${currentSeason}` : ''}: <span style={{ color: 'var(--co-cyan)' }}>{seasonHistory.length}</span>
           </span>

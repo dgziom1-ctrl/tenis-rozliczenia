@@ -115,7 +115,7 @@ export default function Leaderboard({ ranked, podiumPlayers, onSelect }: Leaderb
         )}
         {ranked.length === 0 && (
           <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>
-            Brak danych — dodaj sesje, aby zobaczyć ranking
+            {'>'} BRAK DANYCH — dodaj sesje żeby zobaczyć ranking_
           </p>
         )}
       </div>

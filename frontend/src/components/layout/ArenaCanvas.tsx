@@ -121,7 +121,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
 
       sg.clearRect(0, 0, W, H);
       if (lightMode) {
-        sg.fillStyle = '#F7F4EF';
+        sg.fillStyle = '#F8FAFC';
         sg.fillRect(0, 0, W, H);
       }
 
@@ -130,14 +130,14 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       const BR = proj(TX, 0, TZ), BL = proj(-TX, 0, TZ);
       const tg = sg.createLinearGradient(BL[0], BL[1], FL[0], FL[1]);
       if (lightMode) {
-        tg.addColorStop(0, '#F1ECE2'); tg.addColorStop(1, '#E4DACB');
+        tg.addColorStop(0, '#F1F5F9'); tg.addColorStop(1, '#E2E8F0');
       } else {
-        tg.addColorStop(0, '#14110C'); tg.addColorStop(1, '#241C12');
+        tg.addColorStop(0, '#020810'); tg.addColorStop(1, '#041828');
       }
       quadS([FL, FR, BR, BL], tg);
       const gridA = lightMode ? 0.06 : 0.03;
       const gridB = lightMode ? 0.10 : 0.04;
-      const gridRgb = lightMode ? '140,109,46' : '212,182,120';
+      const gridRgb = lightMode ? '13,148,136' : '0,180,255';
       for (let i = 1; i < 4; i++) {
         const wz = -TZ + (i / 4) * TZ * 2;
         segS(proj(-TX, 0, wz), proj(TX, 0, wz), `rgba(${gridRgb},${gridA + i * 0.012})`, 0.8);
@@ -146,7 +146,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
         const wx = -TX + (i / 5) * TX * 2;
         segS(proj(wx, 0, -TZ), proj(wx, 0, TZ), `rgba(${gridRgb},${gridB})`, 0.7);
       }
-      const edgeRgb = lightMode ? '140,109,46' : '230,208,152';
+      const edgeRgb = lightMode ? '13,148,136' : '0,200,255';
       segS(BL, FL, `rgba(${edgeRgb},${lightMode ? 0.45 : 0.55})`, 1.5);
       segS(BR, FR, `rgba(${edgeRgb},${lightMode ? 0.45 : 0.55})`, 1.5);
       segS(BL, BR, `rgba(${gridRgb},${lightMode ? 0.22 : 0.18})`, 1.0);
@@ -156,15 +156,15 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       const FL2 = proj(-TX, TH, -TZ), FR2 = proj(TX, TH, -TZ);
       const fg = sg.createLinearGradient(0, FL[1], 0, FL2[1]);
       if (lightMode) {
-        fg.addColorStop(0, 'rgba(140,109,46,0.18)'); fg.addColorStop(1, 'rgba(140,109,46,0.04)');
+        fg.addColorStop(0, 'rgba(13,148,136,0.18)'); fg.addColorStop(1, 'rgba(13,148,136,0.04)');
       } else {
-        fg.addColorStop(0, 'rgba(212,150,80,0.30)'); fg.addColorStop(1, 'rgba(120,84,30,0.04)');
+        fg.addColorStop(0, 'rgba(0,140,220,0.35)'); fg.addColorStop(1, 'rgba(0,80,160,0.04)');
       }
       quadS([FL, FR, FR2, FL2], fg);
       sg.save();
       sg.shadowBlur = lightMode ? 3 : 5;
-      sg.shadowColor = lightMode ? 'rgba(140,109,46,0.35)' : 'rgba(230,208,152,0.45)';
-      segS(FL, FR, lightMode ? 'rgba(140,109,46,0.65)' : 'rgba(230,208,152,0.75)', 1.8);
+      sg.shadowColor = lightMode ? 'rgba(13,148,136,0.35)' : 'rgba(0,229,255,0.50)';
+      segS(FL, FR, lightMode ? 'rgba(13,148,136,0.65)' : 'rgba(0,229,255,0.80)', 1.8);
       sg.restore();
 
       /* Net (static) */
@@ -172,9 +172,9 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       const nTN = proj(0, -NH, -TZ), nTF = proj(0, -NH, TZ);
       const ng = sg.createLinearGradient(nTN[0], nTN[1], nBN[0], nBN[1]);
       if (lightMode) {
-        ng.addColorStop(0, 'rgba(140,109,46,0.14)'); ng.addColorStop(1, 'rgba(140,109,46,0.03)');
+        ng.addColorStop(0, 'rgba(13,148,136,0.14)'); ng.addColorStop(1, 'rgba(13,148,136,0.03)');
       } else {
-        ng.addColorStop(0, 'rgba(230,208,152,0.16)'); ng.addColorStop(1, 'rgba(150,110,50,0.03)');
+        ng.addColorStop(0, 'rgba(0,200,255,0.18)'); ng.addColorStop(1, 'rgba(0,100,200,0.03)');
       }
       quadS([nBN, nBF, nTF, nTN], ng);
       for (let r = 0; r <= 4; r++) {
@@ -189,8 +189,8 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       segS(nBF, nTF, `rgba(${edgeRgb},${lightMode ? 0.30 : 0.38})`, 1.4);
       sg.save();
       sg.shadowBlur = lightMode ? 4 : 7;
-      sg.shadowColor = lightMode ? 'rgba(140,109,46,0.45)' : 'rgba(230,208,152,0.85)';
-      segS(nTN, nTF, lightMode ? 'rgba(140,109,46,0.75)' : 'rgba(250,240,215,0.95)', 2.5);
+      sg.shadowColor = lightMode ? 'rgba(13,148,136,0.45)' : 'rgba(0,229,255,0.95)';
+      segS(nTN, nTF, lightMode ? 'rgba(13,148,136,0.75)' : 'rgba(200,248,255,0.95)', 2.5);
       sg.restore();
     }
 
@@ -198,7 +198,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
     const draw = (progress: number, nowTs: number) => {
       g.clearRect(0, 0, W, H);
       if (lightMode) {
-        g.fillStyle = '#F7F4EF';
+        g.fillStyle = '#F8FAFC';
         g.fillRect(0, 0, W, H);
       }
 
@@ -238,20 +238,20 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       const sa = Math.max(0, 0.20*(1 - Math.abs(bv[1])/68));
       g.save(); g.translate(bs[0], bs[1]); g.scale(1, 0.34);
       g.beginPath(); g.arc(0, 0, bR*1.55, 0, Math.PI*2);
-      g.fillStyle = `rgba(70,48,14,${sa})`; g.fill();
+      g.fillStyle = `rgba(0,50,120,${sa})`; g.fill();
       g.restore();
 
       /* Ghost trail */
       const tp = (progress-.02+1)%1, tv = ballAt(tp), tq = proj(tv[0],tv[1],0);
       g.beginPath(); g.arc(tq[0], tq[1], 3.6*tq[2], 0, Math.PI*2);
-      g.fillStyle = 'rgba(212,182,120,0.10)'; g.fill();
+      g.fillStyle = 'rgba(0,200,255,0.06)'; g.fill();
 
       /* Ball sphere */
       g.save();
       g.shadowBlur = 13 * bq[2] * (1 + impact * 0.6);
       g.shadowColor = `rgba(255,255,255,${Math.min(1, 0.86 + 0.18 * impact)})`;
       const bg = g.createRadialGradient(bq[0]-bR*.3,bq[1]-bR*.3,0, bq[0],bq[1],bR);
-      bg.addColorStop(0,'#ffffff'); bg.addColorStop(.46,'#f8efdb'); bg.addColorStop(1,'#c9a86a');
+      bg.addColorStop(0,'#ffffff'); bg.addColorStop(.46,'#d8f5ff'); bg.addColorStop(1,'#80c8e0');
       g.beginPath(); g.arc(bq[0], bq[1], bR, 0, Math.PI*2);
       g.fillStyle = bg; g.fill();
       g.restore();
@@ -270,7 +270,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
         g.scale(1, sry / srx);
         g.beginPath(); g.arc(0, 0, srx, 0, Math.PI*2);
         g.restore();
-        g.strokeStyle = `rgba(212, 182, 120, ${0.12 + 0.35 * stripeVis + 0.30 * impact})`;
+        g.strokeStyle = `rgba(0, 220, 255, ${0.12 + 0.35 * stripeVis + 0.30 * impact})`;
         g.lineWidth = 1.4;
         g.stroke();
         g.restore();
@@ -342,40 +342,40 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       g.save();
       g.shadowBlur  = (hitting ? 20 : 8) * impactK;
       g.shadowColor = hitting
-        ? `rgba(212,182,120,${0.90 + 0.15 * impact})`
-        : `rgba(170,140,80,${0.40 + 0.08 * impact})`;
+        ? `rgba(0,229,255,${0.90 + 0.15 * impact})`
+        : `rgba(0,180,255,${0.40 + 0.08 * impact})`;
       g.strokeStyle = hitting
-        ? `rgba(230,208,152,${0.70 + 0.15 * impact})`
-        : `rgba(170,140,80,${0.36 + 0.08 * impact})`;
+        ? `rgba(0,229,255,${0.70 + 0.15 * impact})`
+        : `rgba(0,160,255,${0.36 + 0.08 * impact})`;
       g.lineWidth = 3.5;
       ellipse(cx, cy, rx*1.1, ry*1.1, ang); g.stroke();
       g.restore();
 
       /* Layer 2: dark body */
       const bdg = g.createRadialGradient(cx-rx*.16,cy-ry*.16,0, cx,cy,Math.max(rx,ry)*1.05);
-      bdg.addColorStop(0,'#241C12'); bdg.addColorStop(.76,'#171209'); bdg.addColorStop(1,'#0D0A05');
+      bdg.addColorStop(0,'#062038'); bdg.addColorStop(.76,'#031428'); bdg.addColorStop(1,'#010C1C');
       ellipse(cx, cy, rx, ry, ang); g.fillStyle = bdg; g.fill();
 
       /* Layer 3: rim stroke */
       g.strokeStyle = hitting
-        ? `rgba(230,208,152,${0.90 + 0.12 * impact})`
-        : `rgba(170,140,80,${0.55 + 0.06 * impact})`;
+        ? `rgba(0,229,255,${0.90 + 0.12 * impact})`
+        : `rgba(0,180,255,${0.55 + 0.06 * impact})`;
       g.lineWidth = 1.9;
       ellipse(cx, cy, rx*.95, ry*.95, ang); g.stroke();
 
       /* Layer 4: rubber face */
       const rfg = g.createRadialGradient(cx-rx*.1,cy-ry*.1,0, cx,cy,rx*.52);
-      rfg.addColorStop(0, hitting ? 'rgba(230,208,152,0.95)' : 'rgba(200,170,105,0.85)');
-      rfg.addColorStop(1, hitting ? 'rgba(180,146,80,0.88)' : 'rgba(140,108,52,0.72)');
+      rfg.addColorStop(0, hitting ? 'rgba(0,229,255,0.95)' : 'rgba(0,180,220,0.85)');
+      rfg.addColorStop(1, hitting ? 'rgba(0,160,210,0.88)' : 'rgba(0,120,180,0.72)');
       ellipse(cx, cy, rx*.52, ry*.52, ang); g.fillStyle = rfg; g.fill();
 
       /* Handle */
       const hs = proj(swingX, finalY + R/pc[2] + 1,  0);
       const he = proj(swingX, finalY + R/pc[2] + 14, 0);
       g.save(); g.lineCap = 'round';
-      g.strokeStyle = 'rgba(13,10,5,0.95)'; g.lineWidth = 4.6*pc[2];
+      g.strokeStyle = 'rgba(2,12,28,0.95)'; g.lineWidth = 4.6*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
-      g.strokeStyle = 'rgba(120,90,40,0.65)'; g.lineWidth = 2.1*pc[2];
+      g.strokeStyle = 'rgba(0,80,140,0.65)'; g.lineWidth = 2.1*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
       g.lineCap = 'butt'; g.restore();
     };
