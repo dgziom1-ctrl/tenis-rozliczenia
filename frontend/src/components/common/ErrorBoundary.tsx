@@ -2,7 +2,7 @@ import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { hardResetApp, isStaleBuildError, recoverFromStaleBuild, signalAppReady } from '@/utils/bootRecovery';
-import { Z, CLIP, FONT, TEXT, TRACK } from '@/constants/styles';
+import { Z, FONT, TEXT, TRACK } from '@/constants/styles';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -56,23 +56,29 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         background: 'var(--co-void)', padding: 24, flexDirection: 'column', gap: 20,
       }}>
         <div aria-hidden="true" style={{
-          position: 'fixed', top: 0, left: 0, right: 0, height: 3,
-          background: 'repeating-linear-gradient(-45deg, var(--co-rose) 0px, var(--co-rose) 8px, transparent 8px, transparent 16px)',
-          boxShadow: 'var(--glow-box-rose)', zIndex: Z.boot,
+          position: 'fixed', top: 0, left: 0, right: 0, height: 2,
+          background: 'linear-gradient(90deg, transparent, var(--co-rose), transparent)',
+          opacity: 0.7, zIndex: Z.boot,
         }} />
 
         <div style={{
-          padding: 24, maxWidth: 420, width: '100%',
-          background: 'var(--co-surface-2)', border: '1px solid var(--co-rose)',
-          clipPath: CLIP.card,
-          boxShadow: 'var(--glow-box-rose)',
+          padding: '28px 26px 24px', maxWidth: 420, width: '100%',
+          background: 'var(--co-surface-2)', border: '1px solid var(--co-border)',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--glow-box-panel)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-            <AlertTriangle size={24} style={{ color: 'var(--co-rose)', flexShrink: 0 }} aria-hidden="true" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+            <div style={{
+              width: 44, height: 44, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              borderRadius: '50%',
+              background: 'var(--co-tint-rose)', border: '1px solid var(--co-tint-rose-line)',
+            }}>
+              <AlertTriangle size={20} style={{ color: 'var(--co-rose)' }} aria-hidden="true" />
+            </div>
             <h1 style={{
               ...FONT.display(TEXT.h3, TRACK.normal),
-              color: 'var(--co-rose)', margin: 0,
-              textShadow: 'var(--glow-rose-md)',
+              color: 'var(--co-text-hi)', margin: 0,
             }}>
               {this.state.isStaleBuild ? 'Aplikacja się zaktualizowała' : 'Coś poszło nie tak'}
             </h1>
@@ -80,7 +86,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
           <p style={{
             ...FONT.mono(TEXT.small),
-            color: 'var(--co-text)', lineHeight: 1.6, margin: '0 0 20px',
+            color: 'var(--co-dim)', lineHeight: 1.6, margin: '0 0 20px',
           }}>
             {this.state.isStaleBuild
               ? 'Wyszła nowa wersja i przeglądarka trzyma jeszcze starą. Odśwież stronę — to wystarczy, nie musisz nic czyścić.'
@@ -91,7 +97,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <details style={{
               marginBottom: 20, padding: '10px 12px',
               background: 'var(--co-tint-rose)', border: '1px solid var(--co-tint-rose-line)',
-              clipPath: CLIP.badge,
+              borderRadius: 'var(--radius-md)',
             }}>
               <summary style={{
                 ...FONT.mono(TEXT.tiny),
@@ -131,7 +137,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             onClick={hardResetApp}
             style={{
               width: '100%', marginTop: 10, padding: '10px 16px', cursor: 'pointer',
-              background: 'transparent', border: '1px solid var(--co-tint-rose-line)',
+              background: 'transparent', border: '1px solid var(--co-border-hi)',
+              borderRadius: 'var(--radius-md)',
               color: 'var(--co-dim)',
               ...FONT.mono(TEXT.tiny),
               letterSpacing: TRACK.normal, textTransform: 'uppercase',

@@ -50,7 +50,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
     <Modal
       open={open}
       onClose={onCancel}
-      title="Podaj hasło admina"
+      title="Dostęp administratora"
       icon={Lock}
       accent={error ? 'var(--co-rose)' : 'var(--co-cyan)'}
       maxWidth={380}
@@ -58,7 +58,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
     >
       {action && (
         <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', marginBottom: 16 }}>
-          {'>'} {action}
+          {action}
         </p>
       )}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -71,7 +71,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
           type="password"
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="// ACCESS CODE..."
+          placeholder="Hasło administratora"
           autoFocus
           autoComplete="current-password"
           aria-invalid={error}
@@ -136,7 +136,7 @@ export function PanelHeader({ icon: Icon, title, sub, accent = 'var(--co-cyan)',
 export interface FieldGroupProps {
   icon: LucideIcon;
   label: string;
-  /** Licznik po prawej, np. „[4/6]”. */
+  /** Licznik po prawej, np. „4 / 6”. */
   counter?: ReactNode;
   counterColor?: string;
   children: ReactNode;

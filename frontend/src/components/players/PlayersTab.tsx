@@ -114,7 +114,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         padding: '20px', maxWidth: CONTENT_WIDTH.form, margin: '0 auto',
         animation: 'slide-in-up 0.3s ease-out',
       }}>
-        <PanelHeader icon={Users} title="Gracze" sub={`> zarządzaj składem · ${players?.length || 0} graczy`} />
+        <PanelHeader icon={Users} title="Gracze" sub={`zarządzaj składem · ${players?.length || 0} graczy`} />
 
         {/* Add player form */}
         <div style={{ marginBottom: 28 }}>
@@ -169,7 +169,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
           <div style={{ marginBottom: 28 }}>
             <SectionHeader icon={Zap} title="Multisport domyślny" accent="var(--co-green)" />
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-text)', marginBottom: 12 }}>
-              {'>'} Zaznaczeni będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.
+              Zaznaczeni będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.
             </p>
             <div className="player-grid">
               {players.map(p => {

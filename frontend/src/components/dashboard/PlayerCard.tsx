@@ -530,7 +530,7 @@ function PlayerCard({
                   {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
                 </span>
                 <span style={{ ...FONT.monoMicro, letterSpacing: '0.06em' }}>
-                  SW-NET
+                  CZŁONEK
                 </span>
               </div>
             </div>
@@ -607,7 +607,7 @@ function PlayerCard({
                   {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
                 </span>
                 <span style={{ ...FONT.monoMicro, letterSpacing: '0.06em' }}>
-                  SW-NET
+                  CZŁONEK
                 </span>
               </div>
             </div>

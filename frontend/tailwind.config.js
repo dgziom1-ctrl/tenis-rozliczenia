@@ -7,9 +7,18 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        cyber: ['"Bebas Neue"', 'sans-serif'],
-        mono:  ['"Space Mono"', 'monospace'],
-        sans:  ['"Rajdhani"', 'system-ui', 'sans-serif'],
+        cyber: ['Fraunces', 'Georgia', 'serif'],
+        mono:  ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        sans:  ['Inter', 'system-ui', 'sans-serif'],
+      },
+      borderRadius: {
+        panel: '20px',
+        card:  '16px',
+        control: '12px',
+      },
+      boxShadow: {
+        soft:  '0 1px 2px rgba(0,0,0,0.24), 0 18px 40px -24px rgba(0,0,0,0.72)',
+        lift:  '0 2px 6px rgba(0,0,0,0.30), 0 28px 60px -28px rgba(0,0,0,0.80)',
       },
       colors: {
         co: {

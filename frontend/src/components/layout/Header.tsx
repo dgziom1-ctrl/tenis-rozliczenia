@@ -51,7 +51,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
 
   const { showError } = useToast();
 
-  const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
+  const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'Skonfiguruj numer';
 
   useEffect(() => {
     return () => {
@@ -118,21 +118,20 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
         background:'linear-gradient(180deg, var(--co-void) 0%, var(--co-dark) 100%)',
         borderBottom:'1px solid var(--co-border)' }}>
 
-        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
+        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,right:0,height:1,
+          background:'linear-gradient(90deg,transparent,var(--co-tint-line),transparent)',zIndex:2 }}/>
 
         <div style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
-          <button onClick={handleCopy} style={{ display:'flex',alignItems:'center',gap:'8px',
-            background:'var(--co-dark)',border:'1px solid var(--co-border)',padding: '6px 12px',cursor:'pointer',
+          <button onClick={handleCopy} style={{ display:'flex',alignItems:'center',gap:'9px',
+            background:'var(--co-surface-2)',border:'1px solid var(--co-border)',padding: '7px 13px',cursor:'pointer',
+            borderRadius:999,
             transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
-            <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
-            <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.wide,color:'var(--co-cyan)',padding:'2px 6px',
+            <Smartphone size={14} style={{ color:'var(--co-cyan)' }}/>
+            <span style={{ fontFamily:'var(--font-display)',fontWeight:600,fontSize:TEXT.tiny,
+              letterSpacing:TRACK.normal,color:'var(--co-cyan)',padding:'2px 8px',borderRadius:999,
               background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>BLIK</span>
-            <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.base,letterSpacing:TRACK.tight,color:'var(--co-text)' }}>
+            <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.base,letterSpacing:TRACK.tight,color:'var(--co-text-hi)' }}>
               {blikNumber}
             </span>
             <div style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
@@ -165,25 +164,25 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
 
           <div style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
             <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to right,transparent,var(--co-tint-line))' }}/>
-            <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
+            <span style={{ fontFamily:'var(--font-display)',fontWeight:500,fontSize:TEXT.tiny,
               letterSpacing:TRACK.wide,color:'var(--co-dim)',textTransform:'uppercase' }}>
-              CENTRUM DOWODZENIA
+              Klubowa księga rozliczeń
             </span>
             <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to left,transparent,var(--co-tint-line))' }}/>
           </div>
 
-          <div style={{ width:'100%',maxWidth:560,marginBottom:14,
+          <div style={{ width:'100%',maxWidth:460,marginBottom:16,
             filter:chaosMode?'none':'var(--glow-drop-cyan)' }}>
             <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit}/>
           </div>
 
           <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
-            {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
+            {/* Ghost layer — glitch fires on paddle hit, just like W GRZE */}
             {!chaosMode && hitting && <span aria-hidden="true" style={{
               position:'absolute',inset:0,
               display:'block',fontFamily:'var(--font-display)',
-              fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              fontWeight:600,fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               color:'transparent',pointerEvents:'none',userSelect:'none',
               textShadow:'-4px 0 var(--co-rose), 4px 0 var(--co-cyan)',
               clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
@@ -191,7 +190,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             }}>CYBER-PONK</span>}
             <span style={{
               display:'block',fontFamily:'var(--font-display)',
-              fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              fontWeight:600,fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               position:'relative',
               transition:'text-shadow 0.06s, transform 0.06s',
               ...(chaosMode
@@ -210,7 +209,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
             background:'linear-gradient(90deg,transparent,var(--co-tint-line) 40%,var(--co-tint-line) 60%,transparent)' }}/>
 
-          {/* JACK IN — lights up exactly when ball hits paddle */}
+          {/* W GRZE — lights up exactly when ball hits paddle */}
           <div style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
             <span style={{
               fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
@@ -220,7 +219,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
               // niewidoczny w obu motywach.
               color: hitting ? 'var(--co-cyan)' : 'var(--co-dim2)',
               textShadow: hitting ? 'var(--glow-cyan-md)' : 'none',
-            }}>⚡ JACK IN ⚡</span>
+            }}>W GRZE</span>
             <span aria-hidden="true" style={{ color:'var(--co-border)' }}>│</span>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.normal,

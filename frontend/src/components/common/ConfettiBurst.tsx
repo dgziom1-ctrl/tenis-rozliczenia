@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
-const DEFAULT_PALETTE = ['#00E5FF', '#00FF88', '#FF2090', '#B8860B', '#9B4DE0'];
+const DEFAULT_PALETTE = ['#D4B678', '#77BE9C', '#D98A7C', '#C58BE0', '#DDA954'];
 
 interface Particle {
   x: number;
@@ -24,7 +24,7 @@ interface ConfettiBurstProps {
 }
 
 /**
- * Neonowe cząsteczki na pełnym ekranie. Nie przechwytuje kliknięć —
+ * Świąteczne iskry na pełnym ekranie. Nie przechwytuje kliknięć —
  * celebracja nie może zablokować cofnięcia wpłaty ani kopiowania na grupę.
  */
 export default function ConfettiBurst({

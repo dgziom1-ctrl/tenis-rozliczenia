@@ -70,7 +70,7 @@ export function TerminalSectionHeader({ label }: { label: string }) {
       color: 'var(--co-dim)',
       display: 'flex', alignItems: 'center', gap: 6,
     }}>
-      <span aria-hidden="true" style={{ color: 'var(--co-green)' }}>{'>'}</span>
+      <span aria-hidden="true" style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--co-cyan)', opacity: 0.7, flexShrink: 0 }} />
       {label}
     </div>
   );
@@ -110,7 +110,7 @@ export function TerminalFooter({ label, value, valueColor, tint = 'var(--co-tint
       borderTop: '1px solid var(--co-border)',
     }}>
       <span style={{ ...FONT.display(TEXT.tiny, TRACK.wide), color: 'var(--co-dim)' }}>
-        ◈ {label}
+        {label}
       </span>
       <span style={{ ...FONT.mono(TEXT.small), color: valueColor }}>
         {value}

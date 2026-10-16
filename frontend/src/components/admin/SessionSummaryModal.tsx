@@ -71,7 +71,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
     <Modal
       open={open}
       onClose={onClose}
-      title="MATCHDAY"
+      title="PODSUMOWANIE SESJI"
       icon={CheckCircle2}
       accent="var(--co-cyan)"
       maxWidth={420}
@@ -111,7 +111,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
 
       {highlights.length > 0 && (
         <div style={{ marginBottom: 14 }}>
-          <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>// highlighty</p>
+          <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>WYRÓŻNIENIA</p>
           {highlights.map(h => {
             const Icon = highlightIcon(h.kind);
             return (

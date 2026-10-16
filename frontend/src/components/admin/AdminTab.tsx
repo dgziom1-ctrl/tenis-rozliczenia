@@ -224,7 +224,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                   })}
                 </div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
-                  {'>'} Limit kart: {maxMulti} ({perCourtHour}/kort/h)
+                  Limit kart: {maxMulti} ({perCourtHour}/kort/h)
                 </p>
               </div>
               <div style={{ flex: 1 }}>
@@ -252,7 +252,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                   })}
                 </div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
-                  {'>'} {durationHours > 1 ? `${durationHours}h × ` : ''}{perCourtHour}/kort/h = {maxMulti} kart
+                  {durationHours > 1 ? `${durationHours}h × ` : ''}{perCourtHour}/kort/h = {maxMulti} kart
                 </p>
               </div>
             </div>
@@ -272,7 +272,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
             <div>
               <FieldLabel htmlFor={totalCostId}>Zapłacone w recepcji (zł)</FieldLabel>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '0 0 8px' }}>
-                {'>'} Kwota po odliczeniu kart Multisport — tyle, ile faktycznie wyszło z portfela
+                Kwota po odliczeniu kart Multisport — tyle, ile faktycznie wyszło z portfela
               </p>
               <input id={totalCostId} type="text" inputMode="decimal" value={totalCost} onChange={e => setTotalCost(e.target.value)}
                 onBlur={() => setCostTouched(true)}
@@ -294,7 +294,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
             <FieldGroup
               icon={Users}
               label="Kto grał?"
-              counter={`[${presentPlayers.length}/${playerNames?.length || 0}]`}
+              counter={`${presentPlayers.length} / ${playerNames?.length || 0}`}
             >
               <PlayerToggleGrid names={playerNames || []} selected={presentPlayers} onToggle={togglePresent} accent="yellow" />
               {!isPresentValid && (
@@ -331,7 +331,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
               >
                 <PlayerToggleGrid names={presentPlayers} selected={ownRacketPlayers} onToggle={toggleOwnRacket} accent="amber" />
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
-                  {'>'} Zaznacz graczy, którzy przynieśli własną rakietkę — nie płacą za wypożyczenie
+                  Zaznacz graczy, którzy przynieśli własną rakietkę — nie płacą za wypożyczenie
                 </p>
               </FieldGroup>
             )}
@@ -404,7 +404,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                 </div>
                 {effectiveRacketCount > 0 && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
-                    {'>'} Koszt {effectiveRacketCount} × {parsedRacketPrice} zł dzielony między graczy bez własnej rakietki
+                    Koszt {effectiveRacketCount} × {parsedRacketPrice} zł dzielony między graczy bez własnej rakietki
                   </p>
                 )}
               </FieldGroup>
@@ -433,7 +433,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
               </button>
               {!isSaving && isDisabled && (
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', textAlign: 'center', marginTop: 8 }}>
-                  {'>'} {isDuplicateDate ? '⚠ Zmień datę — sesja już istnieje' : !isCostValid ? totalCostError : 'Zaznacz co najmniej jednego gracza'}
+                  {isDuplicateDate ? '⚠ Zmień datę — sesja już istnieje' : !isCostValid ? totalCostError : 'Zaznacz co najmniej jednego gracza'}
                 </p>
               )}
             </div>

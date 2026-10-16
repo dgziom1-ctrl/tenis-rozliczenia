@@ -3,109 +3,98 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════
-   COLD OPERATOR  ·  Military-Hacker Cyberpunk
-   Dominant:  Electric Cyan  #00E5FF
-   Support:   Electric Blue  #0080FF
-   Rose:      Rose           #FF2090  (neutral payment status)
-   Amber:     Amber          #F59E0B  (warnings, alerts)
-   Positive:  Matrix Green   #00FF88
-   Accent:    Neon Pink      #FF00FF  (<5% – micro-accents only)
-   Base:      #030508 near-black with cold blue tint
+   THE CLUB LEDGER  ·  Quiet-luxury, warm, editorial
+   Base:      Warm obsidian  #0B0C0E
+   Accent:    Champagne gold #D4B678  (brand, primary, active)
+   Positive:  Sage green     #77BE9C  (settled / credit)
+   Attention: Clay rose      #D98A7C  ("do zapłaty")
+   Warning:   Amber          #DDA954
+   Surfaces are tone-on-tone, softly rounded and gently frosted.
 ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Backgrounds — cold, dark ── */
-  --co-void:     #030508;   /* deepest bg */
-  --co-dark:     #060C12;   /* secondary bg */
-  --co-panel:    #090F18;   /* card/panel */
-  --co-raised:   #0C1420;   /* elevated element */
-  --co-border:   #122034;   /* default border */
-  --co-border-hi:#1A3050;   /* highlighted border */
+  /* ── Surfaces — warm obsidian, tone-on-tone ── */
+  --co-void:     #0B0C0E;   /* deepest bg */
+  --co-dark:     #101215;   /* secondary bg */
+  --co-panel:    #15181C;   /* card/panel */
+  --co-raised:   #1B1F24;   /* elevated element */
+  --co-border:   #262A30;   /* default border */
+  --co-border-hi:#363C45;   /* highlighted border */
 
-  /* ── Primary — Electric Cyan (dominant) ── */
-  --co-cyan:     #00E5FF;   /* main accent */
-  --co-cyan-mid: #00B4D8;   /* secondary cyan */
-  --co-cyan-dim: #003A4A;   /* muted cyan bg */
-  --co-ice:      #0080FF;   /* electric blue — replaces old ice pastel */
+  /* ── Primary — Champagne gold ── */
+  --co-cyan:     #D4B678;   /* main accent */
+  --co-cyan-mid: #B99A5C;   /* secondary gold */
+  --co-cyan-dim: rgba(212,182,120,0.14);   /* muted gold bg */
+  --co-ice:      #9BAEC2;   /* steel — cool counterweight */
 
-  /* ── Rose — payment status (neutral, not aggressive) ── */
-  --co-rose:     #FF2090;   /* "do rozliczenia" */
-  --co-rose-mid: #CC1A74;   /* dimmer rose */
-  --co-rose-dim: #1A0012;   /* rose bg tint */
+  /* ── Rose — "do zapłaty" (warm clay, never aggressive) ── */
+  --co-rose:     #D98A7C;
+  --co-rose-mid: #C07468;
+  --co-rose-dim: rgba(217,138,124,0.12);
 
   /* ── Amber — warnings, informational alerts ── */
-  --co-amber:    #F59E0B;
-  --co-amber-mid:#D97706;
-  --co-amber-dim:#1A1200;
+  --co-amber:    #DDA954;
+  --co-amber-mid:#C08F3E;
+  --co-amber-dim:rgba(221,169,84,0.12);
 
-  /* ── Medal podium — gold / silver / bronze (nie cyan na #1) ── */
-  --co-gold:     #B8860B;
-  --co-gold-mid: #9A7209;
-  --co-gold-dim: #1A1400;
-  --co-silver:   #C0C8D4;
-  --co-bronze:   #CD7F32;
-  --co-tint-gold: rgba(184,134,11,0.10);
-  --co-tint-bronze: rgba(205,127,50,0.10);
-  --glow-gold-md:  0 0 14px rgba(184,134,11,0.45);
-  --glow-box-gold: 0 0 16px rgba(184,134,11,0.22);
+  /* ── Podium — gold / silver / bronze ── */
+  --co-gold:     #CBA35C;
+  --co-gold-mid: #A9863F;
+  --co-gold-dim: rgba(203,163,92,0.12);
+  --co-silver:   #B8BFC7;
+  --co-bronze:   #B57A4E;
+  --co-tint-gold: rgba(203,163,92,0.10);
+  --co-tint-bronze: rgba(181,122,78,0.10);
+  --glow-gold-md:  0 0 18px rgba(203,163,92,0.28);
+  --glow-box-gold: 0 10px 30px -12px rgba(203,163,92,0.38);
 
-  /* ── Positive — Matrix Green ── */
-  --co-green:    #00FF88;   /* settled / positive */
-  --co-green-dim:#003320;   /* green bg tint */
+  /* ── Positive — Sage green ── */
+  --co-green:    #77BE9C;
+  --co-green-dim:rgba(119,190,156,0.12);
 
-  /* ── Micro-accent — Neon Pink (<5% use) ── */
-  --co-pink:     #FF00FF;   /* SPARINGLY: only critical micro-accents */
+  /* ── Micro-accent — muted orchid (<5% use) ── */
+  --co-pink:     #C58BE0;
 
   /* ── Neutrals ──
      --co-dim carries most of the secondary copy in the app (labels, counts,
-     dates), so it has to clear WCAG AA against --co-void. #2A4560 sat at
-     2.06:1; these values are 4.66:1 and 3.19:1. */
-  --co-text:     #A8C4D4;   /* main text — cool blue-grey */
-  --co-text-hi:  #D0E8F5;   /* headings */
-  --co-dim:      #5C7C99;   /* muted text — 4.66:1 on --co-void */
-  --co-dim2:     #42627F;   /* very muted — 3.19:1, large text only */
+     dates), so it has to clear WCAG AA against --co-void. */
+  --co-text:     #C6C4BF;   /* main text — warm grey */
+  --co-text-hi:  #F2EFE9;   /* headings — warm white */
+  --co-dim:      #8C8A84;   /* muted text — ~6.4:1 on --co-void */
+  --co-dim2:     #63615B;   /* very muted — large text only */
 
   /* ── Accent tints ──
-     The dominant surface treatment is "a wash of the accent colour". Inline
-     styles used to hardcode rgba(0,229,255,0.0x), which the light theme could
-     never remap — so light mode got electric-cyan washes under teal borders. */
-  --co-tint:      rgba(0,229,255,0.04);   /* subtle panel wash */
-  --co-tint-hi:   rgba(0,229,255,0.08);   /* active / selected */
-  --co-tint-line: rgba(0,229,255,0.25);   /* hairline, chip border */
-  --co-tint-rose: rgba(255,32,144,0.06);
-  /* Różowy odpowiednik `--co-tint-line`. Ekrany błędu składały tę kreskę
-     z literału `rgba(200,0,30,0.2)` — czwartej czerwieni w aplikacji, której
-     tryb jasny nie mógł przemapować. */
-  --co-tint-rose-line: rgba(255,32,144,0.30);
-  --co-tint-green:rgba(0,255,136,0.05);
+     The dominant surface treatment is "a wash of the accent colour". */
+  --co-tint:      rgba(212,182,120,0.055);  /* subtle panel wash */
+  --co-tint-hi:   rgba(212,182,120,0.11);   /* active / selected */
+  --co-tint-line: rgba(212,182,120,0.30);   /* hairline, chip border */
+  --co-tint-rose: rgba(217,138,124,0.08);
+  --co-tint-rose-line: rgba(217,138,124,0.34);
+  --co-tint-green:rgba(119,190,156,0.09);
 
   /* ── Glow tokens ──
      A CSS override cannot reach an inline `textShadow`, so every glow in the
      app reads a variable instead of a literal. Light mode sets them to `none`
      and the neon disappears without touching a single component. */
-  --glow-cyan-sm:   0 0 8px rgba(0,229,255,0.30);
-  --glow-cyan-md:   0 0 14px rgba(0,229,255,0.40);
-  --glow-cyan-lg:   0 0 20px rgba(0,229,255,0.50);
-  --glow-rose-md:   0 0 14px rgba(255,32,144,0.45);
-  --glow-green-md:  0 0 14px rgba(0,255,136,0.40);
-  --glow-box-cyan:  0 0 16px rgba(0,229,255,0.20);
-  --glow-box-rose:  0 0 18px rgba(255,32,144,0.13);
-  --glow-box-panel: 0 8px 40px rgba(0,0,0,0.80);
+  --glow-cyan-sm:   0 0 14px rgba(212,182,120,0.20);
+  --glow-cyan-md:   0 0 20px rgba(212,182,120,0.26);
+  --glow-cyan-lg:   0 0 32px rgba(212,182,120,0.32);
+  --glow-rose-md:   0 0 18px rgba(217,138,124,0.26);
+  --glow-green-md:  0 0 18px rgba(119,190,156,0.24);
+  --glow-box-cyan:  0 10px 30px -14px rgba(212,182,120,0.45);
+  --glow-box-rose:  0 10px 30px -14px rgba(217,138,124,0.40);
+  --glow-box-panel: 0 24px 60px -20px rgba(0,0,0,0.78);
   /* Filter rysuje cień poza clip-path, w przeciwieństwie do box-shadow. */
-  --glow-drop-panel: drop-shadow(0 8px 40px rgba(0,0,0,0.80));
-  --modal-blur: 8px;
-  /* `filter` nie przyjmuje wartości box-shadow, więc poświata canvasu w
-     nagłówku potrzebuje własnego tokenu. */
-  --glow-drop-cyan: drop-shadow(0 0 20px rgba(0,229,255,0.12));
-  --glow-drop-rose: drop-shadow(0 0 8px rgba(255,32,144,0.50));
+  --glow-drop-panel: drop-shadow(0 28px 60px rgba(0,0,0,0.60));
+  --modal-blur: 14px;
+  --glow-drop-cyan: drop-shadow(0 0 24px rgba(212,182,120,0.10));
+  --glow-drop-rose: drop-shadow(0 0 12px rgba(217,138,124,0.34));
   /* Poświata marki w nagłówku — żyje w trybie jasnym, gdy reszta neonu gaśnie. */
-  --glow-brand-sm: 0 0 8px rgba(0,229,255,0.30);
-  --glow-brand-md: 0 0 14px rgba(0,229,255,0.40);
-  --glow-brand-lg: 0 0 20px rgba(0,229,255,0.50);
+  --glow-brand-sm: 0 0 14px rgba(212,182,120,0.22);
+  --glow-brand-md: 0 0 20px rgba(212,182,120,0.26);
+  --glow-brand-lg: 0 0 32px rgba(212,182,120,0.34);
 
-  /* ── Layer scale ──
-     Was an ad-hoc ladder of 38/39/40/45/49/50/70/100/200/1000/1001/9000, with
-     the film grain painting on top of every dialog. */
+  /* ── Layer scale ── */
   --z-header: 39;
   --z-nav:    40;
   --z-banner: 45;
@@ -117,50 +106,52 @@
   --z-toast:  9000;
 
   /* ── Dialogi ──
-     Ciemny motyw jest kanciasty (ścięte narożniki), jasny — zaokrąglony.
-     Wcześniej dwa modale wpisywały `12px` na sztywno w obu motywach. */
-  --modal-radius: 0px;
+     Oba motywy są teraz miękkie i zaokrąglone. */
+  --modal-radius: 20px;
   --modal-bg:     var(--co-panel);
-  /* ── Kształty ścięć ──
-     Muszą odpowiadać `CLIP` w constants/styles.ts — TypeScript nie czyta
-     zmiennych CSS, więc te same kształty muszą żyć w obu miejscach.
-     Wcześniej klasy przycisków wpisywały wielokąty wprost i rozjechały się:
-     przycisk główny i destrukcyjny miały ścięcie 8px, a outline 6px, więc
-     każda para POTWIERDŹ/ANULUJ stała obok siebie z różnym kątem narożnika. */
-  --clip-panel:   polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
-  --clip-tag:     polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
-  --clip-badge:   polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+  /* ── Kształty ──
+     Ścięcia zniknęły; promienie mieszkają w klasach. Te zmienne muszą
+     odpowiadać `CLIP` w constants/styles.ts — stąd `none` w obu miejscach. */
+  --clip-panel:   none;
+  --clip-tag:     none;
+  --clip-badge:   none;
+
+  /* ── Promienie ── */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
 
   /* Kolor tekstu na wypełnieniu akcentem — zależy od jasności tego akcentu. */
-  --co-on-rose:   #030508;
+  --co-on-rose:   #17110D;
 
   /* ── Theme-switchable inline helpers ── */
-  --co-bar-track:    rgba(255,255,255,0.06);
-  --co-dot-empty:    rgba(255,255,255,0.15);
-  --co-close-btn:    #3a3a3a;
-  --co-toast-success:#031208;
-  --co-toast-error:  #0e0606;
-  --co-toast-info:   #080808;
-  --co-toast-text:   #c8c8c8;
-  --co-separator:    rgba(255,255,255,0.05);
+  --co-bar-track:    rgba(255,255,255,0.07);
+  --co-dot-empty:    rgba(255,255,255,0.14);
+  --co-close-btn:    #8C8A84;
+  --co-toast-success:#101712;
+  --co-toast-error:  #1A1210;
+  --co-toast-info:   #16181C;
+  --co-toast-text:   #DBD9D3;
+  --co-separator:    rgba(255,255,255,0.06);
   /* Powierzchnia wewnętrzna — --co-separator to hairline i użyty jako tło
      dawał pudełka bez widocznej krawędzi (to samo 5% na tle i obramowaniu). */
-  --co-surface-2:    #0C1420;
+  --co-surface-2:    #1A1E23;
+  /* Frosted panel surface — the "glass" in glassmorphism. */
+  --co-glass:        rgba(19,22,26,0.72);
 
   /* ── Fonts ── */
-  --font-display: 'Bebas Neue', monospace;
-  --font-mono:    'Space Mono', 'Courier New', monospace;
-  --font-body:    'Rajdhani', sans-serif;
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
 
   /* ── Misc ── */
-  --co-overlay:    rgba(0,0,0,0.88);
-  --dot-color:     rgba(0,229,255,0.07);
+  --co-overlay:    rgba(6,7,9,0.72);
+  --dot-color:     rgba(212,182,120,0.045);
 
   /* Wysokość dolnej nawigacji (`min-height` w `.mobile-nav-btn`).
-     Wszystko, co kotwiczy się nad nawigacją, liczy się od tej jednej wartości.
-     Wcześniej krążyła w trzech zapisach — 56px w banerach, 72px w toaście
-     i 4.5rem w treści — więc toast nachodził na baner instalacji PWA. */
-  --nav-height:    56px;
+     Wszystko, co kotwiczy się nad nawigacją, liczy się od tej jednej wartości. */
+  --nav-height:    58px;
 }
 
 /* ══ RESET ═══════════════════════════════════════════════════════ */
@@ -171,21 +162,24 @@ body {
   background-color: var(--co-void);
   color: var(--co-text);
   font-family: var(--font-body);
-  font-weight: 500;
+  font-weight: 400;
   overflow-x: hidden;
   overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
-  letter-spacing: 0.02em;
+  text-rendering: optimizeLegibility;
+  letter-spacing: 0.005em;
   transition: background-color 0.4s ease, color 0.4s ease, background-image 0.4s ease;
 
-  /* Cold operator background: deep cyan top bloom + fine grid */
+  /* Club ledger background: warm gold bloom above, cool depth below, fine grid */
   background-image:
-    radial-gradient(ellipse 75% 45% at 50% -8%, rgba(0,229,255,0.08) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 30% at 50% 110%, rgba(0,180,216,0.04) 0%, transparent 60%),
-    radial-gradient(circle at 1px 1px, rgba(0,229,255,0.055) 1px, transparent 0);
-  background-size: 100% 100%, 100% 100%, 28px 28px;
+    radial-gradient(ellipse 85% 50% at 50% -12%, rgba(212,182,120,0.07) 0%, transparent 62%),
+    radial-gradient(ellipse 55% 40% at 88% 112%, rgba(120,140,180,0.05) 0%, transparent 66%),
+    radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 32px 32px;
   background-attachment: fixed;
 }
+
+::selection { background: var(--co-tint-hi); color: var(--co-text-hi); }
 
 /* ── Płynna zmiana motywu ──
    Ta reguła obowiązuje TYLKO w trakcie przełączania motywu (klasę zdejmuje
@@ -216,13 +210,13 @@ body.theme-switching *::after {
 /* ══ ANIMATIONS ══════════════════════════════════════════════════ */
 
 @keyframes neon-cyan {
-  0%, 100% { box-shadow: 0 0 4px var(--co-cyan), 0 0 14px rgba(0,229,255,0.2), inset 0 0 6px rgba(0,229,255,0.03); }
-  50%       { box-shadow: 0 0 12px var(--co-cyan), 0 0 32px rgba(0,229,255,0.38), inset 0 0 14px rgba(0,229,255,0.06); }
+  0%, 100% { box-shadow: 0 0 0 1px rgba(212,182,120,0.22), 0 0 18px rgba(212,182,120,0.16); }
+  50%       { box-shadow: 0 0 0 1px rgba(212,182,120,0.42), 0 0 34px rgba(212,182,120,0.28); }
 }
 /* Rose — calm pulse for pending status */
 @keyframes neon-rose {
-  0%, 100% { box-shadow: 0 0 3px rgba(255,32,144,0.35), 0 0 10px rgba(255,32,144,0.12); }
-  50%       { box-shadow: 0 0 8px rgba(255,32,144,0.55), 0 0 20px rgba(255,32,144,0.22); }
+  0%, 100% { box-shadow: 0 0 0 1px rgba(217,138,124,0.24), 0 0 16px rgba(217,138,124,0.14); }
+  50%       { box-shadow: 0 0 0 1px rgba(217,138,124,0.46), 0 0 28px rgba(217,138,124,0.24); }
 }
 @keyframes scan-sweep {
   0%   { top: -2px; opacity: 1; }
@@ -250,7 +244,7 @@ body.theme-switching *::after {
   80%     { transform: translateY(2px); }
 }
 @keyframes pending-flash {
-  0%   { background: rgba(255,32,144,0.10); }
+  0%   { background: rgba(217,138,124,0.12); }
   100% { background: transparent; }
 }
 @keyframes loading-bar {
@@ -290,110 +284,120 @@ body.theme-switching *::after {
 
   .scan-hover { position: relative; overflow: hidden; }
   .scan-hover::before {
-    content: ''; position: absolute; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.55), transparent);
-    top: -2px; pointer-events: none; z-index: 3;
+    content: ''; position: absolute; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--co-tint-line), transparent);
+    top: -1px; pointer-events: none; z-index: 3;
   }
-  .scan-hover:hover::before { animation: scan-sweep 0.5s ease-out forwards; }
+  .scan-hover:hover::before { animation: scan-sweep 0.6s ease-out forwards; }
 
   .glass-card {
-    background: rgba(6, 12, 18, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: var(--co-glass);
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
     border: 1px solid var(--co-border);
+    border-radius: var(--radius-lg);
     box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 var(--co-tint);
+      0 1px 0 rgba(255,255,255,0.035) inset,
+      0 20px 46px -28px rgba(0,0,0,0.85);
   }
 
   .cyber-box {
-    background: rgba(6, 12, 18, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: var(--co-glass);
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
     border: 1px solid var(--co-border);
+    border-radius: var(--radius-lg);
     box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(0, 229, 255, 0.06);
+      0 1px 0 rgba(255,255,255,0.035) inset,
+      0 20px 46px -28px rgba(0,0,0,0.85);
     position: relative; overflow: hidden;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
   }
 
   .cyber-input {
-    background: rgba(3,5,8,0.9);
+    background: var(--co-surface-2);
     border: 1px solid var(--co-border-hi);
-    color: var(--co-text);
+    border-radius: var(--radius-md);
+    color: var(--co-text-hi);
     font-family: var(--font-mono);
     /* 16px to podłoga, poniżej której iOS Safari przybliża stronę przy
        tapnięciu w pole. Komponenty nie nadpisują już tego inline. */
     font-size: 16px;
-    transition: border-color 0.18s, box-shadow 0.18s;
+    transition: border-color 0.18s, box-shadow 0.18s, background-color 0.18s;
   }
   .cyber-input:focus {
     border-color: var(--co-cyan);
-    box-shadow: 0 0 0 2px var(--co-tint-hi), var(--glow-cyan-sm);
+    box-shadow: 0 0 0 3px var(--co-tint-hi);
     outline: none;
   }
   /* Stan błędu klasą, nie inline: styl inline bije `:focus` i pole traciło
      wtedy jakąkolwiek widoczną oznakę fokusu. */
   .cyber-input.input-error {
     border-color: var(--co-rose);
-    box-shadow: 0 0 0 2px var(--co-tint-rose), var(--glow-rose-md);
+    box-shadow: 0 0 0 3px var(--co-tint-rose);
   }
   /* Rozmiar dziedziczony po polu — przypięte 0.8rem sprawiało, że w polu kwoty
      (1.3rem) podpowiedź była o 40% mniejsza od wpisywanego tekstu. */
   .cyber-input::placeholder { color: var(--co-dim); font-size: inherit; opacity: 0.7; }
 
-  /* Primary button — Cyan dominant */
+  /* Primary button — champagne gold */
   .cyber-button-yellow {
-    background: linear-gradient(135deg, var(--co-cyan), var(--co-cyan-mid));
-    color: #030508;
+    background: linear-gradient(180deg, #E3CD9A 0%, var(--co-cyan) 55%, var(--co-cyan-mid) 100%);
+    color: #1C1508;
     font-family: var(--font-display);
-    font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase;
-    border: none; cursor: pointer; position: relative; overflow: hidden;
-    transition: box-shadow 0.18s, transform 0.1s;
-    clip-path: var(--clip-tag);
+    font-weight: 600;
+    font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: var(--radius-md);
+    cursor: pointer; position: relative; overflow: hidden;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.45) inset,
+      0 10px 24px -12px rgba(201,164,92,0.7);
+    transition: box-shadow 0.2s ease, transform 0.12s ease, filter 0.2s ease;
   }
-  /* Przebłysk po najechaniu. Szedł 0.4s, gdy poświata i wciśnięcie tego samego
-     przycisku jadą 0.18s i 0.1s — blask pojawiał się od razu, a smuga wlokła
-     się za nim i najechanie rozpadało się na dwa osobne zdarzenia. */
+  /* Subtelna smuga światła sunąca po najechaniu — błysk, nie neon. */
   .cyber-button-yellow::before {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    transform: translateX(-100%); transition: transform 0.25s ease;
+    background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.35) 50%, transparent 80%);
+    transform: translateX(-120%); transition: transform 0.45s ease;
   }
   .cyber-button-yellow:hover {
-    box-shadow: 0 0 20px rgba(0,229,255,0.5), 0 0 44px rgba(0,229,255,0.18);
+    filter: brightness(1.04);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.5) inset,
+      0 16px 34px -12px rgba(201,164,92,0.85);
   }
-  .cyber-button-yellow:hover::before { transform: translateX(100%); }
-  .cyber-button-yellow:active { transform: scale(0.96); }
+  .cyber-button-yellow:hover::before { transform: translateX(120%); }
+  .cyber-button-yellow:active { transform: scale(0.975); }
 
-  /* Destructive button — cztery komponenty budowały go inline, każdy z innym
-     rozmiarem i każdy z czarnym tekstem. Czerń ma 5,9:1 na ciemnej róży, ale
-     tylko 3,5:1 na jaśniejszej — dlatego kolor tekstu jedzie tokenem. */
+  /* Destructive button — ciepła glina, nigdy krzyk. */
   .cyber-button-danger {
     background: var(--co-rose);
     color: var(--co-on-rose);
     font-family: var(--font-display);
-    font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase;
-    border: none; cursor: pointer;
-    transition: box-shadow 0.18s, transform 0.1s;
-    clip-path: var(--clip-tag);
+    font-weight: 600;
+    font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.12s ease, filter 0.2s ease;
   }
-  .cyber-button-danger:hover:not(:disabled) { box-shadow: var(--glow-box-rose); }
+  .cyber-button-danger:hover:not(:disabled) { filter: brightness(1.05); box-shadow: var(--glow-box-rose); }
   .cyber-button-danger:disabled {
     background: var(--co-panel);
     color: var(--co-dim);
+    border-color: var(--co-border);
     cursor: not-allowed;
   }
 
   /* Outline button */
   .cyber-button-outline {
     background: transparent; color: var(--co-cyan);
-    font-family: var(--font-display); font-size: 0.875rem;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    border: 1px solid var(--co-tint-line); cursor: pointer;
-    transition: color 0.18s, background-color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.1s;
-    clip-path: var(--clip-tag);
+    font-family: var(--font-display); font-weight: 600; font-size: 0.9rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    border: 1px solid var(--co-border-hi); border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: color 0.18s, background-color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.12s;
   }
   .cyber-button-outline:hover {
     background: var(--co-tint); border-color: var(--co-cyan);
@@ -452,12 +456,12 @@ body.theme-switching *::after {
 }
 
 .fifa-card { position: relative; }
-.fifa-card-legend { background-image: linear-gradient(165deg, rgba(184,134,11,0.20) 0%, transparent 44%); }
-.fifa-card-elite  { background-image: linear-gradient(165deg, rgba(224,25,122,0.16) 0%, transparent 44%); }
-.fifa-card-epic   { background-image: linear-gradient(165deg, rgba(155,77,224,0.16) 0%, transparent 44%); }
-.fifa-card-rare   { background-image: linear-gradient(165deg, rgba(20,138,156,0.14) 0%, transparent 44%); }
-.fifa-card-common { background-image: linear-gradient(165deg, rgba(100,116,139,0.10) 0%, transparent 44%); }
-.fifa-card-ghost  { background-image: linear-gradient(165deg, rgba(85,102,119,0.10) 0%, transparent 44%); }
+.fifa-card-legend { background-image: linear-gradient(165deg, rgba(203,163,92,0.22) 0%, transparent 44%); }
+.fifa-card-elite  { background-image: linear-gradient(165deg, rgba(217,138,124,0.18) 0%, transparent 44%); }
+.fifa-card-epic   { background-image: linear-gradient(165deg, rgba(197,139,224,0.16) 0%, transparent 44%); }
+.fifa-card-rare   { background-image: linear-gradient(165deg, rgba(119,190,156,0.14) 0%, transparent 44%); }
+.fifa-card-common { background-image: linear-gradient(165deg, rgba(140,138,132,0.10) 0%, transparent 44%); }
+.fifa-card-ghost  { background-image: linear-gradient(165deg, rgba(120,140,180,0.10) 0%, transparent 44%); }
 
 .card-foil {
   position: absolute;
@@ -468,7 +472,7 @@ body.theme-switching *::after {
   mix-blend-mode: color-dodge;
   background:
     radial-gradient(circle at var(--foil-x, 50%) var(--foil-y, 22%), rgba(255,255,255,0.32) 0%, transparent 42%),
-    linear-gradient(115deg, transparent 18%, rgba(255,255,255,0.14) 42%, var(--foil-tint, rgba(0,229,255,0.22)) 52%, transparent 72%);
+    linear-gradient(115deg, transparent 18%, rgba(255,255,255,0.14) 42%, var(--foil-tint, rgba(212,182,120,0.22)) 52%, transparent 72%);
   background-size: 100% 100%, 220% 220%;
 }
 .card-foil-legend { opacity: 0.48; }
@@ -540,10 +544,10 @@ body.theme-light .card-foil {
   mix-blend-mode: multiply;
   opacity: 0.14;
 }
-body.theme-light .fifa-card-legend { background-image: linear-gradient(165deg, rgba(154,114,9,0.14) 0%, transparent 44%); }
-body.theme-light .fifa-card-elite  { background-image: linear-gradient(165deg, rgba(190,24,93,0.10) 0%, transparent 44%); }
-body.theme-light .fifa-card-epic   { background-image: linear-gradient(165deg, rgba(155,77,224,0.10) 0%, transparent 44%); }
-body.theme-light .fifa-card-rare   { background-image: linear-gradient(165deg, rgba(13,148,136,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-legend { background-image: linear-gradient(165deg, rgba(140,109,46,0.14) 0%, transparent 44%); }
+body.theme-light .fifa-card-elite  { background-image: linear-gradient(165deg, rgba(168,62,72,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-epic   { background-image: linear-gradient(165deg, rgba(124,79,160,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-rare   { background-image: linear-gradient(165deg, rgba(47,125,91,0.10) 0%, transparent 44%); }
 body.theme-light .fifa-card-common { background-image: none; }
 body.theme-light .fifa-card-ghost  { background-image: none; }
 
@@ -717,36 +721,36 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
 /* ══ NAVIGATION ══════════════════════════════════════════════════ */
 .desktop-nav { display: none; }
 .desktop-nav-inner {
-  display: flex; align-items: center; gap: 3px; padding: 5px;
+  display: flex; align-items: center; gap: 4px; padding: 5px;
   margin-bottom: 2.5rem;
-  background: var(--co-dark);
-  border: 1px solid var(--co-border); border-top: none;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 10px 100%);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.95), inset 0 1px 0 var(--co-border-hi);
+  background: var(--co-glass);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  border: 1px solid var(--co-border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 18px 40px -26px rgba(0,0,0,0.9);
 }
 .desktop-tab {
-  flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
-  padding: 10px 8px;
-  font-family: var(--font-display); font-size: 0.875rem !important; letter-spacing: 0.1em;
-  border: 1px solid transparent; cursor: pointer;
-  transition: color 0.15s, background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 10px;
+  font-family: var(--font-display); font-weight: 600; font-size: 0.875rem !important; letter-spacing: 0.08em;
+  border: 1px solid transparent; border-radius: var(--radius-md); cursor: pointer;
+  transition: color 0.18s, background-color 0.18s, border-color 0.18s, box-shadow 0.18s;
   white-space: nowrap; background: transparent; color: var(--co-dim);
   text-transform: uppercase; position: relative; overflow: hidden;
-  clip-path: var(--clip-badge);
 }
 .desktop-tab.active {
-  background: var(--co-tint); border-color: var(--co-tint-line);
+  background: var(--co-tint-hi); border-color: var(--co-tint-line);
   color: var(--co-cyan);
-  box-shadow: var(--glow-box-cyan);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset;
 }
 .desktop-tab.active::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  content: ''; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+  width: 22px; height: 2px; border-radius: 2px;
   background: var(--co-cyan);
-  box-shadow: var(--glow-cyan-sm);
 }
 .desktop-tab:not(.active):hover {
-  background: var(--co-tint); border-color: var(--co-tint-line);
-  color: var(--co-cyan);
+  background: var(--co-tint); color: var(--co-text-hi);
 }
 
 /* Mobile nav */
@@ -754,10 +758,10 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
   position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--z-nav);
   display: flex; align-items: stretch;
   border-top: 0;
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  background: linear-gradient(180deg, rgba(3,5,8,0.62) 0%, rgba(3,5,8,0.72) 100%);
+  backdrop-filter: blur(22px) saturate(1.1); -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  background: linear-gradient(180deg, rgba(11,12,14,0.72) 0%, rgba(11,12,14,0.86) 100%);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -8px 28px rgba(0,0,0,0.28);
+  box-shadow: 0 -12px 34px -14px rgba(0,0,0,0.7);
 }
 .mobile-nav::before {
   content: '';
@@ -869,8 +873,8 @@ body.has-push-banner .pwa-banner { display: none; }
     padding-left: 16px; padding-right: 16px;
     padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px;
     border-bottom: 1px solid var(--co-border);
-    background: rgba(3,5,8,0.97);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    background: rgba(11,12,14,0.92);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     box-shadow: 0 2px 20px rgba(0,0,0,0.9);
     transition: transform 0.25s ease, opacity 0.25s ease;
   }
@@ -893,23 +897,17 @@ body.has-push-banner .pwa-banner { display: none; }
 
 /* ══ FOCUS ═══════════════════════════════════════════════════════
    2px to minimum z WCAG 2.4.13; kolor bierzemy z tokenu, żeby w trybie jasnym
-   pierścień był stonowaną zielenią morską, a nie elektrycznym cyanem. */
+   pierścień był stonowaną złotą obwódką, a nie elektrycznym cyanem. Odkąd
+   ścięcia zniknęły, narożnik jest zaokrąglony i outline sam podąża za kształtem. */
 *:focus-visible { outline: 2px solid var(--co-cyan); outline-offset: 2px; }
 
-/* Outline jest obcinany przez clip-path. Drop-shadow śledzi widoczny kształt,
-   więc działa na przyciskach, polach i wierszach filtra z ciętymi narożnikami. */
-.cyber-button-yellow:focus-visible,
-.cyber-button-danger:focus-visible,
-.cyber-button-outline:focus-visible,
-.desktop-tab:focus-visible,
-.filter-player-option:focus-visible,
-:focus-visible[style*="clip-path"] {
-  outline: none;
-  filter: drop-shadow(0 0 1px var(--co-cyan)) drop-shadow(0 0 3px var(--co-cyan));
-}
-.modal-panel.cut-corners:focus-visible {
-  outline: none;
-  filter: var(--glow-drop-panel) drop-shadow(0 0 1px var(--co-cyan)) drop-shadow(0 0 3px var(--co-cyan));
+/* ══ UNIFIED GEOMETRY ════════════════════════════════════════════
+   `CLIP.*` zwraca teraz `none`, więc elementy, które mają wyłącznie styl
+   inline `clipPath`, nie obcinają już narożnika — ale też same z siebie nie
+   są zaokrąglone. Ten selektor nadaje im miękki promień, żeby cała
+   aplikacja trzymała jedną, spójną geometrię. */
+[style*="clip-path"] {
+  border-radius: var(--radius-md);
 }
 
 /* ══ CARD HOVER GLOW ════════════════════════════════════════════ */
@@ -1016,77 +1014,78 @@ body.has-push-banner .pwa-banner { display: none; }
    Warm-slate palette · no neon glows · muted teal/rose accents
    ════════════════════════════════════════════════════════════ */
 body.theme-light {
-  background-color: #F8FAFC;
-  color: #334155;
+  background-color: #F7F4EF;
+  color: #4B4740;
 
-  /* ── Backgrounds — warm slate ── */
-  --co-void:      #F8FAFC;
-  --co-dark:      #F1F5F9;
+  /* ── Surfaces — warm ivory ── */
+  --co-void:      #F7F4EF;
+  --co-dark:      #EFEBE3;
   --co-panel:     #FFFFFF;
   --co-raised:    #FFFFFF;
-  --co-border:    #CBD5E1;
-  --co-border-hi: #94A3B8;
+  --co-border:    #E4DFD5;
+  --co-border-hi: #D2CABB;
 
-  /* ── Primary — Muted Teal ── */
-  --co-cyan:      #0D9488;
-  --co-cyan-mid:  #0F766E;
-  --co-cyan-dim:  #CCFBF1;
-  --co-ice:       #0284C7;
+  /* ── Primary — deep gold ── */
+  --co-cyan:      #8C6D2E;
+  --co-cyan-mid:  #725820;
+  --co-cyan-dim:  #F3ECDD;
+  --co-ice:       #3E5A78;
 
-  /* ── Accent — Rose ── */
-  --co-rose:      #BE185D;
-  --co-rose-mid:  #9D174D;
-  --co-rose-dim:  #FCE7F3;
+  /* ── Accent — claret ── */
+  --co-rose:      #A83E48;
+  --co-rose-mid:  #8C323B;
+  --co-rose-dim:  #F8E9E8;
 
   /* ── Amber — warnings ── */
-  --co-amber:     #D97706;
-  --co-amber-mid: #B45309;
-  --co-amber-dim: #FEF3C7;
+  --co-amber:     #A06A1E;
+  --co-amber-mid: #845718;
+  --co-amber-dim: #FBF0DC;
 
-  --co-gold:      #9A7209;
-  --co-gold-mid:  #7A5A07;
-  --co-gold-dim:  #FEF9E7;
-  --co-silver:    #64748B;
-  --co-bronze:    #B87333;
-  --co-tint-gold: rgba(154,114,9,0.12);
-  --co-tint-bronze: rgba(184,115,51,0.10);
+  --co-gold:      #8C6D2E;
+  --co-gold-mid:  #6E5522;
+  --co-gold-dim:  #F6EEDD;
+  --co-silver:    #6B7480;
+  --co-bronze:    #9A6A3C;
+  --co-tint-gold: rgba(140,109,46,0.10);
+  --co-tint-bronze: rgba(154,106,60,0.10);
   --glow-gold-md: none;
-  --glow-box-gold: 0 1px 3px rgba(0,0,0,0.08);
+  --glow-box-gold: 0 6px 18px -8px rgba(140,109,46,0.40);
 
-  /* ── Positive — Leafy green ── */
-  --co-green:     #16A34A;
-  --co-green-dim: #DCFCE7;
+  /* ── Positive — deep green ── */
+  --co-green:     #2F7D5B;
+  --co-green-dim: #E3F2EA;
 
-  /* ── Micro-accent — Soft purple ── */
-  --co-pink:      #A855F7;
+  /* ── Micro-accent — soft plum ── */
+  --co-pink:      #7C4FA0;
 
   /* ── Neutrals ── */
-  --co-text:      #475569;
-  --co-text-hi:   #0F172A;
-  --co-dim:       #64748B;
-  --co-dim2:      #94A3B8;
+  --co-text:      #4B4740;
+  --co-text-hi:   #201E1A;
+  --co-dim:       #6F6A60;
+  --co-dim2:      #948E83;
 
-  --co-overlay:   rgba(15,23,42,0.45);
-  --dot-color:    rgba(13,148,136,0.04);
+  --co-overlay:   rgba(32,28,24,0.40);
+  --dot-color:    rgba(140,109,46,0.05);
 
   /* ── Theme-switchable helpers (light overrides) ── */
-  --co-bar-track:    rgba(0,60,100,0.06);
-  --co-dot-empty:    rgba(0,60,100,0.18);
-  --co-close-btn:    #64748B;
-  --co-toast-success:#F0FDF4;
-  --co-toast-error:  #FEF2F2;
-  --co-toast-info:   #F0F9FF;
-  --co-toast-text:   #334155;
-  --co-separator:    rgba(0,60,100,0.08);
-  --co-surface-2:    #F1F5F9;
+  --co-bar-track:    rgba(60,50,30,0.08);
+  --co-dot-empty:    rgba(60,50,30,0.16);
+  --co-close-btn:    #6F6A60;
+  --co-toast-success:#F1F8F3;
+  --co-toast-error:  #FBEFEE;
+  --co-toast-info:   #F6F3EC;
+  --co-toast-text:   #33302B;
+  --co-separator:    rgba(60,50,30,0.08);
+  --co-surface-2:    #F3EFE7;
+  --co-glass:        rgba(255,255,255,0.78);
 
-  /* ── Accent tints — teal, matching --co-cyan above ── */
-  --co-tint:      rgba(13,148,136,0.05);
-  --co-tint-hi:   rgba(13,148,136,0.10);
-  --co-tint-line: rgba(13,148,136,0.30);
-  --co-tint-rose: rgba(190,24,93,0.06);
-  --co-tint-rose-line: rgba(190,24,93,0.30);
-  --co-tint-green:rgba(22,163,74,0.07);
+  /* ── Accent tints — gold, matching --co-cyan above ── */
+  --co-tint:      rgba(140,109,46,0.06);
+  --co-tint-hi:   rgba(140,109,46,0.11);
+  --co-tint-line: rgba(140,109,46,0.30);
+  --co-tint-rose: rgba(168,62,72,0.06);
+  --co-tint-rose-line: rgba(168,62,72,0.30);
+  --co-tint-green:rgba(47,125,91,0.09);
 
   /* ── Glows off ──
      Jedno miejsce, w którym gaśnie cały neon. Komponenty czytają te tokeny
@@ -1096,30 +1095,30 @@ body.theme-light {
   --glow-cyan-lg:   none;
   --glow-rose-md:   none;
   --glow-green-md:  none;
-  --glow-box-cyan:  0 1px 3px rgba(0,0,0,0.08);
-  --glow-box-rose:  0 1px 3px rgba(0,0,0,0.08);
-  --glow-box-panel: 0 4px 24px rgba(0,0,0,0.12);
-  --glow-drop-panel: drop-shadow(0 4px 24px rgba(0,0,0,0.12));
+  --glow-box-cyan:  0 8px 20px -12px rgba(140,109,46,0.55);
+  --glow-box-rose:  0 8px 20px -12px rgba(168,62,72,0.45);
+  --glow-box-panel: 0 20px 48px -24px rgba(50,42,30,0.38);
+  --glow-drop-panel: drop-shadow(0 22px 48px rgba(50,42,30,0.22));
   --modal-blur: 10px;
-  --glow-drop-cyan: drop-shadow(0 0 12px rgba(13,148,136,0.12));
+  --glow-drop-cyan: drop-shadow(0 0 15px rgba(140,109,46,0.10));
   --glow-drop-rose: none;
-  --glow-brand-sm: 0 0 10px rgba(13,148,136,0.35);
-  --glow-brand-md: 0 0 14px rgba(13,148,136,0.45);
-  --glow-brand-lg: 0 0 20px rgba(13,148,136,0.55);
+  --glow-brand-sm: 0 0 10px rgba(140,109,46,0.30);
+  --glow-brand-md: 0 0 14px rgba(140,109,46,0.38);
+  --glow-brand-lg: 0 0 20px rgba(140,109,46,0.46);
 
-  --modal-radius: 12px;
+  --modal-radius: 20px;
   --modal-bg:     #FFFFFF;
   --co-on-rose:   #FFFFFF;
-  /* Zaokrąglenie i ścinanie narożników wykluczają się — w jasnym motywie
-     wygrywa promień, więc ścięcie musi zniknąć. */
+  /* Zaokrąglenie i ścinanie narożników wykluczają się — teraz wszędzie
+     wygrywa promień, więc ścięcie zostaje wyłączone w obu motywach. */
   --clip-panel:   none;
 }
 
-/* ── Body background — soft teal bloom + fine dot grid ── */
+/* ── Body background — soft gold bloom + fine dot grid ── */
 body.theme-light {
   background-image:
-    radial-gradient(ellipse 75% 45% at 50% -8%, rgba(13,148,136,0.04) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 30% at 50% 110%, rgba(13,148,136,0.02) 0%, transparent 60%),
+    radial-gradient(ellipse 85% 50% at 50% -12%, rgba(140,109,46,0.05) 0%, transparent 62%),
+    radial-gradient(ellipse 55% 40% at 88% 112%, rgba(62,90,120,0.04) 0%, transparent 66%),
     radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
 }
 
@@ -1159,23 +1158,23 @@ body.theme-light .player-card-wrap > div {
   box-shadow: 0 1px 8px rgba(0,0,0,0.06), 0 0 0 1px var(--co-border) !important;
 }
 body.theme-light .player-card-wrap > .fifa-card-legend {
-  background-image: linear-gradient(165deg, rgba(154,114,9,0.14) 0%, transparent 44%) !important;
+  background-image: linear-gradient(165deg, rgba(140,109,46,0.14) 0%, transparent 44%) !important;
 }
 body.theme-light .player-card-wrap > .fifa-card-elite {
-  background-image: linear-gradient(165deg, rgba(190,24,93,0.10) 0%, transparent 44%) !important;
+  background-image: linear-gradient(165deg, rgba(168,62,72,0.10) 0%, transparent 44%) !important;
 }
 body.theme-light .player-card-wrap > .fifa-card-epic {
-  background-image: linear-gradient(165deg, rgba(155,77,224,0.10) 0%, transparent 44%) !important;
+  background-image: linear-gradient(165deg, rgba(124,79,160,0.10) 0%, transparent 44%) !important;
 }
 body.theme-light .player-card-wrap > .fifa-card-rare {
-  background-image: linear-gradient(165deg, rgba(13,148,136,0.10) 0%, transparent 44%) !important;
+  background-image: linear-gradient(165deg, rgba(47,125,91,0.10) 0%, transparent 44%) !important;
 }
 
 /* Header */
 body.theme-light header {
-  background: linear-gradient(180deg, #EDF2F7 0%, #F8FAFC 60%, #FFFFFF 100%) !important;
+  background: linear-gradient(180deg, #F2EEE6 0%, #F7F4EF 60%, #FFFFFF 100%) !important;
   border-bottom-color: var(--co-border) !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+  box-shadow: 0 1px 4px rgba(80,64,40,0.05) !important;
 }
 
 /* ── Navigation ── */
@@ -1187,9 +1186,9 @@ body.theme-light .desktop-nav {
 }
 /* ── Mobile nav ── */
 body.theme-light .mobile-nav {
-  background: linear-gradient(180deg, rgba(248,250,252,0.64) 0%, rgba(248,250,252,0.76) 100%);
+  background: linear-gradient(180deg, rgba(247,244,239,0.72) 0%, rgba(247,244,239,0.86) 100%);
   border-top: 0;
-  box-shadow: 0 -8px 28px rgba(15,23,42,0.08);
+  box-shadow: 0 -12px 34px -14px rgba(60,48,30,0.20);
 }
 body.theme-light .mobile-nav::before {
   background: linear-gradient(90deg, transparent, var(--co-border), transparent);
@@ -1225,8 +1224,13 @@ body.theme-light .cyber-input {
   color: var(--co-text-hi);
 }
 
-/* ── Buttons ── */
-body.theme-light .cyber-button-yellow { color: #FFFFFF; }
+/* ── Buttons ──
+   W jasnym motywie złoto musi być ciemniejsze, żeby biały tekst na przycisku
+   podstawowym wciąż miał kontrast. */
+body.theme-light .cyber-button-yellow {
+  background: linear-gradient(180deg, #A98A45 0%, #8C6D2E 55%, #725820 100%);
+  color: #FFFFFF;
+}
 
 /* ── Log entries ── */
 body.theme-light .log-entry {
@@ -1272,7 +1276,7 @@ body.theme-light .min-h-screen {
     -webkit-backdrop-filter: none !important;
   }
   .modal-overlay::before {
-    background: #030508;
+    background: #0B0C0E;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -1283,7 +1287,7 @@ body.theme-light .min-h-screen {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
-  body.theme-light .modal-overlay::before { background: #0F172A; }
+  body.theme-light .modal-overlay::before { background: #241F1A; }
   body.theme-light .mobile-nav,
   body.theme-light .compact-header,
   body.theme-light .bottom-banner,
@@ -1301,16 +1305,16 @@ body.theme-light .min-h-screen {
 /* Dodatkowy kontrast dla granic kontrolek i tekstów pomocniczych. */
 @media (prefers-contrast: more) {
   :root {
-    --co-dim: #A8C4D4;
-    --co-border: #49657C;
-    --co-border-hi: #7895AA;
-    --co-tint-line: rgba(0,229,255,0.62);
+    --co-dim: #C9C6C0;
+    --co-border: #5A5348;
+    --co-border-hi: #7C7365;
+    --co-tint-line: rgba(212,182,120,0.62);
   }
   body.theme-light {
-    --co-dim: #334155;
-    --co-border: #64748B;
-    --co-border-hi: #475569;
-    --co-tint-line: rgba(13,148,136,0.68);
+    --co-dim: #3A362F;
+    --co-border: #8C6D2E;
+    --co-border-hi: #6E5522;
+    --co-tint-line: rgba(140,109,46,0.68);
   }
   .cyber-button-outline { border-width: 2px; }
   .modal-panel { border-width: 2px; }

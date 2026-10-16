@@ -21,7 +21,7 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
       <SectionHeader icon={CalendarDays} title="DANE MIESIĘCZNE" sub="obecność według miesiąca" />
       {monthlyStats.length === 0 ? (
         <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>
-          {'>'} Brak danych — dodaj pierwszą sesję_
+          Brak danych — dodaj pierwszą sesję
         </p>
       ) : (
         isMobile ? (

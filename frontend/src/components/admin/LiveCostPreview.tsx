@@ -62,17 +62,17 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
         <ShareBreakdown groups={groups} sportEmoji={racketEmoji} />
         {multiCapped && (
           <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
-            {'>'} ⚠ Limit {maxMulti} kart — zadziałało {effectiveCards}, zniżka proporcjonalnie podzielona
+            ⚠ Limit {maxMulti} kart — zadziałało {effectiveCards}, zniżka proporcjonalnie podzielona
           </div>
         )}
         {discountCapped && !multiCapped && (
           <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
-            {'>'} ⚠ Karty nie zbiły ceny o pełne {MULTISPORT_DISCOUNT} zł — udział na osobę wychodzi mniejszy niż zniżka. Sprawdź, czy kwota się zgadza.
+            ⚠ Karty nie zbiły ceny o pełne {MULTISPORT_DISCOUNT} zł — udział na osobę wychodzi mniejszy niż zniżka. Sprawdź, czy kwota się zgadza.
           </div>
         )}
         {hasRackets && (
           <div style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
-            {'>'} Kort: {formatAmountShort(courtCost)} zł · Rakiety ({racketCount} szt.): {formatAmountShort(racketCost)} zł
+            Kort: {formatAmountShort(courtCost)} zł · Rakiety ({racketCount} szt.): {formatAmountShort(racketCost)} zł
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { CheckCircle2, AlertCircle, X, Terminal } from 'lucide-react';
+import { CheckCircle2, AlertCircle, X, Info } from 'lucide-react';
 import { CLIP } from '@/constants/styles';
 
 export type ToastType = 'success' | 'error' | 'info';
@@ -137,7 +137,7 @@ const STYLES: Record<ToastType, ToastStyle> = {
     accent:   'var(--co-rose)',
     tint:     'var(--co-tint-rose)',
     icon:     <AlertCircle size={16} style={{ ...ICON_STYLE, color: 'var(--co-rose)' }} />,
-    prefix:   'ERR',
+    prefix:   'BŁĄD',
   },
   info: {
     bg:       'var(--co-toast-info)',
@@ -145,8 +145,8 @@ const STYLES: Record<ToastType, ToastStyle> = {
     shadow:   '0 0 16px var(--co-tint)',
     accent:   'var(--co-cyan)',
     tint:     'var(--co-tint)',
-    icon:     <Terminal size={16} style={{ ...ICON_STYLE, color: 'var(--co-cyan)' }} />,
-    prefix:   'SYS',
+    icon:     <Info size={16} style={{ ...ICON_STYLE, color: 'var(--co-cyan)' }} />,
+    prefix:   'INFO',
   },
 };
 
