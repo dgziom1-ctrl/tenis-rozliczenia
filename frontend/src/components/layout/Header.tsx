@@ -114,11 +114,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           background:'radial-gradient(ellipse at 50% 30%,var(--co-tint-hi) 0%,var(--co-tint) 60%,transparent 80%)' }}/>
       )}
 
-      <header style={{ position:'relative',overflow:'visible',
-        background:'linear-gradient(180deg, rgba(6,12,18,0.78) 0%, rgba(3,5,8,0.60) 100%)',
-        backdropFilter:'blur(20px) saturate(150%)', WebkitBackdropFilter:'blur(20px) saturate(150%)',
-        borderBottom:'1px solid var(--co-tint-line)',
-        boxShadow:'0 1px 0 var(--glass-hi-line) inset, 0 18px 44px -30px rgba(0,0,0,0.9)' }}>
+      <header className="glass-header" style={{ position:'relative',overflow:'visible' }}>
 
         <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,right:0,height:1,
           background:'linear-gradient(90deg, transparent, var(--glass-hi-line), transparent)',zIndex:2 }}/>
@@ -129,10 +125,8 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
 
         <div style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
-          <button onClick={handleCopy} style={{ display:'flex',alignItems:'center',gap:'8px',
-            background:'var(--co-glass-chip)',backdropFilter:'blur(10px)',WebkitBackdropFilter:'blur(10px)',
+          <button onClick={handleCopy} className="glass-chip" style={{ display:'flex',alignItems:'center',gap:'8px',
             border:'1px solid var(--co-tint-line)',padding: '6px 12px',cursor:'pointer',
-            boxShadow:'inset 0 1px 0 var(--glass-hi-line)',
             transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
             <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,

@@ -116,7 +116,6 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
   const bannerStyle: CSSProperties = {
     left: 0,
     right: 0,
-    background: 'var(--co-panel)',
     borderTop: `2px solid ${showReregister || showManual ? 'var(--co-amber)' : 'var(--co-tint-line)'}`,
     padding: '14px 16px 16px',
     animation: 'slide-in-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both',
@@ -127,7 +126,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
   const accentColor = showReregister || showManual ? 'var(--co-amber)' : 'var(--co-cyan)';
 
   return (
-    <div style={bannerStyle} className="push-banner-sheet bottom-banner">
+    <div style={bannerStyle} className="push-banner-sheet bottom-banner glass-surface">
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
         <div style={{
           padding: '8px', flexShrink: 0,

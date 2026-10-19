@@ -138,32 +138,54 @@
   --co-bar-track:    rgba(255,255,255,0.06);
   --co-dot-empty:    rgba(255,255,255,0.15);
   --co-close-btn:    #3a3a3a;
-  --co-toast-success:#031208;
-  --co-toast-error:  #0e0606;
-  --co-toast-info:   #080808;
+  --co-toast-success:rgba(3,18,8,0.78);
+  --co-toast-error:  rgba(14,6,6,0.78);
+  --co-toast-info:   rgba(8,8,8,0.78);
   --co-toast-text:   #c8c8c8;
   --co-separator:    rgba(255,255,255,0.05);
   /* Powierzchnia wewnętrzna — --co-separator to hairline i użyty jako tło
      dawał pudełka bez widocznej krawędzi (to samo 5% na tle i obramowaniu). */
   --co-surface-2:    #0C1420;
 
-  /* ── Glass surfaces (glassmorphism) ──
+  /* ── Glass surfaces (iOS-style liquid glass) ──
      Panele są półprzezroczyste i rozmywają tło pod sobą. Trzy stopnie krycia:
      `--co-glass` na duże panele, `--co-glass-hi` na dialogi (czytelność tekstu
      nad rozmytym tłem), `--co-glass-chip` na małe kontrolki (pola, chipy).
-     `--glass-sheen` to delikatny refleks światła na górnej krawędzi szkła. */
-  --co-glass:      rgba(9,15,24,0.55);
-  --co-glass-hi:   rgba(9,15,24,0.74);
-  --co-glass-chip: rgba(9,15,24,0.42);
-  --glass-blur:    16px;
-  --glass-sat:     150%;
-  --glass-hi-line: rgba(255,255,255,0.06);
-  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0) 46%);
+
+     Efekt „premium" składa się z czterech warstw, tak jak w Liquid Glass:
+       1. rozmycie + nasycenie tła pod panelem (`--glass-blur`, `--glass-sat`),
+       2. refleks na górnej krawędzi (`--glass-sheen`),
+       3. świetlna plama podążająca za kursorem (`--glass-light`, rysowana
+          w `::after` paneli — patrz sekcja PREMIUM GLASS),
+       4. krawędziowy specular i cień objętościowy (`--glass-edge-top`,
+          `--glass-edge-bottom`, `--glass-shadow`).
+     Wszystkie kolory żyją w tokenach, więc tryb jasny podmienia je jednym
+     blokiem, a `prefers-reduced-transparency` wyłącza całość bez ruszania
+     komponentów. */
+  --co-glass:      rgba(9,15,24,0.52);
+  --co-glass-hi:   rgba(9,15,24,0.72);
+  --co-glass-chip: rgba(9,15,24,0.40);
+  --glass-blur:    22px;
+  --glass-sat:     170%;
+  --glass-hi-line: rgba(255,255,255,0.07);
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 52%);
+  /* Jasna plama refleksu (warstwa 3) — półprzezroczysta biel, nie cień. */
+  --glass-light:   rgba(255,255,255,0.16);
+  /* Krawędzie szkła: jasna góra (światło), ciemny dół (grubość tafli). */
+  --glass-edge-top:    rgba(255,255,255,0.18);
+  --glass-edge-bottom: rgba(0,0,0,0.38);
+  --glass-rim:         inset 0 0 0 1px rgba(255,255,255,0.035);
+  /* Ziarno na powierzchni — rozbija gradienty i daje wrażenie szkła, nie plastiku. */
+  --glass-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
   /* Wgłębienie pola tekstowego — jasny motyw ma własną, jasną wersję. */
-  --input-inset:   inset 0 1px 2px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.02);
-  /* Cień szkła: refleks na górnej krawędzi + głęboki, miękki cień pod panelem. */
+  --input-inset:
+    inset 0 1px 2px rgba(0,0,0,0.45),
+    inset 0 -1px 0 rgba(255,255,255,0.045),
+    inset 0 0 0 1px rgba(255,255,255,0.02);
+  /* Cień szkła: refleks górnej krawędzi + grubość tafli + miękki cień pod panelem. */
   --glass-shadow:
-    0 1px 0 var(--glass-hi-line) inset,
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
     0 20px 50px -26px rgba(0,0,0,0.90),
     0 2px 8px -4px rgba(0,0,0,0.60);
 
@@ -317,27 +339,29 @@ body.theme-switching *::after {
   }
   .scan-hover:hover::before { animation: scan-sweep 0.5s ease-out forwards; }
 
-  .glass-card {
+  /* Wspólna receptura szkła. Wszystkie powierzchnie — karty, panele, modale,
+     nagłówek, nawigacja, toasty i banery — czytają te same tokeny, więc
+     „premium" zmienia się w jednym miejscu, a nie w jedenastu komponentach. */
+  .glass-card,
+  .cyber-box,
+  .glass-panel,
+  .glass-surface {
+    position: relative;
+    isolation: isolate;
     background-color: var(--co-glass);
-    background-image: var(--glass-sheen);
+    /* Warstwy od góry: ziarno → sheen → kolor rzadkości karty (jeśli jest). */
+    background-image:
+      var(--glass-noise),
+      var(--glass-sheen),
+      var(--card-tint, linear-gradient(transparent, transparent));
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
     border: 1px solid var(--co-border);
-    box-shadow:
-      var(--glass-shadow),
-      inset 0 0 0 1px rgba(0,229,255,0.03);
+    box-shadow: var(--glass-shadow), var(--glass-rim);
   }
 
   .cyber-box {
-    background-color: var(--co-glass);
-    background-image: var(--glass-sheen);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-    border: 1px solid var(--co-border);
-    box-shadow:
-      var(--glass-shadow),
-      inset 0 0 0 1px rgba(0,229,255,0.03);
-    position: relative; overflow: hidden;
+    overflow: hidden;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   /* Neonowa kreska na górnej krawędzi szkła — sygnatura „premium cyber". */
@@ -346,17 +370,7 @@ body.theme-switching *::after {
     position: absolute; top: 0; left: 0; right: 0; height: 1px;
     background: linear-gradient(90deg, transparent, var(--co-tint-line), transparent);
     pointer-events: none;
-  }
-
-  /* Panel szklany w treści zakładek — te same właściwości co `.cyber-box`,
-     ale bez własnego nagłówka i `overflow: hidden`. */
-  .glass-panel {
-    background-color: var(--co-glass);
-    background-image: var(--glass-sheen);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-    border: 1px solid var(--co-border);
-    box-shadow: var(--glass-shadow);
+    z-index: 3;
   }
 
   .cyber-input {
@@ -501,12 +515,15 @@ body.theme-switching *::after {
 }
 
 .fifa-card { position: relative; }
-.fifa-card-legend { background-image: linear-gradient(165deg, rgba(184,134,11,0.20) 0%, transparent 44%); }
-.fifa-card-elite  { background-image: linear-gradient(165deg, rgba(224,25,122,0.16) 0%, transparent 44%); }
-.fifa-card-epic   { background-image: linear-gradient(165deg, rgba(155,77,224,0.16) 0%, transparent 44%); }
-.fifa-card-rare   { background-image: linear-gradient(165deg, rgba(20,138,156,0.14) 0%, transparent 44%); }
-.fifa-card-common { background-image: linear-gradient(165deg, rgba(100,116,139,0.10) 0%, transparent 44%); }
-.fifa-card-ghost  { background-image: linear-gradient(165deg, rgba(85,102,119,0.10) 0%, transparent 44%); }
+/* Rzadkość karty to już nie `background-image` (biłoby recepturę szkła z
+   `@layer utilities`), a zmienna dokładana jako spodnia warstwa stosu. Dzięki
+   temu karta zachowuje ziarno, sheen i refleks, a kolor rangi dalej ją barwi. */
+.fifa-card-legend { --card-tint: linear-gradient(165deg, rgba(184,134,11,0.20) 0%, transparent 44%); }
+.fifa-card-elite  { --card-tint: linear-gradient(165deg, rgba(224,25,122,0.16) 0%, transparent 44%); }
+.fifa-card-epic   { --card-tint: linear-gradient(165deg, rgba(155,77,224,0.16) 0%, transparent 44%); }
+.fifa-card-rare   { --card-tint: linear-gradient(165deg, rgba(20,138,156,0.14) 0%, transparent 44%); }
+.fifa-card-common { --card-tint: linear-gradient(165deg, rgba(100,116,139,0.10) 0%, transparent 44%); }
+.fifa-card-ghost  { --card-tint: linear-gradient(165deg, rgba(85,102,119,0.10) 0%, transparent 44%); }
 
 .card-foil {
   position: absolute;
@@ -589,12 +606,12 @@ body.theme-light .card-foil {
   mix-blend-mode: multiply;
   opacity: 0.14;
 }
-body.theme-light .fifa-card-legend { background-image: linear-gradient(165deg, rgba(154,114,9,0.14) 0%, transparent 44%); }
-body.theme-light .fifa-card-elite  { background-image: linear-gradient(165deg, rgba(190,24,93,0.10) 0%, transparent 44%); }
-body.theme-light .fifa-card-epic   { background-image: linear-gradient(165deg, rgba(155,77,224,0.10) 0%, transparent 44%); }
-body.theme-light .fifa-card-rare   { background-image: linear-gradient(165deg, rgba(13,148,136,0.10) 0%, transparent 44%); }
-body.theme-light .fifa-card-common { background-image: none; }
-body.theme-light .fifa-card-ghost  { background-image: none; }
+body.theme-light .fifa-card-legend { --card-tint: linear-gradient(165deg, rgba(154,114,9,0.14) 0%, transparent 44%); }
+body.theme-light .fifa-card-elite  { --card-tint: linear-gradient(165deg, rgba(190,24,93,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-epic   { --card-tint: linear-gradient(165deg, rgba(155,77,224,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-rare   { --card-tint: linear-gradient(165deg, rgba(13,148,136,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-common { --card-tint: none; }
+body.theme-light .fifa-card-ghost  { --card-tint: none; }
 
 /* ── Modal overlay ──
    Scrim i blur żyją na nieinteraktywnym pseudoelemencie. Ich opacity zmienia się
@@ -656,16 +673,29 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
 
 /* Panel dialogu — cień jako drop-shadow, bo box-shadow był ucinany przez clip-path.
    Tło jest półprzezroczyste: scrim pod spodem już rozmywa tło, więc panel
-   czyta się jak szkło bez własnego `backdrop-filter` (który gryzłby się z `filter`). */
+   czyta się jak szkło bez własnego `backdrop-filter` (który gryzłby się z `filter`).
+   Warstwy: ziarno → sheen → refleks powierzchni (ten sam zestaw co reszta szkła). */
 .modal-panel {
+  --glass-x: 50%;
+  --glass-y: 0%;
   width: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--modal-bg);
-  background-image: var(--glass-sheen);
+  position: relative;
+  background-color: var(--modal-bg);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(
+      130% 100% at var(--glass-x) var(--glass-y),
+      var(--glass-light) 0%,
+      transparent 62%
+    );
   border: 1px solid var(--co-tint-line);
   border-radius: var(--modal-radius);
-  box-shadow: none;
+  box-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset;
   filter: var(--glow-drop-panel);
   max-height: 100%;
   overflow: hidden;
@@ -743,6 +773,139 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
 .card-stagger-5 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.24s both; }
 .card-stagger-6 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.30s both; }
 
+/* ══ PREMIUM GLASS ════════════════════════════════════════════════
+   Warstwa „liquid glass" nad wspólną recepturą szkła. Trzy efekty:
+
+   1. Refleks powierzchni — radialna plama światła w tle panelu, ustawiana
+      zmiennymi `--glass-x`/`--glass-y` (hook `useGlassPointer` prowadzi je za
+      kursorem na urządzeniach z myszą). Leży w `background-image`, więc jest
+      POD treścią i nigdy nie podmywa tekstu.
+   2. Krawędziowy specular — `::after` z maską pokazującą wyłącznie 1px ramki.
+      Światło „ślizga się" po krawędzi zamiast zalewać powierzchnię.
+   3. Grubość tafli — ciemna dolna krawędź i jasna górna (tokeny w `:root`).
+
+   Efekt jest czysto dekoracyjny: `pointer-events: none`, `aria-hidden`
+   nie jest potrzebne, bo pseudoelementy nie trafiają do drzewa dostępności. */
+
+.glass-card,
+.cyber-box,
+.glass-panel,
+.glass-surface,
+.modal-panel {
+  --glass-x: 50%;
+  --glass-y: 0%;
+}
+
+/* Refleks powierzchni. Kolejność warstw: ziarno → sheen → plama światła →
+   kolor rzadkości karty (spód). */
+.glass-card,
+.cyber-box,
+.glass-panel,
+.glass-surface {
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(
+      130% 100% at var(--glass-x) var(--glass-y),
+      var(--glass-light) 0%,
+      transparent 62%
+    ),
+    var(--card-tint, linear-gradient(transparent, transparent));
+}
+
+/* Krawędziowy specular — tylko ramka, dzięki masce `content-box exclude`. */
+.glass-card::after,
+.glass-panel::after,
+.cyber-box::after,
+.glass-surface::after,
+.modal-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  padding: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background:
+    radial-gradient(
+      220px circle at var(--glass-x) var(--glass-y),
+      var(--glass-edge-top) 0%,
+      transparent 72%
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .glass-card:hover::after,
+  .glass-panel:hover::after,
+  .cyber-box:hover::after,
+  .glass-surface:hover::after,
+  .modal-panel:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Na wąskich ekranach rozmycie jest najdroższą warstwą — schodzimy z 22 do
+   16px, zachowując refleks i krawędzie (te są darmowe). */
+@media (max-width: 639px) {
+  :root { --glass-blur: 16px; }
+}
+
+/* Bez `backdrop-filter` (stary Firefox, wyłączone wsparcie) szkło musi być
+   czytelne samo z siebie — podnosimy krycie zamiast zostawiać przezroczystą
+   plamę z tekstem na przypadkowym tle. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --co-glass:      rgba(9,15,24,0.94);
+    --co-glass-hi:   rgba(9,15,24,0.97);
+    --co-glass-chip: rgba(9,15,24,0.90);
+  }
+  body.theme-light {
+    --co-glass:      rgba(255,255,255,0.95);
+    --co-glass-hi:   rgba(255,255,255,0.98);
+    --co-glass-chip: rgba(255,255,255,0.92);
+  }
+}
+
+/* Małe kontrolki (chipy, przyciski konturowe) — cieńsza tafla i lżejszy blur;
+   refleks powierzchni byłby na nich tylko plamą pod etykietą. */
+.glass-chip {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--co-glass-chip);
+  background-image: var(--glass-sheen);
+  backdrop-filter: blur(12px) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(12px) saturate(var(--glass-sat));
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge-top),
+    inset 0 -1px 0 var(--glass-edge-bottom);
+}
+
+/* Nagłówek — kiedyś miał tło i blur wpisane inline, przez co tryb jasny musiał
+   nadpisywać je z `!important`. Teraz to zwykła powierzchnia szklana. */
+.glass-header {
+  background-color: var(--co-glass);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(120% 140% at 50% -10%, var(--co-tint-hi) 0%, transparent 58%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border-bottom: 1px solid var(--co-tint-line);
+  box-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 18px 44px -30px rgba(0,0,0,0.9);
+}
+
 /* ══ MAIN CONTENT ════════════════════════════════════════════════ */
 @media (max-width: 639px) {
   /* Wysokość nawigacji plus oddech, żeby ostatni element nie kończył się
@@ -772,12 +935,15 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
   display: flex; align-items: center; gap: 3px; padding: 5px;
   margin-bottom: 2.5rem;
   background-color: var(--co-glass);
-  background-image: var(--glass-sheen);
+  background-image: var(--glass-noise), var(--glass-sheen);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   border: 1px solid var(--co-border); border-top: none;
   clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 10px 100%);
-  box-shadow: var(--glass-shadow), inset 0 0 0 1px rgba(0,229,255,0.03);
+  box-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 18px 40px -26px rgba(0,0,0,0.85);
 }
 .desktop-tab {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
@@ -809,10 +975,14 @@ body.theme-light .fifa-card-ghost  { background-image: none; }
   position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--z-nav);
   display: flex; align-items: stretch;
   border-top: 0;
-  backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
-  background: linear-gradient(180deg, rgba(3,5,8,0.52) 0%, rgba(3,5,8,0.80) 100%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  background-color: var(--co-glass-hi);
+  background-image: var(--glass-noise), var(--glass-sheen);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -8px 28px rgba(0,0,0,0.35), inset 0 1px 0 var(--glass-hi-line);
+  box-shadow:
+    0 -1px 0 var(--glass-edge-top) inset,
+    0 -8px 28px rgba(0,0,0,0.35);
 }
 .mobile-nav::before {
   content: '';
@@ -924,9 +1094,11 @@ body.has-push-banner .pwa-banner { display: none; }
     padding-left: 16px; padding-right: 16px;
     padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px;
     border-bottom: 1px solid var(--co-tint-line);
-    background: rgba(3,5,8,0.82);
-    backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
-    box-shadow: 0 1px 0 var(--glass-hi-line) inset, 0 2px 20px rgba(0,0,0,0.9);
+    background-color: var(--co-glass-hi);
+    background-image: var(--glass-noise), var(--glass-sheen);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    box-shadow: 0 1px 0 var(--glass-edge-top) inset, 0 2px 20px rgba(0,0,0,0.9);
     transition: transform 0.25s ease, opacity 0.25s ease;
   }
   .compact-header.hidden-bar  { transform: translateY(-100%); opacity: 0; }
@@ -1128,18 +1300,38 @@ body.theme-light {
   --co-bar-track:    rgba(0,60,100,0.06);
   --co-dot-empty:    rgba(0,60,100,0.18);
   --co-close-btn:    #64748B;
-  --co-toast-success:#F0FDF4;
-  --co-toast-error:  #FEF2F2;
-  --co-toast-info:   #F0F9FF;
+  --co-toast-success:rgba(240,253,244,0.86);
+  --co-toast-error:  rgba(254,242,242,0.86);
+  --co-toast-info:   rgba(240,249,255,0.86);
   --co-toast-text:   #334155;
   --co-separator:    rgba(0,60,100,0.08);
   --co-surface-2:    #F1F5F9;
 
-  /* ── Glass — jasny wariant ──
-     Chipy w ciemnym motywie są granatowe; na jasnym tle muszą być białawe,
-     inaczej np. przycisk konturowy robi się ciemną plamą. */
+  /* ── Glass — jasny wariant (iOS Control Center) ──
+     Mleczne, białe szkło: wysoka biel, niskie nasycenie, ciemna (a nie biała)
+     krawędź górna, bo światło w jasnym motywie odbija się od ciemniejszego
+     obramowania. Chipy w ciemnym motywie są granatowe; tutaj muszą być
+     białawe, inaczej np. przycisk konturowy robi się ciemną plamą. */
+  --co-glass:      rgba(255,255,255,0.62);
+  --co-glass-hi:   rgba(255,255,255,0.80);
   --co-glass-chip: rgba(255,255,255,0.55);
-  --input-inset:   inset 0 1px 2px rgba(15,23,42,0.05), inset 0 0 0 1px rgba(15,23,42,0.02);
+  --glass-blur:    24px;
+  --glass-sat:     180%;
+  --glass-hi-line: rgba(255,255,255,0.75);
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 55%);
+  --glass-light:   rgba(255,255,255,0.55);
+  --glass-edge-top:    rgba(255,255,255,0.95);
+  --glass-edge-bottom: rgba(15,23,42,0.10);
+  --glass-rim:         inset 0 0 0 1px rgba(15,23,42,0.035);
+  --glass-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 12px 32px -20px rgba(15,23,42,0.30),
+    0 2px 6px -3px rgba(15,23,42,0.10);
+  --input-inset:
+    inset 0 1px 2px rgba(15,23,42,0.05),
+    inset 0 -1px 0 rgba(255,255,255,0.80),
+    inset 0 0 0 1px rgba(15,23,42,0.02);
 
   /* ── Accent tints — teal, matching --co-cyan above ── */
   --co-tint:      rgba(13,148,136,0.05);
@@ -1169,7 +1361,9 @@ body.theme-light {
   --glow-brand-lg: 0 0 20px rgba(13,148,136,0.55);
 
   --modal-radius: 12px;
-  --modal-bg:     #FFFFFF;
+  /* Mleczne, półprzezroczyste tło dialogu — scrim pod spodem już rozmywa
+     stronę, więc panel czyta się jak tafla szkła, a nie biała kartka. */
+  --modal-bg:     rgba(255,255,255,0.84);
   --co-on-rose:   #FFFFFF;
   /* Zaokrąglenie i ścinanie narożników wykluczają się — w jasnym motywie
      wygrywa promień, więc ścięcie musi zniknąć. */
@@ -1193,92 +1387,6 @@ body.theme-light {
 }
 
 /* ══ COMPONENT OVERRIDES ══════════════════════════════════════ */
-
-/* Fix hardcoded dark backgrounds */
-body.theme-light .cyber-box,
-body.theme-light .cyber-input {
-  background: var(--co-panel);
-}
-
-/* Cards — warm white, layered shadow */
-body.theme-light .crt-card {
-  box-shadow:
-    0 1px 2px rgba(0,0,0,0.04),
-    0 2px 8px rgba(0,0,0,0.06),
-    0 0 0 1px rgba(0,0,0,0.03) !important;
-}
-body.theme-light .crt-card:hover {
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.06),
-    0 8px 24px rgba(0,0,0,0.1),
-    0 0 0 1px rgba(0,0,0,0.05) !important;
-}
-body.theme-light .player-card-wrap > div {
-  background: rgba(255, 255, 255, 0.72) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.06), 0 0 0 1px var(--co-border) !important;
-}
-body.theme-light .player-card-wrap > .fifa-card-legend {
-  background-image: linear-gradient(165deg, rgba(154,114,9,0.14) 0%, transparent 44%) !important;
-}
-body.theme-light .player-card-wrap > .fifa-card-elite {
-  background-image: linear-gradient(165deg, rgba(190,24,93,0.10) 0%, transparent 44%) !important;
-}
-body.theme-light .player-card-wrap > .fifa-card-epic {
-  background-image: linear-gradient(165deg, rgba(155,77,224,0.10) 0%, transparent 44%) !important;
-}
-body.theme-light .player-card-wrap > .fifa-card-rare {
-  background-image: linear-gradient(165deg, rgba(13,148,136,0.10) 0%, transparent 44%) !important;
-}
-
-/* Header */
-body.theme-light header {
-  background: linear-gradient(180deg, #EDF2F7 0%, #F8FAFC 60%, #FFFFFF 100%) !important;
-  border-bottom-color: var(--co-border) !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
-}
-
-/* ── Navigation ── */
-body.theme-light .desktop-nav-inner,
-body.theme-light .desktop-nav {
-  background: #FFFFFF;
-  border-color: var(--co-border);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-/* ── Mobile nav ── */
-body.theme-light .mobile-nav {
-  background: linear-gradient(180deg, rgba(248,250,252,0.64) 0%, rgba(248,250,252,0.76) 100%);
-  border-top: 0;
-  box-shadow: 0 -8px 28px rgba(15,23,42,0.08);
-}
-body.theme-light .mobile-nav::before {
-  background: linear-gradient(90deg, transparent, var(--co-border), transparent);
-}
-/* Compact header (scrolled) */
-body.theme-light .compact-header {
-  background: rgba(255,255,255,0.97);
-  border-bottom-color: var(--co-border);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-
-/* ── Glass card & Cyber box ── */
-body.theme-light .glass-card,
-body.theme-light .glass-panel {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(14px) saturate(130%);
-  -webkit-backdrop-filter: blur(14px) saturate(130%);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.70) inset, 0 10px 30px -18px rgba(15,23,42,0.28), 0 1px 3px rgba(0,0,0,0.05);
-}
-body.theme-light .cyber-box {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(14px) saturate(130%);
-  -webkit-backdrop-filter: blur(14px) saturate(130%);
-  border-color: var(--co-border);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.70) inset, 0 10px 30px -18px rgba(15,23,42,0.28), 0 1px 3px rgba(0,0,0,0.05);
-}
-body.theme-light .modal-panel { background-image: none; }
 
 /* ── Cyber input ──
    Tło jest jedyną rzeczą, której token nie załatwia: bazowa reguła ma
@@ -1330,10 +1438,24 @@ body.theme-light .min-h-screen {
 @media (prefers-reduced-transparency: reduce) {
   .glass-card,
   .glass-panel,
-  .cyber-box {
-    background: var(--co-panel) !important;
+  .glass-surface,
+  .glass-chip,
+  .glass-header,
+  .cyber-box,
+  .modal-panel {
+    background-color: var(--co-panel) !important;
+    background-image: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+  /* Krawędziowy specular to też „szkło" — bez niego powierzchnia zostaje
+     płaska, ale czytelna, co jest celem tej preferencji. */
+  .glass-card::after,
+  .glass-panel::after,
+  .cyber-box::after,
+  .glass-surface::after,
+  .modal-panel::after {
+    display: none;
   }
   /* Pola i przycisk konturowy też używają szkła — bez tego zostawał blur,
      mimo że reszta interfejsu już z niego rezygnuje. Nagłówek dodatkowo
@@ -1366,13 +1488,12 @@ body.theme-light .min-h-screen {
   body.theme-light .bottom-banner,
   body.theme-light .glass-card,
   body.theme-light .glass-panel,
-  body.theme-light .cyber-box {
-    background: #FFFFFF !important;
-  }
-  body.theme-light .player-card-wrap > div {
-    background: #FFFFFF !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+  body.theme-light .glass-surface,
+  body.theme-light .glass-chip,
+  body.theme-light .glass-header,
+  body.theme-light .cyber-box,
+  body.theme-light .modal-panel {
+    background-color: #FFFFFF !important;
   }
 }
 
@@ -1396,11 +1517,16 @@ body.theme-light .min-h-screen {
 
   .glass-card,
   .glass-panel,
+  .glass-surface,
+  .glass-chip,
+  .glass-header,
   .cyber-box,
+  .modal-panel,
   .mobile-nav,
   .compact-header,
   .bottom-banner {
-    background: var(--co-panel) !important;
+    background-color: var(--co-panel) !important;
+    background-image: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
@@ -1420,15 +1546,14 @@ body.theme-light .min-h-screen {
   }
   body.theme-light .glass-card,
   body.theme-light .glass-panel,
+  body.theme-light .glass-surface,
+  body.theme-light .glass-chip,
+  body.theme-light .glass-header,
   body.theme-light .cyber-box,
+  body.theme-light .modal-panel,
   body.theme-light .mobile-nav,
   body.theme-light .compact-header,
-  body.theme-light .bottom-banner,
-  body.theme-light .player-card-wrap > div {
-    background: #FFFFFF !important;
-  }
-  body.theme-light .player-card-wrap > div {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+  body.theme-light .bottom-banner {
+    background-color: #FFFFFF !important;
   }
 }

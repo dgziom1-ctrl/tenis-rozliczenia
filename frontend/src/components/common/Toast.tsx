@@ -153,10 +153,12 @@ const STYLES: Record<ToastType, ToastStyle> = {
 function Toast({ toast, onClose }: { toast: ToastItem; onClose: () => void }) {
   const s = STYLES[toast.type] ?? STYLES.info;
   return (
-    <div role="alert" className="accent-top" style={{
-      background: s.bg,
+    <div role="alert" className="accent-top glass-surface" style={{
+      /* `backgroundColor`, nie skrót `background`: skrót kasuje warstwy
+         refleksu i ziarna wniesione klasą `.glass-surface`. */
+      backgroundColor: s.bg,
       border: `1px solid ${s.border}`,
-      boxShadow: s.shadow,
+      boxShadow: `${s.shadow}, var(--glass-shadow)`,
       clipPath: CLIP.card,
       overflow: 'hidden',
     }}>

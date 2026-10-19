@@ -7,6 +7,7 @@ import PWAInstallBanner from '@/components/common/PWAInstallBanner';
 import { useConnectionStatus } from './providers/appDataContext';
 import { useThemeContext } from './providers/themeContext';
 import { useAudio } from '@/hooks/useAudio';
+import { useGlassPointer } from '@/hooks/useGlassPointer';
 import { useScrolled } from '@/hooks/useScrolled';
 import { useSettledFlag } from '@/hooks/useSettledFlag';
 import { SOUND_TYPES, TAB_PATHS, PATH_TO_TAB } from '@/constants';
@@ -52,6 +53,7 @@ export default function Layout() {
   const { theme, toggle: toggleTheme } = useThemeContext();
   const scrolled = useScrolled();
   const { playSound } = useAudio(isMuted);
+  useGlassPointer();
 
   const activeTab = PATH_TO_TAB[location.pathname] ?? 'dashboard';
   const tabOrder: Record<string, number> = {

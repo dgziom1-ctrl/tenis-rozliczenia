@@ -74,17 +74,16 @@ export default function PWAInstallBanner() {
   // `.bottom-banner`, wspólna z banerem powiadomień.
   const bannerStyle: CSSProperties = {
     left: 10, right: 10,
-    background: 'var(--co-panel)',
     border: '1px solid var(--co-tint-line)',
     clipPath: CLIP.card,
-    boxShadow: 'var(--glow-box-panel)',
+    boxShadow: 'var(--glass-shadow)',
     animation: 'pwaSlideUp 0.3s ease-out',
     overflow: 'hidden',
   };
 
   if (!isIOS) {
     return (
-      <div style={bannerStyle} className="pwa-banner bottom-banner accent-top">
+      <div style={bannerStyle} className="pwa-banner bottom-banner glass-surface accent-top">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
           <div style={{
             width: 36, height: 36, flexShrink: 0,
@@ -130,7 +129,7 @@ export default function PWAInstallBanner() {
   ];
 
   return (
-    <div style={bannerStyle} className="pwa-banner bottom-banner accent-top">
+    <div style={bannerStyle} className="pwa-banner bottom-banner glass-surface accent-top">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px 10px' }}>
         <div style={{ width: 32, height: 32, flexShrink: 0, background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)', clipPath: CLIP.badge, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ fontSize: '1rem' }}>🕹️</span>

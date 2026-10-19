@@ -268,8 +268,8 @@ function PlayerCard({
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
         transformStyle: 'preserve-3d',
         boxShadow: isPending && !isOrganizer
-          ? 'var(--glass-shadow), var(--glow-box-rose)'
-          : 'var(--glass-shadow)',
+          ? 'var(--glass-shadow), var(--glass-rim), var(--glow-box-rose)'
+          : 'var(--glass-shadow), var(--glass-rim)',
       }}
       onPointerMove={handleCardPointerMove}
       onPointerDown={handleCardPointerDown}
