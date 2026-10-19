@@ -8,6 +8,7 @@ const GLASS_SELECTOR = [
   '.cyber-box',
   '.modal-panel',
   '.glass-header',
+  '.desktop-nav-inner',
 ].join(',');
 
 /**

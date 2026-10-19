@@ -162,21 +162,24 @@
      Wszystkie kolory żyją w tokenach, więc tryb jasny podmienia je jednym
      blokiem, a `prefers-reduced-transparency` wyłącza całość bez ruszania
      komponentów. */
-  --co-glass:      rgba(9,15,24,0.52);
-  --co-glass-hi:   rgba(9,15,24,0.72);
-  --co-glass-chip: rgba(9,15,24,0.40);
-  --glass-blur:    22px;
-  --glass-sat:     170%;
-  --glass-hi-line: rgba(255,255,255,0.07);
-  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 52%);
-  /* Jasna plama refleksu (warstwa 3) — półprzezroczysta biel, nie cień. */
-  --glass-light:   rgba(255,255,255,0.16);
+  --co-glass:      rgba(6,12,20,0.56);
+  --co-glass-hi:   rgba(6,12,20,0.78);
+  --co-glass-chip: rgba(6,12,20,0.46);
+  --glass-blur:    26px;
+  --glass-sat:     190%;
+  --glass-hi-line: rgba(180,240,255,0.08);
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0) 34%);
+  /* Refleks (warstwa 3) jest cyjanowy, nie biały — biała plama na granatowym
+     tle dawała „siwy" plastik. Kolor czyta się jak światło w szkle. */
+  --glass-light:   rgba(0,229,255,0.10);
   /* Krawędzie szkła: jasna góra (światło), ciemny dół (grubość tafli). */
-  --glass-edge-top:    rgba(255,255,255,0.18);
-  --glass-edge-bottom: rgba(0,0,0,0.38);
-  --glass-rim:         inset 0 0 0 1px rgba(255,255,255,0.035);
-  /* Ziarno na powierzchni — rozbija gradienty i daje wrażenie szkła, nie plastiku. */
-  --glass-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+  --glass-edge-top:    rgba(190,245,255,0.26);
+  --glass-edge-bottom: rgba(0,0,0,0.55);
+  --glass-rim:         inset 0 0 0 1px rgba(0,229,255,0.05);
+  --glass-border:      rgba(0,229,255,0.13);
+  /* Ziarno wyłączone — na ciemnej tafli dodawało szarą mgłę zamiast tekstury.
+     Token zostaje, bo czytają go nagłówek, nawigacja i dialog. */
+  --glass-noise: none;
   /* Wgłębienie pola tekstowego — jasny motyw ma własną, jasną wersję. */
   --input-inset:
     inset 0 1px 2px rgba(0,0,0,0.45),
@@ -356,7 +359,7 @@ body.theme-switching *::after {
       var(--card-tint, linear-gradient(transparent, transparent));
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-    border: 1px solid var(--co-border);
+    border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow), var(--glass-rim);
   }
 
@@ -687,9 +690,9 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
     var(--glass-noise),
     var(--glass-sheen),
     radial-gradient(
-      130% 100% at var(--glass-x) var(--glass-y),
+      80% 70% at var(--glass-x) var(--glass-y),
       var(--glass-light) 0%,
-      transparent 62%
+      transparent 58%
     );
   border: 1px solid var(--co-tint-line);
   border-radius: var(--modal-radius);
@@ -791,6 +794,8 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 .cyber-box,
 .glass-panel,
 .glass-surface,
+.glass-header,
+.desktop-nav-inner,
 .modal-panel {
   --glass-x: 50%;
   --glass-y: 0%;
@@ -806,9 +811,9 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
     var(--glass-noise),
     var(--glass-sheen),
     radial-gradient(
-      130% 100% at var(--glass-x) var(--glass-y),
+      80% 70% at var(--glass-x) var(--glass-y),
       var(--glass-light) 0%,
-      transparent 62%
+      transparent 58%
     ),
     var(--card-tint, linear-gradient(transparent, transparent));
 }
@@ -818,6 +823,8 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 .glass-panel::after,
 .cyber-box::after,
 .glass-surface::after,
+.glass-header::after,
+.desktop-nav-inner::after,
 .modal-panel::after {
   content: '';
   position: absolute;
@@ -848,6 +855,8 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   .glass-panel:hover::after,
   .cyber-box:hover::after,
   .glass-surface:hover::after,
+  .glass-header:hover::after,
+  .desktop-nav-inner:hover::after,
   .modal-panel:hover::after {
     opacity: 1;
   }
@@ -934,11 +943,20 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 .desktop-nav-inner {
   display: flex; align-items: center; gap: 3px; padding: 5px;
   margin-bottom: 2.5rem;
+  position: relative;
+  isolation: isolate;
   background-color: var(--co-glass);
-  background-image: var(--glass-noise), var(--glass-sheen);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(
+      90% 130% at var(--glass-x) var(--glass-y),
+      var(--glass-light) 0%,
+      transparent 60%
+    );
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  border: 1px solid var(--co-border); border-top: none;
+  border: 1px solid var(--glass-border); border-top: none;
   clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 10px 100%);
   box-shadow:
     0 1px 0 var(--glass-edge-top) inset,
@@ -1312,17 +1330,18 @@ body.theme-light {
      krawędź górna, bo światło w jasnym motywie odbija się od ciemniejszego
      obramowania. Chipy w ciemnym motywie są granatowe; tutaj muszą być
      białawe, inaczej np. przycisk konturowy robi się ciemną plamą. */
-  --co-glass:      rgba(255,255,255,0.62);
-  --co-glass-hi:   rgba(255,255,255,0.80);
-  --co-glass-chip: rgba(255,255,255,0.55);
+  --co-glass:      rgba(255,255,255,0.68);
+  --co-glass-hi:   rgba(255,255,255,0.84);
+  --co-glass-chip: rgba(255,255,255,0.60);
   --glass-blur:    24px;
   --glass-sat:     180%;
-  --glass-hi-line: rgba(255,255,255,0.75);
-  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 55%);
-  --glass-light:   rgba(255,255,255,0.55);
-  --glass-edge-top:    rgba(255,255,255,0.95);
-  --glass-edge-bottom: rgba(15,23,42,0.10);
-  --glass-rim:         inset 0 0 0 1px rgba(15,23,42,0.035);
+  --glass-hi-line: rgba(255,255,255,0.80);
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0) 40%);
+  --glass-light:   rgba(255,255,255,0.28);
+  --glass-edge-top:    rgba(255,255,255,0.92);
+  --glass-edge-bottom: rgba(15,23,42,0.12);
+  --glass-rim:         inset 0 0 0 1px rgba(15,23,42,0.04);
+  --glass-border:      rgba(15,23,42,0.10);
   --glass-shadow:
     0 1px 0 var(--glass-edge-top) inset,
     0 -1px 0 var(--glass-edge-bottom) inset,
@@ -1436,11 +1455,14 @@ body.theme-light .min-h-screen {
 
 /* Nie używaj blur/translucency, gdy system prosi o ograniczenie przezroczystości. */
 @media (prefers-reduced-transparency: reduce) {
+  :root { --glass-border: var(--co-border); }
+  body.theme-light { --glass-border: var(--co-border); }
   .glass-card,
   .glass-panel,
   .glass-surface,
   .glass-chip,
   .glass-header,
+  .desktop-nav-inner,
   .cyber-box,
   .modal-panel {
     background-color: var(--co-panel) !important;
@@ -1454,6 +1476,8 @@ body.theme-light .min-h-screen {
   .glass-panel::after,
   .cyber-box::after,
   .glass-surface::after,
+  .glass-header::after,
+  .desktop-nav-inner::after,
   .modal-panel::after {
     display: none;
   }
@@ -1486,6 +1510,7 @@ body.theme-light .min-h-screen {
   body.theme-light .mobile-nav,
   body.theme-light .compact-header,
   body.theme-light .bottom-banner,
+  body.theme-light .desktop-nav-inner,
   body.theme-light .glass-card,
   body.theme-light .glass-panel,
   body.theme-light .glass-surface,
@@ -1504,12 +1529,14 @@ body.theme-light .min-h-screen {
     --co-border: #49657C;
     --co-border-hi: #7895AA;
     --co-tint-line: rgba(0,229,255,0.62);
+    --glass-border: rgba(0,229,255,0.62);
   }
   body.theme-light {
     --co-dim: #334155;
     --co-border: #64748B;
     --co-border-hi: #475569;
     --co-tint-line: rgba(13,148,136,0.68);
+    --glass-border: #64748B;
   }
   .cyber-button-outline { border-width: 2px; }
   .modal-panel { border-width: 2px; }
@@ -1520,6 +1547,7 @@ body.theme-light .min-h-screen {
   .glass-surface,
   .glass-chip,
   .glass-header,
+  .desktop-nav-inner,
   .cyber-box,
   .modal-panel,
   .mobile-nav,
@@ -1549,6 +1577,7 @@ body.theme-light .min-h-screen {
   body.theme-light .glass-surface,
   body.theme-light .glass-chip,
   body.theme-light .glass-header,
+  body.theme-light .desktop-nav-inner,
   body.theme-light .cyber-box,
   body.theme-light .modal-panel,
   body.theme-light .mobile-nav,
