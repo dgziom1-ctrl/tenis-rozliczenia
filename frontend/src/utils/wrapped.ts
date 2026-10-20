@@ -1,4 +1,5 @@
 import { SPORT } from '@/constants';
+import { filterHistorySinceJoin } from './playerHistory';
 import type { PlayerStats, HistoryEntry } from '@/types/ui';
 import type { WrappedStats, WrappedPlayerStats } from '@/types/ui';
 
@@ -12,23 +13,25 @@ export function computeWrappedStats(
   if (yearHistory.length === 0) return null;
 
   const totalSessions = yearHistory.length;
-  const playerNames = players?.map(p => p.name) || [];
 
-  const perPlayer: WrappedPlayerStats[] = playerNames.map(name => {
-    const attended = yearHistory.filter(s => s.presentPlayers.includes(name));
-    const missed = totalSessions - attended.length;
+  const perPlayer: WrappedPlayerStats[] = (players || []).map(player => {
+    // Rok też liczy się od dołączenia: sesje sprzed pierwszego dnia gracza
+    // nie są jego nieobecnościami i nie mogą zaniżać procentu ani psuć serii.
+    const eligible = filterHistorySinceJoin(yearHistory, player.joinDate);
+    const attended = eligible.filter(s => s.presentPlayers.includes(player.name));
+    const missed = eligible.length - attended.length;
 
     let maxStreak = 0, cur = 0;
-    for (const s of [...yearHistory].reverse()) {
-      if (s.presentPlayers.includes(name)) { cur++; maxStreak = Math.max(maxStreak, cur); }
+    for (const s of [...eligible].reverse()) {
+      if (s.presentPlayers.includes(player.name)) { cur++; maxStreak = Math.max(maxStreak, cur); }
       else cur = 0;
     }
 
     return {
-      name,
+      name: player.name,
       attended: attended.length,
       missed,
-      percentage: totalSessions > 0 ? Math.round((attended.length / totalSessions) * 100) : 0,
+      percentage: eligible.length > 0 ? Math.round((attended.length / eligible.length) * 100) : 0,
       longestStreak: maxStreak,
     };
   }).filter(p => p.attended > 0);

@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { SOUND_TYPES } from '@/constants';
 import { calculatePlayerStats, assignRankingPlaces, calculateSeasonPlayerStats } from '@/utils/rankings';
-import { groupSessionsByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
+import { groupSessionsByMonth, getAvailableSeasons, filterHistoryByYear, getWrappedSeason } from '@/utils/sessions';
 import { computeWrappedStats } from '@/utils/wrapped';
 import { Film } from 'lucide-react';
 import Leaderboard from './Leaderboard';
@@ -111,7 +111,10 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     return computeWrappedStats(history, players, wrappedYear);
   }, [wrappedYear, history, players]);
 
-  const recapYear = selectedSeason ?? seasons[0] ?? null;
+  // Wrapped pokazujemy tylko dla zakończonego sezonu. `getWrappedSeason`
+  // obsługuje też przełom roku (przypomnienie poprzedniego, dopóki w danych
+  // nie ma jeszcze sesji nowego roku) i ręczny wybór starszego sezonu.
+  const recapYear = getWrappedSeason(seasons, selectedSeason, new Date().getFullYear());
 
   const handleCloseModal = useCallback(() => setSelectedPlayer(null), []);
   const handleCloseWrapped = useCallback(() => setWrappedYear(null), []);

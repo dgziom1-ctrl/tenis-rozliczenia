@@ -3,11 +3,12 @@ import type { FormEvent } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
 import { PanelHeader, FieldGroup } from '../common/SharedUI';
 import { addSession } from '@/lib/firebase';
-import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, MAX_RENTED_RACKETS, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
+import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
 import { CLIP, CONTENT_WIDTH } from '@/constants/styles';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { parseAmount, isValidAmount } from '@/utils/format';
+import { getRacketSelection, getTotalWithRackets } from '@/utils/sessionCost';
 import type { Sport } from '@/types/domain';
 import type { HistoryEntry, PlayerStats, SessionHighlight, SoundType } from '@/types/ui';
 
@@ -57,11 +58,13 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
   const racketPriceId    = useId();
 
   const withRackets = hasRacketRental(sport);
-  const ownRacketPresentCount = withRackets ? ownRacketPlayers.filter(p => presentPlayers.includes(p)).length : 0;
-  const maxRackets = Math.max(0, Math.min(MAX_RENTED_RACKETS, presentPlayers.length - ownRacketPresentCount));
-  const effectiveRacketCount = Math.min(racketCount, maxRackets);
-  const parsedRacketPrice = racketPrice > 0 ? racketPrice : 0;
-  const racketCost = withRackets ? effectiveRacketCount * parsedRacketPrice : 0;
+  const {
+    ownRacketPresentCount,
+    maxRackets,
+    effectiveCount: effectiveRacketCount,
+    price: parsedRacketPrice,
+    cost: racketCost,
+  } = getRacketSelection(sport, presentPlayers, ownRacketPlayers, racketCount, racketPrice);
 
   const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed);
   const parsedTotalCost = parseAmount(totalCost);
@@ -115,10 +118,12 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
     if (!isCostValid) { showError(totalCostError || 'Wpisz poprawny koszt sesji'); return; }
     if (isDuplicateDate) { showError('Sesja z tą datą już istnieje'); return; }
     setIsSaving(true);
-    const cost = parsedTotalCost;
-    const totalWithRackets = cost + racketCost;
+    const courtAmount = parsedTotalCost;
+    const totalWithRackets = getTotalWithRackets(courtAmount, racketCost);
     try {
-      const ownRacketForSession = ownRacketPlayers.filter(p => presentPlayers.includes(p));
+      const ownRacketForSession = withRackets
+        ? ownRacketPlayers.filter(p => presentPlayers.includes(p))
+        : [];
       const result = await addSession({
         datePlayed,
         totalCost: totalWithRackets,
@@ -168,7 +173,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
       setPresentPlayers([...playerNames]);
       setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, racketCost, players, history, courtCount, durationHours]);
+  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, withRackets, racketCost, players, history, courtCount, durationHours]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
@@ -270,9 +275,9 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
 
             {/* Cost */}
             <div>
-              <FieldLabel htmlFor={totalCostId}>Zapłacone w recepcji (zł)</FieldLabel>
+              <FieldLabel htmlFor={totalCostId}>Zapłacone za kort (zł)</FieldLabel>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '0 0 8px' }}>
-                {'>'} Kwota po odliczeniu kart Multisport — tyle, ile faktycznie wyszło z portfela
+                {'>'} Kwota za kort po odliczeniu kart Multisport. Rakiety doliczysz osobno niżej.
               </p>
               <input id={totalCostId} type="text" inputMode="decimal" value={totalCost} onChange={e => setTotalCost(e.target.value)}
                 onBlur={() => setCostTouched(true)}

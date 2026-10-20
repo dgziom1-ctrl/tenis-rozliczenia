@@ -1,4 +1,4 @@
-import { MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR } from '@/constants';
+import { MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, MAX_RENTED_RACKETS, RACKET_PRICE, hasRacketRental } from '@/constants';
 import { toGrosze, toZloty, allocateNonNegative, splitEqually } from './money';
 
 /**
@@ -61,6 +61,90 @@ export interface SessionShares {
 }
 
 const EMPTY_SHARE: PlayerShare = { court: 0, racket: 0, total: 0 };
+
+/**
+ * Kwota za kort ukryta w zapisanej sesji.
+ *
+ * W bazie `totalCost` jest kwotą całkowitą (kort + rakiety), a `racketCost`
+ * tylko częścią wyodrębnioną. Formularz edycji pyta o kort — tak samo jak
+ * formularz dodawania — więc przed wypełnieniem pola odejmujemy rakiety.
+ */
+export function getCourtAmount(totalCost: number, racketCost = 0): number {
+  const total = Math.max(0, toGrosze(totalCost));
+  const rackets = Math.min(Math.max(0, toGrosze(racketCost)), total);
+  return toZloty(total - rackets);
+}
+
+/**
+ * Kwota, którą zapisujemy w sesji: kort + rakiety. Odwrotność `getCourtAmount`.
+ * Dzięki temu formularz edycji może przyjąć tę samą kwotę co formularz
+ * dodawania, a silnik nadal dostaje pełną kwotę sesji.
+ */
+export function getTotalWithRackets(courtAmount: number, racketCost = 0): number {
+  const court = Math.max(0, toGrosze(courtAmount));
+  const rackets = Math.max(0, toGrosze(racketCost));
+  return toZloty(court + rackets);
+}
+
+export interface RacketSelection {
+  withRackets: boolean;
+  ownRacketPresentCount: number;
+  maxRackets: number;
+  /** Liczba po przycięciu do graczy bez własnej rakietki. */
+  effectiveCount: number;
+  price: number;
+  /** Łączny koszt wypożyczenia, zawsze w złotych i groszach. */
+  cost: number;
+}
+
+/**
+ * Jedna reguła wypożyczenia dla formularza dodawania i edycji: kto ma własną
+ * rakietkę, ile rakiet można wypożyczyć i ile to kosztuje. Dzięki temu edycja
+ * nie może pokazać innej liczby niż zapisze.
+ */
+export function getRacketSelection(
+  sport: string | undefined,
+  presentPlayers: readonly string[],
+  ownRacketPlayers: readonly string[],
+  racketCount: number,
+  racketPrice: number,
+): RacketSelection {
+  const withRackets = hasRacketRental(sport);
+  const ownRacketPresentCount = ownRacketPlayers.filter(p => presentPlayers.includes(p)).length;
+  const maxRackets = withRackets
+    ? Math.max(0, Math.min(MAX_RENTED_RACKETS, presentPlayers.length - ownRacketPresentCount))
+    : 0;
+  const effectiveCount = Math.min(Math.max(0, Math.floor(Number(racketCount) || 0)), maxRackets);
+  const price = Math.max(0, Number.isFinite(racketPrice) ? racketPrice : 0);
+  const cost = withRackets ? toZloty(toGrosze(effectiveCount * price)) : 0;
+
+  return { withRackets, ownRacketPresentCount, maxRackets, effectiveCount, price, cost };
+}
+
+/**
+ * Odtwarza liczbę i cenę rakiet z zapisanego kosztu. Edycja nie może zmienić
+ * kwoty tylko dlatego, że nie znamy historycznego podziału — dlatego szukamy
+ * dokładnego pary (count × price), a gdy się nie da, pokazujemy 1 × koszt.
+ */
+export function inferRacketPricing(racketCost: number | undefined): { racketCount: number; racketPrice: number } {
+  const cost = Math.max(0, toGrosze(racketCost ?? 0));
+  if (cost === 0) return { racketCount: 0, racketPrice: RACKET_PRICE };
+
+  const priceGrosze = Math.max(1, toGrosze(RACKET_PRICE));
+  const preferred = Math.max(1, Math.round(cost / priceGrosze));
+  // Najpierw próbujemy najbardziej prawdopodobnej liczby rakiet, potem
+  // sąsiednich — dzięki temu 12,50 zł pokaże się jako 2 × 6,25, a nie
+  // sztuczne 1 × 12,50. Gdy żaden podział nie wychodzi co do grosza,
+  // zostaje dokładne 1 × koszt.
+  for (const count of [preferred, preferred - 1, preferred + 1]) {
+    if (count < 1 || count > MAX_RENTED_RACKETS) continue;
+    const perRacket = Math.round(cost / count);
+    if (perRacket > 0 && perRacket * count === cost) {
+      return { racketCount: count, racketPrice: toZloty(perRacket) };
+    }
+  }
+  return { racketCount: 1, racketPrice: toZloty(cost) };
+}
 
 interface ParsedSession {
   present: string[];

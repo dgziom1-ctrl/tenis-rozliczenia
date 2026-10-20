@@ -124,7 +124,9 @@ export interface SessionEditForm {
   present: string[];
   multiPlayers: string[];
   sport: Sport;
-  racketCost?: number;
+  /** Liczba wypożyczonych rakiet i cena za sztukę — edytowalne jak przy dodawaniu. */
+  racketCount?: number;
+  racketPrice?: number;
   ownRacketPlayers?: string[];
   courtCount?: number;
   durationHours?: number;

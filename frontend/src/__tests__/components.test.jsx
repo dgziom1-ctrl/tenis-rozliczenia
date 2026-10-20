@@ -10,6 +10,7 @@
  * już jest wartościową informacją.
  */
 
+import { useState } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -44,6 +45,8 @@ import LogEntry from '../components/history/LogEntry';
 import LiveCostPreview from '../components/admin/LiveCostPreview';
 import { PasswordModal } from '../components/common/SharedUI';
 import PlayerSessionModal from '../components/attendance/PlayerSessionModal';
+import AttendanceTab from '../components/attendance/AttendanceTab';
+import EditSessionForm from '../components/history/EditSessionForm';
 import PlayerCard from '../components/dashboard/PlayerCard';
 import { buildPlayerCardMeta } from '../utils/playerCard';
 import { getShareGroups } from '../utils/sessionCost';
@@ -409,6 +412,139 @@ describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
     expect(screen.getByLabelText(/Debiut/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Seria 5/)).toBeInTheDocument();
     expect(screen.getByText(/osiągnięcia · wszystkie sezony/)).toBeInTheDocument();
+  });
+
+  it('joinDate: sesje sprzed dołączenia nie są nieobecnościami', () => {
+    const joined = {
+      ...basePlayer,
+      joinDate: '2026-12-01',
+      attendanceCount: 2,
+      eligibleWeeks: 2,
+      attendancePercentage: 100,
+      currentStreak: 2,
+    };
+    const history = [
+      session('d2', '2026-12-08'),
+      session('d1', '2026-12-01'),
+      // Sesja sprzed dołączenia — Ala nie mogła jej opuścić.
+      { ...session('pre', '2026-11-24'), presentPlayers: [] },
+    ];
+
+    render(
+      <PlayerSessionModal
+        player={joined}
+        history={history}
+        seasonLabel={null}
+        onClose={() => {}}
+      />,
+    );
+
+    expect(screen.getByText(/wszystkie sezony · 2\/2 sesji/)).toBeInTheDocument();
+    expect(screen.getByText(/obecny na 2 z 2/)).toBeInTheDocument();
+    expect(screen.getByText(/Pokaż nieobecne \(0\)/)).toBeInTheDocument();
+  });
+});
+
+describe('AttendanceTab — Wrapped tylko dla zakończonego sezonu', () => {
+  const currentYear = new Date().getFullYear();
+  const previousYear = currentYear - 1;
+  const session = (id, datePlayed) => ({
+    id, datePlayed,
+    sport: 'pingpong',
+    totalCost: 30, costPerPerson: 30, costPerPersonMulti: 15,
+    presentPlayers: ['Ala'], multisportPlayers: [],
+  });
+  const history = [
+    session('c2', `${currentYear}-10-08`),
+    session('c1', `${currentYear}-10-01`),
+    session('p1', `${previousYear}-12-18`),
+  ];
+  const players = [{
+    name: 'Ala', currentDebt: 0, joinDate: null,
+    attendanceCount: 3, eligibleWeeks: 3, attendancePercentage: 100, currentStreak: 3,
+  }];
+
+  it('nie pokazuje przycisku dla nieukończonego bieżącego sezonu', () => {
+    render(<AttendanceTab players={players} history={history} summary={{ totalWeeks: 3 }} />);
+    expect(screen.queryByText(new RegExp(`Podsumowanie ${currentYear}`))).toBeNull();
+  });
+
+  it('po wybraniu starszego sezonu pokazuje jego Wrapped', async () => {
+    const user = userEvent.setup();
+    render(<AttendanceTab players={players} history={history} summary={{ totalWeeks: 3 }} />);
+
+    await user.click(screen.getByRole('button', { name: String(previousYear) }));
+    expect(screen.getByText(new RegExp(`Podsumowanie ${previousYear}`))).toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// EditSessionForm — pełna edycja sesji
+// ════════════════════════════════════════════════════════════════════════════
+
+function EditSessionFormHarness({ initial }) {
+  const [form, setForm] = useState(initial);
+  return (
+    <EditSessionForm
+      editForm={form}
+      setEditForm={setForm}
+      playerNames={['Ala', 'Bolek', 'Celina', 'Dawid']}
+      isSaving={false}
+      isEditCostValid
+      editCostError={null}
+      onSave={() => {}}
+      onCancel={() => {}}
+      onTogglePresent={() => {}}
+      onToggleMulti={() => {}}
+    />
+  );
+}
+
+describe('EditSessionForm — pełna edycja', () => {
+  const baseForm = {
+    date: '2026-08-25',
+    cost: 70,
+    present: ['Ala', 'Bolek', 'Celina', 'Dawid'],
+    multiPlayers: ['Ala'],
+    sport: 'squash',
+    racketCount: 2,
+    racketPrice: 5,
+    ownRacketPlayers: ['Ala'],
+    courtCount: 1,
+    durationHours: 1,
+  };
+
+  it('pozwala zmienić liczbę wypożyczonych rakiet', async () => {
+    const user = userEvent.setup();
+    render(<EditSessionFormHarness initial={baseForm} />);
+
+    expect(screen.getByText(/WYPOŻYCZONE RAKIETY/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Cena/)).toHaveValue(5);
+    expect(screen.getByText(/2 × 5,00 zł = 10,00 zł/)).toBeInTheDocument();
+
+    const racketThree = screen.getAllByRole('button', { name: '3' }).at(-1);
+    await user.click(racketThree);
+    expect(screen.getByText(/3 × 5,00 zł = 15,00 zł/)).toBeInTheDocument();
+  });
+
+  it('stara sesja bez kortów/godzin nie włącza limitu bez wyboru', async () => {
+    const user = userEvent.setup();
+    render(
+      <EditSessionFormHarness
+        initial={{ ...baseForm, courtCount: undefined, durationHours: undefined }}
+      />,
+    );
+
+    expect(screen.getByText(/Stara sesja: bez limitu kart/)).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole('button', { name: '1' })[0]);
+    expect(screen.getByText(/Limit kart: 2/)).toBeInTheDocument();
+  });
+
+  it('blokuje zapis bez obecnych graczy', () => {
+    render(<EditSessionFormHarness initial={{ ...baseForm, present: [] }} />);
+    expect(screen.getByRole('button', { name: /Zapisz zmiany/ })).toBeDisabled();
+    expect(screen.getByText(/Wybierz przynajmniej jednego gracza/)).toBeInTheDocument();
   });
 });
 

@@ -1,7 +1,7 @@
 import { Calculator } from 'lucide-react';
 import { MULTISPORT_DISCOUNT, SPORT_LABEL, SPORT_EMOJI } from '@/constants';
 import { formatAmountShort, parseAmount } from '@/utils/format';
-import { getSessionShares, getShareGroups } from '@/utils/sessionCost';
+import { getSessionShares, getShareGroups, getTotalWithRackets } from '@/utils/sessionCost';
 import ShareBreakdown from '../common/ShareBreakdown';
 import type { Sport } from '@/types/domain';
 import { CLIP } from '@/constants/styles';
@@ -21,12 +21,13 @@ interface LiveCostPreviewProps {
 export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0, courtCount = 1, durationHours = 1 }: LiveCostPreviewProps) {
   const courtCost = parseAmount(totalCost);
   if (!totalCost || isNaN(courtCost) || courtCost <= 0 || presentPlayers.length === 0) return null;
+  const totalWithRackets = getTotalWithRackets(courtCost, racketCost);
 
   // Dokładnie ten sam podział, który trafi do bazy i sald graczy. Podgląd nie
   // liczy własnym wzorem, bo wtedy potrafił pokazać stawki, które nie sumowały
   // się do kwoty zapłaconej w recepcji.
   const session = {
-    totalCost: courtCost + racketCost,
+    totalCost: totalWithRackets,
     racketCost,
     presentPlayers,
     multisportPlayers,
@@ -54,7 +55,7 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
         </span>
         {hasRackets && (
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', marginLeft: 'auto' }}>
-            Σ {formatAmountShort(courtCost + racketCost)} zł
+            Σ {formatAmountShort(totalWithRackets)} zł
           </span>
         )}
       </div>

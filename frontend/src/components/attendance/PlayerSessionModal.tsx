@@ -5,6 +5,7 @@ import { FONT, TEXT, TRACK, CLIP } from '../../constants/styles';
 import { formatDate } from '@/utils/format';
 import { getPlayerColor } from '@/constants/colors';
 import { getPlayerAchievements } from '@/utils/achievements';
+import { filterHistorySinceJoin } from '@/utils/playerHistory';
 import { getPlayerSessionCost } from '@/utils/sessionCost';
 import Modal from '../common/Modal';
 import { useModalExit } from '@/hooks/useModalExit';
@@ -32,32 +33,35 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
   const [showMissed, setShowMissed] = useState(false);
   const { open, close } = useModalExit(onClose);
 
+  // Sesje sprzed dołączenia gracza nie są przez niego „opuszczone" — ten sam
+  // zakres musi zasilać licznik, listę nieobecności, numerację i odznaki.
+  const eligibleHistory = useMemo(
+    () => filterHistorySinceJoin(history, player?.joinDate),
+    [history, player?.joinDate],
+  );
+
   const { sessions, missedSessions } = useMemo(() => {
     if (!player) return { sessions: [], missedSessions: [] };
-    // Sesje sprzed dołączenia gracza nie są przez niego „opuszczone".
-    const eligible = player.joinDate
-      ? history.filter(s => s.datePlayed >= player.joinDate!)
-      : history;
     return {
-      sessions: eligible.filter(s => s.presentPlayers.includes(player.name)),
-      missedSessions: eligible.filter(s => !s.presentPlayers.includes(player.name)),
+      sessions: eligibleHistory.filter(s => s.presentPlayers.includes(player.name)),
+      missedSessions: eligibleHistory.filter(s => !s.presentPlayers.includes(player.name)),
     };
-  }, [history, player]);
+  }, [eligibleHistory, player]);
 
   const currentStreak = player?.currentStreak || 0;
 
   const achievements = useMemo(() => {
     if (!player) return [];
-    return getPlayerAchievements(player, history);
-  }, [player, history]);
+    return getPlayerAchievements(player, eligibleHistory);
+  }, [player, eligibleHistory]);
 
   const scopeLabel = seasonLabel ?? 'wszystkie sezony';
 
   // Domyślnie tylko sesje z obecnością. Nieobecności są na żądanie, bo przy
   // długiej historii dominowały widok i mnożyły węzły w DOM-ie.
   const visibleSessions = useMemo(
-    () => (showMissed ? history : history.filter(s => s.presentPlayers.includes(player?.name ?? ''))),
-    [history, showMissed, player],
+    () => (showMissed ? eligibleHistory : eligibleHistory.filter(s => s.presentPlayers.includes(player?.name ?? ''))),
+    [eligibleHistory, showMissed, player],
   );
 
   if (!player) return null;
@@ -189,7 +193,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <p style={{ ...FONT.monoLabel, margin: 0, flex: 1 }}>
-              // historia sesji — obecny na {sessions.length} z {history.length}
+              // historia sesji — obecny na {sessions.length} z {eligibleHistory.length}
             </p>
             {/* Lista renderowała całą historię, w tym wszystkie nieobecności —
                 przy długiej historii okno było w większości wyszarzonymi
@@ -210,7 +214,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
               {showMissed ? 'Ukryj nieobecne' : `Pokaż nieobecne (${missedSessions.length})`}
             </button>
           </div>
-          {history.length === 0 && (
+          {eligibleHistory.length === 0 && (
             <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>
               Brak danych sesji
             </p>
@@ -218,9 +222,10 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
           {visibleSessions.map((session) => {
             const attended = session.presentPlayers.includes(player.name);
             const isMulti = session.multisportPlayers.includes(player.name);
-            // Numer liczony z pozycji w pełnej historii, nie w przefiltrowanej
-            // liście — inaczej po ukryciu nieobecności numeracja by się przesuwała.
-            const sessionNo = history.length - history.indexOf(session);
+            // Numer liczony z pozycji w pełnej, ale już przyciętej dołączeniem
+            // historii — nie w przefiltrowanej liście, żeby po ukryciu
+            // nieobecności numeracja się nie przesuwała.
+            const sessionNo = eligibleHistory.length - eligibleHistory.indexOf(session);
 
             // Każdy obecny płaci swój udział; posiadacze karty Multisport mają
             // od niego stałą zniżkę, więc czasem wychodzi im dokładnie 0 zł.

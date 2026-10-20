@@ -1,4 +1,5 @@
 import type { ExtendedPlayerStats, Achievement, HistoryEntry } from '@/types/ui';
+import { filterHistorySinceJoin } from './playerHistory';
 
 export const STREAK_MILESTONES: readonly number[] = [5, 10, 15, 20, 25, 30, 40, 50];
 const PERFECT_MONTH_MILESTONES = [5, 10, 15, 20, 25, 30, 40, 50];
@@ -71,14 +72,17 @@ export function getPlayerAchievements(
   history: HistoryEntry[],
 ): Achievement[] {
   const earned: Achievement[] = [];
+  // Sesje sprzed dołączenia nie są nieobecnościami gracza — nie mogą więc
+  // blokować „Perfekcyjnego miesiąca" ani „Debiutu".
+  const eligibleHistory = filterHistorySinceJoin(history, player.joinDate);
 
   for (const ach of STATIC_ACHIEVEMENTS) {
-    if (ach.check(player, history)) {
+    if (ach.check(player, eligibleHistory)) {
       earned.push({ id: ach.id, label: ach.label, desc: ach.desc, emoji: ach.emoji });
     }
   }
 
-  const perfectMonths = countPerfectMonths(player.name, history);
+  const perfectMonths = countPerfectMonths(player.name, eligibleHistory);
   for (const milestone of PERFECT_MONTH_MILESTONES) {
     if (perfectMonths >= milestone) {
       earned.push({
@@ -91,7 +95,7 @@ export function getPlayerAchievements(
   }
 
   let maxStreak = 0, cur = 0;
-  for (const s of [...history].reverse()) {
+  for (const s of [...eligibleHistory].reverse()) {
     if (s.presentPlayers.includes(player.name)) { cur++; maxStreak = Math.max(maxStreak, cur); }
     else cur = 0;
   }

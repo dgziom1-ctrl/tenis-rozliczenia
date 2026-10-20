@@ -4,10 +4,11 @@ import { updateWeek, deleteWeekWithSnapshot, restoreWeek } from '@/lib/firebase'
 import { groupHistoryByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
 import SeasonSelector from '../attendance/SeasonSelector';
 import { parseAmount, isValidAmount, formatDate } from '@/utils/format';
+import { getCourtAmount, getRacketSelection, getTotalWithRackets, inferRacketPricing } from '@/utils/sessionCost';
 import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
 import UndoBar from '../common/UndoBar';
-import { SOUND_TYPES, SPORT, SPORT_LABEL, UNDO_TIMEOUT_SECONDS } from '@/constants';
+import { SOUND_TYPES, SPORT, SPORT_LABEL, RACKET_PRICE, UNDO_TIMEOUT_SECONDS } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useUndoTimer } from '@/hooks/useUndoTimer';
 import type { Week } from '@/types/domain';
@@ -64,7 +65,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const isEditCostValid = isValidAmount(parsedEditCost, 0);
   const editCostError = isEditCostValid
     ? null
-    : (editForm?.cost === '' ? 'Wpisz koszt sesji' : 'Koszt musi być liczbą >= 0');
+    : (editForm?.cost === '' ? 'Wpisz koszt kortu' : 'Koszt musi być liczbą >= 0');
 
   const seasons = useMemo(() => getAvailableSeasons(history), [history]);
   const selectedSeason = chosenSeason === undefined ? null : chosenSeason;
@@ -173,18 +174,25 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     if (!pwModal) return;
     if (pwModal.type === 'edit') {
       const row = pwModal.row;
+      const racketPricing = inferRacketPricing(row.racketCost);
       setEditing({
         id: row.id,
         form: {
           date: row.datePlayed,
-          cost: row.totalCost,
+          // Formularz pyta o sam kort — tak jak przy dodawaniu. Rakiety
+          // dokładamy dopiero przy zapisie, więc edycja bez zmian nie zmienia
+          // kwoty sesji.
+          cost: getCourtAmount(row.totalCost, row.racketCost),
           present: [...row.presentPlayers],
           multiPlayers: [...row.multisportPlayers],
           sport: row.sport || SPORT.PINGPONG,
-          racketCost: row.racketCost,
+          racketCount: racketPricing.racketCount,
+          racketPrice: racketPricing.racketPrice,
           ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [],
-          courtCount: row.courtCount ?? 1,
-          durationHours: row.durationHours ?? 1,
+          // Stare sesje nie mają tych pól — zostawiamy `undefined`, żeby
+          // zapis nie włączył im po cichu limitu kart MultiSport.
+          courtCount: row.courtCount,
+          durationHours: row.durationHours,
         },
       });
     } else {
@@ -209,20 +217,36 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
       showError(editCostError || 'Nieprawidłowy koszt');
       return;
     }
+    if ((editing.form.present ?? []).length === 0) {
+      showError('Zaznacz co najmniej jednego gracza');
+      return;
+    }
     savingRef.current = true;
     setIsSaving(true);
     const { id, form } = editing;
+    const sport = form.sport || SPORT.PINGPONG;
+    const ownRacketForSession = (form.ownRacketPlayers ?? []).filter(p => form.present.includes(p));
+    const racketSelection = getRacketSelection(
+      sport,
+      form.present,
+      ownRacketForSession,
+      form.racketCount ?? 0,
+      form.racketPrice ?? RACKET_PRICE,
+    );
     try {
       const result = await updateWeek(id, {
         date: form.date,
-        cost: parsedEditCost,
+        // W bazie trzymamy pełną kwotę sesji (kort + rakiety), a pole edycji
+        // zawiera tylko kort — dokładnie jak w formularzu dodawania.
+        cost: getTotalWithRackets(parsedEditCost, racketSelection.cost),
         present: form.present,
         multiPlayers: form.multiPlayers,
-        sport: form.sport || SPORT.PINGPONG,
-        racketCost: form.racketCost,
-        ownRacketPlayers: form.ownRacketPlayers,
-        courtCount: form.courtCount ?? 1,
-        durationHours: form.durationHours ?? 1,
+        sport,
+        racketCost: racketSelection.cost,
+        ownRacketPlayers: racketSelection.withRackets ? ownRacketForSession : [],
+        // `undefined` dla starych sesji oznacza „bez limitu kart".
+        courtCount: form.courtCount,
+        durationHours: form.durationHours,
       });
       if (!result.success) { showError(result.error || 'Nie udało się zapisać sesji'); return; }
       showSuccess('Sesja zaktualizowana');

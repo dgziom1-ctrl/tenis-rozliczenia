@@ -28,11 +28,13 @@
 - Monthly attendance table
 - **Yearly Wrapped** — Spotify-style end-of-year summary for past seasons
 
-### ⚙️ Add Session
+### ⚙️ Add / Edit Session
 - Date picker with sport selector: **Ping-Pong**, **Squash**, **Badminton** or **Padel**
-- Cost field takes the amount actually paid at the reception desk, after Multisport cards
+- Cost field takes the amount paid for the **court**, after Multisport cards — the same value when adding and editing
 - Multisport holders get a **−15 PLN discount** off their share, in every sport
-- Racket rental (squash, badminton, padel): count × price, split among players without their own racket
+- Racket rental (squash, badminton, padel): count × price, entered separately and added to the stored session total; split among players without their own racket
+- Editing exposes the same fields: sport, date, courts/hours, players, Multisport, racket count/price and the own-racket list
+- Legacy sessions without courts/hours keep no MultiSport card limit until you explicitly choose them
 - All players pre-selected; Multisport defaults loaded from settings
 - Live per-person cost preview before saving
 - Post-save summary modal with a one-tap **"copy to group chat"** message
@@ -409,10 +411,11 @@ tenis-rozliczenia/
 
 ### One rule for every sport
 
-The amount you enter is **what you actually paid at the reception desk** — the court
-price minus 15 PLN for every Multisport card handed over. To give that rebate back to
-whoever brought the card, the split reconstructs the undiscounted price and subtracts a
-flat −15 PLN from each card holder:
+The amount you enter is **what you actually paid for the court** — the court price
+minus 15 PLN for every Multisport card handed over. Racket rental is entered
+separately and added to the stored session total. To give the card rebate back to
+whoever brought the card, the split reconstructs the undiscounted court price and
+subtracts a flat −15 PLN from each card holder:
 
 ```
 base       = (amountPaid + cardsPresent × 15) / playersPresent
@@ -429,8 +432,9 @@ unused part of the rebate is spread over everyone else, so the total still match
 what was paid. The split reports this as `discountCapped`, and the add-session form
 warns about it — it usually means the amount entered is too low for that many cards.
 
-Racket rental (squash, badminton, padel) is carved out of the total first and split
-equally among the players who did **not** bring their own racket, outside the discount.
+Racket rental (squash, badminton, padel) is part of the stored session total but is
+carved out before the court split and divided equally among the players who did
+**not** bring their own racket, outside the discount.
 
 The debt for a player is:
 

@@ -1,4 +1,5 @@
 import type { PlayerStats, ExtendedPlayerStats, RankedPlayer, RankingHistoryEntry, HistoryEntry } from '@/types/ui';
+import { filterHistorySinceJoin } from './playerHistory';
 
 /** Procent całkowity; 0 sesji do rozegrania to 0%, nie NaN. */
 function percentage(part: number, whole: number): number {
@@ -25,14 +26,17 @@ export function calculatePlayerStats(
 ): ExtendedPlayerStats[] {
   if (!players || !history) return [];
 
-  return players.map(player => ({
-    ...player,
+  return players.map(player => {
     // Mianownikiem są sesje rozegrane od dołączenia gracza, a nie wszystkie
     // w historii — inaczej ktoś, kto dołączył w połowie sezonu i nie opuścił
     // ani jednej gry, miałby 50% zamiast 100%.
-    attendancePercentage: percentage(player.attendanceCount, player.eligibleWeeks ?? totalWeeks),
-    currentStreak: currentStreakOf(player.name, history),
-  }));
+    const eligibleHistory = filterHistorySinceJoin(history, player.joinDate);
+    return {
+      ...player,
+      attendancePercentage: percentage(player.attendanceCount, player.eligibleWeeks ?? totalWeeks),
+      currentStreak: currentStreakOf(player.name, eligibleHistory),
+    };
+  });
 }
 
 /**
@@ -69,10 +73,8 @@ function seasonStatsOf(
 
   return players.map(player => {
     // Sezon też liczymy od dołączenia gracza — sesje sprzed jego pierwszego
-    // dnia nie mogą obniżać mu frekwencji.
-    const eligible = player.joinDate
-      ? seasonHistory.filter(s => s.datePlayed >= player.joinDate!)
-      : seasonHistory;
+    // dnia nie mogą obniżać mu frekwencji ani psuć serii.
+    const eligible = filterHistorySinceJoin(seasonHistory, player.joinDate);
     const attendanceCount = eligible.filter(s => s.presentPlayers.includes(player.name)).length;
 
     return {
@@ -80,7 +82,7 @@ function seasonStatsOf(
       attendanceCount,
       eligibleWeeks: eligible.length,
       attendancePercentage: percentage(attendanceCount, eligible.length),
-      currentStreak: currentStreakOf(player.name, seasonHistory),
+      currentStreak: currentStreakOf(player.name, eligible),
     };
   });
 }
@@ -120,17 +122,21 @@ export function computeRankingHistory(
   const monthSet = new Set<string>();
   history.forEach(s => { if (s.datePlayed) monthSet.add(s.datePlayed.slice(0, 7)); });
   const months = [...monthSet].sort();
-  const playerNames = players.map(p => p.name);
 
   return months.map(month => {
     const sessionsUpTo = history.filter(s => s.datePlayed?.slice(0, 7) <= month);
-    const total = sessionsUpTo.length;
-    if (total === 0) return null;
+    if (sessionsUpTo.length === 0) return null;
 
-    const stats = playerNames.map(name => {
-      const attended = sessionsUpTo.filter(s => s.presentPlayers.includes(name)).length;
-      return { name, pct: percentage(attended, total), attended };
+    // Każdy gracz ma własny mianownik: tylko sesje od jego dołączenia.
+    // Przed dołączeniem nie ma go jeszcze w rankingu — zamiast wieszać go
+    // na 0%, po prostu nie pojawia się na wykresie.
+    const stats = players.flatMap(player => {
+      const eligible = filterHistorySinceJoin(sessionsUpTo, player.joinDate);
+      if (eligible.length === 0) return [];
+      const attended = eligible.filter(s => s.presentPlayers.includes(player.name)).length;
+      return [{ name: player.name, pct: percentage(attended, eligible.length), attended }];
     });
+    if (stats.length === 0) return null;
 
     // Remis rozstrzygamy imieniem, żeby ten sam zestaw danych zawsze dawał
     // ten sam wykres — bez tego kolejność zależałaby od kolejności graczy.

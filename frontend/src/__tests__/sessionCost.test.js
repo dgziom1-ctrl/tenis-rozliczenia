@@ -1,4 +1,4 @@
-import { getPlayerSessionCost, getSessionShares, getShareGroups } from '../utils/sessionCost';
+import { getPlayerSessionCost, getSessionShares, getShareGroups, getCourtAmount, getTotalWithRackets, getRacketSelection, inferRacketPricing } from '../utils/sessionCost';
 
 // Kwota sesji to zawsze tyle, ile organizator zapłacił w recepcji — czyli cena
 // kortu POMNIEJSZONA o 15 zł za każdą okazaną kartę Multisport. Rozliczenie
@@ -6,6 +6,89 @@ import { getPlayerSessionCost, getSessionShares, getShareGroups } from '../utils
 
 const sum = (session) =>
   session.presentPlayers.reduce((acc, p) => acc + getPlayerSessionCost(session, p), 0);
+
+describe('kwota kortu i kwota zapisanej sesji', () => {
+  it('z zapisanej kwoty zdejmuje rakiety', () => {
+    expect(getCourtAmount(80, 10)).toBe(70);
+    expect(getCourtAmount(70)).toBe(70);
+  });
+
+  it('do kwoty kortu dolicza rakiety', () => {
+    expect(getTotalWithRackets(70, 10)).toBe(80);
+    expect(getTotalWithRackets(70)).toBe(70);
+  });
+
+  it('nie schodzi poniżej zera i nie liczy groszy na floatach', () => {
+    expect(getCourtAmount(5, 10)).toBe(0);
+    expect(getCourtAmount(0.1 + 0.2, 0.1)).toBe(0.2);
+    expect(getTotalWithRackets(0.1 + 0.2, 0.1)).toBe(0.4);
+  });
+
+  it('edycja bez zmian odtwarza dokładnie tę samą kwotę sesji', () => {
+    const storedTotal = getTotalWithRackets(70, 10); // dodawanie: kort + rakiety
+    const editPrefill = getCourtAmount(storedTotal, 10); // edycja pyta o kort
+    expect(editPrefill).toBe(70);
+    expect(getTotalWithRackets(editPrefill, 10)).toBe(storedTotal);
+  });
+});
+
+describe('getRacketSelection — wspólna logika wypożyczenia', () => {
+  it('przycina liczbę rakiet do graczy bez własnej rakietki', () => {
+    const selection = getRacketSelection('squash', ['A', 'B', 'C', 'D'], ['A'], 9, 5);
+    expect(selection).toMatchObject({
+      withRackets: true,
+      ownRacketPresentCount: 1,
+      maxRackets: 3,
+      effectiveCount: 3,
+      price: 5,
+      cost: 15,
+    });
+  });
+
+  it('dla sportu bez wypożyczalni zeruje rakiety', () => {
+    const selection = getRacketSelection('pingpong', ['A', 'B'], [], 3, 5);
+    expect(selection).toMatchObject({ withRackets: false, maxRackets: 0, effectiveCount: 0, cost: 0 });
+  });
+
+  it('nie gubi groszy przy cenie ułamkowej', () => {
+    expect(getRacketSelection('badminton', ['A', 'B'], [], 2, 2.5).cost).toBe(5);
+  });
+});
+
+describe('inferRacketPricing — odtworzenie ceny z zapisanego kosztu', () => {
+  it('dzieli typowy koszt przez domyślną cenę', () => {
+    expect(inferRacketPricing(10)).toEqual({ racketCount: 2, racketPrice: 5 });
+    expect(inferRacketPricing(15)).toEqual({ racketCount: 3, racketPrice: 5 });
+  });
+
+  it('szuka sąsiedniej liczby, zanim pokaże 1 × koszt', () => {
+    expect(inferRacketPricing(12.5)).toEqual({ racketCount: 2, racketPrice: 6.25 });
+    expect(inferRacketPricing(25)).toEqual({ racketCount: 4, racketPrice: 6.25 });
+  });
+
+  it('nie proponuje więcej niż maksymalna liczba rakiet', () => {
+    expect(inferRacketPricing(17.5)).toEqual({ racketCount: 1, racketPrice: 17.5 });
+  });
+
+  it('zero rakiet zachowuje domyślną cenę', () => {
+    expect(inferRacketPricing(0)).toEqual({ racketCount: 0, racketPrice: 5 });
+    expect(inferRacketPricing(undefined)).toEqual({ racketCount: 0, racketPrice: 5 });
+  });
+
+  it('edycja bez zmian odtwarza zapisany koszt rakiet', () => {
+    for (const cost of [5, 10, 12.5, 15, 17.5, 25]) {
+      const { racketCount, racketPrice } = inferRacketPricing(cost);
+      const selection = getRacketSelection(
+        'squash',
+        ['A', 'B', 'C', 'D'],
+        [],
+        racketCount,
+        racketPrice,
+      );
+      expect(selection.cost).toBe(cost);
+    }
+  });
+});
 
 describe('podział kosztów jest wspólny dla wszystkich dyscyplin', () => {
   it.each(['pingpong', 'squash', 'badminton', 'padel'])(

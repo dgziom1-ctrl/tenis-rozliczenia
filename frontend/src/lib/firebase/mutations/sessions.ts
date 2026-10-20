@@ -23,8 +23,8 @@ interface NormalizedSession {
   sport: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
-  courtCount: number;
-  durationHours: number;
+  courtCount?: number;
+  durationHours?: number;
 }
 
 /**
@@ -40,7 +40,10 @@ function isSport(value: unknown): value is Sport {
   return typeof value === 'string' && (SPORTS as readonly string[]).includes(value);
 }
 
-function normalizeSession(input: SessionInput): { session: NormalizedSession } | { error: string } {
+function normalizeSession(
+  input: SessionInput,
+  options: { preserveMissingCourtConfig?: boolean } = {},
+): { session: NormalizedSession } | { error: string } {
   const { totalCost, sport = 'pingpong' } = input;
 
   if (!isValidMoney(totalCost)) {
@@ -70,9 +73,15 @@ function normalizeSession(input: SessionInput): { session: NormalizedSession } |
     return { error: 'Koszt rakiet nie może przekraczać kosztu sesji' };
   }
 
-  // Liczba kortów i godzin — domyślnie 1 (stare sesje i backward compatibility).
-  const courtCount = Math.max(1, input.courtCount ?? 1);
-  const durationHours = Math.max(1, input.durationHours ?? 1);
+  // Liczba kortów i godzin — domyślnie 1 dla nowych sesji. Edycja starej
+  // sesji może je zostawić `undefined`, żeby nie włączyć jej po cichu limitu
+  // kart MultiSport, którego wcześniej nie miała.
+  const courtCount = input.courtCount != null
+    ? Math.max(1, input.courtCount)
+    : (options.preserveMissingCourtConfig ? undefined : 1);
+  const durationHours = input.durationHours != null
+    ? Math.max(1, input.durationHours)
+    : (options.preserveMissingCourtConfig ? undefined : 1);
 
   return {
     session: {
@@ -80,8 +89,8 @@ function normalizeSession(input: SessionInput): { session: NormalizedSession } |
       present,
       multiPlayers,
       sport,
-      courtCount,
-      durationHours,
+      ...(courtCount !== undefined ? { courtCount } : {}),
+      ...(durationHours !== undefined ? { durationHours } : {}),
       ...(racketCost != null && racketCost > 0 ? { racketCost } : {}),
       ...(ownRacketPlayers.length > 0 ? { ownRacketPlayers } : {}),
     },
@@ -148,7 +157,7 @@ export async function updateWeek(
     totalCost: params.cost,
     presentPlayers: params.present,
     multisportPlayers: params.multisportPlayers ?? params.multiPlayers,
-  });
+  }, { preserveMissingCourtConfig: true });
   if ('error' in normalized) return { success: false, error: normalized.error };
 
   return withTransaction((current) => {
@@ -225,7 +234,7 @@ export async function restoreWeek(week: Week): Promise<TransactionResult> {
     ownRacketPlayers: week.ownRacketPlayers,
     courtCount: week.courtCount,
     durationHours: week.durationHours,
-  });
+  }, { preserveMissingCourtConfig: true });
   if ('error' in normalized) return { success: false, error: normalized.error };
 
   return withTransaction((current) => {

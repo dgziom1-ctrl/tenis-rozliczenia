@@ -1,5 +1,6 @@
 import { getRank, SPORT } from '@/constants';
 import { getPlayerAchievements } from '@/utils/achievements';
+import { filterHistorySinceJoin } from '@/utils/playerHistory';
 import type { Sport } from '@/types/domain';
 import type {
   Achievement,
@@ -95,12 +96,13 @@ export function buildPlayerCardMeta(
   history: HistoryEntry[],
 ): PlayerCardMeta {
   const rank = getRank(player.attendancePercentage);
-  const achievements: Achievement[] = getPlayerAchievements(player, history);
+  const eligibleHistory = filterHistorySinceJoin(history, player.joinDate);
+  const achievements: Achievement[] = getPlayerAchievements(player, eligibleHistory);
   return {
     overall: overallRating(player.attendancePercentage, player.currentStreak, player.attendanceCount),
     rank,
     rarity: rarityOf(rank),
-    sports: playerSportMix(player.name, history),
+    sports: playerSportMix(player.name, eligibleHistory),
     currentStreak: player.currentStreak,
     attendancePercentage: player.attendancePercentage,
     attendanceCount: player.attendanceCount,

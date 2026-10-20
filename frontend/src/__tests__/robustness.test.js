@@ -630,6 +630,23 @@ describe('updateWeek — edge cases', () => {
     expect(saved.weeks[0].cost).toBe(90);
     expect(saved.weeks[1].cost).toBe(60);
   });
+
+  it('edycja starej sesji nie włącza po cichu limitu kart', async () => {
+    seed({ weeks: [{
+      id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice', 'Bob'],
+      multiPlayers: ['Alice', 'Bob'], sport: 'squash',
+    }] });
+
+    const result = await updateWeek('w1', {
+      date: '2025-01-01', cost: 60, present: ['Alice', 'Bob'],
+      multiPlayers: ['Alice', 'Bob'], sport: 'squash',
+    });
+
+    expect(result.success).toBe(true);
+    const saved = mockSaveData.mock.calls[0][0];
+    expect(saved.weeks[0]).not.toHaveProperty('courtCount');
+    expect(saved.weeks[0]).not.toHaveProperty('durationHours');
+  });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
