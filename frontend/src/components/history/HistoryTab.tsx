@@ -44,6 +44,8 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const [isSaving,     setIsSaving]     = useState(false);
   const [pwModal,      setPwModal]      = useState<{ type: 'edit'; row: HistoryEntry } | { type: 'delete'; rowId: string } | null>(null);
   const [filterPlayer, setFilterPlayer] = useState('');
+  const [filterSport, setFilterSport] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [chosenSeason, setChosenSeason] = useState<number | null | undefined>(undefined);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortOrder,    setSortOrder]    = useState<'desc' | 'asc'>('desc');
@@ -75,11 +77,22 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   );
 
   const filteredHistory = useMemo(() => {
-    const h = !filterPlayer ? seasonHistory : seasonHistory.filter(s => s.presentPlayers.includes(filterPlayer));
+    let h = seasonHistory;
+    if (filterPlayer) h = h.filter(s => s.presentPlayers.includes(filterPlayer));
+    if (filterSport) h = h.filter(s => s.sport === filterSport);
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      h = h.filter(s =>
+        s.datePlayed.toLowerCase().includes(q) ||
+        (SPORT_LABEL[s.sport] ?? '').toLowerCase().includes(q) ||
+        s.presentPlayers.some(p => p.toLowerCase().includes(q)) ||
+        s.multisportPlayers.some(p => p.toLowerCase().includes(q)),
+      );
+    }
     return sortOrder === 'asc' ? [...h].reverse() : h;
-  }, [seasonHistory, filterPlayer, sortOrder]);
+  }, [seasonHistory, filterPlayer, filterSport, searchQuery, sortOrder]);
 
-  useEffect(() => { setVisibleCount(SESSIONS_PAGE_SIZE); }, [filterPlayer, sortOrder, selectedSeason]);
+  useEffect(() => { setVisibleCount(SESSIONS_PAGE_SIZE); }, [filterPlayer, filterSport, searchQuery, sortOrder, selectedSeason]);
 
   const handleExportCSV = () => {
     let url: string | undefined;
@@ -442,6 +455,17 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 kontenera: gdy chipy graczy przechodziły do drugiej linii,
                 rozpychacz spadał do własnego rzędu, a kreska zostawała sama
                 na początku linii. Akcje mają teraz osobną, nierozdzielną grupę. */}
+            {/* Filtr po sporcie */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <button onClick={() => setFilterSport('')} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.1em', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: !filterSport ? 'var(--co-cyan)' : 'var(--co-border)', color: !filterSport ? 'var(--co-cyan)' : 'var(--co-dim)', background: !filterSport ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>WSZYSTKIE SPORTY</button>
+              {Object.entries(SPORT_LABEL).map(([key, label]) => (
+                <button key={key} onClick={() => setFilterSport(prev => prev === key ? '' : key)} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.1em', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: filterSport === key ? 'var(--co-cyan)' : 'var(--co-border)', color: filterSport === key ? 'var(--co-cyan)' : 'var(--co-dim)', background: filterSport === key ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>{label.toUpperCase()}</button>
+              ))}
+            </div>
+
+            {/* Wyszukiwarka tekstowa */}
+            <input type="search" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Szukaj (data, gracz, sport)..." aria-label="Szukaj w historii" className="cyber-input" style={{ flex: '1 1 160px', minWidth: 140, padding: '6px 10px', fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', clipPath: CLIP.badge }} />
+
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <div aria-hidden="true" style={{ width: 1, height: 18, background: 'var(--co-border)' }} />
 

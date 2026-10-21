@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { CSSProperties } from 'react';
 import { Bell, X, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
@@ -125,7 +126,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
   // i #FBBF24 z siatki graczy.
   const accentColor = showReregister || showManual ? 'var(--co-amber)' : 'var(--co-cyan)';
 
-  return (
+  return createPortal(
     <div style={bannerStyle} className="push-banner-sheet bottom-banner glass-surface">
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
         <div style={{
@@ -227,5 +228,5 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
         </button>
       </div>
     </div>
-  );
+  , document.body);
 }
