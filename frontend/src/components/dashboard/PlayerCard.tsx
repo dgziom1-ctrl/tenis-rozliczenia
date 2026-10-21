@@ -16,7 +16,7 @@ import HoldToSettleButton from './HoldToSettleButton';
 import UndoBar from '../common/UndoBar';
 import Modal from '../common/Modal';
 import TreasurerPanel from './TreasurerPanel';
-import ConfettiBurst from '../common/ConfettiBurst';
+
 import StreakBadge from '../attendance/StreakBadge';
 import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerStats, SoundType } from '@/types/ui';
 import type { AddPaymentResult, TransactionResult } from '@/types/domain';
@@ -71,7 +71,7 @@ function PlayerCard({
   const [justCleared, setJustCleared] = useState(false);
   const [settling, setSettling] = useState(false);
   const [confirmSettle, setConfirmSettle] = useState(false);
-  const [showBurst, setShowBurst] = useState(false);
+
   const reducedMotion = useReducedMotion();
 
   const clickCount = useRef(0);
@@ -112,7 +112,6 @@ function PlayerCard({
     const t = setTimeout(() => {
       setSettling(false);
       setJustCleared(true);
-      setShowBurst(true);
       playSound(SOUND_TYPES.SUCCESS);
     }, reducedMotion ? 0 : 900);
     return () => clearTimeout(t);
@@ -303,7 +302,6 @@ function PlayerCard({
     >
       <div ref={foilRef} className={RARITY_FOIL_CLASS[meta.rarity]} style={foilStyle} aria-hidden="true" />
       <CornerBrackets color={accentColor} size={14} thickness={1} />
-      {showBurst && <ConfettiBurst onDone={() => setShowBurst(false)} />}
       <span className="sr-only" role="status" aria-live="polite">
         {isSaving ? 'Zapisywanie wpłaty…' : settling ? 'Rozliczanie…' : justCleared ? 'Wpłata zapisana. Karta rozliczona.' : ''}
       </span>
@@ -447,11 +445,7 @@ function PlayerCard({
               transition: 'background 0.2s ease, border-color 0.2s ease',
             }}
           >
-            {justCleared && (
-              <div className="cleared-stamp" aria-hidden="true">
-                ROZLICZONY
-              </div>
-            )}
+
 
             {hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>

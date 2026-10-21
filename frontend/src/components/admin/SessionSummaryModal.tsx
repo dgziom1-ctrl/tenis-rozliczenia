@@ -8,7 +8,7 @@ import { getShareGroups } from '@/utils/sessionCost';
 import { copyToClipboard } from '@/utils/clipboard';
 import Modal from '../common/Modal';
 import { useModalExit } from '@/hooks/useModalExit';
-import ConfettiBurst from '../common/ConfettiBurst';
+
 import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 import type { Sport } from '@/types/domain';
 import type { SessionHighlight } from '@/types/ui';
@@ -42,7 +42,6 @@ function highlightIcon(kind: SessionHighlight['kind']) {
 
 export default function SessionSummaryModal({ summary, highlights = [], onClose }: SessionSummaryModalProps) {
   const [copied, setCopied] = useState(false);
-  const [burst, setBurst] = useState(true);
   const { open, close } = useModalExit(onClose);
   const { showError } = useToast();
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -91,7 +90,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
         </>
       }
     >
-      {burst && <ConfettiBurst onDone={() => setBurst(false)} />}
+
 
       <div className="matchday-hero">
         <p className="matchday-kicker">SESJA ZAPISANA</p>

@@ -202,6 +202,11 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             filter:chaosMode?'none':'var(--glow-drop-cyan)' }}>
             <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit}/>
           </div>
+          <span aria-hidden="true" style={{
+            fontFamily:'var(--font-display)', fontSize:TEXT.tiny, fontWeight:400,
+            letterSpacing:TRACK.wide, color:'var(--co-dim)', textTransform:'uppercase',
+            marginBottom:10,
+          }}>CYBER-PONK</span>
 
           <button className="header-hero-title" onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>

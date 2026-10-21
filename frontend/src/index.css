@@ -282,11 +282,6 @@ body.theme-switching *::after {
   from { transform: translateY(14px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
 }
-@keyframes confettiBurst {
-  0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
-  60%  { opacity: 1; }
-  100% { transform: translateY(85vh) translateX(var(--drift,0px)) rotate(540deg) scale(0.3); opacity: 0; }
-}
 @keyframes chaosFlash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes headerBounce {
   0%,100% { transform: translateY(0); }
@@ -542,11 +537,6 @@ body.theme-switching *::after {
 }
 
 /* ── FIFA-style player cards ── */
-@keyframes stamp-pop {
-  0%   { transform: scale(1.55) rotate(-14deg); opacity: 0; }
-  65%  { transform: scale(0.96) rotate(-8deg); opacity: 1; }
-  100% { transform: scale(1) rotate(-8deg); opacity: 1; }
-}
 
 .fifa-card { position: relative; }
 /* Rzadkość karty to już nie `background-image` (biłoby recepturę szkła z
@@ -586,34 +576,6 @@ body.theme-switching *::after {
   text-shadow: var(--glow-cyan-md);
 }
 
-.cleared-stamp {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  pointer-events: none;
-  font-family: var(--font-display);
-  font-size: 1.65rem;
-  letter-spacing: 0.18em;
-  color: var(--co-green);
-  text-shadow: var(--glow-green-md);
-  border: 2px solid var(--co-green);
-  margin: 10px 16px;
-  background: var(--co-panel);
-  animation: stamp-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.confetti-layer {
-  display: block;
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: var(--z-confetti);
-  pointer-events: none;
-}
 
 .matchday-hero {
   text-align: center;
