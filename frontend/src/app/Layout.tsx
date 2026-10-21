@@ -169,7 +169,7 @@ export default function Layout() {
 
   return (
     <div
-      className="min-h-screen p-4 md:p-8 relative z-10"
+      className="min-h-screen px-2 md:px-8 py-2 md:py-8 relative z-10"
       style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', position: 'relative' }}
     >
       <CyberBackground />
