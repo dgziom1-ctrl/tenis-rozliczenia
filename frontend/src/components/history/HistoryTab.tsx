@@ -113,7 +113,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
       ];
       // Ochrona przed CSV injection: wartości zaczynające się od znaku formuły
       // („=", „+", „-", „@") mogą być wykonane przez arkusz kalkulacyjny.
-      const sanitizeCsvCell = (value: unknown): string => {
+      const sanitizeCsvCell = (value: string | number | null | undefined): string => {
         const str = String(value ?? '');
         return /^[=+\-@\t\r]/.test(str.trim()) ? `'${str}` : str;
       };
