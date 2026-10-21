@@ -127,7 +127,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
 
         <div className="header-topbar" style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
-          <span className="header-wordmark" aria-hidden="true">CYBER-PONK</span>
+          <span className="header-wordmark">CYBER-PONK</span>
           <button type="button" onClick={handleCopy} className="glass-chip header-blik" aria-label={`Skopiuj numer BLIK ${blikNumber}`} style={{ display:'flex',alignItems:'center',gap:'8px',
             border:'1px solid var(--co-tint-line)',padding: '6px 12px',cursor:'pointer',
             transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
@@ -203,7 +203,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit}/>
           </div>
 
-          <button onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
+          <button className="header-hero-title" onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
             {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
             {!chaosMode && hitting && <span aria-hidden="true" style={{
