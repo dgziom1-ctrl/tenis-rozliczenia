@@ -120,10 +120,6 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       };
 
       sg.clearRect(0, 0, W, H);
-      if (lightMode) {
-        sg.fillStyle = '#F8FAFC';
-        sg.fillRect(0, 0, W, H);
-      }
 
       /* Table (static) */
       const FL = proj(-TX, 0, -TZ), FR = proj(TX, 0, -TZ);
@@ -197,10 +193,6 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
     /* ── DRAW FRAME ── */
     const draw = (progress: number, nowTs: number) => {
       g.clearRect(0, 0, W, H);
-      if (lightMode) {
-        g.fillStyle = '#F8FAFC';
-        g.fillRect(0, 0, W, H);
-      }
 
       const leftHitT  = Math.min(progress, 1-progress) * 2;
       const rightHitT = Math.abs(progress - 0.5) * 2;
