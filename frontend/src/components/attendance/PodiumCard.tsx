@@ -67,7 +67,21 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
         clipPath: CLIP.smallCard,
         position: 'relative', overflow: 'hidden',
         boxShadow: s.glow,
-      }}>
+        // Bez remisu cała karta jest jednym przyciskiem otwierającym modal.
+        // Przy remisie klikalne są poszczególne wiersze graczy.
+        cursor: exAequo ? 'default' : 'pointer',
+      }}
+        role={exAequo ? undefined : 'button'}
+        tabIndex={exAequo ? undefined : 0}
+        aria-label={exAequo ? undefined : `${players[0].name}, ${players[0].attendancePercentage}% frekwencji, miejsce ${podiumEntry.place}`}
+        onClick={exAequo ? undefined : () => openPlayer(players[0])}
+        onKeyDown={exAequo ? undefined : e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPlayer(players[0]);
+          }
+        }}
+      >
         {/* Top stripe */}
         <div aria-hidden="true" style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: 2,

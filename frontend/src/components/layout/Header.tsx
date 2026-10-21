@@ -189,7 +189,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
         <div className="header-hero" style={{ position:'relative',zIndex:10,padding: '16px 16px 20px',
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
-          <div style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
+          <div className="header-hero-eyebrow" style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
             <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to right,transparent,var(--co-tint-line))' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,color:'var(--co-dim)',textTransform:'uppercase' }}>
@@ -198,7 +198,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to left,transparent,var(--co-tint-line))' }}/>
           </div>
 
-          <div style={{ width:'100%',maxWidth:560,marginBottom:14,
+          <div className="header-hero-arena" style={{ width:'100%',maxWidth:560,marginBottom:14,
             filter:chaosMode?'none':'var(--glow-drop-cyan)' }}>
             <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit}/>
           </div>
@@ -237,7 +237,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             background:'linear-gradient(90deg,transparent,var(--co-tint-line) 40%,var(--co-tint-line) 60%,transparent)' }}/>
 
           {/* JACK IN — lights up exactly when ball hits paddle */}
-          <div style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
+          <div className="header-hero-meta" style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
             <span style={{
               fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,textTransform:'uppercase',

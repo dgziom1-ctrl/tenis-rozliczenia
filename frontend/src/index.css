@@ -947,9 +947,9 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 }
 
 /* ── Mobilny nagłówek ─────────────────────────────────────────────
-   Pełny hero (arena + wielki wordmark + JACK IN) ma sens na desktopie. Na
-   telefonie zajmował 328 z 844 px, więc pierwsza karta wpadała pod dolną
-   nawigację. Zostawiamy pasek marki, akcje i osobny wiersz BLIK — ok. 100 px. */
+   Arena z odbijającą piłką to znak rozpoznawczy aplikacji, więc zostaje
+   również na telefonie — w zmniejszonej skali. Pasek marki, akcje i osobny
+   wiersz BLIK trzymają górę kompaktowo, a hero nie dominuje nad treścią. */
 .header-wordmark { display: none; }
 .header-blik-mobile { display: none; }
 
@@ -958,7 +958,6 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   /* Ikony w nagłówku są dotykane kciukiem; 36 px było poniżej progu 44 px. */
   .header-action-btn { width: 44px !important; height: 44px !important; }
   .header-blik { display: none !important; }
-  .header-hero { display: none !important; }
   .header-wordmark {
     display: inline-block;
     font-family: var(--font-display);
@@ -969,6 +968,11 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
     text-shadow: var(--glow-brand-sm);
     text-transform: uppercase;
   }
+  /* Mobile: arena zostaje, ale bez nadtytułu i z ciaśniejszym rytmem. */
+  .header-hero { padding: 8px 12px 10px !important; }
+  .header-hero-eyebrow { display: none !important; }
+  .header-hero-arena { margin-bottom: 6px !important; }
+  .header-hero-meta { gap: 10px !important; }
   .header-blik-mobile {
     display: flex;
     align-items: center;
