@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect, memo } from 'react';
 import type { PointerEvent } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { getPlayerColor } from '@/constants/colors';
-import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, SOUND_TYPES } from '@/constants';
+import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
 import { formatAmountShort } from '@/utils/format';
 import { BLIK_NUMBER } from '@/utils/blik';
