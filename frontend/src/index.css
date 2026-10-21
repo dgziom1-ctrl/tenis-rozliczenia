@@ -921,7 +921,7 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   .header-action-btn { width: 44px !important; height: 44px !important; }
   .header-blik { display: none !important; }
   .header-wordmark {
-    display: inline-block;
+    display: none !important;
     font-family: var(--font-display);
     font-size: 1.35rem;
     line-height: 1;
@@ -935,7 +935,7 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   .header-hero { padding: 10px 8px 12px !important; }
   .header-hero-eyebrow { margin-bottom: 8px !important; }
   .header-hero-arena { margin-bottom: 4px !important; }
-  .header-hero-title { display: none !important; }
+  .header-hero-title { display: block !important; }
   .header-hero-meta { gap: 10px !important; }
   .header-blik-mobile {
     display: flex;
@@ -1636,7 +1636,7 @@ body.theme-light .min-h-screen {
 }
 
 /* ============================================================
-   CYBER-PONK LIQUID GLASS REDESIGN — fluid background + neon
+   CYBER-PONK LIQUID GLASS REDESIGN ï¿½ fluid background + neon
    status accents + microinteractions
    ============================================================ */
 
