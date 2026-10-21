@@ -57,8 +57,9 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
 
   const handleRemovePayment = useCallback(async (playerName: string, paymentId: string) => {
     const result = await removePayment(playerName, paymentId);
-    if (result.success) playSound(SOUND_TYPES.DELETE);
-    else {
+    // Dźwięk przy cofnięciu płatności jest denerwujący — pomijamy go.
+    // Błąd nadal sygnalizujemy.
+    if (!result.success) {
       playSound(SOUND_TYPES.ERROR);
       showError(result.error || 'Nie udało się cofnąć wpłaty');
     }

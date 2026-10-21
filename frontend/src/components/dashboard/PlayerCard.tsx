@@ -112,7 +112,7 @@ function PlayerCard({
     const t = setTimeout(() => {
       setSettling(false);
       setJustCleared(true);
-      playSound(SOUND_TYPES.SUCCESS);
+      // Dźwięk przy płatności gra już wcześniej (COIN) — drugi byłby nadmiarowy.
     }, reducedMotion ? 0 : 900);
     return () => clearTimeout(t);
   }, [settling, debt, reducedMotion, playSound]);
