@@ -32,7 +32,7 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               aria-current={activeTab === tab.id ? 'page' : undefined}
-              className={`desktop-tab ${activeTab === tab.id ? 'active' : ''}`}
+              className={`desktop-tab glass-hover-lift ${activeTab === tab.id ? 'active' : ''}`}
             >
               <tab.icon size={13} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
               {tab.label.toUpperCase()}
@@ -48,7 +48,7 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
             onClick={() => setActiveTab(tab.id)}
             aria-label={tab.label}
             aria-current={activeTab === tab.id ? 'page' : undefined}
-            className={`mobile-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
+            className={`mobile-nav-btn tap-press ${activeTab === tab.id ? 'active' : ''}`}
           >
             <tab.icon size={20} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
             <span className="mobile-nav-label">{tab.shortLabel}</span>

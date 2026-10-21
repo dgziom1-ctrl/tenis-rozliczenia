@@ -1634,3 +1634,94 @@ body.theme-light .min-h-screen {
     background-color: #FFFFFF !important;
   }
 }
+
+/* ============================================================
+   CYBER-PONK LIQUID GLASS REDESIGN — fluid background + neon
+   status accents + microinteractions
+   ============================================================ */
+
+/* Fluid animated background blobs (neon sport accents) */
+.fluid-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.fluid-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.55;
+  will-change: transform;
+  animation: blob-drift 22s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+.fluid-blob-cyan   { background: radial-gradient(circle, rgba(0,229,255,0.55) 0%, rgba(0,229,255,0) 70%); }
+.fluid-blob-rose   { background: radial-gradient(circle, rgba(255,32,144,0.45) 0%, rgba(255,32,144,0) 70%); }
+.fluid-blob-green  { background: radial-gradient(circle, rgba(0,255,136,0.40) 0%, rgba(0,255,136,0) 70%); }
+.fluid-blob-amber  { background: radial-gradient(circle, rgba(245,158,11,0.40) 0%, rgba(245,158,11,0) 70%); }
+.fluid-blob-float  { animation: fluid-float 14s ease-in-out infinite; }
+.fluid-blob-pulse  { animation: neon-pulse 3s ease-in-out infinite; }
+.fluid-grid {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, var(--dot-color, var(--co-tint)) 1px, transparent 0);
+  background-size: 28px 28px;
+  opacity: 0.6;
+}
+
+/* Neon status accents */
+.neon-status-debt {
+  color: var(--co-rose);
+  text-shadow: var(--glow-rose-md);
+  border-color: var(--co-rose);
+  box-shadow: var(--glow-box-rose);
+}
+.neon-status-credit {
+  color: var(--co-green);
+  text-shadow: var(--glow-green-md);
+  border-color: var(--co-green);
+  box-shadow: 0 0 14px rgba(0,255,136,0.25);
+}
+.neon-status-multisport {
+  color: var(--co-amber);
+  text-shadow: 0 0 12px rgba(245,158,11,0.45);
+  border-color: var(--co-amber);
+}
+.neon-status-streak {
+  color: var(--co-cyan);
+  text-shadow: var(--glow-cyan-md);
+  border-color: var(--co-cyan);
+  box-shadow: var(--glow-box-cyan);
+}
+
+/* Microinteractions */
+.glass-hover-lift {
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s ease, filter 0.22s ease;
+}
+.glass-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glass-shadow), var(--glass-rim), var(--glow-box-cyan);
+  filter: brightness(1.05) saturate(1.08);
+}
+.glass-hover-lift:active {
+  transform: translateY(-1px) scale(0.99);
+  filter: brightness(1.02);
+}
+.tap-press { transition: transform 0.08s ease; }
+.tap-press:active { transform: scale(0.96); }
+.status-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid var(--glass-border);
+  background: var(--co-glass-chip);
+  backdrop-filter: blur(12px) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(12px) saturate(var(--glass-sat));
+  clip-path: var(--clip-badge);
+}
+.glass-shine-overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 4s linear infinite;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+}

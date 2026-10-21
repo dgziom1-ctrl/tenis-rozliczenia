@@ -250,49 +250,19 @@ function OfflineBanner({ hasData, onRetry }: { hasData: boolean; onRetry: () => 
 
 function CyberBackground() {
   return (
-    <div aria-hidden="true" style={{
-      position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden', pointerEvents: 'none',
-    }}>
-      <div style={{
-        position: 'absolute', top: '-15%', left: '50%', transform: 'translateX(-50%)',
-        width: '90vw', height: '70vh',
-        background: 'radial-gradient(ellipse at center top, var(--co-tint-hi) 0%, var(--co-tint) 45%, transparent 72%)',
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '-10%', left: '-5%',
-        width: '55vw', height: '55vh',
-        background: 'radial-gradient(ellipse at bottom left, var(--co-tint) 0%, transparent 65%)',
-      }} />
-      <div style={{
-        position: 'absolute', top: '40%', right: '-5%',
-        width: '35vw', height: '40vh',
-        background: 'radial-gradient(ellipse at right center, var(--co-tint) 0%, transparent 60%)',
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '-6%', right: '6%',
-        width: '48vw', height: '46vh',
-        background: 'radial-gradient(ellipse at bottom right, rgba(255,32,144,0.06) 0%, transparent 62%)',
-      }} />
+    <div className="fluid-bg" aria-hidden="true">
+      <div className="fluid-blob fluid-blob-cyan fluid-blob-float" style={{ top: '-15%', left: '50%', width: '90vw', height: '70vh', transform: 'translateX(-50%)' }} />
+      <div className="fluid-blob fluid-blob-rose fluid-blob-pulse" style={{ bottom: '-10%', left: '-5%', width: '55vw', height: '55vh' }} />
+      <div className="fluid-blob fluid-blob-green" style={{ top: '40%', right: '-5%', width: '35vw', height: '40vh' }} />
+      <div className="fluid-blob fluid-blob-amber fluid-blob-float" style={{ bottom: '-6%', right: '6%', width: '48vw', height: '46vh' }} />
+      <div className="fluid-grid" />
       <div style={{
         position: 'absolute', inset: 0,
         background: 'radial-gradient(ellipse 120% 100% at 50% 38%, transparent 52%, rgba(0,0,0,0.42) 100%)',
       }} />
       <div style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: 'radial-gradient(circle at 1px 1px, var(--dot-color, var(--co-tint)) 1px, transparent 0)',
-        backgroundSize: '28px 28px',
-      }} />
-      <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: '30vh',
         background: 'linear-gradient(to top, var(--co-tint) 0%, transparent 100%)',
-      }} />
-      <div style={{
-        position: 'absolute', top: 0, bottom: 0, left: 0, width: '1px',
-        background: 'linear-gradient(to bottom, var(--co-tint-line) 0%, transparent 40%)',
-      }} />
-      <div style={{
-        position: 'absolute', top: 0, bottom: 0, right: 0, width: '1px',
-        background: 'linear-gradient(to bottom, var(--co-tint-line) 0%, transparent 40%)',
       }} />
     </div>
   );

@@ -32,8 +32,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
   const groups = getShareGroups(row);
 
   return (
-    <div className="scan-hover log-entry" style={{
-      background: 'var(--co-dark)', border: '1px solid var(--co-border)',
+    <div className="scan-hover log-entry glass-card glass-hover-lift tap-press" style={{
       clipPath: CLIP.card,
       padding: '12px 14px', marginBottom: 4,
     }}>

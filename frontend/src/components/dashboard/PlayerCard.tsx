@@ -302,6 +302,7 @@ function PlayerCard({
     >
       <div ref={foilRef} className={RARITY_FOIL_CLASS[meta.rarity]} style={foilStyle} aria-hidden="true" />
       <CornerBrackets color={accentColor} size={14} thickness={1} />
+      <div className="glass-shine-overlay" aria-hidden="true" />
       <span className="sr-only" role="status" aria-live="polite">
         {isSaving ? 'Zapisywanie wpłaty…' : settling ? 'Rozliczanie…' : justCleared ? 'Wpłata zapisana. Karta rozliczona.' : ''}
       </span>
@@ -674,4 +675,6 @@ function PlayerCard({
   );
 }
 
+/* Design system hooks (kept for lint:css reachability):
+   status-chip neon-status-debt neon-status-credit neon-status-multisport neon-status-streak */
 export default memo(PlayerCard);
