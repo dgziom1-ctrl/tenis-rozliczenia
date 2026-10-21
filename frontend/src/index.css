@@ -485,6 +485,37 @@ body.theme-switching *::after {
   button:active:not(:disabled) { transform: scale(0.97); transition: transform 0.08s ease !important; }
 }
 
+/* ── Przytrzymanie, aby zapisać wpłatę ───────────────────────────── */
+.hold-confirm-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.hold-confirm-btn:active:not(:disabled) { transform: none !important; }
+.hold-confirm-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: rgba(4, 10, 14, 0.22);
+  pointer-events: none;
+}
+
+@keyframes settle-pulse {
+  0%   { box-shadow: inset 0 0 0 0 rgba(0, 229, 255, 0); }
+  35%  { box-shadow: inset 0 0 24px 0 rgba(0, 229, 255, 0.20); }
+  100% { box-shadow: inset 0 0 0 0 rgba(0, 229, 255, 0); }
+}
+.debt-settling { animation: settle-pulse 0.85s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .debt-settling { animation: none; }
+  .hold-confirm-fill { transition: none !important; }
+}
+
 
 /* ── Card entry animation ── */
 @keyframes card-enter {
@@ -913,6 +944,55 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
     0 1px 0 var(--glass-edge-top) inset,
     0 -1px 0 var(--glass-edge-bottom) inset,
     0 18px 44px -30px rgba(0,0,0,0.9);
+}
+
+/* ── Mobilny nagłówek ─────────────────────────────────────────────
+   Pełny hero (arena + wielki wordmark + JACK IN) ma sens na desktopie. Na
+   telefonie zajmował 328 z 844 px, więc pierwsza karta wpadała pod dolną
+   nawigację. Zostawiamy pasek marki, akcje i osobny wiersz BLIK — ok. 100 px. */
+.header-wordmark { display: none; }
+.header-blik-mobile { display: none; }
+
+@media (max-width: 639px) {
+  .header-topbar { padding: 8px 12px !important; }
+  /* Ikony w nagłówku są dotykane kciukiem; 36 px było poniżej progu 44 px. */
+  .header-action-btn { width: 44px !important; height: 44px !important; }
+  .header-blik { display: none !important; }
+  .header-hero { display: none !important; }
+  .header-wordmark {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: var(--co-cyan);
+    text-shadow: var(--glow-brand-sm);
+    text-transform: uppercase;
+  }
+  .header-blik-mobile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 14px;
+    background: var(--co-tint);
+    border: none;
+    border-bottom: 1px solid var(--co-separator);
+    cursor: pointer;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .header-blik-label {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    color: var(--co-cyan);
+    padding: 2px 6px;
+    background: var(--co-tint);
+    border: 1px solid var(--co-tint-line);
+    flex-shrink: 0;
+  }
 }
 
 /* ══ MAIN CONTENT ════════════════════════════════════════════════ */

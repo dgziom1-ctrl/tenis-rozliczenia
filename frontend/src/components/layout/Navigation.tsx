@@ -10,7 +10,7 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Home',     shortLabel: 'HOME'    },
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Start',    shortLabel: 'START'   },
   { id: 'attendance', icon: Trophy,           label: 'Ranking',  shortLabel: 'RANKING' },
   { id: 'admin',      icon: PlusCircle,       label: 'Dodaj',    shortLabel: 'DODAJ'   },
   { id: 'history',    icon: History,          label: 'Historia', shortLabel: 'HISTORIA'},

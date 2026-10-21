@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useId } from 'react';
+import { useState, useEffect, useCallback, useRef, useId, useMemo } from 'react';
 import type { FormEvent } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
 import { PanelHeader, FieldGroup } from '../common/SharedUI';
@@ -9,6 +9,7 @@ import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { parseAmount, isValidAmount } from '@/utils/format';
 import { getRacketSelection, getTotalWithRackets } from '@/utils/sessionCost';
+import { getLastSessionDefaults } from '@/utils/sessions';
 import type { Sport } from '@/types/domain';
 import type { HistoryEntry, PlayerStats, SessionHighlight, SoundType } from '@/types/ui';
 
@@ -80,14 +81,30 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
   const multiPresentCount = multisportPlayers.filter(p => presentPlayers.includes(p)).length;
   const multiOverLimit = multiPresentCount > maxMulti && multiPresentCount > 0;
 
+  // Nowa sesja startuje składem z ostatniej rozegranej sesji — łącznie z jej
+  // kartami MultiSport. Dzięki temu formularz nie proponuje „wszyscy + 3 karty”
+  // i nie pokazuje ostrzeżenia o limicie jeszcze przed pierwszym kliknięciem.
+  const sessionDefaults = useMemo(
+    () => getLastSessionDefaults(history, playerNames),
+    [history, playerNames],
+  );
+
   const initializedRef = useRef(false);
   useEffect(() => {
     if (!playerNames?.length) return;
     if (initializedRef.current) return;
     initializedRef.current = true;
+    if (sessionDefaults) {
+      setPresentPlayers([...sessionDefaults.presentPlayers]);
+      setMultisportPlayers([...sessionDefaults.multisportPlayers]);
+      setCourtCount(sessionDefaults.courtCount);
+      setDurationHours(sessionDefaults.durationHours);
+      setSport(sessionDefaults.sport);
+      return;
+    }
     setPresentPlayers([...playerNames]);
     setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
-  }, [playerNames, defaultMultiPlayers]);
+  }, [playerNames, defaultMultiPlayers, sessionDefaults]);
 
   const togglePresent = useCallback((name: string) => {
     playSound(SOUND_TYPES.CLICK);
@@ -168,12 +185,13 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
       setRacketCount(0);
       setRacketPrice(RACKET_PRICE);
       setOwnRacketPlayers([]);
-      setCourtCount(1);
-      setDurationHours(1);
-      setPresentPlayers([...playerNames]);
-      setMultisportPlayers([...(defaultMultiPlayers ?? [])]);
+      // Korty, godziny i sport zostają takie jak w zapisanej sesji — to one
+      // wyznaczają limit kart, więc nie mogą wracać do 1 przed kolejnym wpisem.
+      // Następna sesja dziedziczy też dokładnie tę obsadę, która została zapisana.
+      setPresentPlayers([...presentPlayers]);
+      setMultisportPlayers(multisportPlayers.filter(p => presentPlayers.includes(p)));
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playerNames, defaultMultiPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, withRackets, racketCost, players, history, courtCount, durationHours]);
+  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, withRackets, racketCost, players, history, courtCount, durationHours]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
@@ -302,6 +320,11 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
               counter={`[${presentPlayers.length}/${playerNames?.length || 0}]`}
             >
               <PlayerToggleGrid names={playerNames || []} selected={presentPlayers} onToggle={togglePresent} accent="yellow" />
+              {sessionDefaults && (
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
+                  {'>'} Skład z ostatniej sesji — zmień, jeśli dziś gra ktoś inny
+                </p>
+              )}
               {!isPresentValid && (
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
                   ⚠ Wybierz przynajmniej jednego gracza

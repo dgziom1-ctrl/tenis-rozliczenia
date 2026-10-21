@@ -3,6 +3,7 @@ import { TrendingUp } from 'lucide-react';
 import type { HistoryEntry } from '../../types/ui';
 import { CLIP } from '@/constants/styles';
 import { SectionHeader } from '../common/SharedUI';
+import { useElementWidth } from '@/hooks/useElementWidth';
 import { CHART_WIDTH, CHART_LABEL_SIZE, CHART_GRID_DASH, linePath, labelStep } from '@/utils/chart';
 
 interface AttendanceTrendChartProps {
@@ -10,11 +11,6 @@ interface AttendanceTrendChartProps {
 }
 
 export default function AttendanceTrendChart({ history }: AttendanceTrendChartProps) {
-  // Prawy margines robi miejsce na drugą oś (koszt w zł).
-  const W = CHART_WIDTH, H = 200, PAD = { top: 20, right: 46, bottom: 32, left: 36 };
-  const innerW = W - PAD.left - PAD.right;
-  const innerH = H - PAD.top - PAD.bottom;
-
   const data = useMemo(() => {
     if (!history || history.length === 0) return [];
     const recent = [...history].slice(0, 12).reverse();
@@ -27,11 +23,26 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
     }));
   }, [history]);
 
+  const [chartRef, chartWidth] = useElementWidth<HTMLDivElement>(CHART_WIDTH);
+
   if (data.length < 2) return null;
+
+  // Ten sam wykres 1:1 z szerokością kontenera co w rankingu — na telefonie
+  // etykiety osi i wartości nie są już pomniejszane razem z viewBoxem.
+  const compact = chartWidth < 480;
+  const W = Math.max(chartWidth, 280);
+  const H = compact ? 220 : 200;
+  // Prawy margines robi miejsce na drugą oś (koszt w zł).
+  const PAD = compact
+    ? { top: 20, right: 34, bottom: 30, left: 26 }
+    : { top: 20, right: 46, bottom: 32, left: 36 };
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
 
   const maxCount = Math.max(...data.map(d => d.count), 1);
   const maxCost  = Math.max(...data.map(d => d.cost), 1);
   const n = data.length;
+  const valueStep = labelStep(n, Math.max(2, Math.floor(innerW / 34)));
 
   const xPos   = (i: number) => PAD.left + (i / (n - 1)) * innerW;
   const yCount = (v: number) => PAD.top + innerH - (v / maxCount) * innerH;
@@ -71,7 +82,7 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
       />
 
       {/* SVG chart */}
-      <div style={{ position: 'relative', background: 'var(--co-tint)', border: '1px solid var(--co-border)', clipPath: CLIP.smallCard, overflow: 'hidden' }}>
+      <div ref={chartRef} style={{ position: 'relative', background: 'var(--co-tint)', border: '1px solid var(--co-border)', clipPath: CLIP.smallCard, overflow: 'hidden' }}>
         <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Wykres trendu frekwencji" style={{ display: 'block', width: '100%', height: 'auto' }}>
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
@@ -131,10 +142,12 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
             <g key={i}>
               <circle cx={x} cy={y} r="5" fill="var(--co-panel)" stroke="var(--co-cyan)" strokeWidth="1.5" />
               <circle cx={x} cy={y} r="2.5" fill="var(--co-cyan)" />
-              <text x={x} y={y - 9} textAnchor="middle"
-                fill="var(--co-cyan)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)" opacity="0.8">
-                {data[i].count}
-              </text>
+              {(i % valueStep === 0 || i === n - 1) && (
+                <text x={x} y={y - 9} textAnchor="middle"
+                  fill="var(--co-cyan)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)" opacity="0.8">
+                  {data[i].count}
+                </text>
+              )}
             </g>
           ))}
 
@@ -146,7 +159,7 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
               podpisów na raz — gwarantowane nachodzenie. `ceil` wymusza rzadszy
               krok, a ostatnia etykieta zawsze zostaje jako punkt odniesienia. */}
           {data.map((d, i) => (
-            (i % labelStep(n) === 0 || i === n - 1) && (
+            (i % labelStep(n, Math.max(2, Math.floor(innerW / 58))) === 0 || i === n - 1) && (
               <text key={i} x={xPos(i)} y={H - 6} textAnchor="middle"
                 fill="var(--co-dim)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)">
                 {d.label}

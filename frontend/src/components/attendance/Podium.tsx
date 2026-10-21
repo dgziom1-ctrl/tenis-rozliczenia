@@ -17,7 +17,7 @@ export default function Podium({ podiumPlayers, onSelect }: PodiumProps) {
         const entry = podiumPlayers.find(p => p.place === targetPlace);
         // Placeholder bez wysokości przy `alignItems: flex-end` zapadał się
         // i podium z dwoma miejscami rozjeżdżało się asymetrycznie.
-        if (!entry) return <div key={targetPlace} aria-hidden="true" style={{ flex: 1, maxWidth: 'min(100%, 190px)', minWidth: 0, height: 62 }} />;
+        if (!entry) return <div key={targetPlace} aria-hidden="true" style={{ flex: 1, maxWidth: 'min(100%, 190px)', minWidth: 0, height: 150 }} />;
         return <PodiumCard key={targetPlace} podiumEntry={entry} onSelect={onSelect} />;
       })}
     </div>

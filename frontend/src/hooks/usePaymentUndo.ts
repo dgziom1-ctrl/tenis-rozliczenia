@@ -7,12 +7,10 @@ type PendingPayment = Pick<Payment, 'id' | 'amount'>;
 
 interface UsePaymentUndoOptions {
   playerName: string;
-  onPin: (name: string) => void;
-  onUnpin: () => void;
   onRemovePayment: (playerName: string, paymentId: string) => Promise<TransactionResult>;
 }
 
-export function usePaymentUndo({ playerName, onPin, onUnpin, onRemovePayment }: UsePaymentUndoOptions) {
+export function usePaymentUndo({ playerName, onRemovePayment }: UsePaymentUndoOptions) {
   const [lastPayment, setLastPayment] = useState<PendingPayment | null>(null);
   const [isUndoing, setIsUndoing] = useState(false);
   const { undoToast, progressPct, startUndo, dismissUndo, clearUndo } = useUndoTimer<PendingPayment>(8);
@@ -20,14 +18,12 @@ export function usePaymentUndo({ playerName, onPin, onUnpin, onRemovePayment }: 
   const clearPaymentUndo = useCallback(() => {
     dismissUndo();
     setLastPayment(null);
-    onUnpin();
-  }, [dismissUndo, onUnpin]);
+  }, [dismissUndo]);
 
   const startPaymentUndo = useCallback((payment: PendingPayment) => {
-    onPin(playerName);
     setLastPayment(payment);
     startUndo(payment);
-  }, [playerName, onPin, startUndo]);
+  }, [startUndo]);
 
   const handleUndoPayment = useCallback(async () => {
     if (!lastPayment || isUndoing) return;

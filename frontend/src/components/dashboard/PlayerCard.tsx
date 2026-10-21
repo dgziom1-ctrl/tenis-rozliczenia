@@ -1,16 +1,20 @@
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
 import type { PointerEvent } from 'react';
+import { CheckCircle2 } from 'lucide-react';
 import { getPlayerColor } from '@/constants/colors';
 import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, SOUND_TYPES } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
 import { formatAmountShort } from '@/utils/format';
+import { BLIK_NUMBER } from '@/utils/blik';
 import { makeId } from '@/utils/id';
 import { RARITY_CARD_CLASS, RARITY_FOIL_CLASS, RARITY_LABEL } from '@/utils/playerCard';
 import { usePaymentUndo } from '@/hooks/usePaymentUndo';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import BreakdownPanel from './BreakdownPanel';
 import PaymentModal, { type PaymentModalType } from './PaymentModal';
+import HoldToSettleButton from './HoldToSettleButton';
 import UndoBar from '../common/UndoBar';
+import Modal from '../common/Modal';
 import TreasurerPanel from './TreasurerPanel';
 import ConfettiBurst from '../common/ConfettiBurst';
 import StreakBadge from '../attendance/StreakBadge';
@@ -34,8 +38,6 @@ interface PlayerCardProps {
   breakdown: DebtDisplayData | null;
   onAddPayment: (playerName: string, amount: number, paymentId: string) => Promise<AddPaymentResult>;
   onRemovePayment: (playerName: string, paymentId: string) => Promise<TransactionResult>;
-  onPin: (playerName: string) => void;
-  onUnpin: () => void;
   playSound: (type: SoundType) => void;
   playerIndex?: number;
   /** Podawane tylko dla skarbnika — zasila panel „kto ile winien”. */
@@ -45,7 +47,7 @@ interface PlayerCardProps {
 function PlayerCard({
   player, history, meta,
   openDetails, onToggleDetails, breakdown,
-  onAddPayment, onRemovePayment, onPin, onUnpin,
+  onAddPayment, onRemovePayment,
   playSound,
   playerIndex = 0,
   allPlayers,
@@ -67,6 +69,8 @@ function PlayerCard({
   const [adminMode, setAdminMode] = useState(false);
   const [flash,     setFlash]     = useState(false);
   const [justCleared, setJustCleared] = useState(false);
+  const [settling, setSettling] = useState(false);
+  const [confirmSettle, setConfirmSettle] = useState(false);
   const [showBurst, setShowBurst] = useState(false);
   const reducedMotion = useReducedMotion();
 
@@ -82,7 +86,9 @@ function PlayerCard({
   const savingRef  = useRef(false);
   const pendingPaymentIdRef = useRef<string | null>(null);
 
-  const animatedAbs = useAnimatedValue(Math.abs(debt));
+  // 850 ms zamiast 450: po zapisie kwota ma widocznie zjechać do zera, a nie
+  // mrugnąć. Ten sam licznik animuje też powrót długu po „cofnij”.
+  const animatedAbs = useAnimatedValue(Math.abs(debt), 850);
 
   useEffect(() => {
     if (prevDebt.current === debt) return undefined;
@@ -98,8 +104,22 @@ function PlayerCard({
     return () => clearTimeout(t);
   }, [justCleared]);
 
+  // Pieczątka pojawia się dopiero, gdy licznik naprawdę dojechał do zera.
+  // Wcześniej timer startował w momencie zapisu i po 850 ms nakładał
+  // „ROZLICZONY” na jeszcze animującą się kwotę (0,07 zł).
+  useEffect(() => {
+    if (!settling || debt > SETTLED_THRESHOLD) return undefined;
+    const t = setTimeout(() => {
+      setSettling(false);
+      setJustCleared(true);
+      setShowBurst(true);
+      playSound(SOUND_TYPES.SUCCESS);
+    }, reducedMotion ? 0 : 900);
+    return () => clearTimeout(t);
+  }, [settling, debt, reducedMotion, playSound]);
+
   const { lastPayment, secondsLeft, progressPct, startPaymentUndo, handleUndoPayment } =
-    usePaymentUndo({ playerName: player.name, onPin, onUnpin, onRemovePayment });
+    usePaymentUndo({ playerName: player.name, onRemovePayment });
 
   const handleAmountClick = useCallback(() => {
     clickCount.current += 1;
@@ -125,7 +145,6 @@ function PlayerCard({
 
     setPaymentError(null);
     setIsSaving(true);
-    onPin(player.name);
 
     try {
       const result = await onAddPayment(player.name, amount, paymentId);
@@ -133,25 +152,30 @@ function PlayerCard({
         pendingPaymentIdRef.current = null;
         startPaymentUndo({ id: result.paymentId, amount });
         if (debt > SETTLED_THRESHOLD && debt - amount <= SETTLED_THRESHOLD) {
-          setJustCleared(true);
-          setShowBurst(true);
-          playSound(SOUND_TYPES.SUCCESS);
+          // Sam licznik zjeżdża do zera; pieczątka i dźwięk czekają na efekt
+          // powyżej, żeby nie nakładały się na animację.
+          setJustCleared(false);
+          setSettling(true);
         }
-        setTimeout(() => cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
         cancelModal();
+        setConfirmSettle(false);
       } else {
-        onUnpin();
         setPaymentError(result?.error || 'Nie udało się zapisać wpłaty');
       }
     } catch (err) {
-      onUnpin();
       const message = err instanceof Error ? err.message : '';
       setPaymentError(message || 'Nie udało się zapisać wpłaty');
     } finally {
       savingRef.current = false;
       setIsSaving(false);
     }
-  }, [player.name, debt, onAddPayment, onPin, onUnpin, startPaymentUndo, cancelModal, playSound]);
+  }, [player.name, debt, onAddPayment, startPaymentUndo, cancelModal]);
+
+  const handleUndo = useCallback(async () => {
+    setSettling(false);
+    setJustCleared(false);
+    await handleUndoPayment();
+  }, [handleUndoPayment]);
 
   const accentColor = c.border;
   const cardBorder = isSettled && !isOrganizer
@@ -280,6 +304,9 @@ function PlayerCard({
       <div ref={foilRef} className={RARITY_FOIL_CLASS[meta.rarity]} style={foilStyle} aria-hidden="true" />
       <CornerBrackets color={accentColor} size={14} thickness={1} />
       {showBurst && <ConfettiBurst onDone={() => setShowBurst(false)} />}
+      <span className="sr-only" role="status" aria-live="polite">
+        {isSaving ? 'Zapisywanie wpłaty…' : settling ? 'Rozliczanie…' : justCleared ? 'Wpłata zapisana. Karta rozliczona.' : ''}
+      </span>
 
       <div style={{
         padding: '6px 14px',
@@ -398,7 +425,7 @@ function PlayerCard({
         <div style={{ padding: '14px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
 
           <div
-            className={flash ? 'debt-flash' : ''}
+            className={`${flash ? 'debt-flash' : ''} ${settling ? 'debt-settling' : ''}`.trim()}
             onClick={handleAmountClick}
             style={{
               minHeight: 84,
@@ -471,7 +498,7 @@ function PlayerCard({
                 message={<>{formatAmountShort(lastPayment.amount)} zł zapisane</>}
                 secondsLeft={secondsLeft}
                 progressPct={progressPct}
-                onUndo={handleUndoPayment}
+                onUndo={handleUndo}
                 buttonLabel="cofnij"
                 compact
               />
@@ -486,26 +513,59 @@ function PlayerCard({
             errorMsg={paymentError}
           />
 
+          <Modal
+            open={confirmSettle}
+            onClose={() => setConfirmSettle(false)}
+            title="Zapisać wpłatę?"
+            icon={CheckCircle2}
+            align={isMobile ? 'bottom' : 'center'}
+            maxWidth={420}
+            footer={
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => { setConfirmSettle(false); setPaymentError(null); }}
+                  disabled={isSaving}
+                  className="cyber-button-outline"
+                  style={{ flex: 1, minHeight: 44, padding: '10px 14px' }}
+                >
+                  Anuluj
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void savePayment(debt)}
+                  disabled={isSaving}
+                  className="cyber-button-yellow"
+                  style={{ flex: 1, minHeight: 44, padding: '10px 14px' }}
+                >
+                  {isSaving ? 'Zapisywanie…' : 'Tak, zapisz'}
+                </button>
+              </div>
+            }
+          >
+            <p style={{ ...FONT.monoSmall, color: 'var(--co-text)', margin: '0 0 10px', lineHeight: 1.6 }}>
+              Zapisać <strong style={{ color: 'var(--co-green)' }}>{formatAmountShort(debt)} zł</strong> jako wpłatę od {player.name}?
+            </p>
+            <p style={{ ...FONT.monoMicro, color: 'var(--co-dim)', margin: 0, lineHeight: 1.6 }}>
+              To tylko wpis w aplikacji — nie wykonuje przelewu. Przelew BLIK zrób osobno na numer {BLIK_NUMBER}.
+            </p>
+            {paymentError && (
+              <p role="alert" style={{ ...FONT.monoMicro, color: 'var(--co-rose)', margin: '10px 0 0', lineHeight: 1.6 }}>
+                {paymentError}
+              </p>
+            )}
+          </Modal>
+
           {modal === null && (
             <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {isPending && (
                 <>
-                  <button
-                    onClick={() => savePayment(debt)}
+                  <HoldToSettleButton
+                    amount={debt}
                     disabled={isSaving}
-                    className="cyber-button-yellow"
-                    style={{ padding: '10px 16px', width: '100%' }}
-                    aria-label={`Zapłać ${formatAmountShort(debt)} zł przez BLIK`}
-                  >
-                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                      <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-display)', letterSpacing: '0.06em', lineHeight: 1 }}>
-                        {formatAmountShort(debt)} ZŁ
-                      </span>
-                      <span style={{ fontSize: '0.75rem', letterSpacing: '0.18em', opacity: 0.75, fontFamily: 'var(--font-mono)' }}>
-                        ⚡ BLIK
-                      </span>
-                    </span>
-                  </button>
+                    onConfirm={() => void savePayment(debt)}
+                    onKeyboardRequest={() => setConfirmSettle(true)}
+                  />
                   <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }} aria-label="Wpłać inną kwotę">
                     + Inna kwota
                   </button>

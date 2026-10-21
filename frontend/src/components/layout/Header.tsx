@@ -1,7 +1,8 @@
-import { Volume2, VolumeX, Smartphone, Check, Sun, Moon } from 'lucide-react';
+import { Volume2, VolumeX, Smartphone, Check, Sun, Moon, HelpCircle } from 'lucide-react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ArenaCanvas from './ArenaCanvas';
 import { copyToClipboard } from '@/utils/clipboard';
+import { BLIK_NUMBER } from '@/utils/blik';
 import { useToast } from '@/components/common/Toast';
 import { TEXT, TRACK, CLIP } from '@/constants/styles';
 import type { StyleWithVars } from '@/types/css';
@@ -38,9 +39,10 @@ interface HeaderProps {
   scrolled: boolean;
   theme: string;
   onToggleTheme: () => void;
+  onShowGuide: () => void;
 }
 
-function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleTheme }: HeaderProps) {
+function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleTheme, onShowGuide }: HeaderProps) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti,  setConfetti]  = useState<ChaosConfettiPiece[]>([]);
@@ -51,7 +53,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
 
   const { showError } = useToast();
 
-  const blikNumber = import.meta.env.VITE_BLIK_NUMBER || 'SKONFIGURUJ .ENV';
+  const blikNumber = BLIK_NUMBER;
 
   useEffect(() => {
     return () => {
@@ -123,9 +125,10 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
         <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
         <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
 
-        <div style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
+        <div className="header-topbar" style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
-          <button onClick={handleCopy} className="glass-chip" style={{ display:'flex',alignItems:'center',gap:'8px',
+          <span className="header-wordmark" aria-hidden="true">CYBER-PONK</span>
+          <button type="button" onClick={handleCopy} className="glass-chip header-blik" aria-label={`Skopiuj numer BLIK ${blikNumber}`} style={{ display:'flex',alignItems:'center',gap:'8px',
             border:'1px solid var(--co-tint-line)',padding: '6px 12px',cursor:'pointer',
             transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
             <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
@@ -139,8 +142,18 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             {copied ? <Check size={13} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
           </button>
           <div style={{ display:'flex',alignItems:'center',gap:6 }}>
-            <button onClick={() => setIsMuted(!isMuted)}
+            <button type="button" onClick={onShowGuide}
+              aria-label="Pomoc — jak to działa"
+              className="header-action-btn"
+              style={{ display:'flex',alignItems:'center',
+              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',
+              border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
+              clipPath:CLIP.badge }}>
+              <HelpCircle size={17} aria-hidden="true"/>
+            </button>
+            <button type="button" onClick={() => setIsMuted(!isMuted)}
               aria-label={isMuted ? 'Włącz dźwięki' : 'Wycisz dźwięki'} aria-pressed={isMuted}
+              className="header-action-btn"
               style={{ display:'flex',alignItems:'center',
               justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',
               border:isMuted?'1px solid var(--co-rose)':'1px solid var(--co-border)',
@@ -149,8 +162,9 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
               clipPath:CLIP.badge }}>
               {isMuted ? <VolumeX size={17} aria-hidden="true"/> : <Volume2 size={17} aria-hidden="true"/>}
             </button>
-            <button onClick={onToggleTheme}
+            <button type="button" onClick={onToggleTheme}
               aria-label={theme === 'light' ? 'Włącz tryb ciemny' : 'Włącz tryb jasny'}
+              className="header-action-btn"
               style={{ display:'flex',alignItems:'center',
               justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',
               border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
@@ -160,7 +174,19 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           </div>
         </div>
 
-        <div style={{ position:'relative',zIndex:10,padding: '16px 16px 20px',
+        {/* Mobilny pasek BLIK: na telefonie nagłówek ma być kompaktowy, więc
+            numer dostaje własny, pełnowymiarowy wiersz zamiast rozpychać górę. */}
+        <button type="button" onClick={handleCopy} className="header-blik-mobile"
+          aria-label={`Skopiuj numer BLIK ${blikNumber}`}>
+          <Smartphone size={14} aria-hidden="true" style={{ color:'var(--co-dim)', flexShrink:0 }}/>
+          <span className="header-blik-label">BLIK</span>
+          <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.base,letterSpacing:TRACK.tight,color:'var(--co-text)',flex:1,textAlign:'left' }}>
+            {blikNumber}
+          </span>
+          {copied ? <Check size={14} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
+        </button>
+
+        <div className="header-hero" style={{ position:'relative',zIndex:10,padding: '16px 16px 20px',
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
           <div style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
@@ -255,7 +281,16 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             letterSpacing:TRACK.tight,color:isConnected?'var(--co-green)':'var(--co-rose)' }}>
             {isConnected ? '● ONLINE' : '○ OFFLINE'}
           </span>
-          <button onClick={() => setIsMuted(!isMuted)}
+          <button type="button" onClick={onShowGuide}
+            aria-label="Pomoc — jak to działa"
+            style={{ display:'flex',alignItems:'center',
+            border:'1px solid var(--co-border)',color:'var(--co-dim)',
+            background:'transparent',cursor:'pointer',
+            justifyContent:'center',width:40,height:40,
+            clipPath:CLIP.badge }}>
+            <HelpCircle size={16} aria-hidden="true"/>
+          </button>
+          <button type="button" onClick={() => setIsMuted(!isMuted)}
             aria-label={isMuted ? 'Włącz dźwięki' : 'Wycisz dźwięki'} aria-pressed={isMuted}
             style={{ display:'flex',alignItems:'center',
             border:isMuted?'1px solid var(--co-rose)':'1px solid var(--co-border)',

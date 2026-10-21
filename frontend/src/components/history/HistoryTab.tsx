@@ -19,8 +19,8 @@ import EditSessionForm from './EditSessionForm';
 import PlayerFilterSheet from './PlayerFilterSheet';
 import { CLIP } from '@/constants/styles';
 
-/** Ile sesji pokazujemy, zanim użytkownik poprosi o pełną listę. */
-const INITIAL_VISIBLE_SESSIONS = 50;
+/** Ile sesji pokazujemy na raz. 50 rekordów dawało 17 863 px strony na telefonie. */
+const SESSIONS_PAGE_SIZE = 12;
 
 /** Edytowana sesja razem z jej identyfikatorem — jedno albo drugie nigdy nie występuje osobno. */
 interface EditState {
@@ -47,7 +47,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const [chosenSeason, setChosenSeason] = useState<number | null | undefined>(undefined);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortOrder,    setSortOrder]    = useState<'desc' | 'asc'>('desc');
-  const [showAll,      setShowAll]      = useState(false);
+  const [visibleCount, setVisibleCount] = useState(SESSIONS_PAGE_SIZE);
   const { showError, showSuccess } = useToast();
   const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer<PendingDeletedWeek>();
   const isMobile = useIsMobile();
@@ -79,7 +79,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     return sortOrder === 'asc' ? [...h].reverse() : h;
   }, [seasonHistory, filterPlayer, sortOrder]);
 
-  useEffect(() => { setShowAll(false); }, [filterPlayer, sortOrder, selectedSeason]);
+  useEffect(() => { setVisibleCount(SESSIONS_PAGE_SIZE); }, [filterPlayer, sortOrder, selectedSeason]);
 
   const handleExportCSV = () => {
     let url: string | undefined;
@@ -276,7 +276,8 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     });
   }, [setEditForm]);
 
-  const visibleHistory = showAll ? filteredHistory : filteredHistory.slice(0, INITIAL_VISIBLE_SESSIONS);
+  const visibleHistory = filteredHistory.slice(0, visibleCount);
+  const hasMoreSessions = visibleCount < filteredHistory.length;
   const grouped = groupHistoryByMonth(visibleHistory);
 
   return (
@@ -487,7 +488,29 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           </div>
         )}
 
-        {/* ── 5. EMPTY STATE ────────────────────────────────────────── */}
+        {/* ── 5. LICZNIK STRONY ─────────────────────────────────────── */}
+        {filteredHistory.length > 0 && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 12, flexWrap: 'wrap', margin: '0 0 16px',
+          }}>
+            <p aria-live="polite" style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+              Pokazano <span style={{ color: 'var(--co-cyan)' }}>{visibleHistory.length}</span> z {filteredHistory.length} sesji
+            </p>
+            {hasMoreSessions && (
+              <button
+                type="button"
+                onClick={() => setVisibleCount(count => Math.min(count + SESSIONS_PAGE_SIZE, filteredHistory.length))}
+                className="cyber-button-outline"
+                style={{ minHeight: 44, padding: '6px 12px', fontSize: '0.75rem' }}
+              >
+                Pokaż więcej
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* ── 6. EMPTY STATE ────────────────────────────────────────── */}
         {history.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
             <CalendarDays style={{ margin: '0 auto 16px', color: 'var(--co-dim)' }} size={40} />
@@ -550,14 +573,20 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         </div>
         {/* Hover przez klasę, nie przez handlery JS — na dotyku `mouseenter`
             wypalał się przy tapnięciu i stan zostawał do kolejnego kliknięcia. */}
-        {!showAll && filteredHistory.length > INITIAL_VISIBLE_SESSIONS && (
+        {hasMoreSessions && (
           <button
-            onClick={() => setShowAll(true)}
+            type="button"
+            onClick={() => setVisibleCount(count => Math.min(count + SESSIONS_PAGE_SIZE, filteredHistory.length))}
             className="cyber-button-outline"
             style={{ display: 'block', width: '100%', marginTop: 16, minHeight: 44, padding: '12px' }}
           >
-            Pokaż wszystkie ({filteredHistory.length} sesji)
+            Pokaż więcej ({filteredHistory.length - visibleHistory.length} pozostało)
           </button>
+        )}
+        {!hasMoreSessions && filteredHistory.length > SESSIONS_PAGE_SIZE && (
+          <p style={{ margin: '16px 0 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+            {'>'} To wszystkie sesje w tym widoku
+          </p>
         )}
       </div>
     </>

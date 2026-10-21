@@ -74,7 +74,7 @@ describe('App — smoke test', () => {
   it('nie pokazuje zakładek dopóki dane nie są gotowe', () => {
     render(<App />);
     // Nawigacja pojawia się dopiero po załadowaniu danych
-    expect(screen.queryByText('HOME')).not.toBeInTheDocument();
+    expect(screen.queryByText('START')).not.toBeInTheDocument();
   });
 });
 
@@ -143,7 +143,7 @@ describe('Navigation — renderowanie zakładek', () => {
     render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={vi.fn()} />);
     // Komponent renderuje dwie nawigacje (desktop + mobile) — obie zawierają te same
     // etykiety, więc getAllByText zamiast getByText (które rzuciłoby "multiple elements").
-    expect(screen.getAllByText('HOME').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('START').length).toBeGreaterThan(0);
     expect(screen.getAllByText('RANKING').length).toBeGreaterThan(0);
     expect(screen.getAllByText('DODAJ').length).toBeGreaterThan(0);
     expect(screen.getAllByText('HISTORIA').length).toBeGreaterThan(0);
@@ -587,8 +587,6 @@ describe('PlayerCard — karta gracza z obecnością i kropkami sesji', () => {
         breakdown={null}
         onAddPayment={vi.fn()}
         onRemovePayment={vi.fn()}
-        onPin={vi.fn()}
-        onUnpin={vi.fn()}
         playSound={vi.fn()}
       />,
     );

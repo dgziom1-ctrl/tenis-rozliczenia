@@ -4,6 +4,7 @@ import { getMessaging, onMessage } from 'firebase/messaging';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PWAInstallBanner from '@/components/common/PWAInstallBanner';
+import FirstRunGuide from '@/components/common/FirstRunGuide';
 import { useConnectionStatus } from './providers/appDataContext';
 import { useThemeContext } from './providers/themeContext';
 import { useAudio } from '@/hooks/useAudio';
@@ -44,6 +45,10 @@ function isNotificationClick(data: unknown): data is NotificationClickMessage {
  */
 const OFFLINE_NOTICE_DELAY_MS = 4000;
 
+/** Klucz przewodnika. Wersja w nazwie pozwala pokazać nowe wprowadzenie po
+ *  dużej zmianie produktu bez cofania decyzji użytkownika. */
+const GUIDE_STORAGE_KEY = 'cyberponk.guide.v1';
+
 export default function Layout() {
   const [isMuted, setIsMuted] = useState(false);
   const navigate = useNavigate();
@@ -54,6 +59,24 @@ export default function Layout() {
   const scrolled = useScrolled();
   const { playSound } = useAudio(isMuted);
   useGlassPointer();
+
+  const [showGuide, setShowGuide] = useState(false);
+
+  useEffect(() => {
+    let alreadySeen = false;
+    try { alreadySeen = localStorage.getItem(GUIDE_STORAGE_KEY) === '1'; } catch { /* brak dostępu do storage */ }
+    if (alreadySeen) return undefined;
+
+    // Po pierwszym renderze, żeby nie przykrywać ekranu startowego i nie
+    // otwierać dialogu w trakcie animacji wejścia.
+    const timer = setTimeout(() => setShowGuide(true), 700);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const closeGuide = useCallback(() => {
+    setShowGuide(false);
+    try { localStorage.setItem(GUIDE_STORAGE_KEY, '1'); } catch { /* brak dostępu do storage */ }
+  }, []);
 
   const activeTab = PATH_TO_TAB[location.pathname] ?? 'dashboard';
   const tabOrder: Record<string, number> = {
@@ -158,6 +181,7 @@ export default function Layout() {
           scrolled={scrolled}
           theme={theme}
           onToggleTheme={toggleTheme}
+          onShowGuide={() => setShowGuide(true)}
         />
         <Navigation activeTab={activeTab} setActiveTab={switchTab} />
         {(isOffline || (bootTimedOut && !hasData)) && (
@@ -171,6 +195,7 @@ export default function Layout() {
         </main>
       </div>
       <PWAInstallBanner />
+      <FirstRunGuide open={showGuide} onClose={closeGuide} />
     </div>
   );
 }

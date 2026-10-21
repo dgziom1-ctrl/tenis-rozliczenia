@@ -13,8 +13,9 @@ export type ChartPoint = readonly [number, number, ...number[]];
 /** Szerokość viewBoxa — wspólna, żeby oba wykresy skalowały się identycznie. */
 export const CHART_WIDTH = 560;
 
-/** Rozmiar tekstu w viewBoxie. Przy skali ~0.55 na telefonie daje ~7px. */
-export const CHART_LABEL_SIZE = 13;
+/** Rozmiar tekstu w viewBoxie. Wykresy mierzą szerokość kontenera, więc
+ *  viewBox jest w pikselach CSS i 12 px zostaje 12 px także na telefonie. */
+export const CHART_LABEL_SIZE = 12;
 
 /** Wzór kreskowania linii pomocniczych. */
 export const CHART_GRID_DASH = '4 4';

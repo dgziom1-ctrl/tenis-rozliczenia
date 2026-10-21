@@ -20,7 +20,6 @@ interface DashboardTabProps {
 
 export default function DashboardTab({ data, history, playSound }: DashboardTabProps) {
   const [openDetails,   setOpenDetails]   = useState<string | null>(null);
-  const [pinnedPlayer,  setPinnedPlayer]  = useState<string | null>(null);
   const [showRankGuide, setShowRankGuide] = useState(false);
 
   const { showError } = useToast();
@@ -78,18 +77,14 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
 
   const sortedPlayers = useMemo(() => {
     if (!data.players) return [];
-    // Sort: alphabetical A→Z, organizer always last, but pinned card (undo) to the top.
+    // Sort: alphabetical A→Z, organizer always last. Karta nie przeskakuje na
+    // górę po wpłacie — wcześniej pinowanie przenosiło ją w trakcie animacji
+    // licznika i wyglądało jak skok do zera.
     const nonOrg = data.players.filter(p => p.name !== ORGANIZER_NAME);
     const organizer = data.players.filter(p => p.name === ORGANIZER_NAME);
     const alphaSorted = [...nonOrg].sort((a, b) => a.name.localeCompare(b.name, 'pl'));
-    if (pinnedPlayer && pinnedPlayer !== ORGANIZER_NAME) {
-      const pinned = alphaSorted.find(p => p.name === pinnedPlayer);
-      if (pinned) {
-        return [pinned, ...alphaSorted.filter(p => p.name !== pinnedPlayer), ...organizer];
-      }
-    }
     return [...alphaSorted, ...organizer];
-  }, [data.players, pinnedPlayer]);
+  }, [data.players]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -166,8 +161,6 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 breakdown={(!isOrg && showBreakdown) ? getBreakdown(player) : null}
                 onAddPayment={handleAddPayment}
                 onRemovePayment={handleRemovePayment}
-                onPin={setPinnedPlayer}
-                onUnpin={() => setPinnedPlayer(null)}
                 playSound={playSound}
                 playerIndex={idx}
                 allPlayers={isOrg ? data.players : undefined}

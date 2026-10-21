@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "lint:css": "node scripts/find-unused-css.mjs",
     "lint:orphans": "node scripts/find-orphan-modules.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run lint:css && npm run lint:orphans && npm test",
+    "audit:a11y": "node scripts/check-a11y.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run lint:css && npm run lint:orphans && npm run audit:a11y && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

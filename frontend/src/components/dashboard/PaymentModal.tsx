@@ -3,6 +3,7 @@ import { CheckCircle2, X, Zap } from 'lucide-react';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { parseAmount, isValidAmount } from '@/utils/format';
+import { BLIK_NUMBER } from '@/utils/blik';
 import type { PAYMENT_MODAL } from '@/constants';
 import { TEXT, CLIP } from '@/constants/styles';
 
@@ -53,9 +54,12 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <Zap size={12} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} />
         <p id={titleId} style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', textTransform: 'uppercase', margin: 0 }}>
-          {hasCredit ? 'Ile chcesz dopłacić?' : 'Kwota przelewu BLIK'}
+          {hasCredit ? 'Ile chcesz dopłacić?' : 'Zapisz wpłatę'}
         </p>
       </div>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', lineHeight: 1.55, margin: '0 0 12px' }}>
+        To tylko wpis w aplikacji — nie wykonuje przelewu. BLIK zrób osobno na numer {BLIK_NUMBER}.
+      </p>
 
       {/* Amount input */}
       <label htmlFor={inputId} className="sr-only">Kwota w złotych</label>
@@ -107,7 +111,7 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
             } : {}),
           }}
         >
-          {isSaving ? <InlineSpinner size="sm" /> : <><CheckCircle2 size={13} /> Potwierdzam</>}
+          {isSaving ? <InlineSpinner size="sm" /> : <><CheckCircle2 size={13} /> Zapisz wpłatę</>}
         </button>
         <button
           onClick={onCancel}

@@ -1,6 +1,45 @@
 import { MONTHS } from '@/constants';
 import type { HistoryEntry, MonthGroup } from '@/types/ui';
 
+/**
+ * Wartości startowe formularza nowej sesji.
+ *
+ * Grupa gra prawie zawsze w tym samym składzie, więc każdorazowe odznaczanie
+ * połowy listy jest zbędną pracą i źródłem pomyłek. Bierzemy ostatnią sesję
+ * (najpóźniejszą datą), a nie „wszystkich”, i odsiewamy osoby, których nie ma
+ * już w aktywnym składzie.
+ */
+export interface SessionDefaults {
+  presentPlayers: string[];
+  multisportPlayers: string[];
+  courtCount: number;
+  durationHours: number;
+  sport: HistoryEntry['sport'];
+}
+
+export function getLastSessionDefaults(
+  history: HistoryEntry[],
+  playerNames: string[],
+): SessionDefaults | null {
+  if (!history?.length || !playerNames?.length) return null;
+
+  const latest = [...history]
+    .filter(session => Boolean(session?.datePlayed))
+    .sort((a, b) => b.datePlayed.localeCompare(a.datePlayed))[0];
+  if (!latest) return null;
+
+  const presentPlayers = latest.presentPlayers.filter(name => playerNames.includes(name));
+  if (presentPlayers.length === 0) return null;
+
+  return {
+    presentPlayers,
+    multisportPlayers: latest.multisportPlayers.filter(name => presentPlayers.includes(name)),
+    courtCount: latest.courtCount ?? 1,
+    durationHours: latest.durationHours ?? 1,
+    sport: latest.sport,
+  };
+}
+
 function getMonthLabel(dateStr: string): string {
   const [y, m] = dateStr.split('-');
   return `${MONTHS[parseInt(m, 10) - 1]} ${y}`;
