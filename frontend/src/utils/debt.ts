@@ -52,6 +52,9 @@ function buildCarryOver(
 
   const years = [...sessions.map(s => yearOf(s.date)), ...payments.map(p => yearOf(p.date))]
     .filter(Number.isFinite);
+  // Gdy żadna data nie da się odczytać, nie da się policzyć zakresu lat —
+  // zamiast zwracać Infinity/NaN, nie pokazujemy bilansu otwarcia.
+  if (years.length === 0) return null;
   const totalSessionsGrosze = sumGrosze(sessions.map(s => s.amount));
   const totalPaidGrosze = sumGrosze(payments.map(p => p.amount || 0));
 

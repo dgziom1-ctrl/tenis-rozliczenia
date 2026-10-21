@@ -40,9 +40,11 @@ export function getLastSessionDefaults(
   };
 }
 
-function getMonthLabel(dateStr: string): string {
+export function getMonthLabel(dateStr: string): string {
+  if (!dateStr || typeof dateStr !== 'string') return '—';
   const [y, m] = dateStr.split('-');
-  return `${MONTHS[parseInt(m, 10) - 1]} ${y}`;
+  const monthName = MONTHS[parseInt(m, 10) - 1];
+  return `${monthName ?? '—'} ${y ?? ''}`.trim();
 }
 
 function getMonthKey(dateStr: string): string {

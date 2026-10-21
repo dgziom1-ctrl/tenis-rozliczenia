@@ -245,6 +245,19 @@ export async function restoreWeek(week: Week): Promise<TransactionResult> {
       reject('Nie można przywrócić sesji — istnieje już inna sesja z tą datą');
     }
 
-    return { ...data, weeks: sortWeeksByDate([...weeks, week]) } as RawAppData;
+    // Przywracamy znormalizowany rekord, żeby pola (korty, godziny, rakiety)
+    // przeszły przez tę samą walidację co przy edycji — a nie surowy snapshot
+    // z bazy, który mógłby nie spełniać reguł.
+    // Zachowujemy dodatkowe pola legacy (np. overtimeCost), a znormalizowane
+    // wartości nadpisują te, które podlegają walidacji.
+    const restored: Week = {
+      ...week,
+      ...normalized.session,
+      id: week.id,
+      date: week.date,
+      sport: normalized.session.sport || week.sport || 'pingpong',
+    };
+
+    return { ...data, weeks: sortWeeksByDate([...weeks, restored]) } as RawAppData;
   }, 'Nie udało się przywrócić sesji');
 }

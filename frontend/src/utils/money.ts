@@ -70,7 +70,8 @@ export function allocateExact(targets: number[], totalGrosze: number): number[] 
 
   let leftover = remainder - fullRounds * count;
   const step = leftover >= 0 ? 1 : -1;
-  for (let k = 0; leftover !== 0; k++) {
+  // Guard przed nieskończoną pętlą na wypadek nieoczekiwanych danych.
+  for (let k = 0; k < count && leftover !== 0; k++) {
     result[byFraction[k].index] += step;
     leftover -= step;
   }

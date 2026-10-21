@@ -91,7 +91,7 @@ export default defineConfig({
     __CP_APP_BUILD__: JSON.stringify(BUILD_ID),
   },
   server: {
-    allowedHosts: true,
+    allowedHosts: ['localhost', '127.0.0.1'],
   },
   resolve: {
     alias: {

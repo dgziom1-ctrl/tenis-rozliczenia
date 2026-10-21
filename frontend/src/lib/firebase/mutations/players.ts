@@ -1,5 +1,6 @@
 import { todayISO } from '@/utils/id';
 import { normalizePlayerName, normalizePlayerList } from '@/utils/validation';
+import { calculateDebt } from '@/utils/debt';
 import { withTransaction, reject } from '../transaction';
 import type { RawAppData, TransactionResult } from '@/types/domain';
 
@@ -56,6 +57,14 @@ export async function softDeletePlayer(playerName: string): Promise<TransactionR
     const data = (current || {}) as RawAppData;
     const players = data.players || [];
     if (!players.includes(name)) reject('Nie znaleziono gracza');
+
+    // Miękkie usunięcie nie może zniknąć długu z sum — blokujemy, gdy saldo
+    // gracza jest niezerowe. Inaczej skarbnik widzi „znikające" pieniądze,
+    // a dług nadal istnieje w historii.
+    const debt = calculateDebt(name, { weeks: data.weeks || [], payments: data.payments || {} });
+    if (Math.abs(debt) > 0.01) {
+      reject(`Nie można usunąć gracza z niezerowym saldem (${debt.toFixed(2)} zł) — najpierw rozlicz go`);
+    }
 
     const deleted = data.deletedPlayers || [];
     return {

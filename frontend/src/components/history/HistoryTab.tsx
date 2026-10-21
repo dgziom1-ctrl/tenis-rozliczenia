@@ -111,7 +111,13 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           s.multisportPlayers.join('; '),
         ]),
       ];
-      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      // Ochrona przed CSV injection: wartości zaczynające się od znaku formuły
+      // („=", „+", „-", „@") mogą być wykonane przez arkusz kalkulacyjny.
+      const sanitizeCsvCell = (value: unknown): string => {
+        const str = String(value ?? '');
+        return /^[=+\-@\t\r]/.test(str.trim()) ? `'${str}` : str;
+      };
+      const csv = rows.map(r => r.map(v => `"${sanitizeCsvCell(v).replace(/"/g, '""')}"`).join(',')).join('\n');
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       url  = URL.createObjectURL(blob);
       const safeName = filterPlayer.replace(/[/\\:*?"<>|]/g, '_');

@@ -128,16 +128,17 @@ export function buildUIData(rawData: NormalizedData): UIData {
       .filter(p => p.name !== ORGANIZER_NAME)
       .reduce((sum, p) => sum + p.currentDebt, 0),
   );
-  const treasurer = playerStats.find(p => p.name === ORGANIZER_NAME);
-  if (treasurer) {
-    // Pełne saldo bez clampowania: jeśli nadpłaty przewyższają zaległości,
-    // currentDebt > 0 → isPending=true → PersonCard pokazuje stan "saldo" zamiast "wszyscy rozliczeni".
-    treasurer.currentDebt = roundToTwoDecimals(-totalOwed);
-  }
+  // Pełne saldo bez clampowania: jeśli nadpłaty przewyższają zaległości,
+  // currentDebt > 0 → isPending=true → PersonCard pokazuje stan "saldo" zamiast "wszyscy rozliczeni".
+  const playersWithTreasurer = playerStats.map(p =>
+    p.name === ORGANIZER_NAME
+      ? { ...p, currentDebt: roundToTwoDecimals(-totalOwed) }
+      : p,
+  );
 
   return {
     summary: buildSummary(playerStats, weeks.length),
-    players: playerStats,
+    players: playersWithTreasurer,
     playerNames: players,
     defaultMultiPlayers,
     deletedPlayers,

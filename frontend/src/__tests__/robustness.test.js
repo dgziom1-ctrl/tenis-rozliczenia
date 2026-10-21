@@ -8,6 +8,8 @@ import { assignRankingPlaces } from '../utils/rankings';
 import { getPlayerAchievements } from '../utils/achievements';
 import { buildUIData } from '../lib/firebase/transforms';
 import { formatDate, formatAmount } from '../utils/format';
+import { getMonthLabel } from '../utils/sessions';
+import { allocateExact } from '../utils/money';
 import * as stateModule from '../lib/firebase/state';
 
 // ─── vi.hoisted: runs BEFORE vi.mock factories ────────────────────────────────
@@ -747,6 +749,70 @@ describe('getPlayerAchievements — edge cases', () => {
     expect(ids).toContain('perfect_month_10');
     expect(ids).not.toContain('perfect_month_15');
   });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// softDeletePlayer — blokada przy niezerowym saldzie (punkt 1.1)
+// ══════════════════════════════════════════════════════════════════════════════
+
+describe('softDeletePlayer — debt guard', () => {
+  beforeEach(() => { mockSaveData.mockClear(); });
+
+  it('blocks deletion when player owes money', async () => {
+    seed({
+      players: ['Alice', 'Bob'],
+      weeks: [{ id: 'w1', cost: 60, date: '2025-01-01', present: ['Alice'], multiPlayers: [] }],
+    });
+    const result = await softDeletePlayer('Alice');
+    expect(result.success).toBe(false);
+    expect(mockSaveData).not.toHaveBeenCalled();
+  });
+
+  it('allows deletion when balance is zero', async () => {
+    seed({ players: ['Alice', 'Bob'], weeks: [] });
+    const result = await softDeletePlayer('Alice');
+    expect(result.success).toBe(true);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// buildDebtDisplayData — nieprawidłowe daty (punkt 1.2)
+// ══════════════════════════════════════════════════════════════════════════════
+
+describe('buildDebtDisplayData — invalid dates', () => {
+  it('does not return Infinity/NaN when dates are invalid', () => {
+    const history = [
+      { id: 'w1', datePlayed: 'not-a-date', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'], multisportPlayers: [] },
+    ];
+    const player = { name: 'Alice', attendanceCount: 1, currentDebt: 0, eligibleWeeks: 1, joinDate: null };
+    const d = buildDebtDisplayData(player, history, {});
+    expect(Number.isFinite(d.balance)).toBe(true);
+    expect(d.carryOver === null || Number.isFinite(d.carryOver?.amount ?? 0)).toBe(true);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// getMonthLabel — guard (punkt 1.5)
+// ══════════════════════════════════════════════════════════════════════════════
+
+describe('getMonthLabel — guard', () => {
+  it('handles empty/invalid input without throwing', () => {
+    expect(() => getMonthLabel('')).not.toThrow();
+    expect(() => getMonthLabel(null)).not.toThrow();
+    expect(() => getMonthLabel(undefined)).not.toThrow();
+    expect(() => getMonthLabel('bad')).not.toThrow();
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// money — allocateExact guard (punkt 3)
+// ══════════════════════════════════════════════════════════════════════════════
+
+describe('allocateExact — guard', () => {
+  it('terminates and sums correctly for normal input', () => {
+    const r = allocateExact([10, 20, 30], 60);
+    expect(r.reduce((a, b) => a + b, 0)).toBe(60);
+  });
+});
 
   it('seria liczy się z najdłuższego ciągu, nie z bieżącego', () => {
     // `history` jest od najnowszej sesji, tak jak zwraca je buildHistory.

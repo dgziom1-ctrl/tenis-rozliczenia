@@ -22,7 +22,13 @@ function toArray(val) {
   if (!val) return [];
   if (Array.isArray(val)) return val;
   return Object.keys(val)
-    .sort((a, b) => Number(a) - Number(b))
+    .sort((a, b) => {
+      const na = Number(a), nb = Number(b);
+      if (Number.isNaN(na) && Number.isNaN(nb)) return String(a).localeCompare(String(b));
+      if (Number.isNaN(na)) return 1;
+      if (Number.isNaN(nb)) return -1;
+      return na - nb;
+    })
     .map(k => val[k])
     .filter(v => v != null);
 }

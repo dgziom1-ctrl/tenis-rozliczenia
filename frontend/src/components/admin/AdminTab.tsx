@@ -8,6 +8,7 @@ import { CLIP, CONTENT_WIDTH } from '@/constants/styles';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { parseAmount, isValidAmount } from '@/utils/format';
+import { todayISO } from '@/utils/id';
 import { getRacketSelection, getTotalWithRackets } from '@/utils/sessionCost';
 import { getLastSessionDefaults } from '@/utils/sessions';
 import type { Sport } from '@/types/domain';
@@ -33,7 +34,7 @@ interface AdminTabProps {
 export default function AdminTab({ playerNames, defaultMultiPlayers, history, players, setActiveTab, playSound }: AdminTabProps) {
   const { showError } = useToast();
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayISO();
   const [sport,             setSport]             = useState<Sport>(SPORT.PINGPONG as Sport);
   const [datePlayed,        setDatePlayed]        = useState(today);
   const [totalCost,         setTotalCost]         = useState('');
