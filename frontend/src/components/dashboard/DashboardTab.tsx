@@ -129,7 +129,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
         }}>
           <Zap size={9} style={{ color: 'var(--co-cyan)' }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
-            sesji{currentSeason ? ` ${currentSeason}` : ''}: <span style={{ color: 'var(--co-cyan)' }}>{seasonHistory.length}</span>
+            sesji: <span style={{ color: 'var(--co-cyan)' }}>{seasonHistory.length}</span>
           </span>
         </div>
       </div>
