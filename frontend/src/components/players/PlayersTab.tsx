@@ -70,7 +70,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
       const result = await softDeletePlayer(playerName);
       if (!result.success) { showError(result.error || 'Nie udało się usunąć gracza'); return; }
       playSound(SOUND_TYPES.DELETE);
-      showSuccess(`Gracz ${playerName} przeniesiony do kosza`);
+      showSuccess(`Gracz ${playerName} przeniesiony do rezerwy`);
       setPwModal(null);
     } finally {
       setProcessingPlayer(null);
@@ -201,7 +201,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {/* Trash / deleted */}
         {deletedPlayers?.length > 0 && (
           <div>
-            <SectionHeader icon={Trash2} title="Kosz" accent="var(--co-rose)" />
+            <SectionHeader icon={Trash2} title="Rezerwa" accent="var(--co-rose)" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 8 }}>
               {deletedPlayers.map(name => (
                 <div key={name}>
