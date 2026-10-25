@@ -191,7 +191,6 @@ export default function Layout() {
       className="min-h-screen px-2 md:px-8 py-2 md:py-8 relative z-10"
       style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', position: 'relative' }}
     >
-      <a className="skip-link" href="#main-content">Przejdź do treści</a>
       <CyberBackground />
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{routeAnnouncement}</p>
       <div className="max-w-7xl mx-auto relative">
@@ -209,8 +208,6 @@ export default function Layout() {
           <OfflineBanner hasData={hasData} onRetry={retry} />
         )}
         <main
-          id="main-content"
-          tabIndex={-1}
           className={`main-content ${pageDirection === 'forward' ? 'page-enter-forward' : 'page-enter-backward'}`}
           key={location.pathname}
         >
