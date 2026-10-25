@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Smartphone, Check, Sun, Moon, HelpCircle, Zap } from 'lucide-react';
+import { Volume2, VolumeX, Smartphone, Check, Sun, Moon, HelpCircle } from 'lucide-react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ArenaCanvas from './ArenaCanvas';
 import { copyToClipboard } from '@/utils/clipboard';
@@ -57,14 +57,13 @@ const CHAOS_EMOJI = ['🏓', '⚡', '💀', '🎮', '💥', '🔥', '🎯', '�
 interface HeaderProps {
   isMuted: boolean;
   setIsMuted: (muted: boolean) => void;
-  isConnected: boolean;
   scrolled: boolean;
   theme: string;
   onToggleTheme: () => void;
   onShowGuide: () => void;
 }
 
-function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleTheme, onShowGuide }: HeaderProps) {
+function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGuide }: HeaderProps) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti,  setConfetti]  = useState<ChaosConfettiPiece[]>([]);
@@ -253,7 +252,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
 
           <button className="header-hero-title" onClick={handleTitleClick} aria-label="CYBER-PONK"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
-            {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
+            {/* Ghost layer — flashes briefly when the paddle is hit. */}
             {!chaosMode && hitting && <span aria-hidden="true" style={{
               position:'absolute',inset:0,
               display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
@@ -281,44 +280,23 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             }}>CYBER-PONK</span>
           </button>
 
-          <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
-            background:'linear-gradient(90deg,transparent,var(--co-tint-line) 40%,var(--co-tint-line) 60%,transparent)' }}/>
-
-          {/* JACK IN — lights up exactly when ball hits paddle */}
-          <div className="header-hero-meta" style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
-            <span style={{
-              display:'inline-flex',alignItems:'center',gap:5,
-              fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.wide,textTransform: 'none',
-              transition:'color .06s,text-shadow .06s',
-              // Wygaszony stan był cyanem na 8% krycia, czyli praktycznie
-              // niewidoczny w obu motywach.
-              color: hitting ? 'var(--co-cyan)' : 'var(--co-dim)',
-              textShadow: hitting ? 'var(--glow-cyan-md)' : 'none',
-            }}><Zap size={11} aria-hidden="true" /> Jack in <Zap size={11} aria-hidden="true" /></span>
-            <span aria-hidden="true" style={{ color:'var(--co-border)' }}>│</span>
-            <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.normal,
-              color:isConnected?'var(--co-green)':'var(--co-rose)',
-              textShadow:isConnected?'var(--glow-green-md)':'var(--glow-rose-md)' }}>
-              {isConnected ? '● Online' : '○ Offline'}
-            </span>
-            <span aria-hidden="true" style={{ color:'var(--co-border)' }}>│</span>
-            <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-dim)' }}>
-              v2.0.77
-            </span>
-            {/* W trybie demo dane nie pochodzą z bazy — bez tej plakietki łatwo
-                pomylić podgląd projektu z prawdziwymi rozliczeniami grupy. */}
-            {DEMO_MODE && (
-              <span
-                title="Dane demonstracyjne — nie pochodzą z bazy Firebase"
-                style={{
-                  fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-amber)',
-                  border:'1px solid var(--co-amber)',padding:'0 4px',letterSpacing:TRACK.tight,
-                }}
-              >Demo</span>
-            )}
-          </div>
+          {DEMO_MODE && (
+            <>
+              <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
+                background:'linear-gradient(90deg,transparent,var(--co-tint-line) 40%,var(--co-tint-line) 60%,transparent)' }}/>
+              <div className="header-hero-meta" style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
+                {/* W trybie demo dane nie pochodzą z bazy — bez tej plakietki łatwo
+                    pomylić podgląd projektu z prawdziwymi rozliczeniami grupy. */}
+                <span
+                  title="Dane demonstracyjne — nie pochodzą z bazy Firebase"
+                  style={{
+                    fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-amber)',
+                    border:'1px solid var(--co-amber)',padding:'0 4px',letterSpacing:TRACK.tight,
+                  }}
+                >Demo</span>
+              </div>
+            </>
+          )}
         </div>
       </header>
 
@@ -337,10 +315,6 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           {copied ? <Check size={12} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
         </button>
         <div style={{ display:'flex',alignItems:'center',gap:'10px' }}>
-          <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-            letterSpacing:TRACK.tight,color:isConnected?'var(--co-green)':'var(--co-rose)' }}>
-            {isConnected ? '● Online' : '○ Offline'}
-          </span>
           <button type="button" onClick={onShowGuide}
             aria-label="Pomoc — jak to działa"
             style={{ display:'flex',alignItems:'center',
