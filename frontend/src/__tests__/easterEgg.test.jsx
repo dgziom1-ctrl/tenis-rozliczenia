@@ -14,14 +14,13 @@ import { ToastProvider } from '../components/common/Toast';
  * „@keyframes brakuje”), a ten test pilnuje strony komponentu: warstwy w DOM,
  * kompletnego zestawu kawałków, restartu animacji i wariantu bez ruchu.
  */
-function renderHeader() {
+function renderHeader(scrolled = false) {
   return render(
     <ToastProvider>
       <Header
         isMuted={false}
         setIsMuted={() => {}}
-        isConnected
-        scrolled={false}
+        scrolled={scrolled}
         theme="dark"
         onToggleTheme={() => {}}
         onShowGuide={() => {}}
@@ -39,6 +38,15 @@ function clickTitle(times = 5) {
 
 afterEach(() => {
   vi.useRealTimers();
+});
+
+describe('nagłówek — uproszczony pasek', () => {
+  it('nie pokazuje etykiet Jack in, Online ani wersji po przewinięciu', () => {
+    const { container } = renderHeader(true);
+
+    expect(container.querySelector('.compact-header')).toHaveClass('visible-bar');
+    expect(container).not.toHaveTextContent(/Jack in|Online|Offline|v2\.0\.77/i);
+  });
 });
 
 describe('easter egg — konfetti', () => {

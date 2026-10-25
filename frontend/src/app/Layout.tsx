@@ -197,7 +197,6 @@ export default function Layout() {
         <Header
           isMuted={isMuted}
           setIsMuted={setIsMuted}
-          isConnected={!isOffline}
           scrolled={scrolled}
           theme={theme}
           onToggleTheme={toggleTheme}
