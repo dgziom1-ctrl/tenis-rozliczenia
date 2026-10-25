@@ -217,16 +217,16 @@
     0 2px 8px -4px rgba(0,0,0,0.60);
 
   /* ── Fonts ── */
-  /* TYPOGRAFIA — autentyczny duet z interfejsu Cyberpunk 2077.
-     Rajdhani to główny krój UI gry (HUD, menu, dziennik zadań); Orbitron jest
-     tam krojem drugorzędnym na dane techniczne. Oba są self-hosted (@fontsource,
-     patrz main.tsx), więc działają offline.
-     Orbitron ma TYLKO podzbiór `latin` — nie umie złożyć polskich znaków, więc
-     trafia wyłącznie na liczby, kody i wordmark. Zdania zostają w Rajdhani. */
+  /* TYPOGRAFIA — klimat Night City bez kwadratowego HUD-u.
+     Rajdhani to główny krój UI Cyberpunk 2077 (HUD, menu, dziennik) i zostaje
+     na tekście. Dane techniczne składa Chakra Petch Italic: ostre ścięte
+     narożniki i pochył, bliżej liternictwa z logo gry niż poprzedni,
+     geometryczny krój. Wszystkie kroje są self-hosted (@fontsource, patrz fonts.css).
+     Chakra Petch ma pełny latin-ext, więc polszczyzna jest bezpieczna. */
   --font-display: 'Rajdhani', sans-serif;
   --font-body:    'Rajdhani', sans-serif;
   --font-mono:    'Space Mono', 'Courier New', monospace;
-  --font-tech:    'Orbitron Variable', 'Rajdhani', sans-serif;
+  --font-tech:    'Chakra Petch', 'Rajdhani', sans-serif;
   --font-stencil: var(--font-tech);
 
   /* ── Misc ── */
@@ -704,6 +704,7 @@ body.theme-switching *::after {
 
 .card-ovr {
   font-family: var(--font-tech);
+  font-style: italic;
   font-weight: 700;
   font-size: 2.15rem;
   line-height: 0.85;
@@ -717,7 +718,7 @@ body.theme-switching *::after {
   padding: 8px 0 16px;
 }
 .matchday-kicker {
-  /* Zdanie po polsku — Orbitron nie ma latin-ext, zostaje Rajdhani. */
+  /* Zdanie, nie dana — czyta się je w Rajdhani, nie w kroju do liczb. */
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: normal;
@@ -1063,8 +1064,9 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   .header-wordmark {
     display: none !important;
     font-family: var(--font-stencil);
-    font-weight: 800;
-    font-size: 1.15rem;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.3rem;
     line-height: 1;
     letter-spacing: normal;
     color: var(--co-cyan);

@@ -114,21 +114,22 @@ export const FONT = {
     fontSize: size,
   }),
   /**
-   * Dane techniczne z HUD-u Cyberpunk 2077 (Orbitron): liczby, kody, salda.
-   * TYLKO ASCII/cyfry — krój nie ma podzbioru latin-ext, więc polskie zdania
-   * i waluta „zł" muszą zostać przy --font-display / --font-mono.
+   * Dane techniczne (Chakra Petch Italic): liczby, kody, salda, wordmark.
+   * Krój jest pochyły z natury — jawny fontStyle zapobiega podwójnemu,
+   * sztucznemu pochyleniu nakładanemu przez przeglądarkę.
    */
   tech: (size: string = TEXT.base, weight: number = 600): CSSProperties => ({
     fontFamily: 'var(--font-tech)',
+    fontStyle: 'italic',
     fontSize: size,
     fontWeight: weight,
     letterSpacing: 'normal',
     textTransform: 'none',
   }),
   /**
-   * Krój dla danych, które MOGĄ nie być liczbą. Orbitron nie ma polskich
-   * znaków, więc nieskonfigurowany BLIK („SKONFIGURUJ .ENV") składałby się
-   * z dwóch krojów w jednym słowie. Wtedy wracamy do Space Mono.
+   * Krój dla danych, które MOGĄ nie być liczbą. Gdy BLIK nie jest
+   * skonfigurowany, zamiast numeru wyświetla się komunikat („SKONFIGURUJ
+   * .ENV") — taki tekst lepiej czytać w Space Mono niż w kroju do liczb.
    */
   data: (text: string, size: string = TEXT.base): CSSProperties => (
     /^[\d\s]+$/.test(text)

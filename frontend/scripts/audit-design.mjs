@@ -200,9 +200,9 @@ for (const file of files) {
 
 // ── 6. Kroje z bundla, nie z CDN ──────────────────────────────────────────
 /**
- * Cyberpunk 2077 składa HUD w Rajdhani, a dane techniczne w Orbitron. Oba
- * serwujemy z własnego bundla (@fontsource), żeby PWA wyglądała tak samo
- * offline i żeby service worker mógł zapisać kroje razem z resztą wydania.
+ * Tekst składa Rajdhani (krój UI Cyberpunk 2077), a dane — pochyły Chakra
+ * Petch. Wszystko serwujemy z własnego bundla (@fontsource), żeby PWA
+ * wyglądała tak samo offline i żeby service worker zapisał kroje z wydaniem.
  */
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 for (const cdn of ['fonts.googleapis.com', 'fonts.gstatic.com']) {
@@ -211,7 +211,7 @@ for (const cdn of ['fonts.googleapis.com', 'fonts.gstatic.com']) {
   }
 }
 if (/Bebas\s*\+?\s*Neue/i.test(html)) {
-  errors.push('index.html — Bebas Neue nie złoży zdania; użyj Rajdhani i Orbitron');
+  errors.push('index.html — Bebas Neue nie złoży zdania; użyj Rajdhani i Chakra Petch');
 }
 
 const main = fs.readFileSync(path.join(root, 'src/main.tsx'), 'utf8');
@@ -219,7 +219,7 @@ if (!main.includes("import './fonts.css'")) {
   errors.push('src/main.tsx — brak importu ./fonts.css; kroje muszą być self-hosted');
 }
 const fontsCss = fs.readFileSync(path.join(root, 'src/fonts.css'), 'utf8');
-for (const font of ['@fontsource/rajdhani/files', '@fontsource/space-mono/files', '@fontsource-variable/orbitron/files']) {
+for (const font of ['@fontsource/rajdhani/files', '@fontsource/space-mono/files', '@fontsource/chakra-petch/files']) {
   if (!fontsCss.includes(font)) {
     errors.push(`src/fonts.css — brak plików ${font}; kroje muszą być self-hosted`);
   }
@@ -242,10 +242,28 @@ if (faceCount !== rangeCount) {
 if (fontsCss.includes('Space Money')) {
   errors.push('src/fonts.css — literówka w nazwie rodziny: Space Money');
 }
+if (/Orbitron/.test(fontsCss.replace(/\/\*[\s\S]*?\*\//g, ''))) {
+  errors.push('src/fonts.css — Orbitron wrócił do reguł; użyj Chakra Petch');
+}
+if (!/font-family: 'Chakra Petch'/.test(fontsCss)) {
+  errors.push('src/fonts.css — brak rodziny Chakra Petch');
+}
+if (!/font-style: italic/.test(fontsCss)) {
+  errors.push('src/fonts.css — Chakra Petch bez kursywy traci ostry, pochyły charakter');
+}
+if (!/chakra-petch-latin-ext-700-italic\.woff2/.test(fontsCss)) {
+  errors.push('src/fonts.css — brak latin-ext; polskie znaki znikną z danych');
+}
+if (!/fontStyle: 'italic'/.test(fs.readFileSync(path.join(root, 'src/constants/styles.ts'), 'utf8'))) {
+  errors.push('constants/styles.ts — FONT.tech musi prosić o italic (podwójne pochylenie inaczej)');
+}
 
 const indexCss = fs.readFileSync(path.join(root, 'src/index.css'), 'utf8');
-if (!/--font-tech:\s*['"]Orbitron Variable['"]/.test(indexCss)) {
-  errors.push('src/index.css — --font-tech musi wskazywać na Orbitron Variable');
+if (!/--font-tech:\s*['"]Chakra Petch['"]/.test(indexCss)) {
+  errors.push('src/index.css — --font-tech musi wskazywać na Chakra Petch');
+}
+if (/Orbitron/.test(indexCss)) {
+  errors.push('src/index.css — Orbitron jest zbyt kwadratowy; użyj Chakra Petch');
 }
 if (/font-family:\s*['"]?Bebas Neue/.test(indexCss)) {
   errors.push('src/index.css — Bebas Neue wrócił do stylów; zdania składaj Rajdhani');

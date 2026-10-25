@@ -147,7 +147,7 @@ więc zmieniła się wykładnia.
 **Jedyna widoczna zmiana z eksperymentu:** etykiety są zdaniami, nie
 wersalikami. Bebas Neue (krój tylko wielkoliterowy) ustąpił jako display na
 rzecz Rajdhani i został na chwilę `--font-stencil` — obecnie to miejsce zajął
-Orbitron z Cyberpunk 2077 (patrz sekcja o foncie wyżej).
+pochyły Chakra Petch (patrz sekcja o foncie wyżej).
 Regułę egzekwuje `audit:design` (reguła 5) oraz test w `designFloor.test.jsx`.
 
 Szczegóły, tabela decyzji i instrukcja ewentualnego powrotu:
@@ -155,9 +155,11 @@ Szczegóły, tabela decyzji i instrukcja ewentualnego powrotu:
 
 ### Font z Cyberpunk 2077 (kolejna decyzja właściciela)
 
-Klimat został, a typografia poszła krok dalej w stronę oryginału: Rajdhani
-(główny krój HUD-u gry) + **Orbitron Variable** na dane techniczne, oba
-self-hosted przez `@fontsource` zamiast Google Fonts CDN. Reguła 6 w
-`audit-design.mjs` blokuje powrót CDN i pilnuje `--font-tech`. Zasada
-„brief wins" znów zadziałała — tym razem briefem było „daj czcionkę
-z cyberpunka". Szczegóły: [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md).
+Klimat został, a typografia poszła w stronę oryginału: Rajdhani (główny krój
+HUD-u gry) na tekst + **Chakra Petch Italic** na dane — ostre, pochyłe litery
+zamiast kwadratowego Orbitrona, który nie spodobał się właścicielowi. Wszystkie
+kroje są self-hosted przez `@fontsource` zamiast Google Fonts CDN. Reguła 6 w
+`audit-design.mjs` blokuje powrót CDN, pilnuje `--font-tech`, kursywy i
+polskich znaków. Zasada „brief wins" znów zadziałała — briefem było „daj
+czcionkę z cyberpunka", a potem „nie tak kwadratową". Szczegóły i porównanie
+kandydatów: [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md).

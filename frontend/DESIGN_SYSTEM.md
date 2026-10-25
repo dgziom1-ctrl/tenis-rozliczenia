@@ -9,9 +9,9 @@
 >
 > ⚠️ **Kompromis po PR #14 + font z gry:** klimat Cyber‑Ponk wraca w 100%,
 > ale etykiety są zdaniami zamiast wersalików, a `--font-display` to Rajdhani.
-> Kroje to duet z interfejsu Cyberpunk 2077: Rajdhani (tekst) i **Orbitron
-> Variable** (`--font-tech`, dane), oba self-hosted przez `@fontsource`.
-> Bebas Neue został usunięty. Fragmenty poniżej o „wersalikowych etykietach"
+> Kroje: Rajdhani (tekst, główny krój HUD-u Cyberpunk 2077) i **Chakra Petch
+> Italic** (`--font-tech`, ostre pochyłe dane), self-hosted przez `@fontsource`.
+> Bebas Neue i kwadratowy Orbitron zostały usunięte. Fragmenty poniżej o „wersalikowych etykietach"
 > i o Bebas Neue dotyczą stanu sprzed kompromisu — aktualna wykładnia:
 > [`../DESIGN-COMPROMISE.md`](../DESIGN-COMPROMISE.md) i
 > [`../CYBERPUNK-FONT.md`](../CYBERPUNK-FONT.md).
@@ -119,14 +119,17 @@ Skala żyje w `src/constants/styles.ts` jako `TEXT`. Podłoga czytelności to
 | `h3`–`h1` | 20–32 px | nagłówki |
 | `hero` | 40 px | kwoty i liczby-bohaterowie |
 
-Kroje (stan aktualny): **`Rajdhani`** — display i treść, **`Orbitron
-Variable`** (`--font-tech`) — wordmark, liczby OVR, wielkie kwoty, numer BLIK,
+Kroje (stan aktualny): **`Rajdhani`** — display i treść, **`Chakra Petch`
+Italic** (`--font-tech`) — wordmark, liczby OVR, wielkie kwoty, numer BLIK,
 kody `SESSION_…` i liczniki Wrapped, **`Space Mono`** — daty i drobne dane.
-To duet z interfejsu Cyberpunk 2077, hostowany lokalnie przez `@fontsource`
-(własny arkusz `src/fonts.css`, import w `src/main.tsx`, brak CDN —
-15 plików woff2 / ~252 KB zamiast ~1 MB gotowych paczek). Orbitron ma tylko podzbiór `latin` —
-nie wolno go używać do polskich zdań ani do „ZŁ". Więcej:
-[`../CYBERPUNK-FONT.md`](../CYBERPUNK-FONT.md).
+Rajdhani to główny krój HUD-u Cyberpunk 2077; Chakra Petch daje ostre,
+pochyłe litery bliżej klimatu logo gry, bez kwadratowej geometrii Orbitrona.
+Wszystkie hostowane lokalnie przez `@fontsource` (własny arkusz
+`src/fonts.css`, import w `src/main.tsx`, brak CDN — 22 pliki woff2 / ~336 KB
+zamiast ~1 MB gotowych paczek). Chakra Petch ma pełny `latin-ext`, ale zdania
+i tak zostają w Rajdhani, a `ZŁ` przy `--font-display`. Kursywa jest jawna w
+`FONT.tech()` i wordmarkach — inaczej przeglądarka pochyli litery podwójnie.
+Więcej: [`../CYBERPUNK-FONT.md`](../CYBERPUNK-FONT.md).
 
 Pola formularzy mają 16 px, żeby iOS nie przybliżał strony przy dotknięciu.
 

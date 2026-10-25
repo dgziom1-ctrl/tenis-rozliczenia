@@ -22,7 +22,7 @@ też wykładnię.
 | Punkt wyjścia | **Kompromis** — baza = Cyber‑Ponk z PR #13, nie kopia editorialu |
 | Co zostaje z eksperymentu | **Niewidzialne poprawki + zdania zamiast WERSALIKÓW** |
 | Neon i ruch | **Pełny klimat**: cyan/rose/green, poświaty, canvas, skany, plamy, konfetti |
-| Czcionki i kształty | **Oryginał**: trzy kroje, ścięte narożniki (później Bebas Neue → Orbitron, patrz niżej) |
+| Czcionki i kształty | **Oryginał**: trzy kroje, ścięte narożniki (później zmiany fontów, patrz niżej) |
 | Sprzeczność (wersaliki) | **Zdania zostają, kroje i ścięcia wracają** |
 | Dowiezienie | kod + dokumenty + testy + commit + push + PR |
 
@@ -63,7 +63,8 @@ też wykładnię.
 ## Dlaczego Bebas Neue ustąpił (stan PR #15)
 
 Poniższy opis dotyczy stanu po PR #15 — później Bebas Neue zastąpiono
-Orbitronem (sekcja „Aktualizacja" wyżej). Bebas Neue to krój **wyłącznie
+najpierw Orbitronem, a potem Chakra Petch Italic (sekcja „Aktualizacja"
+wyżej). Bebas Neue to krój **wyłącznie
 wielkoliterowy** — nie potrafi złożyć zdania.
 Gdyby został jako `--font-display`, „zdania" i tak wyglądałyby jak
 WIELKIE LITERY. Dlatego:
@@ -79,19 +80,19 @@ Efekt: oryginalne trzy kroje wciąż są w aplikacji, ale czyta się ją łatwie
 
 ## Aktualizacja: prawdziwa czcionka z Cyberpunka
 
-Właściciel poprosił później o „czcionkę z cyberpunka". Okazało się, że
-**Rajdhani jest głównym krojem interfejsu Cyberpunk 2077**, a **Orbitron**
-krojem drugorzędnym na dane techniczne. Rajdhani już mieliśmy, więc dołożyliśmy
-Orbitron Variable jako `--font-tech` na wordmark, liczby OVR, wielkie kwoty,
-numer BLIK, kody sesji i liczniki Wrapped. **Bebas Neue znika** — był krojem
-tylko wielkoliterowym, więc gryzł się ze zdaniami.
+Właściciel poprosił później o „czcionkę z cyberpunka". **Rajdhani jest
+głównym krojem interfejsu Cyberpunk 2077**, więc został na tekście; na dane
+trafił wpierw **Orbitron Variable** (PR #16), potem — po uwadze, że jest
+„zbyt kwadratowy" — **Chakra Petch Italic** (PR #17), ostre ścięte narożniki
+i wyraźny pochył, bliżej klimatu liternictwa z logo gry. **Bebas Neue znika**
+— był krojem tylko wielkoliterowym, więc gryzł się ze zdaniami.
 
-Dodatkowo wszystkie trzy kroje (Rajdhani, Space Mono, Orbitron) przeszły z
-Google Fonts CDN na **self-hosting przez `@fontsource`**: działają offline,
-razem z cache service workera. Orbitron nie ma polskich znaków, więc wolno go
-używać wyłącznie na liczbach i ASCII — zdania zostają w Rajdhani.
+Wszystkie trzy kroje (Rajdhani, Space Mono, Chakra Petch) przeszły z Google
+Fonts CDN na **self-hosting przez `@fontsource`**: działają offline, razem z
+cache service workera. Chakra Petch ma pełny `latin-ext`, więc polszczyzna
+jest bezpieczna; mimo to zdania zostają w Rajdhani, a krój danych na liczbach.
 
-Pełne uzasadnienie, licencja, ograniczenia i instrukcja powrotu:
+Pełne uzasadnienie, licencja, porównanie kandydatów i instrukcja powrotu:
 [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md). Ta zmiana **nie cofa kompromisu** —
 klimat Cyber-Ponk i zdania zamiast wersalików zostają.
 

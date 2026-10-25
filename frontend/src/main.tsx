@@ -1,5 +1,5 @@
 // ── Fonty self-hosted (@fontsource) ────────────────────────────────────
-// Duet z interfejsu Cyberpunk 2077: Rajdhani (UI) + Orbitron (dane).
+// Rajdhani (UI gry) + Chakra Petch Italic (ostre, pochyłe dane).
 // Własny arkusz wybiera tylko podzbiory `latin` i `latin-ext` i tylko woff2 —
 // zamiast ~1 MB gotowych paczek (devanagari, wietnamski, stare .woff) w cache
 // workera ląduje ~300 KB. Szczegóły i unicode-range: src/fonts.css.

@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        cyber: ['"Orbitron Variable"', 'Rajdhani', 'sans-serif'],
-        tech:  ['"Orbitron Variable"', 'Rajdhani', 'sans-serif'],
+        cyber: ['"Chakra Petch"', 'Rajdhani', 'sans-serif'],
+        tech:  ['"Chakra Petch"', 'Rajdhani', 'sans-serif'],
         mono:  ['"Space Mono"', 'monospace'],
         sans:  ['"Rajdhani"', 'system-ui', 'sans-serif'],
       },

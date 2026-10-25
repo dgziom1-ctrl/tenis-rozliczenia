@@ -37,7 +37,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{
-            fontFamily: 'var(--font-stencil)', fontSize: '1.75rem', fontWeight: 800, letterSpacing: 'normal',
+            fontFamily: 'var(--font-stencil)', fontStyle: 'italic', fontSize: '2rem', fontWeight: 700, letterSpacing: 'normal',
             color: 'var(--co-cyan)', textTransform: 'none',
             textShadow: 'var(--glow-cyan-lg)',
             margin: 0, lineHeight: 1,

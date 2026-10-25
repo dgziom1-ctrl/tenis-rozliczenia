@@ -266,16 +266,16 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
             {!chaosMode && hitting && <span aria-hidden="true" style={{
               position:'absolute',inset:0,
-              display:'block',fontFamily:'var(--font-stencil)',fontWeight:800,
-              fontSize:'clamp(1.6rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
+              fontSize:'clamp(1.9rem,7.4vw,3.7rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               color:'transparent',pointerEvents:'none',userSelect:'none',
               textShadow:'-4px 0 var(--co-rose), 4px 0 var(--co-cyan)',
               clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
               opacity:1,
             }}>CYBER-PONK</span>}
             <span style={{
-              display:'block',fontFamily:'var(--font-stencil)',fontWeight:800,
-              fontSize:'clamp(1.6rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
+              fontSize:'clamp(1.9rem,7.4vw,3.7rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               position:'relative',
               transition:'text-shadow 0.06s, transform 0.06s',
               ...(chaosMode
