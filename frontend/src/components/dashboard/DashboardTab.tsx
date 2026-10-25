@@ -163,44 +163,8 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
         </div>
       </div>
 
-      {/* Player cards grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(265px, 1fr))',
-        gap: 14,
-      }}>
-        {sortedPlayers.map((player, idx) => {
-          const showBreakdown = openDetails === player.name;
-          const stagger = `card-stagger-${Math.min(idx + 1, 6)}`;
-          const isOrg = player.name === ORGANIZER_NAME;
-          return (
-            <div key={player.name} className={`player-card-wrap ${stagger}`}>
-              <PlayerCard
-                player={player}
-                history={seasonHistory}
-                meta={cardMeta.get(player.name) ?? buildPlayerCardMeta({
-                  ...player,
-                  attendanceCount: 0,
-                  eligibleWeeks: 0,
-                  attendancePercentage: 0,
-                  currentStreak: 0,
-                }, seasonHistory)}
-                openDetails={showBreakdown}
-                onToggleDetails={toggleDetails}
-                breakdown={(!isOrg && showBreakdown) ? getBreakdown(player) : null}
-                onAddPayment={handleAddPayment}
-                onRemovePayment={handleRemovePayment}
-                playSound={playSound}
-                playerIndex={idx}
-                allPlayers={isOrg ? data.players : undefined}
-              />
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ── Collapsible rank guide — only show when there's data ── */}
-      {totalWeeks > 0 && (
+      {/* Skrót jest zawsze nad kartami; szczegóły rozwijają się na miejscu. */}
+      {(totalWeeks > 0 || sortedPlayers.length > 0) && (
         <div className="glass-panel" style={{ clipPath: CLIP.smallCard }}>
           <button
             type="button"
@@ -213,13 +177,30 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
             }}
           >
-            <span aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              {RANKS.map(r => <RankGlyph key={r.name} rank={r} size={13} />)}
+            <span style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+              gap: 2, flex: 1, minWidth: 0, textAlign: 'left',
+            }}>
+              <span style={{
+                fontFamily: 'var(--font-display)', fontSize: '0.875rem',
+                color: 'var(--co-text-hi)', letterSpacing: 'normal', textTransform: 'none',
+              }}>
+                Jak czytać OVR i rangę?
+              </span>
+              <span style={{
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                color: 'var(--co-dim)', lineHeight: 1.4,
+              }}>
+                OVR uwzględnia frekwencję, serię i zagrane sesje; ranga zależy tylko od frekwencji.
+              </span>
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-dim)', textTransform: 'none', flex: 1, textAlign: 'left' }}>
-              Co oznaczają rangi i OVR?
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+              color: 'var(--co-cyan)', flexShrink: 0,
+            }}>
+              {showRankGuide ? 'Ukryj' : 'Szczegóły'}
             </span>
-            <ChevronDown size={13} aria-hidden="true" style={{ color: 'var(--co-dim)', transform: showRankGuide ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+            <ChevronDown size={13} aria-hidden="true" style={{ color: 'var(--co-dim)', transform: showRankGuide ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }} />
           </button>
           {/* Panel zostaje w DOM także po złożeniu: `aria-controls` zawsze
               wskazuje na istniejący element, a czytnik wie, że jest ukryty. */}
@@ -293,6 +274,42 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
           </div>
         </div>
       )}
+
+      {/* Player cards grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(265px, 1fr))',
+        gap: 14,
+      }}>
+        {sortedPlayers.map((player, idx) => {
+          const showBreakdown = openDetails === player.name;
+          const stagger = `card-stagger-${Math.min(idx + 1, 6)}`;
+          const isOrg = player.name === ORGANIZER_NAME;
+          return (
+            <div key={player.name} className={`player-card-wrap ${stagger}`}>
+              <PlayerCard
+                player={player}
+                history={seasonHistory}
+                meta={cardMeta.get(player.name) ?? buildPlayerCardMeta({
+                  ...player,
+                  attendanceCount: 0,
+                  eligibleWeeks: 0,
+                  attendancePercentage: 0,
+                  currentStreak: 0,
+                }, seasonHistory)}
+                openDetails={showBreakdown}
+                onToggleDetails={toggleDetails}
+                breakdown={(!isOrg && showBreakdown) ? getBreakdown(player) : null}
+                onAddPayment={handleAddPayment}
+                onRemovePayment={handleRemovePayment}
+                playSound={playSound}
+                playerIndex={idx}
+                allPlayers={isOrg ? data.players : undefined}
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

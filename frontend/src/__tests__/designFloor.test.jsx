@@ -30,10 +30,10 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { ToastProvider } from '../components/common/Toast';
 
-describe('legenda rang — stan dla czytnika ekranu', () => {
+describe('pomoc OVR i rang — stan dla czytnika ekranu', () => {
   const data = { summary: { totalWeeks: 3 }, players: [], payments: {} };
 
-  it('pokazuje opis rang i OVR oraz udostępnia stan panelu czytnikowi', async () => {
+  it('pokazuje skrót OVR przed rozwinięciem i udostępnia szczegóły rang czytnikowi', async () => {
     const user = userEvent.setup();
     render(
       <ToastProvider>
@@ -41,7 +41,7 @@ describe('legenda rang — stan dla czytnika ekranu', () => {
       </ToastProvider>,
     );
 
-    const toggle = screen.getByRole('button', { name: /co oznaczają rangi/i });
+    const toggle = screen.getByRole('button', { name: /jak czytać ovr i rangę/i });
     const panel = document.getElementById('rank-guide-panel');
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(toggle).toHaveAttribute('aria-controls', 'rank-guide-panel');
@@ -49,6 +49,7 @@ describe('legenda rang — stan dla czytnika ekranu', () => {
     // na nieistniejący element.
     expect(panel).toBeInTheDocument();
     expect(panel).toHaveAttribute('hidden');
+    expect(screen.getByText(/OVR uwzględnia frekwencję, serię i zagrane sesje/i)).toBeVisible();
 
     await user.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
