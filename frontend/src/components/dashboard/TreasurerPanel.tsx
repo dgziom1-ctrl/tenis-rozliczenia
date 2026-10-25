@@ -41,7 +41,7 @@ export default function TreasurerPanel({ players, open, onToggle }: TreasurerPan
       toggleLabel={toggleLabel}
       footer={
         <TerminalFooter
-          label="DO ZEBRANIA"
+          label="Do zebrania"
           value={`${formatAmountShort(Math.max(0, netToRecover))} ZŁ`}
           valueColor={netToRecover > SETTLED_THRESHOLD ? 'var(--co-green)' : 'var(--co-cyan)'}
           tint="var(--co-tint-green)"

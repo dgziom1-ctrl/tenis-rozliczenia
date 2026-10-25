@@ -19,7 +19,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
       fontFamily: 'var(--font-mono)',
     }}>
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3,
-        background: 'repeating-linear-gradient(-45deg, var(--co-cyan) 0px, var(--co-cyan) 8px, transparent 8px, transparent 16px)',
+        background: 'var(--co-tint-hi)',
         boxShadow: 'var(--glow-box-cyan)', zIndex: Z.boot,
       }} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
@@ -37,15 +37,15 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{
-            fontFamily: 'var(--font-display)', fontSize: '2rem', letterSpacing: '0.1em',
-            color: 'var(--co-cyan)', textTransform: 'uppercase',
+            fontFamily: 'var(--font-display)', fontSize: '2rem', letterSpacing: 'normal',
+            color: 'var(--co-cyan)', textTransform: 'none',
             textShadow: 'var(--glow-cyan-lg)',
             margin: 0, lineHeight: 1,
-          }}>CYBER-PONK</p>
+          }}>Cyber-ponk</p>
           <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.18em',
-            color: 'var(--co-cyan)', textTransform: 'uppercase', marginTop: 4,
-          }}>INITIALIZING SYSTEM...</p>
+            fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: 'normal',
+            color: 'var(--co-cyan)', textTransform: 'none', marginTop: 4,
+          }}>Initializing system...</p>
         </div>
         <div style={{
           width: 280, background: 'var(--co-surface-2)',
@@ -53,18 +53,18 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
           clipPath: CLIP.card,
           padding: '10px 14px',
         }}>
-          {['> BOOT_SEQ: INITIATED', '> LOADING AGENT DATABASE...', '> CONNECTING TO FIREBASE...'].map((line, i) => (
+          {['> BOOT_SEQ: INITIATED', '> Loading agent database...', '> Connecting to firebase...'].map((line, i) => (
             <p key={i} style={{
               fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
               color: i < 2 ? 'var(--co-green)' : 'var(--co-cyan)',
-              letterSpacing: '0.1em', margin: '2px 0',
+              letterSpacing: 'normal', margin: '2px 0',
             }}>{line}</p>
           ))}
         </div>
         <div style={{ width: 280, height: 3, background: 'var(--co-bar-track)', overflow: 'hidden', position: 'relative' }}>
           <div style={{
             height: '100%', width: '35%',
-            background: 'linear-gradient(90deg, transparent, var(--co-cyan), var(--co-cyan))',
+            background: 'var(--co-cyan)',
             boxShadow: '0 0 10px var(--co-cyan)',
             animation: 'loading-bar 1.1s ease-in-out infinite',
           }} />
@@ -77,11 +77,11 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
           clipPath: CLIP.smallCard,
         }}>
           <p style={{
-            margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.1em',
-            textTransform: 'uppercase', color: 'var(--co-cyan)', fontSize: '0.875rem',
-          }}>POŁĄCZENIE WOLNE...</p>
+            margin: 0, fontFamily: 'var(--font-display)', letterSpacing: 'normal',
+            textTransform: 'none', color: 'var(--co-cyan)', fontSize: '0.875rem',
+          }}>Połączenie wolne...</p>
           <p style={{
-            margin: '6px 0 0', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em',
+            margin: '6px 0 0', fontFamily: 'var(--font-mono)', letterSpacing: 'normal',
             color: 'var(--co-dim)', fontSize: '0.75rem',
           }}>Jeśli trwa to dłużej — spróbuj ponownie.</p>
           {onRetry && (
@@ -103,7 +103,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
       background: 'var(--co-void)', padding: 24, flexDirection: 'column', gap: 20,
     }}>
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3,
-        background: 'repeating-linear-gradient(-45deg, var(--co-rose) 0px, var(--co-rose) 8px, transparent 8px, transparent 16px)',
+        background: 'var(--co-tint-rose)',
         boxShadow: 'var(--glow-box-rose)', zIndex: Z.boot,
       }} />
       <div style={{
@@ -119,10 +119,10 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
             <Skull size={44} aria-hidden="true" style={{ color: 'var(--co-rose)' }} />
           </div>
           <p style={{
-            fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.1em',
-            color: 'var(--co-rose)', marginBottom: 6, textTransform: 'uppercase',
+            fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: 'normal',
+            color: 'var(--co-rose)', marginBottom: 6, textTransform: 'none',
             textShadow: 'var(--glow-rose-md)',
-          }}>CONNECTION FAILURE</p>
+          }}>Connection failure</p>
           <div style={{
             padding: '10px 12px', background: 'var(--co-tint-rose)',
             border: '1px solid var(--co-tint-rose-line)', marginBottom: 20,
@@ -130,24 +130,24 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
           }}>
             <p style={{
               fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)',
-              letterSpacing: '0.06em', lineHeight: 1.7,
+              letterSpacing: 'normal', lineHeight: 1.7,
             }}>
-              {'>'} ERR: FIREBASE_TIMEOUT<br />
-              {'>'} Sprawdź internet lub plik .env<br />
-              {'>'} SYSTEM HALTED
+              Błąd: brak odpowiedzi bazy<br />
+              Sprawdź połączenie lub plik .env<br />
+              System zatrzymany
             </p>
           </div>
           <button onClick={onRetry ?? (() => window.location.reload())}
             className="cyber-button-yellow"
             style={{ padding: '12px 24px', width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <Zap size={15} aria-hidden="true" /> RESTART SYSTEMU
+            <Zap size={15} aria-hidden="true" /> Restart systemu
           </button>
           <button onClick={hardResetApp}
             style={{
               marginTop: 10, padding: '10px 16px', width: '100%', cursor: 'pointer',
               background: 'transparent', border: '1px solid var(--co-tint-rose-line)',
               color: 'var(--co-dim)', fontFamily: 'var(--font-mono)',
-              fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase',
+              fontSize: '0.75rem', letterSpacing: 'normal', textTransform: 'none',
             }}>
             Wyczyść cache i uruchom od nowa
           </button>

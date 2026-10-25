@@ -57,7 +57,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }}>
         <div aria-hidden="true" style={{
           position: 'fixed', top: 0, left: 0, right: 0, height: 3,
-          background: 'repeating-linear-gradient(-45deg, var(--co-rose) 0px, var(--co-rose) 8px, transparent 8px, transparent 16px)',
+          background: 'var(--co-tint-rose)',
           boxShadow: 'var(--glow-box-rose)', zIndex: Z.boot,
         }} />
 
@@ -134,7 +134,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               background: 'transparent', border: '1px solid var(--co-tint-rose-line)',
               color: 'var(--co-dim)',
               ...FONT.mono(TEXT.tiny),
-              letterSpacing: TRACK.normal, textTransform: 'uppercase',
+              letterSpacing: TRACK.normal, textTransform: 'none',
             }}
           >
             Wyczyść cache i uruchom od nowa

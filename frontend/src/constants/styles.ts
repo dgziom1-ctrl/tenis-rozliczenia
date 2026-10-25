@@ -1,11 +1,15 @@
 import type { CSSProperties } from 'react';
 
+/**
+ * Eksperymentalny redesign: koniec ze ściętymi narożnikami. Wszystkie kształty
+ * to `none` — komponenty zachowują te same wywołania, więc revert jest prosty.
+ */
 export const CLIP = {
-  panel: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)',
-  card: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-  badge: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
-  smallCard: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
-  tag: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
+  panel: 'none',
+  card: 'none',
+  badge: 'none',
+  smallCard: 'none',
+  tag: 'none',
 } as const;
 
 /**
@@ -29,10 +33,11 @@ export const TEXT = {
 } as const;
 
 /** Odstępy literowe — trzy stopnie zamiast dwudziestu. */
+/** Redesign: brak trackingu etykiet (Hallmark floor 9 / Taste). */
 export const TRACK = {
-  tight: '0.06em',
-  normal: '0.1em',
-  wide: '0.18em',
+  tight: 'normal',
+  normal: 'normal',
+  wide: 'normal',
 } as const;
 
 /**
@@ -92,44 +97,39 @@ export const Z = {
   toast: 9000,
 } as const;
 
-function displayTracking(size: string): string {
-  const numeric = Number.parseFloat(size);
-  const pixels = size.endsWith('rem') ? numeric * 16 : size.endsWith('px') ? numeric : NaN;
-  if (!Number.isFinite(pixels)) return TRACK.normal;
-  if (pixels <= 13) return TRACK.wide;
-  if (pixels >= 32) return '0.02em';
-  if (pixels >= 20) return TRACK.tight;
-  return TRACK.normal;
+function displayTracking(): string {
+  // Jeden krój, naturalny odstęp liter — żadnych wersalików z trackingiem.
+  return 'normal';
 }
 
 export const FONT = {
   display: (size: string = TEXT.lead, spacing?: string): CSSProperties => ({
-    fontFamily: 'var(--font-display)',
+    fontFamily: 'var(--font-body)',
     fontSize: size,
-    letterSpacing: spacing ?? displayTracking(size),
-    textTransform: 'uppercase',
+    letterSpacing: spacing ?? displayTracking(),
+    textTransform: 'none',
   }),
   mono: (size: string = TEXT.small): CSSProperties => ({
-    fontFamily: 'var(--font-mono)',
+    fontFamily: 'var(--font-body)',
     fontSize: size,
   }),
   /** Wersalikowa etykieta nad wartością. */
   monoLabel: {
-    fontFamily: 'var(--font-mono)',
+    fontFamily: 'var(--font-body)',
     fontSize: TEXT.tiny,
-    letterSpacing: TRACK.normal,
-    textTransform: 'uppercase',
+    letterSpacing: 'normal',
+    textTransform: 'none',
     color: 'var(--co-dim)',
   } as CSSProperties,
   /** Treść drugorzędna: daty, liczniki, opisy. */
   monoSmall: {
-    fontFamily: 'var(--font-mono)',
+    fontFamily: 'var(--font-body)',
     fontSize: TEXT.small,
     color: 'var(--co-dim)',
   } as CSSProperties,
   /** Najmniejszy czytelny stopień — tylko dane techniczne. */
   monoMicro: {
-    fontFamily: 'var(--font-mono)',
+    fontFamily: 'var(--font-body)',
     fontSize: TEXT.micro,
     color: 'var(--co-dim)',
   } as CSSProperties,
@@ -139,7 +139,6 @@ export const PANEL = {
   cyberCut: {
     background: 'var(--co-panel)',
     border: '1px solid var(--co-border)',
-    clipPath: CLIP.panel,
     padding: 24,
     position: 'relative',
   } as CSSProperties,

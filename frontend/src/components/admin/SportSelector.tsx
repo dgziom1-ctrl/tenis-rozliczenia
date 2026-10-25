@@ -24,7 +24,7 @@ export default function SportSelector({ value, onChange }: SportSelectorProps) {
               minHeight: 44,
               padding: '10px 6px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
               fontFamily: 'var(--font-display)', fontSize: '0.8125rem', 
-              letterSpacing: '0.06em', textTransform: 'uppercase',
+              letterSpacing: 'normal', textTransform: 'none',
               clipPath: CLIP.badge,
               ...(active ? {
                 background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',

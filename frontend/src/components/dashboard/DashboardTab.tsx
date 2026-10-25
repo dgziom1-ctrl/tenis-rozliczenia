@@ -107,14 +107,14 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
           {/* Ambient scan line */}
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-            background: 'linear-gradient(90deg, transparent, var(--co-cyan), transparent)',
+            background: 'none',
             animation: 'podium-scan 3s ease-in-out infinite',
           }} />
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18, filter: 'var(--glow-drop-cyan)' }}>
             <BrandMark size={64} />
           </div>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', marginBottom: 10 }}>
-            BRAK ROZGRYWEK
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: 'normal', color: 'var(--co-cyan)', marginBottom: 10 }}>
+            Brak rozgrywek
           </p>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.7, marginBottom: 20 }}>
             {'>'} System gotowy.<br/>
@@ -157,7 +157,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
           clipPath: CLIP.badge,
         }}>
           <Zap size={9} aria-hidden="true" style={{ color: 'var(--co-cyan)' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: 'normal' }}>
             sesji: <span style={{ color: 'var(--co-cyan)' }}>{seasonHistory.length}</span>
           </span>
         </div>
@@ -216,7 +216,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
             <span aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
               {RANKS.map(r => <RankGlyph key={r.name} rank={r} size={13} />)}
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-dim)', textTransform: 'uppercase', flex: 1, textAlign: 'left' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-dim)', textTransform: 'none', flex: 1, textAlign: 'left' }}>
               Co oznaczają rangi?
             </span>
             <ChevronDown size={13} aria-hidden="true" style={{ color: 'var(--co-dim)', transform: showRankGuide ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
@@ -237,7 +237,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 }}>
                   <RankGlyph rank={r} size={18} />
                   <div>
-                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', color: r.hex, margin: 0, letterSpacing: '0.1em' }}>{r.name}</p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', color: r.hex, margin: 0, letterSpacing: 'normal' }}>{r.name}</p>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: 0 }}>
                       {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
                     </p>

@@ -10,12 +10,12 @@ interface SeasonSelectorProps {
 
 /**
  * Cyberpunk-styled year/season selector.
- * Shows "WSZYSTKIE" + one button per available year.
+ * Shows "Wszystkie" + one button per available year.
  */
 export default function SeasonSelector({ seasons, selected, onChange }: SeasonSelectorProps) {
   if (!seasons || seasons.length <= 1) return null;
 
-  const options = [{ label: 'WSZYSTKIE', value: ALL_TIME }, ...seasons.map(y => ({ label: String(y), value: y }))];
+  const options = [{ label: 'Wszystkie', value: ALL_TIME }, ...seasons.map(y => ({ label: String(y), value: y }))];
 
   return (
     // Odstęp bierze rodzic (gap 20 w AttendanceTab) — własny marginBottom 16
@@ -26,7 +26,7 @@ export default function SeasonSelector({ seasons, selected, onChange }: SeasonSe
       {/* Etykieta była mono, a przyciski obok display — dwa kroje w jednym
           pasku kontrolek. */}
       <span style={{ ...FONT.display(TEXT.tiny, TRACK.wide), color: 'var(--co-dim)', marginRight: 4 }}>
-        SEZON:
+        Sezon:
       </span>
       {options.map(opt => {
         const active = opt.value === selected;

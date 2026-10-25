@@ -18,7 +18,7 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
     <div style={{
       ...PANEL.cyberCut,
     }}>
-      <SectionHeader icon={CalendarDays} title="DANE MIESIĘCZNE" sub="obecność według miesiąca" />
+      <SectionHeader icon={CalendarDays} title="Dane miesięczne" sub="obecność według miesiąca" />
       {monthlyStats.length === 0 ? (
         <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>
           {'>'} Brak danych — dodaj pierwszą sesję_
@@ -102,23 +102,23 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                 na nich. Teraz siedzi nad treścią, ale pod przyklejoną kolumną. */}
             <div aria-hidden="true" style={{
               position: 'absolute', top: 0, right: 0, bottom: 0, width: 32,
-              background: 'linear-gradient(to right, transparent, var(--co-panel))',
+              background: 'var(--co-panel)',
               pointerEvents: 'none', zIndex: 0,
             }} />
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400, fontFamily: 'var(--font-mono)' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--co-border-hi)' }}>
-                    <th style={{ padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', textTransform: 'uppercase', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 3, borderRight: '1px solid var(--co-border)' }}>
-                      MIESIĄC
+                    <th style={{ padding: '8px 12px', textAlign: 'left', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-cyan)', textTransform: 'none', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 3, borderRight: '1px solid var(--co-border)' }}>
+                      Miesiąc
                     </th>
-                    <th style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', fontWeight: 400, textTransform: 'uppercase' }}>
-                      SESJE
+                    <th style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-cyan)', fontWeight: 400, textTransform: 'none' }}>
+                      Sesje
                     </th>
                     {players?.map(p => {
                       const c = getPlayerColor(p.name);
                       return (
-                        <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 400 }}>
+                        <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', fontWeight: 400 }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                             <div style={{ width: '100%', height: 2, background: c.border, borderRadius: 1, opacity: 0.7 }} />
                             {/* Kolor gracza zostaje na pasku nad nazwą. Sama nazwa
@@ -138,7 +138,7 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                       {/* Przyklejona kolumna musi być nad gradientem i nad
                           własnym obramowaniem wiersza, inaczej wygląda, jakby
                           unosiła się nad tabelą. */}
-                      <td style={{ padding: '10px 12px', fontSize: '0.875rem', color: 'var(--co-text)', fontFamily: 'var(--font-display)', letterSpacing: '0.1em', whiteSpace: 'nowrap', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 2, borderRight: '1px solid var(--co-border)', borderBottom: '1px solid var(--co-separator)' }}>{month}</td>
+                      <td style={{ padding: '10px 12px', fontSize: '0.875rem', color: 'var(--co-text)', fontFamily: 'var(--font-display)', letterSpacing: 'normal', whiteSpace: 'nowrap', position: 'sticky', left: 0, background: 'var(--co-panel)', zIndex: 2, borderRight: '1px solid var(--co-border)', borderBottom: '1px solid var(--co-separator)' }}>{month}</td>
                       <td style={{ padding: '8px 12px', fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-cyan)', textAlign: 'center' }}>{rowData.total}</td>
                       {players?.map(p => {
                         const presence = rowData.players[p.name] || 0;

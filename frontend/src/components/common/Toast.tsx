@@ -172,7 +172,7 @@ function Toast({ toast, onClose }: { toast: ToastItem; onClose: () => void }) {
           {s.icon}
           {/* Etykieta była większa (0.82rem) od samej treści (0.75rem) —
               odwrócona hierarchia w komunikacie. */}
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: '0.18em', color: s.accent, textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: 'normal', color: s.accent, textTransform: 'none' }}>
             {s.prefix}
           </span>
         </div>

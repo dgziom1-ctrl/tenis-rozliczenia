@@ -165,7 +165,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
               {playerNames && playerNames.length > 0 && (
                 <div style={{ marginBottom: 10 }}>
                   <p style={{ ...FONT.monoLabel, marginBottom: 6 }}>
-                    KIM JESTEŚ?
+                    Kim jesteś?
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {playerNames.map(name => (

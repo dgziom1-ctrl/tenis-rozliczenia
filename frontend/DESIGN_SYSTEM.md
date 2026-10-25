@@ -6,6 +6,12 @@
 > Skrócona, maszynowo czytelna wersja dla agentów AI leży w [`../DESIGN.md`](../DESIGN.md)
 > (format `google-labs-code/design.md`). Mapowanie 12 repozytoriów design
 > skills na konkretne zmiany: [`../DESIGN-SKILLS.md`](../DESIGN-SKILLS.md).
+>
+> ⚠️ **Ta gałąź to eksperymentalny pełny redesign.** Poniższy opis dokumentuje
+> system Cyber‑Ponk z `main` (szkło, neon, wersaliki). Aktualny wygląd tej
+> gałęzi opisują [`../DESIGN.md`](../DESIGN.md) i
+> [`../REDESIGN-EXPERIMENT.md`](../REDESIGN-EXPERIMENT.md) — warstwa nadpisań
+> na końcu `src/index.css` wyłącza większość poniższych reguł wizualnych.
 
 ## Skąd się wziął ten kierunek
 

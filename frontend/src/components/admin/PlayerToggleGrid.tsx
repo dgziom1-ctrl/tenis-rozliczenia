@@ -36,7 +36,7 @@ export default function PlayerToggleGrid({ names, selected, onToggle, accent = '
           <button type="button" key={name} onClick={() => onToggle(name)} style={{
             padding: '10px 12px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
             fontFamily: 'var(--font-display)', fontSize: '0.875rem', 
-            letterSpacing: '0.1em', textTransform: 'uppercase',
+            letterSpacing: 'normal', textTransform: 'none',
             clipPath: CLIP.badge,
             ...(active ? {
               background: accentAlpha, border: `1px solid ${accentBorder}`, color: accentColor,

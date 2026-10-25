@@ -1,48 +1,49 @@
 ---
 version: "alpha"
-name: Cyber-Ponk
-description: "Zablokowany system wizualny aplikacji do rozliczania kortu i frekwencji grupy tenisowej. Tryb Operate: skanowanie danych ważniejsze niż ekspresja."
+name: Cyber-Ponk — Editorial
+description: "Eksperymentalny pełny redesign: płaski, cichy system Operate. Jeden krój, jeden akcent,zero szkła i neonu. Zastępuje poprzedni system wizualny na tej gałęzi."
 colors:
-  primary: "#00E5FF"
-  void: "#030508"
-  dark: "#060C12"
-  panel: "#090F18"
-  raised: "#0C1420"
-  border: "#122034"
-  cyan: "#00E5FF"
-  rose: "#FF2090"
-  amber: "#F59E0B"
-  green: "#00FF88"
-  text: "#A8C4D4"
-  text-hi: "#D0E8F5"
-  dim: "#64869F"
-  light-void: "#F8FAFC"
-  light-cyan: "#0F766E"
-  glass: "rgba(6,12,20,0.56)"
-  glass-hi: "rgba(6,12,20,0.78)"
+  primary: "#0E5A54"
+  void: "#F5F5F1"
+  dark: "#EDEDE8"
+  panel: "#FFFFFF"
+  raised: "#FFFFFF"
+  border: "#D8DBD5"
+  cyan: "#0E5A54"
+  rose: "#9B2C2C"
+  amber: "#7A5200"
+  green: "#1B6E4A"
+  text: "#2A312E"
+  text-hi: "#141816"
+  dim: "#4E5A55"
+  light-void: "#F5F5F1"
+  light-cyan: "#0E5A54"
+  glass: "#FFFFFF"
+  glass-hi: "#FFFFFF"
 typography:
   display:
-    fontFamily: "Bebas Neue"
+    fontFamily: Inter
     fontSize: 2rem
-    fontWeight: 400
-    letterSpacing: 0.02em
+    fontWeight: 600
+    letterSpacing: 0
   mono:
-    fontFamily: "Space Mono"
+    fontFamily: Inter
     fontSize: 0.875rem
     fontWeight: 400
   body:
-    fontFamily: Rajdhani
-    fontSize: 0.875rem
-    fontWeight: 500
-    lineHeight: 1.5
+    fontFamily: Inter
+    fontSize: 0.9375rem
+    fontWeight: 400
+    lineHeight: 1.55
   label:
-    fontFamily: "Space Mono"
-    fontSize: 0.75rem
-    letterSpacing: 0.1em
+    fontFamily: Inter
+    fontSize: 0.8125rem
+    fontWeight: 500
+    letterSpacing: 0
 rounded:
   none: 0px
-  badge: 4px
-  light-modal: 12px
+  badge: 2px
+  light-modal: 0px
 spacing:
   xs: 4px
   sm: 8px
@@ -70,12 +71,12 @@ components:
     rounded: "{rounded.light-modal}"
   button-primary:
     backgroundColor: "{colors.primary}"
-    textColor: "#030508"
+    textColor: "#FFFFFF"
     rounded: "{rounded.none}"
     padding: "11px 18px"
     height: 44px
   button-outline:
-    backgroundColor: "transparent"
+    backgroundColor: "{colors.panel}"
     textColor: "{colors.cyan}"
     rounded: "{rounded.none}"
     padding: "10px 16px"
@@ -109,113 +110,99 @@ components:
 
 ## Overview
 
-Cyber-Ponk to narzędzie do rozliczania kortu, wpłat i frekwencji grupy
-tenisowej. To ekran **Operate** w sense Impeccable: użytkownik przychodzi
-odczytać saldo, dopisać sesję i oznaczyć wpłatę. Skanowalność, powtarzalność
-i przewidywalność są ważniejsze niż dekoracja. Marka (neonowe szkło,
-wersalikowe etykiety, ścięte narożniki) jest wybrana i zablokowana — nie
-podlegający dyskusji „brief wins”. Nowe ekrany dokładają się do niej, nie
-zastępują jej nowym, „czystszym” stylem.
+To **pełny redesign**, nie polish. Powstał jako eksperyment na osobnej gałęzi:
+zamiast rozwijać tożsamość Cyber‑Ponk (szkło, neon, wersaliki, ścięte
+narożniki), przyjmujemy nowy, cichy świat wizualny w duchu Hallmark i Taste.
+Tryb pozostaje **Operate** — użytkownik skanuje salda, dopisuje sesje i
+oznacza wpłaty. Forma ma mu w tym nie przeszkadzać.
 
-Ten plik jest skróconym, maszynowo czytelnym kontraktem dla agentów
-(format `google-labs-code/design.md`). Szczegółowe uzasadnienie, macierz
-kontrastu i lista komponentów są w [`frontend/DESIGN_SYSTEM.md`](frontend/DESIGN_SYSTEM.md),
-a źródłem wartości jest `frontend/src/index.css` (bloki `:root` i
-`body.theme-light`) oraz `frontend/src/constants/styles.ts`.
+Kierunek: **utilitarian editorial**. Papierowe tło, głęboki teal jako jedyny
+akcent, trzy kolory stanów, jeden krój (Inter) i hierarchia zbudowana z
+rozmiaru i wagi, nie z koloru ani światła. Brak gradientów, poświaty,
+przezroczystości, folii, siatek, canvasowej animacji i dekoracyjnego ruchu.
+
+Zakres i powrót do poprzedniego wyglądu opisuje
+[`REDESIGN-EXPERIMENT.md`](REDESIGN-EXPERIMENT.md). Szczegółowa historia
+systemu z `main` zostaje w
+[`frontend/DESIGN_SYSTEM.md`](frontend/DESIGN_SYSTEM.md) jako dokumentacja
+poprzedniego wariantu.
 
 Weryfikacja: `cd frontend && npm run verify`. Osobne bramki:
-`npm run audit:design` (ruch, tokeny, stany), `npm run audit:contrast`
-(WCAG AA w obu motywach), `npm run audit:a11y` (podłoga 12 px, wykresy).
+`npm run audit:design`, `npm run audit:contrast`, `npm run audit:a11y`,
+`npm run design:lint`.
 
 ## Colors
 
-Jeden akcent (`--co-cyan`), trzy kolory stanów: `--co-rose` zaległość,
-`--co-green` rozliczone, `--co-amber` ostrzeżenie. `--co-dim2` jest tylko
-do dużych napisów i dekoracji — nie przechodzi 4,5:1. Rangi graczy mają
-osobne wartości na motyw (`--rank-*`), bo jeden kolor nie da AA jednocześnie
-na `#030508` i `#F8FAFC`.
+Jeden akcent (`--co-cyan`, głęboki teal `#0E5A54` w motywie jasnym,
+`#8FD6C6` w ciemnym). Trzy kolory stanów: `--co-rose` zaległość,
+`--co-green` rozliczone, `--co-amber` ostrzeżenie. Powierzchnie są płaskie
+i prawie identyczne (`--co-void`, `--co-panel`, `--co-raised`,
+`--co-glass`), więc nie ma „głębi" z cieni i prześwitów.
 
-Tryb jasny nie jest odwróceniem ciemnego: akcenty tam są ciemniejsze
-(`#0F766E` zamiast `#00E5FF`), inaczej etykiety 12–14 px spadają do 3–3,9:1.
-Kolory tożsamości graczy (`constants/colors.ts`) są paskiem, obramowaniem
-i awatarem; nazwa zawsze jedzie `--co-text-hi`.
-
-**Canvas:** `ArenaCanvas` czyta tokeny `--canvas-*` przez `getComputedStyle`,
-bo API 2D nie rozumie `var()`. Nie wolno dopisywać tam literałów kolorów.
+Oba motywy to wariacje tego samego układu, nie odwrócenie neonu. Wszystkie
+tokeny żyją w `frontend/src/index.css` w blokach `:root` i
+`body.theme-light`. `npm run audit:contrast` sprawdza 300 par w obu motywach
+(WCAG AA). `--co-dim2` jest tylko do dużych napisów (3:1), `--co-dim` do
+treści (4,5:1). Rangi graczy mają osobne wartości na motyw.
 
 ## Typography
 
-Skala `TEXT`: 12 / 13 / 14 / 16 / 20 / 24 / 32 / 40 px. Podłoga 12 px jest
-sprawdzana automatycznie. Kroje: `Bebas Neue` (display), `Space Mono`
-(dane, etykiety), `Rajdhani` (treść). Pola formularzy mają 16 px, żeby iOS
-nie przybliżał widoku. Etykiety osi wykresów: minimum 12 px w jednostkach
-`viewBox`, mierzonego kontenera (`useElementWidth`).
-
-Ikony: wyłącznie wektory (Lucide + własne glyphy). Emoji są treścią tylko
-w wiadomości do czatu i w konfetti — nigdy ikoną w interfejsie.
+Jeden krój: **Inter** (fallback na system-ui). Koniec z Bebas Neue, Space
+Mono i Rajdhani. Skala `TEXT` 12–40 px zostaje, ale etykiety nie są już
+wersalikami z trackingiem: `text-transform: none`, `letter-spacing: normal`.
+Hierarchia: waga 600 dla nagłówków, 500 dla etykiet, 400 dla treści. Pola
+formularzy 16 px (iOS nie przybliża). Ikony: wyłącznie wektory Lucide,
+ emoji tylko jako treść konfetti, nie jako ikona.
 
 ## Layout
 
-Kontener `max-w-7xl`, górny margines 8–32 px, dolna nawigacja 56 px +
-`safe-area-inset-bottom`; treść ma `padding-bottom` o tej samej wysokości.
-Breakpointy 639 / 480 / 768 px są w jednym miejscu (`BREAKPOINT`).
-`html` i `body` mają `overflow-x: clip` — `hidden` tworzył kontener
-przewijania i psuł pozycjonowanie banerów. Zakaz `100vw`.
-
-Wszystkie cele dotykowe: min. 44 × 44 px. Informacja nigdy nie jest
-przekazywana samym kolorem: status ma tekst, ikona ma `aria-label`,
-a wykres ma tekstową alternatywę w `.sr-only`.
+Kontener `max-w-7xl`, dolna nawigacja 56 px + `safe-area-inset-bottom`.
+`html` i `body` mają `overflow-x: clip`, zakaz `100vw`. Wszystkie cele
+dotykowe min. 44 × 44 px. Informacja nigdy nie jest przekazywana samym
+kolorem: status ma tekst, ikona ma `aria-label`, wykres ma alternatywę w
+`.sr-only`. Lewy margines wyrównania dominuje; wyśrodkowane są tylko
+puste stany i podium.
 
 ## Elevation & Depth
 
-Szkło to cztery warstwa: rozmycie, górny refleks, plama światła podążająca
-za kursorem, krawędziowy specular. Wszystko przez tokeny `--glass-*`.
-`prefers-reduced-transparency: reduce` zamienia szkło na pełny `--co-panel`;
-`prefers-contrast: more` podnosi obramowania i kolor etykiet. Cienie na
-elementach w spoczynku są wyłączone — wyjątkiem jest dialog i toast.
+Szkło znika: `backdrop-filter`, `--glass-*`, refleksy `::after` i ziarno są
+wyłączone. Cień w spoczynku nie istnieje — wyjątkiem jest dialog, który
+naprawdę unosi się nad treścią (`--editorial-shadow`). Separacją powierzchni
+jest krok w tonie tła albo 1‑px obramowanie w kolorze `--co-border`.
 
 ## Shapes
 
-Ciemny motyw: ścięte narożniki (`CLIP.panel`, `CLIP.card`, `CLIP.badge`).
-Jasny motyw: promień 12 px na dialogach, bez ścięć. Te dwa kształty nie
-mieszają się w jednym komponencie. Elementy z `clip-path` dostają pierścień
-fokusa przez `drop-shadow`, bo zwykły `outline` jest obcinany.
+Prostokąty. `--clip-*` i `CLIP` w `constants/styles.ts` mają wartość `none`,
+`--modal-radius: 0`. Nie ma ściętych narożników ani miękkich 9–16 px
+promieni, które Taste nazywa domyślnym słabym wyborem. Okrągłe pozostają
+tylko awatary i kropki danych.
 
 ## Components
 
-- `Modal` — portal do `body`, focus trap, wyjście szybsze niż wejście,
-  dolny arkusz z gestem przeciągnięcia i sprężyną.
-- `PlayerCard` — nazwa, kwota, status; pasek obecności skaluje się przez
-  `transform`, nie przez `width`.
-- `UndoBar` — pasek cofania z licznikiem, `role="status"` i
-  `aria-atomic="false"`, żeby czytnik nie czytał całości co sekundę.
-- `WrappedModal` — `role="progressbar"`, nawigacja klawiaturą, widoczny
-  przycisk „Wstecz”.
-- Rozwijane panele mają `aria-expanded` + `aria-controls`; przełączane
-  filtry mają `aria-pressed`.
+- `Modal` — portal, focus trap, wyjście szybsze niż wejście, bez rozmycia
+  scrimu.
+- `PlayerCard` — płaska karta, pasek obecności przez `transform: scaleX()`.
+- `UndoBar` — `role="status"`, `aria-atomic="false"`, pasek przez `scaleX`.
+- `WrappedModal` — `role="progressbar"`, nawigacja klawiaturą, bez skanów
+  i pulsów.
+- Rozwijane panele: `aria-expanded` + `aria-controls`; filtry `aria-pressed`.
 
 ### Ruch
 
-Animujemy wyłącznie `transform` i `opacity` (oraz kolor w krótkich
-przejściach). Zakaz `transition: all`, zakaz animowania `width`, `height`,
-`top`, `left`, `margin`, `padding`. Wejście 240–400 ms z
-`cubic-bezier(.22,1,.36,1)`, wciśnięcie 80–100 ms, wyjście modalu 180 ms.
-`prefers-reduced-motion` zostawia crossfade, wyłącza rAF w hookach i
-canvasie. Animacje poza ekranem są zatrzymywane (`IntersectionObserver`),
-na hidden tab zawsze (`visibilitychange`).
+Tylko `transform` i `opacity`. Wejścia 240–400 ms, wciśnięcie 80–100 ms,
+wyjście modalu 180 ms. Dekoracyjne pętle (`neon-*`, `wm-glow`, `fluid-float`,
+`podium-scan`, `shimmer`, `confettiBurst`) są zredukowane do pustego
+przebiegu — nazwy zostają, żeby komponenty i lint CSS widziały ten sam
+kontrakt. `prefers-reduced-motion` nadal ma pierwszeństwo.
 
 ## Do's and Don'ts
 
-**Rób:** nowy kolor najpierw w `:root` + `body.theme-light`, potem w
-komponencie przez `var()`; nowy ruch przez `transform`/`opacity`; nowy
-komponent z `aria-expanded`/`aria-pressed`, jeśli zmienia stan; test
-regresyjny dla każdej poprawki; `npm run verify` przed wdrożeniem.
+**Rób:** nowy kolor w `:root` + `body.theme-light`, potem `var()` w
+komponencie; zdanie zamiast wersalików; płaskie tło; test regresyjny dla
+każdej zmiany; `npm run verify` przed wdrożeniem.
 
-**Nie rób:** nie wpisuj `transition: all` ani animacji layoutu; nie używaj
-`overflow-x: hidden` na `html`/`body`; nie dodawaj literału koloru ani kroju
-w TSX (wyjątki: `BrandMark` jako zasób marki, paleta graczy, meta
-theme-color — opisane w `scripts/audit-design.mjs`); nie zamieniaj emoji
-w ikonę; nie dodawaj GSAP/React Bits/Canvas UI jako zależności bez
-potrzeby — wzorce z tych bibliotek są tu zaimplementowane w istniejącym
-stacku; nie rób pełnego redesignu bez pytania — to system zablokowany,
-a zmiana marki wymaga decyzji właściciela produktu.
+**Nie rób:** nie wracaj do szkła, neonu, gradientów, wersalików z
+trackingiem ani ściętych narożników; nie dodawaj literału koloru w TSX;
+nie animuj `width`/`height`/`top`/`left`; nie używaj `overflow-x: hidden`;
+nie dokładaj GSAP/React Bits/Canvas UI bez powodu — wzorce są zaimplementowane
+w istniejącym stacku.

@@ -29,7 +29,7 @@ describe('HoldToSettleButton', () => {
     fireEvent(button, pointer('pointerup'));
 
     expect(onConfirm).not.toHaveBeenCalled();
-    expect(screen.getByText('PRZYTRZYMAJ DŁUŻEJ')).toBeInTheDocument();
+    expect(screen.getByText(/przytrzymaj dłużej/i)).toBeInTheDocument();
   });
 
   it('przytrzymanie 0,8 s zapisuje wpłatę dokładnie raz', () => {

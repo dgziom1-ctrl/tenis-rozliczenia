@@ -49,7 +49,7 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <Calculator size={14} style={{ color: 'var(--co-dim)' }} />
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: 'normal', color: 'var(--co-dim)', textTransform: 'none' }}>
           Podział kosztów · {SPORT_LABEL[sport] ?? 'Ping-Pong'}
         </span>
         {hasRackets && (

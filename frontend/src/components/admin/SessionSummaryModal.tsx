@@ -94,7 +94,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
 
 
       <div className="matchday-hero">
-        <p className="matchday-kicker">SESJA ZAPISANA</p>
+        <p className="matchday-kicker">Sesja zapisana</p>
         <div style={{
           display: 'flex', justifyContent: 'center',
           margin: '8px 0 6px', lineHeight: 1,
@@ -104,7 +104,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
           <SportGlyph sport={sport} size={44} strokeWidth={1.5} />
         </div>
         <p style={{ ...FONT.display(TEXT.h2, TRACK.tight), color: 'var(--co-text-hi)', margin: 0 }}>
-          {(SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase()}
+          {(SPORT_LABEL[sport] ?? 'Ping-Pong')}
         </p>
         <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', margin: '6px 0 0' }}>
           {formatDate(date)} · {presentCount} {presentCount === 1 ? 'gracz' : 'graczy'}
@@ -131,10 +131,10 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
         {[
-          { label: 'SPORT', value: (SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase(), color: withRackets ? 'var(--co-green)' : 'var(--co-cyan)' },
-          { label: 'DATA', value: formatDate(date), color: 'var(--co-text)' },
-          { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
-          { label: 'OBECNI', value: presentCount, color: 'var(--co-text)' },
+          { label: 'Sport', value: (SPORT_LABEL[sport] ?? 'Ping-Pong'), color: withRackets ? 'var(--co-green)' : 'var(--co-cyan)' },
+          { label: 'Data', value: formatDate(date), color: 'var(--co-text)' },
+          { label: 'Koszt', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
+          { label: 'Obecni', value: presentCount, color: 'var(--co-text)' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{
             padding: '10px 12px', background: 'var(--co-surface-2)',
@@ -154,10 +154,10 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
           border: '1px solid var(--co-tint-line)',
           clipPath: CLIP.smallCard,
         }}>
-          <p style={{ ...FONT.monoLabel, marginBottom: 6 }}>PODZIAŁ KOSZTÓW</p>
+          <p style={{ ...FONT.monoLabel, marginBottom: 6 }}>Podział kosztów</p>
           <p style={{ ...FONT.mono(TEXT.h2), color: 'var(--co-cyan)', textShadow: 'var(--glow-cyan-lg)', margin: 0 }}>
             {formatAmountShort(headline.perPerson)}
-            <span style={{ fontSize: TEXT.base, color: 'var(--co-dim)', marginLeft: 4 }}>ZŁ / OS.</span>
+            <span style={{ fontSize: TEXT.base, color: 'var(--co-dim)', marginLeft: 4 }}>Zł / os.</span>
           </p>
           {groups.slice(1).map(group => (
             <p key={group.names.join()} style={{

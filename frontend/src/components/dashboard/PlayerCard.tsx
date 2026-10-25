@@ -320,7 +320,7 @@ function PlayerCard({
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
           color: (!isOrganizer && isPending) ? `${c.border}99` : hasCredit ? 'var(--co-green)' : 'var(--co-dim)',
-          letterSpacing: '0.18em', textTransform: 'uppercase',
+          letterSpacing: 'normal', textTransform: 'none',
         }}>
           {isOrganizer
             ? (hasCredit ? '↑ Do zebrania' : isPending ? '↕ Saldo' : '✓ Skarbnik')
@@ -330,7 +330,7 @@ function PlayerCard({
         </span>
         <span style={{
           fontFamily: 'var(--font-display)', fontSize: '0.75rem',
-          color: rank.hex, letterSpacing: '0.18em',
+          color: rank.hex, letterSpacing: 'normal',
         }}>{RARITY_LABEL[meta.rarity]}</span>
       </div>
 
@@ -346,7 +346,7 @@ function PlayerCard({
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
             <span className="card-ovr" style={{ color: rank.hex }}>{meta.overall}</span>
-            <span style={{ ...FONT.monoMicro, letterSpacing: '0.14em', color: rank.hex, lineHeight: 1 }}>OVR</span>
+            <span style={{ ...FONT.monoMicro, letterSpacing: 'normal', color: rank.hex, lineHeight: 1 }}>OVR</span>
           </div>
           <PlayerAvatar
             name={player.name}
@@ -362,7 +362,7 @@ function PlayerCard({
             <h3 style={{
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(1.5rem, 5vw, 1.85rem)',
-              letterSpacing: '0.06em', textTransform: 'uppercase',
+              letterSpacing: 'normal', textTransform: 'none',
               color: 'var(--co-text-hi)',
               margin: 0, lineHeight: 1,
               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
@@ -387,10 +387,10 @@ function PlayerCard({
               <div style={{
                 position: 'absolute', left: 0, top: 0, bottom: 0, right: 0,
                 background: pct >= 75
-                  ? 'linear-gradient(90deg, var(--co-cyan), var(--co-green))'
+                  ? 'var(--co-cyan)'
                   : pct >= 45
-                  ? 'linear-gradient(90deg, var(--co-green), var(--co-cyan))'
-                  : `linear-gradient(90deg, ${c.border}CC, ${c.border}66)`,
+                  ? 'var(--co-green)'
+                  : 'var(--co-dim)',
                 /* Pasek obecności ma stałą szerokość i skaluje się z lewej —
                    bez przeliczania layoutu przy każdej zmianie danych. */
                 transform: `scaleX(${Math.max(0, Math.min(100, pct)) / 100})`,
@@ -454,12 +454,12 @@ function PlayerCard({
 
             {hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: '0.18em', marginBottom: 2 }}>
-                  ↑ NADPŁATA
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
+                  ↑ Nadpłata
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--co-green)', margin: 0, lineHeight: 1 }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
                 </p>
               </div>
             ) : (
@@ -471,13 +471,13 @@ function PlayerCard({
                   textShadow: isPending ? 'var(--glow-rose-md)' : 'var(--glow-cyan-md)',
                 }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
                 </p>
               </div>
             )}
             {adminMode && (
-              <p style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-rose)', letterSpacing: '0.1em', marginTop: 4, position: 'relative', zIndex: 1 }}>
-                <TriangleAlert size={12} aria-hidden="true" /> TRYB EDYCJI
+              <p style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-rose)', letterSpacing: 'normal', marginTop: 4, position: 'relative', zIndex: 1 }}>
+                <TriangleAlert size={12} aria-hidden="true" /> Tryb edycji
               </p>
             )}
           </div>
@@ -587,11 +587,11 @@ function PlayerCard({
             <div style={{ marginTop: modal === null ? 12 : 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
               <Barcode name={player.name} color={accentColor} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                <span style={{ ...FONT.monoMicro, letterSpacing: '0.1em' }}>
-                  {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
+                <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
+                  {playerId}-{player.name.replace(/\s/g, '')}
                 </span>
-                <span style={{ ...FONT.monoMicro, letterSpacing: '0.06em' }}>
-                  SW-NET
+                <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
+                  Sw-net
                 </span>
               </div>
             </div>
@@ -619,34 +619,34 @@ function PlayerCard({
           >
             {hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: '0.18em', marginBottom: 2 }}>
-                  ↑ DO ZEBRANIA
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
+                  ↑ Do zebrania
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--co-green)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-green-md)' }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
                 </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: '0.1em', margin: '4px 0 0' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', margin: '4px 0 0' }}>
                   suma wpłat do zebrania od graczy
                 </p>
               </div>
             ) : isPending ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: '0.18em', marginBottom: 2 }}>
-                  ↕ SALDO
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: 'normal', marginBottom: 2 }}>
+                  ↕ Saldo
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--co-cyan)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-md)' }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
                 </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: '0.1em', margin: '4px 0 0' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: 'normal', margin: '4px 0 0' }}>
                   nadwyżka ponad zaległości
                 </p>
               </div>
             ) : (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--co-green)', margin: 0, letterSpacing: '0.1em', textShadow: 'var(--glow-green-md)' }}>
-                  ✓ WSZYSCY ROZLICZENI
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--co-green)', margin: 0, letterSpacing: 'normal', textShadow: 'var(--glow-green-md)' }}>
+                  ✓ Wszyscy rozliczeni
                 </p>
               </div>
             )}
@@ -664,11 +664,11 @@ function PlayerCard({
             <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
               <Barcode name={player.name} color={c.border} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                <span style={{ ...FONT.monoMicro, letterSpacing: '0.1em' }}>
-                  {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
+                <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
+                  {playerId}-{player.name.replace(/\s/g, '')}
                 </span>
-                <span style={{ ...FONT.monoMicro, letterSpacing: '0.06em' }}>
-                  SW-NET
+                <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
+                  Sw-net
                 </span>
               </div>
             </div>

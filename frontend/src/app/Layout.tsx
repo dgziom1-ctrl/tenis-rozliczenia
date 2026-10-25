@@ -244,14 +244,14 @@ function OfflineBanner({ hasData, onRetry }: { hasData: boolean; onRetry: () => 
       <TriangleAlert size={18} aria-hidden="true" style={{ color: 'var(--co-amber)', flexShrink: 0 }} />
       <div style={{ flex: 1 }}>
         <p style={{
-          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.1em',
-          textTransform: 'uppercase', color: 'var(--co-amber)', fontSize: '0.8125rem',
+          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: 'normal',
+          textTransform: 'none', color: 'var(--co-amber)', fontSize: '0.8125rem',
         }}>
           Brak połączenia
         </p>
         <p style={{
           margin: '2px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-          color: 'var(--co-dim)', letterSpacing: '0.06em', lineHeight: 1.5,
+          color: 'var(--co-dim)', letterSpacing: 'normal', lineHeight: 1.5,
         }}>
           {hasData
             ? 'Pracujesz na ostatnich danych. Zmiany (wpłaty, sesje) nie zapiszą się, dopóki nie wróci sieć.'
@@ -278,11 +278,11 @@ function CyberBackground() {
       <div className="fluid-grid" />
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 120% 100% at 50% 38%, transparent 52%, var(--bg-vignette) 100%)',
+        background: 'none',
       }} />
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: '30vh',
-        background: 'linear-gradient(to top, var(--co-tint) 0%, transparent 100%)',
+        background: 'none',
       }} />
     </div>
   );

@@ -110,14 +110,14 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
     ? `DO ZAPŁATY: ${formatAmountShort(breakdown.balance)} ZŁ`
     : breakdown.balance < -0.01
       ? `NADPŁATA: +${formatAmountShort(Math.abs(breakdown.balance))} ZŁ`
-      : '✓ ROZLICZONY';
+      : '✓ Rozliczony';
 
   return (
     <TerminalPanel
       open
       onToggle={onToggle}
       toggleLabel={toggleLabel}
-      footer={<TerminalFooter label="SALDO" value={balanceLabel} valueColor={balanceColor} />}
+      footer={<TerminalFooter label="Saldo" value={balanceLabel} valueColor={balanceColor} />}
     >
       {breakdown.carryOver && <CarryOverSection carryOver={breakdown.carryOver} />}
 
@@ -135,7 +135,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           ))}
           {breakdown.sessions.length > 1 && (
             <TerminalRow highlight="var(--co-tint-rose)">
-              <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)' }}>RAZEM SESJE</span>
+              <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)' }}>Razem sesje</span>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-rose)' }}>
                 -{formatAmountShort(breakdown.totalSessions)} ZŁ
               </span>
@@ -188,7 +188,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           ))}
           {breakdown.payments.length > 1 && (
             <TerminalRow highlight="var(--co-tint)">
-              <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)' }}>RAZEM WPŁACONO</span>
+              <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)' }}>Razem wpłacono</span>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-cyan)' }}>
                 +{formatAmountShort(breakdown.totalPaid)} ZŁ
               </span>

@@ -93,7 +93,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
           aria-hidden="true"
           style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: 'linear-gradient(105deg, transparent 20%, var(--co-tint-hi) 50%, transparent 80%)',
+            background: 'none',
             animation: shimmerKey > 0 ? 'gold-shimmer 3s ease-out forwards' : 'none',
           }}
         />
@@ -184,7 +184,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
         {/* Ambient scan */}
         {podiumEntry.place === 1 && <div aria-hidden="true" style={{
           position: 'absolute', left: 0, right: 0, height: '1px',
-          background: `linear-gradient(90deg, transparent, ${s.border}, transparent)`,
+          background: 'var(--co-border)',
           animation: 'podium-scan 2.5s ease-in-out infinite',
           pointerEvents: 'none',
         }} />}

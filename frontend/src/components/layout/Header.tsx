@@ -176,22 +176,22 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
       <header className="glass-header" style={{ position:'relative',overflow:'visible' }}>
 
         <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,right:0,height:1,
-          background:'linear-gradient(90deg, transparent, var(--glass-hi-line), transparent)',zIndex:2 }}/>
+          background:'none',zIndex:2 }}/>
         <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
         <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
+        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'none',zIndex:2 }}/>
+        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'none',zIndex:2 }}/>
 
         <div className="header-topbar" style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
-          <span className="header-wordmark">CYBER-PONK</span>
+          <span className="header-wordmark">Cyber-ponk</span>
           <button type="button" onClick={handleCopy} className="glass-chip header-blik" aria-label={`Skopiuj numer BLIK ${blikNumber}`} style={{ display:'flex',alignItems:'center',gap:'8px',
             border:'1px solid var(--co-tint-line)',padding: '6px 12px',cursor:'pointer',
             transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
             <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,color:'var(--co-cyan)',padding:'2px 6px',
-              background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>BLIK</span>
+              background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>
             <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.base,letterSpacing:TRACK.tight,color:'var(--co-text)' }}>
               {blikNumber}
             </span>
@@ -236,7 +236,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
         <button type="button" onClick={handleCopy} className="header-blik-mobile"
           aria-label={`Skopiuj numer BLIK ${blikNumber}`}>
           <Smartphone size={14} aria-hidden="true" style={{ color:'var(--co-dim)', flexShrink:0 }}/>
-          <span className="header-blik-label">BLIK</span>
+          <span className="header-blik-label">Blik</span>
           <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.base,letterSpacing:TRACK.tight,color:'var(--co-text)',flex:1,textAlign:'left' }}>
             {blikNumber}
           </span>
@@ -247,12 +247,12 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
           <div className="header-hero-eyebrow" style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
-            <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to right,transparent,var(--co-tint-line))' }}/>
+            <div aria-hidden="true" style={{ height:1,width:36,background:'var(--co-border)' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.wide,color:'var(--co-dim)',textTransform:'uppercase' }}>
-              CENTRUM DOWODZENIA
+              letterSpacing:TRACK.wide,color:'var(--co-dim)',textTransform: 'none' }}>
+              Centrum dowodzenia
             </span>
-            <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to left,transparent,var(--co-tint-line))' }}/>
+            <div aria-hidden="true" style={{ height:1,width:36,background:'var(--co-border)' }}/>
           </div>
 
           <div className="header-hero-arena" style={{ width:'100%',maxWidth:560,marginBottom:14,
@@ -272,7 +272,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
               textShadow:'-4px 0 var(--co-rose), 4px 0 var(--co-cyan)',
               clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
               opacity:1,
-            }}>CYBER-PONK</span>}
+            }}>Cyber-ponk</span>}
             <span style={{
               display:'block',fontFamily:'var(--font-display)',
               fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
@@ -288,30 +288,30 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
                 : { color:'var(--co-cyan)',
                     textShadow:'var(--glow-brand-sm)',
                   }),
-            }}>CYBER-PONK</span>
+            }}>Cyber-ponk</span>
           </button>
 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
-            background:'linear-gradient(90deg,transparent,var(--co-tint-line) 40%,var(--co-tint-line) 60%,transparent)' }}/>
+            background:'var(--co-border)' }}/>
 
           {/* JACK IN — lights up exactly when ball hits paddle */}
           <div className="header-hero-meta" style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
             <span style={{
               display:'inline-flex',alignItems:'center',gap:5,
               fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.wide,textTransform:'uppercase',
+              letterSpacing:TRACK.wide,textTransform: 'none',
               transition:'color .06s,text-shadow .06s',
               // Wygaszony stan był cyanem na 8% krycia, czyli praktycznie
               // niewidoczny w obu motywach.
               color: hitting ? 'var(--co-cyan)' : 'var(--co-dim)',
               textShadow: hitting ? 'var(--glow-cyan-md)' : 'none',
-            }}><Zap size={11} aria-hidden="true" /> JACK IN <Zap size={11} aria-hidden="true" /></span>
+            }}><Zap size={11} aria-hidden="true" /> Jack in <Zap size={11} aria-hidden="true" /></span>
             <span aria-hidden="true" style={{ color:'var(--co-border)' }}>│</span>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.normal,
               color:isConnected?'var(--co-green)':'var(--co-rose)',
               textShadow:isConnected?'var(--glow-green-md)':'var(--glow-rose-md)' }}>
-              {isConnected ? '● ONLINE' : '○ OFFLINE'}
+              {isConnected ? '● Online' : '○ Offline'}
             </span>
             <span aria-hidden="true" style={{ color:'var(--co-border)' }}>│</span>
             <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-dim)' }}>
@@ -326,13 +326,13 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
                   fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-amber)',
                   border:'1px solid var(--co-amber)',padding:'0 4px',letterSpacing:TRACK.tight,
                 }}
-              >DEMO</span>
+              >Demo</span>
             )}
           </div>
         </div>
       </header>
 
-      <div style={{ height:2,background:'linear-gradient(90deg,transparent,var(--co-cyan) 50%,transparent)',opacity:.6 }}/>
+      <div style={{ height:2,background:'var(--co-border)',opacity:.6 }}/>
 
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
         <button onClick={handleCopy} style={{ background:'transparent',border:'none',padding:0,
@@ -340,7 +340,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
           <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
             letterSpacing:TRACK.normal,color:'var(--co-cyan)',padding: '2px 4px',
-            background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>BLIK</span>
+            background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>
           <span style={{ fontFamily:'var(--font-mono)',color:'var(--co-text)',fontSize:TEXT.small,letterSpacing:TRACK.tight }}>
             {blikNumber}
           </span>
@@ -349,7 +349,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
         <div style={{ display:'flex',alignItems:'center',gap:'10px' }}>
           <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
             letterSpacing:TRACK.tight,color:isConnected?'var(--co-green)':'var(--co-rose)' }}>
-            {isConnected ? '● ONLINE' : '○ OFFLINE'}
+            {isConnected ? '● Online' : '○ Offline'}
           </span>
           <button type="button" onClick={onShowGuide}
             aria-label="Pomoc — jak to działa"
