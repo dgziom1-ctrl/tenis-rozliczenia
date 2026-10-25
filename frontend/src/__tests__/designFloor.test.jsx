@@ -25,6 +25,7 @@ vi.mock('react-router', () => ({ useNavigate: () => vi.fn() }));
 
 import DashboardTab from '../components/dashboard/DashboardTab';
 import ArenaCanvas from '../components/layout/ArenaCanvas';
+import { FONT, TRACK } from '../constants/styles';
 import { ToastProvider } from '../components/common/Toast';
 
 describe('legenda rang — stan dla czytnika ekranu', () => {
@@ -107,5 +108,29 @@ describe('ArenaCanvas — rAF tylko w polu widzenia', () => {
 
     act(() => { callbacks[0]([{ isIntersecting: true }]); });
     expect(rafSpy).toHaveBeenCalled();
+  });
+});
+
+// ── Kompromis: zdania zamiast wersalików ─────────────────────────────────
+/**
+ * PR #14 udowodnił, że bez klimatu Cyber-Ponk aplikacja traci ducha, ale
+ * rozstrzelane WIELKIE LITERY utrudniały czytanie etykiet. Test pilnuje, żeby
+ * wspólne helpery typografii nie wróciły do uppercase. Statyczny odpowiednik
+ * (wszystkie pliki CSS/TSX) jest w `scripts/audit-design.mjs`, reguła 5.
+ */
+describe('typografia — zdania, nie wersaliki', () => {
+  it('FONT.display nie wymusza wielkich liter ani trackingu', () => {
+    for (const size of ['0.75rem', '1rem', '2rem', '2.5rem']) {
+      const style = FONT.display(size);
+      expect(style.textTransform).toBe('none');
+      expect(style.letterSpacing).toBe('normal');
+      expect(style.fontFamily).toBe('var(--font-display)');
+    }
+  });
+
+  it('FONT.monoLabel i skala TRACK są naturalne', () => {
+    expect(FONT.monoLabel.textTransform).toBe('none');
+    expect(FONT.monoLabel.letterSpacing).toBe('normal');
+    expect(Object.values(TRACK).every((value) => value === 'normal')).toBe(true);
   });
 });

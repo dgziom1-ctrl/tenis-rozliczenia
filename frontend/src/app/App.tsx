@@ -19,7 +19,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
       fontFamily: 'var(--font-mono)',
     }}>
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3,
-        background: 'var(--co-tint-hi)',
+        background: 'repeating-linear-gradient(-45deg, var(--co-cyan) 0px, var(--co-cyan) 8px, transparent 8px, transparent 16px)',
         boxShadow: 'var(--glow-box-cyan)', zIndex: Z.boot,
       }} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
@@ -37,11 +37,11 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{
-            fontFamily: 'var(--font-display)', fontSize: '2rem', letterSpacing: 'normal',
+            fontFamily: 'var(--font-stencil)', fontSize: '2rem', letterSpacing: 'normal',
             color: 'var(--co-cyan)', textTransform: 'none',
             textShadow: 'var(--glow-cyan-lg)',
             margin: 0, lineHeight: 1,
-          }}>Cyber-ponk</p>
+          }}>CYBER-PONK</p>
           <p style={{
             fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: 'normal',
             color: 'var(--co-cyan)', textTransform: 'none', marginTop: 4,
@@ -64,7 +64,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
         <div style={{ width: 280, height: 3, background: 'var(--co-bar-track)', overflow: 'hidden', position: 'relative' }}>
           <div style={{
             height: '100%', width: '35%',
-            background: 'var(--co-cyan)',
+            background: 'linear-gradient(90deg, transparent, var(--co-cyan), var(--co-cyan))',
             boxShadow: '0 0 10px var(--co-cyan)',
             animation: 'loading-bar 1.1s ease-in-out infinite',
           }} />
@@ -103,7 +103,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
       background: 'var(--co-void)', padding: 24, flexDirection: 'column', gap: 20,
     }}>
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3,
-        background: 'var(--co-tint-rose)',
+        background: 'repeating-linear-gradient(-45deg, var(--co-rose) 0px, var(--co-rose) 8px, transparent 8px, transparent 16px)',
         boxShadow: 'var(--glow-box-rose)', zIndex: Z.boot,
       }} />
       <div style={{
@@ -132,9 +132,9 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
               fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)',
               letterSpacing: 'normal', lineHeight: 1.7,
             }}>
-              Błąd: brak odpowiedzi bazy<br />
-              Sprawdź połączenie lub plik .env<br />
-              System zatrzymany
+              {'>'} ERR: FIREBASE_TIMEOUT<br />
+              {'>'} Sprawdź internet lub plik .env<br />
+              {'>'} SYSTEM HALTED
             </p>
           </div>
           <button onClick={onRetry ?? (() => window.location.reload())}

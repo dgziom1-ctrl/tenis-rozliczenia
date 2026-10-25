@@ -387,10 +387,10 @@ function PlayerCard({
               <div style={{
                 position: 'absolute', left: 0, top: 0, bottom: 0, right: 0,
                 background: pct >= 75
-                  ? 'var(--co-cyan)'
+                  ? 'linear-gradient(90deg, var(--co-cyan), var(--co-green))'
                   : pct >= 45
-                  ? 'var(--co-green)'
-                  : 'var(--co-dim)',
+                  ? 'linear-gradient(90deg, var(--co-green), var(--co-cyan))'
+                  : `linear-gradient(90deg, ${c.border}CC, ${c.border}66)`,
                 /* Pasek obecności ma stałą szerokość i skaluje się z lewej —
                    bez przeliczania layoutu przy każdej zmianie danych. */
                 transform: `scaleX(${Math.max(0, Math.min(100, pct)) / 100})`,
@@ -588,7 +588,7 @@ function PlayerCard({
               <Barcode name={player.name} color={accentColor} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
                 <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
-                  {playerId}-{player.name.replace(/\s/g, '')}
+                  {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
                 </span>
                 <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
                   Sw-net
@@ -665,7 +665,7 @@ function PlayerCard({
               <Barcode name={player.name} color={c.border} />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
                 <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
-                  {playerId}-{player.name.replace(/\s/g, '')}
+                  {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
                 </span>
                 <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
                   Sw-net

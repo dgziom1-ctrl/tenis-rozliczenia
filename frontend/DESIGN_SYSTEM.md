@@ -7,11 +7,11 @@
 > (format `google-labs-code/design.md`). Mapowanie 12 repozytoriów design
 > skills na konkretne zmiany: [`../DESIGN-SKILLS.md`](../DESIGN-SKILLS.md).
 >
-> ⚠️ **Ta gałąź to eksperymentalny pełny redesign.** Poniższy opis dokumentuje
-> system Cyber‑Ponk z `main` (szkło, neon, wersaliki). Aktualny wygląd tej
-> gałęzi opisują [`../DESIGN.md`](../DESIGN.md) i
-> [`../REDESIGN-EXPERIMENT.md`](../REDESIGN-EXPERIMENT.md) — warstwa nadpisań
-> na końcu `src/index.css` wyłącza większość poniższych reguł wizualnych.
+> ⚠️ **Kompromis po PR #14:** klimat Cyber‑Ponk wraca w 100%, ale etykiety są
+> zdaniami zamiast wersalików, a `--font-display` to Rajdhani (Bebas Neue
+> został jako `--font-stencil` tylko dla logo i liczb). Fragmenty poniżej o
+> „wersalikowych etykietach" dotyczą stanu sprzed kompromisu — aktualna
+> wykładnia: [`../DESIGN-COMPROMISE.md`](../DESIGN-COMPROMISE.md).
 
 ## Skąd się wziął ten kierunek
 

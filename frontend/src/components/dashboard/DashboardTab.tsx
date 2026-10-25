@@ -107,7 +107,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
           {/* Ambient scan line */}
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-            background: 'none',
+            background: 'linear-gradient(90deg, transparent, var(--co-cyan), transparent)',
             animation: 'podium-scan 3s ease-in-out infinite',
           }} />
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18, filter: 'var(--glow-drop-cyan)' }}>

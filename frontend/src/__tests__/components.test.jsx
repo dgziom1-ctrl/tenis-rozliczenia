@@ -68,7 +68,7 @@ describe('App — smoke test', () => {
   it('pokazuje ekran ładowania na starcie (zanim Firebase odpowie)', () => {
     render(<App />);
     // Tekst na ekranie ładowania
-    expect(screen.getByText(/cyber-ponk/i)).toBeInTheDocument();
+    expect(screen.getByText('CYBER-PONK')).toBeInTheDocument();
   });
 
   it('nie pokazuje zakładek dopóki dane nie są gotowe', () => {

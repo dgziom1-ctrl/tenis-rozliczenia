@@ -57,7 +57,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }}>
         <div aria-hidden="true" style={{
           position: 'fixed', top: 0, left: 0, right: 0, height: 3,
-          background: 'var(--co-tint-rose)',
+          background: 'repeating-linear-gradient(-45deg, var(--co-rose) 0px, var(--co-rose) 8px, transparent 8px, transparent 16px)',
           boxShadow: 'var(--glow-box-rose)', zIndex: Z.boot,
         }} />
 

@@ -93,11 +93,11 @@ canvasu) oraz przypadek w `components.test.jsx` dla `scaleX` w `UndoBar`.
 
 ## Czego świadomie nie zrobiliśmy
 
-- **Pełny redesign (na `main`).** Hallmark i Impeccable wymagają pytania przed
-  wymianą systemu, a Taste i Hallmark zakazują m.in. szkła, gradientów,
-  wersalików i neonu — czyli całej tożsamości Cyber-Ponk. Dlatego PR #13
-  zrobił *polish*, nie *replace*. **Na tej gałęzi brief został zmieniony** i
-  pełny redesign istnieje: patrz `REDESIGN-EXPERIMENT.md` i nowy `DESIGN.md`.
+- **Pełny redesign (pierwsza runda).** Hallmark i Impeccable wymagają pytania
+  przed wymianą systemu, a Taste i Hallmark zakazują m.in. szkła, gradientów,
+  wersalików i neonu — czyli całej tożsamości Cyber-Ponk. Zgodnie z zasadą
+  „brief wins” zrobiliśmy *polish*, nie *replace*. Pełny redesign doszedł
+  później (PR #14) i **został wycofany** — patrz sekcja poniżej.
 - **GSAP, React Bits, Canvas UI jako zależności.** Aplikacja ma już własne
   hooki ruchu, sprężynę w modalach i canvas 2D. Douczanie 3 bibliotek do
   bundle'a pogorszyłoby start aplikacji, który jest jednym z priorytetów
@@ -114,32 +114,40 @@ canvasu) oraz przypadek w `components.test.jsx` dla `scaleX` w `UndoBar`.
    potem token w `index.css`, potem komponent.
 2. Nowa animacja → tylko `transform`/`opacity`; dodaj fallback w bloku
    `prefers-reduced-motion`.
-3. `cd frontend && npm run verify` musi być zielone. Opcjonalnie
+3. Etykiety zdaniami — `audit:design` (reguła 5) blokuje powrót
+   `text-transform: uppercase`.
+4. `cd frontend && npm run verify` musi być zielone. Opcjonalnie
    `npm run design:lint` sprawdza składnię `DESIGN.md`.
-4. Nowy wyjątek w audycie dopisuj do `COLOR_ALLOWLIST` z komentarzem
+5. Nowy wyjątek w audycie dopisuj do `COLOR_ALLOWLIST` z komentarzem
    dlaczego — nie wyłączaj całej bramki.
 
 
 ---
 
-## Eksperyment: pełny redesign (ta gałąź)
+## Kompromis po PR #14 (obowiązuje na tej gałęzi)
 
-Po zmianie briefu zastosowaliśmy dosłownie reguły, które wcześniej pominęliśmy:
-**koniec szkła, neonu, wersalików, gradientów, ściętych narożników i
-dekoracyjnego ruchu**. Nowy świat to `utilitarian editorial`: jeden krój
-(Inter), płaskie tło, głęboki teal jako jedyny akcent. Szczegóły, lista zmian,
-wyniki auditów i instrukcja revertu: [`REDESIGN-EXPERIMENT.md`](REDESIGN-EXPERIMENT.md).
+PR #14 zastosował Hallmark/Taste **dosłownie**: płaski styl editorial, jeden
+krój Inter, papierowe tło, zero szkła/neonu/gradientów/ścięć. Wszystkie bramki
+były zielone, ale **wizualnie wyszło gorzej** — aplikacja straciła ducha.
+Właściciel produktu zdecydował o powrocie do Cyber‑Ponka.
 
-Co się zmieniło w interpretacji skilli:
+Wniosek: te skille są świetne jako **bramki jakości**, a nie jako gotowy styl.
+Zasada „brief wins" (Impeccable) działa w obie strony — brief się zmienił,
+więc zmieniła się wykładnia.
 
-| Skill | Wcześniej (polish) | Teraz (full redesign) |
-|---|---|---|
-| Impeccable | „brief wins" → zostawiamy markę | nowy brief → nowy świat wizualny |
-| Hallmark | tylko „The Floor" jako bramka | pełne floor + zakaz szkła/gradientów/eyebrows |
-| Taste | pominięty jako sprzeczny z marką | jeden krój, jedno tło, jeden akcent, zdania |
-| Google DESIGN.md | kontrakt starego systemu | `DESIGN.md` przepisany na nowy system |
-| Canvas UI | tokeny canvasu | canvas ukryty, tokeny zostają na przyszłość |
-| Scroll World / Open Design | pominięte | nadal pominięte (scrolljacking w dashboardzie) |
+| Skille | Wykładnia po kompromisie |
+|---|---|
+| Impeccable | „brief wins" → klimat Cyber‑Ponk jest zablokowany ponownie |
+| Hallmark / Taste | „The Floor" (ruch, tokeny, focus, reduced motion) zostaje; zakaz szkła/neonu **nie** obowiązuje |
+| UI/UX Pro Max | priorytet a11y → interakcja → wydajność bez zmian |
+| GSAP Skills | transform/opacity + pauza rAF bez zmian |
+| Google DESIGN.md | `DESIGN.md` ponownie opisuje Cyber‑Ponka, z dopiskiem o kompromisie |
+| Emil Kowalski | mikro-decyzje ruchu bez zmian |
 
-Wszystkie automatyczne bramki (`verify`, `audit:contrast`, `audit:design`,
-`design:lint`) nadal przechodzą — redesign nie obniżył poprzeczki jakości.
+**Jedyna widoczna zmiana z eksperymentu:** etykiety są zdaniami, nie
+wersalikami. Bebas Neue (krój tylko wielkoliterowy) ustąpił jako display na
+rzecz Rajdhani, ale został jako `--font-stencil` dla wordmarku i liczb OVR.
+Regułę egzekwuje `audit:design` (reguła 5) oraz test w `designFloor.test.jsx`.
+
+Szczegóły, tabela decyzji i instrukcja ewentualnego powrotu:
+[`DESIGN-COMPROMISE.md`](DESIGN-COMPROMISE.md).

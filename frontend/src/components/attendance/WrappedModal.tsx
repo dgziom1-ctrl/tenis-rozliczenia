@@ -460,7 +460,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
       {/* Scan-line overlay */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
-        backgroundImage: 'none',
+        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, var(--co-tint) 2px, var(--co-tint) 4px)',
       }} />
 
       {/* Corner decorations — wspólny komponent zamiast 20-linijkowej kopii */}

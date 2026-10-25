@@ -176,15 +176,15 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
       <header className="glass-header" style={{ position:'relative',overflow:'visible' }}>
 
         <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,right:0,height:1,
-          background:'none',zIndex:2 }}/>
+          background:'linear-gradient(90deg, transparent, var(--glass-hi-line), transparent)',zIndex:2 }}/>
         <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
         <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'none',zIndex:2 }}/>
-        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'none',zIndex:2 }}/>
+        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
+        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
 
         <div className="header-topbar" style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
-          <span className="header-wordmark">Cyber-ponk</span>
+          <span className="header-wordmark">CYBER-PONK</span>
           <button type="button" onClick={handleCopy} className="glass-chip header-blik" aria-label={`Skopiuj numer BLIK ${blikNumber}`} style={{ display:'flex',alignItems:'center',gap:'8px',
             border:'1px solid var(--co-tint-line)',padding: '6px 12px',cursor:'pointer',
             transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
@@ -247,12 +247,12 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
           <div className="header-hero-eyebrow" style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
-            <div aria-hidden="true" style={{ height:1,width:36,background:'var(--co-border)' }}/>
+            <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to right,transparent,var(--co-tint-line))' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,color:'var(--co-dim)',textTransform: 'none' }}>
               Centrum dowodzenia
             </span>
-            <div aria-hidden="true" style={{ height:1,width:36,background:'var(--co-border)' }}/>
+            <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to left,transparent,var(--co-tint-line))' }}/>
           </div>
 
           <div className="header-hero-arena" style={{ width:'100%',maxWidth:560,marginBottom:14,
@@ -266,15 +266,15 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
             {!chaosMode && hitting && <span aria-hidden="true" style={{
               position:'absolute',inset:0,
-              display:'block',fontFamily:'var(--font-display)',
+              display:'block',fontFamily:'var(--font-stencil)',
               fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               color:'transparent',pointerEvents:'none',userSelect:'none',
               textShadow:'-4px 0 var(--co-rose), 4px 0 var(--co-cyan)',
               clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
               opacity:1,
-            }}>Cyber-ponk</span>}
+            }}>CYBER-PONK</span>}
             <span style={{
-              display:'block',fontFamily:'var(--font-display)',
+              display:'block',fontFamily:'var(--font-stencil)',
               fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               position:'relative',
               transition:'text-shadow 0.06s, transform 0.06s',
@@ -288,11 +288,11 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
                 : { color:'var(--co-cyan)',
                     textShadow:'var(--glow-brand-sm)',
                   }),
-            }}>Cyber-ponk</span>
+            }}>CYBER-PONK</span>
           </button>
 
           <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
-            background:'var(--co-border)' }}/>
+            background:'linear-gradient(90deg,transparent,var(--co-tint-line) 40%,var(--co-tint-line) 60%,transparent)' }}/>
 
           {/* JACK IN — lights up exactly when ball hits paddle */}
           <div className="header-hero-meta" style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
@@ -332,7 +332,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
         </div>
       </header>
 
-      <div style={{ height:2,background:'var(--co-border)',opacity:.6 }}/>
+      <div style={{ height:2,background:'linear-gradient(90deg,transparent,var(--co-cyan) 50%,transparent)',opacity:.6 }}/>
 
       <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
         <button onClick={handleCopy} style={{ background:'transparent',border:'none',padding:0,
