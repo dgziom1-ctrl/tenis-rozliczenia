@@ -31,7 +31,7 @@ typography:
     fontSize: 0.875rem
     fontWeight: 400
   tech:
-    fontFamily: "Orbitron Variable"
+    fontFamily: "Chakra Petch Italic"
     fontSize: 2rem
     fontWeight: 700
     letterSpacing: 0
@@ -161,32 +161,37 @@ bo API 2D nie rozumie `var()`. Nie wolno dopisywać tam literałów kolorów.
 ## Typography
 
 Skala `TEXT`: 12 / 13 / 14 / 16 / 20 / 24 / 32 / 40 px. Podłoga 12 px jest
-sprawdzana automatycznie. Kroje to **autentyczny duet z interfejsu Cyberpunk
-2077**: `Rajdhani` (główny krój HUD-u gry — tu display **i** treść, waga 600
-dla nagłówków, 400 dla treści), `Orbitron Variable` (`--font-tech`, drugorzędny
-krój gry na dane techniczne) i `Space Mono` (drobne dane, daty, terminal).
+sprawdzana automatycznie. Kroje: `Rajdhani` (główny krój HUD-u Cyberpunk
+2077 — tu display **i** treść, waga 600 dla nagłówków, 400 dla treści),
+**`Chakra Petch` Italic** (`--font-tech`, ostre ścięte narożniki i pochył na
+dane techniczne) i `Space Mono` (drobne dane, daty, terminal).
 Źródło: [Fonts In Use — Cyberpunk 2077](https://fontsinuse.com/uses/60926/cyberpunk-2077-video-game).
-Własne, nieudostępniane liternictwo logo gry nie jest kopiowane — używamy
-wolnych krojów (SIL OFL) z tego samego systemu.
+Liternictwo logo gry jest własnością CD Projektu — zamiast kopiować pliki
+„free for personal use" z serwisów typu FontSwan, używamy wolnego kroju (SIL
+OFL) o tym samym ostrym, pochyłym charakterze. Szczegóły i porównanie
+kandydatów: [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md).
 
 Wszystkie trzy kroje są **self-hosted przez `@fontsource`** — własny arkusz
 `frontend/src/fonts.css` (importowany w `main.tsx`) wybiera tylko podzbiory
 `latin` i `latin-ext` i tylko `woff2`, więc do `/assets/` i do cache service
-workera trafia 15 plików / ~252 KB zamiast 43 plików / ~1 MB gotowych paczek
-(zbędne devanagari, wietnamski i stare `.woff`). Każda reguła ma
+workera trafia 22 pliki / ~336 KB zamiast ponad 1 MB gotowych paczek
+(zbędne devanagari, tajski, wietnamski i stare `.woff`). Każda reguła ma
 `unicode-range`, więc polszczyzna pobiera `latin-ext` (ą/ę/ż/ł/ś/ź/ć/ń).
 `index.html` nie ładuje niczego z `fonts.googleapis.com` — apka wygląda
 identycznie offline i nie wysyła odwiedzin do trzeciej strony.
 
-**Orbitron tylko na dane.** `FONT.tech()` w `constants/styles.ts` i token
+**Pochyły krój tylko na dane.** `FONT.tech()` w `constants/styles.ts` i token
 `--font-tech` są przeznaczone wyłącznie dla liczb, kodów (`SESSION_…`), numeru
-BLIK, wielkich kwot i wordmarku `CYBER-PONK`. Orbitron ma **tylko** podzbiór
-`latin` — nie umie złożyć polskich znaków, więc nigdy nie wolno go stosować do
-zdań, nazw graczy ani waluty `ZŁ` (ta zostaje przy `--font-display`).
-`--font-stencil` jest teraz aliasem `--font-tech`: to samo miejsce, nowy krój,
-bez wielkoliterowego Bebas Neue. `FONT.data()` wybiera Orbitrona tylko dla
-czysto numerycznych wartości — inaczej wraca do Space Mono (fallback BLIK
-„SKONFIGURUJ .ENV" ma polskie „Ó").
+BLIK, wielkich kwot i wordmarku `CYBER-PONK`. Zdania, nazwy graczy i waluta
+`ZŁ` zostają przy `--font-display`. Chakra Petch ma pełny `latin-ext`, więc
+polskie znaki nie są już problemem — rozdzielenie wynika z czytelności, nie
+z brakujących glifów. `--font-stencil` jest aliasem `--font-tech`.
+`FONT.data()` wybiera krój danych tylko dla czysto numerycznych wartości —
+inaczej wraca do Space Mono (fallback BLIK to komunikat, nie numer).
+
+**Kursywa jest jawna.** Reguły `@font-face` mają `font-style: italic`, a
+`FONT.tech()` i wordmarki proszą o `fontStyle: 'italic'`. Bez tego przeglądarka
+nałożyłaby na pochyły krój drugie, sztuczne pochylenie.
 
 **Zdania, nie wersaliki.** Zakaz `text-transform: uppercase` i trackingu
 etykiet (`TRACK.* = 'normal'`). Hierarchię buduje rozmiar i waga, nie

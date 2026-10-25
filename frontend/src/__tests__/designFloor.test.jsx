@@ -148,9 +148,10 @@ describe('typografia — kroje Cyberpunk 2077', () => {
     fileURLToPath(new URL(relative, import.meta.url)), 'utf8',
   );
 
-  it('FONT.tech daje Orbitrona bez wersalików i trackingu', () => {
+  it('FONT.tech daje pochyły krój bez wersalików i trackingu', () => {
     const style = FONT.tech('2.5rem', 700);
     expect(style.fontFamily).toBe('var(--font-tech)');
+    expect(style.fontStyle).toBe('italic');
     expect(style.fontWeight).toBe(700);
     expect(style.textTransform).toBe('none');
     expect(style.letterSpacing).toBe('normal');
@@ -161,9 +162,9 @@ describe('typografia — kroje Cyberpunk 2077', () => {
     expect(FONT.mono().fontFamily).toBe('var(--font-mono)');
   });
 
-  // BLIK_NUMBER ma fallback „SKONFIGURUJ .ENV" — polskie „Ó" nie istnieje
-  // w Orbitronie. Bez tego guarda słowo składałoby się z dwóch krojów.
-  it('FONT.data daje Orbitrona dla liczb, a mono dla tekstu z polskimi znakami', () => {
+  // Gdy BLIK nie jest skonfigurowany, zamiast numeru widzimy komunikat —
+  // taki tekst czyta się w mono, nie w kroju przeznaczonym do liczb.
+  it('FONT.data daje krój danych dla liczb, a mono dla komunikatu', () => {
     expect(FONT.data('600 000 000').fontFamily).toBe('var(--font-tech)');
     expect(FONT.data('600 000 000').fontWeight).toBe(500);
     expect(FONT.data('SKONFIGURUJ .ENV').fontFamily).toBe('var(--font-mono)');
@@ -185,12 +186,17 @@ describe('typografia — kroje Cyberpunk 2077', () => {
     for (const pkg of [
       '@fontsource/rajdhani/files',
       '@fontsource/space-mono/files',
-      '@fontsource-variable/orbitron/files',
+      '@fontsource/chakra-petch/files',
     ]) {
       expect(fonts).toContain(pkg);
     }
     expect(fonts).toContain('rajdhani-latin-ext-600-normal.woff2');
     expect(fonts).toContain('space-mono-latin-ext-400-normal.woff2');
+    // Pochyły krój musi mieć też polskie znaki — inaczej „ZŁ" zrobi się z dwóch krojów.
+    expect(fonts).toContain('chakra-petch-latin-ext-700-italic.woff2');
+    expect(fonts).toContain("font-family: 'Chakra Petch'");
+    expect(fonts).toContain('font-style: italic');
+    expect(fonts).not.toMatch(/url\([^)]*orbitron/i);
     expect(fonts).not.toMatch(/url\([^)]*(devanagari|vietnamese)/);
     expect(fonts).not.toMatch(/\.woff\)/);
     expect(fonts).not.toContain('Space Money');
@@ -200,10 +206,11 @@ describe('typografia — kroje Cyberpunk 2077', () => {
     expect(ranges.length).toBe(faces.length);
   });
 
-  it('--font-tech to Orbitron, a --font-display to Rajdhani', () => {
+  it('--font-tech to Chakra Petch, a --font-display to Rajdhani', () => {
     const css = read('../index.css');
-    expect(css).toMatch(/--font-tech:\s*['"]Orbitron Variable['"]/);
+    expect(css).toMatch(/--font-tech:\s*['"]Chakra Petch['"]/);
     expect(css).toMatch(/--font-display:\s*['"]Rajdhani['"]/);
     expect(css).not.toMatch(/Bebas Neue/);
+    expect(css).not.toMatch(/Orbitron/);
   });
 });

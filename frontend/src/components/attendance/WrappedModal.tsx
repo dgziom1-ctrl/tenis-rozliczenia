@@ -48,7 +48,7 @@ const display = (size: string, extra?: CSSProperties): CSSProperties => ({
 const mono = (size: string, extra?: CSSProperties): CSSProperties => ({
   ...FONT.mono(size), ...extra,
 });
-/** Wielkie liczby w HUD-zie — Orbitron, ten sam krój co dane w Cyberpunk 2077. */
+/** Wielkie liczby w HUD-zie — pochyły, ostry krój do danych. */
 const tech = (size: string, extra?: CSSProperties): CSSProperties => ({
   ...FONT.tech(size, 700), lineHeight: 1, ...extra,
 });

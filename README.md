@@ -7,8 +7,9 @@
 - [`DESIGN.md`](DESIGN.md) — machine-readable design system for coding agents (YAML tokens + rationale, `google-labs-code/design.md` format).
 - [`DESIGN-SKILLS.md`](DESIGN-SKILLS.md) — which of the 12 popular design-skill repos we actually applied, which we skipped and why.
 - [`DESIGN-COMPROMISE.md`](DESIGN-COMPROMISE.md) — why the full editorial redesign (PR #14) was rolled back and what survived from it (sentence case instead of ALL CAPS).
-- [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md) — why the UI now uses Cyberpunk 2077's own type pairing (Rajdhani + Orbitron), self-hosted via Fontsource in a trimmed `src/fonts.css` (15 woff2 / ~252 KB) instead of a CDN.
+- [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md) — why the UI pairs Rajdhani (Cyberpunk 2077's HUD face) with Chakra Petch Italic for sharp, slanted data, all self-hosted via Fontsource in a trimmed `src/fonts.css` (22 woff2 / ~336 KB) instead of a CDN.
 - [`frontend/DESIGN_SYSTEM.md`](frontend/DESIGN_SYSTEM.md) — full source of truth: contrast matrix, motion, icons, component recipes.
+- [`docs/font-candidates.png`](docs/font-candidates.png) — rendered specimen sheet of the open-licensed fonts considered for the data typeface.
 - `cd frontend && npm run verify` runs the quality gates, including `audit:design`
   (no layout animations, tokens instead of color literals, no uppercase labels, self-hosted fonts, focus/reduced-motion fallbacks).
   `npm run design:lint` validates `DESIGN.md` against the official spec.
