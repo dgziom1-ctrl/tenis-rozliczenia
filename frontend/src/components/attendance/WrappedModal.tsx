@@ -341,8 +341,8 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                 textAlign: 'left', padding: '10px 14px',
                 background: 'var(--co-surface-2)',
                 border: '1px solid var(--co-border)',
-                maxHeight: 180, overflowY: 'auto',
-              }}>
+                maxHeight: 180, overflowY: 'auto', overscrollBehavior: 'contain',
+              }} data-modal-scroll>
                 {rest.map((p) => (
                   <div key={p.name} style={{
                     display: 'flex', alignItems: 'center', gap: 8,
