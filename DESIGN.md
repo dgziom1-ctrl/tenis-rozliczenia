@@ -30,6 +30,11 @@ typography:
     fontFamily: "Space Mono"
     fontSize: 0.875rem
     fontWeight: 400
+  tech:
+    fontFamily: "Orbitron Variable"
+    fontSize: 2rem
+    fontWeight: 700
+    letterSpacing: 0
   body:
     fontFamily: Rajdhani
     fontSize: 0.875rem
@@ -100,6 +105,9 @@ components:
   heading:
     textColor: "{colors.text-hi}"
     typography: "{typography.display}"
+  data-value:
+    textColor: "{colors.cyan}"
+    typography: "{typography.tech}"
   meta:
     textColor: "{colors.dim}"
     typography: "{typography.body}"
@@ -131,7 +139,7 @@ a źródłem wartości jest `frontend/src/index.css` (bloki `:root` i
 `body.theme-light`) oraz `frontend/src/constants/styles.ts`.
 
 Weryfikacja: `cd frontend && npm run verify`. Osobne bramki:
-`npm run audit:design` (ruch, tokeny, stany), `npm run audit:contrast`
+`npm run audit:design` (ruch, tokeny, stany, fonty), `npm run audit:contrast`
 (WCAG AA w obu motywach), `npm run audit:a11y` (podłoga 12 px, wykresy).
 
 ## Colors
@@ -153,17 +161,38 @@ bo API 2D nie rozumie `var()`. Nie wolno dopisywać tam literałów kolorów.
 ## Typography
 
 Skala `TEXT`: 12 / 13 / 14 / 16 / 20 / 24 / 32 / 40 px. Podłoga 12 px jest
-sprawdzana automatycznie. Kroje: `Rajdhani` (display **i** treść — waga 600
-dla nagłówków, 400 dla treści), `Space Mono` wyłącznie do danych technicznych.
-`Bebas Neue` zostaje jako `--font-stencil`, ale **tylko** dla wordmarku
-`CYBER-PONK` i liczb OVR — to krój wyłącznie wielkoliterowy, więc nie nadaje
-się do zdań.
+sprawdzana automatycznie. Kroje to **autentyczny duet z interfejsu Cyberpunk
+2077**: `Rajdhani` (główny krój HUD-u gry — tu display **i** treść, waga 600
+dla nagłówków, 400 dla treści), `Orbitron Variable` (`--font-tech`, drugorzędny
+krój gry na dane techniczne) i `Space Mono` (drobne dane, daty, terminal).
+Źródło: [Fonts In Use — Cyberpunk 2077](https://fontsinuse.com/uses/60926/cyberpunk-2077-video-game).
+Własne, nieudostępniane liternictwo logo gry nie jest kopiowane — używamy
+wolnych krojów (SIL OFL) z tego samego systemu.
+
+Wszystkie trzy kroje są **self-hosted przez `@fontsource`** — własny arkusz
+`frontend/src/fonts.css` (importowany w `main.tsx`) wybiera tylko podzbiory
+`latin` i `latin-ext` i tylko `woff2`, więc do `/assets/` i do cache service
+workera trafia 15 plików / ~252 KB zamiast 43 plików / ~1 MB gotowych paczek
+(zbędne devanagari, wietnamski i stare `.woff`). Każda reguła ma
+`unicode-range`, więc polszczyzna pobiera `latin-ext` (ą/ę/ż/ł/ś/ź/ć/ń).
+`index.html` nie ładuje niczego z `fonts.googleapis.com` — apka wygląda
+identycznie offline i nie wysyła odwiedzin do trzeciej strony.
+
+**Orbitron tylko na dane.** `FONT.tech()` w `constants/styles.ts` i token
+`--font-tech` są przeznaczone wyłącznie dla liczb, kodów (`SESSION_…`), numeru
+BLIK, wielkich kwot i wordmarku `CYBER-PONK`. Orbitron ma **tylko** podzbiór
+`latin` — nie umie złożyć polskich znaków, więc nigdy nie wolno go stosować do
+zdań, nazw graczy ani waluty `ZŁ` (ta zostaje przy `--font-display`).
+`--font-stencil` jest teraz aliasem `--font-tech`: to samo miejsce, nowy krój,
+bez wielkoliterowego Bebas Neue. `FONT.data()` wybiera Orbitrona tylko dla
+czysto numerycznych wartości — inaczej wraca do Space Mono (fallback BLIK
+„SKONFIGURUJ .ENV" ma polskie „Ó").
 
 **Zdania, nie wersaliki.** Zakaz `text-transform: uppercase` i trackingu
 etykiet (`TRACK.* = 'normal'`). Hierarchię buduje rozmiar i waga, nie
-rozstrzelone litery. Wyjątek: wielkie litery w logo wynikają z kroju
-`--font-stencil`, nie ze stylu tekstu. Regułę egzekwuje `audit:design`
-(reguła 5) i test w `designFloor.test.jsx`.
+rozstrzelone litery. Wyjątek: wielkie litery w logo wynikają z treści znaku
+`CYBER-PONK`, nie ze stylu tekstu. Regułę egzekwuje `audit:design` (reguła 5)
+i test w `designFloor.test.jsx`; brak CDN i obecność krojów sprawdza reguła 6.
 
 Pola formularzy mają 16 px, żeby iOS nie przybliżał widoku. Etykiety osi
 wykresów: minimum 12 px w jednostkach `viewBox`, mierzonego kontenera
@@ -234,8 +263,8 @@ regresyjny dla każdej poprawki; `npm run verify` przed wdrożeniem.
 `overflow-x: hidden` na `html`/`body`; nie dodawaj literału koloru ani kroju
 w TSX (wyjątki: `BrandMark` jako zasób marki, paleta graczy, meta
 theme-color — opisane w `scripts/audit-design.mjs`); nie zamieniaj emoji
-w ikonę; nie dodawaj GSAP/React Bits/Canvas UI jako zależności bez
-potrzeby — wzorce z tych bibliotek są tu zaimplementowane w istniejącym
+w ikonę; nie ładuj fontów z CDN (używaj `@fontsource`); nie dodawaj
+GSAP/React Bits/Canvas UI jako zależności bez potrzeby — wzorce z tych bibliotek są tu zaimplementowane w istniejącym
 stacku; nie rób pełnego redesignu bez pytania — to system zablokowany,
 a zmiana marki wymaga decyzji właściciela produktu (PR #14 był tą decyzją
 i został świadomie wycofany — patrz `DESIGN-COMPROMISE.md`).

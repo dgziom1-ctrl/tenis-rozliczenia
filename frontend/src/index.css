@@ -217,14 +217,17 @@
     0 2px 8px -4px rgba(0,0,0,0.60);
 
   /* ── Fonts ── */
-  /* KOMPROMIS: zdania zamiast wersalików. Bebas Neue jest krojem wyłącznie
-     wielkoliterowym — nie potrafi złożyć zdania — więc display/body jedzie na
-     Rajdhani. Bebas zostaje jako --font-stencil wyłącznie dla wordmarku i liczb,
-     gdzie wielkie litery są naturą znaku, a nie stylem tekstu. */
+  /* TYPOGRAFIA — autentyczny duet z interfejsu Cyberpunk 2077.
+     Rajdhani to główny krój UI gry (HUD, menu, dziennik zadań); Orbitron jest
+     tam krojem drugorzędnym na dane techniczne. Oba są self-hosted (@fontsource,
+     patrz main.tsx), więc działają offline.
+     Orbitron ma TYLKO podzbiór `latin` — nie umie złożyć polskich znaków, więc
+     trafia wyłącznie na liczby, kody i wordmark. Zdania zostają w Rajdhani. */
   --font-display: 'Rajdhani', sans-serif;
-  --font-stencil: 'Bebas Neue', monospace;
-  --font-mono:    'Space Mono', 'Courier New', monospace;
   --font-body:    'Rajdhani', sans-serif;
+  --font-mono:    'Space Mono', 'Courier New', monospace;
+  --font-tech:    'Orbitron Variable', 'Rajdhani', sans-serif;
+  --font-stencil: var(--font-tech);
 
   /* ── Misc ── */
   --co-overlay:    rgba(0,0,0,0.88);
@@ -700,7 +703,8 @@ body.theme-switching *::after {
 .card-foil-ghost  { opacity: 0.12; }
 
 .card-ovr {
-  font-family: var(--font-stencil);
+  font-family: var(--font-tech);
+  font-weight: 700;
   font-size: 2.15rem;
   line-height: 0.85;
   letter-spacing: normal;
@@ -713,7 +717,9 @@ body.theme-switching *::after {
   padding: 8px 0 16px;
 }
 .matchday-kicker {
+  /* Zdanie po polsku — Orbitron nie ma latin-ext, zostaje Rajdhani. */
   font-family: var(--font-display);
+  font-weight: 600;
   letter-spacing: normal;
   color: var(--co-cyan);
   font-size: 0.75rem;
@@ -1057,7 +1063,8 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   .header-wordmark {
     display: none !important;
     font-family: var(--font-stencil);
-    font-size: 1.35rem;
+    font-weight: 800;
+    font-size: 1.15rem;
     line-height: 1;
     letter-spacing: normal;
     color: var(--co-cyan);

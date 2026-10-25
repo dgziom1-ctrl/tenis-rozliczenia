@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        cyber: ['"Bebas Neue"', 'sans-serif'],
+        cyber: ['"Orbitron Variable"', 'Rajdhani', 'sans-serif'],
+        tech:  ['"Orbitron Variable"', 'Rajdhani', 'sans-serif'],
         mono:  ['"Space Mono"', 'monospace'],
         sans:  ['"Rajdhani"', 'system-ui', 'sans-serif'],
       },

@@ -1,3 +1,10 @@
+// ── Fonty self-hosted (@fontsource) ────────────────────────────────────
+// Duet z interfejsu Cyberpunk 2077: Rajdhani (UI) + Orbitron (dane).
+// Własny arkusz wybiera tylko podzbiory `latin` i `latin-ext` i tylko woff2 —
+// zamiast ~1 MB gotowych paczek (devanagari, wietnamski, stare .woff) w cache
+// workera ląduje ~300 KB. Szczegóły i unicode-range: src/fonts.css.
+import './fonts.css';
+
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';

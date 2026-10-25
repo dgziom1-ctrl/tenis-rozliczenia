@@ -22,7 +22,7 @@ też wykładnię.
 | Punkt wyjścia | **Kompromis** — baza = Cyber‑Ponk z PR #13, nie kopia editorialu |
 | Co zostaje z eksperymentu | **Niewidzialne poprawki + zdania zamiast WERSALIKÓW** |
 | Neon i ruch | **Pełny klimat**: cyan/rose/green, poświaty, canvas, skany, plamy, konfetti |
-| Czcionki i kształty | **Oryginał**: trzy kroje, ścięte narożniki |
+| Czcionki i kształty | **Oryginał**: trzy kroje, ścięte narożniki (później Bebas Neue → Orbitron, patrz niżej) |
 | Sprzeczność (wersaliki) | **Zdania zostają, kroje i ścięcia wracają** |
 | Dowiezienie | kod + dokumenty + testy + commit + push + PR |
 
@@ -60,9 +60,11 @@ też wykładnię.
 - `.toUpperCase()` znika z widocznych etykiet; zostaje wyłącznie w
   identyfikatorach technicznych (ID sesji, kod kreskowy gracza, inicjały).
 
-## Dlaczego Bebas Neue ustąpił (ale nie zniknął)
+## Dlaczego Bebas Neue ustąpił (stan PR #15)
 
-Bebas Neue to krój **wyłącznie wielkoliterowy** — nie potrafi złożyć zdania.
+Poniższy opis dotyczy stanu po PR #15 — później Bebas Neue zastąpiono
+Orbitronem (sekcja „Aktualizacja" wyżej). Bebas Neue to krój **wyłącznie
+wielkoliterowy** — nie potrafi złożyć zdania.
 Gdyby został jako `--font-display`, „zdania" i tak wyglądałyby jak
 WIELKIE LITERY. Dlatego:
 
@@ -75,6 +77,24 @@ WIELKIE LITERY. Dlatego:
 
 Efekt: oryginalne trzy kroje wciąż są w aplikacji, ale czyta się ją łatwiej.
 
+## Aktualizacja: prawdziwa czcionka z Cyberpunka
+
+Właściciel poprosił później o „czcionkę z cyberpunka". Okazało się, że
+**Rajdhani jest głównym krojem interfejsu Cyberpunk 2077**, a **Orbitron**
+krojem drugorzędnym na dane techniczne. Rajdhani już mieliśmy, więc dołożyliśmy
+Orbitron Variable jako `--font-tech` na wordmark, liczby OVR, wielkie kwoty,
+numer BLIK, kody sesji i liczniki Wrapped. **Bebas Neue znika** — był krojem
+tylko wielkoliterowym, więc gryzł się ze zdaniami.
+
+Dodatkowo wszystkie trzy kroje (Rajdhani, Space Mono, Orbitron) przeszły z
+Google Fonts CDN na **self-hosting przez `@fontsource`**: działają offline,
+razem z cache service workera. Orbitron nie ma polskich znaków, więc wolno go
+używać wyłącznie na liczbach i ASCII — zdania zostają w Rajdhani.
+
+Pełne uzasadnienie, licencja, ograniczenia i instrukcja powrotu:
+[`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md). Ta zmiana **nie cofa kompromisu** —
+klimat Cyber-Ponk i zdania zamiast wersalików zostają.
+
 ## Egzekwowanie kompromisu
 
 Zmiana nie jest tylko kosmetycznym „na razie tak". Ma dwie blokady:
@@ -86,6 +106,9 @@ Zmiana nie jest tylko kosmetycznym „na razie tak". Ma dwie blokady:
    `FONT.display()` dla każdego rozmiaru ma `textTransform: 'none'`,
    `letterSpacing: 'normal'`, a wszystkie wartości `TRACK` są `'normal'`.
 
+Reguła **6** w tym samym audycie pilnuje krojów z Cyberpunka (brak CDN,
+wymagane importy `@fontsource`, obecność `--font-tech`).
+
 Asercje w 3 plikach testowych, które oczekiwały wersalików, dostały matchery
 niewrażliwe na wielkość liter (`/^start$/i` itd.). Nadal sprawdzają obecność
 i działanie elementów — przestały tylko wiązać test z kapitalizacją copy.
@@ -95,7 +118,8 @@ i działanie elementów — przestały tylko wiązać test z kapitalizacją copy
 To jedna decyzja, nie revert całego PR:
 
 1. `index.css`: `text-transform: none` → `uppercase` w 7 regułach,
-   `letter-spacing: normal` → dawne wartości, `--font-display` → Bebas Neue.
+   `letter-spacing: normal` → dawne wartości, `--font-display` → Bebas Neue
+   (trzeba go wtedy z powrotem zainstalować — patrz `CYBERPUNK-FONT.md`).
 2. `constants/styles.ts`: przywrócić `TRACK` i `displayTracking()`.
 3. Usunąć regułę 5 z `audit-design.mjs` i test z `designFloor.test.jsx`.
 4. Zaktualizować `DESIGN.md` i ten plik.

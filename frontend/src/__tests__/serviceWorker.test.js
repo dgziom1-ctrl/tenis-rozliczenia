@@ -337,7 +337,7 @@ describe('czego worker nie tyka', () => {
   });
 
   it('zasobów z obcych serwerów', () => {
-    const event = sw.request('https://fonts.googleapis.com/css2?family=Bebas+Neue');
+    const event = sw.request('https://cdn.example.org/style.css');
     expect(event.respondWith).not.toHaveBeenCalled();
   });
 
