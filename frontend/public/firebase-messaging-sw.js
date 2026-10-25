@@ -316,7 +316,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Obce serwery (fonty Google, SDK z gstatic) zostawiamy przeglądarce.
+  // Obce serwery (np. SDK z gstatic) zostawiamy przeglądarce. Kroje
+  // są nasze — @fontsource trafia do /assets/ i łąduje w ASSET_CACHE.
   if (url.origin !== self.location.origin) return;
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
   if (NEVER_INTERCEPT.includes(url.pathname)) return;

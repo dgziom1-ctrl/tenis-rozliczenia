@@ -4,7 +4,7 @@ import ArenaCanvas from './ArenaCanvas';
 import { copyToClipboard } from '@/utils/clipboard';
 import { BLIK_NUMBER } from '@/utils/blik';
 import { useToast } from '@/components/common/Toast';
-import { TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 import { DEMO_MODE } from '@/constants';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { StyleWithVars } from '@/types/css';
@@ -192,7 +192,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,color:'var(--co-cyan)',padding:'2px 6px',
               background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>
-            <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.base,letterSpacing:TRACK.tight,color:'var(--co-text)' }}>
+            <span style={{ ...FONT.data(blikNumber, TEXT.base),color:'var(--co-text)' }}>
               {blikNumber}
             </span>
             <div style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
@@ -237,7 +237,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           aria-label={`Skopiuj numer BLIK ${blikNumber}`}>
           <Smartphone size={14} aria-hidden="true" style={{ color:'var(--co-dim)', flexShrink:0 }}/>
           <span className="header-blik-label">Blik</span>
-          <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.base,letterSpacing:TRACK.tight,color:'var(--co-text)',flex:1,textAlign:'left' }}>
+          <span style={{ ...FONT.data(blikNumber, TEXT.base),color:'var(--co-text)',flex:1,textAlign:'left' }}>
             {blikNumber}
           </span>
           {copied ? <Check size={14} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
@@ -266,16 +266,16 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
             {!chaosMode && hitting && <span aria-hidden="true" style={{
               position:'absolute',inset:0,
-              display:'block',fontFamily:'var(--font-stencil)',
-              fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              display:'block',fontFamily:'var(--font-stencil)',fontWeight:800,
+              fontSize:'clamp(1.6rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               color:'transparent',pointerEvents:'none',userSelect:'none',
               textShadow:'-4px 0 var(--co-rose), 4px 0 var(--co-cyan)',
               clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
               opacity:1,
             }}>CYBER-PONK</span>}
             <span style={{
-              display:'block',fontFamily:'var(--font-stencil)',
-              fontSize:'clamp(2rem,8vw,4rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              display:'block',fontFamily:'var(--font-stencil)',fontWeight:800,
+              fontSize:'clamp(1.6rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               position:'relative',
               transition:'text-shadow 0.06s, transform 0.06s',
               ...(chaosMode
@@ -341,7 +341,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
             letterSpacing:TRACK.normal,color:'var(--co-cyan)',padding: '2px 4px',
             background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>
-          <span style={{ fontFamily:'var(--font-mono)',color:'var(--co-text)',fontSize:TEXT.small,letterSpacing:TRACK.tight }}>
+          <span style={{ ...FONT.data(blikNumber, TEXT.small),color:'var(--co-text)' }}>
             {blikNumber}
           </span>
           {copied ? <Check size={12} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}

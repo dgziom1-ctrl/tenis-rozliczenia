@@ -146,8 +146,18 @@ więc zmieniła się wykładnia.
 
 **Jedyna widoczna zmiana z eksperymentu:** etykiety są zdaniami, nie
 wersalikami. Bebas Neue (krój tylko wielkoliterowy) ustąpił jako display na
-rzecz Rajdhani, ale został jako `--font-stencil` dla wordmarku i liczb OVR.
+rzecz Rajdhani i został na chwilę `--font-stencil` — obecnie to miejsce zajął
+Orbitron z Cyberpunk 2077 (patrz sekcja o foncie wyżej).
 Regułę egzekwuje `audit:design` (reguła 5) oraz test w `designFloor.test.jsx`.
 
 Szczegóły, tabela decyzji i instrukcja ewentualnego powrotu:
 [`DESIGN-COMPROMISE.md`](DESIGN-COMPROMISE.md).
+
+### Font z Cyberpunk 2077 (kolejna decyzja właściciela)
+
+Klimat został, a typografia poszła krok dalej w stronę oryginału: Rajdhani
+(główny krój HUD-u gry) + **Orbitron Variable** na dane techniczne, oba
+self-hosted przez `@fontsource` zamiast Google Fonts CDN. Reguła 6 w
+`audit-design.mjs` blokuje powrót CDN i pilnuje `--font-tech`. Zasada
+„brief wins" znów zadziałała — tym razem briefem było „daj czcionkę
+z cyberpunka". Szczegóły: [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md).

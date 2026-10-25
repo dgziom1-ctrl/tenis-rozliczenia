@@ -407,12 +407,12 @@ describe('globalny nasłuch', () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  // Zablokowany font z Google nie znaczy, że wyszła nowa wersja — inaczej brak
+  // Zablokowany arkusz z obcego serwera nie znaczy, że wyszła nowa wersja — inaczej brak
   // sieci przeładowywałby stronę w kółko.
   it('ignoruje nieudany zasób z obcego serwera', () => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue';
+    link.href = 'https://cdn.example.org/style.css';
     document.head.appendChild(link);
     link.dispatchEvent(new Event('error', { bubbles: false }));
 

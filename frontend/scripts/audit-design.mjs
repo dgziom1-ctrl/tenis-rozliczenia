@@ -15,7 +15,8 @@
  *      `prefers-reduced-transparency` i `prefers-contrast`,
  *   4. kolory i kroje w komponentach wyłącznie przez tokeny `var(--…)`,
  *   5. zdania zamiast wersalików — zakaz `text-transform: uppercase`
- *      i `textTransform: 'uppercase'` (decyzja kompromisowa, DESIGN-COMPROMISE.md).
+ *      i `textTransform: 'uppercase'` (decyzja kompromisowa, DESIGN-COMPROMISE.md),
+ *   6. kroje są częścią bundla (@fontsource), bez zewnętrznego CDN.
  *
  * Świadome wyjątki (waivers) są jawne w kodzie poniżej, nie w komentarzach
  * przy naruszeniu. Reszta dostępności i kontrastu zostaje w `audit:a11y`,
@@ -197,6 +198,67 @@ for (const file of files) {
 }
 
 
+// ── 6. Kroje z bundla, nie z CDN ──────────────────────────────────────────
+/**
+ * Cyberpunk 2077 składa HUD w Rajdhani, a dane techniczne w Orbitron. Oba
+ * serwujemy z własnego bundla (@fontsource), żeby PWA wyglądała tak samo
+ * offline i żeby service worker mógł zapisać kroje razem z resztą wydania.
+ */
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+for (const cdn of ['fonts.googleapis.com', 'fonts.gstatic.com']) {
+  if (html.includes(cdn)) {
+    errors.push(`index.html — zewnętrzny font (${cdn}); użyj @fontsource w main.tsx`);
+  }
+}
+if (/Bebas\s*\+?\s*Neue/i.test(html)) {
+  errors.push('index.html — Bebas Neue nie złoży zdania; użyj Rajdhani i Orbitron');
+}
+
+const main = fs.readFileSync(path.join(root, 'src/main.tsx'), 'utf8');
+if (!main.includes("import './fonts.css'")) {
+  errors.push('src/main.tsx — brak importu ./fonts.css; kroje muszą być self-hosted');
+}
+const fontsCss = fs.readFileSync(path.join(root, 'src/fonts.css'), 'utf8');
+for (const font of ['@fontsource/rajdhani/files', '@fontsource/space-mono/files', '@fontsource-variable/orbitron/files']) {
+  if (!fontsCss.includes(font)) {
+    errors.push(`src/fonts.css — brak plików ${font}; kroje muszą być self-hosted`);
+  }
+}
+// Gotowe paczki Fontsource emitują devanagari/wietnamski i stare .woff do
+// /assets/ — service worker cache'uje wtedy ~1 MB nieużywanych plików.
+if (/@fontsource\/[a-z-]+\/\d+\.css/.test(main)) {
+  errors.push('src/main.tsx — używaj src/fonts.css zamiast gotowych paczek Fontsource');
+}
+if (/\.woff\)/.test(fontsCss)) {
+  errors.push('src/fonts.css — tylko woff2; stare .woff podwaja wagę cache workera');
+}
+// Każda reguła musi mieć unicode-range, inaczej latin-ext nadpisze latin i
+// polskie znaki znikną (lub odwrotnie).
+const faceCount = (fontsCss.match(/@font-face/g) ?? []).length;
+const rangeCount = (fontsCss.match(/unicode-range:/g) ?? []).length;
+if (faceCount !== rangeCount) {
+  errors.push(`src/fonts.css — ${faceCount} @font-face, ale ${rangeCount} unicode-range; polszczyzna wymaga obu podzbiorów`);
+}
+if (fontsCss.includes('Space Money')) {
+  errors.push('src/fonts.css — literówka w nazwie rodziny: Space Money');
+}
+
+const indexCss = fs.readFileSync(path.join(root, 'src/index.css'), 'utf8');
+if (!/--font-tech:\s*['"]Orbitron Variable['"]/.test(indexCss)) {
+  errors.push('src/index.css — --font-tech musi wskazywać na Orbitron Variable');
+}
+if (/font-family:\s*['"]?Bebas Neue/.test(indexCss)) {
+  errors.push('src/index.css — Bebas Neue wrócił do stylów; zdania składaj Rajdhani');
+}
+
+const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+for (const dep of Object.keys(pkg.dependencies ?? {})) {
+  if (dep.startsWith('@fontsource/') && !fontsCss.includes(`${dep}/files`)) {
+    errors.push(`package.json — ${dep} zainstalowany, ale nieużywany w src/fonts.css`);
+  }
+}
+
+
 if (errors.length > 0) {
   console.error('\n✗ Audyt design floor: znaleziono problemy\n');
   errors.forEach((error) => console.error(`  • ${error}`));
@@ -205,5 +267,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `✓ Design floor: ruch tylko na transform/opacity, clip zamiast hidden, tokeny kolorów i krojów, zdania bez wersalików, stany a11y obecne (${files.length} plików).`,
+  `✓ Design floor: ruch tylko na transform/opacity, clip zamiast hidden, tokeny kolorów i krojów, fonty self-hosted, zdania bez wersalików, stany a11y obecne (${files.length} plików).`,
 );

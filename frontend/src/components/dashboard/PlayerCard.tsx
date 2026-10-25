@@ -457,21 +457,21 @@ function PlayerCard({
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
                   ↑ Nadpłata
                 </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--co-green)', margin: 0, lineHeight: 1 }}>
+                <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-green)', margin: 0, lineHeight: 1 }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
                 </p>
               </div>
             ) : (
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <p style={{
-                  fontFamily: 'var(--font-display)', fontSize: '2.5rem',
+                  ...FONT.tech('2.5rem', 700),
                   margin: 0, lineHeight: 1.1,
                   color: isPending ? 'var(--co-rose)' : 'var(--co-green)',
                   textShadow: isPending ? 'var(--glow-rose-md)' : 'var(--glow-cyan-md)',
                 }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
                 </p>
               </div>
             )}
@@ -622,9 +622,9 @@ function PlayerCard({
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
                   ↑ Do zebrania
                 </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--co-green)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-green-md)' }}>
+                <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-green)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-green-md)' }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', margin: '4px 0 0' }}>
                   suma wpłat do zebrania od graczy
@@ -635,9 +635,9 @@ function PlayerCard({
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: 'normal', marginBottom: 2 }}>
                   ↕ Saldo
                 </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--co-cyan)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-md)' }}>
+                <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-cyan)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-md)' }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: 'normal', margin: '4px 0 0' }}>
                   nadwyżka ponad zaległości

@@ -48,6 +48,10 @@ const display = (size: string, extra?: CSSProperties): CSSProperties => ({
 const mono = (size: string, extra?: CSSProperties): CSSProperties => ({
   ...FONT.mono(size), ...extra,
 });
+/** Wielkie liczby w HUD-zie — Orbitron, ten sam krój co dane w Cyberpunk 2077. */
+const tech = (size: string, extra?: CSSProperties): CSSProperties => ({
+  ...FONT.tech(size, 700), lineHeight: 1, ...extra,
+});
 
 interface WrappedModalProps {
   stats: WrappedStats;
@@ -147,7 +151,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               Razem zagraliśmy
             </div>
             <div style={{
-              ...display('clamp(4rem, 14vw, 8rem)'),
+              ...tech('clamp(4rem, 14vw, 8rem)'),
               color: 'var(--co-cyan)',
               textShadow: 'var(--glow-cyan-lg)',
             }}>
@@ -166,7 +170,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6, color: 'var(--co-cyan)' }}>
                   <SportGlyph sport="pingpong" size={30} />
                 </div>
-                <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-cyan)' }}>{cPP}</div>
+                <div style={{ ...tech('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-cyan)' }}>{cPP}</div>
                 <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Ping pong</div>
               </div>
               {stats.squashSessions > 0 && (
@@ -174,7 +178,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6, color: 'var(--co-green)' }}>
                     <SportGlyph sport="squash" size={30} />
                   </div>
-                  <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-green)' }}>{cSQ}</div>
+                  <div style={{ ...tech('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-green)' }}>{cSQ}</div>
                   <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Squash</div>
                 </div>
               )}
@@ -183,7 +187,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6, color: 'var(--co-pink)' }}>
                     <SportGlyph sport="badminton" size={30} />
                   </div>
-                  <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-pink)' }}>{cBM}</div>
+                  <div style={{ ...tech('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-pink)' }}>{cBM}</div>
                   <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Badminton</div>
                 </div>
               )}
@@ -192,7 +196,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6, color: 'var(--co-amber)' }}>
                     <SportGlyph sport="padel" size={30} />
                   </div>
-                  <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-amber)' }}>{cPD}</div>
+                  <div style={{ ...tech('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-amber)' }}>{cPD}</div>
                   <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Padel</div>
                 </div>
               )}

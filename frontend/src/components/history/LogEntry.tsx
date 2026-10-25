@@ -5,7 +5,7 @@ import { getShareGroups } from '@/utils/sessionCost';
 import ShareBreakdown from '../common/ShareBreakdown';
 import SportGlyph from '../common/icons/SportGlyph';
 import type { HistoryEntry } from '../../types/ui';
-import { CLIP } from '@/constants/styles';
+import { FONT, CLIP } from '@/constants/styles';
 
 interface LogEntryProps {
   row: HistoryEntry;
@@ -41,7 +41,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', opacity: 0.5 }}>{'>'}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-green)' }}>
+            <span style={{ ...FONT.tech('0.8125rem', 500), color: 'var(--co-green)' }}>
               SESSION_{String(row.id).slice(-4).toUpperCase()}
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>
