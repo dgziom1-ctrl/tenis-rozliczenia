@@ -1,10 +1,11 @@
-import { useState, useId } from 'react';
+import { useState, useId, useMemo } from 'react';
 import type { FormEvent } from 'react';
 import type { PlayerStats, SoundType } from '@/types/ui';
 import { Users, UserPlus, Cpu, Trash2, RotateCcw, AlertTriangle, Zap } from 'lucide-react';
 import PlayerProfileCard from './PlayerProfileCard';
 import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } from '@/lib/firebase';
 import { SOUND_TYPES, ORGANIZER_NAME } from '@/constants';
+import { createPlayerColorMap } from '@/constants/colors';
 import { FONT, TEXT, TRACK, CLIP, CONTENT_WIDTH } from '@/constants/styles';
 import { useToast } from '../common/Toast';
 import { PasswordModal, SectionHeader, PanelHeader } from '../common/SharedUI';
@@ -29,6 +30,10 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
   const { showSuccess, showError } = useToast();
 
   const currentMulti = localMulti ?? (defaultMultiPlayers || []);
+  const playerColorMap = useMemo(
+    () => createPlayerColorMap(players?.map(player => player.name) ?? []),
+    [players],
+  );
 
   const toggleDefaultMulti = async (name: string) => {
     const previous = currentMulti;
@@ -154,6 +159,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                   <PlayerProfileCard
                     key={p.name}
                     player={p}
+                    playerColor={playerColorMap.get(p.name)!}
                     onDelete={setPwModal}
                     isOrganizer={p.name === ORGANIZER_NAME}
                     disabled={processingPlayer === p.name}

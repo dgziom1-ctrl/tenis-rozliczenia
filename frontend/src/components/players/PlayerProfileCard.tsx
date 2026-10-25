@@ -1,17 +1,18 @@
 import { Trash2 } from 'lucide-react';
-import { getPlayerColor } from '@/constants/colors';
+import type { PlayerColor } from '@/types/ui';
 import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 import { PlayerAvatar } from '../dashboard/PlayerAvatar';
 
 interface PlayerProfileCardProps {
   player: { name: string };
+  playerColor: PlayerColor;
   onDelete: (name: string) => void;
   isOrganizer: boolean;
   disabled?: boolean;
 }
 
-export default function PlayerProfileCard({ player, onDelete, isOrganizer, disabled = false }: PlayerProfileCardProps) {
-  const c = getPlayerColor(player.name);
+export default function PlayerProfileCard({ player, playerColor, onDelete, isOrganizer, disabled = false }: PlayerProfileCardProps) {
+  const c = playerColor;
   const idleBorder = `${c.border}35`;
 
   return (
@@ -24,7 +25,7 @@ export default function PlayerProfileCard({ player, onDelete, isOrganizer, disab
       onMouseEnter={e => e.currentTarget.style.borderColor = c.border}
       onMouseLeave={e => e.currentTarget.style.borderColor = idleBorder}
     >
-      <PlayerAvatar name={player.name} size={40} />
+      <PlayerAvatar name={player.name} color={c} size={40} />
 
       {/* Name */}
       <div style={{ flex: 1, minWidth: 0 }}>

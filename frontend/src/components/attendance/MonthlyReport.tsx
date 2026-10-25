@@ -1,5 +1,6 @@
+import { useMemo } from 'react';
 import { CalendarDays } from 'lucide-react';
-import { getPlayerColor } from '@/constants/colors';
+import { createPlayerColorMap } from '@/constants/colors';
 import { FONT, CLIP, PANEL, TEXT, TRACK } from '../../constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -13,6 +14,10 @@ interface MonthlyReportProps {
 // ─── Monthly report ────────────────────────────────────────────────
 export default function MonthlyReport({ monthlyStats, players }: MonthlyReportProps) {
   const isMobile = useIsMobile();
+  const playerColorMap = useMemo(
+    () => createPlayerColorMap(players?.map(player => player.name) ?? []),
+    [players],
+  );
 
   return (
     <div style={{
@@ -58,7 +63,7 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {nonZero.length > 0 ? (
                       nonZero.map((e) => {
-                        const c = getPlayerColor(e.name);
+                        const c = playerColorMap.get(e.name)!;
                         const isMax = e.count === rowData.total;
                         return (
                           <span
@@ -116,7 +121,7 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                       Sesje
                     </th>
                     {players?.map(p => {
-                      const c = getPlayerColor(p.name);
+                      const c = playerColorMap.get(p.name)!;
                       return (
                         <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', fontWeight: 400 }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>

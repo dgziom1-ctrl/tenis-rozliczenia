@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { addPayment, removePayment } from '@/lib/firebase';
 import { SOUND_TYPES, ORGANIZER_NAME, RANKS, rankTint } from '@/constants';
+import { createPlayerColorMap } from '@/constants/colors';
 import { buildDebtDisplayData } from '@/utils/debt';
 import { calculateSeasonCardStats } from '@/utils/rankings';
 import { buildPlayerCardMeta } from '@/utils/playerCard';
@@ -90,6 +91,10 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
     const alphaSorted = [...nonOrg].sort((a, b) => a.name.localeCompare(b.name, 'pl'));
     return [...alphaSorted, ...organizer];
   }, [data.players]);
+  const playerColorMap = useMemo(
+    () => createPlayerColorMap(data.players?.map(player => player.name) ?? []),
+    [data.players],
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -289,6 +294,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
             <div key={player.name} className={`player-card-wrap ${stagger}`}>
               <PlayerCard
                 player={player}
+                playerColor={playerColorMap.get(player.name)!}
                 history={seasonHistory}
                 meta={cardMeta.get(player.name) ?? buildPlayerCardMeta({
                   ...player,

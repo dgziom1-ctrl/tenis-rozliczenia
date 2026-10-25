@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { computeRankingHistory } from '@/utils/rankings';
-import { getPlayerColor } from '@/constants/colors';
+import { createPlayerColorMap } from '@/constants/colors';
 import { FONT, TEXT, TRACK, CLIP, PANEL } from '@/constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import { useElementWidth } from '@/hooks/useElementWidth';
@@ -20,10 +20,9 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
   const [chartRef, chartWidth] = useElementWidth<HTMLDivElement>(CHART_WIDTH);
 
   const playerNames = useMemo(() => players?.map(p => p.name) ?? [], [players]);
-  // Wcześniej ten plik miał własną, prywatną paletę o innych wartościach niż
-  // `getPlayerColor`, więc ten sam gracz miał jeden kolor w raporcie
-  // miesięcznym i inny na wykresie obok, na tym samym ekranie.
-  const colorAt = (i: number) => getPlayerColor(playerNames[i] ?? '').border;
+  const playerColorMap = useMemo(() => createPlayerColorMap(playerNames), [playerNames]);
+  // Wykres i raport miesięczny dzielą tę samą mapę kolorów dla całego składu.
+  const colorAt = (i: number) => playerColorMap.get(playerNames[i] ?? '')!.border;
 
   // Wykres skaluje się do szerokości kontenera (viewBox 1:1), więc etykiety
   // nie kurczą się do 7 px na telefonie. Niższe PAD-y zostawiają miejsce na

@@ -50,7 +50,10 @@ import EditSessionForm from '../components/history/EditSessionForm';
 import PlayerCard from '../components/dashboard/PlayerCard';
 import { buildPlayerCardMeta } from '../utils/playerCard';
 import { getShareGroups } from '../utils/sessionCost';
+import { createPlayerColorMap } from '../constants/colors';
 import { TABS } from '../constants';
+
+const alaColor = createPlayerColorMap(['Ala']).get('Ala');
 
 // ════════════════════════════════════════════════════════════════════════════
 // App — smoke test
@@ -394,6 +397,7 @@ describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
     render(
       <PlayerSessionModal
         player={{ ...basePlayer, attendanceCount: 1, eligibleWeeks: 1, currentStreak: 1 }}
+        playerColor={alaColor}
         history={season2027}
         seasonLabel="2027"
         onClose={() => {}}
@@ -412,6 +416,7 @@ describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
     render(
       <PlayerSessionModal
         player={basePlayer}
+        playerColor={alaColor}
         history={fullHistory}
         seasonLabel={null}
         onClose={() => {}}
@@ -443,6 +448,7 @@ describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
     render(
       <PlayerSessionModal
         player={joined}
+        playerColor={alaColor}
         history={history}
         seasonLabel={null}
         onClose={() => {}}
@@ -590,6 +596,7 @@ describe('PlayerCard — karta gracza z obecnością i kropkami sesji', () => {
     render(
       <PlayerCard
         player={player}
+        playerColor={alaColor}
         history={history}
         meta={meta}
         openDetails={false}
