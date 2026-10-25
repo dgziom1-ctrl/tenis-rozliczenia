@@ -217,7 +217,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
               {RANKS.map(r => <RankGlyph key={r.name} rank={r} size={13} />)}
             </span>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-dim)', textTransform: 'none', flex: 1, textAlign: 'left' }}>
-              Co oznaczają rangi?
+              Co oznaczają rangi i OVR?
             </span>
             <ChevronDown size={13} aria-hidden="true" style={{ color: 'var(--co-dim)', transform: showRankGuide ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
           </button>
@@ -228,7 +228,53 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
             hidden={!showRankGuide}
             style={{ padding: '0 16px 16px', display: showRankGuide ? 'grid' : 'none', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 6, borderTop: '1px solid var(--co-border)' }}
           >
-              {RANKS.map((r, i) => (
+            <div style={{
+              gridColumn: '1 / -1',
+              marginTop: 6,
+              padding: 12,
+              background: 'var(--co-surface-2)',
+              border: '1px solid var(--co-border)',
+              clipPath: CLIP.smallCard,
+            }}>
+              <p style={{
+                fontFamily: 'var(--font-display)', fontSize: '0.875rem',
+                color: 'var(--co-text-hi)', letterSpacing: 'normal', margin: '0 0 4px',
+              }}>
+                OVR — ocena z bieżącego sezonu
+              </p>
+              <p style={{
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                color: 'var(--co-dim)', lineHeight: 1.5, margin: 0,
+              }}>
+                Każdy zaczyna od <strong style={{ color: 'var(--co-text)' }}>40 pkt</strong>. Do wyniku dochodzą:
+              </p>
+              <ul style={{
+                listStyle: 'none', padding: 0, margin: '8px 0',
+                display: 'grid', gap: 4,
+              }}>
+                {[
+                  ['Frekwencja', '0,48 pkt za każdy punkt procentowy (maks. +48).'],
+                  ['Seria', '0,6 pkt za każdą sesję z rzędu (maks. +12 po 20 sesjach).'],
+                  ['Zagrane sesje', '0,2 pkt za każdą sesję, na której byłeś (maks. +10 po 50 sesjach).'],
+                ].map(([label, detail]) => (
+                  <li key={label} style={{
+                    display: 'flex', gap: 7,
+                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                    color: 'var(--co-dim)', lineHeight: 1.5,
+                  }}>
+                    <span aria-hidden="true" style={{ color: 'var(--co-cyan)' }}>•</span>
+                    <span><strong style={{ color: 'var(--co-text)' }}>{label}:</strong> {detail}</span>
+                  </li>
+                ))}
+              </ul>
+              <p style={{
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                color: 'var(--co-dim)', lineHeight: 1.5, margin: 0,
+              }}>
+                Wynik zaokrągla się do całości i nie przekracza 99. Ranga zależy wyłącznie od frekwencji; saldo nie wpływa na OVR.
+              </p>
+            </div>
+            {RANKS.map((r, i) => (
                 <div key={r.name} style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
                   background: rankTint(r, 2), border: `1px solid ${rankTint(r, 13)}`,

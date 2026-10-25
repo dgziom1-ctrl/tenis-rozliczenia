@@ -33,7 +33,7 @@ import { ToastProvider } from '../components/common/Toast';
 describe('legenda rang — stan dla czytnika ekranu', () => {
   const data = { summary: { totalWeeks: 3 }, players: [], payments: {} };
 
-  it('przycisk ma aria-expanded i aria-controls, a panel dostaje id', async () => {
+  it('pokazuje opis rang i OVR oraz udostępnia stan panelu czytnikowi', async () => {
     const user = userEvent.setup();
     render(
       <ToastProvider>
@@ -53,6 +53,9 @@ describe('legenda rang — stan dla czytnika ekranu', () => {
     await user.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(panel).not.toHaveAttribute('hidden');
+    expect(screen.getByText('OVR — ocena z bieżącego sezonu')).toBeInTheDocument();
+    expect(screen.getByText(/0,48 pkt za każdy punkt procentowy/)).toBeInTheDocument();
+    expect(screen.getByText(/ranga zależy wyłącznie od frekwencji/i)).toBeInTheDocument();
   });
 });
 
