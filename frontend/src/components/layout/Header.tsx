@@ -246,22 +246,12 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
         <div className="header-hero" style={{ position:'relative',zIndex:10,padding: '16px 16px 20px',
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
-          <div className="header-hero-eyebrow" style={{ display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px' }}>
-            <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to right,transparent,var(--co-tint-line))' }}/>
-            <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.wide,color:'var(--co-dim)',textTransform: 'none' }}>
-              Centrum dowodzenia
-            </span>
-            <div aria-hidden="true" style={{ height:1,width:36,background:'linear-gradient(to left,transparent,var(--co-tint-line))' }}/>
-          </div>
-
           <div className="header-hero-arena" style={{ width:'100%',maxWidth:560,marginBottom:14,
             filter:chaosMode?'none':'var(--glow-drop-cyan)' }}>
             <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit}/>
           </div>
 
-
-          <button className="header-hero-title" onClick={handleTitleClick} aria-label="CYBER-PONK — centrum dowodzenia"
+          <button className="header-hero-title" onClick={handleTitleClick} aria-label="CYBER-PONK"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
             {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
             {!chaosMode && hitting && <span aria-hidden="true" style={{
