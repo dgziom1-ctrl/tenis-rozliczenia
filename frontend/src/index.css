@@ -1095,10 +1095,8 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
     text-shadow: var(--glow-brand-sm);
     text-transform: none;
   }
-  /* Mobile: brand jest w pasku u góry, więc hero pokazuje sam nadtytuł,
-     arenę i status — bez drugiego „CYBER-PONK”. */
+  /* Na telefonie zmniejszamy odstępy hero; arena, nazwa i status zostają widoczne. */
   .header-hero { padding: 10px 8px 12px !important; }
-  .header-hero-eyebrow { margin-bottom: 8px !important; }
   .header-hero-arena { margin-bottom: 4px !important; }
   .header-hero-title { display: block !important; }
   .header-hero-meta { gap: 10px !important; }
