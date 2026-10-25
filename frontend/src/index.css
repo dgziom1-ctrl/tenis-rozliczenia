@@ -3,160 +3,277 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════
-   EDITORIAL  ·  eksperymentalny pełny redesign (bez szkła i neonu)
-   Jeden krój (Inter), jedno płaskie tło, jeden akcent (głęboki teal).
-   Stany: czerwony = zaległość, zielony = rozliczone, ochra = ostrzeżenie.
-   Oba motywy są wariacją tego samego układu, nie odwróceniem neonu.
-   Szczegóły i uzasadnienie: ../REDESIGN-EXPERIMENT.md oraz ../DESIGN.md.
+   COLD OPERATOR  ·  Military-Hacker Cyberpunk
+   Dominant:  Electric Cyan  #00E5FF
+   Support:   Electric Blue  #0080FF
+   Rose:      Rose           #FF2090  (neutral payment status)
+   Amber:     Amber          #F59E0B  (warnings, alerts)
+   Positive:  Matrix Green   #00FF88
+   Accent:    Neon Pink      #FF00FF  (<5% – micro-accents only)
+   Base:      #030508 near-black with cold blue tint
+
+   KOMPROMIS (po PR #14): klimat wraca w 100% (szkło, neon, canvas, skany,
+   ścięcia, konfetti), ale etykiety są zdaniami — bez wymuszania wielkich liter
+   i bez trackingu. Szczegóły: ../../DESIGN-COMPROMISE.md.
 ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* EDITORIAL / dark — płaski, jeden krój, zero neonu. */
-  --bg-vignette: transparent;
-  --canvas-accent: 143,214,198;
-  --canvas-accent-deep: 111,188,169;
-  --canvas-ball-core: #EFF3EE;
-  --canvas-ball-edge: #94A79A;
-  --canvas-ball-mid: #C9D6CC;
-  --canvas-body-from: #26322C;
-  --canvas-body-mid: #1B211E;
-  --canvas-body-to: #101413;
-  --canvas-deep-shade: 70,90,80;
-  --canvas-edge: 120,145,134;
-  --canvas-floor-wash: 120,145,134;
-  --canvas-glow: 111,188,169;
-  --canvas-glow-idle: 120,145,134;
-  --canvas-grid: 90,110,102;
-  --canvas-handle: 20,30,25;
-  --canvas-handle-line: 70,90,80;
-  --canvas-ice-stripe: 143,214,198;
-  --canvas-net-top: 180,200,188;
-  --canvas-rubber-hit: 143,214,198;
-  --canvas-rubber-hit-end: 90,140,124;
-  --canvas-rubber-idle: 111,188,169;
-  --canvas-rubber-idle-end: 60,100,84;
-  --canvas-shadow: 20,40,32;
-  --canvas-table-from: #1B211E;
-  --canvas-table-to: #202824;
-  --canvas-white: 239,243,238;
-  --card-tint: none;
-  --clip-badge: none;
-  --clip-panel: none;
-  --clip-tag: none;
-  --co-amber: #E3BC6B;
-  --co-amber-dim: #332A17;
-  --co-amber-mid: #CFA352;
-  --co-bar-track: #E4E7E1;
-  --co-border: #303A34;
-  --co-border-hi: #47544C;
-  --co-bronze: #C79A72;
-  --co-close-btn: #4E5A55;
-  --co-cyan: #8FD6C6;
-  --co-cyan-dim: #1A332E;
-  --co-cyan-mid: #6FBCA9;
-  --co-dark: #151A18;
-  --co-dim: #A9B5AE;
-  --co-dim2: #8B9991;
-  --co-dot-empty: #CBD1CA;
-  --co-glass: #1B211E;
-  --co-glass-chip: #1B211E;
-  --co-glass-hi: #1B211E;
-  --co-gold: #D9BE73;
-  --co-gold-dim: #302A17;
-  --co-gold-mid: #C2A658;
-  --co-green: #86CFA3;
-  --co-green-dim: #173025;
-  --co-ice: #9CC4D6;
-  --co-on-accent: #101413;
-  --co-on-rose: #121615;
-  --co-overlay: rgba(16,20,18,0.66);
-  --co-panel: #1B211E;
-  --co-pink: #DDA6C6;
-  --co-raised: #202824;
-  --co-rose: #F09C9C;
-  --co-rose-dim: #3A1E1E;
-  --co-rose-mid: #D97F7F;
-  --co-separator: #E0E4DD;
-  --co-silver: #B9C3BD;
-  --co-surface-2: #1E2521;
-  --co-text: #D9E1DB;
-  --co-text-hi: #F2F6F2;
-  --co-tint: rgba(143,214,198,0.06);
-  --co-tint-bronze: rgba(199,154,114,0.10);
-  --co-tint-gold: rgba(217,190,115,0.10);
-  --co-tint-green: rgba(134,207,163,0.08);
-  --co-tint-hi: rgba(143,214,198,0.12);
-  --co-tint-line: rgba(143,214,198,0.32);
-  --co-tint-rose: rgba(240,156,156,0.08);
-  --co-tint-rose-line: rgba(240,156,156,0.30);
-  --co-toast-error: #3A1E1E;
-  --co-toast-info: #1B211E;
-  --co-toast-success: #173025;
-  --co-toast-text: #F2F6F2;
-  --co-void: #101413;
-  --dot-color: rgba(14,90,84,0.05);
-  --drift: 0px;
-  --editorial-shadow: 0 18px 46px -22px rgba(16,20,18,0.38);
-  --foil-tint: none;
-  --foil-x: 50%;
-  --foil-y: 22%;
-  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --glass-blur: 0px;
-  --glass-border: #D8DBD5;
-  --glass-edge-bottom: transparent;
-  --glass-edge-top: transparent;
-  --glass-hi-line: #D8DBD5;
-  --glass-light: transparent;
-  --glass-noise: none;
-  --glass-rim: none;
-  --glass-sat: 100%;
-  --glass-shadow: none;
-  --glass-sheen: none;
-  --glass-x: 50%;
-  --glass-y: 0%;
-  --glow-box-cyan: none;
-  --glow-box-gold: none;
-  --glow-box-panel: none;
-  --glow-box-rose: none;
-  --glow-brand-lg: none;
-  --glow-brand-md: none;
-  --glow-brand-sm: none;
-  --glow-cyan-lg: none;
-  --glow-cyan-md: none;
-  --glow-cyan-sm: none;
-  --glow-drop-cyan: none;
-  --glow-drop-panel: none;
-  --glow-drop-rose: none;
-  --glow-gold-md: none;
-  --glow-green-md: none;
-  --glow-rose-md: none;
-  --input-inset: none;
-  --modal-bg: #1B211E;
-  --modal-blur: 0px;
-  --modal-motion-duration: 280ms;
-  --modal-radius: 0px;
-  --nav-height: 56px;
-  --rank-duch: #B4BFB8;
-  --rank-gosc: #A5D2B0;
-  --rank-legenda: #D9BE73;
-  --rank-mistrz: #E7A3C4;
-  --rank-staly: #8FD6C6;
-  --rank-weteran: #9CC4D6;
-  --scrim-progress: 0;
-  --spin: 0deg;
-  --z-banner: 45;
-  --z-boot: 1000;
-  --z-confetti: 110;
-  --z-grain: 50;
-  --z-header: 39;
-  --z-modal: 100;
-  --z-nav: 40;
-  --z-popover: 60;
-  --z-toast: 9000;
-}
+  /* ── Backgrounds — cold, dark ── */
+  --co-void:     #030508;   /* deepest bg */
+  --co-dark:     #060C12;   /* secondary bg */
+  --co-panel:    #090F18;   /* card/panel */
+  --co-raised:   #0C1420;   /* elevated element */
+  --co-border:   #122034;   /* default border */
+  --co-border-hi:#1A3050;   /* highlighted border */
 
+  /* ── Primary — Electric Cyan (dominant) ── */
+  --co-cyan:     #00E5FF;   /* main accent */
+  --co-cyan-mid: #00B4D8;   /* secondary cyan */
+  --co-cyan-dim: #003A4A;   /* muted cyan bg */
+  --co-ice:      #0080FF;   /* electric blue — replaces old ice pastel */
+
+  /* ── Rose — payment status (neutral, not aggressive) ── */
+  --co-rose:     #FF2090;   /* "do rozliczenia" */
+  --co-rose-mid: #CC1A74;   /* dimmer rose */
+  --co-rose-dim: #1A0012;   /* rose bg tint */
+
+  /* ── Amber — warnings, informational alerts ── */
+  --co-amber:    #F59E0B;
+  --co-amber-mid:#D97706;
+  --co-amber-dim:#1A1200;
+
+  /* ── Medal podium — gold / silver / bronze (nie cyan na #1) ── */
+  --co-gold:     #B8860B;
+  --co-gold-mid: #9A7209;
+  --co-gold-dim: #1A1400;
+  --co-silver:   #C0C8D4;
+  --co-bronze:   #CD7F32;
+  --co-tint-gold: rgba(184,134,11,0.10);
+  --co-tint-bronze: rgba(205,127,50,0.10);
+  --glow-gold-md:  0 0 14px rgba(184,134,11,0.45);
+  --glow-box-gold: 0 0 16px rgba(184,134,11,0.22);
+
+  /* ── Kolory rang ──
+     Nie mogą być jedną wartością na oba motywy. Aby kolor przechodził 4,5:1
+     jednocześnie na prawie czarnym i prawie białym tle, jego luminancja
+     musiałaby leżeć w przedziale 0,183–0,199 — wąskim jak włos i niemożliwym
+     dla nasyconych barw. Dlatego ranga ma osobny token na motyw; komponenty
+     czytają `var(--rank-*)`, a nie literał. Wartości pilnuje
+     `npm run audit:contrast`. */
+  --rank-legenda: #D4A017;
+  --rank-mistrz:  #F0509A;
+  --rank-weteran: #B37FEB;
+  --rank-staly:   #22B8CF;
+  --rank-gosc:    #8AA3B8;
+  --rank-duch:    #7C93A6;
+
+  /* ── Positive — Matrix Green ── */
+  --co-green:    #00FF88;   /* settled / positive */
+  --co-green-dim:#003320;   /* green bg tint */
+
+  /* ── Micro-accent — Neon Pink (<5% use) ── */
+  --co-pink:     #FF00FF;   /* SPARINGLY: only critical micro-accents */
+
+  /* ── Neutrals ──
+     --co-dim carries most of the secondary copy in the app (labels, counts,
+     dates), so it has to clear WCAG AA not only on --co-void, but also on the
+     raised panel it usually sits on: #64869F is 5,30:1 on void and 4,80:1 on
+     --co-raised. --co-dim2 is a large-text/decorative token only (3,80:1) —
+     body copy uses --co-dim. `npm run audit:contrast` guards both. */
+  --co-text:     #A8C4D4;   /* main text — cool blue-grey */
+  --co-text-hi:  #D0E8F5;   /* headings */
+  --co-dim:      #64869F;   /* muted text — 5,30:1 on void, 4,80:1 on raised */
+  --co-dim2:     #4B6E8C;   /* very muted — 3,80:1, large/decorative only */
+
+  /* ── Accent tints ──
+     The dominant surface treatment is "a wash of the accent colour". Inline
+     styles used to hardcode rgba(0,229,255,0.0x), which the light theme could
+     never remap — so light mode got electric-cyan washes under teal borders. */
+  --co-tint:      rgba(0,229,255,0.04);   /* subtle panel wash */
+  --co-tint-hi:   rgba(0,229,255,0.08);   /* active / selected */
+  --co-tint-line: rgba(0,229,255,0.25);   /* hairline, chip border */
+  --co-tint-rose: rgba(255,32,144,0.06);
+  /* Różowy odpowiednik `--co-tint-line`. Ekrany błędu składały tę kreskę
+     z literału `rgba(200,0,30,0.2)` — czwartej czerwieni w aplikacji, której
+     tryb jasny nie mógł przemapować. */
+  --co-tint-rose-line: rgba(255,32,144,0.30);
+  --co-tint-green:rgba(0,255,136,0.05);
+
+  /* ── Glow tokens ──
+     A CSS override cannot reach an inline `textShadow`, so every glow in the
+     app reads a variable instead of a literal. Light mode sets them to `none`
+     and the neon disappears without touching a single component. */
+  --glow-cyan-sm:   0 0 8px rgba(0,229,255,0.30);
+  --glow-cyan-md:   0 0 14px rgba(0,229,255,0.40);
+  --glow-cyan-lg:   0 0 20px rgba(0,229,255,0.50);
+  --glow-rose-md:   0 0 14px rgba(255,32,144,0.45);
+  --glow-green-md:  0 0 14px rgba(0,255,136,0.40);
+  --glow-box-cyan:  0 0 16px rgba(0,229,255,0.20);
+  --glow-box-rose:  0 0 18px rgba(255,32,144,0.13);
+  --glow-box-panel: 0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 70px -30px rgba(0,0,0,0.92), 0 6px 18px -8px rgba(0,0,0,0.70);
+  /* Filter rysuje cień poza clip-path, w przeciwieństwie do box-shadow. */
+  --glow-drop-panel: drop-shadow(0 30px 60px rgba(0,0,0,0.70));
+  --modal-blur: 8px;
+  /* `filter` nie przyjmuje wartości box-shadow, więc poświata canvasu w
+     nagłówku potrzebuje własnego tokenu. */
+  --glow-drop-cyan: drop-shadow(0 0 20px rgba(0,229,255,0.12));
+  --glow-drop-rose: drop-shadow(0 0 8px rgba(255,32,144,0.50));
+  /* Poświata marki w nagłówku — żyje w trybie jasnym, gdy reszta neonu gaśnie. */
+  --glow-brand-sm: 0 0 8px rgba(0,229,255,0.30);
+  --glow-brand-md: 0 0 14px rgba(0,229,255,0.40);
+  --glow-brand-lg: 0 0 20px rgba(0,229,255,0.50);
+
+  /* ── Layer scale ──
+     Was an ad-hoc ladder of 38/39/40/45/49/50/70/100/200/1000/1001/9000, with
+     the film grain painting on top of every dialog. */
+  --z-header: 39;
+  --z-nav:    40;
+  --z-banner: 45;
+  --z-grain:  50;
+  --z-popover:60;
+  --z-modal:  100;
+  --z-confetti: 110;
+  --z-boot:   1000;
+  --z-toast:  9000;
+
+  /* ── Dialogi ──
+     Ciemny motyw jest kanciasty (ścięte narożniki), jasny — zaokrąglony.
+     Wcześniej dwa modale wpisywały `12px` na sztywno w obu motywach. */
+  --modal-radius: 0px;
+  --modal-bg:     var(--co-glass-hi);
+  /* ── Kształty ścięć ──
+     Muszą odpowiadać `CLIP` w constants/styles.ts — TypeScript nie czyta
+     zmiennych CSS, więc te same kształty muszą żyć w obu miejscach.
+     Wcześniej klasy przycisków wpisywały wielokąty wprost i rozjechały się:
+     przycisk główny i destrukcyjny miały ścięcie 8px, a outline 6px, więc
+     każda para POTWIERDŹ/ANULUJ stała obok siebie z różnym kątem narożnika. */
+  --clip-panel:   polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+  --clip-tag:     polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  --clip-badge:   polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+
+  /* Kolor tekstu na wypełnieniu akcentem — zależy od jasności tego akcentu.
+     `--co-on-accent` dotyczy cyanu (przycisk główny, skip link), `--co-on-rose`
+     przycisku destrukcyjnego. Oba mają osobne wartości w trybie jasnym, bo ten
+     sam akcent jest tam znacznie ciemniejszy. */
+  --co-on-rose:   #030508;
+  --co-on-accent: #030508;
+
+  /* ── Theme-switchable inline helpers ── */
+  --co-bar-track:    rgba(255,255,255,0.06);
+  --co-dot-empty:    rgba(255,255,255,0.15);
+  --co-close-btn:    #3a3a3a;
+  --co-toast-success:rgba(3,18,8,0.78);
+  --co-toast-error:  rgba(14,6,6,0.78);
+  --co-toast-info:   rgba(8,8,8,0.78);
+  --co-toast-text:   #c8c8c8;
+  --co-separator:    rgba(255,255,255,0.05);
+  /* Powierzchnia wewnętrzna — --co-separator to hairline i użyty jako tło
+     dawał pudełka bez widocznej krawędzi (to samo 5% na tle i obramowaniu). */
+  --co-surface-2:    #0C1420;
+
+  /* ── Glass surfaces (iOS-style liquid glass) ──
+     Panele są półprzezroczyste i rozmywają tło pod sobą. Trzy stopnie krycia:
+     `--co-glass` na duże panele, `--co-glass-hi` na dialogi (czytelność tekstu
+     nad rozmytym tłem), `--co-glass-chip` na małe kontrolki (pola, chipy).
+
+     Efekt „premium" składa się z czterech warstw, tak jak w Liquid Glass:
+       1. rozmycie + nasycenie tła pod panelem (`--glass-blur`, `--glass-sat`),
+       2. refleks na górnej krawędzi (`--glass-sheen`),
+       3. świetlna plama podążająca za kursorem (`--glass-light`, rysowana
+          w `::after` paneli — patrz sekcja PREMIUM GLASS),
+       4. krawędziowy specular i cień objętościowy (`--glass-edge-top`,
+          `--glass-edge-bottom`, `--glass-shadow`).
+     Wszystkie kolory żyją w tokenach, więc tryb jasny podmienia je jednym
+     blokiem, a `prefers-reduced-transparency` wyłącza całość bez ruszania
+     komponentów. */
+  --co-glass:      rgba(6,12,20,0.56);
+  --co-glass-hi:   rgba(6,12,20,0.78);
+  --co-glass-chip: rgba(6,12,20,0.46);
+  --glass-blur:    26px;
+  --glass-sat:     190%;
+  --glass-hi-line: rgba(180,240,255,0.08);
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0) 34%);
+  /* Refleks (warstwa 3) jest cyjanowy, nie biały — biała plama na granatowym
+     tle dawała „siwy" plastik. Kolor czyta się jak światło w szkle. */
+  --glass-light:   rgba(0,229,255,0.10);
+  /* Krawędzie szkła: jasna góra (światło), ciemny dół (grubość tafli). */
+  --glass-edge-top:    rgba(190,245,255,0.26);
+  --glass-edge-bottom: rgba(0,0,0,0.55);
+  --glass-rim:         inset 0 0 0 1px rgba(0,229,255,0.05);
+  --glass-border:      rgba(0,229,255,0.13);
+  /* Ziarno wyłączone — na ciemnej tafli dodawało szarą mgłę zamiast tekstury.
+     Token zostaje, bo czytają go nagłówek, nawigacja i dialog. */
+  --glass-noise: none;
+  /* Wgłębienie pola tekstowego — jasny motyw ma własną, jasną wersję. */
+  --input-inset:
+    inset 0 1px 2px rgba(0,0,0,0.45),
+    inset 0 -1px 0 rgba(255,255,255,0.045),
+    inset 0 0 0 1px rgba(255,255,255,0.02);
+  /* Cień szkła: refleks górnej krawędzi + grubość tafli + miękki cień pod panelem. */
+  --glass-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 20px 50px -26px rgba(0,0,0,0.90),
+    0 2px 8px -4px rgba(0,0,0,0.60);
+
+  /* ── Fonts ── */
+  /* KOMPROMIS: zdania zamiast wersalików. Bebas Neue jest krojem wyłącznie
+     wielkoliterowym — nie potrafi złożyć zdania — więc display/body jedzie na
+     Rajdhani. Bebas zostaje jako --font-stencil wyłącznie dla wordmarku i liczb,
+     gdzie wielkie litery są naturą znaku, a nie stylem tekstu. */
+  --font-display: 'Rajdhani', sans-serif;
+  --font-stencil: 'Bebas Neue', monospace;
+  --font-mono:    'Space Mono', 'Courier New', monospace;
+  --font-body:    'Rajdhani', sans-serif;
+
+  /* ── Misc ── */
+  --co-overlay:    rgba(0,0,0,0.88);
+  --dot-color:     rgba(0,229,255,0.07);
+
+  /* Wysokość dolnej nawigacji (`min-height` w `.mobile-nav-btn`).
+     Wszystko, co kotwiczy się nad nawigacją, liczy się od tej jednej wartości.
+     Wcześniej krążyła w trzech zapisach — 56px w banerach, 72px w toaście
+     i 4.5rem w treści — więc toast nachodził na baner instalacji PWA. */
+  --nav-height:    56px;
+
+  /* ── Winieta tła ──
+     Ostatnia warstwa `CyberBackground`. Literał w komponencie nie zmieniał się
+     z motywem, więc jasny ekran dostawał czarną ramkę. */
+  --bg-vignette:  rgba(0,0,0,0.42);
+
+  /* ── Canvas nagłówka (ArenaCanvas) ──────────────────────────────────
+     Canvas 2D nie rozumie `var()`, ale może przeczytać tokeny przez
+     `getComputedStyle(document.body)`. Wartości RGB są bez `rgb()`, żeby
+     w pętli składać `rgba(...)` z własnym alpha. Dzięki temu każdy kolor
+     dekoracji ma jedno źródło prawdy i reaguje na zmianę motywu — Hallmark
+     „every colour goes through a token”, Canvas UI bez twardych literałów. */
+  --canvas-accent:          0,229,255;
+  --canvas-accent-deep:     0,140,220;
+  --canvas-grid:            0,180,255;
+  --canvas-edge:            0,200,255;
+  --canvas-deep-shade:      0,100,200;
+  --canvas-table-from:      #020810;
+  --canvas-table-to:        #041828;
+  --canvas-body-from:       #062038;
+  --canvas-body-mid:        #031428;
+  --canvas-body-to:         #010C1C;
+  --canvas-ball-core:       #ffffff;
+  --canvas-ball-mid:        #d8f5ff;
+  --canvas-ball-edge:       #80c8e0;
+  --canvas-shadow:          0,50,120;
+  --canvas-floor-wash:      0,200,255;
+  --canvas-ice-stripe:      0,220,255;
+  --canvas-handle:          2,12,28;
+  --canvas-handle-line:     0,80,140;
+  --canvas-net-top:         200,248,255;
+  --canvas-glow:            0,160,255;
+  --canvas-glow-idle:       0,180,255;
+  --canvas-rubber-hit:      0,229,255;
+  --canvas-rubber-idle:     0,180,220;
+  --canvas-rubber-hit-end:  0,160,210;
+  --canvas-rubber-idle-end: 0,120,180;
+  --canvas-white:           255,255,255;
+}
 
 /* ══ RESET ═══════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
@@ -183,7 +300,7 @@ body {
   overflow-x: clip;
   overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
-  letter-spacing: 0.02em;
+  letter-spacing: normal;
   /* `background-image` nie przechodzi płynnie między gradientami — wpisanie go
      do transitionu obiecywało animację, której przeglądarka i tak nie robi. */
   transition: background-color 0.4s ease, color 0.4s ease;
@@ -419,7 +536,7 @@ body.theme-switching *::after {
     background: linear-gradient(135deg, var(--co-cyan), var(--co-cyan-mid));
     color: var(--co-on-accent);
     font-family: var(--font-display);
-    font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.875rem; letter-spacing: normal; text-transform: none;
     border: none; cursor: pointer; position: relative; overflow: hidden;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), var(--glow-brand-sm);
     transition: box-shadow 0.18s, transform 0.1s;
@@ -446,7 +563,7 @@ body.theme-switching *::after {
     background: var(--co-rose);
     color: var(--co-on-rose);
     font-family: var(--font-display);
-    font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.875rem; letter-spacing: normal; text-transform: none;
     border: none; cursor: pointer;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.20), var(--glow-rose-md);
     transition: box-shadow 0.18s, transform 0.1s;
@@ -465,7 +582,7 @@ body.theme-switching *::after {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     font-family: var(--font-display); font-size: 0.875rem;
-    letter-spacing: 0.1em; text-transform: uppercase;
+    letter-spacing: normal; text-transform: none;
     border: 1px solid var(--co-tint-line); cursor: pointer;
     box-shadow: inset 0 1px 0 var(--glass-hi-line);
     transition: color 0.18s, background-color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.1s;
@@ -583,10 +700,10 @@ body.theme-switching *::after {
 .card-foil-ghost  { opacity: 0.12; }
 
 .card-ovr {
-  font-family: var(--font-display);
+  font-family: var(--font-stencil);
   font-size: 2.15rem;
   line-height: 0.85;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   text-shadow: var(--glow-cyan-md);
 }
 
@@ -597,7 +714,7 @@ body.theme-switching *::after {
 }
 .matchday-kicker {
   font-family: var(--font-display);
-  letter-spacing: 0.22em;
+  letter-spacing: normal;
   color: var(--co-cyan);
   font-size: 0.75rem;
   text-shadow: var(--glow-cyan-sm);
@@ -939,13 +1056,13 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   .compact-header button { min-height: 44px; }
   .header-wordmark {
     display: none !important;
-    font-family: var(--font-display);
+    font-family: var(--font-stencil);
     font-size: 1.35rem;
     line-height: 1;
-    letter-spacing: 0.06em;
+    letter-spacing: normal;
     color: var(--co-cyan);
     text-shadow: var(--glow-brand-sm);
-    text-transform: uppercase;
+    text-transform: none;
   }
   /* Mobile: brand jest w pasku u góry, więc hero pokazuje sam nadtytuł,
      arenę i status — bez drugiego „CYBER-PONK”. */
@@ -971,7 +1088,7 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   .header-blik-label {
     font-family: var(--font-display);
     font-size: 0.75rem;
-    letter-spacing: 0.18em;
+    letter-spacing: normal;
     color: var(--co-cyan);
     padding: 2px 6px;
     background: var(--co-tint);
@@ -1031,11 +1148,11 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 .desktop-tab {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
   padding: 10px 8px;
-  font-family: var(--font-display); font-size: 0.875rem !important; letter-spacing: 0.1em;
+  font-family: var(--font-display); font-size: 0.875rem !important; letter-spacing: normal;
   border: 1px solid transparent; cursor: pointer;
   transition: color 0.15s, background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
   white-space: nowrap; background: transparent; color: var(--co-dim);
-  text-transform: uppercase; position: relative; overflow: hidden;
+  text-transform: none; position: relative; overflow: hidden;
   clip-path: var(--clip-badge);
 }
 .desktop-tab.active {
@@ -1113,8 +1230,8 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 }
 .mobile-nav-btn:active { transform: scale(0.95); }
 .mobile-nav-label {
-  font-size: 0.75rem; letter-spacing: 0.08em; line-height: 1;
-  margin-top: 1px; font-family: var(--font-display); text-transform: uppercase;
+  font-size: 0.75rem; letter-spacing: normal; line-height: 1;
+  margin-top: 1px; font-family: var(--font-display); text-transform: none;
 }
 
 @media (min-width: 640px) { .desktop-nav { display: block; } .mobile-nav { display: none; } }
@@ -1332,152 +1449,157 @@ body.has-push-banner .pwa-banner { display: none; }
    Warm-slate palette · no neon glows · muted teal/rose accents
    ════════════════════════════════════════════════════════════ */
 body.theme-light {
-  /* EDITORIAL / light — papier, głęboki teal, zero neonu. */
-  --bg-vignette: transparent;
-  --canvas-accent: 14,90,84;
-  --canvas-accent-deep: 10,74,69;
-  --canvas-ball-core: #2A312E;
-  --canvas-ball-edge: #7A8B80;
-  --canvas-ball-mid: #4E5A55;
-  --canvas-body-from: #DDE3DC;
-  --canvas-body-mid: #C9D2C9;
-  --canvas-body-to: #A9B7AB;
-  --canvas-deep-shade: 90,120,108;
-  --canvas-edge: 90,120,108;
-  --canvas-floor-wash: 120,150,138;
-  --canvas-glow: 10,74,69;
-  --canvas-glow-idle: 90,120,108;
-  --canvas-grid: 120,140,128;
-  --canvas-handle: 200,210,202;
-  --canvas-handle-line: 120,150,138;
-  --canvas-ice-stripe: 14,90,84;
-  --canvas-net-top: 14,90,84;
-  --canvas-rubber-hit: 14,90,84;
-  --canvas-rubber-hit-end: 30,110,98;
-  --canvas-rubber-idle: 10,74,69;
-  --canvas-rubber-idle-end: 60,120,106;
-  --canvas-shadow: 90,110,100;
-  --canvas-table-from: #FFFFFF;
-  --canvas-table-to: #EDEDE8;
-  --canvas-white: 20,24,22;
-  --card-tint: none;
-  --clip-badge: none;
-  --clip-panel: none;
-  --clip-tag: none;
-  --co-amber: #7A5200;
-  --co-amber-dim: #F5EBD6;
-  --co-amber-mid: #634200;
-  --co-bar-track: #E4E7E1;
-  --co-border: #D8DBD5;
-  --co-border-hi: #B9BEB6;
-  --co-bronze: #6B4A2A;
-  --co-close-btn: #4E5A55;
-  --co-cyan: #0E5A54;
-  --co-cyan-dim: #DDEDEA;
-  --co-cyan-mid: #0A4A45;
-  --co-dark: #EDEDE8;
-  --co-dim: #4E5A55;
-  --co-dim2: #6B7772;
-  --co-dot-empty: #CBD1CA;
-  --co-glass: #FFFFFF;
-  --co-glass-chip: #FFFFFF;
-  --co-glass-hi: #FFFFFF;
-  --co-gold: #6B5200;
-  --co-gold-dim: #F3ECD6;
-  --co-gold-mid: #574300;
-  --co-green: #1B6E4A;
-  --co-green-dim: #DDEEE5;
-  --co-ice: #1D4E5F;
-  --co-on-accent: #FFFFFF;
-  --co-on-rose: #FFFFFF;
-  --co-overlay: rgba(20,24,22,0.45);
-  --co-panel: #FFFFFF;
-  --co-pink: #7A2E5D;
-  --co-raised: #FFFFFF;
-  --co-rose: #9B2C2C;
-  --co-rose-dim: #F6E4E4;
-  --co-rose-mid: #7E2222;
-  --co-separator: #E0E4DD;
-  --co-silver: #4A5551;
-  --co-surface-2: #F0F0EB;
-  --co-text: #2A312E;
-  --co-text-hi: #141816;
-  --co-tint: rgba(14,90,84,0.05);
-  --co-tint-bronze: rgba(107,74,42,0.10);
-  --co-tint-gold: rgba(107,82,0,0.10);
-  --co-tint-green: rgba(27,110,74,0.07);
-  --co-tint-hi: rgba(14,90,84,0.10);
-  --co-tint-line: rgba(14,90,84,0.32);
-  --co-tint-rose: rgba(155,44,44,0.06);
-  --co-tint-rose-line: rgba(155,44,44,0.30);
-  --co-toast-error: #F6E4E4;
-  --co-toast-info: #EDEDE8;
-  --co-toast-success: #DDEEE5;
-  --co-toast-text: #141816;
-  --co-void: #F5F5F1;
-  --dot-color: rgba(14,90,84,0.04);
-  --drift: 0px;
-  --editorial-shadow: 0 18px 46px -22px rgba(16,20,18,0.38);
-  --foil-tint: none;
-  --foil-x: 50%;
-  --foil-y: 22%;
-  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --glass-blur: 0px;
-  --glass-border: #D8DBD5;
-  --glass-edge-bottom: transparent;
-  --glass-edge-top: transparent;
-  --glass-hi-line: #FFFFFF;
-  --glass-light: transparent;
-  --glass-noise: none;
-  --glass-rim: none;
-  --glass-sat: 100%;
-  --glass-shadow: none;
-  --glass-sheen: none;
-  --glass-x: 50%;
-  --glass-y: 0%;
-  --glow-box-cyan: none;
-  --glow-box-gold: none;
-  --glow-box-panel: none;
-  --glow-box-rose: none;
-  --glow-brand-lg: none;
-  --glow-brand-md: none;
-  --glow-brand-sm: none;
-  --glow-cyan-lg: none;
-  --glow-cyan-md: none;
-  --glow-cyan-sm: none;
-  --glow-drop-cyan: none;
-  --glow-drop-panel: none;
-  --glow-drop-rose: none;
-  --glow-gold-md: none;
-  --glow-green-md: none;
-  --glow-rose-md: none;
-  --input-inset: none;
-  --modal-bg: #FFFFFF;
-  --modal-blur: 0px;
-  --modal-motion-duration: 280ms;
-  --modal-radius: 0px;
-  --nav-height: 56px;
-  --rank-duch: #55605B;
-  --rank-gosc: #3F5A45;
-  --rank-legenda: #6B5200;
-  --rank-mistrz: #8A2352;
-  --rank-staly: #0E5A54;
-  --rank-weteran: #2F5D7C;
-  --scrim-progress: 0;
-  --spin: 0deg;
-  --z-banner: 45;
-  --z-boot: 1000;
-  --z-confetti: 110;
-  --z-grain: 50;
-  --z-header: 39;
-  --z-modal: 100;
-  --z-nav: 40;
-  --z-popover: 60;
-  --z-toast: 9000;
-}
+  background-color: #F8FAFC;
+  color: #334155;
 
+  /* ── Backgrounds — warm slate ── */
+  --co-void:      #F8FAFC;
+  --co-dark:      #F1F5F9;
+  --co-panel:     #FFFFFF;
+  --co-raised:    #FFFFFF;
+  --co-border:    #CBD5E1;
+  --co-border-hi: #94A3B8;
+
+  /* ── Primary — Muted Teal ── */
+  --co-cyan:      #0F766E;
+  --co-cyan-mid:  #115E59;
+  --co-cyan-dim:  #CCFBF1;
+  --co-ice:       #0369A1;
+
+  /* ── Accent — Rose ── */
+  --co-rose:      #BE185D;
+  --co-rose-mid:  #9D174D;
+  --co-rose-dim:  #FCE7F3;
+
+  /* ── Amber — warnings ── */
+  --co-amber:     #B45309;
+  --co-amber-mid: #92400E;
+  --co-amber-dim: #FEF3C7;
+
+  --co-gold:      #7A5A07;
+  --co-gold-mid:  #5F4606;
+  --co-gold-dim:  #FEF9E7;
+  --co-silver:    #5B6B80;
+  --co-bronze:    #8C5A2B;
+  --co-tint-gold: rgba(122,90,7,0.12);
+  --co-tint-bronze: rgba(140,90,43,0.10);
+  --glow-gold-md: none;
+  --glow-box-gold: 0 1px 3px rgba(0,0,0,0.08);
+
+  /* ── Positive — Leafy green ── */
+  --co-green:     #15803D;
+  --co-green-dim: #DCFCE7;
+
+  /* ── Micro-accent — Soft purple ── */
+  --co-pink:      #7E22CE;
+
+  /* ── Neutrals ── */
+  --co-text:      #475569;
+  --co-text-hi:   #0F172A;
+  --co-dim:       #5B6B80;
+  --co-dim2:      #6B7F94;
+
+  /* ── Kolory rang — ciemniejsze odpowiedniki dla jasnego tła ── */
+  --rank-legenda: #7A5A07;
+  --rank-mistrz:  #BE185D;
+  --rank-weteran: #7E22CE;
+  --rank-staly:   #0F766E;
+  --rank-gosc:    #5F7085;
+  --rank-duch:    #566B80;
+
+  --co-overlay:   rgba(15,23,42,0.45);
+  --dot-color:    rgba(15,118,110,0.04);
+
+  /* ── Theme-switchable helpers (light overrides) ── */
+  --co-bar-track:    rgba(0,60,100,0.06);
+  --co-dot-empty:    rgba(0,60,100,0.18);
+  --co-close-btn:    #64748B;
+  --co-toast-success:rgba(240,253,244,0.86);
+  --co-toast-error:  rgba(254,242,242,0.86);
+  --co-toast-info:   rgba(240,249,255,0.86);
+  --co-toast-text:   #334155;
+  --co-separator:    rgba(0,60,100,0.08);
+  --co-surface-2:    #F1F5F9;
+
+  /* ── Glass — jasny wariant (iOS Control Center) ──
+     Mleczne, białe szkło: wysoka biel, niskie nasycenie, ciemna (a nie biała)
+     krawędź górna, bo światło w jasnym motywie odbija się od ciemniejszego
+     obramowania. Chipy w ciemnym motywie są granatowe; tutaj muszą być
+     białawe, inaczej np. przycisk konturowy robi się ciemną plamą. */
+  --co-glass:      rgba(255,255,255,0.68);
+  --co-glass-hi:   rgba(255,255,255,0.84);
+  --co-glass-chip: rgba(255,255,255,0.60);
+  --glass-blur:    24px;
+  --glass-sat:     180%;
+  --glass-hi-line: rgba(255,255,255,0.80);
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0) 40%);
+  --glass-light:   rgba(255,255,255,0.28);
+  --glass-edge-top:    rgba(255,255,255,0.92);
+  --glass-edge-bottom: rgba(15,23,42,0.12);
+  --glass-rim:         inset 0 0 0 1px rgba(15,23,42,0.04);
+  --glass-border:      rgba(15,23,42,0.10);
+  --glass-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 12px 32px -20px rgba(15,23,42,0.30),
+    0 2px 6px -3px rgba(15,23,42,0.10);
+  --input-inset:
+    inset 0 1px 2px rgba(15,23,42,0.05),
+    inset 0 -1px 0 rgba(255,255,255,0.80),
+    inset 0 0 0 1px rgba(15,23,42,0.02);
+
+  /* ── Accent tints — teal, matching --co-cyan above ──
+     Akcenty w trybie jasnym są ciemniejsze niż w ciemnym: ten sam kolor, który
+     świeci na czerni, na białym tle dawał 3,0–3,9:1 i łamał AA dla etykiet
+     12–14 px. Wartości poniżej przechodzą 4,5:1 na każdej powierzchni
+     (patrz `npm run audit:contrast`). */
+  --co-tint:      rgba(15,118,110,0.05);
+  --co-tint-hi:   rgba(15,118,110,0.10);
+  --co-tint-line: rgba(15,118,110,0.32);
+  --co-tint-rose: rgba(190,24,93,0.06);
+  --co-tint-rose-line: rgba(190,24,93,0.30);
+  --co-tint-green:rgba(21,128,61,0.07);
+
+  /* ── Glows off ──
+     Jedno miejsce, w którym gaśnie cały neon. Komponenty czytają te tokeny
+     inline, więc nie trzeba ich znać ani po kolei poprawiać. */
+  --glow-cyan-sm:   none;
+  --glow-cyan-md:   none;
+  --glow-cyan-lg:   none;
+  --glow-rose-md:   none;
+  --glow-green-md:  none;
+  --glow-box-cyan:  0 1px 3px rgba(0,0,0,0.08);
+  --glow-box-rose:  0 1px 3px rgba(0,0,0,0.08);
+  --glow-box-panel: 0 4px 24px rgba(0,0,0,0.12);
+  --glow-drop-panel: drop-shadow(0 4px 24px rgba(0,0,0,0.12));
+  --modal-blur: 10px;
+  --glow-drop-cyan: drop-shadow(0 0 12px rgba(15,118,110,0.12));
+  --glow-drop-rose: none;
+  --glow-brand-sm: 0 0 10px rgba(15,118,110,0.35);
+  --glow-brand-md: 0 0 14px rgba(15,118,110,0.45);
+  --glow-brand-lg: 0 0 20px rgba(15,118,110,0.55);
+
+  --modal-radius: 12px;
+  /* Mleczne, półprzezroczyste tło dialogu — scrim pod spodem już rozmywa
+     stronę, więc panel czyta się jak tafla szkła, a nie biała kartka. */
+  --modal-bg:     rgba(255,255,255,0.84);
+  --co-on-rose:   #FFFFFF;
+  --co-on-accent: #FFFFFF;
+  /* Zaokrąglenie i ścinanie narożników wykluczają się — w jasnym motywie
+     wygrywa promień, więc ścięcie musi zniknąć. */
+  --clip-panel:   none;
+
+  /* ── Canvas w jasnym motywie: teal zamiast neonu, jasny blat ── */
+  --bg-vignette:            rgba(15,23,42,0.10);
+  --canvas-accent:          13,148,136;
+  --canvas-accent-deep:     13,148,136;
+  --canvas-grid:            13,148,136;
+  --canvas-edge:            13,148,136;
+  --canvas-deep-shade:      13,148,136;
+  --canvas-table-from:      #F1F5F9;
+  --canvas-table-to:        #E2E8F0;
+  --canvas-net-top:         13,148,136;
+}
 
 /* ── Body background — soft teal bloom + fine dot grid ── */
 body.theme-light {
@@ -1749,8 +1871,8 @@ body.theme-light .min-h-screen {
   padding: 4px 10px;
   font-family: var(--font-display);
   font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: normal;
+  text-transform: none;
   border: 1px solid var(--glass-border);
   background: var(--co-glass-chip);
   backdrop-filter: blur(12px) saturate(var(--glass-sat));
@@ -1790,113 +1912,3 @@ body.theme-light .min-h-screen {
   :root,
   body.theme-light { --glass-blur: 18px; }
 }
-
-/* ═══════════════════════════════════════════════════════════════════
-   EDITORIAL RESTYLE — eksperymentalny pełny redesign
-   ═══════════════════════════════════════════════════════════════════
-   Ta warstwa jest jedynym miejscem, które odróżnia tę gałąź od `main`.
-   Zasady (Hallmark floor + Taste + Impeccable „full redesign"):
-   płaskie powierzchnie, jeden krój, zdanie zamiast wersalików, zero neonu,
-   zero gradientów, zero ściętych narożników, zero dekoracyjnego ruchu.
-   Logika, routing, dane i komponenty zostają nietknięte — revert to
-   usunięcie tej sekcji i przywrócenie trzech plików z main.
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* Jeden krój, zdanie zamiast wersalików, brak trackingu i poświaty tekstu. */
-body, body *, body *::before, body *::after {
-  font-family: var(--font-body) !important;
-  text-transform: none !important;
-  letter-spacing: normal !important;
-  text-shadow: none !important;
-}
-
-/* Płaskie tło strony. */
-body, body.theme-light {
-  background-image: none !important;
-  background-color: var(--co-void) !important;
-}
-
-/* Dekoracja znika: plamy, siatka, folia, refleksy, canvas, konfetti. */
-.fluid-bg, .fluid-grid, .fluid-blob, .card-foil, .glass-shine-overlay,
-.chaos-layer, .chaos-flash, .header-hero-arena, .header-hero-eyebrow,
-.scan-hover::before, .cyber-box::before, .cyber-button-yellow::before,
-.cyber-button-danger::before, .accent-top::before, .mobile-nav::before,
-.desktop-tab.active::after {
-  display: none !important;
-}
-
-/* Każda powierzchnia „szkła" staje się zwykłą płaską kartą. */
-.glass-card, .cyber-box, .glass-panel, .glass-surface, .glass-header,
-.desktop-nav-inner, .modal-panel, .status-chip, .glass-chip, .bottom-banner,
-.toast, .cyber-input, .push-banner-sheet {
-  background-color: var(--co-panel) !important;
-  background-image: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: none !important;
-  border: 1px solid var(--co-border) !important;
-  filter: none !important;
-}
-/* Jedyny cień, jaki zostaje: dialog naprawdę unosi się nad treścią. */
-.modal-panel { box-shadow: var(--editorial-shadow) !important; }
-.glass-card::after, .glass-panel::after, .cyber-box::after,
-.glass-surface::after, .glass-header::after, .desktop-nav-inner::after,
-.modal-panel::after { display: none !important; }
-.modal-overlay::before {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Ścięte narożniki → prostokąty. */
-body * { clip-path: none !important; }
-
-/* Przyciski: płaski kolor, bez gradientu i bez przebłysku. */
-.cyber-button-yellow, .cyber-button-yellow:disabled:hover {
-  background: var(--co-cyan) !important;
-  color: var(--co-on-accent) !important;
-  box-shadow: none !important;
-}
-.cyber-button-danger {
-  background: var(--co-rose) !important;
-  color: var(--co-on-rose) !important;
-  box-shadow: none !important;
-}
-.cyber-button-outline {
-  background: transparent !important;
-  color: var(--co-cyan) !important;
-  border: 1px solid var(--co-cyan) !important;
-  box-shadow: none !important;
-}
-
-/* Karty graczy bez folii i gradientów rzadkości. */
-.fifa-card, .fifa-card-legend, .fifa-card-elite, .fifa-card-epic,
-.fifa-card-rare, .fifa-card-common, .fifa-card-ghost {
-  --card-tint: none !important;
-  background-color: var(--co-panel) !important;
-}
-
-/* Dekoracyjne pętle ruchu wyłączone. */
-.fluid-blob-float, .fluid-blob-pulse, .glass-shine-overlay,
-.header-hero-title, .debt-flash, .debt-settling, .mobile-nav-btn.active {
-  animation: none !important;
-}
-
-/* Kluczowe klatki ozdobników zredukowane do pustego przebiegu.
-   Nazwy zostają, żeby komponenty i `lint:css` widziały te same animacje. */
-@keyframes neon-cyan     { 0%, 100% { box-shadow: none; } }
-@keyframes neon-rose     { 0%, 100% { box-shadow: none; } }
-@keyframes chaosFlash    { 0%, 100% { opacity: 0; } }
-@keyframes pending-flash { 0%, 100% { background: transparent; } }
-@keyframes settle-pulse  { 0%, 100% { box-shadow: none; } }
-@keyframes podium-scan   { 0%, 100% { transform: none; opacity: 0; } }
-@keyframes gold-shimmer  { 0%, 100% { transform: none; opacity: 0; } }
-@keyframes wm-glow       { 0%, 100% { text-shadow: none; } }
-@keyframes wm-pulse      { 0%, 100% { opacity: 1; } }
-@keyframes wm-float      { 0%, 100% { transform: none; } }
-@keyframes fluid-float   { 0%, 100% { transform: none; } }
-@keyframes blob-drift    { 0%, 100% { transform: none; } }
-@keyframes neon-pulse    { 0%, 100% { opacity: 1; filter: none; } }
-@keyframes glass-shine   { 0%, 100% { opacity: 0; } }
-@keyframes shimmer       { 0%, 100% { background-position: 0 0; } }
-@keyframes headerBounce  { 0%, 100% { transform: none; } }
-@keyframes tabBounce     { 0%, 100% { transform: none; } }

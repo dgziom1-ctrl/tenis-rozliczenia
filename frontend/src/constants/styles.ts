@@ -1,15 +1,11 @@
 import type { CSSProperties } from 'react';
 
-/**
- * Eksperymentalny redesign: koniec ze ściętymi narożnikami. Wszystkie kształty
- * to `none` — komponenty zachowują te same wywołania, więc revert jest prosty.
- */
 export const CLIP = {
-  panel: 'none',
-  card: 'none',
-  badge: 'none',
-  smallCard: 'none',
-  tag: 'none',
+  panel: 'polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)',
+  card: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
+  badge: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+  smallCard: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)',
+  tag: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
 } as const;
 
 /**
@@ -32,8 +28,11 @@ export const TEXT = {
   hero: '2.5rem',     // 40px — kwoty i liczby-bohaterowie
 } as const;
 
-/** Odstępy literowe — trzy stopnie zamiast dwudziestu. */
-/** Redesign: brak trackingu etykiet (Hallmark floor 9 / Taste). */
+/**
+ * KOMPROMIS: koniec z rozstrzelonymi wersalikami. Trzy stopnie skali
+ * zostają jako nazwy (komponenty ich używają), ale wszystkie dają naturalny
+ * odstęp — hierarchię buduje rozmiar i waga, nie tracking liter.
+ */
 export const TRACK = {
   tight: 'normal',
   normal: 'normal',
@@ -98,24 +97,25 @@ export const Z = {
 } as const;
 
 function displayTracking(): string {
-  // Jeden krój, naturalny odstęp liter — żadnych wersalików z trackingiem.
+  // Zdania bez trackingu. Parametr `size` pozostaje w sygnaturze, żeby
+  // wszystkie wywołania FONT.display(size) dalej się kompilowały.
   return 'normal';
 }
 
 export const FONT = {
   display: (size: string = TEXT.lead, spacing?: string): CSSProperties => ({
-    fontFamily: 'var(--font-body)',
+    fontFamily: 'var(--font-display)',
     fontSize: size,
     letterSpacing: spacing ?? displayTracking(),
     textTransform: 'none',
   }),
   mono: (size: string = TEXT.small): CSSProperties => ({
-    fontFamily: 'var(--font-body)',
+    fontFamily: 'var(--font-mono)',
     fontSize: size,
   }),
-  /** Wersalikowa etykieta nad wartością. */
+  /** Etykieta nad wartością — zdanie, bez wersalików. */
   monoLabel: {
-    fontFamily: 'var(--font-body)',
+    fontFamily: 'var(--font-mono)',
     fontSize: TEXT.tiny,
     letterSpacing: 'normal',
     textTransform: 'none',
@@ -123,13 +123,13 @@ export const FONT = {
   } as CSSProperties,
   /** Treść drugorzędna: daty, liczniki, opisy. */
   monoSmall: {
-    fontFamily: 'var(--font-body)',
+    fontFamily: 'var(--font-mono)',
     fontSize: TEXT.small,
     color: 'var(--co-dim)',
   } as CSSProperties,
   /** Najmniejszy czytelny stopień — tylko dane techniczne. */
   monoMicro: {
-    fontFamily: 'var(--font-body)',
+    fontFamily: 'var(--font-mono)',
     fontSize: TEXT.micro,
     color: 'var(--co-dim)',
   } as CSSProperties,
@@ -139,6 +139,7 @@ export const PANEL = {
   cyberCut: {
     background: 'var(--co-panel)',
     border: '1px solid var(--co-border)',
+    clipPath: CLIP.panel,
     padding: 24,
     position: 'relative',
   } as CSSProperties,

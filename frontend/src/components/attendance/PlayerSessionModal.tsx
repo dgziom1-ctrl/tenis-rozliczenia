@@ -160,7 +160,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
                 <div style={{
                   height: '100%', width: '100%', borderRadius: 2,
                   background: nextRank
-                    ? 'var(--co-cyan)'
+                    ? `linear-gradient(90deg, ${currentRank.hex}, ${nextRank.hex})`
                     : currentRank.hex,
                   boxShadow: 'var(--glow-box-cyan)',
                   /* `scaleX` zamiast `width`: wypełnienie paska rangi nie

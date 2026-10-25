@@ -102,7 +102,7 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                 na nich. Teraz siedzi nad treścią, ale pod przyklejoną kolumną. */}
             <div aria-hidden="true" style={{
               position: 'absolute', top: 0, right: 0, bottom: 0, width: 32,
-              background: 'var(--co-panel)',
+              background: 'linear-gradient(to right, transparent, var(--co-panel))',
               pointerEvents: 'none', zIndex: 0,
             }} />
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>

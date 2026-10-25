@@ -100,7 +100,7 @@ export default function Leaderboard({ ranked, podiumPlayers, onSelect }: Leaderb
           się z żadną krawędzią i wyrównanie czytało się jak przypadek. */}
       <div aria-hidden="true" style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
-        backgroundImage: 'none',
+        backgroundImage: `linear-gradient(var(--co-tint) 1px, transparent 1px), linear-gradient(90deg, var(--co-tint) 1px, transparent 1px)`,
         backgroundSize: '40px 40px',
         backgroundPosition: '24px 24px',
       }} />

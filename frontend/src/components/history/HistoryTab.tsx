@@ -571,7 +571,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-cyan)' }}>{label}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>[{rows.length}x]</span>
                 </div>
-                <div style={{ flex: 1, height: 1, background: 'var(--co-border)' }} />
+                <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, var(--co-tint-line), transparent)' }} />
               </div>
 
               {/* Log entries */}

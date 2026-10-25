@@ -6,10 +6,10 @@
 
 - [`DESIGN.md`](DESIGN.md) — machine-readable design system for coding agents (YAML tokens + rationale, `google-labs-code/design.md` format).
 - [`DESIGN-SKILLS.md`](DESIGN-SKILLS.md) — which of the 12 popular design-skill repos we actually applied, which we skipped and why.
-- [`frontend/DESIGN_SYSTEM.md`](frontend/DESIGN_SYSTEM.md) — full source of truth for the `main` system: contrast matrix, motion, icons, component recipes.
-- [`REDESIGN-EXPERIMENT.md`](REDESIGN-EXPERIMENT.md) — **this branch**: experimental full redesign (flat editorial, no glass/neon/caps), what changed and how to revert.
+- [`DESIGN-COMPROMISE.md`](DESIGN-COMPROMISE.md) — why the full editorial redesign (PR #14) was rolled back and what survived from it (sentence case instead of ALL CAPS).
+- [`frontend/DESIGN_SYSTEM.md`](frontend/DESIGN_SYSTEM.md) — full source of truth: contrast matrix, motion, icons, component recipes.
 - `cd frontend && npm run verify` runs the quality gates, including `audit:design`
-  (no layout animations, tokens instead of color literals, focus/reduced-motion fallbacks).
+  (no layout animations, tokens instead of color literals, no uppercase labels, focus/reduced-motion fallbacks).
   `npm run design:lint` validates `DESIGN.md` against the official spec.
 
 ---

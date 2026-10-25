@@ -195,7 +195,7 @@ export function SectionHeader({ icon: Icon, title, accent = 'var(--co-cyan)', su
         <span style={{ ...FONT.display(TEXT.h3, TRACK.normal), color: accent }}>{title}</span>
         {/* Jedna moc kreski dla wszystkich separatorów — było ich trzy
             (0.133, 0.2 i 0.25 krycia), dwie w tym samym pliku. */}
-        <div aria-hidden="true" style={{ flex: 1, minWidth: 20, height: 1, background: 'var(--co-border)' }} />
+        <div aria-hidden="true" style={{ flex: 1, minWidth: 20, height: 1, background: 'linear-gradient(to right, var(--co-tint-line), transparent)' }} />
         {aside && <div style={{ flexShrink: 0 }}>{aside}</div>}
       </div>
       {sub && (

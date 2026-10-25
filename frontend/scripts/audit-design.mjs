@@ -13,7 +13,9 @@
  *   2. `overflow-x: clip` zamiast `hidden`, brak `100vw`,
  *   3. obecność `:focus-visible`, `prefers-reduced-motion`,
  *      `prefers-reduced-transparency` i `prefers-contrast`,
- *   4. kolory i kroje w komponentach wyłącznie przez tokeny `var(--…)`.
+ *   4. kolory i kroje w komponentach wyłącznie przez tokeny `var(--…)`,
+ *   5. zdania zamiast wersalików — zakaz `text-transform: uppercase`
+ *      i `textTransform: 'uppercase'` (decyzja kompromisowa, DESIGN-COMPROMISE.md).
  *
  * Świadome wyjątki (waivers) są jawne w kodzie poniżej, nie w komentarzach
  * przy naruszeniu. Reszta dostępności i kontrastu zostaje w `audit:a11y`,
@@ -177,6 +179,24 @@ for (const file of files) {
   });
 }
 
+// ── 5. Zdania, nie wersaliki ─────────────────────────────────────────────
+/**
+ * Kompromis po PR #14: klimat Cyber-Ponk wraca, ale etykiety przestają krzyczeć.
+ * Wordmark/logo wolno złożyć wielkimi literami — ale przez krój (--font-stencil),
+ * nigdy przez `text-transform`. Dlatego reguła jest bez wyjątków.
+ */
+const UPPERCASE_STYLE = /text-?[Tt]ransform\s*[:=]\s*['"]?\s*uppercase/;
+for (const file of files) {
+  file.code.split(/\r?\n/).forEach((line, index) => {
+    if (UPPERCASE_STYLE.test(line)) {
+      errors.push(
+        `${file.relative}:${index + 1} — wersaliki przez text-transform; użyj zdania (DESIGN-COMPROMISE.md)`,
+      );
+    }
+  });
+}
+
+
 if (errors.length > 0) {
   console.error('\n✗ Audyt design floor: znaleziono problemy\n');
   errors.forEach((error) => console.error(`  • ${error}`));
@@ -185,5 +205,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `✓ Design floor: ruch tylko na transform/opacity, clip zamiast hidden, tokeny kolorów i krojów, stany a11y obecne (${files.length} plików).`,
+  `✓ Design floor: ruch tylko na transform/opacity, clip zamiast hidden, tokeny kolorów i krojów, zdania bez wersalików, stany a11y obecne (${files.length} plików).`,
 );
