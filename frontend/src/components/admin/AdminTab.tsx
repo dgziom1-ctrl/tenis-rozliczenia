@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
 import { PanelHeader, FieldGroup } from '../common/SharedUI';
 import { addSession } from '@/lib/firebase';
-import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, SPORT_EMOJI, RACKET_PRICE, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
+import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, RACKET_PRICE, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
 import { CLIP, CONTENT_WIDTH } from '@/constants/styles';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
@@ -354,7 +354,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
             {withRackets && presentPlayers.length > 0 && (
               <FieldGroup
                 icon={Hand}
-                label={`${SPORT_EMOJI[sport]} Własna rakietka`}
+                label="Własna rakietka"
                 counter={ownRacketPresentCount > 0 ? ownRacketPlayers.filter(p => presentPlayers.includes(p)).join(', ') : undefined}
                 counterColor="var(--co-amber)"
               >
@@ -369,7 +369,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
             {withRackets && (
               <FieldGroup
                 icon={Hand}
-                label={`${SPORT_EMOJI[sport]} Wypożyczone rakiety`}
+                label="Wypożyczone rakiety"
                 counter={effectiveRacketCount > 0 ? `${effectiveRacketCount} × ${parsedRacketPrice} = ${racketCost} zł` : undefined}
               >
 

@@ -49,6 +49,20 @@
   --glow-gold-md:  0 0 14px rgba(184,134,11,0.45);
   --glow-box-gold: 0 0 16px rgba(184,134,11,0.22);
 
+  /* ── Kolory rang ──
+     Nie mogą być jedną wartością na oba motywy. Aby kolor przechodził 4,5:1
+     jednocześnie na prawie czarnym i prawie białym tle, jego luminancja
+     musiałaby leżeć w przedziale 0,183–0,199 — wąskim jak włos i niemożliwym
+     dla nasyconych barw. Dlatego ranga ma osobny token na motyw; komponenty
+     czytają `var(--rank-*)`, a nie literał. Wartości pilnuje
+     `npm run audit:contrast`. */
+  --rank-legenda: #D4A017;
+  --rank-mistrz:  #F0509A;
+  --rank-weteran: #B37FEB;
+  --rank-staly:   #22B8CF;
+  --rank-gosc:    #8AA3B8;
+  --rank-duch:    #7C93A6;
+
   /* ── Positive — Matrix Green ── */
   --co-green:    #00FF88;   /* settled / positive */
   --co-green-dim:#003320;   /* green bg tint */
@@ -58,12 +72,14 @@
 
   /* ── Neutrals ──
      --co-dim carries most of the secondary copy in the app (labels, counts,
-     dates), so it has to clear WCAG AA against --co-void. #2A4560 sat at
-     2.06:1; these values are 4.66:1 and 3.19:1. */
+     dates), so it has to clear WCAG AA not only on --co-void, but also on the
+     raised panel it usually sits on: #64869F is 5,30:1 on void and 4,80:1 on
+     --co-raised. --co-dim2 is a large-text/decorative token only (3,80:1) —
+     body copy uses --co-dim. `npm run audit:contrast` guards both. */
   --co-text:     #A8C4D4;   /* main text — cool blue-grey */
   --co-text-hi:  #D0E8F5;   /* headings */
-  --co-dim:      #5C7C99;   /* muted text — 4.66:1 on --co-void */
-  --co-dim2:     #42627F;   /* very muted — 3.19:1, large text only */
+  --co-dim:      #64869F;   /* muted text — 5,30:1 on void, 4,80:1 on raised */
+  --co-dim2:     #4B6E8C;   /* very muted — 3,80:1, large/decorative only */
 
   /* ── Accent tints ──
      The dominant surface treatment is "a wash of the accent colour". Inline
@@ -131,8 +147,12 @@
   --clip-tag:     polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
   --clip-badge:   polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
 
-  /* Kolor tekstu na wypełnieniu akcentem — zależy od jasności tego akcentu. */
+  /* Kolor tekstu na wypełnieniu akcentem — zależy od jasności tego akcentu.
+     `--co-on-accent` dotyczy cyanu (przycisk główny, skip link), `--co-on-rose`
+     przycisku destrukcyjnego. Oba mają osobne wartości w trybie jasnym, bo ten
+     sam akcent jest tam znacznie ciemniejszy. */
   --co-on-rose:   #030508;
+  --co-on-accent: #030508;
 
   /* ── Theme-switchable inline helpers ── */
   --co-bar-track:    rgba(255,255,255,0.06);
@@ -211,6 +231,14 @@
 /* ══ RESET ═══════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+
+/* Kursor na wszystkim, co klikalne. Wcześniej zależało to od tego, czy autor
+   komponentu pamiętał o `cursor: pointer` — część przycisków pokazywała
+   domyślną strzałkę, co czyta się jak „to nie jest aktywne”. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+summary { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
 
 body {
   background-color: var(--co-void);
@@ -397,12 +425,12 @@ body.theme-switching *::after {
   }
   /* Rozmiar dziedziczony po polu — przypięte 0.8rem sprawiało, że w polu kwoty
      (1.3rem) podpowiedź była o 40% mniejsza od wpisywanego tekstu. */
-  .cyber-input::placeholder { color: var(--co-dim); font-size: inherit; opacity: 0.7; }
+  .cyber-input::placeholder { color: var(--co-dim); font-size: inherit; opacity: 1; }
 
   /* Primary button — Cyan dominant */
   .cyber-button-yellow {
     background: linear-gradient(135deg, var(--co-cyan), var(--co-cyan-mid));
-    color: #030508;
+    color: var(--co-on-accent);
     font-family: var(--font-display);
     font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase;
     border: none; cursor: pointer; position: relative; overflow: hidden;
@@ -473,7 +501,6 @@ body.theme-switching *::after {
   .cyber-button-outline:disabled:hover { box-shadow: none; background: transparent; }
   .cyber-button-yellow:disabled:hover { background: linear-gradient(135deg, var(--co-cyan), var(--co-cyan-mid)); }
 
-  .terminal-cursor::after { content: '▮'; animation: blink-cursor 1s step-end infinite; color: var(--co-cyan); margin-left: 2px; }
 
   .debt-flash   { animation: pending-flash 0.75s ease-out; }
 
@@ -605,7 +632,7 @@ body.theme-light .card-foil {
 body.theme-light .fifa-card-legend { --card-tint: linear-gradient(165deg, rgba(154,114,9,0.14) 0%, transparent 44%); }
 body.theme-light .fifa-card-elite  { --card-tint: linear-gradient(165deg, rgba(190,24,93,0.10) 0%, transparent 44%); }
 body.theme-light .fifa-card-epic   { --card-tint: linear-gradient(165deg, rgba(155,77,224,0.10) 0%, transparent 44%); }
-body.theme-light .fifa-card-rare   { --card-tint: linear-gradient(165deg, rgba(13,148,136,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-rare   { --card-tint: linear-gradient(165deg, rgba(15,118,110,0.10) 0%, transparent 44%); }
 body.theme-light .fifa-card-common { --card-tint: none; }
 body.theme-light .fifa-card-ghost  { --card-tint: none; }
 
@@ -919,7 +946,10 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   .header-topbar { padding: 8px 12px !important; }
   /* Ikony w nagłówku są dotykane kciukiem; 36 px było poniżej progu 44 px. */
   .header-action-btn { width: 44px !important; height: 44px !important; }
-  .header-blik { display: flex !important; }
+  /* Chip BLIK jest przyciskiem kopiującym numer — na telefonie dostaje
+     pełne 44 px wysokości, tak jak przyciski akcji obok. */
+  .header-blik { display: flex !important; min-height: 44px; }
+  .compact-header button { min-height: 44px; }
   .header-wordmark {
     display: none !important;
     font-family: var(--font-display);
@@ -1188,6 +1218,40 @@ body.has-push-banner .pwa-banner { display: none; }
    2px to minimum z WCAG 2.4.13; kolor bierzemy z tokenu, żeby w trybie jasnym
    pierścień był stonowaną zielenią morską, a nie elektrycznym cyanem. */
 *:focus-visible { outline: 2px solid var(--co-cyan); outline-offset: 2px; }
+/* ── Skip link ──
+   Pierwszy element w DOM: Tab trafia tu przed nagłówkiem, pięcioma zakładkami
+   i numerem BLIK. Poza fokusem schowany nad krawędzią ekranu transformacją,
+   nie `display: none` — element musi dać się sfokusować klawiaturą. */
+.skip-link {
+  position: fixed;
+  top: calc(8px + env(safe-area-inset-top, 0px));
+  left: 8px;
+  z-index: var(--z-boot);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  background: var(--co-cyan);
+  color: var(--co-on-accent);
+  clip-path: var(--clip-tag);
+  transform: translateY(calc(-100% - 24px));
+  transition: transform 0.15s ease;
+  touch-action: manipulation;
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--co-void);
+  outline-offset: 3px;
+}
+/* Cel skip linku nie jest kontrolką — obrys całej strony po Tabie byłby
+   wizualnym hałasem. Pozycję komunikuje tytuł strony i region `aria-live`. */
+#main-content:focus { outline: none; }
+
 
 /* Outline jest obcinany przez clip-path. Drop-shadow śledzi widoczny kształt,
    więc działa na przyciskach, polach i wierszach filtra z ciętymi narożnikami. */
@@ -1321,10 +1385,10 @@ body.theme-light {
   --co-border-hi: #94A3B8;
 
   /* ── Primary — Muted Teal ── */
-  --co-cyan:      #0D9488;
-  --co-cyan-mid:  #0F766E;
+  --co-cyan:      #0F766E;
+  --co-cyan-mid:  #115E59;
   --co-cyan-dim:  #CCFBF1;
-  --co-ice:       #0284C7;
+  --co-ice:       #0369A1;
 
   /* ── Accent — Rose ── */
   --co-rose:      #BE185D;
@@ -1332,35 +1396,43 @@ body.theme-light {
   --co-rose-dim:  #FCE7F3;
 
   /* ── Amber — warnings ── */
-  --co-amber:     #D97706;
-  --co-amber-mid: #B45309;
+  --co-amber:     #B45309;
+  --co-amber-mid: #92400E;
   --co-amber-dim: #FEF3C7;
 
-  --co-gold:      #9A7209;
-  --co-gold-mid:  #7A5A07;
+  --co-gold:      #7A5A07;
+  --co-gold-mid:  #5F4606;
   --co-gold-dim:  #FEF9E7;
-  --co-silver:    #64748B;
-  --co-bronze:    #B87333;
-  --co-tint-gold: rgba(154,114,9,0.12);
-  --co-tint-bronze: rgba(184,115,51,0.10);
+  --co-silver:    #5B6B80;
+  --co-bronze:    #8C5A2B;
+  --co-tint-gold: rgba(122,90,7,0.12);
+  --co-tint-bronze: rgba(140,90,43,0.10);
   --glow-gold-md: none;
   --glow-box-gold: 0 1px 3px rgba(0,0,0,0.08);
 
   /* ── Positive — Leafy green ── */
-  --co-green:     #16A34A;
+  --co-green:     #15803D;
   --co-green-dim: #DCFCE7;
 
   /* ── Micro-accent — Soft purple ── */
-  --co-pink:      #A855F7;
+  --co-pink:      #7E22CE;
 
   /* ── Neutrals ── */
   --co-text:      #475569;
   --co-text-hi:   #0F172A;
-  --co-dim:       #64748B;
-  --co-dim2:      #94A3B8;
+  --co-dim:       #5B6B80;
+  --co-dim2:      #6B7F94;
+
+  /* ── Kolory rang — ciemniejsze odpowiedniki dla jasnego tła ── */
+  --rank-legenda: #7A5A07;
+  --rank-mistrz:  #BE185D;
+  --rank-weteran: #7E22CE;
+  --rank-staly:   #0F766E;
+  --rank-gosc:    #5F7085;
+  --rank-duch:    #566B80;
 
   --co-overlay:   rgba(15,23,42,0.45);
-  --dot-color:    rgba(13,148,136,0.04);
+  --dot-color:    rgba(15,118,110,0.04);
 
   /* ── Theme-switchable helpers (light overrides) ── */
   --co-bar-track:    rgba(0,60,100,0.06);
@@ -1400,13 +1472,17 @@ body.theme-light {
     inset 0 -1px 0 rgba(255,255,255,0.80),
     inset 0 0 0 1px rgba(15,23,42,0.02);
 
-  /* ── Accent tints — teal, matching --co-cyan above ── */
-  --co-tint:      rgba(13,148,136,0.05);
-  --co-tint-hi:   rgba(13,148,136,0.10);
-  --co-tint-line: rgba(13,148,136,0.30);
+  /* ── Accent tints — teal, matching --co-cyan above ──
+     Akcenty w trybie jasnym są ciemniejsze niż w ciemnym: ten sam kolor, który
+     świeci na czerni, na białym tle dawał 3,0–3,9:1 i łamał AA dla etykiet
+     12–14 px. Wartości poniżej przechodzą 4,5:1 na każdej powierzchni
+     (patrz `npm run audit:contrast`). */
+  --co-tint:      rgba(15,118,110,0.05);
+  --co-tint-hi:   rgba(15,118,110,0.10);
+  --co-tint-line: rgba(15,118,110,0.32);
   --co-tint-rose: rgba(190,24,93,0.06);
   --co-tint-rose-line: rgba(190,24,93,0.30);
-  --co-tint-green:rgba(22,163,74,0.07);
+  --co-tint-green:rgba(21,128,61,0.07);
 
   /* ── Glows off ──
      Jedno miejsce, w którym gaśnie cały neon. Komponenty czytają te tokeny
@@ -1421,17 +1497,18 @@ body.theme-light {
   --glow-box-panel: 0 4px 24px rgba(0,0,0,0.12);
   --glow-drop-panel: drop-shadow(0 4px 24px rgba(0,0,0,0.12));
   --modal-blur: 10px;
-  --glow-drop-cyan: drop-shadow(0 0 12px rgba(13,148,136,0.12));
+  --glow-drop-cyan: drop-shadow(0 0 12px rgba(15,118,110,0.12));
   --glow-drop-rose: none;
-  --glow-brand-sm: 0 0 10px rgba(13,148,136,0.35);
-  --glow-brand-md: 0 0 14px rgba(13,148,136,0.45);
-  --glow-brand-lg: 0 0 20px rgba(13,148,136,0.55);
+  --glow-brand-sm: 0 0 10px rgba(15,118,110,0.35);
+  --glow-brand-md: 0 0 14px rgba(15,118,110,0.45);
+  --glow-brand-lg: 0 0 20px rgba(15,118,110,0.55);
 
   --modal-radius: 12px;
   /* Mleczne, półprzezroczyste tło dialogu — scrim pod spodem już rozmywa
      stronę, więc panel czyta się jak tafla szkła, a nie biała kartka. */
   --modal-bg:     rgba(255,255,255,0.84);
   --co-on-rose:   #FFFFFF;
+  --co-on-accent: #FFFFFF;
   /* Zaokrąglenie i ścinanie narożników wykluczają się — w jasnym motywie
      wygrywa promień, więc ścięcie musi zniknąć. */
   --clip-panel:   none;
@@ -1440,8 +1517,8 @@ body.theme-light {
 /* ── Body background — soft teal bloom + fine dot grid ── */
 body.theme-light {
   background-image:
-    radial-gradient(ellipse 75% 45% at 50% -8%, rgba(13,148,136,0.04) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 30% at 50% 110%, rgba(13,148,136,0.02) 0%, transparent 60%),
+    radial-gradient(ellipse 75% 45% at 50% -8%, rgba(15,118,110,0.04) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 30% at 50% 110%, rgba(15,118,110,0.02) 0%, transparent 60%),
     radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
 }
 
@@ -1463,8 +1540,6 @@ body.theme-light .cyber-input {
   color: var(--co-text-hi);
 }
 
-/* ── Buttons ── */
-body.theme-light .cyber-button-yellow { color: #FFFFFF; }
 
 /* ── Log entries ── */
 body.theme-light .log-entry {
@@ -1583,7 +1658,7 @@ body.theme-light .min-h-screen {
     --co-dim: #334155;
     --co-border: #64748B;
     --co-border-hi: #475569;
-    --co-tint-line: rgba(13,148,136,0.68);
+    --co-tint-line: rgba(15,118,110,0.68);
     --glass-border: #64748B;
   }
   .cyber-button-outline { border-width: 2px; }
@@ -1636,7 +1711,7 @@ body.theme-light .min-h-screen {
 }
 
 /* ============================================================
-   CYBER-PONK LIQUID GLASS REDESIGN � fluid background + neon
+   CYBER-PONK LIQUID GLASS REDESIGN — fluid background + neon
    status accents + microinteractions
    ============================================================ */
 
@@ -1724,4 +1799,29 @@ body.theme-light .min-h-screen {
   animation: shimmer 4s linear infinite;
   opacity: 0.35;
   mix-blend-mode: overlay;
+}
+
+/* ══ TELEFON — BUDŻET KLATEK ═══════════════════════════════════════
+   Cztery rozmyte plamy pod animacją + `backdrop-filter` na każdej karcie to
+   najdroższe warstwy interfejsu. Na telefonie zostawiamy ten sam obraz, ale
+   bez pracy co klatkę: plamy przestają dryfować (statyczny blur jest
+   cache'owany), a szkło rozmywa tło słabiej — na 6-calowym ekranie różnicy
+   nie widać, a przewijanie listy 8 kart przestaje gubić klatki.
+   `prefers-reduced-motion` nadal ma pierwszeństwo: tam ruch i tak znika. */
+@media (max-width: 639px) {
+  .fluid-blob {
+    animation: none;
+    will-change: auto;
+    filter: blur(44px);
+    opacity: 0.24;
+  }
+  .fluid-blob-float,
+  .fluid-blob-pulse { animation: none; }
+}
+
+/* Musi stać po bloku `body.theme-light`, bo ten sam selektor ustawia 24px —
+   przy równej specyficzności wygrywa reguła późniejsza. */
+@media (max-width: 639px) {
+  :root,
+  body.theme-light { --glass-blur: 18px; }
 }

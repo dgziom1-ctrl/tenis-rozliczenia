@@ -1,5 +1,5 @@
 import { Calculator } from 'lucide-react';
-import { MULTISPORT_DISCOUNT, SPORT_LABEL, SPORT_EMOJI } from '@/constants';
+import { MULTISPORT_DISCOUNT, SPORT_LABEL } from '@/constants';
 import { formatAmountShort, parseAmount } from '@/utils/format';
 import { getSessionShares, getShareGroups, getTotalWithRackets } from '@/utils/sessionCost';
 import ShareBreakdown from '../common/ShareBreakdown';
@@ -39,7 +39,6 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
   const { discountCapped, multiCapped, maxMulti, effectiveCards } = getSessionShares(session);
   const groups = getShareGroups(session);
   const hasRackets = racketCost > 0;
-  const racketEmoji = SPORT_EMOJI[sport] ?? '🎾';
 
   return (
     <div style={{
@@ -60,7 +59,7 @@ export default function LiveCostPreview({ totalCost, presentPlayers, multisportP
         )}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <ShareBreakdown groups={groups} sportEmoji={racketEmoji} />
+        <ShareBreakdown groups={groups} sport={sport} />
         {multiCapped && (
           <div role="status" style={{ marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
             {'>'} ⚠ Limit {maxMulti} kart — zadziałało {effectiveCards}, zniżka proporcjonalnie podzielona

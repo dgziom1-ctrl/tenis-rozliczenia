@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 import { formatDate, formatAmountShort } from '@/utils/format';
 import { FONT, TEXT, TRACK } from '@/constants/styles';
 import { TerminalPanel, TerminalSectionHeader, TerminalRow, TerminalFooter } from './TerminalPanel';
@@ -171,7 +172,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
                     className="icon-btn danger"
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      width: 32, height: 32, flexShrink: 0,
+                      width: 44, height: 44, flexShrink: 0,
                       background: 'transparent', border: '1px solid var(--co-border)',
                       color: 'var(--co-rose)', cursor: 'pointer', lineHeight: 1,
                       fontSize: TEXT.small,
@@ -179,7 +180,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
                     title="Usuń wpłatę"
                     aria-label={`Usuń wpłatę ${formatAmountShort(item.amount)} zł z ${formatDate(item.date)}`}
                   >
-                    <span aria-hidden="true">✕</span>
+                    <X size={16} aria-hidden="true" />
                   </button>
                 )}
               </span>

@@ -4,8 +4,12 @@ import { subscribeToData, database, loadSnapshot, buildUIData, setCurrentData } 
 import { useToast } from '@/components/common/Toast';
 import type { UIData } from '@/types/ui';
 import { AppDataContext, INITIAL_APP_DATA, type AppDataContextValue } from './appDataContext';
+import { DEMO_MODE } from '@/constants';
 
 const SLOW_LOADING_AFTER_MS = 8000;
+
+/* Flaga `DEMO_MODE` żyje w `constants` — jedno źródło prawdy dla providera,
+   nagłówka i mutacji. W produkcji zwija się do `false`. */
 
 /**
  * Ostatnie znane dane, odczytane z pamięci urządzenia.
@@ -56,7 +60,29 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   const retry = useCallback(() => setRetryNonce(n => n + 1), []);
 
+  // ── Tryb demo ────────────────────────────────────────────────────
+  // Osobny efekt, bo dane są importowane dynamicznie: paczka demo nie jedzie
+  // w głównym bundlu i nie obciąża normalnego startu aplikacji.
   useEffect(() => {
+    if (!DEMO_MODE) return undefined;
+    let cancelled = false;
+    void import('@/dev/demoData')
+      .then(({ buildDemoUIData }) => {
+        if (cancelled) return;
+        setAppData(buildDemoUIData());
+        setHasData(true);
+        setIsLoading(false);
+        setIsConnected(true);
+      })
+      .catch(error => {
+        console.warn('Nie udało się wczytać danych demo:', error);
+        setIsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (DEMO_MODE) return undefined;
     setIsLoading(true);
     setSlowLoading(false);
     setSubscriptionError(null);
@@ -106,6 +132,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   // Rzeczywisty stan połączenia z bazą (nie polega na niepewnym navigator.onLine).
   useEffect(() => {
+    if (DEMO_MODE) return undefined;
     const connRef = ref(database, '.info/connected');
     const unsub = onValue(connRef, (snap) => setIsConnected(snap.val() === true));
     return () => { if (typeof unsub === 'function') unsub(); };

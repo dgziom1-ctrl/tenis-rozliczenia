@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { FONT, TEXT, TRACK, CLIP, Z } from '@/constants/styles';
 import type { Achievement } from '@/types/ui';
+import AchievementGlyph from '../common/icons/AchievementGlyph';
 
 interface AchievementBadgeProps {
   achievement: Achievement;
@@ -29,7 +30,7 @@ export default function AchievementBadge({ achievement: a, accentColor }: Achiev
         aria-label={a.label + ': ' + a.desc}
         style={{
           display: 'flex', alignItems: 'center', gap: 6,
-          minHeight: 36, padding: '6px 10px',
+          minHeight: 44, padding: '8px 10px',
           cursor: 'pointer',
           background: `${accentColor}10`,
           border: `1px solid ${accentColor}${visible ? '' : '30'}`,
@@ -38,7 +39,7 @@ export default function AchievementBadge({ achievement: a, accentColor }: Achiev
           transition: 'border-color 0.15s',
         }}
       >
-        <span aria-hidden="true" style={{ fontSize: TEXT.base }}>{a.emoji}</span>
+        <AchievementGlyph id={a.id} color={accentColor} size={15} />
         <span style={{ ...FONT.display(TEXT.small, TRACK.tight), color: accentColor }}>
           {a.label}
         </span>
@@ -58,8 +59,8 @@ export default function AchievementBadge({ achievement: a, accentColor }: Achiev
           boxShadow: 'var(--glow-box-cyan)',
           animation: 'slide-in-up 0.15s ease-out',
         }}>
-          <p style={{ ...FONT.mono(TEXT.small), color: accentColor, margin: 0 }}>
-            {a.emoji} {a.label}
+          <p style={{ ...FONT.mono(TEXT.small), color: accentColor, margin: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+            <AchievementGlyph id={a.id} color={accentColor} size={12} /> {a.label}
           </p>
           <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-text)', margin: '4px 0 0', lineHeight: 1.4 }}>
             {a.desc}

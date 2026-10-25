@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
 import type { PointerEvent } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, TriangleAlert } from 'lucide-react';
 import { getPlayerColor } from '@/constants/colors';
-import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL } from '@/constants';
+import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, rankTint } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
 import { formatAmountShort } from '@/utils/format';
 import { BLIK_NUMBER } from '@/utils/blik';
@@ -274,7 +274,7 @@ function PlayerCard({
   const foilStyle: StyleWithVars = {
     '--foil-x': '50%',
     '--foil-y': '22%',
-    '--foil-tint': `${rank.hex}99`,
+    '--foil-tint': rankTint(rank, 60),
   };
 
   return (
@@ -455,7 +455,7 @@ function PlayerCard({
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--co-green)', margin: 0, lineHeight: 1 }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
               </div>
             ) : (
@@ -467,13 +467,13 @@ function PlayerCard({
                   textShadow: isPending ? 'var(--glow-rose-md)' : 'var(--glow-cyan-md)',
                 }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', opacity: 0.35, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
               </div>
             )}
             {adminMode && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-rose)', letterSpacing: '0.1em', marginTop: 4, position: 'relative', zIndex: 1 }}>
-                ⚠ TRYB EDYCJI
+              <p style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-rose)', letterSpacing: '0.1em', marginTop: 4, position: 'relative', zIndex: 1 }}>
+                <TriangleAlert size={12} aria-hidden="true" /> TRYB EDYCJI
               </p>
             )}
           </div>
@@ -572,7 +572,7 @@ function PlayerCard({
                 </button>
               )}
               {isSettled && (
-                <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', opacity: 0.45 }}>
+                <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }}>
                   + Wpłać na zapas
                 </button>
               )}
@@ -620,7 +620,7 @@ function PlayerCard({
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--co-green)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-green-md)' }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: '0.1em', margin: '4px 0 0' }}>
                   suma wpłat do zebrania od graczy
@@ -633,7 +633,7 @@ function PlayerCard({
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: 'var(--co-cyan)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-md)' }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontSize: '1rem', opacity: 0.4, marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
+                  <span style={{ fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: '0.1em' }}>ZŁ</span>
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: '0.1em', margin: '4px 0 0' }}>
                   nadwyżka ponad zaległości

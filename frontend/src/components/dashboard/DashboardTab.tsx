@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router';
 import { addPayment, removePayment } from '@/lib/firebase';
-import { SOUND_TYPES, ORGANIZER_NAME, RANKS } from '@/constants';
+import { SOUND_TYPES, ORGANIZER_NAME, RANKS, rankTint } from '@/constants';
 import { buildDebtDisplayData } from '@/utils/debt';
 import { calculateSeasonCardStats } from '@/utils/rankings';
 import { buildPlayerCardMeta } from '@/utils/playerCard';
@@ -11,6 +12,8 @@ import { Zap, ChevronDown } from 'lucide-react';
 import PushPermissionBanner from '../common/PushPermissionBanner';
 import type { UIData, HistoryEntry, PlayerStats, SoundType } from '@/types/ui';
 import { CLIP } from '@/constants/styles';
+import BrandMark from '../common/BrandMark';
+import RankGlyph from '../common/icons/RankGlyph';
 
 interface DashboardTabProps {
   data: Pick<UIData, 'summary' | 'players' | 'payments'>;
@@ -23,6 +26,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
   const [showRankGuide, setShowRankGuide] = useState(false);
 
   const { showError } = useToast();
+  const navigate = useNavigate();
 
   const totalWeeks = data.summary?.totalWeeks ?? 0;
 
@@ -106,16 +110,40 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
             background: 'linear-gradient(90deg, transparent, var(--co-cyan), transparent)',
             animation: 'podium-scan 3s ease-in-out infinite',
           }} />
-          <div style={{ fontSize: '2.5rem', marginBottom: 16, filter: 'drop-shadow(0 0 8px var(--co-cyan))' }}>🏓</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18, filter: 'var(--glow-drop-cyan)' }}>
+            <BrandMark size={64} />
+          </div>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', marginBottom: 10 }}>
             BRAK ROZGRYWEK
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.7, marginBottom: 20 }}>
             {'>'} System gotowy.<br/>
-            {'>'} Dodaj pierwszą sesję w zakładce{' '}
-            <span style={{ color: 'var(--co-cyan)', borderBottom: '1px solid var(--co-tint-line)' }}>DODAJ</span>
-            <span className="terminal-cursor" />
+            {'>'} {sortedPlayers.length === 0
+              ? 'Najpierw dodaj graczy, potem pierwszą sesję.'
+              : 'Dodaj pierwszą sesję — reszta policzy się sama.'}
           </p>
+          {/* Pusty stan musi mieć akcję, nie tylko wskazówkę: wcześniej
+              trzeba było samemu znaleźć zakładkę DODAJ w nawigacji. */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
+            <button
+              type="button"
+              className="cyber-button-yellow"
+              onClick={() => navigate('/admin')}
+              style={{ minHeight: 44, padding: '11px 18px', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+            >
+              <Zap size={15} aria-hidden="true" /> Dodaj pierwszą sesję
+            </button>
+            {sortedPlayers.length === 0 && (
+              <button
+                type="button"
+                className="cyber-button-outline"
+                onClick={() => navigate('/players')}
+                style={{ minHeight: 44, padding: '11px 18px' }}
+              >
+                Dodaj graczy
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -181,8 +209,8 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
             }}
           >
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.18em' }}>
-              {RANKS.map(r => r.emoji).join(' ')}
+            <span aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              {RANKS.map(r => <RankGlyph key={r.name} rank={r} size={13} />)}
             </span>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-dim)', textTransform: 'uppercase', flex: 1, textAlign: 'left' }}>
               Co oznaczają rangi?
@@ -194,11 +222,11 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
               {RANKS.map((r, i) => (
                 <div key={r.name} style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-                  background: `${r.hex}06`, border: `1px solid ${r.hex}20`,
+                  background: rankTint(r, 2), border: `1px solid ${rankTint(r, 13)}`,
                   clipPath: CLIP.badge,
                   marginTop: 6,
                 }}>
-                  <span aria-hidden="true" style={{ fontSize: '1.25rem', flexShrink: 0 }}>{r.emoji}</span>
+                  <RankGlyph rank={r} size={18} />
                   <div>
                     <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', color: r.hex, margin: 0, letterSpacing: '0.1em' }}>{r.name}</p>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: 0 }}>

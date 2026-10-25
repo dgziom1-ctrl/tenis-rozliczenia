@@ -8,6 +8,8 @@ import { hardResetApp, signalAppReady } from '@/utils/bootRecovery';
 import { Z, CLIP } from '@/constants/styles';
 import Layout from './Layout';
 import { routes } from './routes';
+import BrandMark from '@/components/common/BrandMark';
+import { Skull, Zap } from 'lucide-react';
 
 function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry?: () => void }) {
   return (
@@ -31,7 +33,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
           animation: 'neon-cyan 1.5s ease-in-out infinite',
           position: 'relative', overflow: 'hidden',
         }}>
-          <span style={{ fontSize: '2rem', position: 'relative', zIndex: 1 }}>🏓</span>
+          <BrandMark size={52} />
         </div>
         <div style={{ textAlign: 'center' }}>
           <p style={{
@@ -113,7 +115,9 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
         animation: 'neon-rose 2s ease-in-out infinite',
       }}>
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: 14, filter: 'var(--glow-drop-rose)' }}>☠</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, filter: 'var(--glow-drop-rose)' }}>
+            <Skull size={44} aria-hidden="true" style={{ color: 'var(--co-rose)' }} />
+          </div>
           <p style={{
             fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.1em',
             color: 'var(--co-rose)', marginBottom: 6, textTransform: 'uppercase',
@@ -134,8 +138,9 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
             </p>
           </div>
           <button onClick={onRetry ?? (() => window.location.reload())}
-            className="cyber-button-yellow" style={{ padding: '12px 24px', width: '100%' }}>
-            ⚡ RESTART SYSTEMU
+            className="cyber-button-yellow"
+            style={{ padding: '12px 24px', width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <Zap size={15} aria-hidden="true" /> RESTART SYSTEMU
           </button>
           <button onClick={hardResetApp}
             style={{

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import { Download, Share, X } from 'lucide-react';
 import { TEXT, CLIP } from '@/constants/styles';
+import BrandMark from './BrandMark';
 
 /** Ile czekamy na iOS, zanim pokażemy podpowiedź instalacji. */
 const IOS_BANNER_DELAY_MS = 2000;
@@ -91,7 +92,7 @@ export default function PWAInstallBanner() {
             clipPath: CLIP.badge,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <span style={{ fontSize: '1.25rem' }}>🕹️</span>
+            <BrandMark size={26} />
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
@@ -132,7 +133,7 @@ export default function PWAInstallBanner() {
     <div style={bannerStyle} className="pwa-banner bottom-banner glass-surface accent-top">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px 10px' }}>
         <div style={{ width: 32, height: 32, flexShrink: 0, background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)', clipPath: CLIP.badge, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: '1rem' }}>🕹️</span>
+          <BrandMark size={22} />
         </div>
         <div style={{ flex: 1 }}>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>

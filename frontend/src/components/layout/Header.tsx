@@ -1,10 +1,11 @@
-import { Volume2, VolumeX, Smartphone, Check, Sun, Moon, HelpCircle } from 'lucide-react';
+import { Volume2, VolumeX, Smartphone, Check, Sun, Moon, HelpCircle, Zap } from 'lucide-react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ArenaCanvas from './ArenaCanvas';
 import { copyToClipboard } from '@/utils/clipboard';
 import { BLIK_NUMBER } from '@/utils/blik';
 import { useToast } from '@/components/common/Toast';
 import { TEXT, TRACK, CLIP } from '@/constants/styles';
+import { DEMO_MODE } from '@/constants';
 import type { StyleWithVars } from '@/types/css';
 
 
@@ -240,14 +241,15 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           {/* JACK IN — lights up exactly when ball hits paddle */}
           <div className="header-hero-meta" style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
             <span style={{
+              display:'inline-flex',alignItems:'center',gap:5,
               fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,textTransform:'uppercase',
               transition:'color .06s,text-shadow .06s',
               // Wygaszony stan był cyanem na 8% krycia, czyli praktycznie
               // niewidoczny w obu motywach.
-              color: hitting ? 'var(--co-cyan)' : 'var(--co-dim2)',
+              color: hitting ? 'var(--co-cyan)' : 'var(--co-dim)',
               textShadow: hitting ? 'var(--glow-cyan-md)' : 'none',
-            }}>⚡ JACK IN ⚡</span>
+            }}><Zap size={11} aria-hidden="true" /> JACK IN <Zap size={11} aria-hidden="true" /></span>
             <span aria-hidden="true" style={{ color:'var(--co-border)' }}>│</span>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.normal,
@@ -259,6 +261,17 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
             <span style={{ fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-dim)' }}>
               v2.0.77
             </span>
+            {/* W trybie demo dane nie pochodzą z bazy — bez tej plakietki łatwo
+                pomylić podgląd projektu z prawdziwymi rozliczeniami grupy. */}
+            {DEMO_MODE && (
+              <span
+                title="Dane demonstracyjne — nie pochodzą z bazy Firebase"
+                style={{
+                  fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-amber)',
+                  border:'1px solid var(--co-amber)',padding:'0 4px',letterSpacing:TRACK.tight,
+                }}
+              >DEMO</span>
+            )}
           </div>
         </div>
       </header>

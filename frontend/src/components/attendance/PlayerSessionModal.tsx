@@ -1,6 +1,7 @@
 import { useMemo, useState, useId } from 'react';
 import { X } from 'lucide-react';
-import { RANKS, getRank } from '@/constants';
+import { RANKS, getRank, rankTint } from '@/constants';
+import RankGlyph from '../common/icons/RankGlyph';
 import { FONT, TEXT, TRACK, CLIP } from '../../constants/styles';
 import { formatDate } from '@/utils/format';
 import { getPlayerColor } from '@/constants/colors';
@@ -135,10 +136,10 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
           const rankIdx = RANKS.findIndex(r => r.name === currentRank.name);
           const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
           return (
-            <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15`, background: `${currentRank.hex}04` }}>
+            <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15`, background: rankTint(currentRank, 2) }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ ...FONT.display(TEXT.base, TRACK.tight), color: currentRank.hex }}>
-                  {currentRank.emoji} {currentRank.name}
+                <span style={{ ...FONT.display(TEXT.base, TRACK.tight), color: currentRank.hex, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <RankGlyph rank={currentRank} size={14} /> {currentRank.name}
                   {!seasonLabel && (
                     <span style={{ ...FONT.monoMicro, color: 'var(--co-dim)', marginLeft: 6 }}>
                       wszystkie sezony
@@ -146,8 +147,8 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
                   )}
                 </span>
                 {nextRank ? (
-                  <span style={{ ...FONT.monoSmall }}>
-                    do {nextRank.emoji} {nextRank.name}: <span style={{ color: nextRank.hex }}>{Math.max(0, nextRank.min - pct)}%</span>
+                  <span style={{ ...FONT.monoSmall, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    do <RankGlyph rank={nextRank} size={11} /> {nextRank.name}: <span style={{ color: nextRank.hex }}>{Math.max(0, nextRank.min - pct)}%</span>
                   </span>
                 ) : (
                   <span style={{ ...FONT.mono(TEXT.small), color: currentRank.hex }}>
@@ -204,7 +205,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
               aria-pressed={showMissed}
               className="icon-btn"
               style={{
-                minHeight: 32, padding: '4px 10px', flexShrink: 0,
+                minHeight: 44, padding: '8px 10px', flexShrink: 0,
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: showMissed ? 'var(--co-cyan)' : 'var(--co-dim)',
                 cursor: 'pointer', clipPath: CLIP.badge,

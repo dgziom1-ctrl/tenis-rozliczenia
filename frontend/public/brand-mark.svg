@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Cyber-Ponk">
+  <defs>
+    <linearGradient id="blade" x1="18" y1="16" x2="42" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5CF2FF"/>
+      <stop offset="1" stop-color="#00B4D8"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="32" y1="2" x2="32" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1A28"/>
+      <stop offset="1" stop-color="#050B12"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00E5FF"/>
+      <stop offset="1" stop-color="#0083A0"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#plate)"/>
+  <rect x="2.8" y="2.8" width="58.4" height="58.4" rx="14.4" fill="none" stroke="url(#rim)" stroke-width="1.6"/>
+  <g transform="translate(28,30) rotate(-25)">
+    <ellipse cx="0" cy="-8" rx="15.5" ry="17.5" fill="url(#blade)"/>
+    <ellipse cx="0" cy="-8" rx="9.5" ry="11" fill="#07131C" opacity="0.85"/>
+    <rect x="-4.2" y="8" width="8.4" height="21" rx="4.2" fill="#BEF5FF"/>
+  </g>
+  <circle cx="46.5" cy="18" r="5.4" fill="#FF2090"/>
+  <circle cx="44.8" cy="16.4" r="1.5" fill="#FFD6E8" opacity="0.8"/>
+</svg>

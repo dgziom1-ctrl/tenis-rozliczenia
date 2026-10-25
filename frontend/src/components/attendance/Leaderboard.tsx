@@ -4,6 +4,7 @@ import { getRank } from '@/constants';
 import { FONT, TEXT, TRACK, CLIP, PANEL } from '../../constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import StreakBadge from './StreakBadge';
+import RankGlyph from '../common/icons/RankGlyph';
 import Podium from './Podium';
 import type { PodiumEntry } from './PodiumCard';
 import type { RankedPlayer } from '@/types/ui';
@@ -53,7 +54,7 @@ function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
       }}>
         {String(place).padStart(2, '0')}.
       </span>
-      <span aria-hidden="true" style={{ fontSize: '1rem', flexShrink: 0 }}>{rank.emoji}</span>
+      <RankGlyph rank={rank} size={16} />
       <span style={{
         ...FONT.display(TEXT.lead, TRACK.tight), flex: 1, minWidth: 0,
         textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap',

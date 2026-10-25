@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FONT, TEXT, TRACK, CLIP } from '../../constants/styles';
 import StreakBadge from './StreakBadge';
+import MedalGlyph from '../common/icons/MedalGlyph';
 import type { RankedPlayer } from '@/types/ui';
 
 /** Jedno miejsce na podium — kilku graczy, gdy remis (ex aequo). */
@@ -16,16 +17,15 @@ interface PlaceStyle {
   height: number;
   cardHeight: number;
   label: string;
-  medal: string;
 }
 
 /**
  * Kolory medalów: złoto / srebro / brąz — nie cyan na pierwszym miejscu.
  */
 const PLACE_STYLES: Record<number, PlaceStyle> = {
-  1: { border: 'var(--co-gold)',    glow: 'var(--glow-box-gold)', bg: 'var(--co-gold-dim)',    height: 130, cardHeight: 146, label: '#1', medal: '🥇' },
-  2: { border: 'var(--co-silver)',  glow: 'none',                 bg: 'var(--co-tint)',        height: 90,  cardHeight: 126, label: '#2', medal: '🥈' },
-  3: { border: 'var(--co-bronze)',  glow: 'none',                 bg: 'var(--co-tint-bronze)', height: 62,  cardHeight: 112, label: '#3', medal: '🥉' },
+  1: { border: 'var(--co-gold)',    glow: 'var(--glow-box-gold)', bg: 'var(--co-gold-dim)',    height: 130, cardHeight: 146, label: '#1' },
+  2: { border: 'var(--co-silver)',  glow: 'none',                 bg: 'var(--co-tint)',        height: 90,  cardHeight: 126, label: '#2' },
+  3: { border: 'var(--co-bronze)',  glow: 'none',                 bg: 'var(--co-tint-bronze)', height: 62,  cardHeight: 112, label: '#3' },
 };
 
 interface PodiumCardProps {
@@ -103,7 +103,9 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
           // każdy remisujący dostawał pełną kartę, więc kolumna #3 rosła wyżej
           // od #1 i nachodziła na dolną nawigację.
           <div style={{ position: 'relative', zIndex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <div aria-hidden="true" style={{ fontSize: TEXT.lead, lineHeight: 1, marginBottom: 2 }}>{s.medal}</div>
+            <div aria-hidden="true" style={{ display: 'flex', justifyContent: 'center', lineHeight: 1, marginBottom: 4 }}>
+              <MedalGlyph place={podiumEntry.place} size={17} />
+            </div>
             {players.map((player, index) => (
               <div
                 key={player.name}
@@ -143,7 +145,9 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
           </div>
         ) : (
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div aria-hidden="true" style={{ fontSize: TEXT.h2, marginBottom: 6 }}>{s.medal}</div>
+            <div aria-hidden="true" style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
+              <MedalGlyph place={podiumEntry.place} size={24} />
+            </div>
             {/* Nazwa nie miała żadnego zabezpieczenia przed przepełnieniem, a
                 karta ma `overflow: hidden` — dłuższe imię było ucinane
                 w połowie znaku, zamiast dostać wielokropek. */}

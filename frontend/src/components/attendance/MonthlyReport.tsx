@@ -121,7 +121,11 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                         <th key={p.name} style={{ padding: '8px 12px', textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 400 }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                             <div style={{ width: '100%', height: 2, background: c.border, borderRadius: 1, opacity: 0.7 }} />
-                            <span style={{ color: c.border, whiteSpace: 'nowrap' }}>{p.name}</span>
+                            {/* Kolor gracza zostaje na pasku nad nazwą. Sama nazwa
+                                jedzie kolorem treści: paleta tożsamości ma tony
+                                środkowe, które na jednym z motywów schodzą do
+                                3,2–4,1:1, a to za mało dla 14-pikselowego tekstu. */}
+                            <span style={{ color: 'var(--co-text-hi)', whiteSpace: 'nowrap' }}>{p.name}</span>
                           </div>
                         </th>
                       );
@@ -151,7 +155,7 @@ export default function MonthlyReport({ monthlyStats, players }: MonthlyReportPr
                               } : presence > 0 ? {
                                 color: 'var(--co-cyan)',
                               } : {
-                                color: 'var(--co-dim2)',
+                                color: 'var(--co-dim)',
                               }),
                             }}>
                               {presence}

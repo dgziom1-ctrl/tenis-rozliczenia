@@ -52,7 +52,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
         className="cyber-button-outline"
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, flexShrink: 0,
-          minHeight: 36,
+          minHeight: 44,
           padding: compact ? '6px 10px' : '8px 14px',
         }}
       >

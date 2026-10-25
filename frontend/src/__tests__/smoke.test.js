@@ -112,9 +112,10 @@ describe('constants/index.js — struktura', () => {
     // każda ranga powinna mieć wymagane pola
     for (const rank of RANKS) {
       expect(rank.min).toBeTypeOf('number');
-      expect(rank.emoji).toBeTypeOf('string');
       expect(rank.name).toBeTypeOf('string');
-      expect(rank.hex).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      // Token motywu, nie literał hex: jeden kolor nie przejdzie 4,5:1
+      // jednocześnie na ciemnym i jasnym tle (patrz scripts/check-contrast.mjs).
+      expect(rank.hex).toMatch(/^var\(--rank-[a-z]+\)$/);
     }
     // rangi powinny być posortowane malejąco
     for (let i = 1; i < RANKS.length; i++) {

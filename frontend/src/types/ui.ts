@@ -97,7 +97,6 @@ export interface DebtDisplayData {
 
 export interface Rank {
   min: number;
-  emoji: string;
   name: string;
   hex: string;
 }
@@ -106,7 +105,6 @@ export interface Achievement {
   id: string;
   label: string;
   desc: string;
-  emoji: string;
 }
 
 export interface MonthGroup {
