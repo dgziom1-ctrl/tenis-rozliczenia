@@ -8,14 +8,13 @@ import { CyberPortrait } from './CyberPortrait';
 
 interface PlayerAvatarProps {
   name: string;
-  index?: number;
   size?: number;
   /** Kropka statusu rozliczenia — tylko na karcie gracza. */
   isPending?: boolean;
 }
 
-export function PlayerAvatar({ name, index, size = 60, isPending }: PlayerAvatarProps) {
-  const c = getPlayerColor(name, index);
+export function PlayerAvatar({ name, size = 60, isPending }: PlayerAvatarProps) {
+  const c = getPlayerColor(name);
 
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>

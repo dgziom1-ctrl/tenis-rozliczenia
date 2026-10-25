@@ -60,7 +60,7 @@ function PlayerCard({
   const isSettled   = !isPending && !hasCredit;
   const pct         = meta.attendancePercentage;
   const rank        = meta.rank;
-  const c           = getPlayerColor(player.name, playerIndex);
+  const c           = getPlayerColor(player.name);
 
   const [modal,     setModal]     = useState<PaymentModalType | null>(null);
   const [customAmt, setCustomAmt] = useState('');
@@ -350,7 +350,6 @@ function PlayerCard({
           </div>
           <PlayerAvatar
             name={player.name}
-            index={playerIndex}
             isPending={isOrganizer ? undefined : isPending}
           />
         </div>

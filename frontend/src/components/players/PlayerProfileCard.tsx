@@ -5,27 +5,26 @@ import { PlayerAvatar } from '../dashboard/PlayerAvatar';
 
 interface PlayerProfileCardProps {
   player: { name: string };
-  index: number;
   onDelete: (name: string) => void;
   isOrganizer: boolean;
   disabled?: boolean;
 }
 
-export default function PlayerProfileCard({ player, index, onDelete, isOrganizer, disabled = false }: PlayerProfileCardProps) {
-  const c = getPlayerColor(player.name, index);
-  const accent = isOrganizer ? 'var(--co-cyan)' : c.border;
+export default function PlayerProfileCard({ player, onDelete, isOrganizer, disabled = false }: PlayerProfileCardProps) {
+  const c = getPlayerColor(player.name);
+  const idleBorder = `${c.border}35`;
 
   return (
     <div className="glass-panel" style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-      border: `1px solid ${isOrganizer ? 'var(--co-tint-line)' : c.border + '35'}`,
+      border: `1px solid ${idleBorder}`,
       clipPath: CLIP.smallCard,
       transition: 'border-color 0.2s',
     }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = accent}
-      onMouseLeave={e => e.currentTarget.style.borderColor = isOrganizer ? 'var(--co-tint-line)' : c.border + '35'}
+      onMouseEnter={e => e.currentTarget.style.borderColor = c.border}
+      onMouseLeave={e => e.currentTarget.style.borderColor = idleBorder}
     >
-      <PlayerAvatar name={player.name} index={index} size={40} />
+      <PlayerAvatar name={player.name} size={40} />
 
       {/* Name */}
       <div style={{ flex: 1, minWidth: 0 }}>
