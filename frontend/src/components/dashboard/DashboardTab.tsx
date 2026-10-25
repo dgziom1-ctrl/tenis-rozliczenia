@@ -156,7 +156,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
           border: '1px solid var(--co-tint-hi)',
           clipPath: CLIP.badge,
         }}>
-          <Zap size={9} style={{ color: 'var(--co-cyan)' }} />
+          <Zap size={9} aria-hidden="true" style={{ color: 'var(--co-cyan)' }} />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>
             sesji: <span style={{ color: 'var(--co-cyan)' }}>{seasonHistory.length}</span>
           </span>
@@ -203,9 +203,13 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
       {totalWeeks > 0 && (
         <div className="glass-panel" style={{ clipPath: CLIP.smallCard }}>
           <button
+            type="button"
             onClick={() => setShowRankGuide(v => !v)}
+            aria-expanded={showRankGuide}
+            aria-controls="rank-guide-panel"
             style={{
-              width: '100%', padding: '10px 16px', background: 'transparent', border: 'none',
+              width: '100%', minHeight: 44, padding: '10px 16px',
+              background: 'transparent', border: 'none',
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
             }}
           >
@@ -215,10 +219,15 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-dim)', textTransform: 'uppercase', flex: 1, textAlign: 'left' }}>
               Co oznaczają rangi?
             </span>
-            <ChevronDown size={13} style={{ color: 'var(--co-dim)', transform: showRankGuide ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+            <ChevronDown size={13} aria-hidden="true" style={{ color: 'var(--co-dim)', transform: showRankGuide ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
           </button>
-          {showRankGuide && (
-            <div style={{ padding: '0 16px 16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 6, borderTop: '1px solid var(--co-border)' }}>
+          {/* Panel zostaje w DOM także po złożeniu: `aria-controls` zawsze
+              wskazuje na istniejący element, a czytnik wie, że jest ukryty. */}
+          <div
+            id="rank-guide-panel"
+            hidden={!showRankGuide}
+            style={{ padding: '0 16px 16px', display: showRankGuide ? 'grid' : 'none', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 6, borderTop: '1px solid var(--co-border)' }}
+          >
               {RANKS.map((r, i) => (
                 <div key={r.name} style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
@@ -235,8 +244,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                   </div>
                 </div>
               ))}
-            </div>
-          )}
+          </div>
         </div>
       )}
     </div>

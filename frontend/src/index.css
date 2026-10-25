@@ -226,11 +226,54 @@
      Wcześniej krążyła w trzech zapisach — 56px w banerach, 72px w toaście
      i 4.5rem w treści — więc toast nachodził na baner instalacji PWA. */
   --nav-height:    56px;
+
+  /* ── Winieta tła ──
+     Ostatnia warstwa `CyberBackground`. Literał w komponencie nie zmieniał się
+     z motywem, więc jasny ekran dostawał czarną ramkę. */
+  --bg-vignette:  rgba(0,0,0,0.42);
+
+  /* ── Canvas nagłówka (ArenaCanvas) ──────────────────────────────────
+     Canvas 2D nie rozumie `var()`, ale może przeczytać tokeny przez
+     `getComputedStyle(document.body)`. Wartości RGB są bez `rgb()`, żeby
+     w pętli składać `rgba(...)` z własnym alpha. Dzięki temu każdy kolor
+     dekoracji ma jedno źródło prawdy i reaguje na zmianę motywu — Hallmark
+     „every colour goes through a token”, Canvas UI bez twardych literałów. */
+  --canvas-accent:          0,229,255;
+  --canvas-accent-deep:     0,140,220;
+  --canvas-grid:            0,180,255;
+  --canvas-edge:            0,200,255;
+  --canvas-deep-shade:      0,100,200;
+  --canvas-table-from:      #020810;
+  --canvas-table-to:        #041828;
+  --canvas-body-from:       #062038;
+  --canvas-body-mid:        #031428;
+  --canvas-body-to:         #010C1C;
+  --canvas-ball-core:       #ffffff;
+  --canvas-ball-mid:        #d8f5ff;
+  --canvas-ball-edge:       #80c8e0;
+  --canvas-shadow:          0,50,120;
+  --canvas-floor-wash:      0,200,255;
+  --canvas-ice-stripe:      0,220,255;
+  --canvas-handle:          2,12,28;
+  --canvas-handle-line:     0,80,140;
+  --canvas-net-top:         200,248,255;
+  --canvas-glow:            0,160,255;
+  --canvas-glow-idle:       0,180,255;
+  --canvas-rubber-hit:      0,229,255;
+  --canvas-rubber-idle:     0,180,220;
+  --canvas-rubber-hit-end:  0,160,210;
+  --canvas-rubber-idle-end: 0,120,180;
+  --canvas-white:           255,255,255;
 }
 
 /* ══ RESET ═══════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* Hallmark floor: `overflow-x: clip`, nigdy `hidden`. `hidden` tworzy kontener
+   przewijania na <body>, przez co `position: fixed` wewnątrz elementu z
+   transformem kotwiczy się względem niego (baner powiadomień wypadał poza
+   ekran), a `position: sticky` traci punkt odniesienia. `clip` tnie
+   poziome wystawanie dekoracji bez zmiany containing blocku. */
+html { scroll-behavior: smooth; overflow-x: clip; }
 
 /* Kursor na wszystkim, co klikalne. Wcześniej zależało to od tego, czy autor
    komponentu pamiętał o `cursor: pointer` — część przycisków pokazywała
@@ -245,11 +288,13 @@ body {
   color: var(--co-text);
   font-family: var(--font-body);
   font-weight: 500;
-  overflow-x: hidden;
+  overflow-x: clip;
   overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0.02em;
-  transition: background-color 0.4s ease, color 0.4s ease, background-image 0.4s ease;
+  /* `background-image` nie przechodzi płynnie między gradientami — wpisanie go
+     do transitionu obiecywało animację, której przeglądarka i tak nie robi. */
+  transition: background-color 0.4s ease, color 0.4s ease;
 
   /* Cold operator background: cyan top bloom + rose/blue depth below + fine grid */
   background-image:
@@ -298,9 +343,11 @@ body.theme-switching *::after {
   0%, 100% { box-shadow: 0 0 3px rgba(255,32,144,0.35), 0 0 10px rgba(255,32,144,0.12); }
   50%       { box-shadow: 0 0 8px rgba(255,32,144,0.55), 0 0 20px rgba(255,32,144,0.22); }
 }
+/* Ruch po `transform`, nie po `top`: `top` przelicza layout w każdej klatce,
+   a ten efekt odpala się na hoverze na wielu kartach naraz. */
 @keyframes scan-sweep {
-  0%   { top: -2px; opacity: 1; }
-  100% { top: 100%; opacity: 0; }
+  0%   { transform: translateY(-100%); opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
 }
 @keyframes blink-cursor {
   0%, 49% { opacity: 1; }
@@ -398,11 +445,20 @@ body.theme-switching *::after {
 
   .scan-hover { position: relative; overflow: hidden; }
   .scan-hover::before {
-    content: ''; position: absolute; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.55), transparent);
-    top: -2px; pointer-events: none; z-index: 3;
+    /* Pełna wysokość + linia jako `background-size`: `translateY(100%)` jest
+       wtedy równe wysokości karty, więc skan przejeżdża od góry do dołu. */
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.55), transparent)
+      top center / 100% 2px no-repeat;
+    transform: translateY(-100%);
+    pointer-events: none; z-index: 3;
   }
-  .scan-hover:hover::before { animation: scan-sweep 0.5s ease-out forwards; }
+  /* `will-change` tylko w momencie animacji. Na stałe promowałoby do warstwy
+     każdą kartę na ekranie, nawet tej, której nikt nie dotknął. */
+  .scan-hover:hover::before {
+    animation: scan-sweep 0.5s ease-out forwards;
+    will-change: transform;
+  }
 
   /* Wspólna receptura szkła. Wszystkie powierzchnie — karty, panele, modale,
      nagłówek, nawigacja, toasty i banery — czytają te same tokeny, więc
@@ -1137,9 +1193,15 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   -webkit-tap-highlight-color: transparent;
 }
 .mobile-nav-btn::before {
-  content: ''; position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
-  width: 0; height: 3px; border-radius: 0 0 3px 3px;
-  background: var(--co-cyan); transition: width 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  content: ''; position: absolute; top: -1px; left: 50%;
+  /* Wskaźnik ma stałą szerokość i rośnie przez `scaleX` — transform jedzie na
+     kompozytorze, a zmiana `width` wywoływała layout przy każdej zmianie
+     zakładki. */
+  width: 24px; height: 3px; border-radius: 0 0 3px 3px;
+  background: var(--co-cyan);
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   box-shadow: none;
 }
 .mobile-nav-btn .lucide {
@@ -1153,7 +1215,7 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   transform: scale(1.12);
 }
 .mobile-nav-btn.active::before {
-  width: 24px;
+  transform: translateX(-50%) scaleX(1);
   background: var(--co-cyan);
   box-shadow: var(--glow-box-cyan);
 }
@@ -1517,6 +1579,17 @@ body.theme-light {
   /* Zaokrąglenie i ścinanie narożników wykluczają się — w jasnym motywie
      wygrywa promień, więc ścięcie musi zniknąć. */
   --clip-panel:   none;
+
+  /* ── Canvas w jasnym motywie: teal zamiast neonu, jasny blat ── */
+  --bg-vignette:            rgba(15,23,42,0.10);
+  --canvas-accent:          13,148,136;
+  --canvas-accent-deep:     13,148,136;
+  --canvas-grid:            13,148,136;
+  --canvas-edge:            13,148,136;
+  --canvas-deep-shade:      13,148,136;
+  --canvas-table-from:      #F1F5F9;
+  --canvas-table-to:        #E2E8F0;
+  --canvas-net-top:         13,148,136;
 }
 
 /* ── Body background — soft teal bloom + fine dot grid ── */

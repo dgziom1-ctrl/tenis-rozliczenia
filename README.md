@@ -2,6 +2,15 @@
 
 > A real-time debt tracker and attendance leaderboard for a private ping-pong, squash, badminton & padel group. Who showed up, what they owe, who's on a streak — all in one place.
 
+## 🎨 Design contract
+
+- [`DESIGN.md`](DESIGN.md) — machine-readable design system for coding agents (YAML tokens + rationale, `google-labs-code/design.md` format).
+- [`DESIGN-SKILLS.md`](DESIGN-SKILLS.md) — which of the 12 popular design-skill repos we actually applied, which we skipped and why.
+- [`frontend/DESIGN_SYSTEM.md`](frontend/DESIGN_SYSTEM.md) — full source of truth: contrast matrix, motion, icons, component recipes.
+- `cd frontend && npm run verify` runs the quality gates, including `audit:design`
+  (no layout animations, tokens instead of color literals, focus/reduced-motion fallbacks).
+  `npm run design:lint` validates `DESIGN.md` against the official spec.
+
 ---
 
 ## ✨ Features
@@ -524,7 +533,8 @@ Unit tests live in `src/__tests__/` and cover:
 | `robustness.test.js` | null/undefined/empty data guards, mutation validation, payment idempotency |
 | `functionsParity.test.js` | Cloud Functions and the app agree on every cost split, to the grosz |
 | `rulesParity.test.js` | Every field the app writes passes `database.rules.json` (a mismatch means `PERMISSION_DENIED` on all writes) |
-| `components.test.jsx` | Basic component rendering |
+| `components.test.jsx` | Basic component rendering, transform-based progress bars |
+| `designFloor.test.jsx` | Expand/collapse ARIA state, canvas rAF paused off-screen |
 | `hooks.test.js` | Custom hook behaviour |
 | `smoke.test.js` | App-level smoke tests |
 | `serviceWorker.test.js` | App-shell caching, network-first navigation, cache poisoning guards |

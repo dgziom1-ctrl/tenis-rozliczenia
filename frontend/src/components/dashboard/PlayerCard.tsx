@@ -385,13 +385,17 @@ function PlayerCard({
             </div>
             <div style={{ height: 2, background: 'var(--co-bar-track)', position: 'relative', overflow: 'hidden' }}>
               <div style={{
-                position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`,
+                position: 'absolute', left: 0, top: 0, bottom: 0, right: 0,
                 background: pct >= 75
                   ? 'linear-gradient(90deg, var(--co-cyan), var(--co-green))'
                   : pct >= 45
                   ? 'linear-gradient(90deg, var(--co-green), var(--co-cyan))'
                   : `linear-gradient(90deg, ${c.border}CC, ${c.border}66)`,
-                transition: 'width 0.8s ease',
+                /* Pasek obecności ma stałą szerokość i skaluje się z lewej —
+                   bez przeliczania layoutu przy każdej zmianie danych. */
+                transform: `scaleX(${Math.max(0, Math.min(100, pct)) / 100})`,
+                transformOrigin: 'left center',
+                transition: 'transform 0.8s ease',
               }} />
             </div>
             {history && history.length > 0 && (

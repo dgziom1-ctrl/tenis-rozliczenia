@@ -158,13 +158,16 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
               </div>
               <div style={{ height: 3, background: 'var(--co-bar-track)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{
-                  height: '100%', borderRadius: 2,
-                  width: `${pct}%`,
+                  height: '100%', width: '100%', borderRadius: 2,
                   background: nextRank
                     ? `linear-gradient(90deg, ${currentRank.hex}, ${nextRank.hex})`
                     : currentRank.hex,
                   boxShadow: 'var(--glow-box-cyan)',
-                  transition: 'width 0.6s ease',
+                  /* `scaleX` zamiast `width`: wypełnienie paska rangi nie
+                     przelicza layoutu okna przy otwarciu (motion floor). */
+                  transform: `scaleX(${Math.max(0, Math.min(100, pct)) / 100})`,
+                  transformOrigin: 'left center',
+                  transition: 'transform 0.6s ease',
                 }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>

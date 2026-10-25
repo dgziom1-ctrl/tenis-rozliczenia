@@ -211,6 +211,14 @@ describe('UndoBar — wyświetlanie i interakcja', () => {
     render(<UndoBar {...defaultProps} secondsLeft={4} />);
     expect(screen.getByText(/4/)).toBeInTheDocument();
   });
+
+  it('pasek postępu skaluje się przez transform, nie przez width', () => {
+    render(<UndoBar {...defaultProps} progressPct={42} />);
+    const bar = screen.getByTestId('undo-progress');
+    expect(bar.style.transform).toBe('scaleX(0.42)');
+    expect(bar.style.transition).toContain('transform');
+    expect(bar.style.transition).not.toContain('width');
+  });
 });
 
 // ════════════════════════════════════════════════════════════════════════════

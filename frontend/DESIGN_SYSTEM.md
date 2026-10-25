@@ -2,6 +2,10 @@
 
 > Dokument jest źródłem prawdy dla wyglądu i zachowania interfejsu. Zmieniasz
 > kolor, ikonę albo ruch — zmieniasz najpierw ten plik, potem token.
+>
+> Skrócona, maszynowo czytelna wersja dla agentów AI leży w [`../DESIGN.md`](../DESIGN.md)
+> (format `google-labs-code/design.md`). Mapowanie 12 repozytoriów design
+> skills na konkretne zmiany: [`../DESIGN-SKILLS.md`](../DESIGN-SKILLS.md).
 
 ## Skąd się wziął ten kierunek
 
@@ -32,8 +36,14 @@ komponent  .cyber-button-yellow, .status-chip, .neon-status-debt
 ```
 
 Tokeny żyją w `src/index.css` w `:root` (ciemny) i `body.theme-light` (jasny).
-**Nie wpisujemy kolorów w komponentach.** Wyjątkiem są marki zewnętrzne
-(np. gradient logo), które nie zmieniają się z motywem.
+**Nie wpisujemy kolorów w komponentach.** Wyjątki (jawnie wypisane w
+`scripts/audit-design.mjs`): gradient logo w `BrandMark`, paleta tożsamości
+graczy w `constants/colors.ts`, kolor `<meta name="theme-color">` w `useTheme`
+oraz fallbacki w `ArenaCanvas`.
+
+Canvas nagłówka rysuje API 2D, które nie rozumie `var()`. Dlatego czyta
+`--canvas-*` przez `getComputedStyle(document.body)`, a `--bg-vignette`
+zasila ostatnią warstwę tła. Zmiana motywu nie wymaga grzebania w TSX.
 
 ### Co znaczy który kolor
 
@@ -153,6 +163,16 @@ Zasady: animujemy `transform` i `opacity`, nie `width`/`height`; każda
 animacja ma stan końcowy także przy `prefers-reduced-motion`; ruch nigdy nie
 przesuwa sąsiednich elementów (brak layout shiftu w stanie wciśnięcia).
 
+`npm run audit:design` (w `verify`) egzekwuje to statycznie: zakaz
+`transition: all`, zakaz animowania `width/height/top/left/margin/padding`
+również w `@keyframes`, `overflow-x: clip` zamiast `hidden` na `html`/`body`
+(`hidden` psuł kotwiczenie banerów), brak `100vw`, obecność
+`:focus-visible` i trzech preferencji systemowych. Paski postępu
+(`UndoBar`, `PlayerCard`, `PlayerSessionModal`, kroki Wrapped, wskaźnik
+nawigacji) mają stałą szerokość i rosną przez `scaleX`; skan kart jedzie
+`translateY` po pełnej wysokości, nie `top`. `ArenaCanvas` zatrzymuje rAF
+przez `IntersectionObserver`, gdy nagłówek znika z ekranu.
+
 ### Easter egg
 
 Pięć kliknięć w tytuł „CYBER-PONK” wysypuje konfetti (44 kawałki) i rozjaśnia
@@ -196,7 +216,8 @@ tło na 0,6 s. Szczegóły, które łatwo zepsuć:
 ## 9. Checklist przed wdrożeniem
 
 - [ ] `npm run verify` zielone (typy, lint, martwy CSS, sieroty, typografia,
-      kontrast, testy).
+      kontrast, design floor, testy); opcjonalnie `npm run design:lint`
+      waliduje składnię `DESIGN.md`.
 - [ ] Easter egg: pięć kliknięć w tytuł wysypuje konfetti, drugie odpalenie
       w trakcie pierwszego też startuje od nowa.
 - [ ] Sprawdzone 375 px i 390 × 844: pierwsza karta nad dolną nawigacją.
