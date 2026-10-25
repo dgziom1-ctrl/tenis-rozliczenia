@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
@@ -11,7 +11,9 @@ import { useAudio } from '@/hooks/useAudio';
 import { useGlassPointer } from '@/hooks/useGlassPointer';
 import { useScrolled } from '@/hooks/useScrolled';
 import { useSettledFlag } from '@/hooks/useSettledFlag';
-import { SOUND_TYPES, TAB_PATHS, PATH_TO_TAB } from '@/constants';
+import { usePageTitle } from '@/hooks/usePageTitle';
+import { SOUND_TYPES, TAB_PATHS } from '@/constants';
+import { TriangleAlert } from 'lucide-react';
 import { CLIP } from '@/constants/styles';
 
 /**
@@ -78,7 +80,24 @@ export default function Layout() {
     try { localStorage.setItem(GUIDE_STORAGE_KEY, '1'); } catch { /* brak dostępu do storage */ }
   }, []);
 
-  const activeTab = PATH_TO_TAB[location.pathname] ?? 'dashboard';
+  const { tab: activeTab, announced } = usePageTitle();
+
+  /**
+   * Zmiana zakładki nie przeładowuje dokumentu, więc czytnik ekranu nie
+   * ogłasza nic nowego — użytkownik zostaje z fokusem na przycisku nawigacji
+   * i bez informacji, co się otworzyło. Ten region mówi to raz na nawigację
+   * (pierwszy render pomijamy — tytuł dokumentu już nazywa stronę).
+   */
+  const [routeAnnouncement, setRouteAnnouncement] = useState('');
+  const announceAfterMount = useRef(false);
+  useEffect(() => {
+    if (!announceAfterMount.current) {
+      announceAfterMount.current = true;
+      return;
+    }
+    setRouteAnnouncement(announced);
+  }, [announced]);
+
   const tabOrder: Record<string, number> = {
     dashboard: 0, attendance: 1, admin: 2, history: 3, players: 4,
   };
@@ -172,7 +191,9 @@ export default function Layout() {
       className="min-h-screen px-2 md:px-8 py-2 md:py-8 relative z-10"
       style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', position: 'relative' }}
     >
+      <a className="skip-link" href="#main-content">Przejdź do treści</a>
       <CyberBackground />
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{routeAnnouncement}</p>
       <div className="max-w-7xl mx-auto relative">
         <Header
           isMuted={isMuted}
@@ -188,6 +209,8 @@ export default function Layout() {
           <OfflineBanner hasData={hasData} onRetry={retry} />
         )}
         <main
+          id="main-content"
+          tabIndex={-1}
           className={`main-content ${pageDirection === 'forward' ? 'page-enter-forward' : 'page-enter-backward'}`}
           key={location.pathname}
         >
@@ -221,7 +244,7 @@ function OfflineBanner({ hasData, onRetry }: { hasData: boolean; onRetry: () => 
         clipPath: CLIP.smallCard,
       }}
     >
-      <span style={{ fontSize: '1rem', lineHeight: 1 }}>⚠</span>
+      <TriangleAlert size={18} aria-hidden="true" style={{ color: 'var(--co-amber)', flexShrink: 0 }} />
       <div style={{ flex: 1 }}>
         <p style={{
           margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.1em',

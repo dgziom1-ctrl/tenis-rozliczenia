@@ -1,8 +1,9 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Zap } from 'lucide-react';
 import { formatDate, formatAmount, formatAmountShort } from '@/utils/format';
-import { SPORT_EMOJI, SPORT_SHORT, hasRacketRental } from '@/constants';
+import { SPORT_SHORT, hasRacketRental } from '@/constants';
 import { getShareGroups } from '@/utils/sessionCost';
 import ShareBreakdown from '../common/ShareBreakdown';
+import SportGlyph from '../common/icons/SportGlyph';
 import type { HistoryEntry } from '../../types/ui';
 import { CLIP } from '@/constants/styles';
 
@@ -25,7 +26,6 @@ const labelStyle = {
 
 export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
   const isCourt = hasRacketRental(row.sport);
-  const sportEmoji = SPORT_EMOJI[row.sport] ?? '🏓';
   const racketCost = row.racketCost ?? 0;
   const ownRacketPlayers = row.ownRacketPlayers ?? [];
   // Te same stawki, które widać w podglądzie przy dodawaniu i na grupie.
@@ -48,6 +48,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               {formatDate(row.datePlayed)}
             </span>
             <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
               fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
               padding: '2px 6px',
               background: isCourt ? 'var(--co-tint-green)' : 'var(--co-tint)',
@@ -55,12 +56,13 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               color: isCourt ? 'var(--co-green)' : 'var(--co-cyan)',
               clipPath: CLIP.badge,
             }}>
-              {`${sportEmoji} ${SPORT_SHORT[row.sport] ?? 'PING'}`}
+              <SportGlyph sport={row.sport} size={12} />
+              {SPORT_SHORT[row.sport] ?? 'PING'}
             </span>
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button onClick={() => onEdit(row)} className="icon-btn" aria-label="Edytuj sesję" style={{
-              minWidth: 38, minHeight: 38,
+              minWidth: 44, minHeight: 44,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               padding: '8px 10px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
@@ -70,7 +72,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               <Pencil size={15} />
             </button>
             <button onClick={() => onDelete(row.id)} className="icon-btn danger" aria-label="Usuń sesję" style={{
-              minWidth: 38, minHeight: 38,
+              minWidth: 44, minHeight: 44,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               padding: '8px 10px', background: 'transparent',
               border: '1px solid var(--co-border)', cursor: 'pointer',
@@ -98,7 +100,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
 
           <div>
             <p style={labelStyle}>Na osobę</p>
-            <ShareBreakdown groups={groups} sportEmoji={sportEmoji} size="sm" />
+            <ShareBreakdown groups={groups} sport={row.sport} size="sm" />
           </div>
         </div>
 
@@ -110,7 +112,8 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               const hasCard = row.multisportPlayers.includes(name);
               const hasOwnRacket = racketCost > 0 && ownRacketPlayers.includes(name);
               return (
-                <span key={name} style={{
+                <span key={name} aria-label={`${name}${hasCard ? ', karta MultiSport' : ''}${hasOwnRacket ? ', własna rakietka' : ''}`} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 3,
                   fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
                   padding: '2px 6px',
                   color: hasCard ? 'var(--co-green)' : 'var(--co-text)',
@@ -118,7 +121,9 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
                   border: `1px solid ${hasCard ? 'var(--co-green)' : 'var(--co-border)'}`,
                   clipPath: CLIP.badge,
                 }}>
-                  {hasCard && '⚡'}{hasOwnRacket && sportEmoji}{(hasCard || hasOwnRacket) && ' '}{name}
+                  {hasCard && <Zap size={10} aria-hidden="true" />}
+                  {hasOwnRacket && <SportGlyph sport={row.sport} size={10} />}
+                  {name}
                 </span>
               );
             })}

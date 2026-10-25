@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { CSSProperties } from 'react';
-import { Bell, X, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Bell, X, RefreshCw, CheckCircle2, TriangleAlert, Zap } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { ref, get } from 'firebase/database';
 import { database } from '@/lib/firebase/config';
@@ -145,13 +145,13 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
 
         <div style={{ flex: 1, minWidth: 0 }}>
           {status === 'success' ? (
-            <p role="status" style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-green)', margin: 0 }}>
-              ✓ Powiadomienia włączone!
+            <p role="status" style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-green)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <CheckCircle2 size={15} aria-hidden="true" /> Powiadomienia włączone!
             </p>
           ) : (
             <>
               <p style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-text-hi)', margin: '0 0 4px' }}>
-                {showReregister ? '⚠ Rejestracja wygasła — odnów' : 'Włącz powiadomienia'}
+                {showReregister ? 'Rejestracja wygasła — odnów' : 'Włącz powiadomienia'}
               </p>
               {/* Cały opis banera miał 0.6rem, czyli 9,6px. */}
               <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-text)', margin: '0 0 10px', lineHeight: 1.5 }}>
@@ -192,8 +192,9 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
               )}
 
               {status === 'error' && (
-                <p role="alert" style={{ ...FONT.mono(TEXT.small), color: 'var(--co-rose)', marginBottom: 8 }}>
-                  ⚠ {errorMsg || 'Nie udało się włączyć. Sprawdź ustawienia przeglądarki.'}
+                <p role="alert" style={{ ...FONT.mono(TEXT.small), color: 'var(--co-rose)', marginBottom: 8, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                  <TriangleAlert size={14} aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span>{errorMsg || 'Nie udało się włączyć. Sprawdź ustawienia przeglądarki.'}</span>
                 </p>
               )}
 
@@ -202,9 +203,11 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
                   onClick={() => void handleEnable()}
                   disabled={isRegistering}
                   className="cyber-button-yellow"
-                  style={{ minHeight: 44, padding: '10px 16px' }}
+                  style={{ minHeight: 44, padding: '10px 16px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}
                 >
-                  {isRegistering ? 'Rejestruję…' : showReregister ? '🔄 Odnów' : '⚡ Włącz'}
+                  {isRegistering ? 'Rejestruję…' : showReregister
+                    ? <><RefreshCw size={14} aria-hidden="true" /> Odnów</>
+                    : <><Zap size={14} aria-hidden="true" /> Włącz</>}
                 </button>
                 <button
                   onClick={dismiss}

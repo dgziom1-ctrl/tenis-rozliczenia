@@ -6,6 +6,14 @@ const STORAGE_KEY = 'cyber-ponk-theme';
 /** Musi odpowiadać `transition-duration` reguły `body.theme-switching` w index.css. */
 const THEME_TRANSITION_MS = 400;
 
+/**
+ * Kolor paska przeglądarki/statusu. Musi odpowiadać `--co-void` obu motywów —
+ * inaczej na telefonie nad ciemną aplikacją świeci jasny pasek (albo odwrotnie)
+ * i wygląda to jak niedokończona aplikacja. `index.html` ma wartość ciemną,
+ * bo taki motyw startuje domyślnie; JS przełącza ją razem z motywem.
+ */
+const THEME_COLOR: Record<Theme, string> = { dark: '#030508', light: '#F8FAFC' };
+
 function readSavedTheme(): Theme | null {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -38,6 +46,7 @@ export function useTheme() {
   useLayoutEffect(() => {
     document.body.classList.toggle('theme-light', theme === 'light');
     document.body.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[theme]);
 
     const themeChanged = previousTheme.current !== theme;
     previousTheme.current = theme;

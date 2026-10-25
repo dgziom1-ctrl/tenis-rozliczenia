@@ -1,4 +1,5 @@
-import { SPORT, SPORT_EMOJI, SPORT_SHORT } from '@/constants';
+import { SPORT, SPORT_SHORT } from '@/constants';
+import SportGlyph from '../common/icons/SportGlyph';
 import type { Sport } from '@/types/domain';
 import { CLIP } from '@/constants/styles';
 
@@ -19,6 +20,8 @@ export default function SportSelector({ value, onChange }: SportSelectorProps) {
             key={sport} type="button"
             onClick={() => onChange(sport)}
             style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              minHeight: 44,
               padding: '10px 6px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
               fontFamily: 'var(--font-display)', fontSize: '0.8125rem', 
               letterSpacing: '0.06em', textTransform: 'uppercase',
@@ -31,7 +34,8 @@ export default function SportSelector({ value, onChange }: SportSelectorProps) {
               }),
             }}
           >
-            {SPORT_EMOJI[sport]} {SPORT_SHORT[sport]}
+            <SportGlyph sport={sport} size={15} />
+            {SPORT_SHORT[sport]}
           </button>
         );
       })}

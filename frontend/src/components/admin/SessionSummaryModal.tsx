@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Copy, Flame, Trophy, Gamepad2 } from 'lucide-react';
-import { SPORT_EMOJI, SPORT_LABEL, hasRacketRental } from '@/constants';
+import { CheckCircle2, Copy, Flame, Trophy, Gamepad2, Zap } from 'lucide-react';
+import { SPORT_LABEL, hasRacketRental } from '@/constants';
+import SportGlyph from '../common/icons/SportGlyph';
 import { useToast } from '../common/Toast';
 import { formatDate, formatAmountShort } from '@/utils/format';
 import { buildGroupMessage } from '@/utils/message';
@@ -94,12 +95,14 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
 
       <div className="matchday-hero">
         <p className="matchday-kicker">SESJA ZAPISANA</p>
-        <p style={{
-          fontSize: '2.5rem', margin: '8px 0 4px', lineHeight: 1,
+        <div style={{
+          display: 'flex', justifyContent: 'center',
+          margin: '8px 0 6px', lineHeight: 1,
+          color: 'var(--co-cyan)',
           filter: 'drop-shadow(0 0 10px var(--co-cyan))',
         }}>
-          {SPORT_EMOJI[sport] ?? '🏓'}
-        </p>
+          <SportGlyph sport={sport} size={44} strokeWidth={1.5} />
+        </div>
         <p style={{ ...FONT.display(TEXT.h2, TRACK.tight), color: 'var(--co-text-hi)', margin: 0 }}>
           {(SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase()}
         </p>
@@ -128,7 +131,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
         {[
-          { label: 'SPORT', value: `${SPORT_EMOJI[sport] ?? '🏓'} ${(SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase()}`, color: withRackets ? 'var(--co-green)' : 'var(--co-cyan)' },
+          { label: 'SPORT', value: (SPORT_LABEL[sport] ?? 'Ping-Pong').toUpperCase(), color: withRackets ? 'var(--co-green)' : 'var(--co-cyan)' },
           { label: 'DATA', value: formatDate(date), color: 'var(--co-text)' },
           { label: 'KOSZT', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
           { label: 'OBECNI', value: presentCount, color: 'var(--co-text)' },
@@ -154,14 +157,18 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
           <p style={{ ...FONT.monoLabel, marginBottom: 6 }}>PODZIAŁ KOSZTÓW</p>
           <p style={{ ...FONT.mono(TEXT.h2), color: 'var(--co-cyan)', textShadow: 'var(--glow-cyan-lg)', margin: 0 }}>
             {formatAmountShort(headline.perPerson)}
-            <span style={{ fontSize: TEXT.base, opacity: 0.5, marginLeft: 4 }}>ZŁ / OS.</span>
+            <span style={{ fontSize: TEXT.base, color: 'var(--co-dim)', marginLeft: 4 }}>ZŁ / OS.</span>
           </p>
           {groups.slice(1).map(group => (
             <p key={group.names.join()} style={{
               ...FONT.mono(TEXT.small), marginTop: 4,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
               color: group.hasCard ? 'var(--co-green)' : 'var(--co-amber)',
             }}>
-              {group.hasCard ? '⚡' : SPORT_EMOJI[sport]} {group.names.join(', ')}
+              {group.hasCard
+                ? <Zap size={12} aria-hidden="true" />
+                : <SportGlyph sport={sport} size={12} />}
+              {group.names.join(', ')}
               {group.ownRacket ? ' (własna rakietka)' : ''}: {formatAmountShort(group.perPerson)} zł
             </p>
           ))}

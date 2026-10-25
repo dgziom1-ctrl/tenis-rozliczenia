@@ -245,7 +245,7 @@ describe('LogEntry — koszt i stawki w historii', () => {
     renderRow();
     expect(screen.getByText('bez karty')).toBeInTheDocument();
     expect(screen.getByText('37,83 zł')).toBeInTheDocument();
-    expect(screen.getByText('⚡ z kartą')).toBeInTheDocument();
+    expect(screen.getByText('z kartą')).toBeInTheDocument();
     expect(screen.getByText('22,84 zł')).toBeInTheDocument();
     expect(screen.getByText('17,50 zł')).toBeInTheDocument();
     expect(screen.getByText('· 2 os.')).toBeInTheDocument();
@@ -260,9 +260,11 @@ describe('LogEntry — koszt i stawki w historii', () => {
 
   it('oznacza posiadaczy karty przy nazwisku', () => {
     renderRow();
-    expect(screen.getByText('⚡🏸 Ada')).toBeInTheDocument();
-    expect(screen.getByText('⚡ Bartek')).toBeInTheDocument();
-    expect(screen.getByText('Celina')).toBeInTheDocument();
+    // Informacja o karcie/rakiecie nie może być tylko ikoną — czytnik
+    // ekranu dostaje ją w `aria-label` chipa.
+    expect(screen.getByText('Ada').closest('[aria-label]')).toHaveAttribute('aria-label', 'Ada, karta MultiSport, własna rakietka');
+    expect(screen.getByText('Bartek').closest('[aria-label]')).toHaveAttribute('aria-label', 'Bartek, karta MultiSport');
+    expect(screen.getByText('Celina').closest('[aria-label]')).toHaveAttribute('aria-label', 'Celina');
   });
 });
 

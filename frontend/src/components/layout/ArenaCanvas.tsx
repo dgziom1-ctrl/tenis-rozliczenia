@@ -27,7 +27,11 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
     }
     const canvas = ref.current;
     if (!canvas) return;
-    const g = canvas.getContext('2d')!;
+    // Brak kontekstu 2D zdarza się w przeglądarkach z wyłączonym canvasem
+    // (tryb oszczędzania danych, niektóre rozszerzenia prywatności) i w jsdom.
+    // Bez tej straży cały nagłówek wywracał się razem z dekoracją tła.
+    const g = canvas.getContext('2d');
+    if (!g) return undefined;
     const W = 560, H = 180, CX = 265, CY = 90;
 
     const dpr = Math.min((typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1, 2);

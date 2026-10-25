@@ -7,20 +7,32 @@ import type { Rank } from '@/types/ui';
  * klasami Tailwind oraz `hex`. Trzy pierwsze nie były czytane nigdzie — tylko
  * `hex` trafia do interfejsu — więc zostały usunięte.
  *
- * Same wartości `hex` były dobrane pod ciemne tło i w trybie jasnym przestawały
- * być czytelne: złoto `#FFD700` miało 1,4:1 na bieli, a cyan `#00E5FF` 1,5:1 —
- * a to kolor nazwy rangi i odczytu procentowego w oknie gracza. Nowe tony
- * przekraczają 3:1 w obu motywach, zachowując progresję złoto → magenta →
- * fiolet → morski → szarość.
+ * Kolor rangi jest tokenem motywu (`--rank-*` w `index.css`), a nie literałem:
+ * jeden kolor nie może przejść 4,5:1 jednocześnie na prawie czarnym i prawie
+ * białym tle (wymagana luminancja to wąski przedział 0,183–0,199). Wartości
+ * w obu motywach pilnuje `npm run audit:contrast`; nazwa, ikona, obramowanie
+ * i pasek postępu czytają ten sam token, więc nie mogą się rozjechać.
  */
 export const RANKS: Rank[] = [
-  { min: 90, emoji: '🏆', name: 'LEGENDA', hex: '#B8860B' }, // 3,3:1 / 6,3:1
-  { min: 75, emoji: '⭐',  name: 'MISTRZ',  hex: '#E0197A' }, // 4,6:1 / 4,5:1
-  { min: 60, emoji: '🎖️', name: 'WETERAN', hex: '#9B4DE0' }, // 4,6:1 / 4,4:1
-  { min: 45, emoji: '🔥', name: 'STAŁY',   hex: '#148A9C' }, // 4,1:1 / 5,0:1
-  { min: 20, emoji: '👀', name: 'GOŚĆ',    hex: '#64748B' }, // 4,6:1 / 4,3:1
-  { min:  0, emoji: '👻', name: 'DUCH',    hex: '#556677' }, // 5,9:1 / 3,5:1
+  { min: 90, name: 'LEGENDA', hex: 'var(--rank-legenda)' },
+  { min: 75, name: 'MISTRZ',  hex: 'var(--rank-mistrz)' },
+  { min: 60, name: 'WETERAN', hex: 'var(--rank-weteran)' },
+  { min: 45, name: 'STAŁY',   hex: 'var(--rank-staly)' },
+  { min: 20, name: 'GOŚĆ',    hex: 'var(--rank-gosc)' },
+  { min: 0,  name: 'DUCH',    hex: 'var(--rank-duch)' },
 ];
+
+/**
+ * Tło/obramowanie w kolorze rangi o zadanym kryciu.
+ *
+ * Wcześniej sklejano hex z alfą (`${hex}10`). Tokenów CSS nie da się tak
+ * dopisać — `var(--rank-legenda)10` jest nieprawidłową deklaracją — więc
+ * przezroczystość liczy `color-mix`. Starsza przeglądarka bez `color-mix`
+ * po prostu nie pokaże tła, zachowując czytelny tekst.
+ */
+export function rankTint(rank: Rank, percent: number): string {
+  return `color-mix(in srgb, ${rank.hex} ${percent}%, transparent)`;
+}
 
 export function getRank(pct: number): Rank {
   return RANKS.find(r => pct >= r.min) ?? RANKS[RANKS.length - 1];

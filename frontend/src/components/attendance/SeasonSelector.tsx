@@ -36,7 +36,7 @@ export default function SeasonSelector({ seasons, selected, onChange }: SeasonSe
             onClick={() => onChange(opt.value)}
             aria-pressed={active}
             style={{
-              minHeight: 36, padding: '6px 12px',
+              minHeight: 44, padding: '8px 12px',
               ...FONT.display(TEXT.base, TRACK.normal),
               background: active ? 'var(--co-tint-hi)' : 'transparent',
               border: `1px solid ${active ? 'var(--co-tint-line)' : 'var(--co-border)'}`,

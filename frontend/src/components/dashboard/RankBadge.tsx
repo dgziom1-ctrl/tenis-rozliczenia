@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useId, type MouseEvent } from 'react';
-import { RANKS } from '@/constants';
+import { RANKS, rankTint } from '@/constants';
 import { FONT, CLIP, Z, TEXT, TRACK } from '../../constants/styles';
+import RankGlyph from '../common/icons/RankGlyph';
 import type { Rank } from '@/types/ui';
 
 /** Jak długo wisi dymek z progiem następnej rangi. */
@@ -14,10 +15,9 @@ interface RankBadgeProps {
 
 // ── Rank badge ───────────────────────────────────────────────────
 export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
-  // Bez zapasowego `var(--co-dim)`: `col` jedzie dalej jako `${col}30`, a token
-  // z dopiskiem krycia daje `var(--co-dim)30` — deklarację nieprawidłową po
-  // podstawieniu zmiennej. `hex` jest wymagane w typie i ustawione w każdej
-  // randze, więc zapas był i tak martwy, a tylko czekał na wywrotkę.
+  // `hex` to token motywu (`var(--rank-*)`) — dlatego krycie liczy `rankTint`,
+  // a nie dopisek alfy. Zapasowy kolor nie istnieje: `hex` jest wymagane
+  // w typie i ustawione w każdej randze.
   const col = rank.hex;
   const rankIdx = RANKS.findIndex(r => r.name === rank.name);
   const nextRank = rankIdx > 0 ? RANKS[rankIdx - 1] : null;
@@ -49,16 +49,18 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
           padding: '2px 6px 2px 4px',
-          background: `${col}10`, border: `1px solid ${col}30`,
+          background: rankTint(rank, 6), border: `1px solid ${rankTint(rank, 19)}`,
           clipPath: CLIP.badge,
           cursor: 'pointer', userSelect: 'none',
         }}
       >
-        <span aria-hidden="true" style={{ fontSize: TEXT.tiny }}>{rank.emoji}</span>
+        <RankGlyph rank={rank} size={13} />
         <span style={{ ...FONT.display(TEXT.tiny, TRACK.tight), color: col }}>
           {rank.name}
         </span>
-        <span style={{ ...FONT.monoMicro, color: col, opacity: 0.75 }}>
+        {/* Bez `opacity`: procent to treść, a półprzezroczysty tekst na szkle
+            schodził poniżej 4,5:1 (w jasnym motywie nawet do 3,6:1). */}
+        <span style={{ ...FONT.monoMicro, color: col }}>
           {pct}%
         </span>
       </button>
@@ -81,7 +83,7 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
         <div id={tooltipId} role="status" style={{
           position: 'absolute', top: 'calc(100% + 6px)', left: 0,
           background: 'var(--co-panel)',
-          border: `1px solid ${col}50`,
+          border: `1px solid ${rankTint(rank, 31)}`,
           padding: '6px 10px',
           zIndex: Z.popover,
           whiteSpace: 'nowrap',
@@ -89,12 +91,12 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
           boxShadow: 'var(--glow-box-cyan)',
           animation: 'slide-in-up 0.15s ease-out',
         }}>
-          <p style={{ ...FONT.display(TEXT.tiny, TRACK.tight), color: col, margin: 0 }}>
-            {rank.emoji} {rank.name} · {rank.min}%+
+          <p style={{ ...FONT.display(TEXT.tiny, TRACK.tight), color: col, margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <RankGlyph rank={rank} size={12} /> {rank.name} · {rank.min}%+
           </p>
           {nextRank ? (
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '3px 0 0' }}>
-              do {nextRank.emoji} {nextRank.name}: <span style={{ color: nextRank.hex }}>+{Math.max(0, nextRank.min - pct)}%</span>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '3px 0 0', display: 'flex', alignItems: 'center', gap: 3 }}>
+              do <RankGlyph rank={nextRank} size={11} /> {nextRank.name}: <span style={{ color: nextRank.hex }}>+{Math.max(0, nextRank.min - pct)}%</span>
             </p>
           ) : (
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: col, margin: '3px 0 0' }}>

@@ -12,7 +12,6 @@ interface AchievementDef {
   id: string;
   label: string;
   desc: string;
-  emoji: string;
   check: (player: ExtendedPlayerStats, history: HistoryEntry[]) => boolean;
 }
 
@@ -34,35 +33,30 @@ const STATIC_ACHIEVEMENTS: AchievementDef[] = [
     id: 'first_session',
     label: 'Debiut',
     desc: 'Pierwsza sesja',
-    emoji: '🎮',
     check: (player, history) => history.some(s => s.presentPlayers.includes(player.name)),
   },
   {
     id: 'perfect_month',
     label: 'Perfekcyjny miesiąc',
     desc: '100% w jednym miesiącu (min. 3 sesje)',
-    emoji: '💎',
     check: (player, history) => countPerfectMonths(player.name, history) >= 1,
   },
   {
     id: 'sessions_10',
     label: '10 sesji',
     desc: 'Łącznie 10 sesji na koncie',
-    emoji: '🏅',
     check: (player) => (player.attendanceCount || 0) >= 10,
   },
   {
     id: 'sessions_25',
     label: '25 sesji',
     desc: 'Łącznie 25 sesji na koncie',
-    emoji: '🥈',
     check: (player) => (player.attendanceCount || 0) >= 25,
   },
   {
     id: 'sessions_50',
     label: '50 sesji',
     desc: 'Łącznie 50 sesji na koncie',
-    emoji: '🏆',
     check: (player) => (player.attendanceCount || 0) >= 50,
   },
 ];
@@ -78,7 +72,7 @@ export function getPlayerAchievements(
 
   for (const ach of STATIC_ACHIEVEMENTS) {
     if (ach.check(player, eligibleHistory)) {
-      earned.push({ id: ach.id, label: ach.label, desc: ach.desc, emoji: ach.emoji });
+      earned.push({ id: ach.id, label: ach.label, desc: ach.desc });
     }
   }
 
@@ -89,7 +83,6 @@ export function getPlayerAchievements(
         id: `perfect_month_${milestone}`,
         label: `Perfekcyjny miesiąc ×${milestone}`,
         desc: `${milestone} miesięcy ze 100% frekwencją (min. 3 sesje/mies.)`,
-        emoji: milestone >= 20 ? '💠' : '💎',
       });
     }
   }
@@ -105,7 +98,6 @@ export function getPlayerAchievements(
         id: `streak_${milestone}`,
         label: `Seria ${milestone}`,
         desc: `${milestone} sesji z rzędu`,
-        emoji: milestone >= 20 ? '🔥' : '⚡',
       });
     }
   }

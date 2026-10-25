@@ -91,7 +91,24 @@ export default defineConfig({
     __CP_APP_BUILD__: JSON.stringify(BUILD_ID),
   },
   server: {
-    allowedHosts: ['localhost', '127.0.0.1'],
+    // `localhost` wystarcza do pracy na własnym komputerze. W środowiskach
+    // podglądu (Arena/E2B) strona jest serwowana z domeny `*.e2b.app` — bez
+    // wpisu na liście Vite odrzuca żądanie z komunikatem o niedozwolonym
+    // hoście i podgląd pokazuje biały ekran.
+    allowedHosts: ['localhost', '127.0.0.1', '.e2b.app'],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Firebase (~400 kB) zmienia się raz na kilka miesięcy, a kod aplikacji
+        // przy każdym wydaniu. Osobne paczki pozwalają przeglądarce zachować
+        // dużą zależność w cache, zamiast pobierać ją od nowa z każdym buildem.
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router'],
+          'vendor-firebase': ['firebase/app', 'firebase/database', 'firebase/messaging'],
+        },
+      },
+    },
   },
   resolve: {
     alias: {

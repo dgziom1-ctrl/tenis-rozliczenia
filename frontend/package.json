@@ -11,10 +11,11 @@
     "lint:css": "node scripts/find-unused-css.mjs",
     "lint:orphans": "node scripts/find-orphan-modules.mjs",
     "audit:a11y": "node scripts/check-a11y.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run lint:css && npm run lint:orphans && npm run audit:a11y && npm test",
+    "verify": "npm run typecheck && npm run lint && npm run lint:css && npm run lint:orphans && npm run audit:a11y && npm run audit:contrast && npm run test",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "audit:contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "firebase": "^11.10.0",

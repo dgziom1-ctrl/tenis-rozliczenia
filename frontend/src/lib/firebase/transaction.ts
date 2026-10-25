@@ -1,5 +1,6 @@
 import { runTransaction } from 'firebase/database';
 import { dataRef } from './config';
+import { DEMO_MODE } from '@/constants';
 import type { RawAppData, TransactionResult } from '@/types/domain';
 
 const WRITE_TIMEOUT_MS = 12_000;
@@ -65,6 +66,15 @@ export async function withTransaction(
   fn: (current: RawAppData | null) => RawAppData,
   fallbackErrorMsg: string,
 ): Promise<TransactionResult> {
+  // Tryb demo nie ma bazy, do której mógłby zapisać. Zamiast czekać na timeout
+  // i pokazywać „Permission denied”, mówimy wprost, że to podgląd.
+  if (DEMO_MODE) {
+    return {
+      success: false,
+      error: 'Tryb demo — zmiany nie są zapisywane. Wyłącz VITE_DEMO_DATA, aby pracować na bazie.',
+    };
+  }
+
   /**
    * Bez sieci nie zaczynamy transakcji w ogóle.
    *

@@ -5,7 +5,7 @@ import ShareBreakdown from '../common/ShareBreakdown';
 import CyberDateInput from '../admin/CyberDateInput';
 import SportSelector from '../admin/SportSelector';
 import PlayerToggleGrid from '../admin/PlayerToggleGrid';
-import { SPORT_EMOJI, RACKET_PRICE, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
+import { RACKET_PRICE, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
 import { CLIP } from '@/constants/styles';
 import { parseAmount, formatAmountShort } from '@/utils/format';
 import { getRacketSelection, getShareGroups, getTotalWithRackets } from '@/utils/sessionCost';
@@ -268,7 +268,7 @@ export default function EditSessionForm({
       {withRackets && isPresentValid && (
         <div>
           <p style={{ ...sectionLabel, color: 'var(--co-amber)' }}>
-            <Hand size={11} /> {SPORT_EMOJI[editForm.sport]} WŁASNA RAKIETKA
+            <Hand size={11} /> WŁASNA RAKIETKA
           </p>
           <PlayerToggleGrid names={present} selected={ownRacketPlayers} onToggle={toggleOwnRacket} accent="amber" />
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
@@ -281,7 +281,7 @@ export default function EditSessionForm({
       {withRackets && (
         <div>
           <p style={sectionLabel}>
-            <Hand size={11} /> {SPORT_EMOJI[editForm.sport]} WYPOŻYCZONE RAKIETY
+            <Hand size={11} /> WYPOŻYCZONE RAKIETY
           </p>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
@@ -348,7 +348,7 @@ export default function EditSessionForm({
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
             Po zmianie na osobę
           </p>
-          <ShareBreakdown groups={previewGroups} sportEmoji={SPORT_EMOJI[editForm.sport] ?? '🏓'} size="sm" />
+          <ShareBreakdown groups={previewGroups} sport={editForm.sport} size="sm" />
         </div>
       )}
 

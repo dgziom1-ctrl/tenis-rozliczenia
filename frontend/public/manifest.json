@@ -1,11 +1,11 @@
 {
-  "name": "Cyber Ponk",
-  "short_name": "Cyber Ponk",
-  "description": "Ping-pong z ekipą 🏓",
+  "name": "Cyber-Ponk",
+  "short_name": "Cyber-Ponk",
+  "description": "Rozliczenia kortu i frekwencja grupy tenisowej",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d0d12",
-  "theme_color": "#00d4ff",
+  "background_color": "#030508",
+  "theme_color": "#030508",
   "icons": [
     {
       "src": "/icon-192v2.png",

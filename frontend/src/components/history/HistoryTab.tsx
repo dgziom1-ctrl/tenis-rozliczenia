@@ -483,7 +483,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
               className="icon-btn"
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
-                minHeight: 36, padding: '6px 10px', cursor: 'pointer',
+                minHeight: 44, padding: '8px 10px', cursor: 'pointer',
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
                 clipPath: CLIP.badge,
@@ -503,7 +503,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
               className="icon-btn"
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
-                minHeight: 36, padding: '6px 10px', cursor: 'pointer',
+                minHeight: 44, padding: '8px 10px', cursor: 'pointer',
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
                 clipPath: CLIP.badge,

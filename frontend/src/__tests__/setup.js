@@ -33,6 +33,11 @@ globalThis.AudioContext = vi.fn(() => ({
   resume: vi.fn().mockResolvedValue(undefined),
 }));
 
+// Canvas 2D — jsdom nie implementuje `getContext` i loguje „Not implemented”
+// przy każdym renderze nagłówka. Aplikacja sama radzi sobie z brakiem
+// kontekstu (patrz ArenaCanvas), więc w testach wystarczy `null`.
+HTMLCanvasElement.prototype.getContext = vi.fn(() => null);
+
 // matchMedia (jsdom go nie ma, używany przez hooki motywu)
 globalThis.matchMedia = vi.fn(() => ({
   matches: false,

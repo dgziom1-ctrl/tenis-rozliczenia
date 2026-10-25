@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { CSSProperties } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Trophy } from 'lucide-react';
+import SportGlyph from '../common/icons/SportGlyph';
+import MedalGlyph from '../common/icons/MedalGlyph';
 import Modal from '../common/Modal';
 import { useModalExit } from '@/hooks/useModalExit';
 import { CornerBrackets } from '../dashboard/CornerBrackets';
@@ -161,27 +163,35 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
             {/* Sport breakdown */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 6vw, 48px)', marginBottom: 28 }}>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🏓</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6, color: 'var(--co-cyan)' }}>
+                  <SportGlyph sport="pingpong" size={30} />
+                </div>
                 <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-cyan)' }}>{cPP}</div>
                 <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PING PONG</div>
               </div>
               {stats.squashSessions > 0 && (
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🎾</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6, color: 'var(--co-green)' }}>
+                    <SportGlyph sport="squash" size={30} />
+                  </div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-green)' }}>{cSQ}</div>
                   <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>SQUASH</div>
                 </div>
               )}
               {stats.badmintonSessions > 0 && (
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🏸</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6, color: 'var(--co-pink)' }}>
+                    <SportGlyph sport="badminton" size={30} />
+                  </div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-pink)' }}>{cBM}</div>
                   <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>BADMINTON</div>
                 </div>
               )}
               {stats.padelSessions > 0 && (
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)', marginBottom: 4 }}>🥎</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6, color: 'var(--co-amber)' }}>
+                    <SportGlyph sport="padel" size={30} />
+                  </div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-amber)' }}>{cPD}</div>
                   <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PADEL</div>
                 </div>
@@ -276,7 +286,6 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
       case 4: {
         const top3 = stats.players.slice(0, 3);
         const rest = stats.players.slice(3);
-        const medals = ['🥇', '🥈', '🥉'];
         const medalColors = ['var(--co-gold)', 'var(--co-silver)', 'var(--co-bronze)'];
         const medalTints = ['var(--co-tint-gold)', 'var(--co-tint)', 'var(--co-tint-bronze)'];
         const medalBorders = ['var(--co-gold)', 'var(--co-silver)', 'var(--co-bronze)'];
@@ -300,7 +309,9 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                   clipPath: CLIP.card,
                   animation: `wm-slideUp 0.6s ease-out ${0.15 * i}s both`,
                 }}>
-                  <div style={{ fontSize: 'clamp(1.2rem, 4vw, 1.8rem)', marginBottom: 6 }}>{medals[i]}</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
+                    <MedalGlyph place={i + 1} size={26} />
+                  </div>
                   <div style={{
                     ...display('clamp(0.9rem, 3vw, 1.4rem)'),
                     color: medalColors[i],
@@ -367,8 +378,8 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               MISTRZ ROKU {stats.year}
             </div>
 
-            <div style={{ fontSize: 'clamp(2.5rem, 10vw, 5rem)', marginBottom: 8, animation: 'wm-float 3s ease-in-out infinite' }}>
-              🏆
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8, animation: 'wm-float 3s ease-in-out infinite', color: 'var(--co-gold)' }}>
+              <Trophy size={68} strokeWidth={1.6} aria-hidden="true" focusable="false" />
             </div>
 
             <div style={{

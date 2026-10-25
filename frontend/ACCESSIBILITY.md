@@ -5,11 +5,20 @@ pomniejszony przez `viewBox`, 7-pikselowych podpisów osi ani przycisków, któr
 są czytelne tylko przy 100% zoomie. Poniższa lista jest uzupełnieniem testów —
 przechodzimy ją przy zmianach w nagłówku, wykresach, historii i gestach.
 
-`npm run audit:a11y` pilnuje dwóch regresji automatycznie:
+`npm run verify` uruchamia trzy automaty, które nie zastąpią przeglądu ręcznego,
+ale łapią najczęstsze regresje:
 
-1. żaden `font-size` w `src/index.css` nie schodzi poniżej 12 px,
-2. `CHART_LABEL_SIZE >= 12`, a oba wykresy używają `useElementWidth`
-   (viewBox 1:1 z kontenerem, bez skalowania tekstu).
+1. **`npm run audit:a11y`** — żaden `font-size` w `src/index.css` nie schodzi
+   poniżej 12 px; `CHART_LABEL_SIZE >= 12`, a oba wykresy używają
+   `useElementWidth` (viewBox 1:1 z kontenerem, bez skalowania tekstu).
+2. **`npm run audit:contrast`** — czyta tokeny z `src/index.css`, składa
+   półprzezroczyste szkło na realnym tle i sprawdza 300 par tekst × powierzchnia
+   w obu motywach (także sześć kolorów rang). Próg 4,5:1 dla tekstu zwykłego,
+   3:1 dla dużego (`--co-dim2`) i pierścienia fokusu. Bez tej bramki akcenty w trybie jasnym
+   schodziły do 3,0:1 — axe tego nie widzi, bo mierzy jeden ekran naraz.
+3. **testy** — skip link, `id="main-content"`, tytuł dokumentu per zakładka
+   i region `aria-live` (`layoutA11y.test.jsx`), a także dane demo
+   (`demoData.test.js`).
 
 ## Typografia i wykresy
 
@@ -31,7 +40,8 @@ przechodzimy ją przy zmianach w nagłówku, wykresach, historii i gestach.
       nad dolną nawigacją przy 390 × 844.
 - [ ] Dolna nawigacja uwzględnia `safe-area-inset-bottom` (iPhone z paskiem
       gestów); ostatni element strony nie chowa się pod nią.
-- [ ] Cel dotykowy ma min. **44 × 44 px** (przyciski nagłówka, „Pokaż więcej”,
+- [ ] Cel dotykowy ma min. **44 × 44 px** (przyciski nagłówka, edycja i usunięcie
+      w historii, selektor sezonu, „Cofnij”, usuwanie wpłaty, „Pokaż więcej”,
       legenda wykresu, wiersze ex aequo).
 - [ ] Przytrzymanie przycisku wpłaty nie zaznacza tekstu, nie otwiera menu
       kontekstowego i nie przewija strony po rozpoczęciu gestu.
@@ -41,6 +51,12 @@ przechodzimy ją przy zmianach w nagłówku, wykresach, historii i gestach.
 
 ## Klawiatura i czytnik ekranu
 
+- [ ] Pierwszy Tab pokazuje „Przejdź do treści”, a Enter przenosi fokus do
+      `<main id="main-content">` — bez przeskakiwania przez nagłówek i pięć
+      zakładek.
+- [ ] Tytuł karty zmienia się przy przełączaniu zakładek
+      (Pulpit / Ranking / Dodaj sesję / Historia / Gracze) i ma nazwę produktu.
+- [ ] Po zmianie zakładki czytnik ogłasza nową stronę (region `aria-live`).
 - [ ] Krótkie Enter/Space na przycisku wpłaty otwiera dialog potwierdzenia;
       przytrzymanie Enter/Space zapisuje wpłatę.
 - [ ] Dialog potwierdzenia ma focus trap, Escape zamyka, a fokus wraca na
@@ -59,6 +75,14 @@ przechodzimy ją przy zmianach w nagłówku, wykresach, historii i gestach.
 - [ ] „Pokaż więcej” jest i nad listą (w liczniku), i pod listą; licznik
       „Pokazano X z Y” jest ogłaszany przez `aria-live`.
 - [ ] Zmiana filtra gracza, sezonu lub sortowania wraca do pierwszych 12.
+
+## Ikony i informacja
+
+- [ ] Żadna informacja nie jest przekazana tylko ikoną ani tylko kolorem.
+      Chip „Ada, karta MultiSport, własna rakietka” ma to w `aria-label`,
+      a nie wyłącznie w ⚡ i 🏸.
+- [ ] Ikony obok widocznego tekstu są `aria-hidden`; samodzielne mają nazwę.
+- [ ] Emoji nie pełni roli ikony interfejsu (patrz `DESIGN_SYSTEM.md` §4).
 
 ## Czego axe nie sprawdzi
 

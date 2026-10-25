@@ -66,7 +66,7 @@ export function detectSessionHighlights(
       highlights.push({
         name,
         kind: 'rankup',
-        label: `${rankAfter.emoji} ${rankAfter.name}`,
+        label: `Awans: ${rankAfter.name}`,
       });
     }
   }

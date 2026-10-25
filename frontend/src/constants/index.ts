@@ -9,6 +9,16 @@ export const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? '';
 
 /** Czy w ogóle da się potwierdzić hasłem — puste hasło NIE odblokowuje niczego. */
 export const isAdminPasswordConfigured = (): boolean => ADMIN_PASSWORD.length > 0;
+/**
+ * Czy aplikacja działa na danych demo (`src/dev/demoData.ts`).
+ *
+ * Włącza się wyłącznie w buildzie deweloperskim i tylko po `VITE_DEMO_DATA=1`.
+ * W produkcji warunek zwija się do `false`, więc gałęzie demo znikają
+ * z paczki. Mutacje sprawdzają tę stałą, żeby podgląd UI nie próbował
+ * zapisywać do nieistniejącej bazy i nie pokazywał błędów uprawnień.
+ */
+export const DEMO_MODE = import.meta.env.DEV && import.meta.env.VITE_DEMO_DATA === '1';
+
 export const SETTLED_THRESHOLD = 0.01;
 export const UNDO_TIMEOUT_SECONDS = 8;
 export const MODAL_EXIT_MS = 280;
@@ -22,6 +32,14 @@ export const SPORT = { PINGPONG: 'pingpong', SQUASH: 'squash', BADMINTON: 'badmi
 const RACKET_RENTAL_SPORTS: readonly string[] = [SPORT.SQUASH, SPORT.BADMINTON, SPORT.PADEL];
 export const hasRacketRental = (sport?: string): boolean => RACKET_RENTAL_SPORTS.includes(sport ?? '');
 
+/**
+ * Emoji dyscypliny — WYŁĄCZNIE do treści kopiowanej do czatu (`utils/message`).
+ *
+ * W interfejsie dyscyplina jest rysowana przez `SportGlyph`: emoji ma inną
+ * szerokość i baseline na każdym systemie, przez co rozjeżdżało wiersze
+ * historii i podpisy pod ikonami. W wiadomości do grupy emoji jest treścią,
+ * nie ikoną — tam zostaje.
+ */
 export const SPORT_EMOJI: Record<string, string> = { pingpong: '🏓', squash: '🎾', badminton: '🏸', padel: '🥎' };
 export const SPORT_LABEL: Record<string, string> = { pingpong: 'Ping-Pong', squash: 'Squash', badminton: 'Badminton', padel: 'Padel' };
 export const SPORT_SHORT: Record<string, string> = { pingpong: 'PING', squash: 'SQUASH', badminton: 'BADM', padel: 'PADEL' };
@@ -71,4 +89,4 @@ export const ORGANIZER_NAME = 'Kamil';
 export const PAYMENT_MODAL = { EXACT: 'exact', CUSTOM: 'custom' } as const;
 export const MONTHS = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
 
-export { RANKS, getRank, PODIUM_ORDER } from './ranks';
+export { RANKS, getRank, rankTint, PODIUM_ORDER } from './ranks';

@@ -135,8 +135,22 @@ npm run typecheck    # TypeScript strict check (no emit)
 npm run lint         # ESLint
 npm run lint:css     # fails on unused classes / @keyframes in src/index.css
 npm run lint:orphans # fails on modules under src/ that nothing imports
+npm run audit:a11y   # typography floor + chart label size
+npm run audit:contrast # WCAG AA contrast of every theme token pair
 npm run verify       # everything above + tests — run this before pushing
 ```
+
+#### Tryb demo (bez Firebase)
+
+`frontend/.env.development` ustawia `VITE_DEMO_DATA=1`, więc `npm run dev`
+startuje na danych demonstracyjnych: 8 graczy, 22 sesje, wpłaty, długi
+i nadpłata. Nagłówek pokazuje wtedy plakietkę **DEMO**. Dane pochodzą
+z `src/dev/demoData.ts` i są wczytywane dynamicznie tylko w buildzie
+deweloperskim — paczka produkcyjna nie zawiera tej ścieżki.
+
+Aby oglądać prawdziwą bazę, w `.env.local` ustaw `VITE_DEMO_DATA=0` i wpisz
+własne klucze Firebase. Szczegóły wyglądu i reguł: `frontend/DESIGN_SYSTEM.md`,
+`frontend/ACCESSIBILITY.md`.
 
 `lint:css` and `lint:orphans` cover the two blind spots the compiler has: an unused
 CSS rule and an unimported module both typecheck perfectly. A selector built at
@@ -519,6 +533,9 @@ Unit tests live in `src/__tests__/` and cover:
 | `buildVersion.test.js` | Stale-build detection against `/version.json` |
 | `connectionResilience.test.js` | Offline write guard, no manual `goOffline`/`goOnline` |
 | `appDataProvider.test.jsx` | Boot gate timeout, snapshot cache fallback |
+| `layoutA11y.test.jsx` | Skip link, `main#main-content`, page title per tab, `aria-live` route announcer |
+| `pageMeta.test.jsx` | Every tab has a unique, descriptive document title |
+| `demoData.test.js` | Demo seed keeps every balance state, unique ids, valid sessions |
 
 ```bash
 npm test             # run all tests once
