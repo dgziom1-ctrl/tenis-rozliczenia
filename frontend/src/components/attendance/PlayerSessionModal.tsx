@@ -194,7 +194,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
         )}
 
         {/* Session log */}
-        <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
+        <div data-modal-scroll style={{ overflowY: 'auto', flex: 1, minHeight: 0, overscrollBehavior: 'contain', padding: '12px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <p style={{ ...FONT.monoLabel, margin: 0, flex: 1 }}>
               // historia sesji — obecny na {sessions.length} z {eligibleHistory.length}

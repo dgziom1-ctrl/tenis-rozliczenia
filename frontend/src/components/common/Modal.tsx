@@ -6,6 +6,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { MODAL_EXIT_MS, REDUCED_MOTION_MODAL_EXIT_MS } from '@/constants';
 import { FONT, TEXT, TRACK } from '@/constants/styles';
+import { lockScroll, unlockScroll } from '@/utils/scrollLock';
 import type { StyleWithVars } from '@/types/css';
 
 /**
@@ -222,12 +223,15 @@ export default function Modal({
     };
   }, [open, exitDuration, clearCloseTimer, clearPresentTimer]);
 
-  // Strona pozostaje zablokowana do końca animacji wyjścia, nie tylko do kliknięcia X.
+  // Strona pozostaje zablokowana do końca animacji wyjścia, nie tylko do
+  // kliknięcia X. Współdzielony licznik sprawia, że zamknięcie jednego z dwóch
+  // okien nie odblokowuje tła pod drugim. `useLayoutEffect` zamiast `useEffect`:
+  // blokada musi wejść w życie przed paintem, inaczej pierwszy gest zdąży
+  // przesunąć stronę.
   useLayoutEffect(() => {
     if (!isPresent) return undefined;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = previous; };
+    lockScroll();
+    return unlockScroll;
   }, [isPresent]);
 
   useFocusTrap(overlayRef, isPresent && isVisible);
@@ -368,7 +372,7 @@ export default function Modal({
       } : undefined}
     >
       {bare ? (
-        <div className="modal-bare-fill">{children}</div>
+        <div className="modal-bare-fill" data-modal-scroll>{children}</div>
       ) : (
         <div
           ref={panelRef}
@@ -411,7 +415,7 @@ export default function Modal({
               </button>
             </div>
           )}
-          <div className="modal-body">{children}</div>
+          <div className="modal-body" data-modal-scroll>{children}</div>
           {footer && <div className="modal-foot">{footer}</div>}
         </div>
       )}
