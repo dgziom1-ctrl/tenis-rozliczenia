@@ -16,9 +16,9 @@ ale łapią najczęstsze regresje:
    w obu motywach (także sześć kolorów rang). Próg 4,5:1 dla tekstu zwykłego,
    3:1 dla dużego (`--co-dim2`) i pierścienia fokusu. Bez tej bramki akcenty w trybie jasnym
    schodziły do 3,0:1 — axe tego nie widzi, bo mierzy jeden ekran naraz.
-3. **testy** — skip link, `id="main-content"`, tytuł dokumentu per zakładka
-   i region `aria-live` (`layoutA11y.test.jsx`), a także dane demo
-   (`demoData.test.js`).
+3. **testy** — landmark `<main>`, brak skip linku (decyzja produktowa),
+   tytuł dokumentu per zakładka i region `aria-live` (`layoutA11y.test.jsx`),
+   easter egg (`easterEgg.test.jsx`) oraz dane demo (`demoData.test.js`).
 
 ## Typografia i wykresy
 
@@ -51,9 +51,10 @@ ale łapią najczęstsze regresje:
 
 ## Klawiatura i czytnik ekranu
 
-- [ ] Pierwszy Tab pokazuje „Przejdź do treści”, a Enter przenosi fokus do
-      `<main id="main-content">` — bez przeskakiwania przez nagłówek i pięć
-      zakładek.
+- [ ] Nawigacja zakładek jest osiągalna Tabem od pierwszego elementu nagłówka;
+      link „Przejdź do treści” został świadomie usunięty (pięć pozycji
+      w nawigacji to za mało, by usprawiedliwić dodatkowy element na wierzchu
+      strony) — nie dodawaj go z powrotem bez decyzji produktowej.
 - [ ] Tytuł karty zmienia się przy przełączaniu zakładek
       (Pulpit / Ranking / Dodaj sesję / Historia / Gracze) i ma nazwę produktu.
 - [ ] Po zmianie zakładki czytnik ogłasza nową stronę (region `aria-live`).

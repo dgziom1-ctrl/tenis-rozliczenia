@@ -14,7 +14,7 @@ spójność ikon, budżet animacji i czytelność na telefonie.
 
 | Priorytet (UI/UX Pro Max) | Co z tego wdrożono |
 |---|---|
-| 1. Dostępność | bramka kontrastu WCAG AA, skip link, tytuły stron, region `aria-live` |
+| 1. Dostępność | bramka kontrastu WCAG AA, tytuły stron, region `aria-live` |
 | 2. Dotyk i interakcja | cele ≥ 44 px, widoczny stan wciśnięcia, `cursor: pointer` globalnie |
 | 3. Wydajność | podział paczek (react/firebase), lżejsze szkło i statyczne plamy na telefonie |
 | 4. Spójność stylu | ikony wektorowe zamiast emoji w całym interfejsie |
@@ -153,6 +153,24 @@ Zasady: animujemy `transform` i `opacity`, nie `width`/`height`; każda
 animacja ma stan końcowy także przy `prefers-reduced-motion`; ruch nigdy nie
 przesuwa sąsiednich elementów (brak layout shiftu w stanie wciśnięcia).
 
+### Easter egg
+
+Pięć kliknięć w tytuł „CYBER-PONK” wysypuje konfetti (44 kawałki) i rozjaśnia
+tło na 0,6 s. Szczegóły, które łatwo zepsuć:
+
+- animacja `confettiBurst` **musi** istnieć w `index.css` — komponent podaje
+  tylko nazwę; brak reguły oznacza, że przeglądarka odrzuca deklarację
+  i elementy stoją w miejscu,
+- obrót i dryf jadą zmiennymi `--spin` i `--drift`, bo `transform`
+  z animacji nadpisuje styl inline,
+- cała warstwa to jeden `.chaos-layer` (`position: fixed`, `overflow: hidden`,
+  `z-index: var(--z-confetti)`) — pojedyncze `fixed` na każdy kawałek
+  wywoływało poziome przewijanie,
+- klucz Reacta zawiera numer uruchomienia (`chaosRun`), inaczej powtórne
+  odpalenie w trakcie trwania efektu nie restartuje animacji,
+- przy `prefers-reduced-motion` nie ma ruchu: statyczna posypka na 4 s,
+  bez błysku tła.
+
 ## 7. Wydajność
 
 - `vite build` dzieli zależności: `vendor-react` (~49 kB) i `vendor-firebase`
@@ -165,8 +183,10 @@ przesuwa sąsiednich elementów (brak layout shiftu w stanie wciśnięcia).
 
 ## 8. Nawigacja i orientacja
 
-- Skip link „Przejdź do treści” jest pierwszym elementem DOM i pojawia się
-  po Tabie.
+- Nie ma linku „Przejdź do treści”. Był, ale został usunięty decyzją
+  produktową: przy pięciu pozycjach nawigacji dodatkowy element wyskakujący
+  nad nagłówkiem przeszkadzał bardziej, niż pomagał. `layoutA11y.test.jsx`
+  pilnuje, żeby nie wrócił przez przypadek.
 - Każda zakładka ustawia `document.title` (`Ranking · Cyber-Ponk`).
 - Zmiana trasy trafia do regionu `aria-live="polite"` — czytnik ekranu wie,
   że treść się wymieniła, mimo braku przeładowania.
@@ -177,6 +197,8 @@ przesuwa sąsiednich elementów (brak layout shiftu w stanie wciśnięcia).
 
 - [ ] `npm run verify` zielone (typy, lint, martwy CSS, sieroty, typografia,
       kontrast, testy).
+- [ ] Easter egg: pięć kliknięć w tytuł wysypuje konfetti, drugie odpalenie
+      w trakcie pierwszego też startuje od nowa.
 - [ ] Sprawdzone 375 px i 390 × 844: pierwsza karta nad dolną nawigacją.
 - [ ] Oba motywy: kontrast i widoczność obramowań.
 - [ ] `prefers-reduced-motion` i zoom 200%.

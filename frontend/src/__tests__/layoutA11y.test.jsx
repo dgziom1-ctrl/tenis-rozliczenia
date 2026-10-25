@@ -4,10 +4,10 @@ import { MemoryRouter, Routes, Route } from 'react-router';
 
 /**
  * Nawigacja w SPA nie przeładowuje dokumentu, więc bez jawnej pracy:
- *  - użytkownik klawiatury musi móc pominąć nagłówek i pięć zakładek,
  *  - tytuł karty musi mówić, gdzie jesteśmy (WCAG 2.4.2),
- *  - czytnik ekranu musi usłyszeć, że treść się zmieniła.
- * Ten test pilnuje wszystkich trzech rzeczy w jednym miejscu.
+ *  - czytnik ekranu musi usłyszeć, że treść się zmieniła,
+ *  - `<main>` musi istnieć jako punkt odniesienia dla nawigacji po nagłówkach.
+ * Ten test pilnuje tych trzech rzeczy w jednym miejscu.
  */
 vi.mock('firebase/app', () => ({ initializeApp: vi.fn(() => ({})) }));
 vi.mock('firebase/database', () => ({
@@ -55,20 +55,19 @@ function renderLayout(path = '/attendance') {
 }
 
 describe('Layout — nawigacja i dostępność', () => {
-  it('zaczyna się od linku pomijającego nawigację', () => {
-    const { container } = renderLayout();
-    const skip = screen.getByRole('link', { name: 'Przejdź do treści' });
-    expect(skip).toHaveAttribute('href', '#main-content');
-    // Musi być pierwszym elementem w DOM, żeby Tab trafił w niego od razu.
-    expect(container.querySelector('a.skip-link')).toBe(skip);
-    expect(container.firstElementChild?.firstElementChild).toBe(skip);
-  });
-
-  it('cel skip linku jest oznaczony i osiągalny programowo', () => {
+  it('ma landmark <main> na treść zakładki', () => {
     renderLayout();
     const main = screen.getByRole('main');
-    expect(main).toHaveAttribute('id', 'main-content');
-    expect(main).toHaveAttribute('tabindex', '-1');
+    expect(main).toBeInTheDocument();
+    expect(main).toContainElement(screen.getByRole('heading', { name: 'Ranking' }));
+  });
+
+  // Skip link był tu wcześniej, ale został usunięty decyzją produktową:
+  // nawigacja ma pięć pozycji, a link przykrywał nagłówek po Tabie.
+  // Ten test pilnuje, że nie wróci przez przypadek.
+  it('nie renderuje linku „Przejdź do treści”', () => {
+    renderLayout();
+    expect(screen.queryByRole('link', { name: /przejdź do treści/i })).toBeNull();
   });
 
   it('ustawia tytuł dokumentu na nazwę aktywnej zakładki', () => {

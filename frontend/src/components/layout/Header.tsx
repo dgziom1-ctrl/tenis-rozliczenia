@@ -6,6 +6,7 @@ import { BLIK_NUMBER } from '@/utils/blik';
 import { useToast } from '@/components/common/Toast';
 import { TEXT, TRACK, CLIP } from '@/constants/styles';
 import { DEMO_MODE } from '@/constants';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { StyleWithVars } from '@/types/css';
 
 
@@ -25,13 +26,33 @@ const CopyIcon = () => (
 interface ChaosConfettiPiece {
   id: number;
   emoji: string;
+  /** Pozycja pozioma w % szerokości ekranu. */
   x: number;
+  /** Pozycja pionowa — używana tylko w wariancie bez ruchu. */
+  y: number;
   delay: number;
   dur: number;
   size: number;
-  rotate: number;
+  /** Obrót w stopniach — animacja nadpisuje `transform`, więc jedzie zmienną. */
+  spin: number;
   drift: number;
 }
+
+/**
+ * Ile kliknięć w tytuł uruchamia niespodziankę i ile wolno czekać między nimi.
+ * Trzymane razem, bo zmiana jednej liczby bez drugiej zmienia próg trudności.
+ */
+const CHAOS_CLICKS = 5;
+const CHAOS_CLICK_WINDOW_MS = 2000;
+
+/**
+ * Czas życia efektu. Musi pokryć najdłuższy kawałek konfetti
+ * (maks. opóźnienie 0,9 s + maks. czas 2,6 s) z zapasem na wygaszenie.
+ */
+const CHAOS_DURATION_MS = 4000;
+
+/** Co leci z góry. Dekoracja, nie ikona interfejsu — emoji jest tu treścią. */
+const CHAOS_EMOJI = ['🏓', '⚡', '💀', '🎮', '💥', '🔥', '🎯', '💣', '🌊', '👑'];
 
 interface HeaderProps {
   isMuted: boolean;
@@ -47,7 +68,15 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
   const [confetti,  setConfetti]  = useState<ChaosConfettiPiece[]>([]);
+  /**
+   * Numer uruchomienia. Ten sam zestaw kawałków (id 0–43) w kolejnym odpaleniu
+   * dostawał te same klucze Reacta, więc węzły były tylko aktualizowane —
+   * a animacja z `forwards` stała już na końcu i konfetti nie ruszało się
+   * z miejsca. Numer w kluczu wymusza nowe węzły, czyli start od zera.
+   */
+  const [chaosRun,  setChaosRun]  = useState(0);
   const [hitting,   setHitting]   = useState(false);
+  const reducedMotion = useReducedMotion();
   const chaosTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clickCount = useRef(0);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -82,39 +111,66 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
   const handleTitleClick = () => {
     clickCount.current += 1;
     clearTimeout(clickTimer.current ?? undefined);
-    if (clickCount.current >= 5) { clickCount.current = 0; activateChaos(); }
-    else clickTimer.current = setTimeout(() => { clickCount.current = 0; }, 2000);
+    if (clickCount.current >= CHAOS_CLICKS) { clickCount.current = 0; activateChaos(); }
+    else clickTimer.current = setTimeout(() => { clickCount.current = 0; }, CHAOS_CLICK_WINDOW_MS);
   };
 
   const activateChaos = () => {
     setChaosMode(true);
-    const pool = ['🏓','⚡','💀','🎮','💥','⚠️','🔥','🎯','💣','🌊'];
-    setConfetti(Array.from({ length: 40 }, (_, i) => ({
-      id: i, emoji: pool[Math.floor(Math.random() * pool.length)],
-      x: Math.random()*100, delay: Math.random()*1.2,
-      dur: 1.8+Math.random()*1.5, size: 18+Math.random()*24,
-      rotate: Math.random()*360, drift: (Math.random()-.5)*120,
+    setChaosRun(run => run + 1);
+    setConfetti(Array.from({ length: 44 }, (_, i) => ({
+      id: i,
+      emoji: CHAOS_EMOJI[Math.floor(Math.random() * CHAOS_EMOJI.length)],
+      x: Math.random() * 100,
+      y: 6 + Math.random() * 80,
+      delay: Math.random() * 0.9,
+      dur: 1.6 + Math.random() * 1.0,
+      size: 16 + Math.random() * 22,
+      spin: 180 + Math.random() * 540,
+      drift: (Math.random() - 0.5) * 160,
     })));
     clearTimeout(chaosTimer.current ?? undefined);
-    chaosTimer.current = setTimeout(() => { setChaosMode(false); setConfetti([]); }, 4000);
+    chaosTimer.current = setTimeout(() => { setChaosMode(false); setConfetti([]); }, CHAOS_DURATION_MS);
   };
 
   return (
     <>
-      {chaosMode && confetti.map(c => {
-        const style: StyleWithVars = { left:`${c.x}%`,top:0,fontSize:`${c.size}px`,
-          animation:`confettiBurst ${c.dur}s ${c.delay}s cubic-bezier(.2,.8,.4,1) forwards`,
-          '--drift':`${c.drift}px`,transform:`rotate(${c.rotate}deg)` };
-        return (
-          <div key={c.id} className="fixed pointer-events-none z-50" style={style}>
-            {c.emoji}
-          </div>
-        );
-      })}
       {chaosMode && (
-        <div className="fixed inset-0 pointer-events-none" style={{ zIndex:49,
-          animation:'chaosFlash 0.6s ease-out forwards',
-          background:'radial-gradient(ellipse at 50% 30%,var(--co-tint-hi) 0%,var(--co-tint) 60%,transparent 80%)' }}/>
+        // Jedna warstwa na cały efekt: `position: fixed` + `overflow: hidden`.
+        // Wcześniej każdy kawałek był osobnym `fixed` bez klucza animacji
+        // (`confettiBurst` nie istniało w arkuszu), więc 40 emoji zostawało
+        // w górnej krawędzi na całe 4 sekundy.
+        <div className="chaos-layer" aria-hidden="true">
+          {!reducedMotion && <div className="chaos-flash" />}
+          {confetti.map(piece => {
+            // Bez ruchu: statyczna posypka na tym samym obszarze zamiast
+            // spadającego konfetti (prefers-reduced-motion).
+            if (reducedMotion) {
+              return (
+                <span
+                  key={`${chaosRun}-${piece.id}`}
+                  className="chaos-piece chaos-piece-static"
+                  style={{ left: `${piece.x}%`, top: `${piece.y}%`, fontSize: `${piece.size}px` }}
+                >
+                  {piece.emoji}
+                </span>
+              );
+            }
+            const style: StyleWithVars = {
+              left: `${piece.x}%`,
+              top: 0,
+              fontSize: `${piece.size}px`,
+              animation: `confettiBurst ${piece.dur}s ${piece.delay}s cubic-bezier(.2,.8,.4,1) forwards`,
+              '--drift': `${piece.drift}px`,
+              '--spin': `${piece.spin}deg`,
+            };
+            return (
+              <span key={`${chaosRun}-${piece.id}`} className="chaos-piece" style={style}>
+                {piece.emoji}
+              </span>
+            );
+          })}
+        </div>
       )}
 
       <header className="glass-header" style={{ position:'relative',overflow:'visible' }}>
@@ -205,7 +261,7 @@ function Header({ isMuted, setIsMuted, isConnected, scrolled, theme, onToggleThe
           </div>
 
 
-          <button className="header-hero-title" onClick={handleTitleClick} aria-label="Ping Pong — kliknij 5x dla niespodzianki"
+          <button className="header-hero-title" onClick={handleTitleClick} aria-label="CYBER-PONK — centrum dowodzenia"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
             {/* Ghost layer — glitch fires on paddle hit, just like JACK IN */}
             {!chaosMode && hitting && <span aria-hidden="true" style={{

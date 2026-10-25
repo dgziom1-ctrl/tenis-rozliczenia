@@ -311,6 +311,45 @@ body.theme-switching *::after {
   to   { transform: translateY(0); opacity: 1; }
 }
 @keyframes chaosFlash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ── Easter egg: konfetti po pięciu kliknięciach w tytuł ─────────────
+   Reguła `confettiBurst` była wpisana w komponencie, ale brakowało samego
+   `@keyframes` w arkuszu — przeglądarka odrzucała deklarację, więc emoji
+   pojawiały się w górnej krawędzi i tam zostawały. Obrót i dryf jadą
+   zmiennymi, bo `transform` z animacji i tak nadpisuje styl inline. */
+@keyframes confettiBurst {
+  0%   { opacity: 0; transform: translate3d(0, -14vh, 0) rotate(0deg) scale(0.5); }
+  12%  { opacity: 1; }
+  78%  { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--drift, 0px), 106vh, 0) rotate(var(--spin, 360deg)) scale(1); }
+}
+
+.chaos-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-confetti);
+  pointer-events: none;
+  overflow: hidden;   /* dryf nie może wywołać poziomego przewijania */
+  contain: strict;    /* warstwa nie wpływa na layout strony */
+}
+.chaos-piece {
+  position: absolute;
+  top: 0;
+  left: 0;
+  line-height: 1;
+  will-change: transform, opacity;
+}
+/* Wariant dla `prefers-reduced-motion`: statyczna posypka, zero ruchu. */
+.chaos-piece-static { opacity: 0.9; }
+.chaos-flash {
+  position: absolute;
+  inset: 0;
+  animation: chaosFlash 0.6s ease-out forwards;
+  background: radial-gradient(ellipse at 50% 30%, var(--co-tint-hi) 0%, var(--co-tint) 60%, transparent 80%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .chaos-flash { display: none; }
+}
 @keyframes headerBounce {
   0%,100% { transform: translateY(0); }
   20%     { transform: translateY(-6px); }
@@ -1218,40 +1257,6 @@ body.has-push-banner .pwa-banner { display: none; }
    2px to minimum z WCAG 2.4.13; kolor bierzemy z tokenu, żeby w trybie jasnym
    pierścień był stonowaną zielenią morską, a nie elektrycznym cyanem. */
 *:focus-visible { outline: 2px solid var(--co-cyan); outline-offset: 2px; }
-/* ── Skip link ──
-   Pierwszy element w DOM: Tab trafia tu przed nagłówkiem, pięcioma zakładkami
-   i numerem BLIK. Poza fokusem schowany nad krawędzią ekranu transformacją,
-   nie `display: none` — element musi dać się sfokusować klawiaturą. */
-.skip-link {
-  position: fixed;
-  top: calc(8px + env(safe-area-inset-top, 0px));
-  left: 8px;
-  z-index: var(--z-boot);
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 10px 18px;
-  font-family: var(--font-display);
-  font-size: 0.875rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  background: var(--co-cyan);
-  color: var(--co-on-accent);
-  clip-path: var(--clip-tag);
-  transform: translateY(calc(-100% - 24px));
-  transition: transform 0.15s ease;
-  touch-action: manipulation;
-}
-.skip-link:focus-visible {
-  transform: translateY(0);
-  outline: 2px solid var(--co-void);
-  outline-offset: 3px;
-}
-/* Cel skip linku nie jest kontrolką — obrys całej strony po Tabie byłby
-   wizualnym hałasem. Pozycję komunikuje tytuł strony i region `aria-live`. */
-#main-content:focus { outline: none; }
-
 
 /* Outline jest obcinany przez clip-path. Drop-shadow śledzi widoczny kształt,
    więc działa na przyciskach, polach i wierszach filtra z ciętymi narożnikami. */

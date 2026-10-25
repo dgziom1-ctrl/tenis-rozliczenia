@@ -1,7 +1,16 @@
 /**
- * Fails when `src/index.css` declares a class or @keyframes that nothing references.
- * Selectors composed at runtime (e.g. `card-stagger-${n}`) never appear literally in
- * the source, so they must be listed in DYNAMIC_CLASSES to stay whitelisted.
+ * Pilnuje dwóch stron kontraktu CSS ↔ komponenty:
+ *
+ *  1. `src/index.css` nie deklaruje klasy ani `@keyframes`, których nikt nie używa,
+ *  2. komponent nie podaje w `animation:` nazwy, której nie ma w arkuszu.
+ *
+ * Punkt 2 powstał po usterce easter egga: `Header` ustawiał
+ * `animation: confettiBurst …`, ale reguły `@keyframes confettiBurst` nigdy nie
+ * dopisano do arkusza. TypeScript tego nie widzi, a przeglądarka po cichu
+ * odrzuca całą deklarację — konfetti pojawiało się i stało w miejscu.
+ *
+ * Selektory składane w czasie działania (np. `card-stagger-${n}`) nigdy nie
+ * występują w źródle dosłownie, więc są w DYNAMIC_CLASSES.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -43,11 +52,38 @@ const unusedKeyframes = [...keyframes]
   .filter((k) => !cssBody.includes(k) && !source.includes(k))
   .sort();
 
-if (unusedClasses.length === 0 && unusedKeyframes.length === 0) {
-  console.log(`${CSS_FILE}: no dead classes or keyframes.`);
+// ── Nazwy animacji podawane z komponentów ──────────────────────────
+// Bierzemy wyłącznie literały z linii, w których ustawiane jest `animation:`
+// (także warianty warunkowe: `animation: x > 0 ? 'nazwa 3s …' : 'none'`).
+// Wartość liczy się jako nazwa, gdy po niej następuje czas (`3s`, `0.4s`).
+const ANIMATION_KEYWORDS = new Set(['none', 'inherit', 'initial', 'unset', 'revert', 'var']);
+const missingKeyframes = [];
+
+for (const file of sourceFiles) {
+  const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
+  lines.forEach((line, index) => {
+    const at = line.indexOf('animation:');
+    if (at === -1) return;
+    for (const match of line.slice(at).matchAll(/(['"`])([^'"`]*)\1/g)) {
+      const value = match[2].trim();
+      // Po nazwie musi przyjść czas — albo wpisany wprost (`3s`), albo wstawiony
+      // z JS (`${piece.dur}s`). Sam wyraz bez czasu to zwykły tekst, nie animacja.
+      const name = value.match(/^([a-zA-Z][\w-]*)\s+(?:[\d.]|\$\{)/);
+      if (!name) continue;
+      const animationName = name[1];
+      if (ANIMATION_KEYWORDS.has(animationName)) continue;
+      if (keyframes.has(animationName)) continue;
+      missingKeyframes.push(`${file}:${index + 1} — animation „${animationName}” nie ma @keyframes w ${CSS_FILE}`);
+    }
+  });
+}
+
+if (unusedClasses.length === 0 && unusedKeyframes.length === 0 && missingKeyframes.length === 0) {
+  console.log(`${CSS_FILE}: no dead classes or keyframes, every inline animation is defined.`);
   process.exit(0);
 }
 
 if (unusedClasses.length > 0) console.error('Unused classes:\n  ' + unusedClasses.join('\n  '));
 if (unusedKeyframes.length > 0) console.error('Unused keyframes:\n  ' + unusedKeyframes.join('\n  '));
+if (missingKeyframes.length > 0) console.error('Missing keyframes:\n  ' + missingKeyframes.join('\n  '));
 process.exit(1);
