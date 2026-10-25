@@ -376,7 +376,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
             {/* Etykieta filtra */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'var(--co-tint)', border: '1px solid var(--co-tint-hi)', clipPath: CLIP.badge, flexShrink: 0 }}>
               <Search size={11} style={{ color: 'var(--co-dim)' }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>FILTR</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: 'normal' }}>Filtr</span>
             </div>
 
             {isMobile ? (
@@ -386,7 +386,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: '0.8125rem',
-                    letterSpacing: '0.1em',
+                    letterSpacing: 'normal',
                     padding: '6px 10px',
                     cursor: 'pointer',
                     border: '1px solid',
@@ -398,7 +398,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                     flexShrink: 0,
                   }}
                 >
-                  {filterPlayer || 'WSZYSCY'}
+                  {filterPlayer || 'Wszyscy'}
                 </button>
 
                 {filterPlayer && (
@@ -414,7 +414,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: '0.8125rem',
-                    letterSpacing: '0.1em',
+                    letterSpacing: 'normal',
                     padding: '4px 10px',
                     cursor: 'pointer',
                     border: '1px solid',
@@ -425,7 +425,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                     transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                   }}
                 >
-                  WSZYSCY
+                  Wszyscy
                 </button>
                 {playerNames.map(name => (
                   <button
@@ -434,7 +434,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                     style={{
                       fontFamily: 'var(--font-display)',
                       fontSize: '0.8125rem',
-                      letterSpacing: '0.1em',
+                      letterSpacing: 'normal',
                       padding: '4px 10px',
                       cursor: 'pointer',
                       border: '1px solid',
@@ -463,9 +463,9 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 na początku linii. Akcje mają teraz osobną, nierozdzielną grupę. */}
             {/* Filtr po sporcie */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <button onClick={() => setFilterSport('')} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.1em', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: !filterSport ? 'var(--co-cyan)' : 'var(--co-border)', color: !filterSport ? 'var(--co-cyan)' : 'var(--co-dim)', background: !filterSport ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>WSZYSTKIE SPORTY</button>
+              <button onClick={() => setFilterSport('')} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: !filterSport ? 'var(--co-cyan)' : 'var(--co-border)', color: !filterSport ? 'var(--co-cyan)' : 'var(--co-dim)', background: !filterSport ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>Wszystkie sporty</button>
               {Object.entries(SPORT_LABEL).map(([key, label]) => (
-                <button key={key} onClick={() => setFilterSport(prev => prev === key ? '' : key)} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.1em', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: filterSport === key ? 'var(--co-cyan)' : 'var(--co-border)', color: filterSport === key ? 'var(--co-cyan)' : 'var(--co-dim)', background: filterSport === key ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>{label.toUpperCase()}</button>
+                <button key={key} onClick={() => setFilterSport(prev => prev === key ? '' : key)} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: filterSport === key ? 'var(--co-cyan)' : 'var(--co-border)', color: filterSport === key ? 'var(--co-cyan)' : 'var(--co-dim)', background: filterSport === key ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>{label}</button>
               ))}
             </div>
 
@@ -487,12 +487,12 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
                 clipPath: CLIP.badge,
-                fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em',
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: 'normal',
                 flexShrink: 0,
               }}
             >
               <ArrowUpDown size={12} aria-hidden="true" />
-              {sortOrder === 'desc' ? 'NOWE' : 'STARE'}
+              {sortOrder === 'desc' ? 'Nowe' : 'Stare'}
             </button>
 
             {/* CSV */}
@@ -507,7 +507,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
                 clipPath: CLIP.badge,
-                fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.1em',
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: 'normal',
                 flexShrink: 0,
               }}
             >
@@ -544,8 +544,8 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         {history.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
             <CalendarDays style={{ margin: '0 auto 16px', color: 'var(--co-dim)' }} size={40} />
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.18em', color: 'var(--co-dim)', textTransform: 'uppercase' }}>
-              BRAK DANYCH
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', color: 'var(--co-dim)', textTransform: 'none' }}>
+              Brak danych
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', marginTop: 8 }}>
               {'>'} Dodaj pierwszą sesję w zakładce DODAJ_
@@ -568,10 +568,10 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
               {/* Month header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: CLIP.tag }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-cyan)' }}>{label}</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-cyan)' }}>{label}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>[{rows.length}x]</span>
                 </div>
-                <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, var(--co-tint-line), transparent)' }} />
+                <div style={{ flex: 1, height: 1, background: 'var(--co-border)' }} />
               </div>
 
               {/* Log entries */}

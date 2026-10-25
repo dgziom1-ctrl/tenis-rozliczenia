@@ -64,7 +64,7 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
 
   return (
     <div style={PANEL.cyberCut}>
-      <SectionHeader icon={TrendingUp} title="HISTORIA RANKINGU" sub="pozycja graczy w czasie" />
+      <SectionHeader icon={TrendingUp} title="Historia rankingu" sub="pozycja graczy w czasie" />
       {/* Legend */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
         {playerNames.map((name, i) => {

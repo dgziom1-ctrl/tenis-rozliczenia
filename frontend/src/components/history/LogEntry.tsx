@@ -18,10 +18,10 @@ interface LogEntryProps {
 const labelStyle = {
   fontFamily: 'var(--font-display)',
   fontSize: '0.75rem',
-  letterSpacing: '0.18em',
+  letterSpacing: 'normal',
   color: 'var(--co-dim)',
   marginBottom: 4,
-  textTransform: 'uppercase',
+  textTransform: 'none',
 } as const;
 
 export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {

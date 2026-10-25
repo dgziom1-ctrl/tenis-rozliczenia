@@ -10,11 +10,11 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  { id: 'dashboard',  icon: LayoutDashboard, label: 'Start',    shortLabel: 'START'   },
-  { id: 'attendance', icon: Trophy,           label: 'Ranking',  shortLabel: 'RANKING' },
-  { id: 'admin',      icon: PlusCircle,       label: 'Dodaj',    shortLabel: 'DODAJ'   },
-  { id: 'history',    icon: History,          label: 'Historia', shortLabel: 'HISTORIA'},
-  { id: 'players',    icon: Users,            label: 'Gracze',   shortLabel: 'GRACZE'  },
+  { id: 'dashboard',  icon: LayoutDashboard, label: 'Start',    shortLabel: 'Start'   },
+  { id: 'attendance', icon: Trophy,           label: 'Ranking',  shortLabel: 'Ranking' },
+  { id: 'admin',      icon: PlusCircle,       label: 'Dodaj',    shortLabel: 'Dodaj'   },
+  { id: 'history',    icon: History,          label: 'Historia', shortLabel: 'Historia'},
+  { id: 'players',    icon: Users,            label: 'Gracze',   shortLabel: 'Gracze'  },
 ];
 
 interface NavigationProps {
@@ -35,7 +35,7 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
               className={`desktop-tab glass-hover-lift ${activeTab === tab.id ? 'active' : ''}`}
             >
               <tab.icon size={13} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
-              {tab.label.toUpperCase()}
+              {tab.label}
             </button>
           ))}
         </div>

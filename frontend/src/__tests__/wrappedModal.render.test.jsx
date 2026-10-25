@@ -10,7 +10,7 @@ describe('WrappedModal render', () => {
     expect(overlay).toBeTruthy();
     expect(bare).toBeTruthy();
     expect(document.body.textContent).toContain('2025');
-    expect(document.body.textContent).toContain('PODSUMOWANIE ROKU');
+    expect(document.body.textContent).toMatch(/podsumowanie roku/i);
 
     const slideWrap = bare?.querySelector('[style*="wm-fadeScale"]') ?? bare?.children[2];
     const styles = slideWrap instanceof HTMLElement ? getComputedStyle(slideWrap) : null;

@@ -11,7 +11,7 @@ export interface UndoBarProps {
   compact?: boolean;
 }
 
-export default function UndoBar({ message, secondsLeft, progressPct, onUndo, buttonLabel = 'COFNIJ', compact = false }: UndoBarProps) {
+export default function UndoBar({ message, secondsLeft, progressPct, onUndo, buttonLabel = 'Cofnij', compact = false }: UndoBarProps) {
   return (
     // aria-atomic="false" + ukryty licznik: bez tego czytnik ekranu czytałby
     // cały pasek od nowa co sekundę, przy każdym tyknięciu odliczania.

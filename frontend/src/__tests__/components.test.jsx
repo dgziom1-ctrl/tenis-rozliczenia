@@ -68,13 +68,13 @@ describe('App — smoke test', () => {
   it('pokazuje ekran ładowania na starcie (zanim Firebase odpowie)', () => {
     render(<App />);
     // Tekst na ekranie ładowania
-    expect(screen.getByText('CYBER-PONK')).toBeInTheDocument();
+    expect(screen.getByText(/cyber-ponk/i)).toBeInTheDocument();
   });
 
   it('nie pokazuje zakładek dopóki dane nie są gotowe', () => {
     render(<App />);
     // Nawigacja pojawia się dopiero po załadowaniu danych
-    expect(screen.queryByText('START')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^start$/i)).not.toBeInTheDocument();
   });
 });
 
@@ -143,11 +143,11 @@ describe('Navigation — renderowanie zakładek', () => {
     render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={vi.fn()} />);
     // Komponent renderuje dwie nawigacje (desktop + mobile) — obie zawierają te same
     // etykiety, więc getAllByText zamiast getByText (które rzuciłoby "multiple elements").
-    expect(screen.getAllByText('START').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('RANKING').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('DODAJ').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('HISTORIA').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('GRACZE').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^start$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^ranking$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^dodaj$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^historia$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^gracze$/i).length).toBeGreaterThan(0);
   });
 
   it('wywołuje setActiveTab po kliknięciu zakładki', async () => {
@@ -156,7 +156,7 @@ describe('Navigation — renderowanie zakładek', () => {
 
     render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={setTab} />);
     // Klikamy pierwszy znaleziony przycisk z tym tekstem (desktop nav)
-    await user.click(screen.getAllByText('HISTORIA')[0]);
+    await user.click(screen.getAllByText(/^historia$/i)[0]);
     expect(setTab).toHaveBeenCalledWith(TABS.HISTORY);
   });
 
@@ -166,10 +166,10 @@ describe('Navigation — renderowanie zakładek', () => {
     render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={setTab} />);
 
     for (const [label, tabId] of [
-      ['RANKING',  TABS.ATTENDANCE],
-      ['DODAJ',    TABS.ADMIN],
-      ['HISTORIA', TABS.HISTORY],
-      ['GRACZE',   TABS.PLAYERS],
+      [/^ranking$/i,  TABS.ATTENDANCE],
+      [/^dodaj$/i,    TABS.ADMIN],
+      [/^historia$/i, TABS.HISTORY],
+      [/^gracze$/i,   TABS.PLAYERS],
     ]) {
       await user.click(screen.getAllByText(label)[0]);
       expect(setTab).toHaveBeenLastCalledWith(tabId);
@@ -528,7 +528,7 @@ describe('EditSessionForm — pełna edycja', () => {
     const user = userEvent.setup();
     render(<EditSessionFormHarness initial={baseForm} />);
 
-    expect(screen.getByText(/WYPOŻYCZONE RAKIETY/)).toBeInTheDocument();
+    expect(screen.getByText(/wypożyczone rakiety/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Cena/)).toHaveValue(5);
     expect(screen.getByText(/2 × 5,00 zł = 10,00 zł/)).toBeInTheDocument();
 

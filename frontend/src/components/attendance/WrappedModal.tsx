@@ -34,9 +34,9 @@ function useCountUp(target: number, duration = 1200, active = false) {
 
 // ─── Month short → full name map (PL) ───────────────────────────
 const MONTH_FULL: Record<string, string> = {
-  STY: 'STYCZEŃ', LUT: 'LUTY', MAR: 'MARZEC', KWI: 'KWIECIEŃ',
-  MAJ: 'MAJ', CZE: 'CZERWIEC', LIP: 'LIPIEC', SIE: 'SIERPIEŃ',
-  WRZ: 'WRZESIEŃ', PAŹ: 'PAŹDZIERNIK', LIS: 'LISTOPAD', GRU: 'GRUDZIEŃ',
+  STY: 'Styczeń', LUT: 'Luty', MAR: 'Marzec', KWI: 'Kwiecień',
+  MAJ: 'MAJ', CZE: 'Czerwiec', LIP: 'Lipiec', SIE: 'Sierpień',
+  WRZ: 'Wrzesień', PAŹ: 'Październik', LIS: 'Listopad', GRU: 'Grudzień',
 };
 
 // ─── Shared inline-style helpers ─────────────────────────────────
@@ -120,11 +120,11 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               {stats.year}
             </div>
             <div style={{
-              ...display('clamp(1.2rem, 4vw, 2rem)', { letterSpacing: '0.18em' }),
+              ...display('clamp(1.2rem, 4vw, 2rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-text-hi)',
               marginBottom: 40,
             }}>
-              {stats.year === new Date().getFullYear() ? 'SEZON NA ŻYWO' : 'PODSUMOWANIE ROKU'}
+              {stats.year === new Date().getFullYear() ? 'Sezon na żywo' : 'Podsumowanie roku'}
             </div>
             <div style={{
               ...mono('clamp(0.6rem, 2vw, 0.8rem)'),
@@ -141,10 +141,10 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
         return (
           <div style={{ textAlign: 'center', maxWidth: 500, width: '100%' }}>
             <div style={{
-              ...mono('clamp(0.6rem, 2vw, 0.85rem)', { letterSpacing: '0.18em' }),
+              ...mono('clamp(0.6rem, 2vw, 0.85rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-dim)', marginBottom: 12,
             }}>
-              RAZEM ZAGRALIŚMY
+              Razem zagraliśmy
             </div>
             <div style={{
               ...display('clamp(4rem, 14vw, 8rem)'),
@@ -154,7 +154,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               {cSessions}
             </div>
             <div style={{
-              ...display('clamp(1rem, 3.5vw, 1.6rem)', { letterSpacing: '0.1em' }),
+              ...display('clamp(1rem, 3.5vw, 1.6rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-text-hi)', marginBottom: 32,
             }}>
               SESJI W {stats.year} ROKU
@@ -167,7 +167,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                   <SportGlyph sport="pingpong" size={30} />
                 </div>
                 <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-cyan)' }}>{cPP}</div>
-                <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PING PONG</div>
+                <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Ping pong</div>
               </div>
               {stats.squashSessions > 0 && (
                 <div style={{ textAlign: 'center' }}>
@@ -175,7 +175,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                     <SportGlyph sport="squash" size={30} />
                   </div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-green)' }}>{cSQ}</div>
-                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>SQUASH</div>
+                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Squash</div>
                 </div>
               )}
               {stats.badmintonSessions > 0 && (
@@ -184,7 +184,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                     <SportGlyph sport="badminton" size={30} />
                   </div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-pink)' }}>{cBM}</div>
-                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>BADMINTON</div>
+                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Badminton</div>
                 </div>
               )}
               {stats.padelSessions > 0 && (
@@ -193,7 +193,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                     <SportGlyph sport="padel" size={30} />
                   </div>
                   <div style={{ ...display('clamp(1.2rem, 4vw, 2rem)'), color: 'var(--co-amber)' }}>{cPD}</div>
-                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em' }}>PADEL</div>
+                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Padel</div>
                 </div>
               )}
             </div>
@@ -211,10 +211,10 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
           <div style={{ textAlign: 'center', maxWidth: 480, width: '100%' }}>
             {/* Busiest month */}
             <div style={{
-              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
+              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-dim)', marginBottom: 14,
             }}>
-              NAJAKTYWNIEJSZY MIESIĄC
+              Najaktywniejszy miesiąc
             </div>
             <div style={{
               ...display('clamp(1.8rem, 7vw, 3.5rem)'),
@@ -225,7 +225,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               {(stats.busiestMonthName && MONTH_FULL[stats.busiestMonthName]) || stats.busiestMonthName}
             </div>
             <div style={{
-              ...display('clamp(1.2rem, 4vw, 2rem)', { letterSpacing: '0.1em' }),
+              ...display('clamp(1.2rem, 4vw, 2rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-text-hi)',
             }}>
               {cBusiest} SESJI
@@ -238,10 +238,10 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
         return (
           <div style={{ textAlign: 'center', maxWidth: 460, width: '100%' }}>
             <div style={{
-              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
+              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-dim)', marginBottom: 28,
             }}>
-              NAJLEPSZA PARA
+              Najlepsza para
             </div>
 
             <div style={{
@@ -293,7 +293,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
         return (
           <div style={{ textAlign: 'center', maxWidth: 500, width: '100%' }}>
             <div style={{
-              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
+              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-dim)', marginBottom: 24,
             }}>
               RANKING {stats.year}
@@ -372,7 +372,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
         return (
           <div style={{ textAlign: 'center', maxWidth: 460, width: '100%' }}>
             <div style={{
-              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: '0.18em' }),
+              ...mono('clamp(0.65rem, 1.8vw, 0.75rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-dim)', marginBottom: 8,
             }}>
               MISTRZ ROKU {stats.year}
@@ -397,9 +397,9 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               gap: 10, marginBottom: 28,
             }}>
               {[
-                { label: 'SESJE', value: `${ch.attended}`, color: 'var(--co-cyan)' },
-                { label: 'FREKWENCJA', value: `${ch.percentage}%`, color: 'var(--co-green)' },
-                { label: 'NAJDŁUŻSZA SERIA', value: `${ch.longestStreak}`, color: 'var(--co-pink)' },
+                { label: 'Sesje', value: `${ch.attended}`, color: 'var(--co-cyan)' },
+                { label: 'Frekwencja', value: `${ch.percentage}%`, color: 'var(--co-green)' },
+                { label: 'Najdłuższa seria', value: `${ch.longestStreak}`, color: 'var(--co-pink)' },
               ].map(s => (
                 <div key={s.label} style={{
                   padding: 'clamp(8px, 2vw, 14px)',
@@ -410,7 +410,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                   <div style={{ ...display('clamp(1rem, 3.5vw, 1.6rem)'), color: s.color }}>
                     {s.value}
                   </div>
-                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: '0.1em', marginTop: 4 }}>
+                  <div style={{ ...mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal', marginTop: 4 }}>
                     {s.label}
                   </div>
                 </div>
@@ -424,7 +424,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               className="cyber-button-outline"
               style={{ padding: 'clamp(12px, 2.5vw, 16px) clamp(28px, 8vw, 56px)', minHeight: 44 }}
             >
-              ZAMKNIJ
+              Zamknij
             </button>
           </div>
         );
@@ -460,7 +460,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
       {/* Scan-line overlay */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
-        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, var(--co-tint) 2px, var(--co-tint) 4px)',
+        backgroundImage: 'none',
       }} />
 
       {/* Corner decorations — wspólny komponent zamiast 20-linijkowej kopii */}

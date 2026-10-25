@@ -134,7 +134,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
               className="cyber-button-yellow"
               style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', whiteSpace: 'nowrap', flexShrink: 0, opacity: isAddingPlayer ? 0.7 : 1, cursor: isAddingPlayer ? 'not-allowed' : 'pointer' }}
             >
-              {isAddingPlayer ? <InlineSpinner size="sm" /> : <UserPlus size={14} />} {isAddingPlayer ? 'DODAJĘ...' : 'DODAJ'}
+              {isAddingPlayer ? <InlineSpinner size="sm" /> : <UserPlus size={14} />} {isAddingPlayer ? 'Dodaję...' : 'Dodaj'}
             </button>
           </form>
         </div>
@@ -142,7 +142,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {/* Player list */}
         {players && players.length > 0 && (
           <div style={{ marginBottom: 28 }}>
-            <SectionHeader icon={Cpu} title="AKTYWNI GRACZE" />
+            <SectionHeader icon={Cpu} title="Aktywni gracze" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 8 }}>
               {[...players]
                 .sort((a, b) => {
@@ -180,7 +180,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                     style={{
                       padding: '10px 14px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                       display: 'flex', alignItems: 'center', gap: 8,
-                      fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase',
+                      fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none',
                       clipPath: CLIP.badge,
                       ...(active ? {
                         background: 'var(--co-tint)', border: '1px solid var(--co-tint-line)', color: 'var(--co-green)',
@@ -210,8 +210,8 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                       padding: '14px', background: 'var(--co-tint-rose)', border: '1px solid var(--co-rose)',
                       clipPath: CLIP.smallCard,
                     }}>
-                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.1em', color: 'var(--co-rose)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'uppercase' }}>
-                        <AlertTriangle size={12} /> USUNĄĆ NA ZAWSZE?
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: 'normal', color: 'var(--co-rose)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'none' }}>
+                        <AlertTriangle size={12} /> Usunąć na zawsze?
                       </p>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-text)', marginBottom: 12 }}>{name}</p>
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -220,10 +220,10 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                         <button onClick={() => void handlePermanentDelete(name)} disabled={processingPlayer === name}
                           className="cyber-button-danger"
                           style={{ flex: 1, minHeight: 44, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {processingPlayer === name ? <InlineSpinner size="sm" /> : 'POTWIERDŹ'}
+                          {processingPlayer === name ? <InlineSpinner size="sm" /> : 'Potwierdź'}
                         </button>
                         <button onClick={() => setConfirmDelete(null)} disabled={processingPlayer === name} className="cyber-button-outline" style={{ flex: 1, minHeight: 44, padding: '10px' }}>
-                          ANULUJ
+                          Anuluj
                         </button>
                       </div>
                     </div>

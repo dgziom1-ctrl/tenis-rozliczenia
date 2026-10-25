@@ -53,7 +53,7 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <Zap size={12} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} />
-        <p id={titleId} style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', textTransform: 'uppercase', margin: 0 }}>
+        <p id={titleId} style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: 'normal', color: 'var(--co-cyan)', textTransform: 'none', margin: 0 }}>
           {hasCredit ? 'Ile chcesz dopłacić?' : 'Zapisz wpłatę'}
         </p>
       </div>
@@ -85,13 +85,13 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
       />
 
       {showError && (
-        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
+        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ {customAmt !== '' && parsedAmt > 0 && parsedAmt < 0.01 ? 'Minimalna kwota to 0.01 zł' : 'KWOTA MUSI BYĆ WIĘKSZA OD 0'}
         </p>
       )}
 
       {errorMsg && !showError && (
-        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
+        <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
           ⚠ {errorMsg}
         </p>
       )}
@@ -104,7 +104,7 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
           style={{
             flex: 1, padding: '10px',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            fontSize: '0.75rem', letterSpacing: '0.1em',
+            fontSize: '0.75rem', letterSpacing: 'normal',
             ...(!isValid || isSaving ? {
               background: 'var(--co-panel)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
               cursor: 'not-allowed', fontFamily: 'var(--font-display)', 
@@ -119,7 +119,7 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
           className="cyber-button-outline"
           style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: isSaving ? 0.65 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}
         >
-          <X size={13} /> ANULUJ
+          <X size={13} /> Anuluj
         </button>
       </div>
     </div>

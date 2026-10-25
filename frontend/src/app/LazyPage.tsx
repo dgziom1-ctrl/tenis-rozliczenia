@@ -73,7 +73,7 @@ class RouteErrorBoundary extends Component<RouteErrorProps, RouteErrorState> {
         <p role="status" style={{
           padding: '24px 20px', textAlign: 'center', margin: 0,
           fontFamily: 'var(--font-mono)', fontSize: '0.8125rem',
-          letterSpacing: '0.1em', color: 'var(--co-dim)',
+          letterSpacing: 'normal', color: 'var(--co-dim)',
         }}>
           Naprawiam i przeładowuję...
         </p>
@@ -89,14 +89,14 @@ class RouteErrorBoundary extends Component<RouteErrorProps, RouteErrorState> {
         clipPath: CLIP.card,
       }}>
         <p style={{
-          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.1em',
-          textTransform: 'uppercase', color: 'var(--co-rose)', fontSize: '1rem',
+          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: 'normal',
+          textTransform: 'none', color: 'var(--co-rose)', fontSize: '1rem',
         }}>
           Nie udało się otworzyć tej zakładki
         </p>
         <p style={{
           margin: '6px 0 16px', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
-          color: 'var(--co-dim)', letterSpacing: '0.06em', lineHeight: 1.6,
+          color: 'var(--co-dim)', letterSpacing: 'normal', lineHeight: 1.6,
         }}>
           {offline
             ? 'Brak połączenia — tej zakładki nie ma jeszcze w pamięci offline.'

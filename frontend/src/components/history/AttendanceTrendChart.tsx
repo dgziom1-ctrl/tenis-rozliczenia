@@ -74,7 +74,7 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
             ].map(({ color, label }) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <div aria-hidden="true" style={{ width: 20, height: 2, background: color }} />
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: '0.1em' }}>{label}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: 'normal' }}>{label}</span>
               </div>
             ))}
           </div>
@@ -181,7 +181,7 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
         ].map(({ label, value, color }) => (
           <div key={label} style={{ flex: 1, padding: '8px 10px', background: 'var(--co-panel)', textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color, margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-sm)' }}>{value}</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: 'normal', textTransform: 'none' }}>{label}</p>
           </div>
         ))}
       </div>

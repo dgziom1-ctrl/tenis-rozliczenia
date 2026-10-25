@@ -29,13 +29,13 @@ interface EditSessionFormProps {
 const sectionLabel = {
   fontFamily: 'var(--font-display)',
   fontSize: '0.875rem',
-  letterSpacing: '0.18em',
+  letterSpacing: 'normal',
   color: 'var(--co-dim)',
   marginBottom: 8,
   display: 'flex',
   alignItems: 'center',
   gap: 4,
-  textTransform: 'uppercase',
+  textTransform: 'none',
 } as const;
 
 export default function EditSessionForm({
@@ -142,17 +142,17 @@ export default function EditSessionForm({
     }}>
       {/* Sport */}
       <div>
-        <span style={sectionLabel}>SPORT</span>
+        <span style={sectionLabel}>Sport</span>
         <SportSelector value={editForm.sport} onChange={handleSportChange} />
       </div>
 
       <div className="field-pair">
         <div>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>DATA</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'none' }}>Data</span>
           <CyberDateInput compact label="Data sesji" value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
         </div>
         <div>
-          <label htmlFor={costId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'uppercase' }}>
+          <label htmlFor={costId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'none' }}>
             Koszt kortu
           </label>
           <input id={costId} type="text" inputMode="decimal" value={editForm.cost}
@@ -163,7 +163,7 @@ export default function EditSessionForm({
             style={{ width: '100%', padding: '10px 12px', clipPath: CLIP.tag }}
           />
           {!isEditCostValid ? (
-            <p id={costErrorId} role="alert" style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-rose)' }}>
+            <p id={costErrorId} role="alert" style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-rose)' }}>
               ⚠ {editCostError}
             </p>
           ) : (
@@ -240,10 +240,10 @@ export default function EditSessionForm({
 
       {/* Obecni */}
       <div>
-        <p style={sectionLabel}><Users size={11} /> OBECNI</p>
+        <p style={sectionLabel}><Users size={11} /> Obecni</p>
         <PlayerToggleGrid names={playerNames} selected={present} onToggle={onTogglePresent} accent="yellow" />
         {!isPresentValid && (
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
             ⚠ Wybierz przynajmniej jednego gracza
           </p>
         )}
@@ -268,7 +268,7 @@ export default function EditSessionForm({
       {withRackets && isPresentValid && (
         <div>
           <p style={{ ...sectionLabel, color: 'var(--co-amber)' }}>
-            <Hand size={11} /> WŁASNA RAKIETKA
+            <Hand size={11} /> Własna rakietka
           </p>
           <PlayerToggleGrid names={present} selected={ownRacketPlayers} onToggle={toggleOwnRacket} accent="amber" />
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
@@ -281,7 +281,7 @@ export default function EditSessionForm({
       {withRackets && (
         <div>
           <p style={sectionLabel}>
-            <Hand size={11} /> WYPOŻYCZONE RAKIETY
+            <Hand size={11} /> Wypożyczone rakiety
           </p>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
@@ -345,7 +345,7 @@ export default function EditSessionForm({
 
       {previewGroups.length > 0 && (
         <div style={{ padding: '10px 12px', background: 'var(--co-tint)', border: '1px solid var(--co-tint-line)', clipPath: CLIP.tag }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'none' }}>
             Po zmianie na osobę
           </p>
           <ShareBreakdown groups={previewGroups} sport={editForm.sport} size="sm" />
@@ -361,7 +361,7 @@ export default function EditSessionForm({
         <button onClick={onCancel} disabled={isSaving}
           aria-label="Anuluj edycję"
           className="cyber-button-outline" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <X size={14} aria-hidden="true" /> ANULUJ
+          <X size={14} aria-hidden="true" /> Anuluj
         </button>
       </div>
     </div>

@@ -95,8 +95,8 @@ export default function PWAInstallBanner() {
             <BrandMark size={26} />
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
-              DODAJ DO EKRANU GŁÓWNEGO
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: 'normal', color: 'var(--co-cyan)', margin: 0, textTransform: 'none' }}>
+              Dodaj do ekranu głównego
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
               Otwieraj jak natywna aplikacja
@@ -109,7 +109,7 @@ export default function PWAInstallBanner() {
             minHeight: 44, padding: '10px 14px',
             whiteSpace: 'nowrap',
           }}>
-            <Download size={13} aria-hidden="true" /> DODAJ
+            <Download size={13} aria-hidden="true" /> Dodaj
           </button>
           <button onClick={dismiss} aria-label="Zamknij" className="icon-btn" style={{
             background: 'transparent', border: 'none', color: 'var(--co-dim)', cursor: 'pointer',
@@ -136,8 +136,8 @@ export default function PWAInstallBanner() {
           <BrandMark size={22} />
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: '0.18em', color: 'var(--co-cyan)', margin: 0, textTransform: 'uppercase' }}>
-            DODAJ DO EKRANU GŁÓWNEGO
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: 'normal', color: 'var(--co-cyan)', margin: 0, textTransform: 'none' }}>
+            Dodaj do ekranu głównego
           </p>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
             Działa jak natywna aplikacja
@@ -160,7 +160,7 @@ export default function PWAInstallBanner() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'var(--co-tint)',
             }}>
-              <span style={{ fontFamily: 'var(--font-display)', color: 'var(--co-cyan)', fontSize: '0.875rem', letterSpacing: '0.06em' }}>{step.n}</span>
+              <span style={{ fontFamily: 'var(--font-display)', color: 'var(--co-cyan)', fontSize: '0.875rem', letterSpacing: 'normal' }}>{step.n}</span>
             </div>
             <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.4 }}>{step.content}</p>
           </div>

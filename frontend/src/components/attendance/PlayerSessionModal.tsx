@@ -88,7 +88,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
           <PlayerAvatar name={player.name} size={44} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <p id={titleId} style={{ ...FONT.display(TEXT.h3, TRACK.tight), color: 'var(--co-text-hi)', margin: 0, lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {player.name.toUpperCase()}
+              {player.name}
             </p>
             <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: TRACK.normal }}>
               {scopeLabel} · {player.attendanceCount}/{player.eligibleWeeks} sesji · {player.attendancePercentage}% frekwencja
@@ -160,7 +160,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
                 <div style={{
                   height: '100%', width: '100%', borderRadius: 2,
                   background: nextRank
-                    ? `linear-gradient(90deg, ${currentRank.hex}, ${nextRank.hex})`
+                    ? 'var(--co-cyan)'
                     : currentRank.hex,
                   boxShadow: 'var(--glow-box-cyan)',
                   /* `scaleX` zamiast `width`: wypełnienie paska rangi nie

@@ -286,8 +286,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
               <FieldLabel>Data gry</FieldLabel>
               <CyberDateInput label="Data gry" value={datePlayed} onChange={setDatePlayed} />
               {isDuplicateDate && (
-                <p role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.18em', color: 'var(--co-amber)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  ⚠ SESJA Z TĄ DATĄ JUŻ ISTNIEJE
+                <p role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-amber)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  ⚠ Sesja z tą datą już istnieje
                 </p>
               )}
             </div>
@@ -308,7 +308,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                 required
               />
               {costTouched && !isCostValid && (
-                <p id={totalCostErrorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 8 }}>
+                <p id={totalCostErrorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-rose)', marginTop: 8 }}>
                   ⚠ {totalCostError}
                 </p>
               )}
@@ -327,7 +327,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                 </p>
               )}
               {!isPresentValid && (
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
                   ⚠ Wybierz przynajmniej jednego gracza
                 </p>
               )}
@@ -449,7 +449,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                 style={{
                   width: '100%', padding: '14px 20px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  fontSize: '0.8125rem', letterSpacing: '0.1em',
+                  fontSize: '0.8125rem', letterSpacing: 'normal',
                   cursor: isDisabled ? 'not-allowed' : 'pointer',
                   fontFamily: 'var(--font-display)', 
                   ...(isDisabled ? {
@@ -457,8 +457,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                   } : {}),
                 }}>
                 {isSaving
-                  ? <><InlineSpinner size="sm" /> ZAPISUJĘ...</>
-                  : <><CheckCircle2 size={16} /> ZAPISZ SESJĘ</>}
+                  ? <><InlineSpinner size="sm" /> Zapisuję...</>
+                  : <><CheckCircle2 size={16} /> Zapisz sesję</>}
               </button>
               {!isSaving && isDisabled && (
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', textAlign: 'center', marginTop: 8 }}>

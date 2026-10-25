@@ -48,8 +48,8 @@ export default function FirstRunGuide({ open, onClose }: FirstRunGuideProps) {
           <strong style={{ color: 'var(--co-text)' }}>Kamil (skarbnik)</strong> wykłada za kort. Twoja karta pokazuje, ile masz mu oddać.
         </li>
         <li style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', lineHeight: 1.55 }}>
-          <strong style={{ color: 'var(--co-rose)' }}>ZALEGŁOŚĆ</strong> to kwota do wpłaty.
-          {' '}<strong style={{ color: 'var(--co-green)' }}>ROZLICZONY</strong> znaczy, że wpłata została zapisana w aplikacji — nie że pieniądze już doszły.
+          <strong style={{ color: 'var(--co-rose)' }}>Zaległość</strong> to kwota do wpłaty.
+          {' '}<strong style={{ color: 'var(--co-green)' }}>Rozliczony</strong> znaczy, że wpłata została zapisana w aplikacji — nie że pieniądze już doszły.
         </li>
         <li style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', lineHeight: 1.55 }}>
           <strong style={{ color: 'var(--co-text)' }}>Dodaj</strong> zapisuje sesję, a <strong style={{ color: 'var(--co-text)' }}>Ranking</strong> liczy obecność. W Historii znajdziesz wszystkie wpisy.
