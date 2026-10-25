@@ -150,11 +150,10 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                   if (b.name === ORGANIZER_NAME) return -1;
                   return a.name.localeCompare(b.name, 'pl');
                 })
-                .map((p, i) => (
+                .map(p => (
                   <PlayerProfileCard
                     key={p.name}
                     player={p}
-                    index={i}
                     onDelete={setPwModal}
                     isOrganizer={p.name === ORGANIZER_NAME}
                     disabled={processingPlayer === p.name}

@@ -23,7 +23,7 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
   // Wcześniej ten plik miał własną, prywatną paletę o innych wartościach niż
   // `getPlayerColor`, więc ten sam gracz miał jeden kolor w raporcie
   // miesięcznym i inny na wykresie obok, na tym samym ekranie.
-  const colorAt = (i: number) => getPlayerColor(playerNames[i] ?? '', i).border;
+  const colorAt = (i: number) => getPlayerColor(playerNames[i] ?? '').border;
 
   // Wykres skaluje się do szerokości kontenera (viewBox 1:1), więc etykiety
   // nie kurczą się do 7 px na telefonie. Niższe PAD-y zostawiają miejsce na

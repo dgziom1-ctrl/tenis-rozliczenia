@@ -22,14 +22,12 @@ const PLAYER_COLOR_PALETTE: PlayerColor[] = [
   { bg: '#D9770618', border: '#D97706', text: '#D97706' }, // pomarańcz 3,2:1 / 6,4:1
 ];
 
-/** Ile kolorów ma paleta — do rozdzielania serii na wykresach. */
+/** Liczba kolorów dostępnych dla tożsamości graczy. */
 export const PLAYER_COLOR_COUNT = PLAYER_COLOR_PALETTE.length;
 
-export function getPlayerColor(name: string, sortedIndex?: number): PlayerColor {
+/** Stable by player name: sorting, ranking, or adding a teammate won't change identity colors. */
+export function getPlayerColor(name: string): PlayerColor {
   const palette = PLAYER_COLOR_PALETTE;
-  if (sortedIndex !== undefined && sortedIndex !== null) {
-    return palette[sortedIndex % palette.length];
-  }
   if (!name) return palette[0];
   let h = 0;
   for (let i = 0; i < name.length; i++) {
