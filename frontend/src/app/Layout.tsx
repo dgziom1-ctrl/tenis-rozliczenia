@@ -278,7 +278,7 @@ function CyberBackground() {
       <div className="fluid-grid" />
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 120% 100% at 50% 38%, transparent 52%, rgba(0,0,0,0.42) 100%)',
+        background: 'radial-gradient(ellipse 120% 100% at 50% 38%, transparent 52%, var(--bg-vignette) 100%)',
       }} />
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: '30vh',

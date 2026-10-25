@@ -24,14 +24,17 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
       boxShadow: compact ? 'none' : 'var(--glow-box-cyan)',
       clipPath: compact ? CLIP.badge : CLIP.tag,
     }}>
-      {/* Progress bar */}
-      <div aria-hidden="true" style={{
-        position: 'absolute', bottom: 0, left: 0,
+      {/* Pasek postępu: stała szerokość + `scaleX`. Animacja `width` co sekundę
+          wywoływała layout w całym pasku cofania; transform jest na kompozytorze
+          (GSAP performance / Hallmark floor: nie animujemy width). */}
+      <div aria-hidden="true" data-testid="undo-progress" style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
         height: 2,
-        width: `${progressPct}%`,
         background: 'var(--co-cyan)',
         boxShadow: 'var(--glow-box-cyan)',
-        transition: 'width 1s linear',
+        transform: `scaleX(${Math.max(0, Math.min(100, progressPct)) / 100})`,
+        transformOrigin: 'left center',
+        transition: 'transform 1s linear',
       }} />
 
       {/* Message */}

@@ -488,23 +488,29 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
           display: 'flex', gap: 8, zIndex: 4,
         }}>
         {slideList.map((_, i) => (
-          <div
-            key={i}
-            style={{
-              width: i === currentSlide ? 24 : 8,
-              height: 8,
-              borderRadius: 4,
-              background: i === currentSlide
-                ? 'var(--co-cyan)'
-                : i < currentSlide
-                  ? 'var(--co-tint-line)'
-                  : 'var(--co-dot-empty)',
-              boxShadow: i === currentSlide ? 'var(--glow-box-cyan)' : 'none',
-              // Wskaźnik slajdu przełącza się przy każdej zmianie, więc 0.3s
-              // było odczuwalnie ospałe przy 0.15–0.2s w reszcie interfejsu.
-              transition: 'width 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
-            }}
-          />
+          // Każda kropka ma stałą szerokość 24 px; aktywna jest w pełnej skali,
+          // pozostałe zwężają się do 8 px przez `scaleX`. Dzięki temu zmiana
+          // slajdu nie animuje `width` (layout) i nie przesuwa sąsiednich kropek.
+          <div key={i} style={{ width: 24, height: 8, flexShrink: 0 }}>
+            <div
+              style={{
+                width: 24,
+                height: 8,
+                borderRadius: 4,
+                transform: `scaleX(${i === currentSlide ? 1 : 1 / 3})`,
+                transformOrigin: 'center',
+                background: i === currentSlide
+                  ? 'var(--co-cyan)'
+                  : i < currentSlide
+                    ? 'var(--co-tint-line)'
+                    : 'var(--co-dot-empty)',
+                boxShadow: i === currentSlide ? 'var(--glow-box-cyan)' : 'none',
+                // Wskaźnik slajdu przełącza się przy każdej zmianie, więc 0.3s
+                // było odczuwalnie ospałe przy 0.15–0.2s w reszcie interfejsu.
+                transition: 'transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
+              }}
+            />
+          </div>
         ))}
       </div>
 

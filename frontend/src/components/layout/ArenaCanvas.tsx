@@ -32,6 +32,43 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
     // Bez tej straży cały nagłówek wywracał się razem z dekoracją tła.
     const g = canvas.getContext('2d');
     if (!g) return undefined;
+
+    /* Canvas 2D nie rozumie `var()`. Zamiast wpisywać kolory w komponencie,
+       czytamy tokeny zrealizowane w `:root` / `body.theme-light`. Fallbacki
+       są tylko dla środowisk bez `getComputedStyle` (jsdom, stare webview). */
+    const styles = typeof getComputedStyle === 'function' ? getComputedStyle(document.body) : null;
+    const token = (name: string, fallback: string) =>
+      styles?.getPropertyValue(name).trim() || fallback;
+    const P = {
+      accent:          token('--canvas-accent', '0,229,255'),
+      accentDeep:      token('--canvas-accent-deep', '0,140,220'),
+      grid:            token('--canvas-grid', '0,180,255'),
+      edge:            token('--canvas-edge', '0,200,255'),
+      deepShade:       token('--canvas-deep-shade', '0,100,200'),
+      tableFrom:       token('--canvas-table-from', '#020810'),
+      tableTo:         token('--canvas-table-to', '#041828'),
+      bodyFrom:        token('--canvas-body-from', '#062038'),
+      bodyMid:         token('--canvas-body-mid', '#031428'),
+      bodyTo:          token('--canvas-body-to', '#010C1C'),
+      ballCore:        token('--canvas-ball-core', '#ffffff'),
+      ballMid:         token('--canvas-ball-mid', '#d8f5ff'),
+      ballEdge:        token('--canvas-ball-edge', '#80c8e0'),
+      shadow:          token('--canvas-shadow', '0,50,120'),
+      floorWash:       token('--canvas-floor-wash', '0,200,255'),
+      iceStripe:       token('--canvas-ice-stripe', '0,220,255'),
+      handle:          token('--canvas-handle', '2,12,28'),
+      handleLine:      token('--canvas-handle-line', '0,80,140'),
+      netTop:          token('--canvas-net-top', '200,248,255'),
+      glow:            token('--canvas-glow', '0,160,255'),
+      glowIdle:        token('--canvas-glow-idle', '0,180,255'),
+      rubberHit:       token('--canvas-rubber-hit', '0,229,255'),
+      rubberIdle:      token('--canvas-rubber-idle', '0,180,220'),
+      rubberHitEnd:    token('--canvas-rubber-hit-end', '0,160,210'),
+      rubberIdleEnd:   token('--canvas-rubber-idle-end', '0,120,180'),
+      white:           token('--canvas-white', '255,255,255'),
+    };
+    const rgba = (rgb: string, alpha: number) => `rgba(${rgb},${alpha})`;
+
     const W = 560, H = 180, CX = 265, CY = 90;
 
     const dpr = Math.min((typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1, 2);
@@ -129,15 +166,11 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       const FL = proj(-TX, 0, -TZ), FR = proj(TX, 0, -TZ);
       const BR = proj(TX, 0, TZ), BL = proj(-TX, 0, TZ);
       const tg = sg.createLinearGradient(BL[0], BL[1], FL[0], FL[1]);
-      if (lightMode) {
-        tg.addColorStop(0, '#F1F5F9'); tg.addColorStop(1, '#E2E8F0');
-      } else {
-        tg.addColorStop(0, '#020810'); tg.addColorStop(1, '#041828');
-      }
+      tg.addColorStop(0, P.tableFrom); tg.addColorStop(1, P.tableTo);
       quadS([FL, FR, BR, BL], tg);
       const gridA = lightMode ? 0.06 : 0.03;
       const gridB = lightMode ? 0.10 : 0.04;
-      const gridRgb = lightMode ? '13,148,136' : '0,180,255';
+      const gridRgb = P.grid;
       for (let i = 1; i < 4; i++) {
         const wz = -TZ + (i / 4) * TZ * 2;
         segS(proj(-TX, 0, wz), proj(TX, 0, wz), `rgba(${gridRgb},${gridA + i * 0.012})`, 0.8);
@@ -146,7 +179,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
         const wx = -TX + (i / 5) * TX * 2;
         segS(proj(wx, 0, -TZ), proj(wx, 0, TZ), `rgba(${gridRgb},${gridB})`, 0.7);
       }
-      const edgeRgb = lightMode ? '13,148,136' : '0,200,255';
+      const edgeRgb = P.edge;
       segS(BL, FL, `rgba(${edgeRgb},${lightMode ? 0.45 : 0.55})`, 1.5);
       segS(BR, FR, `rgba(${edgeRgb},${lightMode ? 0.45 : 0.55})`, 1.5);
       segS(BL, BR, `rgba(${gridRgb},${lightMode ? 0.22 : 0.18})`, 1.0);
@@ -155,27 +188,21 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       /* Table front face (static) */
       const FL2 = proj(-TX, TH, -TZ), FR2 = proj(TX, TH, -TZ);
       const fg = sg.createLinearGradient(0, FL[1], 0, FL2[1]);
-      if (lightMode) {
-        fg.addColorStop(0, 'rgba(13,148,136,0.18)'); fg.addColorStop(1, 'rgba(13,148,136,0.04)');
-      } else {
-        fg.addColorStop(0, 'rgba(0,140,220,0.35)'); fg.addColorStop(1, 'rgba(0,80,160,0.04)');
-      }
+      fg.addColorStop(0, rgba(P.accentDeep, lightMode ? 0.18 : 0.35));
+      fg.addColorStop(1, rgba(P.accentDeep, 0.04));
       quadS([FL, FR, FR2, FL2], fg);
       sg.save();
       sg.shadowBlur = lightMode ? 3 : 5;
-      sg.shadowColor = lightMode ? 'rgba(13,148,136,0.35)' : 'rgba(0,229,255,0.50)';
-      segS(FL, FR, lightMode ? 'rgba(13,148,136,0.65)' : 'rgba(0,229,255,0.80)', 1.8);
+      sg.shadowColor = rgba(P.accent, lightMode ? 0.35 : 0.50);
+      segS(FL, FR, rgba(P.accent, lightMode ? 0.65 : 0.80), 1.8);
       sg.restore();
 
       /* Net (static) */
       const nBN = proj(0, 0, -TZ), nBF = proj(0, 0, TZ);
       const nTN = proj(0, -NH, -TZ), nTF = proj(0, -NH, TZ);
       const ng = sg.createLinearGradient(nTN[0], nTN[1], nBN[0], nBN[1]);
-      if (lightMode) {
-        ng.addColorStop(0, 'rgba(13,148,136,0.14)'); ng.addColorStop(1, 'rgba(13,148,136,0.03)');
-      } else {
-        ng.addColorStop(0, 'rgba(0,200,255,0.18)'); ng.addColorStop(1, 'rgba(0,100,200,0.03)');
-      }
+      ng.addColorStop(0, rgba(P.edge, lightMode ? 0.14 : 0.18));
+      ng.addColorStop(1, rgba(P.deepShade, 0.03));
       quadS([nBN, nBF, nTF, nTN], ng);
       for (let r = 0; r <= 4; r++) {
         const ny = -NH * (1 - r / 4);
@@ -189,8 +216,8 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       segS(nBF, nTF, `rgba(${edgeRgb},${lightMode ? 0.30 : 0.38})`, 1.4);
       sg.save();
       sg.shadowBlur = lightMode ? 4 : 7;
-      sg.shadowColor = lightMode ? 'rgba(13,148,136,0.45)' : 'rgba(0,229,255,0.95)';
-      segS(nTN, nTF, lightMode ? 'rgba(13,148,136,0.75)' : 'rgba(200,248,255,0.95)', 2.5);
+      sg.shadowColor = rgba(P.accent, lightMode ? 0.45 : 0.95);
+      segS(nTN, nTF, lightMode ? rgba(P.accent, 0.75) : rgba(P.netTop, 0.95), 2.5);
       sg.restore();
     }
 
@@ -234,20 +261,20 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       const sa = Math.max(0, 0.20*(1 - Math.abs(bv[1])/68));
       g.save(); g.translate(bs[0], bs[1]); g.scale(1, 0.34);
       g.beginPath(); g.arc(0, 0, bR*1.55, 0, Math.PI*2);
-      g.fillStyle = `rgba(0,50,120,${sa})`; g.fill();
+      g.fillStyle = rgba(P.shadow, sa); g.fill();
       g.restore();
 
       /* Ghost trail */
       const tp = (progress-.02+1)%1, tv = ballAt(tp), tq = proj(tv[0],tv[1],0);
       g.beginPath(); g.arc(tq[0], tq[1], 3.6*tq[2], 0, Math.PI*2);
-      g.fillStyle = 'rgba(0,200,255,0.06)'; g.fill();
+      g.fillStyle = rgba(P.floorWash, 0.06); g.fill();
 
       /* Ball sphere */
       g.save();
       g.shadowBlur = 13 * bq[2] * (1 + impact * 0.6);
-      g.shadowColor = `rgba(255,255,255,${Math.min(1, 0.86 + 0.18 * impact)})`;
+      g.shadowColor = rgba(P.white, Math.min(1, 0.86 + 0.18 * impact));
       const bg = g.createRadialGradient(bq[0]-bR*.3,bq[1]-bR*.3,0, bq[0],bq[1],bR);
-      bg.addColorStop(0,'#ffffff'); bg.addColorStop(.46,'#d8f5ff'); bg.addColorStop(1,'#80c8e0');
+      bg.addColorStop(0, P.ballCore); bg.addColorStop(.46, P.ballMid); bg.addColorStop(1, P.ballEdge);
       g.beginPath(); g.arc(bq[0], bq[1], bR, 0, Math.PI*2);
       g.fillStyle = bg; g.fill();
       g.restore();
@@ -266,7 +293,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
         g.scale(1, sry / srx);
         g.beginPath(); g.arc(0, 0, srx, 0, Math.PI*2);
         g.restore();
-        g.strokeStyle = `rgba(0, 220, 255, ${0.12 + 0.35 * stripeVis + 0.30 * impact})`;
+        g.strokeStyle = rgba(P.iceStripe, 0.12 + 0.35 * stripeVis + 0.30 * impact);
         g.lineWidth = 1.4;
         g.stroke();
         g.restore();
@@ -338,40 +365,40 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       g.save();
       g.shadowBlur  = (hitting ? 20 : 8) * impactK;
       g.shadowColor = hitting
-        ? `rgba(0,229,255,${0.90 + 0.15 * impact})`
-        : `rgba(0,180,255,${0.40 + 0.08 * impact})`;
+        ? rgba(P.accent, 0.90 + 0.15 * impact)
+        : rgba(P.glowIdle, 0.40 + 0.08 * impact);
       g.strokeStyle = hitting
-        ? `rgba(0,229,255,${0.70 + 0.15 * impact})`
-        : `rgba(0,160,255,${0.36 + 0.08 * impact})`;
+        ? rgba(P.accent, 0.70 + 0.15 * impact)
+        : rgba(P.glow, 0.36 + 0.08 * impact);
       g.lineWidth = 3.5;
       ellipse(cx, cy, rx*1.1, ry*1.1, ang); g.stroke();
       g.restore();
 
       /* Layer 2: dark body */
       const bdg = g.createRadialGradient(cx-rx*.16,cy-ry*.16,0, cx,cy,Math.max(rx,ry)*1.05);
-      bdg.addColorStop(0,'#062038'); bdg.addColorStop(.76,'#031428'); bdg.addColorStop(1,'#010C1C');
+      bdg.addColorStop(0, P.bodyFrom); bdg.addColorStop(.76, P.bodyMid); bdg.addColorStop(1, P.bodyTo);
       ellipse(cx, cy, rx, ry, ang); g.fillStyle = bdg; g.fill();
 
       /* Layer 3: rim stroke */
       g.strokeStyle = hitting
-        ? `rgba(0,229,255,${0.90 + 0.12 * impact})`
-        : `rgba(0,180,255,${0.55 + 0.06 * impact})`;
+        ? rgba(P.accent, 0.90 + 0.12 * impact)
+        : rgba(P.glowIdle, 0.55 + 0.06 * impact);
       g.lineWidth = 1.9;
       ellipse(cx, cy, rx*.95, ry*.95, ang); g.stroke();
 
       /* Layer 4: rubber face */
       const rfg = g.createRadialGradient(cx-rx*.1,cy-ry*.1,0, cx,cy,rx*.52);
-      rfg.addColorStop(0, hitting ? 'rgba(0,229,255,0.95)' : 'rgba(0,180,220,0.85)');
-      rfg.addColorStop(1, hitting ? 'rgba(0,160,210,0.88)' : 'rgba(0,120,180,0.72)');
+      rfg.addColorStop(0, hitting ? rgba(P.rubberHit, 0.95) : rgba(P.rubberIdle, 0.85));
+      rfg.addColorStop(1, hitting ? rgba(P.rubberHitEnd, 0.88) : rgba(P.rubberIdleEnd, 0.72));
       ellipse(cx, cy, rx*.52, ry*.52, ang); g.fillStyle = rfg; g.fill();
 
       /* Handle */
       const hs = proj(swingX, finalY + R/pc[2] + 1,  0);
       const he = proj(swingX, finalY + R/pc[2] + 14, 0);
       g.save(); g.lineCap = 'round';
-      g.strokeStyle = 'rgba(2,12,28,0.95)'; g.lineWidth = 4.6*pc[2];
+      g.strokeStyle = rgba(P.handle, 0.95); g.lineWidth = 4.6*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
-      g.strokeStyle = 'rgba(0,80,140,0.65)'; g.lineWidth = 2.1*pc[2];
+      g.strokeStyle = rgba(P.handleLine, 0.65); g.lineWidth = 2.1*pc[2];
       g.beginPath(); g.moveTo(hs[0],hs[1]); g.lineTo(he[0],he[1]); g.stroke();
       g.lineCap = 'butt'; g.restore();
     };
@@ -391,6 +418,9 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       if (raf.current === null) return;
       cancelAnimationFrame(raf.current);
       raf.current = null;
+      // Wznawiamy cykl od początku, żeby po powrocie piłeczka nie skoczyła
+      // o czas, w którym animacja była zatrzymana.
+      t0.current = null;
     };
 
     const drawStaticFrame = () => {
@@ -398,20 +428,38 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       draw(0.25, performance.now());
     };
 
-    const onVisibility = () => {
-      if (document.visibilityState === 'hidden') stopLoop();
-      else if (reducedMotion) drawStaticFrame();
-      else startLoop();
+    /**
+     * rAF tylko wtedy, gdy canvas faktycznie widać. Sama zmiana widoczności
+     * karty nie wystarcza: po przewinięciu nagłówka poza ekran pętla rysowała
+     * 60 klatek/s w tle (GSAP performance: „pause off-screen animations”).
+     * Gdy IntersectionObserver nie istnieje (stare webview, jsdom), zostaje
+     * dotychczasowe zachowanie oparte wyłącznie na `visibilitychange`.
+     */
+    let onScreen = true;
+    const syncLoop = () => {
+      if (reducedMotion) { drawStaticFrame(); return; }
+      const hidden = document.visibilityState === 'hidden';
+      if (onScreen && !hidden) startLoop();
+      else stopLoop();
     };
+    const onVisibility = () => syncLoop();
+
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting;
+        syncLoop();
+      }, { threshold: 0.01 });
+      observer.observe(canvas);
+    }
 
     document.addEventListener('visibilitychange', onVisibility);
-    if (reducedMotion) drawStaticFrame();
-    else startLoop();
+    syncLoop();
 
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
+      observer?.disconnect();
       stopLoop();
-      t0.current = null;
     };
   }, [chaosMode, lightMode, onHit, reducedMotion]);
 
