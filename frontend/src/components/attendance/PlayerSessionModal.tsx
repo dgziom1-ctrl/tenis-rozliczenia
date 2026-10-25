@@ -4,7 +4,6 @@ import { RANKS, getRank, rankTint } from '@/constants';
 import RankGlyph from '../common/icons/RankGlyph';
 import { FONT, TEXT, TRACK, CLIP } from '../../constants/styles';
 import { formatDate } from '@/utils/format';
-import { getPlayerColor } from '@/constants/colors';
 import { getPlayerAchievements } from '@/utils/achievements';
 import { filterHistorySinceJoin } from '@/utils/playerHistory';
 import { getPlayerSessionCost } from '@/utils/sessionCost';
@@ -12,7 +11,7 @@ import Modal from '../common/Modal';
 import { useModalExit } from '@/hooks/useModalExit';
 import { PlayerAvatar } from '../dashboard/PlayerAvatar';
 import AchievementBadge from './AchievementBadge';
-import type { ExtendedPlayerStats, HistoryEntry } from '@/types/ui';
+import type { ExtendedPlayerStats, HistoryEntry, PlayerColor } from '@/types/ui';
 
 interface PlayerSessionModalProps {
   /**
@@ -21,6 +20,7 @@ interface PlayerSessionModalProps {
    * 2027, „wszystkie" pokazują wszystko.
    */
   player: ExtendedPlayerStats | null;
+  playerColor: PlayerColor;
   /** Sesje wybranego zakresu, od najnowszej do najstarszej. */
   history: HistoryEntry[];
   /** Rok wybranego sezonu albo `null`, gdy oglądamy wszystkie lata naraz. */
@@ -29,7 +29,7 @@ interface PlayerSessionModalProps {
 }
 
 // ─── Player Session Drill-Down Modal ─────────────────────────────
-export default function PlayerSessionModal({ player, history, seasonLabel, onClose }: PlayerSessionModalProps) {
+export default function PlayerSessionModal({ player, playerColor, history, seasonLabel, onClose }: PlayerSessionModalProps) {
   const titleId = useId();
   const [showMissed, setShowMissed] = useState(false);
   const { open, close } = useModalExit(onClose);
@@ -67,7 +67,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
 
   if (!player) return null;
 
-  const c = getPlayerColor(player.name);
+  const c = playerColor;
 
   return (
     // `bare` — okno ma własną szapkę z awatarem i sekcje na całą szerokość,
@@ -85,7 +85,7 @@ export default function PlayerSessionModal({ player, history, seasonLabel, onClo
           borderBottomColor: `${c.border}20`,
           background: `${c.border}07`,
         }}>
-          <PlayerAvatar name={player.name} size={44} />
+          <PlayerAvatar name={player.name} color={c} size={44} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <p id={titleId} style={{ ...FONT.display(TEXT.h3, TRACK.tight), color: 'var(--co-text-hi)', margin: 0, lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {player.name}

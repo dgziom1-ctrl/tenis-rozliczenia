@@ -1,4 +1,4 @@
-import { getPlayerColor } from '@/constants/colors';
+import type { PlayerColor } from '@/types/ui';
 import { CLIP } from '@/constants/styles';
 import { CyberPortrait } from './CyberPortrait';
 
@@ -8,13 +8,14 @@ import { CyberPortrait } from './CyberPortrait';
 
 interface PlayerAvatarProps {
   name: string;
+  color: PlayerColor;
   size?: number;
   /** Kropka statusu rozliczenia — tylko na karcie gracza. */
   isPending?: boolean;
 }
 
-export function PlayerAvatar({ name, size = 60, isPending }: PlayerAvatarProps) {
-  const c = getPlayerColor(name);
+export function PlayerAvatar({ name, color, size = 60, isPending }: PlayerAvatarProps) {
+  const c = color;
 
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>

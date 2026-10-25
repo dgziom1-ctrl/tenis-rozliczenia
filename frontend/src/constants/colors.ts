@@ -1,37 +1,90 @@
 import type { PlayerColor } from '@/types/ui';
 
-/**
- * Kolory tożsamości graczy — jedna paleta dla obu motywów.
- *
- * Poprzedni zestaw był neonem dobranym wyłącznie pod ciemne tło i w trybie
- * jasnym trzy z sześciu kolorów przestawały być czytelne jako tekst: limonka
- * `#AACC00` miała 1,77:1, morski `#00CCDD` 1,88:1, pomarańcz `#FF9B00` 2,02:1.
- *
- * Żaden pojedynczy kolor nie zdaje 4,5:1 na czerni i na bieli jednocześnie —
- * te progi się wykluczają. Dobrane są więc tony środkowe, które wszędzie
- * przekraczają 3:1 (próg dla dużego tekstu i elementów interfejsu, czyli tego,
- * do czego paleta służy: obramowań, inicjałów awatara i nazw w dużym stopniu),
- * a większość mieści się powyżej 4:1 w obu motywach.
- */
-const PLAYER_COLOR_PALETTE: PlayerColor[] = [
-  { bg: '#E0197A18', border: '#E0197A', text: '#E0197A' }, // róż      4,6:1 / 4,5:1
-  { bg: '#2B7FD418', border: '#2B7FD4', text: '#2B7FD4' }, // błękit   4,1:1 / 5,0:1
-  { bg: '#47962618', border: '#479626', text: '#479626' }, // zieleń   3,7:1 / 5,5:1
-  { bg: '#9B4DE018', border: '#9B4DE0', text: '#9B4DE0' }, // fiolet   4,6:1 / 4,4:1
-  { bg: '#148A9C18', border: '#148A9C', text: '#148A9C' }, // morski   4,1:1 / 5,0:1
-  { bg: '#D9770618', border: '#D97706', text: '#D97706' }, // pomarańcz 3,2:1 / 6,4:1
-];
+const HUE_COUNT = 360;
+const SLOT_STEP = 137;
+const TARGET_LUMINANCE = [0.16, 0.18, 0.2] as const;
+const COLOR_SLOT_COUNT = HUE_COUNT * TARGET_LUMINANCE.length;
+const SATURATION = 0.74;
 
-/** Liczba kolorów dostępnych dla tożsamości graczy. */
-export const PLAYER_COLOR_COUNT = PLAYER_COLOR_PALETTE.length;
-
-/** Stable by player name: sorting, ranking, or adding a teammate won't change identity colors. */
-export function getPlayerColor(name: string): PlayerColor {
-  const palette = PLAYER_COLOR_PALETTE;
-  if (!name) return palette[0];
-  let h = 0;
+function hashName(name: string): number {
+  let hash = 2166136261;
   for (let i = 0; i < name.length; i++) {
-    h = Math.imul(31, h) + name.charCodeAt(i) | 0;
+    hash = Math.imul(hash ^ name.charCodeAt(i), 16777619);
   }
-  return palette[Math.abs(h) % palette.length];
+  return hash >>> 0;
+}
+
+function hslToRgb(hue: number, saturation: number, lightness: number): [number, number, number] {
+  const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+  const hueSector = hue / 60;
+  const x = chroma * (1 - Math.abs((hueSector % 2) - 1));
+  const offset = lightness - chroma / 2;
+  const sector = Math.floor(hueSector);
+  const rgb = sector === 0 ? [chroma, x, 0]
+    : sector === 1 ? [x, chroma, 0]
+      : sector === 2 ? [0, chroma, x]
+        : sector === 3 ? [0, x, chroma]
+          : sector === 4 ? [x, 0, chroma]
+            : [chroma, 0, x];
+
+  return rgb.map(channel => Math.round((channel + offset) * 255)) as [number, number, number];
+}
+
+function relativeLuminance(rgb: readonly number[]): number {
+  const linear = rgb.map(channel => {
+    const value = channel / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+}
+
+function toHex(channel: number): string {
+  return channel.toString(16).padStart(2, '0').toUpperCase();
+}
+
+function colorForSlot(slot: number): PlayerColor {
+  const hue = slot % HUE_COUNT;
+  const luminanceTarget = TARGET_LUMINANCE[Math.floor(slot / HUE_COUNT)];
+  let low = 0;
+  let high = 1;
+
+  // Keep every identity color readable on both light and dark surfaces.
+  for (let i = 0; i < 22; i++) {
+    const lightness = (low + high) / 2;
+    if (relativeLuminance(hslToRgb(hue, SATURATION, lightness)) < luminanceTarget) {
+      low = lightness;
+    } else {
+      high = lightness;
+    }
+  }
+
+  const rgb = hslToRgb(hue, SATURATION, (low + high) / 2);
+  const border = `#${rgb.map(toHex).join('')}`;
+  return { bg: `${border}18`, border, text: border };
+}
+
+/**
+ * Assigns one deterministic, distinct color to every name in the roster.
+ * Names are sorted before resolving any hash collisions, so UI sort order
+ * never changes the color assignment.
+ */
+export function createPlayerColorMap(playerNames: readonly string[]): Map<string, PlayerColor> {
+  const names = [...new Set(playerNames.filter(name => name.trim().length > 0))]
+    .sort((a, b) => a.localeCompare(b, 'pl'));
+  const colors = new Map<string, PlayerColor>();
+  const usedColors = new Set<string>();
+
+  for (const name of names) {
+    const start = hashName(name) % COLOR_SLOT_COUNT;
+    for (let attempt = 0; attempt < COLOR_SLOT_COUNT; attempt++) {
+      const slot = (start + attempt * SLOT_STEP) % COLOR_SLOT_COUNT;
+      const color = colorForSlot(slot);
+      if (usedColors.has(color.border)) continue;
+      usedColors.add(color.border);
+      colors.set(name, color);
+      break;
+    }
+  }
+
+  return colors;
 }

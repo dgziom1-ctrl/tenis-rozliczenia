@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { SOUND_TYPES } from '@/constants';
+import { createPlayerColorMap } from '@/constants/colors';
 import { calculatePlayerStats, assignRankingPlaces, calculateSeasonPlayerStats } from '@/utils/rankings';
 import { groupSessionsByMonth, getAvailableSeasons, filterHistoryByYear, getWrappedSeason } from '@/utils/sessions';
 import { computeWrappedStats } from '@/utils/wrapped';
@@ -39,6 +40,10 @@ export default function AttendanceTab({ players, history, summary, playSound, in
   }, [initialPlayer, onInitialPlayerConsumed]);
 
   const seasons = useMemo(() => getAvailableSeasons(history), [history]);
+  const playerColorMap = useMemo(
+    () => createPlayerColorMap(players?.map(player => player.name) ?? []),
+    [players],
+  );
 
   // Nowy rok ma zaczynać nową rywalizację, więc domyślnie pokazujemy bieżący
   // sezon zamiast sumy wszystkich lat — inaczej w styczniu ranking to zamrożona
@@ -127,6 +132,7 @@ export default function AttendanceTab({ players, history, summary, playSound, in
     {selectedStats && (
       <PlayerSessionModal
         player={selectedStats}
+        playerColor={playerColorMap.get(selectedStats.name)!}
         history={seasonHistory}
         seasonLabel={selectedSeason ? String(selectedSeason) : null}
         onClose={handleCloseModal}

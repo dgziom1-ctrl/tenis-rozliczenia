@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
 import type { PointerEvent } from 'react';
 import { CheckCircle2, TriangleAlert } from 'lucide-react';
-import { getPlayerColor } from '@/constants/colors';
 import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, rankTint } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
 import { formatAmountShort } from '@/utils/format';
@@ -18,7 +17,7 @@ import Modal from '../common/Modal';
 import TreasurerPanel from './TreasurerPanel';
 
 import StreakBadge from '../attendance/StreakBadge';
-import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerStats, SoundType } from '@/types/ui';
+import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerColor, PlayerStats, SoundType } from '@/types/ui';
 import type { AddPaymentResult, TransactionResult } from '@/types/domain';
 import type { StyleWithVars } from '@/types/css';
 import { useAnimatedValue } from './useAnimatedValue';
@@ -30,6 +29,7 @@ import { RankBadge } from './RankBadge';
 
 interface PlayerCardProps {
   player: PlayerStats;
+  playerColor: PlayerColor;
   /** Sesje bieżącego sezonu — ostatnie kropki i licznik obecności. */
   history: HistoryEntry[];
   meta: PlayerCardMeta;
@@ -45,7 +45,7 @@ interface PlayerCardProps {
 }
 
 function PlayerCard({
-  player, history, meta,
+  player, playerColor, history, meta,
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment,
   playSound,
@@ -60,7 +60,7 @@ function PlayerCard({
   const isSettled   = !isPending && !hasCredit;
   const pct         = meta.attendancePercentage;
   const rank        = meta.rank;
-  const c           = getPlayerColor(player.name);
+  const c           = playerColor;
 
   const [modal,     setModal]     = useState<PaymentModalType | null>(null);
   const [customAmt, setCustomAmt] = useState('');
@@ -350,6 +350,7 @@ function PlayerCard({
           </div>
           <PlayerAvatar
             name={player.name}
+            color={c}
             isPending={isOrganizer ? undefined : isPending}
           />
         </div>
