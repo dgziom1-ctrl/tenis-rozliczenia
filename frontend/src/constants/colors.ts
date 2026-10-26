@@ -1,10 +1,8 @@
 import type { PlayerColor } from '@/types/ui';
 
 const HUE_COUNT = 360;
-const SLOT_STEP = 137;
-const TARGET_LUMINANCE = [0.16, 0.18, 0.2] as const;
-const COLOR_SLOT_COUNT = HUE_COUNT * TARGET_LUMINANCE.length;
 const SATURATION = 0.74;
+const TARGET_LUMINANCE = [0.18, 0.16, 0.2] as const;
 
 function hashName(name: string): number {
   let hash = 2166136261;
@@ -42,9 +40,7 @@ function toHex(channel: number): string {
   return channel.toString(16).padStart(2, '0').toUpperCase();
 }
 
-function colorForSlot(slot: number): PlayerColor {
-  const hue = slot % HUE_COUNT;
-  const luminanceTarget = TARGET_LUMINANCE[Math.floor(slot / HUE_COUNT)];
+function colorForHue(hue: number, luminanceTarget: number): PlayerColor {
   let low = 0;
   let high = 1;
 
@@ -63,26 +59,62 @@ function colorForSlot(slot: number): PlayerColor {
   return { bg: `${border}18`, border, text: border };
 }
 
+const COLOR_CANDIDATES = TARGET_LUMINANCE.flatMap((luminance, variant) =>
+  Array.from({ length: HUE_COUNT }, (_, hue) => ({
+    hue,
+    variant,
+    color: colorForHue(hue, luminance),
+  })),
+);
+
+function hueDistance(a: number, b: number): number {
+  const distance = Math.abs(a - b);
+  return Math.min(distance, HUE_COUNT - distance);
+}
+
 /**
- * Assigns one deterministic, distinct color to every name in the roster.
- * Names are sorted before resolving any hash collisions, so UI sort order
- * never changes the color assignment.
+ * Assigns colors for the whole roster together. It spreads hues as far apart
+ * as possible, using the name hash only to break ties. This avoids both exact
+ * collisions and groups of near-identical colors, independent of UI sort order.
  */
 export function createPlayerColorMap(playerNames: readonly string[]): Map<string, PlayerColor> {
   const names = [...new Set(playerNames.filter(name => name.trim().length > 0))]
     .sort((a, b) => a.localeCompare(b, 'pl'));
   const colors = new Map<string, PlayerColor>();
   const usedColors = new Set<string>();
+  const usedHues: number[] = [];
 
   for (const name of names) {
-    const start = hashName(name) % COLOR_SLOT_COUNT;
-    for (let attempt = 0; attempt < COLOR_SLOT_COUNT; attempt++) {
-      const slot = (start + attempt * SLOT_STEP) % COLOR_SLOT_COUNT;
-      const color = colorForSlot(slot);
-      if (usedColors.has(color.border)) continue;
-      usedColors.add(color.border);
-      colors.set(name, color);
-      break;
+    const preferredHue = hashName(name) % HUE_COUNT;
+    let bestCandidate: (typeof COLOR_CANDIDATES)[number] | undefined;
+    let bestSpacing = -1;
+    let bestVariant = Number.POSITIVE_INFINITY;
+    let bestHashDistance = Number.POSITIVE_INFINITY;
+
+    for (const candidate of COLOR_CANDIDATES) {
+      if (usedColors.has(candidate.color.border)) continue;
+
+      const spacing = usedHues.length === 0
+        ? HUE_COUNT / 2
+        : Math.min(...usedHues.map(hue => hueDistance(candidate.hue, hue)));
+      const hashDistance = hueDistance(candidate.hue, preferredHue);
+      if (
+        spacing > bestSpacing
+        || (spacing === bestSpacing && candidate.variant < bestVariant)
+        || (spacing === bestSpacing && candidate.variant === bestVariant && hashDistance < bestHashDistance)
+        || (spacing === bestSpacing && candidate.variant === bestVariant && hashDistance === bestHashDistance && candidate.hue < (bestCandidate?.hue ?? HUE_COUNT))
+      ) {
+        bestCandidate = candidate;
+        bestSpacing = spacing;
+        bestVariant = candidate.variant;
+        bestHashDistance = hashDistance;
+      }
+    }
+
+    if (bestCandidate) {
+      usedColors.add(bestCandidate.color.border);
+      usedHues.push(bestCandidate.hue);
+      colors.set(name, bestCandidate.color);
     }
   }
 
