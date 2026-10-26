@@ -30,10 +30,10 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { ToastProvider } from '../components/common/Toast';
 
-describe('pomoc OVR i rang — stan dla czytnika ekranu', () => {
+describe('pomoc OVR, rang i rzadkości — stan dla czytnika ekranu', () => {
   const data = { summary: { totalWeeks: 3 }, players: [], payments: {} };
 
-  it('pokazuje skrót OVR przed rozwinięciem i udostępnia szczegóły rang czytnikowi', async () => {
+  it('pokazuje skrót OVR i rzadkości przed rozwinięciem oraz pełne szczegóły po kliknięciu', async () => {
     const user = userEvent.setup();
     render(
       <ToastProvider>
@@ -41,7 +41,7 @@ describe('pomoc OVR i rang — stan dla czytnika ekranu', () => {
       </ToastProvider>,
     );
 
-    const toggle = screen.getByRole('button', { name: /jak czytać ovr i rangę/i });
+    const toggle = screen.getByRole('button', { name: /jak czytać ovr, rangę i rzadkość kart/i });
     const panel = document.getElementById('rank-guide-panel');
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(toggle).toHaveAttribute('aria-controls', 'rank-guide-panel');
@@ -50,13 +50,22 @@ describe('pomoc OVR i rang — stan dla czytnika ekranu', () => {
     expect(panel).toBeInTheDocument();
     expect(panel).toHaveAttribute('hidden');
     expect(screen.getByText(/OVR uwzględnia frekwencję, serię i zagrane sesje/i)).toBeVisible();
+    expect(screen.getByText(/rzadkość karty wynika z rangi/i)).toBeVisible();
 
     await user.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(panel).not.toHaveAttribute('hidden');
+    expect(panel).not.toHaveTextContent(/saldo/i);
     expect(screen.getByText('OVR — ocena z bieżącego sezonu')).toBeInTheDocument();
     expect(screen.getByText(/0,48 pkt za każdy punkt procentowy/)).toBeInTheDocument();
-    expect(screen.getByText(/ranga zależy wyłącznie od frekwencji/i)).toBeInTheDocument();
+    expect(screen.getByText(/Wynik zaokrągla się do całości i nie przekracza 99\. Ranga zależy wyłącznie od frekwencji\./)).toBeInTheDocument();
+    expect(screen.getByText(/To wizualna klasa przypisana do rangi/i)).toBeInTheDocument();
+    expect(screen.getByText(/karta HOLO/)).toBeInTheDocument();
+    expect(screen.getByText(/karta ELITA/)).toBeInTheDocument();
+    expect(screen.getByText(/karta EPICKA/)).toBeInTheDocument();
+    expect(screen.getByText(/karta RZADKA/)).toBeInTheDocument();
+    expect(screen.getByText(/karta ZWYKŁA/)).toBeInTheDocument();
+    expect(screen.getByText(/karta DUCH/)).toBeInTheDocument();
   });
 });
 
