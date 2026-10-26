@@ -5,7 +5,7 @@ import { SOUND_TYPES, ORGANIZER_NAME, RANKS, rankTint } from '@/constants';
 import { createPlayerColorMap } from '@/constants/colors';
 import { buildDebtDisplayData } from '@/utils/debt';
 import { calculateSeasonCardStats } from '@/utils/rankings';
-import { buildPlayerCardMeta } from '@/utils/playerCard';
+import { buildPlayerCardMeta, RARITY_LABEL, rarityOf } from '@/utils/playerCard';
 import { getCurrentSeason, filterHistoryByYear } from '@/utils/sessions';
 import { useToast } from '../common/Toast';
 import PlayerCard from './PlayerCard';
@@ -190,13 +190,13 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 fontFamily: 'var(--font-display)', fontSize: '0.875rem',
                 color: 'var(--co-text-hi)', letterSpacing: 'normal', textTransform: 'none',
               }}>
-                Jak czytać OVR i rangę?
+                Jak czytać OVR, rangę i rzadkość kart?
               </span>
               <span style={{
                 fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
                 color: 'var(--co-dim)', lineHeight: 1.4,
               }}>
-                OVR uwzględnia frekwencję, serię i zagrane sesje; ranga zależy tylko od frekwencji.
+                OVR uwzględnia frekwencję, serię i zagrane sesje; ranga zależy od frekwencji, a rzadkość karty wynika z rangi.
               </span>
             </span>
             <span style={{
@@ -257,7 +257,28 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
                 color: 'var(--co-dim)', lineHeight: 1.5, margin: 0,
               }}>
-                Wynik zaokrągla się do całości i nie przekracza 99. Ranga zależy wyłącznie od frekwencji; saldo nie wpływa na OVR.
+                Wynik zaokrągla się do całości i nie przekracza 99. Ranga zależy wyłącznie od frekwencji.
+              </p>
+            </div>
+            <div style={{
+              gridColumn: '1 / -1',
+              marginTop: 6,
+              padding: 12,
+              background: 'var(--co-surface-2)',
+              border: '1px solid var(--co-border)',
+              clipPath: CLIP.smallCard,
+            }}>
+              <p style={{
+                fontFamily: 'var(--font-display)', fontSize: '0.875rem',
+                color: 'var(--co-text-hi)', letterSpacing: 'normal', margin: '0 0 4px',
+              }}>
+                Rzadkość karty
+              </p>
+              <p style={{
+                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                color: 'var(--co-dim)', lineHeight: 1.5, margin: 0,
+              }}>
+                To wizualna klasa przypisana do rangi, nie osobny wynik — nie zmienia OVR. Efekt holo/foil jest dekoracyjny.
               </p>
             </div>
             {RANKS.map((r, i) => (
@@ -271,7 +292,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                   <div>
                     <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', color: r.hex, margin: 0, letterSpacing: 'normal' }}>{r.name}</p>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: 0 }}>
-                      {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`}
+                      {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`} · karta {RARITY_LABEL[rarityOf(r)]}
                     </p>
                   </div>
                 </div>
