@@ -13,7 +13,7 @@ import { Skull, Zap } from 'lucide-react';
 
 function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry?: () => void }) {
   return (
-    <div role="status" aria-busy="true" aria-label="Ładowanie danych" style={{
+    <main aria-live="polite" aria-atomic="true" aria-busy="true" aria-label="Ładowanie danych" style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'var(--co-void)', flexDirection: 'column', gap: 24,
       fontFamily: 'var(--font-mono)',
@@ -92,13 +92,13 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
           )}
         </div>
       )}
-    </div>
+    </main>
   );
 }
 
 function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
   return (
-    <div role="alert" style={{
+    <main style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'var(--co-void)', padding: 24, flexDirection: 'column', gap: 20,
     }}>
@@ -106,7 +106,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
         background: 'repeating-linear-gradient(-45deg, var(--co-rose) 0px, var(--co-rose) 8px, transparent 8px, transparent 16px)',
         boxShadow: 'var(--glow-box-rose)', zIndex: Z.boot,
       }} />
-      <div style={{
+      <div role="alert" style={{
         padding: '24px 24px', textAlign: 'center', maxWidth: 380, width: '100%',
         background: 'var(--co-surface-2)', border: '1px solid var(--co-rose)',
         clipPath: CLIP.card,
@@ -153,7 +153,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
           </button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 

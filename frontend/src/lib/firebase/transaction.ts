@@ -89,12 +89,14 @@ export async function withTransaction(
     return { success: false, error: OFFLINE_MESSAGE };
   }
 
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
   try {
     await Promise.race([
       runTransaction(dataRef, (current: RawAppData | null) => withoutLegacyFields(fn(current))),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('__WRITE_TIMEOUT__')), WRITE_TIMEOUT_MS),
-      ),
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('__WRITE_TIMEOUT__')), WRITE_TIMEOUT_MS);
+      }),
     ]);
     return { success: true };
   } catch (error) {
@@ -134,5 +136,10 @@ export async function withTransaction(
       success: false,
       error: error instanceof Error ? error.message : fallbackErrorMsg,
     };
+  } finally {
+    // Bez tego timer żył jeszcze 12 s po zakończonej transakcji i trzymał
+    // referencję do funkcji obsługi — w testach i przy szybkich zapisach
+    // zostawiał zbędną pracę po fakcie.
+    if (timeoutId !== undefined) clearTimeout(timeoutId);
   }
 }

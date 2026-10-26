@@ -45,7 +45,7 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
         onClick={handleTap}
         aria-expanded={visible}
         aria-controls={visible ? tooltipId : undefined}
-        aria-label={`Ranga ${rank.name}, ${pct}% frekwencji — pokaż próg następnej rangi`}
+        aria-label={`${rank.name} ${pct}% — ranga, ${nextRank ? 'pokaż próg następnej rangi' : 'najwyższa ranga'}`}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
           padding: '2px 6px 2px 4px',

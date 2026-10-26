@@ -1079,6 +1079,30 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 .header-wordmark { display: none; }
 .header-blik-mobile { display: none; }
 
+/* Błysk „ghost” przy trafieniu piłką. Treść w pseudo-elemencie nie jest
+   osobnym węzłem tekstowym, więc nazwa dostępna przycisku pozostaje spójna
+   z tym, co widzi użytkownik — także w trakcie animacji. */
+.header-hero-title::before {
+  content: 'CYBER-PONK';
+  position: absolute;
+  inset: 0;
+  display: block;
+  font-family: var(--font-stencil);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(1.7rem, 6.4vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: normal;
+  text-align: center;
+  color: transparent;
+  text-shadow: -4px 0 var(--co-rose), 4px 0 var(--co-cyan);
+  clip-path: polygon(0 20%, 100% 20%, 100% 52%, 0 52%);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+}
+.header-hero-title.is-hitting::before { opacity: 1; }
+
 @media (max-width: 639px) {
   .header-topbar { padding: 8px 12px !important; }
   /* Ikony w nagłówku są dotykane kciukiem; 36 px było poniżej progu 44 px. */

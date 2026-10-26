@@ -48,6 +48,8 @@ import PlayerSessionModal from '../components/attendance/PlayerSessionModal';
 import AttendanceTab from '../components/attendance/AttendanceTab';
 import EditSessionForm from '../components/history/EditSessionForm';
 import PlayerCard from '../components/dashboard/PlayerCard';
+import HistoryTab from '../components/history/HistoryTab';
+import { ToastProvider } from '../components/common/Toast';
 import { buildPlayerCardMeta } from '../utils/playerCard';
 import { getShareGroups } from '../utils/sessionCost';
 import { createPlayerColorMap } from '../constants/colors';
@@ -611,7 +613,7 @@ describe('PlayerCard — karta gracza z obecnością i kropkami sesji', () => {
     expect(screen.getByText(String(meta.overall))).toBeInTheDocument();
     expect(screen.getByText('OVR')).toBeInTheDocument();
     expect(screen.getByText('Ala')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Ranga MISTRZ, 83% frekwencji/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /MISTRZ 83%/ })).toHaveAccessibleName(/MISTRZ 83%/);
     expect(screen.getByText(/SERIA 3/i)).toBeInTheDocument();
     expect(screen.getByText('Obecność')).toBeInTheDocument();
     expect(screen.getByText('5/6')).toBeInTheDocument();
@@ -619,6 +621,72 @@ describe('PlayerCard — karta gracza z obecnością i kropkami sesji', () => {
 
     // Usunięte sporty i odznaki nie zaśmiecają karty
     expect(screen.queryByLabelText('Osiągnięcia')).not.toBeInTheDocument();
+  });
+
+  it('tryb edycji wpłat daje się włączyć z klawiatury', async () => {
+    const user = userEvent.setup();
+    render(
+      <PlayerCard
+        player={player}
+        playerColor={alaColor}
+        history={history}
+        meta={meta}
+        openDetails={false}
+        onToggleDetails={vi.fn()}
+        breakdown={null}
+        onAddPayment={vi.fn()}
+        onRemovePayment={vi.fn()}
+        playSound={vi.fn()}
+      />,
+    );
+
+    const amount = screen.getByRole('button', { name: /45,00zł.*włącz tryb edycji wpłat/ });
+    expect(amount).toHaveAttribute('aria-pressed', 'false');
+
+    amount.focus();
+    await user.keyboard('{Enter}');
+
+    expect(amount).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('Tryb edycji')).toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// HistoryTab — filtry są przełącznikami, więc muszą mówić o stanie
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('HistoryTab — aria-pressed na filtrach', () => {
+  const history = [{
+    id: 's1', datePlayed: '2026-10-01', sport: 'squash', totalCost: 60,
+    costPerPerson: 30, costPerPersonMulti: 15,
+    presentPlayers: ['Ala'], multisportPlayers: [],
+  }];
+
+  it('aktualizuje stan po wybraniu gracza i sportu', async () => {
+    const user = userEvent.setup();
+    render(
+      <ToastProvider>
+        <HistoryTab history={history} playerNames={['Ala', 'Bolek']} playSound={vi.fn()} />
+      </ToastProvider>,
+    );
+
+    const allPlayers = screen.getByRole('button', { name: 'Wszyscy' });
+    const ala = screen.getByRole('button', { name: 'Ala' });
+    expect(allPlayers).toHaveAttribute('aria-pressed', 'true');
+    expect(ala).toHaveAttribute('aria-pressed', 'false');
+
+    await user.click(ala);
+    expect(ala).toHaveAttribute('aria-pressed', 'true');
+    expect(allPlayers).toHaveAttribute('aria-pressed', 'false');
+
+    const allSports = screen.getByRole('button', { name: 'Wszystkie sporty' });
+    const squash = screen.getByRole('button', { name: 'Squash' });
+    expect(allSports).toHaveAttribute('aria-pressed', 'true');
+    expect(squash).toHaveAttribute('aria-pressed', 'false');
+
+    await user.click(squash);
+    expect(squash).toHaveAttribute('aria-pressed', 'true');
+    expect(allSports).toHaveAttribute('aria-pressed', 'false');
   });
 });
 

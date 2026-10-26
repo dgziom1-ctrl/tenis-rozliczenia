@@ -20,7 +20,8 @@ interface NormalizedSession {
   cost: number;
   present: string[];
   multiPlayers: string[];
-  sport: Sport;
+  /** Pomijane przy edycji starej sesji, która nie miała jeszcze pola `sport`. */
+  sport?: Sport;
   racketCost?: number;
   ownRacketPlayers?: string[];
   courtCount?: number;
@@ -40,11 +41,25 @@ function isSport(value: unknown): value is Sport {
   return typeof value === 'string' && (SPORTS as readonly string[]).includes(value);
 }
 
+/**
+ * Liczba kortów/godzin musi być całkowita i mieścić się w 1–12 — dokładnie
+ * taki zakres przepuszczają reguły bazy. Wcześniej `Math.max(1, value)`
+ * przepuszczało `NaN`, ułamki i wartości powyżej 12, a wtedy cały zapis węzła
+ * `appData` był odrzucany jako „permission denied”.
+ */
+function normalizeCourtUnit(value: unknown, label: string): { value: number } | { error: string } {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 1 || value > 12) {
+    return { error: `${label} musi być liczbą całkowitą od 1 do 12` };
+  }
+  return { value };
+}
+
 function normalizeSession(
   input: SessionInput,
-  options: { preserveMissingCourtConfig?: boolean } = {},
+  options: { preserveMissingCourtConfig?: boolean; preserveMissingSport?: boolean } = {},
 ): { session: NormalizedSession } | { error: string } {
-  const { totalCost, sport = 'pingpong' } = input;
+  const { totalCost } = input;
+  const sport = input.sport ?? (options.preserveMissingSport ? undefined : 'pingpong');
 
   if (!isValidMoney(totalCost)) {
     return { error: 'Koszt sesji musi być liczbą nieujemną' };
@@ -52,7 +67,7 @@ function normalizeSession(
 
   // Reguły bazy przepuszczają tylko dyscypliny z tej listy. Bez sprawdzenia
   // tutaj zapis wracałby jako „permission denied" bez czytelnego powodu.
-  if (!isSport(sport)) {
+  if (sport !== undefined && !isSport(sport)) {
     return { error: 'Nieznana dyscyplina sportu' };
   }
 
@@ -76,19 +91,30 @@ function normalizeSession(
   // Liczba kortów i godzin — domyślnie 1 dla nowych sesji. Edycja starej
   // sesji może je zostawić `undefined`, żeby nie włączyć jej po cichu limitu
   // kart MultiSport, którego wcześniej nie miała.
-  const courtCount = input.courtCount != null
-    ? Math.max(1, input.courtCount)
-    : (options.preserveMissingCourtConfig ? undefined : 1);
-  const durationHours = input.durationHours != null
-    ? Math.max(1, input.durationHours)
-    : (options.preserveMissingCourtConfig ? undefined : 1);
+  let courtCount: number | undefined;
+  if (input.courtCount != null) {
+    const normalizedCourtCount = normalizeCourtUnit(input.courtCount, 'Liczba kortów');
+    if ('error' in normalizedCourtCount) return normalizedCourtCount;
+    courtCount = normalizedCourtCount.value;
+  } else if (!options.preserveMissingCourtConfig) {
+    courtCount = 1;
+  }
+
+  let durationHours: number | undefined;
+  if (input.durationHours != null) {
+    const normalizedDurationHours = normalizeCourtUnit(input.durationHours, 'Czas trwania');
+    if ('error' in normalizedDurationHours) return normalizedDurationHours;
+    durationHours = normalizedDurationHours.value;
+  } else if (!options.preserveMissingCourtConfig) {
+    durationHours = 1;
+  }
 
   return {
     session: {
       cost: totalCost,
       present,
       multiPlayers,
-      sport,
+      ...(sport !== undefined ? { sport } : {}),
       ...(courtCount !== undefined ? { courtCount } : {}),
       ...(durationHours !== undefined ? { durationHours } : {}),
       ...(racketCost != null && racketCost > 0 ? { racketCost } : {}),
@@ -127,7 +153,14 @@ export async function addSession(params: AddSessionParams): Promise<TransactionR
 
     return {
       ...data,
-      weeks: sortWeeksByDate([...weeks, { id: newId, date: params.datePlayed, ...normalized.session }]),
+      weeks: sortWeeksByDate([...weeks, {
+        id: newId,
+        date: params.datePlayed,
+        ...normalized.session,
+        // Nowa sesja zawsze ma sport; opcjonalność w typie dotyczy tylko
+        // edycji starego rekordu, która zachowuje dotychczasową wartość.
+        sport: normalized.session.sport ?? 'pingpong',
+      }]),
       lastAddedSession: { id: newId, ts: addedAt },
     } as RawAppData;
   }, 'Nie udało się zapisać sesji');
@@ -157,7 +190,7 @@ export async function updateWeek(
     totalCost: params.cost,
     presentPlayers: params.present,
     multisportPlayers: params.multisportPlayers ?? params.multiPlayers,
-  }, { preserveMissingCourtConfig: true });
+  }, { preserveMissingCourtConfig: true, preserveMissingSport: true });
   if ('error' in normalized) return { success: false, error: normalized.error };
 
   return withTransaction((current) => {
@@ -170,11 +203,15 @@ export async function updateWeek(
       reject('Sesja z tą datą już istnieje');
     }
 
+    // Gdy formularz nie podał sportu, zachowujemy dotychczasowy — inaczej
+    // edycja squasha/badmintona/padla po cichu zmieniała go na ping-pong.
+    const existingSport = weeks[idx].sport;
     const updated: Week = {
       id: weekId,
       date: params.date,
       ...normalized.session,
-      sport: normalized.session.sport || weeks[idx].sport || 'pingpong',
+      sport: normalized.session.sport
+        ?? (isSport(existingSport) ? existingSport : 'pingpong'),
     };
 
     const updatedWeeks = [...weeks];

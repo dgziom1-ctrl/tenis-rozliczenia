@@ -190,7 +190,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
             <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,color:'var(--co-cyan)',padding:'2px 6px',
-              background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>
+              background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>{' '}
             <span className="header-blik-number" style={{ ...FONT.data(blikNumber, TEXT.base),color:'var(--co-text)' }}>
               {blikNumber}
             </span>
@@ -237,7 +237,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
         <button type="button" onClick={handleCopy} className="header-blik-mobile"
           aria-label={`Skopiuj numer BLIK ${blikNumber}`}>
           <Smartphone size={14} aria-hidden="true" style={{ color:'var(--co-dim)', flexShrink:0 }}/>
-          <span className="header-blik-label">Blik</span>
+          <span className="header-blik-label">Blik</span>{' '}
           <span style={{ ...FONT.data(blikNumber, TEXT.base),color:'var(--co-text)',flex:1,textAlign:'left' }}>
             {blikNumber}
           </span>
@@ -252,18 +252,11 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
             <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit}/>
           </div>
 
-          <button className="header-hero-title" onClick={handleTitleClick} aria-label="CYBER-PONK"
+          <button className={`header-hero-title${!chaosMode && hitting ? ' is-hitting' : ''}`}
+            onClick={handleTitleClick} aria-label="CYBER-PONK"
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
-            {/* Ghost layer — flashes briefly when the paddle is hit. */}
-            {!chaosMode && hitting && <span aria-hidden="true" style={{
-              position:'absolute',inset:0,
-              display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
-              fontSize:'clamp(1.7rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
-              color:'transparent',pointerEvents:'none',userSelect:'none',
-              textShadow:'-4px 0 var(--co-rose), 4px 0 var(--co-cyan)',
-              clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
-              opacity:1,
-            }}>CYBER-PONK</span>}
+            {/* Ghost flash is a CSS pseudo-element: a second visible text node
+                made axe report a label/visible-text mismatch during the hit. */}
             <span style={{
               display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
               fontSize:'clamp(1.7rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',

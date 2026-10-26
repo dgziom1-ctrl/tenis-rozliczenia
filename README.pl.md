@@ -58,6 +58,8 @@ npm run verify    # sprawdzenie typów, lint, audyty i testy
 npm run build
 ```
 
+W CI `npm run build` nie zbuduje paczki bez `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_DATABASE_URL`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` i `VITE_BLIK_NUMBER` (w `.env.production`, `.env.production.local` albo w środowisku CI), żeby brak sekretu nie wdrożył aplikacji bez bazy. Poza CI ten sam build tylko ostrzega — lokalnie działa bez żadnej konfiguracji. Brak `VITE_ADMIN_PASSWORD` lub `VITE_FIREBASE_VAPID_KEY` zawsze daje tylko ostrzeżenie, bo panel admina i powiadomienia push są opcjonalne.
+
 ## Układ repozytorium
 
 | Ścieżka | Zawartość |

@@ -24,7 +24,7 @@ describe('PodiumCard', () => {
     const onSelect = vi.fn();
     render(<PodiumCard podiumEntry={{ place: 1, players: [player('Kamil')] }} onSelect={onSelect} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Kamil, 93% frekwencji, miejsce 1/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Kamil 93% 38\/41 sesji, miejsce 1/ }));
 
     expect(onSelect).toHaveBeenCalledWith('Kamil');
   });
@@ -51,6 +51,8 @@ describe('PodiumCard', () => {
 
     const rows = screen.getAllByRole('button');
     expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveAccessibleName('Marek 38/41 88%, miejsce 3');
+    expect(rows[1]).toHaveAccessibleName('Tomek 38/41 88%, miejsce 3');
 
     fireEvent.click(rows[1]);
     expect(onSelect).toHaveBeenCalledWith('Tomek');

@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
-import type { PointerEvent } from 'react';
+import type { KeyboardEvent, PointerEvent } from 'react';
 import { CheckCircle2, TriangleAlert } from 'lucide-react';
 import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, rankTint } from '@/constants';
 import { FONT, CLIP } from '../../constants/styles';
@@ -120,12 +120,28 @@ function PlayerCard({
   const { lastPayment, secondsLeft, progressPct, startPaymentUndo, handleUndoPayment } =
     usePaymentUndo({ playerName: player.name, onRemovePayment });
 
+  const toggleAdminMode = useCallback(() => {
+    clickCount.current = 0;
+    clearTimeout(clickTimer.current ?? undefined);
+    setAdminMode(prev => !prev);
+  }, []);
+
   const handleAmountClick = useCallback(() => {
     clickCount.current += 1;
     clearTimeout(clickTimer.current ?? undefined);
-    if (clickCount.current >= 5) { clickCount.current = 0; setAdminMode(prev => !prev); }
+    if (clickCount.current >= 5) toggleAdminMode();
     else clickTimer.current = setTimeout(() => { clickCount.current = 0; }, 1000);
-  }, []);
+  }, [toggleAdminMode]);
+
+  // Ukryte 5 kliknięć było niedostępne z klawiatury. Kwota ma teraz rolę
+  // przycisku i `aria-pressed`; Enter/Spacja przełącza tryb od razu, bez
+  // zmuszania użytkownika czytnika ekranu do pięciu osobnych aktywacji.
+  const handleAmountKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    toggleAdminMode();
+  }, [toggleAdminMode]);
+
   useEffect(() => () => clearTimeout(clickTimer.current ?? undefined), []);
 
   const cancelModal = useCallback(() => {
@@ -181,6 +197,10 @@ function PlayerCard({
     ? `${c.border}25`
     : `${c.border}30`;
   const playerId = `P${String((player.name.charCodeAt(0) * 31 + playerIndex * 17) % 9000 + 1000)}`;
+  // Etykieta musi zawierać widoczny tekst (kwotę i stan), inaczej osoby
+  // korzystające z rozpoznawania mowy nie mogą aktywować elementu po nazwie.
+  const amountText = `${hasCredit ? '+' : ''}${formatAmountShort(Math.abs(debt))}zł`;
+  const amountAriaLabel = `${hasCredit ? '↑ Nadpłata ' : ''}${amountText}${adminMode ? ' Tryb edycji' : ''} — ${adminMode ? 'wyłącz' : 'włącz'} tryb edycji wpłat`;
 
   const scheduleCardTilt = useCallback((clientX: number, clientY: number) => {
     if (reducedMotion) return;
@@ -429,7 +449,12 @@ function PlayerCard({
 
           <div
             className={`${flash ? 'debt-flash' : ''} ${settling ? 'debt-settling' : ''}`.trim()}
+            role="button"
+            tabIndex={0}
+            aria-pressed={adminMode}
+            aria-label={amountAriaLabel}
             onClick={handleAmountClick}
+            onKeyDown={handleAmountKeyDown}
             style={{
               minHeight: 84,
               padding: '12px',
@@ -565,7 +590,7 @@ function PlayerCard({
                     onConfirm={() => void savePayment(debt)}
                     onKeyboardRequest={() => setConfirmSettle(true)}
                   />
-                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }} aria-label="Wpłać inną kwotę">
+                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }} aria-label="+ Inna kwota — wpłać dowolną kwotę">
                     + Inna kwota
                   </button>
                 </>

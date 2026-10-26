@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
 
@@ -21,11 +21,15 @@ interface TerminalPanelProps {
 }
 
 export function TerminalPanel({ open, onToggle, toggleLabel, children, footer }: TerminalPanelProps) {
+  const contentId = useId();
+
   return (
     <div style={{ marginBottom: 12 }}>
       <button
+        type="button"
         onClick={onToggle}
         aria-expanded={open}
+        aria-controls={open ? contentId : undefined}
         className="icon-btn"
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
@@ -44,7 +48,7 @@ export function TerminalPanel({ open, onToggle, toggleLabel, children, footer }:
       </button>
 
       {open && (
-        <div style={{
+        <div id={contentId} style={{
           marginTop: 4,
           background: 'var(--co-surface-2)',
           border: '1px solid var(--co-border)',

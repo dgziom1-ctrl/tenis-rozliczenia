@@ -58,6 +58,8 @@ npm run verify    # typecheck, lint, audits and tests
 npm run build
 ```
 
+In CI, `npm run build` refuses to produce a bundle unless `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_DATABASE_URL`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` and `VITE_BLIK_NUMBER` are set (in `.env.production`, `.env.production.local` or the CI environment), so a missing secret cannot deploy an app with no database. Outside CI the same build only prints a warning — you can run it locally without configuring anything. A missing `VITE_ADMIN_PASSWORD` or `VITE_FIREBASE_VAPID_KEY` always only warns, because the admin panel and push notifications are optional.
+
 ## Project layout
 
 | Path | Purpose |

@@ -31,11 +31,13 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
   // etykiety osi i wartości nie są już pomniejszane razem z viewBoxem.
   const compact = chartWidth < 480;
   const W = Math.max(chartWidth, 280);
-  const H = compact ? 220 : 200;
-  // Prawy margines robi miejsce na drugą oś (koszt w zł).
+  const H = compact ? 234 : 212;
+  // Górny margines musi pomieścić etykiety jednostek („os.”, „zł”) nad
+  // najwyższą linią siatki. Przy 20 px jednostki nachodziły na wartość
+  // szczytową i na etykiety punktów.
   const PAD = compact
-    ? { top: 20, right: 34, bottom: 30, left: 26 }
-    : { top: 20, right: 46, bottom: 32, left: 36 };
+    ? { top: 34, right: 34, bottom: 30, left: 26 }
+    : { top: 32, right: 46, bottom: 32, left: 36 };
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
 
@@ -113,11 +115,11 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
           ))}
 
           {/* Podpisy osi */}
-          <text x={PAD.left - 6} y={PAD.top - 6} textAnchor="end"
+          <text x={PAD.left - 6} y={12} textAnchor="end"
             fill="var(--co-cyan)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)">
             os.
           </text>
-          <text x={W - PAD.right + 6} y={PAD.top - 6} textAnchor="start"
+          <text x={W - PAD.right + 6} y={12} textAnchor="start"
             fill="var(--co-rose)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)">
             zł
           </text>

@@ -370,7 +370,10 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
             {isMobile ? (
               <>
                 <button
+                  type="button"
                   onClick={() => setIsFilterOpen(true)}
+                  aria-haspopup="dialog"
+                  aria-label={filterPlayer ? `Filtr gracza: ${filterPlayer}` : 'Filtr gracza: wszyscy'}
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: '0.8125rem',
@@ -398,7 +401,9 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
             ) : (
               <>
                 <button
+                  type="button"
                   onClick={() => setFilterPlayer('')}
+                  aria-pressed={!filterPlayer}
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: '0.8125rem',
@@ -418,7 +423,9 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 {playerNames.map(name => (
                   <button
                     key={name}
+                    type="button"
                     onClick={() => setFilterPlayer(prev => prev === name ? '' : name)}
+                    aria-pressed={filterPlayer === name}
                     style={{
                       fontFamily: 'var(--font-display)',
                       fontSize: '0.8125rem',
@@ -451,9 +458,9 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 na początku linii. Akcje mają teraz osobną, nierozdzielną grupę. */}
             {/* Filtr po sporcie */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <button onClick={() => setFilterSport('')} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: !filterSport ? 'var(--co-cyan)' : 'var(--co-border)', color: !filterSport ? 'var(--co-cyan)' : 'var(--co-dim)', background: !filterSport ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>Wszystkie sporty</button>
+              <button type="button" onClick={() => setFilterSport('')} aria-pressed={!filterSport} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: !filterSport ? 'var(--co-cyan)' : 'var(--co-border)', color: !filterSport ? 'var(--co-cyan)' : 'var(--co-dim)', background: !filterSport ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>Wszystkie sporty</button>
               {Object.entries(SPORT_LABEL).map(([key, label]) => (
-                <button key={key} onClick={() => setFilterSport(prev => prev === key ? '' : key)} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: filterSport === key ? 'var(--co-cyan)' : 'var(--co-border)', color: filterSport === key ? 'var(--co-cyan)' : 'var(--co-dim)', background: filterSport === key ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>{label}</button>
+                <button key={key} type="button" onClick={() => setFilterSport(prev => prev === key ? '' : key)} aria-pressed={filterSport === key} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: filterSport === key ? 'var(--co-cyan)' : 'var(--co-border)', color: filterSport === key ? 'var(--co-cyan)' : 'var(--co-dim)', background: filterSport === key ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>{label}</button>
               ))}
             </div>
 
@@ -465,9 +472,12 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
 
             {/* Sort */}
             <button
+              type="button"
               onClick={() => setSortOrder(o => o === 'desc' ? 'asc' : 'desc')}
               title={sortOrder === 'desc' ? 'Najnowsze pierwsze' : 'Najstarsze pierwsze'}
-              aria-label="Zmień kolejność"
+              aria-label={sortOrder === 'desc'
+                ? 'Sortowanie: najnowsze pierwsze — zmień na najstarsze'
+                : 'Sortowanie: najstarsze pierwsze — zmień na najnowsze'}
               className="icon-btn"
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
@@ -485,6 +495,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
 
             {/* CSV */}
             <button
+              type="button"
               onClick={handleExportCSV}
               title="Pobierz CSV"
               aria-label="Eksportuj CSV"

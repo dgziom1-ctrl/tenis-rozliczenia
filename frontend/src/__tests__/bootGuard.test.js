@@ -25,6 +25,14 @@ let listeners;
 let deletedCaches;
 let unregistered;
 
+/**
+ * Natywny nasłuch bierzemy raz, przed założeniem jakiegokolwiek szpiega.
+ * Późniejsze `vi.spyOn` podmienia metodę na `window`, więc wiązanie jej
+ * wewnątrz `loadGuard()` mogłoby związać już podstawiony mock i zapętlić
+ * wywołanie w nieskończoność.
+ */
+const nativeAddEventListener = window.addEventListener.bind(window);
+
 /** Podstawia adres strony — jsdom nie umie nawigować i rzuca przy `reload()`. */
 function stubLocation(href = `${ORIGIN}/`) {
   replace = vi.fn();
@@ -78,10 +86,9 @@ function readStage() {
  * testów reagowałyby na te same zdarzenia i psuły liczniki.
  */
 function loadGuard() {
-  const realAdd = window.addEventListener.bind(window);
   vi.spyOn(window, 'addEventListener').mockImplementation((type, handler, options) => {
     listeners.push([type, handler, options]);
-    realAdd(type, handler, options);
+    nativeAddEventListener(type, handler, options);
   });
 
   new Function(GUARD_SOURCE)();

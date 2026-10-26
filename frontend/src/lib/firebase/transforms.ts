@@ -1,8 +1,8 @@
 import { calculateDebt, roundToTwoDecimals } from '@/utils/debt';
 import { getSessionShares } from '@/utils/sessionCost';
-import { isValidISODate } from '@/utils/validation';
-import { ORGANIZER_NAME, SPORT } from '@/constants';
-import type { Week, NormalizedData, Payment, PlayerJoinDates } from '@/types/domain';
+import { isValidISODate, isValidMoney } from '@/utils/validation';
+import { ORGANIZER_NAME, SPORT, SPORT_LABEL } from '@/constants';
+import type { Week, NormalizedData, Payment, PlayerJoinDates, Sport } from '@/types/domain';
 import type { PlayerStats, HistoryEntry, Summary, UIData } from '@/types/ui';
 
 /** Data, której nie osiągnie żadna sesja — gracz zapisany „od następnej sesji". */
@@ -147,17 +147,170 @@ export function buildUIData(rawData: NormalizedData): UIData {
   };
 }
 
-export function normalizeRawData(rawData: Partial<NormalizedData>): NormalizedData {
+/** Czy wartość jest zwykłym obiektem (bez tablic i null). */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Klucze, które w zwykłym obiekcie mogłyby podmienić prototyp. Dane z bazy są
+ * publiczne i mogą pochodzić spoza aplikacji, więc nie wolno ich przepisywać
+ * wprost do obiektu wynikowego.
+ */
+function isSafeKey(key: string): boolean {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
+
+/** Lista imion: tylko tekstowe, niepuste wpisy bez duplikatów. */
+function sanitizeNames(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  for (const entry of value) {
+    if (typeof entry === 'string' && entry.trim().length > 0 && entry.length <= 40) {
+      seen.add(entry);
+    }
+  }
+  return [...seen];
+}
+
+const SPORT_VALUES = new Set(Object.keys(SPORT_LABEL));
+
+function sanitizeSport(value: unknown): Sport {
+  return typeof value === 'string' && SPORT_VALUES.has(value)
+    ? value as Sport
+    : SPORT.PINGPONG;
+}
+
+/** Liczba kortów/godzin: całkowita 1–12, inaczej `undefined` (stare sesje bez limitu). */
+function sanitizeCourtUnit(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 12
+    ? value
+    : undefined;
+}
+
+/**
+ * Pojedyncza sesja z bazy. Uszkodzone rekordy są odrzucane, a pojedyncze pola
+ * naprawiane do wartości, które reguły bazy i silnik kosztów na pewno przyjmą.
+ */
+function sanitizeWeek(value: unknown): Week | null {
+  if (!isRecord(value)) return null;
+
+  const id = value.id;
+  if (typeof id !== 'string' || id.length === 0 || id.length > 64) return null;
+  if (!isValidISODate(value.date)) return null;
+
+  const cost = isValidMoney(value.cost) ? value.cost : 0;
+  const present = sanitizeNames(value.present);
+  const multiPlayers = sanitizeNames(value.multiPlayers).filter(p => present.includes(p));
+  const ownRacketPlayers = sanitizeNames(value.ownRacketPlayers).filter(p => present.includes(p));
+  const racketCost = isValidMoney(value.racketCost)
+    ? Math.min(value.racketCost, cost)
+    : undefined;
+  const overtimeCost = isValidMoney(value.overtimeCost) ? value.overtimeCost : undefined;
+  const overtimePlayers = sanitizeNames(value.overtimePlayers);
+  const courtCount = sanitizeCourtUnit(value.courtCount);
+  const durationHours = sanitizeCourtUnit(value.durationHours);
+
+  return {
+    id,
+    date: value.date,
+    cost,
+    sport: sanitizeSport(value.sport),
+    present,
+    multiPlayers,
+    ...(racketCost !== undefined && racketCost > 0 ? { racketCost } : {}),
+    ...(ownRacketPlayers.length > 0 ? { ownRacketPlayers } : {}),
+    ...(courtCount !== undefined ? { courtCount } : {}),
+    ...(durationHours !== undefined ? { durationHours } : {}),
+    ...(overtimeCost !== undefined && overtimeCost > 0 ? { overtimeCost } : {}),
+    ...(overtimePlayers.length > 0 ? { overtimePlayers } : {}),
+  };
+}
+
+/** Sesje: odrzuca śmieci i duplikaty id, zachowuje poprawne rekordy bez obecnych. */
+function sanitizeWeeks(value: unknown): Week[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const weeks: Week[] = [];
+  for (const entry of value) {
+    const week = sanitizeWeek(entry);
+    if (!week || seen.has(week.id)) continue;
+    seen.add(week.id);
+    weeks.push(week);
+  }
+  return sortWeeksByDate(weeks);
+}
+
+/** Księga wpłat: tylko poprawne, unikalne wpisy i bezpieczne klucze graczy. */
+function sanitizePayments(value: unknown): Record<string, Payment[]> {
+  if (!isRecord(value)) return {};
+  const payments: Record<string, Payment[]> = {};
+
+  for (const [playerName, entries] of Object.entries(value)) {
+    if (!isSafeKey(playerName) || playerName.length === 0 || playerName.length > 40) continue;
+    if (!Array.isArray(entries)) continue;
+
+    const seen = new Set<string>();
+    const valid: Payment[] = [];
+    for (const entry of entries) {
+      if (!isRecord(entry)) continue;
+      const { id, amount, date } = entry;
+      if (typeof id !== 'string' || id.length === 0 || id.length > 64 || seen.has(id)) continue;
+      if (!isValidMoney(amount) || !isValidISODate(date)) continue;
+      seen.add(id);
+      valid.push({ id, amount, date });
+    }
+    if (valid.length > 0) payments[playerName] = valid;
+  }
+
+  return payments;
+}
+
+/** Daty dołączenia: wyłącznie poprawny format ISO, bez kluczy prototypu. */
+function sanitizeJoinDates(value: unknown): PlayerJoinDates {
+  if (!isRecord(value)) return {};
+  const dates: PlayerJoinDates = {};
+  for (const [name, date] of Object.entries(value)) {
+    if (!isSafeKey(name) || name.length === 0 || name.length > 40) continue;
+    if (isValidISODate(date)) dates[name] = date;
+  }
+  return dates;
+}
+
+/** Zaszłościowy indeks dołączenia: skończona liczba nieujemna. */
+function sanitizeJoinWeeks(value: unknown): Record<string, number> | undefined {
+  if (!isRecord(value)) return undefined;
+  const weeks: Record<string, number> = {};
+  for (const [name, index] of Object.entries(value)) {
+    if (!isSafeKey(name) || name.length === 0 || name.length > 40) continue;
+    if (typeof index === 'number' && Number.isFinite(index) && index >= 0 && index <= 100_000) {
+      weeks[name] = Math.floor(index);
+    }
+  }
+  return Object.keys(weeks).length > 0 ? weeks : undefined;
+}
+
+/**
+ * Jedyne wejście surowych danych z Firebase.
+ *
+ * `snapshot.val()` jest nietypowany — może zawierać wszystko, co ktoś zapisze
+ * w publicznym węźle. Normalizacja odsiewa rekordy bez tożsamości (id/daty),
+ * naprawia typy pól i odrzuca klucze mogące podmienić prototyp, dzięki czemu
+ * jeden uszkodzony wpis nie wywraca całego interfejsu.
+ */
+export function normalizeRawData(rawData: unknown): NormalizedData {
+  const raw = isRecord(rawData) ? rawData : {};
+
   // Sesje zawsze porządkujemy chronologicznie po dacie (rosnąco). Dzięki temu
   // sesja dodana z datą wsteczną nie psuje historii, wykresów ani kursora rozliczeń
   // (kolejność w tablicy przestaje zależeć od momentu wpisania sesji).
   return {
-    players: rawData.players || [],
-    weeks: sortWeeksByDate(rawData.weeks || []),
-    defaultMultiPlayers: rawData.defaultMultiPlayers || [],
-    playerJoinDate: rawData.playerJoinDate || {},
-    playerJoinWeek: rawData.playerJoinWeek,
-    deletedPlayers: rawData.deletedPlayers || [],
-    payments: rawData.payments || {},
+    players: sanitizeNames(raw.players),
+    weeks: sanitizeWeeks(raw.weeks),
+    defaultMultiPlayers: sanitizeNames(raw.defaultMultiPlayers),
+    playerJoinDate: sanitizeJoinDates(raw.playerJoinDate),
+    playerJoinWeek: sanitizeJoinWeeks(raw.playerJoinWeek),
+    deletedPlayers: sanitizeNames(raw.deletedPlayers),
+    payments: sanitizePayments(raw.payments),
   };
 }

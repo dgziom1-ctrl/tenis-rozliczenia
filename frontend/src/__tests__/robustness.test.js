@@ -436,6 +436,33 @@ describe('addSession — validation', () => {
 
   it('accepts cost = 0', async () =>
     expect((await addSession({ datePlayed: '2025-01-01', totalCost: 0, presentPlayers: ['Alice'] })).success).toBe(true));
+
+  // Reguły bazy wymagają liczby całkowitej 1–12. Wcześniej `Math.max(1, value)`
+  // przepuszczało ułamki, NaN i 13+, a wtedy cały zapis `appData` był odrzucany.
+  it.each([
+    ['zero', 0],
+    ['negative', -1],
+    ['fraction', 1.5],
+    ['too many', 13],
+    ['NaN', NaN],
+    ['Infinity', Infinity],
+  ])('rejects a %s court count', async (_label, courtCount) => {
+    const result = await addSession({
+      datePlayed: '2025-01-01', totalCost: 60, presentPlayers: ['Alice'], courtCount,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/całkowitą od 1 do 12/);
+    expect(mockSaveData).not.toHaveBeenCalled();
+  });
+
+  it('rejects a non-integer duration', async () => {
+    const result = await addSession({
+      datePlayed: '2025-01-01', totalCost: 60, presentPlayers: ['Alice'], durationHours: 0.5,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/całkowitą od 1 do 12/);
+    expect(mockSaveData).not.toHaveBeenCalled();
+  });
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -648,6 +675,48 @@ describe('updateWeek — edge cases', () => {
     const saved = mockSaveData.mock.calls[0][0];
     expect(saved.weeks[0]).not.toHaveProperty('courtCount');
     expect(saved.weeks[0]).not.toHaveProperty('durationHours');
+  });
+
+  // Regresja: `normalizeSession` zawsze ustawiał domyślny sport, więc edycja
+  // bez pola `sport` po cichu zmieniała squash na ping-pong.
+  it('zachowuje sport, gdy edycja go nie poda', async () => {
+    seed({ weeks: [{
+      id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice'],
+      multiPlayers: [], sport: 'squash',
+    }] });
+
+    const result = await updateWeek('w1', {
+      date: '2025-01-01', cost: 60, present: ['Alice'], multiPlayers: [],
+    });
+
+    expect(result.success).toBe(true);
+    expect(mockSaveData.mock.calls[0][0].weeks[0].sport).toBe('squash');
+  });
+
+  it('zachowuje sport badmintona przy edycji bez pola sport', async () => {
+    seed({ weeks: [{
+      id: 'w1', date: '2025-01-01', cost: 80, present: ['Alice'],
+      multiPlayers: [], sport: 'badminton',
+    }] });
+
+    await updateWeek('w1', { date: '2025-01-01', cost: 80, present: ['Alice'] });
+
+    expect(mockSaveData.mock.calls[0][0].weeks[0].sport).toBe('badminton');
+  });
+
+  it('odrzuca liczbę kortów spoza zakresu zamiast psuć cały zapis', async () => {
+    seed({ weeks: [{
+      id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice'],
+      multiPlayers: [],
+    }] });
+
+    const result = await updateWeek('w1', {
+      date: '2025-01-01', cost: 60, present: ['Alice'], courtCount: 13,
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/całkowitą od 1 do 12/);
+    expect(mockSaveData).not.toHaveBeenCalled();
   });
 });
 

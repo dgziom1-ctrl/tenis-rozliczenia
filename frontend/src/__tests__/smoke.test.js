@@ -189,8 +189,77 @@ describe('lib/firebase/transforms.ts — eksporty', () => {
   it('normalizeRawData zwraca kompletny obiekt gdy wejście jest null', async () => {
     const { normalizeRawData } = await import('../lib/firebase/transforms');
     // snapshot Firebase może zwrócić null gdy baza jest pusta
-    const result = normalizeRawData({});
-    expect(result).toBeDefined();
+    const result = normalizeRawData(null);
+    expect(result.players).toEqual([]);
+    expect(result.weeks).toEqual([]);
+    expect(result.payments).toEqual({});
+  });
+
+  it('normalizeRawData odsiewa uszkodzone dane i zachowuje poprawne sesje', async () => {
+    const { normalizeRawData, buildUIData } = await import('../lib/firebase/transforms');
+
+    const result = normalizeRawData({
+      players: ['Ala', null, 42, 'Ala', 'x'.repeat(41)],
+      weeks: [
+        null,
+        'uszkodzona',
+        {
+          id: 'w1', date: '2025-01-01', cost: 60, sport: 'squash',
+          present: ['Ala', 'Ala'], multiPlayers: ['Ala', 'Ghost'],
+          ownRacketPlayers: ['Ghost'], courtCount: 2, durationHours: 3,
+          overtimeCost: 15, overtimePlayers: ['Ala'],
+        },
+        { id: 'w2', date: 'nie-data', cost: 60, present: ['Ala'] },
+        { id: 'w1', date: '2025-02-01', cost: 60, present: ['Ala'] },
+        {
+          id: 'w3', date: '2025-03-01', cost: NaN, sport: 'hacker',
+          present: 'Ala', courtCount: 99, durationHours: 0,
+        },
+      ],
+      payments: {
+        Ala: [
+          { id: 'p1', amount: 30, date: '2025-01-02' },
+          { id: 'p1', amount: 99, date: '2025-01-03' },
+          { id: 'bad', amount: NaN, date: '2025-01-04' },
+          null,
+        ],
+        Bob: 'nie-tablica',
+        ['__proto__']: [{ id: 'evil', amount: 1, date: '2025-01-01' }],
+      },
+      playerJoinDate: { Ala: '2025-01-01', Bob: 'wczoraj' },
+      playerJoinWeek: { Ala: 2.9, Bob: Infinity, Carl: '1' },
+      defaultMultiPlayers: 'nie-tablica',
+      deletedPlayers: ['Dawny', null],
+    });
+
+    expect(result.players).toEqual(['Ala']);
+    expect(result.weeks.map(w => w.id)).toEqual(['w1', 'w3']);
+
+    expect(result.weeks[0]).toMatchObject({
+      sport: 'squash',
+      present: ['Ala'],
+      multiPlayers: ['Ala'],
+      courtCount: 2,
+      durationHours: 3,
+      overtimeCost: 15,
+      overtimePlayers: ['Ala'],
+    });
+    expect(result.weeks[0]).not.toHaveProperty('ownRacketPlayers');
+
+    expect(result.weeks[1]).toMatchObject({ cost: 0, sport: 'pingpong', present: [] });
+    expect(result.weeks[1]).not.toHaveProperty('courtCount');
+    expect(result.weeks[1]).not.toHaveProperty('durationHours');
+
+    expect(result.payments).toEqual({ Ala: [{ id: 'p1', amount: 30, date: '2025-01-02' }] });
+    expect(Object.prototype.hasOwnProperty.call(result.payments, '__proto__')).toBe(false);
+    expect(result.playerJoinDate).toEqual({ Ala: '2025-01-01' });
+    expect(result.playerJoinWeek).toEqual({ Ala: 2 });
+    expect(result.defaultMultiPlayers).toEqual([]);
+    expect(result.deletedPlayers).toEqual(['Dawny']);
+
+    // Cały łańcuch czytania danych musi przetrwać to samo wejście.
+    expect(() => buildUIData(result)).not.toThrow();
+    expect(buildUIData(result).history).toHaveLength(2);
   });
 });
 

@@ -18,6 +18,11 @@ describe('HoldToSettleButton', () => {
     vi.useRealTimers();
   });
 
+  it('nazwa dostępna zawiera widoczną kwotę i podpowiedź', () => {
+    render(<HoldToSettleButton amount={11.22} onConfirm={vi.fn()} onKeyboardRequest={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /11,22 zł Przytrzymaj, aby zapisać/ })).toBeInTheDocument();
+  });
+
   it('krótkie dotknięcie nie zapisuje wpłaty i pokazuje podpowiedź', () => {
     vi.useFakeTimers();
     const onConfirm = vi.fn();

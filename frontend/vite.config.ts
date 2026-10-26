@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin, type ResolvedConfig } from 'vite';
+import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -84,41 +84,89 @@ function prepareServiceWorker(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [react(), prepareServiceWorker()],
-  define: {
-    // Aplikacja musi znać własne wydanie, żeby porównać je z `version.json`.
-    __CP_APP_BUILD__: JSON.stringify(BUILD_ID),
-  },
-  server: {
-    // `localhost` wystarcza do pracy na własnym komputerze. W środowiskach
-    // podglądu (Arena/E2B) strona jest serwowana z domeny `*.e2b.app` — bez
-    // wpisu na liście Vite odrzuca żądanie z komunikatem o niedozwolonym
-    // hoście i podgląd pokazuje biały ekran.
-    allowedHosts: ['localhost', '127.0.0.1', '.e2b.app'],
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        // Firebase (~400 kB) zmienia się raz na kilka miesięcy, a kod aplikacji
-        // przy każdym wydaniu. Osobne paczki pozwalają przeglądarce zachować
-        // dużą zależność w cache, zamiast pobierać ją od nowa z każdym buildem.
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router'],
-          'vendor-firebase': ['firebase/app', 'firebase/database', 'firebase/messaging'],
+/**
+ * Bez tych zmiennych `initializeApp`/`getDatabase` rzuca wyjątek jeszcze przed
+ * zamontowaniem Reacta — zamiast komunikatu użytkownik widzi biały ekran.
+ *
+ * W CI brak sekretów musi zatrzymać wdrożenie. Lokalnie build ma przechodzić bez
+ * konfiguracji: wymuszanie sekretów na komputerze dewelopera blokuje zwykłe
+ * `npm run build`, a niczego nie chroni — wdrożenie i tak idzie z sekretów CI.
+ */
+const REQUIRED_BUILD_ENV = [
+  'VITE_FIREBASE_API_KEY',
+  'VITE_FIREBASE_AUTH_DOMAIN',
+  'VITE_FIREBASE_DATABASE_URL',
+  'VITE_FIREBASE_PROJECT_ID',
+  'VITE_FIREBASE_MESSAGING_SENDER_ID',
+  'VITE_FIREBASE_APP_ID',
+  'VITE_BLIK_NUMBER',
+];
+
+export default defineConfig(({ command, mode }) => {
+  if (command === 'build') {
+    const env = loadEnv(mode, process.cwd(), 'VITE_');
+    const missing = REQUIRED_BUILD_ENV.filter(key => !env[key]?.trim());
+    const optionalMissing = ['VITE_ADMIN_PASSWORD', 'VITE_FIREBASE_VAPID_KEY']
+      .filter(key => !env[key]?.trim());
+
+    if (missing.length > 0) {
+      const detail = `Brak konfiguracji: ${missing.join(', ')}.`;
+      if (process.env.CI) {
+        throw new Error(
+          `${detail} W CI zatrzymujemy build, żeby nie wdrożyć aplikacji bez bazy. `
+          + 'Uzupełnij sekrety repozytorium.',
+        );
+      }
+      console.warn(
+        `[build] ${detail} Paczka powstanie, ale bez tych wartości aplikacja nie połączy się z Firebase. `
+        + 'Wdrożenie i tak korzysta z sekretów CI.',
+      );
+    }
+
+    if (optionalMissing.length > 0) {
+      console.warn(
+        `[build] Brak opcjonalnych zmiennych: ${optionalMissing.join(', ')}. `
+        + 'Panel admina lub powiadomienia push będą niedostępne.',
+      );
+    }
+  }
+
+  return {
+    plugins: [react(), prepareServiceWorker()],
+    define: {
+      // Aplikacja musi znać własne wydanie, żeby porównać je z `version.json`.
+      __CP_APP_BUILD__: JSON.stringify(BUILD_ID),
+    },
+    server: {
+      // `localhost` wystarcza do pracy na własnym komputerze. W środowiskach
+      // podglądu (Arena/E2B) strona jest serwowana z domeny `*.e2b.app` — bez
+      // wpisu na liście Vite odrzuca żądanie z komunikatem o niedozwolonym
+      // hoście i podgląd pokazuje biały ekran.
+      allowedHosts: ['localhost', '127.0.0.1', '.e2b.app'],
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          // Firebase (~400 kB) zmienia się raz na kilka miesięcy, a kod aplikacji
+          // przy każdym wydaniu. Osobne paczki pozwalają przeglądarce zachować
+          // dużą zależność w cache, zamiast pobierać ją od nowa z każdym buildem.
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom', 'react-router'],
+            'vendor-firebase': ['firebase/app', 'firebase/database', 'firebase/messaging'],
+          },
         },
       },
     },
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+      },
     },
-  },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['src/__tests__/setup.js'],
-    include: ['src/__tests__/**/*.test.{js,jsx,ts,tsx}'],
-  },
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      setupFiles: ['src/__tests__/setup.js'],
+      include: ['src/__tests__/**/*.test.{js,jsx,ts,tsx}'],
+    },
+  };
 });

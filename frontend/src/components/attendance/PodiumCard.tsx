@@ -55,6 +55,16 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
     onSelect(player.name);
   };
 
+  // Etykieta dostępna musi zaczynać się od tekstu widocznego na karcie —
+  // inaczej WCAG 2.5.3 (Label in Name) zgłasza konflikt nazwy z etykietą.
+  const playerLabel = (player: RankedPlayer, layout: 'card' | 'row') => {
+    if (layout === 'row') {
+      return `${player.name} ${player.attendanceCount}/${player.eligibleWeeks} ${player.attendancePercentage}%, miejsce ${podiumEntry.place}`;
+    }
+    const streak = player.currentStreak >= 2 ? ` seria ${player.currentStreak}` : '';
+    return `${player.name} ${player.attendancePercentage}% ${player.attendanceCount}/${player.eligibleWeeks} sesji${streak}, miejsce ${podiumEntry.place}`;
+  };
+
   return (
     <div className="podium-column" data-podium-place={podiumEntry.place} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: 'min(100%, 190px)', minWidth: 0 }}>
       <div style={{
@@ -73,7 +83,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
       }}
         role={exAequo ? undefined : 'button'}
         tabIndex={exAequo ? undefined : 0}
-        aria-label={exAequo ? undefined : `${players[0].name}, ${players[0].attendancePercentage}% frekwencji, miejsce ${podiumEntry.place}`}
+        aria-label={exAequo ? undefined : playerLabel(players[0], 'card')}
         onClick={exAequo ? undefined : () => openPlayer(players[0])}
         onKeyDown={exAequo ? undefined : e => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -111,7 +121,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
                 key={player.name}
                 role="button"
                 tabIndex={0}
-                aria-label={`${player.name}, ${player.attendancePercentage}% frekwencji, miejsce ${podiumEntry.place}`}
+                aria-label={playerLabel(player, 'row')}
                 onClick={() => openPlayer(player)}
                 onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {

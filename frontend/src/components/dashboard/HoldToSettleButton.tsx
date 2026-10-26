@@ -33,6 +33,7 @@ export default function HoldToSettleButton({ amount, disabled = false, onConfirm
   const suppressClickRef = useRef(false);
   const hintTimerRef = useRef<number | null>(null);
   const describedBy = useId();
+  const sublabel = holding ? 'Trzymaj…' : showHint ? 'Przytrzymaj dłużej' : 'Przytrzymaj, aby zapisać';
 
   const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
@@ -148,7 +149,7 @@ export default function HoldToSettleButton({ amount, disabled = false, onConfirm
         onKeyUp={handleKeyUp}
         onBlur={() => cancelHold()}
         disabled={disabled}
-        aria-label={`Przytrzymaj, aby zapisać wpłatę ${formatAmountShort(amount)} zł. Na klawiaturze naciśnij Enter, aby potwierdzić.`}
+        aria-label={`${formatAmountShort(amount)} zł ${sublabel}. Na klawiaturze naciśnij Enter, aby potwierdzić.`}
         aria-describedby={describedBy}
         style={{ padding: '10px 16px', width: '100%' }}
       >
@@ -161,7 +162,7 @@ export default function HoldToSettleButton({ amount, disabled = false, onConfirm
             {formatAmountShort(amount)} zł
           </span>
           <span id={describedBy} style={{ fontSize: '0.75rem', letterSpacing: 'normal', opacity: 0.8, fontFamily: 'var(--font-mono)' }}>
-            {holding ? 'Trzymaj…' : showHint ? 'Przytrzymaj dłużej' : 'Przytrzymaj, aby zapisać'}
+            {sublabel}
           </span>
         </span>
       </button>
