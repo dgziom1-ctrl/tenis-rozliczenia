@@ -38,7 +38,7 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
   // etykiety osi i wartości nie są już pomniejszane razem z viewBoxem.
   const compact = chartWidth < 480;
   const W = Math.max(chartWidth, 280);
-  const H = compact ? 234 : 212;
+  const H = compact ? 250 : 212;
   // Górny margines musi pomieścić etykiety jednostek („os.”, „zł”) nad
   // najwyższą linią siatki. Przy 20 px jednostki nachodziły na wartość
   // szczytową i na etykiety punktów.
@@ -54,6 +54,9 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
   // Podpisy liczb nad punktami mogą być gęstsze niż daty — mieszczą się w ok. 34 px.
   const valueLabels = new Set(spacedLabelIndices(n, innerW, 34));
   const dateLabels = new Set(spacedLabelIndices(n, innerW, 58));
+  // Najwyższa frekwencja sezonu — wyróżniona, żeby „rekord” był widoczny
+  // bez czytania liczb pod wykresem.
+  const recordCount = maxCount;
 
   const xPos   = (i: number) => PAD.left + (i / (n - 1)) * innerW;
   const yCount = (v: number) => PAD.top + innerH - (v / maxCount) * innerH;
@@ -97,7 +100,7 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
         <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Wykres trendu frekwencji" style={{ display: 'block', width: '100%', height: 'auto' }}>
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--co-cyan)" stopOpacity="0.18" />
+              <stop offset="0%" stopColor="var(--co-cyan)" stopOpacity="0.12" />
               <stop offset="100%" stopColor="var(--co-cyan)" stopOpacity="0.01" />
             </linearGradient>
             <filter id="lineGlow" x="-20%" y="-80%" width="140%" height="260%">
@@ -133,11 +136,8 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
             zł
           </text>
 
-          {data.map(d => (
-            <line key={d.i} x1={xPos(d.i)} y1={PAD.top} x2={xPos(d.i)} y2={PAD.top + innerH}
-              stroke="var(--co-separator)" strokeWidth="1" />
-          ))}
-
+          {/* Linia pionowa dla każdego punktu tylko zaśmieca wykres — zostaje
+              sama linia trendu i punkty. Siatka pozioma wystarczy do odczytu. */}
           <path d={areaPath} fill="url(#areaGrad)" />
 
           <path d={linePath(costPts)} fill="none"
@@ -149,21 +149,24 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
             stroke="var(--co-cyan)" strokeWidth="2"
             filter="url(#lineGlow)" />
 
-          {countPts.map(([x, y], i) => (
-            <g key={i}>
-              <circle cx={x} cy={y} r="5" fill="var(--co-panel)" stroke="var(--co-cyan)" strokeWidth="1.5" />
-              <circle cx={x} cy={y} r="2.5" fill="var(--co-cyan)" />
-              {(valueLabels.has(i)) && (
-                <text x={x} y={y - 9} textAnchor="middle"
-                  fill="var(--co-cyan)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)" opacity="0.8">
-                  {data[i].count}
-                </text>
-              )}
-            </g>
-          ))}
+          {countPts.map(([x, y], i) => {
+            const isRecord = data[i].count === recordCount;
+            return (
+              <g key={i}>
+                <circle cx={x} cy={y} r={isRecord ? 6 : 3.5} fill="var(--co-panel)" stroke={isRecord ? 'var(--co-green)' : 'var(--co-cyan)'} strokeWidth={isRecord ? 2 : 1.5} />
+                <circle cx={x} cy={y} r={isRecord ? 3 : 1.75} fill={isRecord ? 'var(--co-green)' : 'var(--co-cyan)'} />
+                {(valueLabels.has(i)) && (
+                  <text x={x} y={y - 9} textAnchor="middle"
+                    fill={isRecord ? 'var(--co-green)' : 'var(--co-cyan)'} fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)" opacity="0.85">
+                    {data[i].count}
+                  </text>
+                )}
+              </g>
+            );
+          })}
 
           {costPts.map(([x, y], i) => (
-            <circle key={i} cx={x} cy={y} r="3" fill="var(--co-panel)" stroke="var(--co-rose)" strokeWidth="1.5" opacity="0.8" />
+            <circle key={i} cx={x} cy={y} r="2" fill="var(--co-panel)" stroke="var(--co-rose)" strokeWidth="1.25" opacity="0.7" />
           ))}
 
           {/* Ostatnia etykieta zawsze zostaje jako punkt odniesienia, ale bez
