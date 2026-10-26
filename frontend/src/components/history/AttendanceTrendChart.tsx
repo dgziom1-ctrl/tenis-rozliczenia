@@ -52,7 +52,7 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
   const maxCost  = Math.max(...data.map(d => d.cost), 1);
   const n = data.length;
   // Podpisy liczb nad punktami mogą być gęstsze niż daty — mieszczą się w ok. 34 px.
-  const valueLabels = new Set(spacedLabelIndices(n, innerW, 34));
+  const valueLabels = new Set(spacedLabelIndices(n, innerW, 60));
   const dateLabels = new Set(spacedLabelIndices(n, innerW, 58));
   // Najwyższa frekwencja sezonu — wyróżniona, żeby „rekord” był widoczny
   // bez czytania liczb pod wykresem.
@@ -146,18 +146,20 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
             filter="url(#lineGlow)" />
 
           <path d={linePath(countPts)} fill="none"
-            stroke="var(--co-cyan)" strokeWidth="2"
+            stroke="var(--co-cyan)" strokeWidth="2.5"
+            strokeLinecap="round" strokeLinejoin="round"
             filter="url(#lineGlow)" />
 
           {countPts.map(([x, y], i) => {
             const isRecord = data[i].count === recordCount;
+            if (!isRecord) return null;
             return (
               <g key={i}>
-                <circle cx={x} cy={y} r={isRecord ? 6 : 3.5} fill="var(--co-panel)" stroke={isRecord ? 'var(--co-green)' : 'var(--co-cyan)'} strokeWidth={isRecord ? 2 : 1.5} />
-                <circle cx={x} cy={y} r={isRecord ? 3 : 1.75} fill={isRecord ? 'var(--co-green)' : 'var(--co-cyan)'} />
-                {(valueLabels.has(i)) && (
-                  <text x={x} y={y - 9} textAnchor="middle"
-                    fill={isRecord ? 'var(--co-green)' : 'var(--co-cyan)'} fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)" opacity="0.85">
+                <circle cx={x} cy={y} r="7" fill="none" stroke="var(--co-green)" strokeWidth="1.5" opacity="0.5" />
+                <circle cx={x} cy={y} r="4" fill="var(--co-green)" />
+                {(valueLabels.has(i) || isRecord) && (
+                  <text x={x} y={y - 12} textAnchor="middle"
+                    fill="var(--co-green)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)" opacity="0.9">
                     {data[i].count}
                   </text>
                 )}
@@ -165,9 +167,7 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
             );
           })}
 
-          {costPts.map(([x, y], i) => (
-            <circle key={i} cx={x} cy={y} r="2" fill="var(--co-panel)" stroke="var(--co-rose)" strokeWidth="1.25" opacity="0.7" />
-          ))}
+          {/* Koszt: tylko linia, bez kropek — mniej szumu, wykres płynniejszy. */}
 
           {/* Ostatnia etykieta zawsze zostaje jako punkt odniesienia, ale bez
               wchodzenia na poprzednią — patrz `spacedLabelIndices`. */}
