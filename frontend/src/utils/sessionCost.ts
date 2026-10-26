@@ -1,4 +1,4 @@
-import { MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, MAX_RENTED_RACKETS, RACKET_PRICE, hasRacketRental } from '@/constants';
+import { MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, RACKET_PRICE, hasRacketRental } from '@/constants';
 import { toGrosze, toZloty, allocateNonNegative, splitEqually } from './money';
 
 /**
@@ -111,8 +111,11 @@ export function getRacketSelection(
 ): RacketSelection {
   const withRackets = hasRacketRental(sport);
   const ownRacketPresentCount = ownRacketPlayers.filter(p => presentPlayers.includes(p)).length;
+  // Rakiety wypożycza się na graczy, nie na korty: górną granicą jest liczba
+  // obecnych bez własnej rakietki. Stały limit 4 („2 korty × 2 rakiety”) ucinał
+  // deble i sesje na 3+ kortach.
   const maxRackets = withRackets
-    ? Math.max(0, Math.min(MAX_RENTED_RACKETS, presentPlayers.length - ownRacketPresentCount))
+    ? Math.max(0, presentPlayers.length - ownRacketPresentCount)
     : 0;
   const effectiveCount = Math.min(Math.max(0, Math.floor(Number(racketCount) || 0)), maxRackets);
   const price = Math.max(0, Number.isFinite(racketPrice) ? racketPrice : 0);
@@ -124,26 +127,35 @@ export function getRacketSelection(
 /**
  * Odtwarza liczbę i cenę rakiet z zapisanego kosztu. Edycja nie może zmienić
  * kwoty tylko dlatego, że nie znamy historycznego podziału — dlatego szukamy
- * dokładnego pary (count × price), a gdy się nie da, pokazujemy 1 × koszt.
+ * dokładnej pary (count × price) w granicach tego, ilu graczy w ogóle mogło
+ * wypożyczyć rakietę. Sprawdzamy wszystkie dzielniki, a nie tylko sąsiadów
+ * domyślnej ceny: 48 zł przy 6 graczach to 6 × 8, a nie 1 × 48.
  */
-export function inferRacketPricing(racketCost: number | undefined): { racketCount: number; racketPrice: number } {
+export function inferRacketPricing(
+  racketCost: number | undefined,
+  maxRackets: number,
+): { racketCount: number; racketPrice: number } {
   const cost = Math.max(0, toGrosze(racketCost ?? 0));
   if (cost === 0) return { racketCount: 0, racketPrice: RACKET_PRICE };
 
-  const priceGrosze = Math.max(1, toGrosze(RACKET_PRICE));
-  const preferred = Math.max(1, Math.round(cost / priceGrosze));
-  // Najpierw próbujemy najbardziej prawdopodobnej liczby rakiet, potem
-  // sąsiednich — dzięki temu 12,50 zł pokaże się jako 2 × 6,25, a nie
-  // sztuczne 1 × 12,50. Gdy żaden podział nie wychodzi co do grosza,
-  // zostaje dokładne 1 × koszt.
-  for (const count of [preferred, preferred - 1, preferred + 1]) {
-    if (count < 1 || count > MAX_RENTED_RACKETS) continue;
-    const perRacket = Math.round(cost / count);
-    if (perRacket > 0 && perRacket * count === cost) {
-      return { racketCount: count, racketPrice: toZloty(perRacket) };
+  const preferred = Math.max(1, toGrosze(RACKET_PRICE));
+  const limit = Math.max(1, Math.floor(maxRackets));
+  let bestCount = 1;
+  let bestPrice = cost;
+  let bestDistance = Math.abs(cost - preferred);
+
+  for (let count = 2; count <= limit; count++) {
+    if (cost % count !== 0) continue;
+    const perRacket = cost / count;
+    const distance = Math.abs(perRacket - preferred);
+    if (distance < bestDistance) {
+      bestCount = count;
+      bestPrice = perRacket;
+      bestDistance = distance;
     }
   }
-  return { racketCount: 1, racketPrice: toZloty(cost) };
+
+  return { racketCount: bestCount, racketPrice: toZloty(bestPrice) };
 }
 
 interface ParsedSession {

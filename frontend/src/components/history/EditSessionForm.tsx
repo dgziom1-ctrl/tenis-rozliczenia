@@ -314,13 +314,16 @@ export default function EditSessionForm({
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {Array.from({ length: racketSelection.maxRackets + 1 }, (_, i) => i).map(n => {
               const active = racketSelection.effectiveCount === n;
               return (
-                <button type="button" key={n} onClick={() => setEditForm(p => ({ ...p, racketCount: n }))}
+                <button type="button" key={n}
+                  aria-label={`Liczba wypożyczonych rakiet: ${n}`}
+                  aria-pressed={active}
+                  onClick={() => setEditForm(p => ({ ...p, racketCount: n }))}
                   style={{
-                    flex: 1, padding: '8px 4px', cursor: 'pointer',
+                    flex: 1, minWidth: 40, padding: '8px 4px', cursor: 'pointer',
                     fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
                     clipPath: CLIP.badge,
                     ...(active ? {

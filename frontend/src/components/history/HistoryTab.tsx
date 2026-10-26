@@ -193,7 +193,12 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     if (!pwModal) return;
     if (pwModal.type === 'edit') {
       const row = pwModal.row;
-      const racketPricing = inferRacketPricing(row.racketCost);
+      const ownRacketCount = (row.ownRacketPlayers ?? [])
+        .filter(p => row.presentPlayers.includes(p)).length;
+      const racketPricing = inferRacketPricing(
+        row.racketCost,
+        Math.max(0, row.presentPlayers.length - ownRacketCount),
+      );
       setEditing({
         id: row.id,
         form: {

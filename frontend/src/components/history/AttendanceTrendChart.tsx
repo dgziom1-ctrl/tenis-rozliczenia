@@ -4,7 +4,7 @@ import type { HistoryEntry } from '../../types/ui';
 import { CLIP } from '@/constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import { useElementWidth } from '@/hooks/useElementWidth';
-import { CHART_WIDTH, CHART_LABEL_SIZE, CHART_GRID_DASH, linePath, labelStep } from '@/utils/chart';
+import { CHART_WIDTH, CHART_LABEL_SIZE, CHART_GRID_DASH, linePath, spacedLabelIndices } from '@/utils/chart';
 
 interface AttendanceTrendChartProps {
   history: HistoryEntry[];
@@ -13,14 +13,21 @@ interface AttendanceTrendChartProps {
 export default function AttendanceTrendChart({ history }: AttendanceTrendChartProps) {
   const data = useMemo(() => {
     if (!history || history.length === 0) return [];
-    const recent = [...history].slice(0, 12).reverse();
-    return recent.map((s, i) => ({
-      i,
-      date: s.datePlayed,
-      count: s.presentPlayers.length,
-      cost: s.costPerPerson || 0,
-      label: new Date(s.datePlayed).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }),
-    }));
+    // Wykres i statystyki pod nim opisują CAŁĄ historię wybranego sezonu, nie
+    // jej ostatnie 12 sesji. Wcześniej „Max sesja" liczyło się tylko z wycinka,
+    // więc sesja z 6 osobami sprzed trzech miesięcy znikała z podsumowania.
+    // Jawnie sortujemy po dacie: tabela może być ustawiona rosnąco lub malejąco.
+    return [...history]
+      .sort((a, b) => a.datePlayed.localeCompare(b.datePlayed))
+      .map((s, i) => ({
+        i,
+        date: s.datePlayed,
+        count: s.presentPlayers.length,
+        cost: s.costPerPerson || 0,
+        // Data w bazie jest dniem kalendarzowym, nie chwilą w UTC. Bez `T00:00:00`
+        // przeglądarki na zachód od UTC pokazywałyby poprzedni dzień.
+        label: new Date(`${s.datePlayed}T00:00:00`).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }),
+      }));
   }, [history]);
 
   const [chartRef, chartWidth] = useElementWidth<HTMLDivElement>(CHART_WIDTH);
@@ -44,7 +51,9 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
   const maxCount = Math.max(...data.map(d => d.count), 1);
   const maxCost  = Math.max(...data.map(d => d.cost), 1);
   const n = data.length;
-  const valueStep = labelStep(n, Math.max(2, Math.floor(innerW / 34)));
+  // Podpisy liczb nad punktami mogą być gęstsze niż daty — mieszczą się w ok. 34 px.
+  const valueLabels = new Set(spacedLabelIndices(n, innerW, 34));
+  const dateLabels = new Set(spacedLabelIndices(n, innerW, 58));
 
   const xPos   = (i: number) => PAD.left + (i / (n - 1)) * innerW;
   const yCount = (v: number) => PAD.top + innerH - (v / maxCount) * innerH;
@@ -144,7 +153,7 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
             <g key={i}>
               <circle cx={x} cy={y} r="5" fill="var(--co-panel)" stroke="var(--co-cyan)" strokeWidth="1.5" />
               <circle cx={x} cy={y} r="2.5" fill="var(--co-cyan)" />
-              {(i % valueStep === 0 || i === n - 1) && (
+              {(valueLabels.has(i)) && (
                 <text x={x} y={y - 9} textAnchor="middle"
                   fill="var(--co-cyan)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)" opacity="0.8">
                   {data[i].count}
@@ -157,11 +166,10 @@ export default function AttendanceTrendChart({ history }: AttendanceTrendChartPr
             <circle key={i} cx={x} cy={y} r="3" fill="var(--co-panel)" stroke="var(--co-rose)" strokeWidth="1.5" opacity="0.8" />
           ))}
 
-          {/* `floor(n / 6)` dawało krok 1 dla n = 7, czyli wszystkie siedem
-              podpisów na raz — gwarantowane nachodzenie. `ceil` wymusza rzadszy
-              krok, a ostatnia etykieta zawsze zostaje jako punkt odniesienia. */}
+          {/* Ostatnia etykieta zawsze zostaje jako punkt odniesienia, ale bez
+              wchodzenia na poprzednią — patrz `spacedLabelIndices`. */}
           {data.map((d, i) => (
-            (i % labelStep(n, Math.max(2, Math.floor(innerW / 58))) === 0 || i === n - 1) && (
+            dateLabels.has(i) && (
               <text key={i} x={xPos(i)} y={H - 6} textAnchor="middle"
                 fill="var(--co-dim)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)">
                 {d.label}

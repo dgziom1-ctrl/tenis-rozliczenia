@@ -540,9 +540,27 @@ describe('EditSessionForm — pełna edycja', () => {
     expect(screen.getByLabelText(/Cena/)).toHaveValue(5);
     expect(screen.getByText(/2 × 5,00 zł = 10,00 zł/)).toBeInTheDocument();
 
-    const racketThree = screen.getAllByRole('button', { name: '3' }).at(-1);
+    const racketThree = screen.getAllByRole('button', { name: /Liczba wypożyczonych rakiet: 3/ }).at(-1);
     await user.click(racketThree);
     expect(screen.getByText(/3 × 5,00 zł = 15,00 zł/)).toBeInTheDocument();
+  });
+
+  it('pozwala wypożyczyć rakietę każdemu z sześciu graczy', async () => {
+    const user = userEvent.setup();
+    render(
+      <EditSessionFormHarness
+        initial={{
+          ...baseForm,
+          present: ['Ala', 'Bolek', 'Celina', 'Dawid', 'Ewa', 'Filip'],
+          ownRacketPlayers: [],
+          racketCount: 4,
+        }}
+      />,
+    );
+
+    const sixRackets = screen.getByRole('button', { name: /Liczba wypożyczonych rakiet: 6/ });
+    await user.click(sixRackets);
+    expect(screen.getByText(/6 × 5,00 zł = 30,00 zł/)).toBeInTheDocument();
   });
 
   it('stara sesja bez kortów/godzin nie włącza limitu bez wyboru', async () => {

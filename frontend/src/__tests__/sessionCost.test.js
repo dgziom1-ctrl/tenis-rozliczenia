@@ -45,6 +45,17 @@ describe('getRacketSelection — wspólna logika wypożyczenia', () => {
     });
   });
 
+  it('pozwala wypożyczyć rakietę każdemu obecnemu graczowi', () => {
+    const selection = getRacketSelection('squash', ['A', 'B', 'C', 'D', 'E', 'F'], [], 6, 5);
+    expect(selection).toMatchObject({ maxRackets: 6, effectiveCount: 6, price: 5, cost: 30 });
+  });
+
+  it('nie ucina liczby rakiet przy większej grupie', () => {
+    const names = Array.from({ length: 12 }, (_, i) => `P${i}`);
+    const selection = getRacketSelection('padel', names, [], 12, 5);
+    expect(selection).toMatchObject({ maxRackets: 12, effectiveCount: 12, cost: 60 });
+  });
+
   it('dla sportu bez wypożyczalni zeruje rakiety', () => {
     const selection = getRacketSelection('pingpong', ['A', 'B'], [], 3, 5);
     expect(selection).toMatchObject({ withRackets: false, maxRackets: 0, effectiveCount: 0, cost: 0 });
@@ -57,30 +68,36 @@ describe('getRacketSelection — wspólna logika wypożyczenia', () => {
 
 describe('inferRacketPricing — odtworzenie ceny z zapisanego kosztu', () => {
   it('dzieli typowy koszt przez domyślną cenę', () => {
-    expect(inferRacketPricing(10)).toEqual({ racketCount: 2, racketPrice: 5 });
-    expect(inferRacketPricing(15)).toEqual({ racketCount: 3, racketPrice: 5 });
+    expect(inferRacketPricing(10, 4)).toEqual({ racketCount: 2, racketPrice: 5 });
+    expect(inferRacketPricing(15, 4)).toEqual({ racketCount: 3, racketPrice: 5 });
   });
 
-  it('szuka sąsiedniej liczby, zanim pokaże 1 × koszt', () => {
-    expect(inferRacketPricing(12.5)).toEqual({ racketCount: 2, racketPrice: 6.25 });
-    expect(inferRacketPricing(25)).toEqual({ racketCount: 4, racketPrice: 6.25 });
+  it('szuka innego podziału, gdy domyślna cena nie wychodzi co do grosza', () => {
+    expect(inferRacketPricing(12.5, 4)).toEqual({ racketCount: 2, racketPrice: 6.25 });
+    expect(inferRacketPricing(25, 4)).toEqual({ racketCount: 4, racketPrice: 6.25 });
   });
 
-  it('nie proponuje więcej niż maksymalna liczba rakiet', () => {
-    expect(inferRacketPricing(17.5)).toEqual({ racketCount: 1, racketPrice: 17.5 });
+  it('nie przekracza liczby graczy bez własnej rakietki', () => {
+    expect(inferRacketPricing(17.5, 4)).toEqual({ racketCount: 2, racketPrice: 8.75 });
+    expect(inferRacketPricing(30, 4)).toEqual({ racketCount: 4, racketPrice: 7.5 });
+  });
+
+  it('odtwarza więcej niż 4 rakiety', () => {
+    expect(inferRacketPricing(30, 6)).toEqual({ racketCount: 6, racketPrice: 5 });
+    expect(inferRacketPricing(48, 6)).toEqual({ racketCount: 6, racketPrice: 8 });
   });
 
   it('zero rakiet zachowuje domyślną cenę', () => {
-    expect(inferRacketPricing(0)).toEqual({ racketCount: 0, racketPrice: 5 });
-    expect(inferRacketPricing(undefined)).toEqual({ racketCount: 0, racketPrice: 5 });
+    expect(inferRacketPricing(0, 4)).toEqual({ racketCount: 0, racketPrice: 5 });
+    expect(inferRacketPricing(undefined, 4)).toEqual({ racketCount: 0, racketPrice: 5 });
   });
 
   it('edycja bez zmian odtwarza zapisany koszt rakiet', () => {
-    for (const cost of [5, 10, 12.5, 15, 17.5, 25]) {
-      const { racketCount, racketPrice } = inferRacketPricing(cost);
+    for (const cost of [5, 10, 12.5, 15, 17.5, 25, 30, 48]) {
+      const { racketCount, racketPrice } = inferRacketPricing(cost, 6);
       const selection = getRacketSelection(
         'squash',
-        ['A', 'B', 'C', 'D'],
+        ['A', 'B', 'C', 'D', 'E', 'F'],
         [],
         racketCount,
         racketPrice,

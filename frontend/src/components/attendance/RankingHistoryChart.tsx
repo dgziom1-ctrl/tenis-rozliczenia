@@ -5,7 +5,7 @@ import { createPlayerColorMap } from '@/constants/colors';
 import { FONT, TEXT, TRACK, CLIP, PANEL } from '@/constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import { useElementWidth } from '@/hooks/useElementWidth';
-import { CHART_WIDTH, CHART_LABEL_SIZE, CHART_GRID_DASH, linePath, labelStep, type ChartPoint } from '@/utils/chart';
+import { CHART_WIDTH, CHART_LABEL_SIZE, CHART_GRID_DASH, linePath, spacedLabelIndices, type ChartPoint } from '@/utils/chart';
 import type { HistoryEntry, PlayerStats } from '@/types/ui';
 
 interface RankingHistoryChartProps {
@@ -41,6 +41,7 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
   const n = data.length;
   const maxPlace = Math.max(...data.flatMap(d => d.rankings.map(r => r.place)));
   const visibleNames = playerNames.filter(name => !hidden.has(name));
+  const monthLabels = new Set(spacedLabelIndices(n, innerW, 58));
 
   const xPos = (i: number) => PAD.left + (i / (n - 1)) * innerW;
   const yPos = (place: number) => PAD.top + ((place - 1) / Math.max(maxPlace - 1, 1)) * innerH;
@@ -141,7 +142,7 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
           })}
           {/* X axis month labels */}
           {data.map((d, i) => (
-            (i % labelStep(n, Math.max(2, Math.floor(innerW / 58))) === 0 || i === n - 1) && (
+            monthLabels.has(i) && (
               <text key={i} x={xPos(i)} y={H - 6} textAnchor="middle"
                 fill="var(--co-dim)" fontSize={CHART_LABEL_SIZE} fontFamily="var(--font-mono)">
                 {d.month.slice(2).replace('-', '/')}

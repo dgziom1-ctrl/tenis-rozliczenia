@@ -64,7 +64,6 @@ export const MULTISPORT_PER_COURT_HOUR: Record<string, number> = {
   padel: 4,
 };
 export const RACKET_PRICE = 5;
-export const MAX_RENTED_RACKETS = 4; // 2 korty × 2 rakietki — nigdy nie potrzeba więcej
 export const SOUND_TYPES = { TAB: 'tab', CLICK: 'click', SUCCESS: 'success', DELETE: 'delete', COIN: 'coin', RANK1: 'rank1', ERROR: 'error', STREAK: 'streak' } as const;
 export const TABS = { DASHBOARD: 'dashboard', ATTENDANCE: 'attendance', ADMIN: 'admin', HISTORY: 'history', PLAYERS: 'players' } as const;
 

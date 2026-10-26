@@ -409,14 +409,16 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                 </div>
 
                 {/* Racket count buttons */}
-                <div style={{ display: 'flex', gap: 6 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {Array.from({ length: maxRackets + 1 }, (_, i) => i).map(n => {
                     const active = effectiveRacketCount === n;
                     return (
                       <button type="button" key={n}
+                        aria-label={`Liczba wypożyczonych rakiet: ${n}`}
+                        aria-pressed={active}
                         onClick={() => { setRacketCount(n); playSound(SOUND_TYPES.CLICK); }}
                         style={{
-                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+                          flex: 1, minWidth: 40, padding: '8px 4px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
                           fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
                           clipPath: CLIP.badge,
                           ...(active ? {

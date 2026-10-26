@@ -34,9 +34,28 @@ export function linePath(pts: readonly ChartPoint[]): string {
 }
 
 /**
- * Co która etykieta osi ma się pokazać, żeby podpisy nie nachodziły.
- * `Math.floor` dawał krok 1 dla n = 7 przy limicie 6, czyli wszystkie naraz.
+ * Indeksy etykiet osi X: równy krok plus ostatnia sesja jako punkt odniesienia.
+ *
+ * Sam warunek `i % krok === 0 || i === n - 1` dokładał ostatni podpis obok
+ * przedostatniego, gdy wypadał tuż za nim — na 390 px „6 paź” i „20 paź”
+ * nachodziły na siebie. Gdy ostatni punkt jest bliżej niż `minGapPx` od
+ * poprzedniej etykiety, zastępuje ją zamiast dokładać drugą w tym samym miejscu.
  */
-export function labelStep(count: number, maxLabels = 6): number {
-  return Math.max(1, Math.ceil(count / maxLabels));
+export function spacedLabelIndices(count: number, width: number, minGapPx = 58): number[] {
+  if (count <= 0) return [];
+  if (count === 1) return [0];
+
+  const last = count - 1;
+  const gap = width / last;
+  const maxLabels = Math.max(2, Math.floor(width / minGapPx) + 1);
+  const step = Math.max(1, Math.ceil(last / (maxLabels - 1)));
+
+  const indices: number[] = [];
+  for (let i = 0; i < last; i += step) indices.push(i);
+
+  const previous = indices[indices.length - 1];
+  if ((last - previous) * gap >= minGapPx) indices.push(last);
+  else indices[indices.length - 1] = last;
+
+  return indices;
 }
