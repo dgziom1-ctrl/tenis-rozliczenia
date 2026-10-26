@@ -3,7 +3,7 @@ import { Terminal, CalendarDays, Search, Download, ArrowUpDown } from 'lucide-re
 import { updateWeek, deleteWeekWithSnapshot, restoreWeek } from '@/lib/firebase';
 import { groupHistoryByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
 import SeasonSelector from '../attendance/SeasonSelector';
-import { parseAmount, isValidAmount, formatDate } from '@/utils/format';
+import { parseAmount, isValidAmount, formatDate, plural } from '@/utils/format';
 import { getCourtAmount, getRacketSelection, getTotalWithRackets, inferRacketPricing } from '@/utils/sessionCost';
 import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
@@ -343,24 +343,12 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           accent="var(--co-green)"
           aside={
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
-              {filteredHistory.length}{selectedSeason || filterPlayer ? ` / ${history.length}` : ''} REKORDÓW
+              {filteredHistory.length}{selectedSeason || filterPlayer ? ` z ${history.length}` : ''} {plural(filteredHistory.length, 'rekord', 'rekordy', 'rekordów')}
             </span>
           }
         />
 
-        {/* ── 2. BOOT TEXT ──────────────────────────────────────────── */}
-        {/* Zieleń przy 70% krycia schodziła w trybie jasnym do ~2,6:1. */}
-        <div className="glass-panel" style={{ marginBottom: 20, padding: '10px 14px' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', lineHeight: 1.6 }}>
-            {'>'} System OK
-            <br />
-            {'>'} {filteredHistory.length}{selectedSeason || filterPlayer ? ` z ${history.length}` : ''} rekordów znaleziono
-            <br />
-            {'>'} Dostęp przyznany<span style={{ animation: 'blink-cursor 1s step-end infinite', color: 'var(--co-green)' }}>▮</span>
-          </p>
-        </div>
-
-        {/* ── 3. WYKRES TRENDU ──────────────────────────────────────── */}
+        {/* ── 2. WYKRES TRENDU ──────────────────────────────────────── */}
         {seasonHistory.length >= 2 && (
           <AttendanceTrendChart history={seasonHistory} />
         )}
@@ -548,7 +536,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
               Brak danych
             </p>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', marginTop: 8 }}>
-              {'>'} Dodaj pierwszą sesję w zakładce DODAJ_
+              Dodaj pierwszą sesję w zakładce Dodaj.
             </p>
           </div>
         )}
@@ -556,7 +544,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         {history.length > 0 && filteredHistory.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>
-              {'>'} Brak sesji dla wybranych filtrów_
+              Brak sesji dla wybranych filtrów.
             </p>
           </div>
         )}
@@ -615,7 +603,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         )}
         {!hasMoreSessions && filteredHistory.length > SESSIONS_PAGE_SIZE && (
           <p style={{ margin: '16px 0 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
-            {'>'} To wszystkie sesje w tym widoku
+            To wszystkie sesje w tym widoku.
           </p>
         )}
       </div>

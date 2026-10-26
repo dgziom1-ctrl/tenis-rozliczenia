@@ -97,7 +97,7 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
         })}
       </div>
       <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '0 0 10px', letterSpacing: TRACK.tight }}>
-        {'>'} Dotknij nazwę, aby ukryć linię
+        Dotknij nazwę, aby ukryć linię
       </p>
       <div ref={chartRef} style={{ position: 'relative', background: 'var(--co-tint)', border: '1px solid var(--co-border)', clipPath: CLIP.smallCard, overflow: 'hidden' }}>
         <svg

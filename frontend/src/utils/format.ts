@@ -14,6 +14,21 @@ export function formatAmountShort(value: number): string {
 }
 
 /**
+ * Odmiana rzeczownika po liczbie (1 rekord, 2 rekordy, 5 rekordów).
+ *
+ * Liczniki w interfejsie są zdaniami, więc „22 REKORDÓW" nie może zostać:
+ * poprawna forma zależy od liczby, a nie od tego, czy etykieta jest ozdobna.
+ */
+export function plural(count: number, one: string, few: string, many: string): string {
+  const absolute = Math.abs(count);
+  const lastTwo = absolute % 100;
+  const last = absolute % 10;
+  if (absolute === 1) return one;
+  if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14)) return few;
+  return many;
+}
+
+/**
  * Parsuje kwotę wpisaną przez użytkownika, akceptując przecinek jako separator
  * dziesiętny (typowy dla polskiej klawiatury) oraz spacje jako separator tysięcy.
  * Zwraca liczbę zaokrągloną do 2 miejsc lub NaN, gdy wejście jest nieprawidłowe.

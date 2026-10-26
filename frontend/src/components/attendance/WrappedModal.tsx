@@ -8,6 +8,7 @@ import Modal from '../common/Modal';
 import { useModalExit } from '@/hooks/useModalExit';
 import { CornerBrackets } from '../dashboard/CornerBrackets';
 import { FONT, TEXT, TRACK, CLIP, Z } from '@/constants/styles';
+import { plural } from '@/utils/format';
 import type { WrappedStats } from '@/types/ui';
 
 // ─── Count-up hook ───────────────────────────────────────────────
@@ -161,7 +162,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               ...display('clamp(1rem, 3.5vw, 1.6rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-text-hi)', marginBottom: 32,
             }}>
-              SESJI W {stats.year} ROKU
+              sesji w {stats.year} roku
             </div>
 
             {/* Sport breakdown */}
@@ -232,7 +233,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               ...display('clamp(1.2rem, 4vw, 2rem)', { letterSpacing: 'normal' }),
               color: 'var(--co-text-hi)',
             }}>
-              {cBusiest} SESJI
+              {cBusiest} {plural(cBusiest, 'sesja', 'sesje', 'sesji')}
             </div>
           </div>
         );

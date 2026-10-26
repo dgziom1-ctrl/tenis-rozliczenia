@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import { formatDate, formatAmountShort } from '@/utils/format';
+import { formatDate, formatAmountShort, plural } from '@/utils/format';
 import { FONT, TEXT, TRACK } from '@/constants/styles';
 import { TerminalPanel, TerminalSectionHeader, TerminalRow, TerminalFooter } from './TerminalPanel';
 import type { DebtCarryOver, DebtDisplayData } from '@/types/ui';
@@ -25,9 +25,9 @@ function CarryOverSection({ carryOver }: { carryOver: DebtCarryOver }) {
   const label = owed ? `Zaległość z ${years}` : overpaid ? `Nadpłata z ${years}` : `Sezon ${years} rozliczony`;
   const color = owed ? 'var(--co-rose)' : overpaid ? 'var(--co-cyan)' : 'var(--co-green)';
   const value = owed
-    ? `-${formatAmountShort(amount)} ZŁ`
+    ? `-${formatAmountShort(amount)} zł`
     : overpaid
-      ? `+${formatAmountShort(Math.abs(amount))} ZŁ`
+      ? `+${formatAmountShort(Math.abs(amount))} zł`
       : '✓';
 
   return (
@@ -59,7 +59,7 @@ function CarryOverSection({ carryOver }: { carryOver: DebtCarryOver }) {
             {formatDate(item.date)}
           </span>
           <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-rose)' }}>
-            -{formatAmountShort(item.amount)} ZŁ
+            -{formatAmountShort(item.amount)} zł
           </span>
         </TerminalRow>
       ))}
@@ -71,7 +71,7 @@ function CarryOverSection({ carryOver }: { carryOver: DebtCarryOver }) {
               : `Wpłata ${formatDate(item.date)}`}
           </span>
           <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-cyan)' }}>
-            +{formatAmountShort(item.amount)} ZŁ
+            +{formatAmountShort(item.amount)} zł
           </span>
         </TerminalRow>
       ))}
@@ -95,7 +95,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
   const toggleLabel  = open
     ? 'Zwiń szczegóły'
     : sessionCount > 0
-      ? `Skąd ta kwota? (${sessionCount} sesje)`
+      ? `Skąd ta kwota? (${sessionCount} ${plural(sessionCount, 'sesja', 'sesje', 'sesji')})`
       : 'Skąd ta kwota?';
 
   if (!open || !breakdown) {
@@ -107,9 +107,9 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
     : 'var(--co-green)';
 
   const balanceLabel = breakdown.balance > 0.01
-    ? `DO ZAPŁATY: ${formatAmountShort(breakdown.balance)} ZŁ`
+    ? `Do zapłaty: ${formatAmountShort(breakdown.balance)} zł`
     : breakdown.balance < -0.01
-      ? `NADPŁATA: +${formatAmountShort(Math.abs(breakdown.balance))} ZŁ`
+      ? `Nadpłata: +${formatAmountShort(Math.abs(breakdown.balance))} zł`
       : '✓ Rozliczony';
 
   return (
@@ -129,7 +129,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
             <TerminalRow key={idx}>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)' }}>{formatDate(item.date)}</span>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-rose)' }}>
-                -{formatAmountShort(item.amount)} ZŁ
+                -{formatAmountShort(item.amount)} zł
               </span>
             </TerminalRow>
           ))}
@@ -137,7 +137,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
             <TerminalRow highlight="var(--co-tint-rose)">
               <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)' }}>Razem sesje</span>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-rose)' }}>
-                -{formatAmountShort(breakdown.totalSessions)} ZŁ
+                -{formatAmountShort(breakdown.totalSessions)} zł
               </span>
             </TerminalRow>
           )}
@@ -162,7 +162,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-cyan)' }}>
-                  +{formatAmountShort(item.amount)} ZŁ
+                  +{formatAmountShort(item.amount)} zł
                 </span>
                 {/* Cel dotykowy miał ok. 15×13px przy 40% krycia — a to akcja
                     kasująca wpłatę. */}
@@ -190,7 +190,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
             <TerminalRow highlight="var(--co-tint)">
               <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)' }}>Razem wpłacono</span>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-cyan)' }}>
-                +{formatAmountShort(breakdown.totalPaid)} ZŁ
+                +{formatAmountShort(breakdown.totalPaid)} zł
               </span>
             </TerminalRow>
           )}

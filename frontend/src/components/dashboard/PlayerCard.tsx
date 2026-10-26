@@ -459,7 +459,7 @@ function PlayerCard({
                 </div>
                 <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-green)', margin: 0, lineHeight: 1 }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
                 </p>
               </div>
             ) : (
@@ -471,7 +471,7 @@ function PlayerCard({
                   textShadow: isPending ? 'var(--glow-rose-md)' : 'var(--glow-cyan-md)',
                 }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
                 </p>
               </div>
             )}
@@ -624,7 +624,7 @@ function PlayerCard({
                 </div>
                 <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-green)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-green-md)' }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', margin: '4px 0 0' }}>
                   suma wpłat do zebrania od graczy
@@ -637,7 +637,7 @@ function PlayerCard({
                 </div>
                 <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-cyan)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-md)' }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>ZŁ</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
                 </p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: 'normal', margin: '4px 0 0' }}>
                   nadwyżka ponad zaległości

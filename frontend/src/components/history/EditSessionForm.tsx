@@ -169,8 +169,8 @@ export default function EditSessionForm({
           ) : (
             <p style={{ margin: '6px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
               {racketSelection.cost > 0
-                ? `> Kwota za kort. Rakiety ${formatAmountShort(racketSelection.cost)} zł doliczone osobno — razem ${formatAmountShort(totalWithRackets)} zł`
-                : '> Kwota za kort, po odliczeniu kart Multisport'}
+                ? `Kwota za kort. Rakiety ${formatAmountShort(racketSelection.cost)} zł doliczone osobno — razem ${formatAmountShort(totalWithRackets)} zł`
+                : 'Kwota za kort, po odliczeniu kart Multisport'}
             </p>
           )}
         </div>
@@ -253,7 +253,7 @@ export default function EditSessionForm({
       {isPresentValid && (
         <div>
           <p style={{ ...sectionLabel, color: 'var(--co-green)' }}>
-            <Zap size={11} /> MULTISPORT (zniżka -{MULTISPORT_DISCOUNT} zł)
+            <Zap size={11} /> Multisport (zniżka -{MULTISPORT_DISCOUNT} zł)
           </p>
           <PlayerToggleGrid names={present} selected={multiPlayers} onToggle={onToggleMulti} accent="green" />
           {multiOverLimit && (
@@ -272,7 +272,7 @@ export default function EditSessionForm({
           </p>
           <PlayerToggleGrid names={present} selected={ownRacketPlayers} onToggle={toggleOwnRacket} accent="amber" />
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
-            {'>'} Zaznacz graczy, którzy przynieśli własną rakietkę — nie płacą za wypożyczenie
+            Zaznacz graczy, którzy przynieśli własną rakietkę — nie płacą za wypożyczenie
           </p>
         </div>
       )}
@@ -309,7 +309,7 @@ export default function EditSessionForm({
                   padding: '2px 8px', clipPath: CLIP.badge,
                 }}
               >
-                reset ({RACKET_PRICE} zł)
+                Przywróć {RACKET_PRICE} zł
               </button>
             )}
           </div>
@@ -337,8 +337,8 @@ export default function EditSessionForm({
           </div>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
             {racketSelection.effectiveCount > 0
-              ? `> ${racketSelection.effectiveCount} × ${formatAmountShort(racketSelection.price)} zł = ${formatAmountShort(racketSelection.cost)} zł, dzielone między graczy bez własnej rakietki`
-              : '> 0 zł — nikt nie wypożycza rakiet'}
+              ? `${racketSelection.effectiveCount} × ${formatAmountShort(racketSelection.price)} zł = ${formatAmountShort(racketSelection.cost)} zł, dzielone między graczy bez własnej rakietki`
+              : '0 zł — nikt nie wypożycza rakiet'}
           </p>
         </div>
       )}

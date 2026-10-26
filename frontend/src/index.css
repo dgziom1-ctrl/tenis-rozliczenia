@@ -361,10 +361,6 @@ body.theme-switching *::after {
   0%   { transform: translateY(-100%); opacity: 1; }
   100% { transform: translateY(100%); opacity: 0; }
 }
-@keyframes blink-cursor {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
 @keyframes slide-in-up {
   from { transform: translateY(14px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
@@ -791,7 +787,15 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   padding: 0;
   background: transparent;
 }
-.modal-overlay.modal-bare::before { display: none; }
+/* Wariant `bare` nie ma własnego tła ani paddingu, ale zostawia rozmycie:
+   panel jest półprzezroczysty i bez niego treść pod nim prześwituje przez
+   tekst (kontrast spadał poniżej progu czytelności). */
+.modal-overlay.modal-bare::before {
+  display: block;
+  background: transparent;
+  backdrop-filter: blur(14px) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(14px) saturate(var(--glass-sat));
+}
 .modal-bare-fill {
   position: absolute;
   top: max(16px, env(safe-area-inset-top, 0px));
@@ -1097,9 +1101,16 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   }
   /* Na telefonie zmniejszamy odstępy hero; arena, nazwa i status zostają widoczne. */
   .header-hero { padding: 10px 8px 12px !important; }
-  .header-hero-arena { margin-bottom: 4px !important; }
+  .header-hero-arena { max-width: 340px !important; margin-bottom: 4px !important; }
   .header-hero-title { display: block !important; }
   .header-hero-meta { gap: 10px !important; }
+  /* Numer BLIK nie może się łamać na dwie linie i wypychać akcji poza ekran.
+     Ikona kopiowania jest zbędna — cały chip kopiuje numer, a robi to również
+     jego aria-label. */
+  .header-blik { gap: 6px !important; padding: 6px 10px !important; white-space: nowrap; }
+  .header-blik-label,
+  .header-blik-copy { display: none !important; }
+  .header-blik-number { font-size: 0.8125rem !important; white-space: nowrap; }
   .header-blik-mobile {
     display: none !important;
     align-items: center;

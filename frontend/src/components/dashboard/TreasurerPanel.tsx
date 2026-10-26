@@ -42,7 +42,7 @@ export default function TreasurerPanel({ players, open, onToggle }: TreasurerPan
       footer={
         <TerminalFooter
           label="Do zebrania"
-          value={`${formatAmountShort(Math.max(0, netToRecover))} ZŁ`}
+          value={`${formatAmountShort(Math.max(0, netToRecover))} zł`}
           valueColor={netToRecover > SETTLED_THRESHOLD ? 'var(--co-green)' : 'var(--co-cyan)'}
           tint="var(--co-tint-green)"
         />
@@ -53,7 +53,7 @@ export default function TreasurerPanel({ players, open, onToggle }: TreasurerPan
         <>
           <TerminalSectionHeader label="Do wpłaty" />
           {debtors.map(p => (
-            <Row key={p.name} name={p.name} amount={`${formatAmountShort(p.currentDebt)} ZŁ`} color="var(--co-rose)" />
+            <Row key={p.name} name={p.name} amount={`${formatAmountShort(p.currentDebt)} zł`} color="var(--co-rose)" />
           ))}
         </>
       )}
@@ -63,7 +63,7 @@ export default function TreasurerPanel({ players, open, onToggle }: TreasurerPan
         <>
           <TerminalSectionHeader label="Nadpłata" />
           {creditors.map(p => (
-            <Row key={p.name} name={p.name} amount={`+${formatAmountShort(Math.abs(p.currentDebt))} ZŁ`} color="var(--co-cyan)" />
+            <Row key={p.name} name={p.name} amount={`+${formatAmountShort(Math.abs(p.currentDebt))} zł`} color="var(--co-cyan)" />
           ))}
         </>
       )}

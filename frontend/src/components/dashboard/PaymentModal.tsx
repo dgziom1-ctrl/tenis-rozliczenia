@@ -86,7 +86,7 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
 
       {showError && (
         <p id={errorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-rose)', textAlign: 'center', marginBottom: 8 }}>
-          ⚠ {customAmt !== '' && parsedAmt > 0 && parsedAmt < 0.01 ? 'Minimalna kwota to 0.01 zł' : 'KWOTA MUSI BYĆ WIĘKSZA OD 0'}
+          ⚠ {customAmt !== '' && parsedAmt > 0 && parsedAmt < 0.01 ? 'Minimalna kwota to 0,01 zł' : 'Kwota musi być większa od 0'}
         </p>
       )}
 

@@ -409,7 +409,7 @@ describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
     expect(screen.getByLabelText(/Debiut/)).toBeInTheDocument();
     // ...ale seria 5 z grudnia do stycznia nie przechodzi.
     expect(screen.queryByLabelText(/Seria 5/)).not.toBeInTheDocument();
-    expect(screen.getByText(/osiągnięcia · 2027/)).toBeInTheDocument();
+    expect(screen.getByText(/Osiągnięcia · 2027/)).toBeInTheDocument();
   });
 
   it('wszystkie sezony: pełen dorobek z kariery', () => {
@@ -426,7 +426,7 @@ describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
     expect(screen.getByText(/wszystkie sezony · 6\/6 sesji/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Debiut/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Seria 5/)).toBeInTheDocument();
-    expect(screen.getByText(/osiągnięcia · wszystkie sezony/)).toBeInTheDocument();
+    expect(screen.getByText(/Osiągnięcia · wszystkie sezony/)).toBeInTheDocument();
   });
 
   it('joinDate: sesje sprzed dołączenia nie są nieobecnościami', () => {

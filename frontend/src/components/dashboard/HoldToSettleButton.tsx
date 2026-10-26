@@ -158,7 +158,7 @@ export default function HoldToSettleButton({ amount, disabled = false, onConfirm
         }} />
         <span style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
           <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-display)', letterSpacing: 'normal', lineHeight: 1 }}>
-            {formatAmountShort(amount)} ZŁ
+            {formatAmountShort(amount)} zł
           </span>
           <span id={describedBy} style={{ fontSize: '0.75rem', letterSpacing: 'normal', opacity: 0.8, fontFamily: 'var(--font-mono)' }}>
             {holding ? 'Trzymaj…' : showHint ? 'Przytrzymaj dłużej' : 'Przytrzymaj, aby zapisać'}

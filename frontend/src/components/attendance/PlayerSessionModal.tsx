@@ -183,7 +183,7 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
         {achievements.length > 0 && (
             <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15` }}>
               <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>
-                // osiągnięcia · {scopeLabel} — {achievements.length}
+                Osiągnięcia · {scopeLabel} — {achievements.length}
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {achievements.map(a => (
@@ -195,9 +195,9 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
 
         {/* Session log */}
         <div data-modal-scroll style={{ overflowY: 'auto', flex: 1, minHeight: 0, overscrollBehavior: 'contain', padding: '12px 16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
             <p style={{ ...FONT.monoLabel, margin: 0, flex: 1 }}>
-              // historia sesji — obecny na {sessions.length} z {eligibleHistory.length}
+              Historia sesji — obecny na {sessions.length} z {eligibleHistory.length}
             </p>
             {/* Lista renderowała całą historię, w tym wszystkie nieobecności —
                 przy długiej historii okno było w większości wyszarzonymi
@@ -236,7 +236,7 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
             let costLabel = '—';
             if (attended) {
               const playerCost = getPlayerSessionCost(session, player.name);
-              costLabel = playerCost === 0 ? 'free' : `${playerCost.toFixed(2)} zł`;
+              costLabel = playerCost === 0 ? '0 zł' : `${playerCost.toFixed(2)} zł`;
             }
 
             return (

@@ -1,6 +1,6 @@
 import { Pencil, Trash2, Zap } from 'lucide-react';
 import { formatDate, formatAmount, formatAmountShort } from '@/utils/format';
-import { SPORT_SHORT, hasRacketRental } from '@/constants';
+import { SPORT_LABEL, hasRacketRental } from '@/constants';
 import { getShareGroups } from '@/utils/sessionCost';
 import ShareBreakdown from '../common/ShareBreakdown';
 import SportGlyph from '../common/icons/SportGlyph';
@@ -57,7 +57,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               clipPath: CLIP.badge,
             }}>
               <SportGlyph sport={row.sport} size={12} />
-              {SPORT_SHORT[row.sport] ?? 'PING'}
+              {SPORT_LABEL[row.sport] ?? 'Ping-Pong'}
             </span>
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>

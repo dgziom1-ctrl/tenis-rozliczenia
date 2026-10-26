@@ -42,7 +42,6 @@ export const hasRacketRental = (sport?: string): boolean => RACKET_RENTAL_SPORTS
  */
 export const SPORT_EMOJI: Record<string, string> = { pingpong: '🏓', squash: '🎾', badminton: '🏸', padel: '🥎' };
 export const SPORT_LABEL: Record<string, string> = { pingpong: 'Ping-Pong', squash: 'Squash', badminton: 'Badminton', padel: 'Padel' };
-export const SPORT_SHORT: Record<string, string> = { pingpong: 'PING', squash: 'SQUASH', badminton: 'BADM', padel: 'PADEL' };
 /** Biernik do zdania „Graliśmy w …" w wiadomości na grupę. */
 export const SPORT_ACCUSATIVE: Record<string, string> = { pingpong: 'ping-ponga', squash: 'squasha', badminton: 'badmintona', padel: 'padla' };
 

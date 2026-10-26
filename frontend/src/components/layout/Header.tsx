@@ -191,11 +191,13 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,color:'var(--co-cyan)',padding:'2px 6px',
               background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>
-            <span style={{ ...FONT.data(blikNumber, TEXT.base),color:'var(--co-text)' }}>
+            <span className="header-blik-number" style={{ ...FONT.data(blikNumber, TEXT.base),color:'var(--co-text)' }}>
               {blikNumber}
             </span>
-            <div style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
-            {copied ? <Check size={13} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
+            <span className="header-blik-copy" style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <span aria-hidden="true" style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
+              {copied ? <Check size={13} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
+            </span>
           </button>
           <div style={{ display:'flex',alignItems:'center',gap:6 }}>
             <button type="button" onClick={onShowGuide}
@@ -242,10 +244,10 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
           {copied ? <Check size={14} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
         </button>
 
-        <div className="header-hero" style={{ position:'relative',zIndex:10,padding: '16px 16px 20px',
+        <div className="header-hero" style={{ position:'relative',zIndex:10,padding: '12px 16px 14px',
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
-          <div className="header-hero-arena" style={{ width:'100%',maxWidth:560,marginBottom:14,
+          <div className="header-hero-arena" style={{ width:'100%',maxWidth:460,marginBottom:8,
             filter:chaosMode?'none':'var(--glow-drop-cyan)' }}>
             <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit}/>
           </div>
@@ -256,7 +258,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
             {!chaosMode && hitting && <span aria-hidden="true" style={{
               position:'absolute',inset:0,
               display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
-              fontSize:'clamp(1.9rem,7.4vw,3.7rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              fontSize:'clamp(1.7rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               color:'transparent',pointerEvents:'none',userSelect:'none',
               textShadow:'-4px 0 var(--co-rose), 4px 0 var(--co-cyan)',
               clipPath:'polygon(0 20%, 100% 20%, 100% 52%, 0 52%)',
@@ -264,7 +266,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
             }}>CYBER-PONK</span>}
             <span style={{
               display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
-              fontSize:'clamp(1.9rem,7.4vw,3.7rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              fontSize:'clamp(1.7rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               position:'relative',
               transition:'text-shadow 0.06s, transform 0.06s',
               ...(chaosMode
@@ -282,7 +284,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
 
           {DEMO_MODE && (
             <>
-              <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'14px 0 10px',
+              <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'10px 0 8px',
                 background:'linear-gradient(90deg,transparent,var(--co-tint-line) 40%,var(--co-tint-line) 60%,transparent)' }}/>
               <div className="header-hero-meta" style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
                 {/* W trybie demo dane nie pochodzą z bazy — bez tej plakietki łatwo

@@ -71,7 +71,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
     <Modal
       open={open}
       onClose={onClose}
-      title="MATCHDAY"
+      title="Podsumowanie sesji"
       icon={CheckCircle2}
       accent="var(--co-cyan)"
       maxWidth={420}
@@ -113,7 +113,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
 
       {highlights.length > 0 && (
         <div style={{ marginBottom: 14 }}>
-          <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>// highlighty</p>
+          <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>Wyróżnienia</p>
           {highlights.map(h => {
             const Icon = highlightIcon(h.kind);
             return (
@@ -133,7 +133,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
         {[
           { label: 'Sport', value: (SPORT_LABEL[sport] ?? 'Ping-Pong'), color: withRackets ? 'var(--co-green)' : 'var(--co-cyan)' },
           { label: 'Data', value: formatDate(date), color: 'var(--co-text)' },
-          { label: 'Koszt', value: `${formatAmountShort(totalCost)} ZŁ`, color: 'var(--co-cyan)' },
+          { label: 'Koszt', value: `${formatAmountShort(totalCost)} zł`, color: 'var(--co-cyan)' },
           { label: 'Obecni', value: presentCount, color: 'var(--co-text)' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{
@@ -157,7 +157,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
           <p style={{ ...FONT.monoLabel, marginBottom: 6 }}>Podział kosztów</p>
           <p style={{ ...FONT.mono(TEXT.h2), color: 'var(--co-cyan)', textShadow: 'var(--glow-cyan-lg)', margin: 0 }}>
             {formatAmountShort(headline.perPerson)}
-            <span style={{ fontSize: TEXT.base, color: 'var(--co-dim)', marginLeft: 4 }}>Zł / os.</span>
+            <span style={{ fontSize: TEXT.base, color: 'var(--co-dim)', marginLeft: 4 }}>zł / os.</span>
           </p>
           {groups.slice(1).map(group => (
             <p key={group.names.join()} style={{

@@ -45,7 +45,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
           <p style={{
             fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: 'normal',
             color: 'var(--co-cyan)', textTransform: 'none', marginTop: 4,
-          }}>Initializing system...</p>
+          }}>Uruchamiam aplikację...</p>
         </div>
         <div style={{
           width: 280, background: 'var(--co-surface-2)',
@@ -53,7 +53,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
           clipPath: CLIP.card,
           padding: '10px 14px',
         }}>
-          {['> BOOT_SEQ: INITIATED', '> Loading agent database...', '> Connecting to firebase...'].map((line, i) => (
+          {['> Start systemu', '> Wczytuję bazę graczy...', '> Łączę z Firebase...'].map((line, i) => (
             <p key={i} style={{
               fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
               color: i < 2 ? 'var(--co-green)' : 'var(--co-cyan)',
@@ -87,7 +87,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
           {onRetry && (
             <button onClick={onRetry} className="cyber-button-yellow"
               style={{ marginTop: 10, padding: '10px 16px', width: '100%', maxWidth: 280 }}>
-              ↻ Retry
+              ↻ Spróbuj ponownie
             </button>
           )}
         </div>
@@ -122,7 +122,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
             fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: 'normal',
             color: 'var(--co-rose)', marginBottom: 6, textTransform: 'none',
             textShadow: 'var(--glow-rose-md)',
-          }}>Connection failure</p>
+          }}>Brak połączenia</p>
           <div style={{
             padding: '10px 12px', background: 'var(--co-tint-rose)',
             border: '1px solid var(--co-tint-rose-line)', marginBottom: 20,
@@ -132,9 +132,9 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
               fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)',
               letterSpacing: 'normal', lineHeight: 1.7,
             }}>
-              {'>'} ERR: FIREBASE_TIMEOUT<br />
-              {'>'} Sprawdź internet lub plik .env<br />
-              {'>'} SYSTEM HALTED
+              Baza nie odpowiada: przekroczono czas połączenia.<br />
+              Sprawdź internet lub plik .env.<br />
+              Aplikacja wstrzymana do czasu ponownego połączenia.
             </p>
           </div>
           <button onClick={onRetry ?? (() => window.location.reload())}

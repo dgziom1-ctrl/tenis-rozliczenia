@@ -1,4 +1,4 @@
-import { SPORT, SPORT_SHORT } from '@/constants';
+import { SPORT, SPORT_LABEL } from '@/constants';
 import SportGlyph from '../common/icons/SportGlyph';
 import type { Sport } from '@/types/domain';
 import { CLIP } from '@/constants/styles';
@@ -35,7 +35,7 @@ export default function SportSelector({ value, onChange }: SportSelectorProps) {
             }}
           >
             <SportGlyph sport={sport} size={15} />
-            {SPORT_SHORT[sport]}
+            {SPORT_LABEL[sport]}
           </button>
         );
       })}

@@ -165,7 +165,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
               {players[0].attendancePercentage}%
             </div>
             <div style={{ ...FONT.monoSmall, marginTop: 4, marginBottom: 6, letterSpacing: TRACK.normal }}>
-              {players[0].attendanceCount}/{players[0].eligibleWeeks} SESJI
+              {players[0].attendanceCount}/{players[0].eligibleWeeks} sesji
             </div>
             {players[0].currentStreak >= 2 && <StreakBadge streak={players[0].currentStreak} />}
           </div>
@@ -200,7 +200,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
             ...FONT.monoSmall, fontSize: '0.75rem', letterSpacing: TRACK.tight,
             textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.1,
           }}>
-            EX AEQUO ×{players.length}
+            remis ×{players.length}
           </span>
         )}
       </div>

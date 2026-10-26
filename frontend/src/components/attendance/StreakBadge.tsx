@@ -20,7 +20,7 @@ export default function StreakBadge({ streak }: StreakBadgeProps) {
     }}>
       <Flame size={11} style={{ color: 'var(--co-amber)' }} aria-hidden="true" />
       <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-amber)' }}>
-        SERIA {streak}
+        seria {streak}
       </span>
     </div>
   );
