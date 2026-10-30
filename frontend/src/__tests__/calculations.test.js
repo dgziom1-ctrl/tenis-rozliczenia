@@ -197,8 +197,9 @@ describe('getWrappedSeason', () => {
     expect(getWrappedSeason([2027, 2026, 2025], 2025, 2027)).toBe(2025);
   });
 
-  it('nie proponuje roku, w którym nikt nie grał', () => {
-    expect(getWrappedSeason([2025], null, 2027)).toBeNull();
+  it('daje dostęp do ostatniego sezonu także po kilku latach bez sesji', () => {
+    expect(getWrappedSeason([2025], null, 2027)).toBe(2025);
+    expect(getWrappedSeason([2026, 2025], 2026, 2028)).toBe(2026);
     expect(getWrappedSeason([], null, 2027)).toBeNull();
   });
 });

@@ -95,8 +95,8 @@ export function getAvailableSeasons(history: HistoryEntry[]): number[] {
  * przy jednym sezonie w danych filtr sezonów jest ukryty, a po pierwszej sesji
  * nowego roku domyślnym sezonem jest już ten nowy.
  *
- * Propozycja gaśnie sama z pierwszą sesją nowego roku — na tym samym progu,
- * który przestawia domyślny sezon i bilans otwarcia w rozliczeniach.
+ * Po pierwszej sesji nowego roku wystarczy wybrać starszy sezon w rankingu.
+ * Jeśli w danych jest tylko jeden, pozostaje dostępny bez selektora.
  */
 export function getWrappedSeason(
   seasons: number[],
@@ -109,7 +109,10 @@ export function getWrappedSeason(
   // Wybrany sezon starszy niż najnowszy w danych — gotowe podsumowanie.
   // Porównujemy z danymi, nie z kalendarzem: inaczej w sierpniu 2026, gdy w
   // bazie są już sesje z „2027", Wrapped dla 2026 nigdy by się nie pokazał.
-  if (selectedSeason && selectedSeason < latest) return selectedSeason;
+  if (selectedSeason && (selectedSeason < latest || selectedSeason < currentYear)) return selectedSeason;
+
+  // Przy jednym sezonie selektor jest ukryty — nadal dajemy dostęp do archiwum.
+  if (seasons.length === 1 && latest < currentYear) return latest;
 
   // 1 stycznia: w kalendarzu już nowy rok, w danych jeszcze tylko stary sezon.
   const previous = currentYear - 1;

@@ -5,7 +5,8 @@ import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PWAInstallBanner from '@/components/common/PWAInstallBanner';
 import FirstRunGuide from '@/components/common/FirstRunGuide';
-import { useConnectionStatus } from './providers/appDataContext';
+import AnnualRecapNotice from '@/components/attendance/AnnualRecapNotice';
+import { useAttendanceData, useConnectionStatus } from './providers/appDataContext';
 import { useThemeContext } from './providers/themeContext';
 import { useAudio } from '@/hooks/useAudio';
 import { useGlassPointer } from '@/hooks/useGlassPointer';
@@ -56,6 +57,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isConnected, hasData, bootTimedOut, retry } = useConnectionStatus();
+  const { history, players } = useAttendanceData();
   const isOffline = useSettledFlag(!isConnected, OFFLINE_NOTICE_DELAY_MS);
   const { theme, toggle: toggleTheme } = useThemeContext();
   const scrolled = useScrolled();
@@ -63,11 +65,17 @@ export default function Layout() {
   useGlassPointer();
 
   const [showGuide, setShowGuide] = useState(false);
+  const [guideReady, setGuideReady] = useState(false);
+  const guideExitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (guideExitTimer.current !== null) clearTimeout(guideExitTimer.current);
+  }, []);
 
   useEffect(() => {
     let alreadySeen = false;
     try { alreadySeen = localStorage.getItem(GUIDE_STORAGE_KEY) === '1'; } catch { /* brak dostępu do storage */ }
-    if (alreadySeen) return undefined;
+    if (alreadySeen) { setGuideReady(true); return undefined; }
 
     // Po pierwszym renderze, żeby nie przykrywać ekranu startowego i nie
     // otwierać dialogu w trakcie animacji wejścia.
@@ -77,6 +85,9 @@ export default function Layout() {
 
   const closeGuide = useCallback(() => {
     setShowGuide(false);
+    // Poczekaj na animację przewodnika, żeby dwa dialogi nie nachodziły na siebie.
+    if (guideExitTimer.current !== null) clearTimeout(guideExitTimer.current);
+    guideExitTimer.current = setTimeout(() => setGuideReady(true), 350);
     try { localStorage.setItem(GUIDE_STORAGE_KEY, '1'); } catch { /* brak dostępu do storage */ }
   }, []);
 
@@ -215,6 +226,7 @@ export default function Layout() {
       </div>
       <PWAInstallBanner />
       <FirstRunGuide open={showGuide} onClose={closeGuide} />
+      <AnnualRecapNotice history={history} players={players} enabled={hasData && guideReady && !showGuide} />
     </div>
   );
 }
