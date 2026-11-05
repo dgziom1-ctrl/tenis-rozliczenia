@@ -11,7 +11,7 @@ export default function AdminPage() {
   const navigate = useNavigate();
 
   const setActiveTab = useCallback((id: string) => {
-    void navigate(TAB_PATHS[id] ?? '/');
+    void navigate(TAB_PATHS[id] ?? '/', { preventScrollReset: true });
   }, [navigate]);
 
   return (

@@ -29,7 +29,9 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
       {tabs.map(tab => (
         <button
           key={tab.id}
+          type="button"
           onClick={() => setActiveTab(tab.id)}
+          onMouseDown={(e) => e.preventDefault()}
           aria-label={tab.label}
           aria-current={activeTab === tab.id ? 'page' : undefined}
           className={`mobile-nav-btn tap-press ${activeTab === tab.id ? 'active' : ''}`}
@@ -48,7 +50,9 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
           {tabs.map(tab => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
+              onMouseDown={(e) => e.preventDefault()}
               aria-current={activeTab === tab.id ? 'page' : undefined}
               className={`desktop-tab glass-hover-lift ${activeTab === tab.id ? 'active' : ''}`}
             >

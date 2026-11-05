@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router';
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
@@ -80,20 +80,22 @@ export default function Layout() {
   // `scrollTop` zamiast `scrollTo` nie wywołuje w jsdom „not implemented”, ale
   // globalne `scroll-behavior: smooth` nadal potrafi je animować — dlatego na
   // jedną synchroniczną operację wyłączamy je inline.
-  // requestAnimationFrame odkłada reset o jedną klatkę: przeglądarka zdąży
-  // najpierw ustawić fokus na właśnie klikniętym przycisku nawigacji (i
-  // wewnętrznie wywołać scrollIntoView), a dopiero potem resetujemy pozycję.
-  // Dzięki temu przy pierwszym kliknięciu zakładki nie widać skoku do góry
-  // spowodowanego przez scroll-into-view focused button w portalu nawigacji.
+  // Zablokuj automatyczne przywracanie przewinięcia przez historię przeglądarki.
   useEffect(() => {
-    const raf = requestAnimationFrame(() => {
-      const root = document.documentElement;
-      root.style.scrollBehavior = 'auto';
-      root.scrollTop = 0;
-      document.body.scrollTop = 0;
-      root.style.scrollBehavior = '';
-    });
-    return () => cancelAnimationFrame(raf);
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  // useLayoutEffect resetuje pozycję przewinięcia synchronicznie przed renderem/paintem,
+  // co eliminuje asynchroniczny skok scrolla przy pierwszym i kolejnym montowaniu widoku.
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const previousBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    root.scrollTop = 0;
+    document.body.scrollTop = 0;
+    root.style.scrollBehavior = previousBehavior;
   }, [location.pathname]);
 
   const [showGuide, setShowGuide] = useState(false);
@@ -161,7 +163,7 @@ export default function Layout() {
 
   const switchTab = useCallback((id: string) => {
     playSound(SOUND_TYPES.TAB);
-    void navigate(TAB_PATHS[id] ?? '/');
+    void navigate(TAB_PATHS[id] ?? '/', { preventScrollReset: true });
   }, [playSound, navigate]);
 
   useEffect(() => {

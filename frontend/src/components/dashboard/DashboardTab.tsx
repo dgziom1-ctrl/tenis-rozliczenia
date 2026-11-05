@@ -132,7 +132,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
             <button
               type="button"
               className="cyber-button-yellow"
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate('/admin', { preventScrollReset: true })}
               style={{ minHeight: 44, padding: '11px 18px', display: 'inline-flex', alignItems: 'center', gap: 8 }}
             >
               <Zap size={15} aria-hidden="true" /> Dodaj pierwszą sesję
@@ -141,7 +141,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
               <button
                 type="button"
                 className="cyber-button-outline"
-                onClick={() => navigate('/players')}
+                onClick={() => navigate('/players', { preventScrollReset: true })}
                 style={{ minHeight: 44, padding: '11px 18px' }}
               >
                 Dodaj graczy
