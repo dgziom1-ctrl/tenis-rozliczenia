@@ -85,8 +85,8 @@ async function sendToAll(tokens, title, body, data = {}) {
       webpush: {
         notification: {
           title, body,
-          icon:     '/icon-192v2.png',
-          badge:    '/icon-192v2.png',
+          icon:     '/icon-192v3.png',
+          badge:    '/icon-192v3.png',
           vibrate:  [100, 50, 100],
           requireInteraction: false,
         },

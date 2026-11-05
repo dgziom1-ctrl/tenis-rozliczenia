@@ -402,8 +402,8 @@ try {
     const data = payload.data || {};
     self.registration.showNotification(title || 'Cyber-Ponk', {
       body,
-      icon:     '/icon-192v2.png',
-      badge:    '/icon-192v2.png',
+      icon:     '/icon-192v3.png',
+      badge:    '/icon-192v3.png',
       vibrate:  [100, 50, 100],
       // `url` na końcu: rozpakowanie `data` po nim nadpisywało wartość domyślną
       // pustym stringiem z payloadu.

@@ -174,8 +174,8 @@ export default function Layout() {
         const reg = await navigator.serviceWorker?.ready;
         const options: SwNotificationOptions = {
           body,
-          icon: '/icon-192v2.png',
-          badge: '/icon-192v2.png',
+          icon: '/icon-192v3.png',
+          badge: '/icon-192v3.png',
           vibrate: [100, 50, 100],
           tag: data.tag || data.type || 'default',
           renotify: true,
@@ -184,7 +184,7 @@ export default function Layout() {
         await reg?.showNotification(title, options);
       } catch (err) {
         console.warn('showNotification failed:', err);
-        try { new Notification(title, { body, icon: '/icon-192v2.png' }); } catch { /* powiadomienia niedostępne */ }
+        try { new Notification(title, { body, icon: '/icon-192v3.png' }); } catch { /* powiadomienia niedostępne */ }
       }
     };
 
