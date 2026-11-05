@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
+﻿import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { onValue, ref } from 'firebase/database';
 import { subscribeToData, database, loadSnapshot, buildUIData, setCurrentData } from '@/lib/firebase';
 import { useToast } from '@/components/common/Toast';
@@ -57,6 +57,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [subscriptionError, setSubscriptionError] = useState<Error | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
   const { showError } = useToast();
+  // Ref zapobiega wchodzeniu showError do dependency array efektu subskrypcji.
+  // Bez tego: zmiana referencji showError (np. po re-renderze ToastProvider)
+  // resetowałaby cały efekt — Firebase unsubscribe + nowy subscribe — co przy
+  // każdym zapisie sesji tworzyło drugi subscriber i dawało podwójne powiadomienie.
+  const showErrorRef = useRef(showError);
+  showErrorRef.current = showError;
 
   const retry = useCallback(() => setRetryNonce(n => n + 1), []);
 
@@ -112,7 +118,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           // Połączenie działa, ale jeden snapshot był wadliwy — NIE kasujemy
           // działającej aplikacji, pokazujemy tylko dyskretny komunikat.
           console.error('Data processing error:', error);
-          showError('Nie udało się przetworzyć części danych — pokazuję ostatni poprawny stan.');
+          showErrorRef.current('Nie udało się przetworzyć części danych — pokazuję ostatni poprawny stan.');
           setIsLoading(false);
           setSlowLoading(false);
           return;
@@ -128,7 +134,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       stopWaiting();
       if (typeof unsub === 'function') unsub();
     };
-  }, [retryNonce, showError]);
+  }, [retryNonce]);
 
   // Rzeczywisty stan połączenia z bazą (nie polega na niepewnym navigator.onLine).
   useEffect(() => {

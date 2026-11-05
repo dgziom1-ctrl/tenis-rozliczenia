@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation } from 'react-router';
+﻿﻿﻿import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import Header from '@/components/layout/Header';
@@ -80,13 +80,20 @@ export default function Layout() {
   // `scrollTop` zamiast `scrollTo` nie wywołuje w jsdom „not implemented”, ale
   // globalne `scroll-behavior: smooth` nadal potrafi je animować — dlatego na
   // jedną synchroniczną operację wyłączamy je inline.
+  // requestAnimationFrame odkłada reset o jedną klatkę: przeglądarka zdąży
+  // najpierw ustawić fokus na właśnie klikniętym przycisku nawigacji (i
+  // wewnętrznie wywołać scrollIntoView), a dopiero potem resetujemy pozycję.
+  // Dzięki temu przy pierwszym kliknięciu zakładki nie widać skoku do góry
+  // spowodowanego przez scroll-into-view focused button w portalu nawigacji.
   useEffect(() => {
-    const root = document.documentElement;
-    const previousBehavior = root.style.scrollBehavior;
-    root.style.scrollBehavior = 'auto';
-    root.scrollTop = 0;
-    document.body.scrollTop = 0;
-    root.style.scrollBehavior = previousBehavior;
+    const raf = requestAnimationFrame(() => {
+      const root = document.documentElement;
+      root.style.scrollBehavior = 'auto';
+      root.scrollTop = 0;
+      document.body.scrollTop = 0;
+      root.style.scrollBehavior = '';
+    });
+    return () => cancelAnimationFrame(raf);
   }, [location.pathname]);
 
   const [showGuide, setShowGuide] = useState(false);
