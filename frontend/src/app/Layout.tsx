@@ -1,4 +1,4 @@
-﻿﻿﻿import { Outlet, useNavigate, useLocation } from 'react-router';
+import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import Header from '@/components/layout/Header';

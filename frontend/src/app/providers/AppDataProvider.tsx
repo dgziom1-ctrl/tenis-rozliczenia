@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { onValue, ref } from 'firebase/database';
 import { subscribeToData, database, loadSnapshot, buildUIData, setCurrentData } from '@/lib/firebase';
 import { useToast } from '@/components/common/Toast';
