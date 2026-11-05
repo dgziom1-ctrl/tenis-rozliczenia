@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { LayoutDashboard, PlusCircle, History, Users, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { TabId } from '@/types/ui';
@@ -23,6 +24,23 @@ interface NavigationProps {
 }
 
 export default function Navigation({ activeTab, setActiveTab }: NavigationProps) {
+  const mobileNav = (
+    <nav className="mobile-nav" role="navigation" aria-label="Nawigacja główna">
+      {tabs.map(tab => (
+        <button
+          key={tab.id}
+          onClick={() => setActiveTab(tab.id)}
+          aria-label={tab.label}
+          aria-current={activeTab === tab.id ? 'page' : undefined}
+          className={`mobile-nav-btn tap-press ${activeTab === tab.id ? 'active' : ''}`}
+        >
+          <tab.icon size={20} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
+          <span className="mobile-nav-label">{tab.shortLabel}</span>
+        </button>
+      ))}
+    </nav>
+  );
+
   return (
     <>
       <nav className="desktop-nav" role="navigation" aria-label="Nawigacja główna">
@@ -41,20 +59,15 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
         </div>
       </nav>
 
-      <nav className="mobile-nav" role="navigation" aria-label="Nawigacja główna">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            aria-label={tab.label}
-            aria-current={activeTab === tab.id ? 'page' : undefined}
-            className={`mobile-nav-btn tap-press ${activeTab === tab.id ? 'active' : ''}`}
-          >
-            <tab.icon size={20} strokeWidth={activeTab === tab.id ? 2.5 : 1.8} />
-            <span className="mobile-nav-label">{tab.shortLabel}</span>
-          </button>
-        ))}
-      </nav>
+      {/*
+        Pasek mobilny jedzie do <body>, nie zostaje w kontenerze Layoutu.
+        `position: fixed` przestaje być „fixed do viewportu”, gdy którykolwiek
+        przodek ma `transform`, `filter`, `backdrop-filter` albo `contain`.
+        Wystarczyło, że w przyszłości jakiś wrapper dostanie animację wejścia —
+        i dolny pasek przesuwał się razem z treścią, czasem na środek ekranu.
+        Portal odcina go od tych pułapek raz na zawsze.
+      */}
+      {typeof document !== 'undefined' ? createPortal(mobileNav, document.body) : null}
     </>
   );
 }

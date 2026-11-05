@@ -13,6 +13,7 @@ import { useGlassPointer } from '@/hooks/useGlassPointer';
 import { useScrolled } from '@/hooks/useScrolled';
 import { useSettledFlag } from '@/hooks/useSettledFlag';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { useKeyboardOpen } from '@/hooks/useKeyboardOpen';
 import { SOUND_TYPES, TAB_PATHS } from '@/constants';
 import { TriangleAlert } from 'lucide-react';
 import { CLIP } from '@/constants/styles';
@@ -61,8 +62,32 @@ export default function Layout() {
   const isOffline = useSettledFlag(!isConnected, OFFLINE_NOTICE_DELAY_MS);
   const { theme, toggle: toggleTheme } = useThemeContext();
   const scrolled = useScrolled();
+  const keyboardOpen = useKeyboardOpen();
   const { playSound } = useAudio(isMuted);
   useGlassPointer();
+
+  // Dolny pasek jest `position: fixed`, więc na iOS z otwartą klawiaturą
+  // potrafi wylądować w połowie ekranu (fixed liczy się od layout viewportu,
+  // a nie od widocznego fragmentu). Chowamy go na czas pisania — CSS robi to
+  // klasą na <body>, bo pasek jest portalowany poza drzewo Layoutu.
+  useEffect(() => {
+    document.body.classList.toggle('keyboard-open', keyboardOpen);
+    return () => document.body.classList.remove('keyboard-open');
+  }, [keyboardOpen]);
+
+  // Przejście między zakładkami nie przeładowuje dokumentu, więc bez tego nowa
+  // zakładka otwierała się na tej samej wysokości przewinięcia co poprzednia.
+  // `scrollTop` zamiast `scrollTo` nie wywołuje w jsdom „not implemented”, ale
+  // globalne `scroll-behavior: smooth` nadal potrafi je animować — dlatego na
+  // jedną synchroniczną operację wyłączamy je inline.
+  useEffect(() => {
+    const root = document.documentElement;
+    const previousBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    root.scrollTop = 0;
+    document.body.scrollTop = 0;
+    root.style.scrollBehavior = previousBehavior;
+  }, [location.pathname]);
 
   const [showGuide, setShowGuide] = useState(false);
   const [guideReady, setGuideReady] = useState(false);
@@ -199,7 +224,7 @@ export default function Layout() {
 
   return (
     <div
-      className="min-h-screen px-2 md:px-8 py-2 md:py-8 relative z-10"
+      className="app-shell px-2 md:px-8 py-2 md:py-8 relative z-10"
       style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', position: 'relative' }}
     >
       <CyberBackground />

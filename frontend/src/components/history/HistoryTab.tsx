@@ -470,7 +470,10 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
             </div>
 
             {/* Wyszukiwarka tekstowa */}
-            <input type="search" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Szukaj (data, gracz, sport)..." aria-label="Szukaj w historii" className="cyber-input" style={{ flex: '1 1 160px', minWidth: 140, padding: '6px 10px', fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', clipPath: CLIP.badge }} />
+            {/* Bez lokalnego `fontSize`: 13 px zmuszało iOS do automatycznego
+                przybliżenia strony przy każdym dotknięciu pola. 16 px z
+                `.cyber-input` jest progiem, poniżej którego Safari zoomuje. */}
+            <input type="search" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Szukaj (data, gracz, sport)..." aria-label="Szukaj w historii" className="cyber-input" style={{ flex: '1 1 160px', minWidth: 140, padding: '6px 10px', fontFamily: 'var(--font-mono)', clipPath: CLIP.badge }} />
 
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <div aria-hidden="true" style={{ width: 1, height: 18, background: 'var(--co-border)' }} />

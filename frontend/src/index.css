@@ -285,7 +285,25 @@
    transformem kotwiczy się względem niego (baner powiadomień wypadał poza
    ekran), a `position: sticky` traci punkt odniesienia. `clip` tnie
    poziome wystawanie dekoracji bez zmiany containing blocku. */
-html { scroll-behavior: smooth; overflow-x: clip; }
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  /* iOS potrafi samodzielnie powiększać tekst przy obrocie telefonu. Efekt:
+     po zdjęciu z pionu interfejs wygląda jak inna aplikacja. 100% zostawia
+     decyzję o rozmiarze autorowi arkusza. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Powłoka aplikacji. `100vh` na telefonie mierzy viewport razem z paskiem
+   adresu, więc strona zawsze ma kilka–kilkadziesiąt pikseli nadmiaru i dolna
+   nawigacja „ucieka” przy chowaniu paska. `svh` to najmniejszy stabilny
+   viewport — bez skoków przy przewijaniu. `vh` zostaje jako fallback. */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+#root { min-height: 100%; }
 
 /* Kursor na wszystkim, co klikalne. Wcześniej zależało to od tego, czy autor
    komponentu pamiętał o `cursor: pointer` — część przycisków pokazywała
@@ -318,6 +336,14 @@ body {
   background-attachment: fixed;
 }
 
+/* `background-attachment: fixed` na telefonie kosztuje przemalowanie całego
+   tła przy każdym przewinięciu (iOS i tak je ignoruje). Wersja `scroll`
+   wygląda identycznie na krótkim ekranie, a przestaje rywalizować z dolnym
+   paskiem o klatki. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  body { background-attachment: scroll; }
+}
+
 /* ── Płynna zmiana motywu ──
    Ta reguła obowiązuje TYLKO w trakcie przełączania motywu (klasę zdejmuje
    useTheme po zakończeniu przejścia). Wcześniej wisiała na `*` na stałe, więc
@@ -332,8 +358,12 @@ body.theme-switching *::after {
   transition-timing-function: ease;
 }
 
-/* ── Film grain (desktop only — skipped on mobile to reduce rendering overhead) ── */
-@media (min-width: 768px) {
+/* ── Film grain (desktop only — skipped on mobile to reduce rendering overhead) ──
+   Sam `min-width` nie wystarcza: tablet 1024×768 i telefon w poziomie też go
+   przekraczają, a warstwa z `mix-blend-mode` nad całym ekranem jest wtedy
+   kosztowna przy każdym przewinięciu. Precyzyjny wskaźnik zostawia ziarno
+   tylko tam, gdzie faktycznie mamy mysz. */
+@media (min-width: 768px) and (pointer: fine) {
   body::before {
     content: '';
     position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none;
@@ -860,7 +890,9 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 .modal-panel.sheet {
   border-bottom: none;
   border-radius: var(--modal-radius) var(--modal-radius) 0 0;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Android z gestami zwraca `env(...) = 0`; bez minimalnego odstępu stopka
+     arkusza dotyka samej krawędzi i trudno w nią trafić kciukiem. */
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
   transform: translate3d(0, 100%, 0);
   transition: opacity 220ms ease-out, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1021,7 +1053,7 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 
 /* Na wąskich ekranach rozmycie jest najdroższą warstwą — schodzimy z 22 do
    16px, zachowując refleks i krawędzie (te są darmowe). */
-@media (max-width: 639px) {
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
   :root { --glass-blur: 16px; }
 }
 
@@ -1103,7 +1135,11 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 }
 .header-hero-title.is-hitting::before { opacity: 1; }
 
-@media (max-width: 639px) {
+/* Telefon w poziomie ma szerokość desktopu, ale nadal jest telefonem —
+   kciuki potrzebują 44 px, a hero musi się zmieścić nad treścią. Sam
+   `pointer: coarse` tu nie wystarcza: tablet ma dość miejsca na pełny
+   nagłówek, więc redukujemy go tylko na wąskich i niskich ekranach. */
+@media (max-width: 639px), (max-height: 479px) {
   .header-topbar { padding: 8px 12px !important; }
   /* Ikony w nagłówku są dotykane kciukiem; 36 px było poniżej progu 44 px. */
   .header-action-btn { width: 44px !important; height: 44px !important; }
@@ -1162,10 +1198,20 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 }
 
 /* ══ MAIN CONTENT ════════════════════════════════════════════════ */
-@media (max-width: 639px) {
+/* Ten sam warunek co widoczność dolnego paska. Wcześniej był tylko
+   `max-width: 639px`, więc na tablecie z mobilnym paskiem ostatnia karta
+   chowała się pod nawigacją. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
   /* Wysokość nawigacji plus oddech, żeby ostatni element nie kończył się
      tuż pod jej krawędzią. */
   .main-content { padding-bottom: calc(var(--nav-height) + 1rem + env(safe-area-inset-bottom, 16px)); }
+
+  /* Fokus w polu przy dolnej krawędzi (albo przejście do kotwicy) nie może
+     wylądować pod przyklejonym paskiem lub kompaktowym nagłówkiem. */
+  html {
+    scroll-padding-top: calc(64px + env(safe-area-inset-top, 0px));
+    scroll-padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
+  }
 }
 
 /* Kierunek zakładki określa, z której strony nowa treść wchodzi w układ. */
@@ -1236,7 +1282,14 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 
 /* Mobile nav */
 .mobile-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--z-nav);
+  /* `inset-inline` zamiast `left/right` — pasek nie wystaje przy RTL i nie
+     tworzy poziomego przewijania, gdy przeglądarka doliczy pasek systemowy. */
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  top: auto;
+  width: 100%;
+  z-index: var(--z-nav);
   display: flex; align-items: stretch;
   border-top: 0;
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
@@ -1247,6 +1300,20 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   box-shadow:
     0 -1px 0 var(--glass-edge-top) inset,
     0 -8px 28px rgba(0,0,0,0.35);
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease;
+  /* Bez tego podwójne tapnięcie w zakładkę potrafi przybliżyć stronę. */
+  touch-action: manipulation;
+}
+
+/* Klawiatura zasłania dół visual viewportu, a `fixed` dalej liczy się od
+   layout viewportu — dlatego pasek chowa się na czas pisania zamiast wisieć
+   w połowie ekranu. `visibility` odcina go też od czytników i fokusu. */
+body.keyboard-open .mobile-nav {
+  transform: translate3d(0, 110%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 .mobile-nav::before {
   content: '';
@@ -1298,10 +1365,28 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   margin-top: 1px; font-family: var(--font-display); text-transform: none;
 }
 
-@media (min-width: 640px) { .desktop-nav { display: block; } .mobile-nav { display: none; } }
+/*
+ * Szerokość to nie to samo co „desktop”. Telefon obrócony do poziomu ma
+ * 700–950 px szerokości, więc stary warunek `min-width: 640px` zamieniał
+ * przyklejony dolny pasek na nawigację w przepływie strony — wyglądało to
+ * dokładnie tak, jakby dock „przeskoczył” na środek ekranu. Desktopowa
+ * nawigacja dostaje więc dodatkowo zapas wysokości i precyzyjny wskaźnik;
+ * każdy dotykowy (albo niski) ekran zachowuje dolny pasek.
+ */
+@media (min-width: 640px) and (min-height: 480px) {
+  .desktop-nav { display: block; }
+  .mobile-nav { display: none; }
+}
+
+/* Ta reguła musi stać po desktopowej — przy tablecie 1024×768 z `pointer:
+   coarse` wygrywa mobilny pasek, a nie nawigacja w nagłówku. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  .desktop-nav { display: none; }
+  .mobile-nav { display: flex; }
+}
 
 /* Push banner sits above mobile nav on mobile, at screen bottom on desktop */
-@media (min-width: 640px) {
+@media (min-width: 640px) and (min-height: 480px) and (pointer: fine) {
   .push-banner-sheet {
     bottom: 0 !important;
     border-radius: 0;
@@ -1322,7 +1407,7 @@ body.has-push-banner .pwa-banner { display: none; }
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
-@media (min-width: 640px) {
+@media (min-width: 640px) and (min-height: 480px) and (pointer: fine) {
   /* Na desktopie nie ma dolnej nawigacji — banery siadają na krawędzi ekranu. */
   .bottom-banner { bottom: 0; }
 }
@@ -1346,7 +1431,7 @@ body.has-push-banner .pwa-banner { display: none; }
   bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
   max-width: 400px;
 }
-@media (min-width: 640px) {
+@media (min-width: 640px) and (min-height: 480px) and (pointer: fine) {
   .toast-stack {
     left: auto;
     right: 16px;
@@ -1357,7 +1442,9 @@ body.has-push-banner .pwa-banner { display: none; }
 
 /* ══ COMPACT HEADER ══════════════════════════════════════════════ */
 .compact-header { display: none; }
-@media (max-width: 639px) {
+/* Także telefon w poziomie: ma szerokość desktopu, ale wysokością nadal
+   zasługuje na kompaktowy nagłówek po przewinięciu. */
+@media (max-width: 639px), (max-height: 479px) {
   .compact-header {
     display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-header);
     align-items: center; justify-content: space-between;
@@ -1674,7 +1761,7 @@ body.theme-light {
 }
 
 /* ── Film grain — almost invisible in light mode ── */
-@media (min-width: 768px) {
+@media (min-width: 768px) and (pointer: fine) {
   body.theme-light::before {
     opacity: 0.015;
     mix-blend-mode: multiply;
@@ -1703,7 +1790,7 @@ body.theme-light ::-webkit-scrollbar-thumb { background: var(--co-border); }
 body.theme-light ::-webkit-scrollbar-thumb:hover { background: var(--co-border-hi); }
 
 /* ── Main page background ── */
-body.theme-light .min-h-screen {
+body.theme-light .app-shell {
   background: var(--co-void);
 }
 
@@ -1959,7 +2046,7 @@ body.theme-light .min-h-screen {
    cache'owany), a szkło rozmywa tło słabiej — na 6-calowym ekranie różnicy
    nie widać, a przewijanie listy 8 kart przestaje gubić klatki.
    `prefers-reduced-motion` nadal ma pierwszeństwo: tam ruch i tak znika. */
-@media (max-width: 639px) {
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
   .fluid-blob {
     animation: none;
     will-change: auto;
@@ -1972,7 +2059,7 @@ body.theme-light .min-h-screen {
 
 /* Musi stać po bloku `body.theme-light`, bo ten sam selektor ustawia 24px —
    przy równej specyficzności wygrywa reguła późniejsza. */
-@media (max-width: 639px) {
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
   :root,
   body.theme-light { --glass-blur: 18px; }
 }
