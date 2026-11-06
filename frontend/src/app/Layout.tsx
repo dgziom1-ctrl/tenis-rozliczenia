@@ -4,6 +4,7 @@ import { getMessaging, onMessage } from 'firebase/messaging';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PWAInstallBanner from '@/components/common/PWAInstallBanner';
+import BootSequence from '@/components/common/BootSequence';
 import FirstRunGuide from '@/components/common/FirstRunGuide';
 import AnnualRecapNotice from '@/components/attendance/AnnualRecapNotice';
 import { useAttendanceData, useConnectionStatus } from './providers/appDataContext';
@@ -236,6 +237,7 @@ export default function Layout() {
       className="app-shell px-2 md:px-8 py-2 md:py-8 relative z-10"
       style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', position: 'relative' }}
     >
+      <BootSequence />
       <CyberBackground />
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{routeAnnouncement}</p>
       <div className="max-w-7xl mx-auto relative">

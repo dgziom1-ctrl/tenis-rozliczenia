@@ -666,7 +666,71 @@ body.theme-switching *::after {
 }
 .debt-settling { animation: settle-pulse 0.85s ease-out; }
 
+/* ── Glitch nagłówków i sekwencja startowa ──
+   Tylko transform/opacity (motion floor). Efekt to dwie kopie tekstu z
+   `data-text`, rozsunięte w cyan i róż na ułamek sekundy przy montowaniu —
+   czyli przy każdej zmianie zakładki, bo `main` dostaje nowy klucz. */
+.glitch-text { position: relative; }
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text) / "";
+  position: absolute; left: 0; top: 0; width: 100%;
+  pointer-events: none; opacity: 0;
+  will-change: transform, opacity;
+}
+.glitch-text::before { color: var(--co-cyan); animation: glitch-a 0.42s steps(2, end) 1 both; }
+.glitch-text::after  { color: var(--co-rose); animation: glitch-b 0.42s steps(2, end) 1 both; }
+@keyframes glitch-a {
+  0%   { opacity: 0;   transform: translate(0, 0); }
+  20%  { opacity: 0.8; transform: translate(-3px, 1px); }
+  45%  { opacity: 0.6; transform: translate(2px, -1px); }
+  70%  { opacity: 0.8; transform: translate(-2px, 0); }
+  100% { opacity: 0;   transform: translate(0, 0); }
+}
+@keyframes glitch-b {
+  0%   { opacity: 0;   transform: translate(0, 0); }
+  25%  { opacity: 0.8; transform: translate(3px, -1px); }
+  50%  { opacity: 0.6; transform: translate(-2px, 1px); }
+  75%  { opacity: 0.8; transform: translate(2px, 0); }
+  100% { opacity: 0;   transform: translate(0, 0); }
+}
+
+.boot-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--co-void);
+  opacity: 1; transition: opacity 0.32s ease;
+  overflow: hidden;
+}
+.boot-overlay-leaving { opacity: 0; pointer-events: none; }
+.boot-scan {
+  position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: var(--co-cyan); opacity: 0.35;
+  animation: boot-scan 1.6s linear infinite;
+}
+@keyframes boot-scan {
+  from { transform: translateY(-4px); }
+  to   { transform: translateY(100vh); }
+}
+.boot-cursor {
+  display: inline-block; width: 8px; height: 14px; background: var(--co-cyan);
+  animation: boot-blink 0.8s steps(1, end) infinite;
+}
+@keyframes boot-blink { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
+  .glitch-text::before, .glitch-text::after, .boot-scan, .boot-cursor { animation: none; }
+}
+
+/* Siatka frekwencji: ostatnia obecność pulsuje. Tylko opacity (motion floor);
+   globalny reduced-motion niżej skraca animację do jednej klatki. */
+@keyframes attendance-cell-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+.attendance-cell-latest { animation: attendance-cell-pulse 1.6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-cell-latest { animation: none; }
   .debt-settling { animation: none; }
   .hold-confirm-fill { transition: none !important; }
 }

@@ -7,6 +7,7 @@ import { computeWrappedStats } from '@/utils/wrapped';
 import { Film } from 'lucide-react';
 import Leaderboard from './Leaderboard';
 import RankingHistoryChart from './RankingHistoryChart';
+import RankingReplay from './RankingReplay';
 import MonthlyReport from './MonthlyReport';
 import PlayerSessionModal from './PlayerSessionModal';
 import SeasonSelector from './SeasonSelector';
@@ -161,6 +162,7 @@ export default function AttendanceTab({ players, history, summary, playSound, in
 
       <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} onSelect={handleSelect} />
       <RankingHistoryChart players={players} history={seasonHistory} />
+      <RankingReplay players={players} history={seasonHistory} />
       <MonthlyReport monthlyStats={monthlyStats} players={players} />
     </div>
   </>

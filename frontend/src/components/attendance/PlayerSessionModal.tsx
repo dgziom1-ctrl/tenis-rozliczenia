@@ -11,6 +11,8 @@ import Modal from '../common/Modal';
 import { useModalExit } from '@/hooks/useModalExit';
 import { PlayerAvatar } from '../dashboard/PlayerAvatar';
 import AchievementBadge from './AchievementBadge';
+import AttendanceGrid from './AttendanceGrid';
+import SportRadar from './SportRadar';
 import type { ExtendedPlayerStats, HistoryEntry, PlayerColor } from '@/types/ui';
 
 interface PlayerSessionModalProps {
@@ -178,6 +180,10 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
             </div>
           );
         })()}
+
+        <AttendanceGrid history={eligibleHistory} playerName={player.name} color={c} />
+
+        <SportRadar history={eligibleHistory} playerName={player.name} color={c} />
 
         {/* Achievements */}
         {achievements.length > 0 && (
