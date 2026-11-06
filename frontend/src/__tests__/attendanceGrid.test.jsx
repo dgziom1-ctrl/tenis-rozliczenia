@@ -15,16 +15,25 @@ const history = [
 ];
 
 describe('AttendanceGrid', () => {
-  it('układa okno 20 tygodni × 7 dni kończące się tygodniem ostatniej sesji', () => {
-    const cells = buildAttendanceGrid(history, 'Ala', 20);
-    expect(cells).toHaveLength(140);
+  it('daje jedno pole na tydzień, rzędami po 13, kończąc na tygodniu ostatniej sesji', () => {
+    const cells = buildAttendanceGrid(history, 'Ala', 26, 13);
+    expect(cells).toHaveLength(26);
     const present = cells.filter(c => c.state === 'present');
     const missed = cells.filter(c => c.state === 'missed');
     expect(present.map(c => c.date)).toEqual(['2026-03-02']);
     expect(missed.map(c => c.date)).toEqual(['2026-03-09']);
-    // poniedziałek = wiersz 0, ostatnia kolumna to tydzień 03-09
-    expect(missed[0]).toMatchObject({ col: 19, row: 0 });
+    // ostatni tydzień (03-09) to ostatnie pole: 2. rząd, 13. kolumna
+    expect(missed[0]).toMatchObject({ col: 12, row: 1 });
     expect(present[0].latest).toBe(true);
+    // tygodnie bez grania to 'none', nie nieobecność
+    expect(cells.filter(c => c.state === 'none')).toHaveLength(24);
+  });
+
+  it('dwie sesje w jednym tygodniu to jedno pole', () => {
+    const two = [session('1', '2026-03-02', ['Bartek']), session('2', '2026-03-04', ['Ala'])];
+    const cells = buildAttendanceGrid(two, 'Ala', 26, 13);
+    expect(cells.filter(c => c.state !== 'none')).toHaveLength(1);
+    expect(cells.find(c => c.state !== 'none').state).toBe('present');
   });
 
   it('zwraca pustą siatkę bez historii i nic nie renderuje', () => {

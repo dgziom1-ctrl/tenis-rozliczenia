@@ -9,11 +9,13 @@ interface AttendanceGridProps {
   playerName: string;
   color: PlayerColor;
   weeks?: number;
+  /** Tygodni w jednym rzędzie; 13 daje na telefonie pola ~25 px. */
+  perRow?: number;
 }
 
 // ─── Grid frekwencji ──────────────────────────────────────────────
-export default function AttendanceGrid({ history, playerName, color, weeks = 20 }: AttendanceGridProps) {
-  const cells = useMemo(() => buildAttendanceGrid(history, playerName, weeks), [history, playerName, weeks]);
+export default function AttendanceGrid({ history, playerName, color, weeks = 26, perRow = 13 }: AttendanceGridProps) {
+  const cells = useMemo(() => buildAttendanceGrid(history, playerName, weeks, perRow), [history, playerName, weeks, perRow]);
   if (cells.length === 0) return null;
 
   const present = cells.filter(c => c.state === 'present').length;
@@ -26,15 +28,13 @@ export default function AttendanceGrid({ history, playerName, color, weeks = 20 
 
   return (
     <div style={{ padding: '10px 16px', borderBottom: `1px solid ${color.border}15` }}>
-      <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>Siatka frekwencji · ostatnie {weeks} tyg.</p>
+      <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>Siatka frekwencji · ostatnie {weeks} tyg. (1 pole = 1 tydzień)</p>
       <div
         role="img"
         aria-label={`Frekwencja gracza ${playerName} w ostatnich ${weeks} tygodniach: obecny ${present} razy, nieobecny ${missed} razy`}
         style={{
-          display: 'grid', gap: 2,
-          gridTemplateColumns: `repeat(${weeks}, 1fr)`,
-          gridTemplateRows: 'repeat(7, auto)',
-          gridAutoFlow: 'column',
+          display: 'grid', gap: 4,
+          gridTemplateColumns: `repeat(${perRow}, 1fr)`,
         }}
       >
         {cells.map(c => (
@@ -56,7 +56,7 @@ export default function AttendanceGrid({ history, playerName, color, weeks = 20 
       <div style={{ display: 'flex', gap: 14, marginTop: 8, flexWrap: 'wrap', ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: TRACK.tight }}>
         <Legend swatch={color.border} label="obecny" />
         <Legend swatch="var(--co-dim)" label="nieobecny" />
-        <Legend swatch="var(--co-border)" label="brak sesji" />
+        <Legend swatch="var(--co-border)" label="brak grania w tygodniu" />
       </div>
     </div>
   );

@@ -106,6 +106,10 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
           </button>
         </div>
 
+        {/* Wszystko pod szapką przewija się razem. Wcześniej przewijała się tylko
+            lista sesji, a statystyki, siatka i radar były na stałe — na telefonie
+            zabierały całą wysokość okna i lista zostawała bez miejsca. */}
+        <div data-modal-scroll style={{ overflowY: 'auto', flex: 1, minHeight: 0, overscrollBehavior: 'contain' }}>
         {/* Stats grid */}
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
@@ -200,7 +204,7 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
         )}
 
         {/* Session log */}
-        <div data-modal-scroll style={{ overflowY: 'auto', flex: 1, minHeight: 0, overscrollBehavior: 'contain', padding: '12px 16px' }}>
+        <div style={{ padding: '12px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
             <p style={{ ...FONT.monoLabel, margin: 0, flex: 1 }}>
               Historia sesji — obecny na {sessions.length} z {eligibleHistory.length}
@@ -283,6 +287,7 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
               </div>
             );
           })}
+        </div>
         </div>
       </div>
     </Modal>
