@@ -366,8 +366,10 @@ body.theme-oled {
   --co-glass-chip: rgba(8,12,18,0.36);
   --glass-blur:    30px;
   --glass-sat:     210%;
-  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.065) 0%, rgba(255,255,255,0) 36%);
-  --glass-light:   rgba(0,229,255,0.12);
+  /* Refleks w pikselach, nie w procentach: 36% wysokości na panelu 3500px
+     (Historia, Gracze) to 1250px szarej mgły — dokładnie to, czego OLED ma unikać. */
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.075) 0, rgba(255,255,255,0.02) 16px, rgba(255,255,255,0) 40px);
+  --glass-light:   rgba(0,229,255,0.13);
   --glass-edge-top:    rgba(215,248,255,0.34);
   --glass-edge-bottom: rgba(0,0,0,0.8);
   --glass-rim:         inset 0 0 0 1px rgba(0,229,255,0.07);
@@ -386,9 +388,56 @@ body.theme-oled {
     radial-gradient(ellipse 70% 32% at 50% -10%, rgba(0,229,255,0.035) 0%, transparent 65%);
   background-size: 100% 100%;
 }
+/* Szkło na OLED. Wspólna receptura ma refleks i plamę światła liczone w % wysokości
+   panelu — na dużych panelach (Historia, Gracze, Admin) rozlewało się to w szary
+   całopanelowy filtr, więc te zakładki wyglądały jak stary motyw. Tu światło jest
+   w pikselach: jasny pas na górnej krawędzi i ciasna plama pod kursorem, a reszta
+   panelu to czysta czerń. Kontener jest ciemniejszy niż karty w środku, żeby
+   warstwy czytały się głębią (karta „unosi się" nad tłem), a nie obwódką. */
+body.theme-oled .glass-card,
+body.theme-oled .cyber-box,
+body.theme-oled .glass-panel,
+body.theme-oled .glass-surface {
+  background-color: rgba(9,13,19,0.76);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(ellipse 220px 44px at var(--glass-x) var(--glass-y), var(--glass-light) 0%, transparent 100%),
+    var(--card-tint, linear-gradient(transparent, transparent));
+}
+body.theme-oled .cyber-box {
+  background-color: rgba(2,4,6,0.80);
+}
+/* Nagłówek ma wysokość ~290px na telefonie — jego poświata 120%×140% zalewała
+   cały baner szarozielonym filtrem. Tu jest ciasna i słabsza. */
+body.theme-oled .glass-header {
+  background-color: rgba(2,4,6,0.72);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(70% 60% at 50% -12%, rgba(0,229,255,0.07) 0%, transparent 70%);
+}
+/* Folia rzadkości (color-dodge) i połysk karty na czerni robią szarą mgłę —
+   dlatego karty graczy prawie nie zmieniały się względem starego motywu.
+   Zostaje delikatny błysk, który podkreśla kolor rzadkości, nie rozjaśnia karty. */
+body.theme-oled .card-foil         { opacity: 0.10; }
+body.theme-oled .card-foil-legend  { opacity: 0.22; }
+body.theme-oled .card-foil-elite   { opacity: 0.18; }
+body.theme-oled .card-foil-epic    { opacity: 0.15; }
+body.theme-oled .card-foil-rare    { opacity: 0.12; }
+body.theme-oled .card-foil-common  { opacity: 0.07; }
+body.theme-oled .card-foil-ghost   { opacity: 0.05; }
+body.theme-oled .glass-shine-overlay { opacity: 0.10; }
+/* Karta gracza: czarne wnętrze, kolor rzadkości tylko jako poświata przy rogu. */
+body.theme-oled .fifa-card-legend { --card-tint: linear-gradient(165deg, rgba(184,134,11,0.22) 0%, transparent 34%); }
+body.theme-oled .fifa-card-elite  { --card-tint: linear-gradient(165deg, rgba(224,25,122,0.20) 0%, transparent 34%); }
+body.theme-oled .fifa-card-epic   { --card-tint: linear-gradient(165deg, rgba(155,77,224,0.20) 0%, transparent 34%); }
+body.theme-oled .fifa-card-rare   { --card-tint: linear-gradient(165deg, rgba(20,138,156,0.18) 0%, transparent 34%); }
+body.theme-oled .fifa-card-common { --card-tint: linear-gradient(165deg, rgba(100,116,139,0.10) 0%, transparent 30%); }
+body.theme-oled .fifa-card-ghost  { --card-tint: linear-gradient(165deg, rgba(85,102,119,0.08) 0%, transparent 30%); }
 /* Ziarno rozjaśnia czerń i daje banding na OLED. */
 body.theme-oled::before { display: none; }
-body.theme-oled .fluid-blob { opacity: 0.16; }
+body.theme-oled .fluid-blob { opacity: 0.12; }
 body.theme-oled .fluid-grid { opacity: 0.15; }
 
 /* ── Płynna zmiana motywu ──
