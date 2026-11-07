@@ -156,10 +156,11 @@ describe('useTheme — localStorage i klasy body', () => {
   });
   afterEach(() => { globalThis.matchMedia = originalMatchMedia; });
 
-  it('domyślnie zwraca motyw "dark" przy systemowym ustawieniu ciemnym', async () => {
+  it('domyślnie zwraca motyw "oled" przy systemowym ustawieniu ciemnym', async () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('dark');
+    expect(result.current.theme).toBe('oled');
+    expect(document.body.classList.contains('theme-oled')).toBe(true);
   });
 
   it('na pierwszym uruchomieniu szanuje systemowy motyw jasny, ale go nie zapisuje', async () => {
@@ -178,50 +179,49 @@ describe('useTheme — localStorage i klasy body', () => {
 
     systemLight = false;
     act(() => listeners.forEach(listener => listener()));
-    expect(result.current.theme).toBe('dark');
+    expect(result.current.theme).toBe('oled');
     expect(localStorage.getItem('cyber-ponk-theme')).toBeNull();
   });
 
-  it('toggle przełącza z dark na light', async () => {
+  it('toggle przechodzi cyklicznie oled → dark → light → oled', async () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle());
-    expect(result.current.theme).toBe('light');
-  });
-
-  it('toggle z powrotem na dark', async () => {
-    const { useTheme } = await import('../hooks/useTheme');
-    const { result } = renderHook(() => useTheme());
-
-    act(() => result.current.toggle());
     act(() => result.current.toggle());
     expect(result.current.theme).toBe('dark');
+    act(() => result.current.toggle());
+    expect(result.current.theme).toBe('light');
+    act(() => result.current.toggle());
+    expect(result.current.theme).toBe('oled');
   });
 
   it('dodaje klasę theme-light do body przy motywie light', async () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
 
+    act(() => result.current.toggle()); // → dark
     act(() => result.current.toggle()); // → light
     expect(document.body.classList.contains('theme-light')).toBe(true);
+    expect(document.body.classList.contains('theme-oled')).toBe(false);
   });
 
-  it('usuwa klasę theme-light przy powrocie do dark', async () => {
+  it('usuwa klasę theme-light przy powrocie do oled', async () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle()); // → light
     act(() => result.current.toggle()); // → dark
+    act(() => result.current.toggle()); // → light
+    act(() => result.current.toggle()); // → oled
     expect(document.body.classList.contains('theme-light')).toBe(false);
+    expect(document.body.classList.contains('theme-oled')).toBe(true);
   });
 
   it('zapisuje wybór do localStorage', async () => {
     const { useTheme } = await import('../hooks/useTheme');
     const { result } = renderHook(() => useTheme());
 
-    act(() => result.current.toggle()); // → light
-    expect(localStorage.getItem('cyber-ponk-theme')).toBe('light');
+    act(() => result.current.toggle()); // → dark
+    expect(localStorage.getItem('cyber-ponk-theme')).toBe('dark');
   });
 
   it('odczytuje zapisany motyw z localStorage', async () => {
