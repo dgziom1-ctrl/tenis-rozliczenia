@@ -4,8 +4,8 @@
   "description": "Rozliczenia kortu i frekwencja grupy tenisowej",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#030508",
-  "theme_color": "#030508",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "/icon-192v3.png",

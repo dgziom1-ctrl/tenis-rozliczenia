@@ -63,6 +63,13 @@ interface HeaderProps {
   onShowGuide: () => void;
 }
 
+/** Przełącznik cyklicznie: OLED → ciemny → jasny → OLED. Etykieta mówi, co włączy następne kliknięcie. */
+const THEME_NEXT_LABEL: Record<string, string> = {
+  oled: 'Włącz tryb ciemny',
+  dark: 'Włącz tryb jasny',
+  light: 'Włącz tryb OLED (czarny)',
+};
+
 function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGuide }: HeaderProps) {
   const [copied,    setCopied]    = useState(false);
   const [chaosMode, setChaosMode] = useState(false);
@@ -221,7 +228,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
               {isMuted ? <VolumeX size={17} aria-hidden="true"/> : <Volume2 size={17} aria-hidden="true"/>}
             </button>
             <button type="button" onClick={onToggleTheme}
-              aria-label={theme === 'light' ? 'Włącz tryb ciemny' : 'Włącz tryb jasny'}
+              aria-label={THEME_NEXT_LABEL[theme] ?? 'Zmień motyw'}
               className="header-action-btn"
               style={{ display:'flex',alignItems:'center',
               justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',
@@ -330,7 +337,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
             {isMuted ? <VolumeX size={16} aria-hidden="true"/> : <Volume2 size={16} aria-hidden="true"/>}
           </button>
           <button onClick={onToggleTheme}
-            aria-label={theme === 'light' ? 'Włącz tryb ciemny' : 'Włącz tryb jasny'}
+            aria-label={THEME_NEXT_LABEL[theme] ?? 'Zmień motyw'}
             style={{ display:'flex',alignItems:'center',
             border:'1px solid var(--co-border)',color:'var(--co-dim)',
             background:'transparent',cursor:'pointer',

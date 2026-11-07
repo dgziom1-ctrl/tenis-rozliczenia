@@ -12,12 +12,15 @@ const THEME_TRANSITION_MS = 400;
  * i wygląda to jak niedokończona aplikacja. `index.html` ma wartość ciemną,
  * bo taki motyw startuje domyślnie; JS przełącza ją razem z motywem.
  */
-const THEME_COLOR: Record<Theme, string> = { dark: '#030508', light: '#F8FAFC' };
+const THEME_COLOR: Record<Theme, string> = { oled: '#000000', dark: '#030508', light: '#F8FAFC' };
+
+/** Kolejność przełącznika: czerń OLED → ciemny granat → jasny. */
+const THEME_CYCLE: Theme[] = ['oled', 'dark', 'light'];
 
 function readSavedTheme(): Theme | null {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved === 'light' || saved === 'dark' ? saved : null;
+    return saved === 'light' || saved === 'dark' || saved === 'oled' ? saved : null;
   } catch {
     return null;
   }
@@ -28,7 +31,7 @@ function readSystemTheme(): Theme {
     && typeof window.matchMedia === 'function'
     && window.matchMedia('(prefers-color-scheme: light)').matches
     ? 'light'
-    : 'dark';
+    : 'oled';
 }
 
 export function useTheme() {
@@ -45,6 +48,7 @@ export function useTheme() {
   // świadomego wyboru. Dzięki temu następne uruchomienie nadal może podążyć za OS.
   useLayoutEffect(() => {
     document.body.classList.toggle('theme-light', theme === 'light');
+    document.body.classList.toggle('theme-oled', theme === 'oled');
     document.body.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[theme]);
 
@@ -69,7 +73,7 @@ export function useTheme() {
     const syncWithSystem = () => {
       setPreference(current => current.hasExplicitChoice
         ? current
-        : { ...current, theme: media.matches ? 'light' : 'dark' });
+        : { ...current, theme: media.matches ? 'light' : 'oled' });
     };
 
     if (typeof media.addEventListener === 'function') {
@@ -82,7 +86,7 @@ export function useTheme() {
   }, []);
 
   const toggle = useCallback(() => {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    const next = THEME_CYCLE[(THEME_CYCLE.indexOf(theme) + 1) % THEME_CYCLE.length];
     try { localStorage.setItem(STORAGE_KEY, next); } catch { /* prywatny tryb przeglądarki */ }
     setPreference({ theme: next, hasExplicitChoice: true });
   }, [theme]);

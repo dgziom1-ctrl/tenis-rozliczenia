@@ -344,6 +344,53 @@ body {
   body { background-attachment: scroll; }
 }
 
+/* ══ MOTYW OLED ═════════════════════════════════════════════════════
+   Prawdziwa czerń (#000 = piksele wyłączone na AMOLED) zamiast granatowego
+   near-blacka. Dziedziczy wszystko z ciemnego motywu (`:root`) i podmienia
+   tylko to, co zasłaniało czerń: tło, siatkę, ziarno, winietę i krycie szkła.
+   Szkło jest tu bardziej przezroczyste, a krawędzie jaśniejsze — na czerni
+   panel czyta się przez światło na krawędzi i delikatną poświatę pod spodem,
+   a nie przez szare wypełnienie. `--glass-shadow` trzeba zadeklarować ponownie:
+   `var()` w tokenie rozwiązuje się tam, gdzie token jest zadeklarowany. */
+body.theme-oled {
+  --co-void:      #000000;
+  --co-dark:      #000000;
+  --co-panel:     #050709;
+  --co-raised:    #0A0D12;
+  --co-surface-2: #0A0D12;
+  --co-border:    #0F1722;
+  --co-border-hi: #182739;
+
+  --co-glass:      rgba(8,12,18,0.42);
+  --co-glass-hi:   rgba(6,9,14,0.72);
+  --co-glass-chip: rgba(8,12,18,0.36);
+  --glass-blur:    30px;
+  --glass-sat:     210%;
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.065) 0%, rgba(255,255,255,0) 36%);
+  --glass-light:   rgba(0,229,255,0.12);
+  --glass-edge-top:    rgba(215,248,255,0.34);
+  --glass-edge-bottom: rgba(0,0,0,0.8);
+  --glass-rim:         inset 0 0 0 1px rgba(0,229,255,0.07);
+  --glass-border:      rgba(0,229,255,0.17);
+  --glass-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 0 0 1px rgba(255,255,255,0.025),
+    0 22px 56px -28px rgba(0,229,255,0.10),
+    0 2px 8px -4px rgba(0,0,0,0.9);
+  --co-overlay:    rgba(0,0,0,0.92);
+  --bg-vignette:   rgba(0,0,0,0);
+
+  /* Tylko lokalny bloom u góry — reszta ekranu to czysta czerń. */
+  background-image:
+    radial-gradient(ellipse 70% 32% at 50% -10%, rgba(0,229,255,0.035) 0%, transparent 65%);
+  background-size: 100% 100%;
+}
+/* Ziarno rozjaśnia czerń i daje banding na OLED. */
+body.theme-oled::before { display: none; }
+body.theme-oled .fluid-blob { opacity: 0.16; }
+body.theme-oled .fluid-grid { opacity: 0.15; }
+
 /* ── Płynna zmiana motywu ──
    Ta reguła obowiązuje TYLKO w trakcie przełączania motywu (klasę zdejmuje
    useTheme po zakończeniu przejścia). Wcześniej wisiała na `*` na stałe, więc
@@ -1920,7 +1967,7 @@ body.theme-light .app-shell {
     -webkit-backdrop-filter: none !important;
   }
   .modal-overlay::before {
-    background: #030508;
+    background: var(--co-void);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -2125,5 +2172,6 @@ body.theme-light .app-shell {
    przy równej specyficzności wygrywa reguła późniejsza. */
 @media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
   :root,
-  body.theme-light { --glass-blur: 18px; }
+  body.theme-light,
+  body.theme-oled { --glass-blur: 18px; }
 }

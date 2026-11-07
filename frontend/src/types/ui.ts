@@ -181,7 +181,7 @@ export interface SessionHighlight {
   kind: SessionHighlightKind;
   label: string;
 }
-export type Theme = 'dark' | 'light';
+export type Theme = 'dark' | 'light' | 'oled';
 export type TabId = 'dashboard' | 'attendance' | 'admin' | 'history' | 'players';
 
 export interface WrappedPlayerStats {
