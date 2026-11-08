@@ -1,7 +1,9 @@
 import type { ExtendedPlayerStats, Achievement, HistoryEntry } from '@/types/ui';
 import { filterHistorySinceJoin } from './playerHistory';
 
-export const STREAK_MILESTONES: readonly number[] = [5, 10, 15, 20, 25, 30, 40, 50];
+// Ta sama lista jest w `functions/index.js` (STREAK_MILESTONES) — pilnuje jej
+// `functionsParity.test.js`.
+export const STREAK_MILESTONES: readonly number[] = [5, 10, 15, 20, 25, 30, 40, 50, 100];
 const PERFECT_MONTH_MILESTONES = [5, 10, 15, 20, 25, 30, 40, 50];
 
 export function isStreakMilestone(n: number): boolean {

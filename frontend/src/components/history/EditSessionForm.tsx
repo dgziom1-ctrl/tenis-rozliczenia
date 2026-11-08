@@ -241,7 +241,14 @@ export default function EditSessionForm({
       {/* Obecni */}
       <div>
         <p style={sectionLabel}><Users size={11} /> Obecni</p>
-        <PlayerToggleGrid names={playerNames} selected={present} onToggle={onTogglePresent} accent="yellow" />
+        {/* Gracze przeniesieni do rezerwy po tej sesji dalej w niej są — bez
+            tego byli niewidoczni i nie dało się ich odznaczyć. */}
+        <PlayerToggleGrid
+          names={[...playerNames, ...present.filter(p => !playerNames.includes(p))]}
+          selected={present}
+          onToggle={onTogglePresent}
+          accent="yellow"
+        />
         {!isPresentValid && (
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
             ⚠ Wybierz przynajmniej jednego gracza

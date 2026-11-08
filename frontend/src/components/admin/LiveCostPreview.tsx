@@ -20,7 +20,7 @@ interface LiveCostPreviewProps {
 
 export default function LiveCostPreview({ totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0, courtCount = 1, durationHours = 1 }: LiveCostPreviewProps) {
   const courtCost = parseAmount(totalCost);
-  if (!totalCost || isNaN(courtCost) || courtCost <= 0 || presentPlayers.length === 0) return null;
+  if (!totalCost || isNaN(courtCost) || courtCost < 0 || presentPlayers.length === 0) return null;
   const totalWithRackets = getTotalWithRackets(courtCost, racketCost);
 
   // Dokładnie ten sam podział, który trafi do bazy i sald graczy. Podgląd nie

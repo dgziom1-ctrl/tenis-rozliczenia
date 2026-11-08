@@ -14,7 +14,7 @@
 
    KOMPROMIS (po PR #14): klimat wraca w 100% (szkło, neon, canvas, skany,
    ścięcia, konfetti), ale etykiety są zdaniami — bez wymuszania wielkich liter
-   i bez trackingu. Szczegóły: ../../DESIGN-COMPROMISE.md.
+   i bez trackingu. Szczegóły: ../../docs/DESIGN-COMPROMISE.md.
 ═══════════════════════════════════════════════════════════════════ */
 
 :root {
@@ -1294,6 +1294,13 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   opacity: 0;
 }
 .header-hero-title.is-hitting::before { opacity: 1; }
+
+/* Potwierdzenie skopiowania numeru BLIK — widoczne także na telefonie,
+   gdzie ikona kopiowania jest schowana. */
+.header-blik[data-copied="true"] {
+  border-color: var(--co-green) !important;
+  box-shadow: 0 0 0 1px var(--co-green) inset;
+}
 
 /* Telefon w poziomie ma szerokość desktopu, ale nadal jest telefonem —
    kciuki potrzebują 44 px, a hero musi się zmieścić nad treścią. Sam

@@ -134,7 +134,7 @@ Wracamy do Cyber-Ponka w 100%, ale zatrzymujemy jedną rzecz z eksperymentu:
 
 Ten plik jest skróconym, maszynowo czytelnym kontraktem dla agentów
 (format `google-labs-code/design.md`). Szczegółowe uzasadnienie, macierz
-kontrastu i lista komponentów są w [`frontend/DESIGN_SYSTEM.md`](frontend/DESIGN_SYSTEM.md),
+kontrastu i lista komponentów są w [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md),
 a źródłem wartości jest `frontend/src/index.css` (bloki `:root` i
 `body.theme-light`) oraz `frontend/src/constants/styles.ts`.
 

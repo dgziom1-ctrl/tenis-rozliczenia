@@ -127,6 +127,18 @@ interface AddSessionParams extends SessionInput {
   datePlayed: string;
 }
 
+const DUPLICATE_SESSION_ERROR = 'Sesja z tą datą i tym sportem już istnieje';
+
+/**
+ * Ta sama data i ten sam sport to niemal na pewno podwójny wpis. Inny sport
+ * tego samego dnia jest dozwolony (np. squash rano i ping-pong wieczorem).
+ * Stare rekordy bez pola `sport` liczą się jako ping-pong.
+ */
+function isSameSlot(existing: { date: string; sport?: unknown }, date: string, sport: string): boolean {
+  const existingSport = isSport(existing.sport) ? existing.sport : 'pingpong';
+  return existing.date === date && existingSport === sport;
+}
+
 export async function addSession(params: AddSessionParams): Promise<TransactionResult> {
   if (!isValidISODate(params.datePlayed)) {
     return { success: false, error: 'Nieprawidłowa data sesji' };
@@ -147,8 +159,11 @@ export async function addSession(params: AddSessionParams): Promise<TransactionR
 
     // Idempotencja: ponowienie transakcji nie doda drugiej kopii tej sesji.
     if (weeks.some(w => w.id === newId)) return data;
-    if (weeks.some(w => w.date === params.datePlayed)) {
-      reject('Sesja z tą datą już istnieje');
+    // Nowa sesja zawsze ma sport; opcjonalność w typie dotyczy tylko
+    // edycji starego rekordu, która zachowuje dotychczasową wartość.
+    const newSport = normalized.session.sport ?? 'pingpong';
+    if (weeks.some(w => isSameSlot(w, params.datePlayed, newSport))) {
+      reject(DUPLICATE_SESSION_ERROR);
     }
 
     return {
@@ -157,9 +172,7 @@ export async function addSession(params: AddSessionParams): Promise<TransactionR
         id: newId,
         date: params.datePlayed,
         ...normalized.session,
-        // Nowa sesja zawsze ma sport; opcjonalność w typie dotyczy tylko
-        // edycji starego rekordu, która zachowuje dotychczasową wartość.
-        sport: normalized.session.sport ?? 'pingpong',
+        sport: newSport,
       }]),
       lastAddedSession: { id: newId, ts: addedAt },
     } as RawAppData;
@@ -199,13 +212,16 @@ export async function updateWeek(
     const idx = weeks.findIndex(w => w.id === weekId);
     if (idx === -1) reject('Nie znaleziono sesji');
 
-    if (weeks.some(w => w.id !== weekId && w.date === params.date)) {
-      reject('Sesja z tą datą już istnieje');
-    }
-
     // Gdy formularz nie podał sportu, zachowujemy dotychczasowy — inaczej
     // edycja squasha/badmintona/padla po cichu zmieniała go na ping-pong.
     const existingSport = weeks[idx].sport;
+    const effectiveSport = normalized.session.sport
+      ?? (isSport(existingSport) ? existingSport : 'pingpong');
+
+    if (weeks.some(w => w.id !== weekId && isSameSlot(w, params.date, effectiveSport))) {
+      reject(DUPLICATE_SESSION_ERROR);
+    }
+
     const updated: Week = {
       id: weekId,
       date: params.date,
@@ -278,8 +294,9 @@ export async function restoreWeek(week: Week): Promise<TransactionResult> {
     const data = (current || {}) as RawAppData;
     const weeks = data.weeks || [];
     if (weeks.some(existing => existing.id === week.id)) return data;
-    if (weeks.some(existing => existing.date === week.date)) {
-      reject('Nie można przywrócić sesji — istnieje już inna sesja z tą datą');
+    const restoredSport = normalized.session.sport || week.sport || 'pingpong';
+    if (weeks.some(existing => isSameSlot(existing, week.date, restoredSport))) {
+      reject('Nie można przywrócić sesji — istnieje już inna sesja z tą datą i sportem');
     }
 
     // Przywracamy znormalizowany rekord, żeby pola (korty, godziny, rakiety)

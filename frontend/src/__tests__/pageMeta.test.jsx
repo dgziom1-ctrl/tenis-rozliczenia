@@ -37,6 +37,6 @@ describe('pageMeta', () => {
       wrapper: ({ children }) => <MemoryRouter initialEntries={['/nie-ma-takiej']}>{children}</MemoryRouter>,
     });
 
-    expect(result.current.title).toBe('Pulpit');
+    expect(result.current.title).toBe('Start');
   });
 });

@@ -14,7 +14,7 @@ export const APP_NAME = 'Cyber-Ponk';
  * dla każdego klucza `TAB_PATHS`; pilnuje tego test `pageMeta.test.js`.
  */
 export const PAGE_META: Record<TabId, { title: string; announced: string }> = {
-  [TABS.DASHBOARD]:  { title: 'Pulpit',        announced: 'Pulpit — salda i sesje' },
+  [TABS.DASHBOARD]:  { title: 'Start',         announced: 'Start — salda i sesje' },
   [TABS.ATTENDANCE]: { title: 'Ranking',       announced: 'Ranking — frekwencja i podium' },
   [TABS.ADMIN]:      { title: 'Dodaj sesję',   announced: 'Dodaj sesję — nowy wpis rozliczenia' },
   [TABS.HISTORY]:    { title: 'Historia',      announced: 'Historia — wszystkie sesje' },

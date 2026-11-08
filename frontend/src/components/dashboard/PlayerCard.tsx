@@ -39,7 +39,6 @@ interface PlayerCardProps {
   onAddPayment: (playerName: string, amount: number, paymentId: string) => Promise<AddPaymentResult>;
   onRemovePayment: (playerName: string, paymentId: string) => Promise<TransactionResult>;
   playSound: (type: SoundType) => void;
-  playerIndex?: number;
   /** Podawane tylko dla skarbnika — zasila panel „kto ile winien”. */
   allPlayers?: PlayerStats[];
 }
@@ -49,7 +48,6 @@ function PlayerCard({
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment,
   playSound,
-  playerIndex = 0,
   allPlayers,
 }: PlayerCardProps) {
   const isMobile = useIsMobile();
@@ -196,7 +194,6 @@ function PlayerCard({
   const cardBorder = isSettled && !isOrganizer
     ? `${c.border}25`
     : `${c.border}30`;
-  const playerId = `P${String((player.name.charCodeAt(0) * 31 + playerIndex * 17) % 9000 + 1000)}`;
   // Etykieta musi zawierać widoczny tekst (kwotę i stan), inaczej osoby
   // korzystające z rozpoznawania mowy nie mogą aktywować elementu po nazwie.
   const amountText = `${hasCredit ? '+' : ''}${formatAmountShort(Math.abs(debt))}zł`;
@@ -590,18 +587,18 @@ function PlayerCard({
                     onConfirm={() => void savePayment(debt)}
                     onKeyboardRequest={() => setConfirmSettle(true)}
                   />
-                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }} aria-label="+ Inna kwota — wpłać dowolną kwotę">
+                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', minHeight: 44 }} aria-label="+ Inna kwota — wpłać dowolną kwotę">
                     + Inna kwota
                   </button>
                 </>
               )}
               {hasCredit && (
-                <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }}>
+                <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', minHeight: 44 }}>
                   + Wpłać więcej
                 </button>
               )}
               {isSettled && (
-                <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%' }}>
+                <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', minHeight: 44 }}>
                   + Wpłać na zapas
                 </button>
               )}
@@ -611,12 +608,9 @@ function PlayerCard({
           {!isMobile && (
             <div style={{ marginTop: modal === null ? 12 : 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
               <Barcode name={player.name} color={accentColor} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2 }}>
                 <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
-                  {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
-                </span>
-                <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
-                  Sw-net
+                  {player.name.toUpperCase().replace(/\s/g, '')}
                 </span>
               </div>
             </div>
@@ -688,12 +682,9 @@ function PlayerCard({
           {!isMobile && (
             <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
               <Barcode name={player.name} color={c.border} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2 }}>
                 <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
-                  {playerId}-{player.name.toUpperCase().replace(/\s/g, '')}
-                </span>
-                <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
-                  Sw-net
+                  {player.name.toUpperCase().replace(/\s/g, '')}
                 </span>
               </div>
             </div>

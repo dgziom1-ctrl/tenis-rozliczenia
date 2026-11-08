@@ -3,6 +3,7 @@ const { initializeApp }   = require('firebase-admin/app');
 const { getMessaging }    = require('firebase-admin/messaging');
 const { getDatabase }     = require('firebase-admin/database');
 const { getSessionShares } = require('./sessionCost');
+const { STREAK_MILESTONES, selectTokens } = require('./notificationTargets');
 
 initializeApp();
 
@@ -41,13 +42,16 @@ function readToken(entry) {
   return '';
 }
 
-async function getAllTokens() {
+/**
+ * Tokeny do wysyłki. Bez argumentu — wszyscy; z listą graczy — tylko ich
+ * urządzenia (i urządzenia bez przypisanego gracza). Duplikaty odsiewa
+ * `selectTokens`: ta sama przeglądarka potrafi zapisać się pod kilkoma kluczami
+ * (np. po reinstalacji PWA) i dostawałaby tyle powiadomień, ile ma wpisów.
+ */
+async function getTokens(playerNames = null) {
   const snap = await getDatabase().ref('fcmTokens').get();
   if (!snap.exists()) return [];
-  // Ta sama przeglądarka potrafi zapisać się pod kilkoma kluczami (np. po
-  // reinstalacji PWA). Bez odsiania duplikatów dostaje tyle powiadomień,
-  // ile ma wpisów w bazie.
-  return [...new Set(Object.values(snap.val() || {}).map(readToken).filter(Boolean))];
+  return selectTokens(snap.val() || {}, playerNames);
 }
 
 const PERMANENT_INVALID_CODES = new Set([
@@ -199,18 +203,22 @@ exports.onSessionAdded = onValueUpdated(
 
     const sportEmoji = SPORT_EMOJI[sport] || SPORT_EMOJI.pingpong;
 
-    const tokens = await getAllTokens();
-    console.log(`Tokenów FCM w bazie: ${tokens.length}`);
-    if (!tokens.length) return;
+    // „Nowa sesja" dotyczy tych, którzy grali — reszta nie dostaje powiadomienia
+    // o rozliczeniu, w którym nie uczestniczy. Ogłoszenia dla grupy (serie,
+    // nowy gracz) idą do wszystkich.
+    const allTokens = await getTokens();
+    console.log(`Tokenów FCM w bazie: ${allTokens.length}`);
+    if (!allTokens.length) return;
+    const sessionTokens = await getTokens(present);
 
     await sendToAll(
-      tokens,
+      sessionTokens,
       `${sportEmoji} Nowa sesja dodana!`,
       notifBody,
       { type: 'new_session', date, url: '/?tab=dashboard', tag: `session-${date}` }
     );
 
-    const STREAK_MILESTONES = [5, 10, 20, 30, 50, 100];
+    const tokens = allTokens;
     for (const playerName of present) {
       const streak = computeStreak(weeksAfter, playerName);
       console.log(`  ${playerName}: seria ${streak}`);
@@ -249,7 +257,7 @@ exports.onPlayerAdded = onValueUpdated(
 
     console.log(`Nowi gracze: ${newPlayers.join(', ')}`);
 
-    const tokens = await getAllTokens();
+    const tokens = await getTokens();
     if (!tokens.length) return;
 
     for (const playerName of newPlayers) {

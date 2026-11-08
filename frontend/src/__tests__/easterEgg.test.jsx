@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import Header from '../components/layout/Header';
 import { ToastProvider } from '../components/common/Toast';
 
@@ -16,16 +17,18 @@ import { ToastProvider } from '../components/common/Toast';
  */
 function renderHeader(scrolled = false) {
   return render(
-    <ToastProvider>
-      <Header
-        isMuted={false}
-        setIsMuted={() => {}}
-        scrolled={scrolled}
-        theme="dark"
-        onToggleTheme={() => {}}
-        onShowGuide={() => {}}
-      />
-    </ToastProvider>,
+    <MemoryRouter>
+      <ToastProvider>
+        <Header
+          isMuted={false}
+          setIsMuted={() => {}}
+          scrolled={scrolled}
+          theme="dark"
+          onToggleTheme={() => {}}
+          onShowGuide={() => {}}
+        />
+      </ToastProvider>
+    </MemoryRouter>,
   );
 }
 

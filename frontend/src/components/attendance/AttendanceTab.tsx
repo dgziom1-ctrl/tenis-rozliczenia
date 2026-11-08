@@ -160,7 +160,7 @@ export default function AttendanceTab({ players, history, summary, playSound, in
         </button>
       )}
 
-      <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} onSelect={handleSelect} />
+      <Leaderboard ranked={ranked} podiumPlayers={podiumPlayers} onSelect={handleSelect} seasonLabel={selectedSeason ? String(selectedSeason) : null} />
       <RankingHistoryChart players={players} history={seasonHistory} />
       <RankingReplay players={players} history={seasonHistory} />
       <MonthlyReport monthlyStats={monthlyStats} players={players} />

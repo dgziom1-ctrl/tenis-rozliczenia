@@ -3,9 +3,9 @@
 > Dokument jest źródłem prawdy dla wyglądu i zachowania interfejsu. Zmieniasz
 > kolor, ikonę albo ruch — zmieniasz najpierw ten plik, potem token.
 >
-> Skrócona, maszynowo czytelna wersja dla agentów AI leży w [`../DESIGN.md`](../DESIGN.md)
+> Skrócona, maszynowo czytelna wersja dla agentów AI leży w [`DESIGN.md`](DESIGN.md)
 > (format `google-labs-code/design.md`). Mapowanie 12 repozytoriów design
-> skills na konkretne zmiany: [`../DESIGN-SKILLS.md`](../DESIGN-SKILLS.md).
+> skills na konkretne zmiany: [`DESIGN-SKILLS.md`](DESIGN-SKILLS.md).
 >
 > ⚠️ **Kompromis po PR #14 + font z gry:** klimat Cyber‑Ponk wraca w 100%,
 > ale etykiety są zdaniami zamiast wersalików, a `--font-display` to Rajdhani.
@@ -13,8 +13,8 @@
 > Italic** (`--font-tech`, ostre pochyłe dane), self-hosted przez `@fontsource`.
 > Bebas Neue i kwadratowy Orbitron zostały usunięte. Fragmenty poniżej o „wersalikowych etykietach"
 > i o Bebas Neue dotyczą stanu sprzed kompromisu — aktualna wykładnia:
-> [`../DESIGN-COMPROMISE.md`](../DESIGN-COMPROMISE.md) i
-> [`../CYBERPUNK-FONT.md`](../CYBERPUNK-FONT.md).
+> [`DESIGN-COMPROMISE.md`](DESIGN-COMPROMISE.md) i
+> [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md).
 
 ## Skąd się wziął ten kierunek
 
@@ -129,7 +129,7 @@ Wszystkie hostowane lokalnie przez `@fontsource` (własny arkusz
 zamiast ~1 MB gotowych paczek). Chakra Petch ma pełny `latin-ext`, ale zdania
 i tak zostają w Rajdhani, a `ZŁ` przy `--font-display`. Kursywa jest jawna w
 `FONT.tech()` i wordmarkach — inaczej przeglądarka pochyli litery podwójnie.
-Więcej: [`../CYBERPUNK-FONT.md`](../CYBERPUNK-FONT.md).
+Więcej: [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md).
 
 Pola formularzy mają 16 px, żeby iOS nie przybliżał strony przy dotknięciu.
 

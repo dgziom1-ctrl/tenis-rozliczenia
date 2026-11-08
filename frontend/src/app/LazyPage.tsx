@@ -6,8 +6,10 @@ import { CLIP } from '@/constants/styles';
 // Pusty fallback zamiast spinnera: strony ładują się z tego samego bundla w
 // ułamku sekundy, a migający placeholder byłby bardziej widoczny niż samo
 // oczekiwanie.
+// Rezerwuje wysokość, żeby dokument nie zapadał się na czas pobierania paczki
+// (inaczej dolny pasek nawigacji przeskakiwał przy pierwszym wejściu w zakładkę).
 function PageFallback() {
-  return null;
+  return <div aria-hidden="true" style={{ minHeight: '70vh' }} />;
 }
 
 /**

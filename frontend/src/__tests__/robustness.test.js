@@ -434,6 +434,19 @@ describe('addSession — validation', () => {
     expect(r.error).toMatch(/już istnieje/);
   });
 
+  it('rejects the same date and the same sport', async () => {
+    seed({ weeks: [{ id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice'], multiPlayers: [], sport: 'squash' }] });
+    const r = await addSession({ datePlayed: '2025-01-01', totalCost: 60, presentPlayers: ['Bob'], sport: 'squash' });
+    expect(r.success).toBe(false);
+    expect(r.error).toMatch(/już istnieje/);
+  });
+
+  it('allows a second session on the same date with a different sport', async () => {
+    seed({ weeks: [{ id: 'w1', date: '2025-01-01', cost: 60, present: ['Alice'], multiPlayers: [], sport: 'squash' }] });
+    const r = await addSession({ datePlayed: '2025-01-01', totalCost: 40, presentPlayers: ['Bob'], sport: 'pingpong' });
+    expect(r.success).toBe(true);
+  });
+
   it('accepts cost = 0', async () =>
     expect((await addSession({ datePlayed: '2025-01-01', totalCost: 0, presentPlayers: ['Alice'] })).success).toBe(true));
 

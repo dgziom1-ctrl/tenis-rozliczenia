@@ -12,7 +12,7 @@
  *  3. oba wykresy korzystają ze wspólnej stałej rozmiaru etykiet.
  *
  * Reszta (zoom 200%, czytniki, fizyczny telefon) zostaje w ręcznej checkliście
- * `ACCESSIBILITY.md` — automat tego nie zastąpi.
+ * `docs/ACCESSIBILITY.md` — automat tego nie zastąpi.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -77,7 +77,7 @@ for (const file of ['src/components/attendance/RankingHistoryChart.tsx', 'src/co
 if (errors.length > 0) {
   console.error('\n✗ Audyt typografii: znaleziono problemy\n');
   errors.forEach(error => console.error(`  • ${error}`));
-  console.error('\nPatrz ACCESSIBILITY.md → „Typografia i wykresy”.\n');
+  console.error('\nPatrz docs/ACCESSIBILITY.md → „Typografia i wykresy”.\n');
   process.exit(1);
 }
 

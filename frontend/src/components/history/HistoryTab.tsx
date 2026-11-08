@@ -8,6 +8,7 @@ import { getCourtAmount, getRacketSelection, getTotalWithRackets, inferRacketPri
 import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
 import UndoBar from '../common/UndoBar';
+import ToggleChip from '../common/ToggleChip';
 import { SOUND_TYPES, SPORT, SPORT_LABEL, RACKET_PRICE, UNDO_TIMEOUT_SECONDS } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useUndoTimer } from '@/hooks/useUndoTimer';
@@ -405,48 +406,14 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
               </>
             ) : (
               <>
-                <button
-                  type="button"
-                  onClick={() => setFilterPlayer('')}
-                  aria-pressed={!filterPlayer}
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '0.8125rem',
-                    letterSpacing: 'normal',
-                    padding: '4px 10px',
-                    cursor: 'pointer',
-                    border: '1px solid',
-                    borderColor: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-border)',
-                    color: !filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
-                    background: !filterPlayer ? 'var(--co-tint-hi)' : 'transparent',
-                    clipPath: CLIP.badge,
-                    transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                  }}
-                >
+                <ToggleChip compact active={!filterPlayer} onClick={() => setFilterPlayer('')}>
                   Wszyscy
-                </button>
+                </ToggleChip>
                 {playerNames.map(name => (
-                  <button
-                    key={name}
-                    type="button"
-                    onClick={() => setFilterPlayer(prev => prev === name ? '' : name)}
-                    aria-pressed={filterPlayer === name}
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '0.8125rem',
-                      letterSpacing: 'normal',
-                      padding: '4px 10px',
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-border)',
-                      color: filterPlayer === name ? 'var(--co-cyan)' : 'var(--co-dim)',
-                      background: filterPlayer === name ? 'var(--co-tint-hi)' : 'transparent',
-                      clipPath: CLIP.badge,
-                      transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                    }}
-                  >
+                  <ToggleChip compact key={name} active={filterPlayer === name}
+                    onClick={() => setFilterPlayer(prev => prev === name ? '' : name)}>
                     {name}
-                  </button>
+                  </ToggleChip>
                 ))}
 
                 {filterPlayer && (
@@ -463,9 +430,9 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 na początku linii. Akcje mają teraz osobną, nierozdzielną grupę. */}
             {/* Filtr po sporcie */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <button type="button" onClick={() => setFilterSport('')} aria-pressed={!filterSport} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: !filterSport ? 'var(--co-cyan)' : 'var(--co-border)', color: !filterSport ? 'var(--co-cyan)' : 'var(--co-dim)', background: !filterSport ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>Wszystkie sporty</button>
+              <ToggleChip compact active={!filterSport} onClick={() => setFilterSport('')} style={{ fontSize: '0.75rem', padding: '4px 8px' }}>Wszystkie sporty</ToggleChip>
               {Object.entries(SPORT_LABEL).map(([key, label]) => (
-                <button key={key} type="button" onClick={() => setFilterSport(prev => prev === key ? '' : key)} aria-pressed={filterSport === key} style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', padding: '4px 8px', cursor: 'pointer', border: '1px solid', borderColor: filterSport === key ? 'var(--co-cyan)' : 'var(--co-border)', color: filterSport === key ? 'var(--co-cyan)' : 'var(--co-dim)', background: filterSport === key ? 'var(--co-tint-hi)' : 'transparent', clipPath: CLIP.badge }}>{label}</button>
+                <ToggleChip compact key={key} active={filterSport === key} onClick={() => setFilterSport(prev => prev === key ? '' : key)} style={{ fontSize: '0.75rem', padding: '4px 8px' }}>{label}</ToggleChip>
               ))}
             </div>
 

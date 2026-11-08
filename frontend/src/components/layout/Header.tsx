@@ -1,5 +1,6 @@
 import { Volume2, VolumeX, Smartphone, Check, Sun, Moon, HelpCircle } from 'lucide-react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router';
 import ArenaCanvas from './ArenaCanvas';
 import { copyToClipboard } from '@/utils/clipboard';
 import { BLIK_NUMBER } from '@/utils/blik';
@@ -87,7 +88,9 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
   const clickCount = useRef(0);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { showError } = useToast();
+  const { showError, showSuccess } = useToast();
+  const location = useLocation();
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const blikNumber = BLIK_NUMBER;
 
@@ -95,6 +98,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
     return () => {
       clearTimeout(chaosTimer.current ?? undefined);
       clearTimeout(clickTimer.current ?? undefined);
+      clearTimeout(copiedTimer.current ?? undefined);
     };
   }, []);
 
@@ -108,7 +112,9 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
     const ok = await copyToClipboard(blikNumber.replace(/\s/g, ''));
     if (ok) {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      showSuccess('Numer BLIK skopiowany');
+      clearTimeout(copiedTimer.current ?? undefined);
+      copiedTimer.current = setTimeout(() => setCopied(false), 2000);
     } else {
       showError('Nie udało się skopiować numeru BLIK');
     }
@@ -191,15 +197,15 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
         <div className="header-topbar" style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
           <span className="header-wordmark">CYBER-PONK</span>
-          <button type="button" onClick={handleCopy} className="glass-chip header-blik" aria-label={`Skopiuj numer BLIK ${blikNumber}`} style={{ display:'flex',alignItems:'center',gap:'8px',
+          <button type="button" onClick={handleCopy} className="glass-chip header-blik" data-copied={copied ? 'true' : undefined} aria-label={copied ? 'Numer BLIK skopiowany' : `Skopiuj numer BLIK ${blikNumber}`} style={{ display:'flex',alignItems:'center',gap:'8px',
             border:'1px solid var(--co-tint-line)',padding: '6px 12px',cursor:'pointer',
             transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
             <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
               letterSpacing:TRACK.wide,color:'var(--co-cyan)',padding:'2px 6px',
               background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>{' '}
-            <span className="header-blik-number" style={{ ...FONT.data(blikNumber, TEXT.base),color:'var(--co-text)' }}>
-              {blikNumber}
+            <span className="header-blik-number" style={{ ...FONT.data(blikNumber, TEXT.base),color: copied ? 'var(--co-green)' : 'var(--co-text)' }}>
+              {copied ? <><Check size={14} aria-hidden="true" style={{ verticalAlign:'-2px', marginRight:4 }}/>Skopiowano</> : blikNumber}
             </span>
             <span className="header-blik-copy" style={{ display:'flex', alignItems:'center', gap:8 }}>
               <span aria-hidden="true" style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
@@ -264,7 +270,9 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
             style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
             {/* Ghost flash is a CSS pseudo-element: a second visible text node
                 made axe report a label/visible-text mismatch during the hit. */}
-            <span style={{
+            {/* `key` na ścieżce: glitch odtwarza się przy każdej zmianie zakładki,
+                tak jak w nagłówkach sekcji (animacja CSS biegnie raz przy montowaniu). */}
+            <span key={location.pathname} className="glitch-text" data-text="CYBER-PONK" style={{
               display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
               fontSize:'clamp(1.7rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
               position:'relative',

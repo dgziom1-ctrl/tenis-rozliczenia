@@ -15,6 +15,7 @@ import { useScrolled } from '@/hooks/useScrolled';
 import { useSettledFlag } from '@/hooks/useSettledFlag';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useKeyboardOpen } from '@/hooks/useKeyboardOpen';
+import { routeFromNotificationUrl } from '@/utils/notificationRoute';
 import { SOUND_TYPES, TAB_PATHS } from '@/constants';
 import { TriangleAlert } from 'lucide-react';
 import { CLIP } from '@/constants/styles';
@@ -217,20 +218,23 @@ export default function Layout() {
         return; // uszkodzony adres z workera — ignorujemy zamiast wywracać aplikację
       }
 
-      const tab = url.searchParams.get('tab');
-      if (tab === 'attendance') {
-        const player = url.searchParams.get('player');
-        void navigate(player ? `/attendance?player=${encodeURIComponent(player)}` : '/attendance');
-      } else if (tab === 'dashboard') {
-        void navigate('/');
-      } else if (tab === 'admin') {
-        void navigate('/admin');
-      }
+      const target = routeFromNotificationUrl(url);
+      if (target) void navigate(target);
     };
 
     swContainer.addEventListener('message', handleSwMessage);
     return () => swContainer.removeEventListener('message', handleSwMessage);
   }, [navigate]);
+
+  // Zimny start z powiadomienia: worker otwiera okno pod `/?tab=…`, a wiadomość
+  // z workera trafia tylko do już otwartej apki. Bez tego kliknięcie w
+  // powiadomienie przy zamkniętej apce zawsze lądowało na ekranie startowym.
+  useEffect(() => {
+    const target = routeFromNotificationUrl(new URL(window.location.href));
+    if (target) void navigate(target, { replace: true });
+    // Tylko przy pierwszym montowaniu.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div

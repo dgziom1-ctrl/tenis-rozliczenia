@@ -12,7 +12,7 @@
     "lint:orphans": "node scripts/find-orphan-modules.mjs",
     "audit:a11y": "node scripts/check-a11y.mjs",
     "audit:design": "node scripts/audit-design.mjs",
-    "design:lint": "npx -y @google/design.md lint ../DESIGN.md",
+    "design:lint": "npx -y @google/design.md lint ../docs/DESIGN.md",
     "verify": "npm run typecheck && npm run lint && npm run lint:css && npm run lint:orphans && npm run audit:a11y && npm run audit:contrast && npm run audit:design && npm run test",
     "preview": "vite preview",
     "test": "vitest run",

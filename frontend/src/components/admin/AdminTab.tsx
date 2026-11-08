@@ -18,6 +18,7 @@ import { detectSessionHighlights } from '@/utils/celebrations';
 import SessionSummaryModal from './SessionSummaryModal';
 import LiveCostPreview from './LiveCostPreview';
 import PlayerToggleGrid from './PlayerToggleGrid';
+import ToggleChip from '../common/ToggleChip';
 import SportSelector from './SportSelector';
 import CyberDateInput from './CyberDateInput';
 import FieldLabel from './FieldLabel';
@@ -41,7 +42,10 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
   const [presentPlayers,    setPresentPlayers]    = useState<string[]>([]);
   const [multisportPlayers, setMultisportPlayers] = useState<string[]>([]);
   const [racketCount,       setRacketCount]       = useState(0);
-  const [racketPrice,       setRacketPrice]       = useState(RACKET_PRICE);
+  const [racketPrice,       setRacketPriceValue]  = useState(RACKET_PRICE);
+  // Tekst pola ceny trzymany osobno, żeby dało się je wyczyścić i wpisać przecinek.
+  const [racketPriceText,   setRacketPriceText]   = useState(String(RACKET_PRICE));
+  const setRacketPrice = (value: number) => { setRacketPriceValue(value); setRacketPriceText(String(value)); };
   const [ownRacketPlayers,  setOwnRacketPlayers]  = useState<string[]>([]);
   const [courtCount,        setCourtCount]        = useState(1);
   const [durationHours,     setDurationHours]     = useState(1);
@@ -68,7 +72,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
     cost: racketCost,
   } = getRacketSelection(sport, presentPlayers, ownRacketPlayers, racketCount, racketPrice);
 
-  const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed);
+  // Duplikat to ta sama data i ten sam sport — drugi sport tego dnia jest OK.
+  const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed && (s.sport ?? 'pingpong') === sport);
   const parsedTotalCost = parseAmount(totalCost);
   const isCostValid = isValidAmount(parsedTotalCost, 0);
   const isPresentValid = presentPlayers.length > 0;
@@ -134,7 +139,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
     if (isSaving) return;
     if (!isPresentValid) { showError('Zaznacz co najmniej jednego gracza'); return; }
     if (!isCostValid) { showError(totalCostError || 'Wpisz poprawny koszt sesji'); return; }
-    if (isDuplicateDate) { showError('Sesja z tą datą już istnieje'); return; }
+    if (isDuplicateDate) { showError('Sesja z tą datą i sportem już istnieje'); return; }
     setIsSaving(true);
     const courtAmount = parsedTotalCost;
     const totalWithRackets = getTotalWithRackets(courtAmount, racketCost);
@@ -226,26 +231,14 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
               <div style={{ flex: 1 }}>
                 <FieldLabel>Korty / stoły</FieldLabel>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  {[1, 2, 3].map(n => {
-                    const active = courtCount === n;
-                    return (
-                      <button type="button" key={n}
-                        onClick={() => { setCourtCount(n); playSound(SOUND_TYPES.CLICK); }}
-                        style={{
-                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
-                          clipPath: CLIP.badge,
-                          ...(active ? {
-                            background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
-                            color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
-                          } : {
-                            background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-                          }),
-                        }}>
-                        {n}
-                      </button>
-                    );
-                  })}
+                  {[1, 2, 3].map(n => (
+                    <ToggleChip key={n} font="mono" active={courtCount === n}
+                      ariaLabel={`Liczba kortów: ${n}`}
+                      style={{ flex: 1, padding: '8px 4px' }}
+                      onClick={() => { setCourtCount(n); playSound(SOUND_TYPES.CLICK); }}>
+                      {n}
+                    </ToggleChip>
+                  ))}
                 </div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
                   Limit kart: {maxMulti} ({perCourtHour}/kort/h)
@@ -254,26 +247,14 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
               <div style={{ flex: 1 }}>
                 <FieldLabel>Godziny</FieldLabel>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  {[1, 2, 3].map(n => {
-                    const active = durationHours === n;
-                    return (
-                      <button type="button" key={n}
-                        onClick={() => { setDurationHours(n); playSound(SOUND_TYPES.CLICK); }}
-                        style={{
-                          flex: 1, padding: '8px 4px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
-                          clipPath: CLIP.badge,
-                          ...(active ? {
-                            background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
-                            color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
-                          } : {
-                            background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-                          }),
-                        }}>
-                        {n}h
-                      </button>
-                    );
-                  })}
+                  {[1, 2, 3].map(n => (
+                    <ToggleChip key={n} font="mono" active={durationHours === n}
+                      ariaLabel={`Czas gry: ${n} h`}
+                      style={{ flex: 1, padding: '8px 4px' }}
+                      onClick={() => { setDurationHours(n); playSound(SOUND_TYPES.CLICK); }}>
+                      {n}h
+                    </ToggleChip>
+                  ))}
                 </div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
                   {durationHours > 1 ? `${durationHours}h × ` : ''}{perCourtHour}/kort/h = {maxMulti} {plural(maxMulti, 'karta', 'karty', 'kart')}
@@ -287,7 +268,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
               <CyberDateInput label="Data gry" value={datePlayed} onChange={setDatePlayed} />
               {isDuplicateDate && (
                 <p role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-amber)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  ⚠ Sesja z tą datą już istnieje
+                  ⚠ Sesja z tą datą i tym sportem już istnieje
                 </p>
               )}
             </div>
@@ -380,11 +361,10 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                   </label>
                   <input
                     id={racketPriceId}
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    value={racketPrice}
-                    onChange={e => setRacketPrice(parseAmount(e.target.value) || 0)}
+                    type="text"
+                    inputMode="decimal"
+                    value={racketPriceText}
+                    onChange={e => { setRacketPriceText(e.target.value); setRacketPriceValue(parseAmount(e.target.value) || 0); }}
                     className="cyber-input"
                     style={{
                       width: 78, padding: '8px', textAlign: 'center',
@@ -410,28 +390,14 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
 
                 {/* Racket count buttons */}
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {Array.from({ length: maxRackets + 1 }, (_, i) => i).map(n => {
-                    const active = effectiveRacketCount === n;
-                    return (
-                      <button type="button" key={n}
-                        aria-label={`Liczba wypożyczonych rakiet: ${n}`}
-                        aria-pressed={active}
-                        onClick={() => { setRacketCount(n); playSound(SOUND_TYPES.CLICK); }}
-                        style={{
-                          flex: 1, minWidth: 40, padding: '8px 4px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
-                          clipPath: CLIP.badge,
-                          ...(active ? {
-                            background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
-                            color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
-                          } : {
-                            background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-                          }),
-                        }}>
-                        {n === 0 ? '0' : `${n}`}
-                      </button>
-                    );
-                  })}
+                  {Array.from({ length: maxRackets + 1 }, (_, i) => i).map(n => (
+                    <ToggleChip key={n} font="mono" active={effectiveRacketCount === n}
+                      ariaLabel={`Liczba wypożyczonych rakiet: ${n}`}
+                      style={{ flex: 1, minWidth: 44, padding: '8px 4px' }}
+                      onClick={() => { setRacketCount(n); playSound(SOUND_TYPES.CLICK); }}>
+                      {n}
+                    </ToggleChip>
+                  ))}
                 </div>
                 {effectiveRacketCount > 0 && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
@@ -464,7 +430,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
               </button>
               {!isSaving && isDisabled && (
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', textAlign: 'center', marginTop: 8 }}>
-                  {isDuplicateDate ? '⚠ Zmień datę — sesja już istnieje' : !isCostValid ? totalCostError : 'Zaznacz co najmniej jednego gracza'}
+                  {isDuplicateDate ? '⚠ Zmień datę lub sport — sesja już istnieje' : !isCostValid ? totalCostError : 'Zaznacz co najmniej jednego gracza'}
                 </p>
               )}
             </div>

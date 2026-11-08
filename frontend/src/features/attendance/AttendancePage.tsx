@@ -9,7 +9,9 @@ export default function AttendancePage() {
   const { players, history, summary } = useAttendanceData();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const initialPlayer = searchParams.get('player') ? decodeURIComponent(searchParams.get('player')!) : null;
+  // `searchParams.get` już zdekodował wartość — drugie `decodeURIComponent`
+  // wywalało się błędem URIError na nazwie z `%`.
+  const initialPlayer = searchParams.get('player') || null;
   const [notifPlayer, setNotifPlayer] = useState<string | null>(initialPlayer);
 
   const handleNotifPlayerConsumed = useCallback(() => {

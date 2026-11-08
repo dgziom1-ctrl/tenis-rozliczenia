@@ -85,10 +85,12 @@ interface LeaderboardProps {
   ranked: RankedPlayer[];
   podiumPlayers: PodiumEntry[];
   onSelect: (name: string) => void;
+  /** Wybrany sezon (np. „2026") albo `null` dla wszystkich sesji. */
+  seasonLabel?: string | null;
 }
 
 // ─── Full leaderboard ─────────────────────────────────────────────
-export default function Leaderboard({ ranked, podiumPlayers, onSelect }: LeaderboardProps) {
+export default function Leaderboard({ ranked, podiumPlayers, onSelect, seasonLabel = null }: LeaderboardProps) {
   const theRest = useMemo(() => ranked.filter(p => p.place > 3), [ranked]);
   return (
     <div style={{
@@ -105,7 +107,7 @@ export default function Leaderboard({ ranked, podiumPlayers, onSelect }: Leaderb
         backgroundPosition: '24px 24px',
       }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <SectionHeader icon={TrendingUp} title="Ranking" sub="frekwencja · wszystkie sesje" />
+        <SectionHeader icon={TrendingUp} title="Ranking" sub={seasonLabel ? `frekwencja · sezon ${seasonLabel}` : 'frekwencja · wszystkie sesje'} />
         <Podium podiumPlayers={podiumPlayers} onSelect={onSelect} />
         {theRest.length > 0 && (
           <div style={{ borderTop: '1px solid var(--co-border)', paddingTop: 14 }}>

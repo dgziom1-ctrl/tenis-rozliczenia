@@ -8,6 +8,7 @@ import { createRequire } from 'node:module';
 import { getSessionShares } from '../utils/sessionCost';
 import { allocateExact, allocateNonNegative, splitEqually, toGrosze } from '../utils/money';
 import { MULTISPORT_DISCOUNT, SPORT, hasRacketRental } from '../constants';
+import { STREAK_MILESTONES } from '../utils/achievements';
 
 const require = createRequire(import.meta.url);
 const fns = require('../../../functions/sessionCost.js');
@@ -149,6 +150,37 @@ describe('Cloud Functions używają tych samych stałych co aplikacja', () => {
       expect(fns.hasRacketRental(sport)).toBe(hasRacketRental(sport));
     },
   );
+});
+
+describe('powiadomienia push', () => {
+  const targets = require('../../../functions/notificationTargets.js');
+
+  it('progi serii są takie same jak w aplikacji', () => {
+    expect(targets.STREAK_MILESTONES).toEqual([...STREAK_MILESTONES]);
+    expect(STREAK_MILESTONES).toContain(100);
+  });
+
+  const entries = {
+    a: { token: 't-ola', playerName: 'Ola' },
+    b: { token: 't-bartek', playerName: 'Bartek' },
+    c: { token: 't-nikt', playerName: 'unknown' },
+    d: 't-stary-format',
+    e: { token: 't-ola', playerName: 'Ola' },
+  };
+
+  it('bez listy graczy zwraca wszystkie tokeny bez duplikatów', () => {
+    expect(targets.selectTokens(entries).sort())
+      .toEqual(['t-bartek', 't-nikt', 't-ola', 't-stary-format']);
+  });
+
+  it('z listą graczy zostawia ich urządzenia i te bez przypisanego gracza', () => {
+    expect(targets.selectTokens(entries, ['Ola']).sort())
+      .toEqual(['t-nikt', 't-ola', 't-stary-format']);
+  });
+
+  it('nie wybiera urządzeń graczy spoza listy', () => {
+    expect(targets.selectTokens(entries, ['Ola'])).not.toContain('t-bartek');
+  });
 });
 
 describe('Cloud Functions dzielą kwoty tym samym algorytmem', () => {

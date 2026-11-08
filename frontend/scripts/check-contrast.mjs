@@ -252,7 +252,7 @@ if (errors.length > 0) {
   console.error('\n✗ Audyt kontrastu: znaleziono problemy\n');
   errors.forEach(error => console.error(`  • ${error}`));
   console.error('\nProgi: 4.5:1 dla tekstu zwykłego, 3:1 dla dużego tekstu i elementów interfejsu.');
-  console.error('Patrz DESIGN_SYSTEM.md → „Kontrast i motywy”.\n');
+  console.error('Patrz docs/DESIGN_SYSTEM.md → „Kontrast i motywy”.\n');
   process.exit(1);
 }
 

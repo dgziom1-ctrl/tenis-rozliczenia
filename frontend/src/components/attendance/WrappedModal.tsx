@@ -36,7 +36,7 @@ function useCountUp(target: number, duration = 1200, active = false) {
 // ─── Month short → full name map (PL) ───────────────────────────
 const MONTH_FULL: Record<string, string> = {
   STY: 'Styczeń', LUT: 'Luty', MAR: 'Marzec', KWI: 'Kwiecień',
-  MAJ: 'MAJ', CZE: 'Czerwiec', LIP: 'Lipiec', SIE: 'Sierpień',
+  MAJ: 'Maj', CZE: 'Czerwiec', LIP: 'Lipiec', SIE: 'Sierpień',
   WRZ: 'Wrzesień', PAŹ: 'Październik', LIS: 'Listopad', GRU: 'Grudzień',
 };
 

@@ -10,6 +10,7 @@ import { FONT, TEXT, TRACK, CLIP, CONTENT_WIDTH } from '@/constants/styles';
 import { useToast } from '../common/Toast';
 import { PasswordModal, SectionHeader, PanelHeader } from '../common/SharedUI';
 import { InlineSpinner } from '../common/LoadingSkeleton';
+import ToggleChip from '../common/ToggleChip';
 
 interface PlayersTabProps {
   players: PlayerStats[];
@@ -180,23 +181,12 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
               {players.map(p => {
                 const active = currentMulti.includes(p.name);
                 return (
-                  <button key={p.name} onClick={() => void toggleDefaultMulti(p.name)} disabled={savingMulti}
-                    aria-pressed={active}
-                    style={{
-                      padding: '10px 14px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none',
-                      clipPath: CLIP.badge,
-                      ...(active ? {
-                        background: 'var(--co-tint)', border: '1px solid var(--co-tint-line)', color: 'var(--co-green)',
-                        boxShadow: 'var(--glow-box-cyan)',
-                      } : {
-                        background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-                      }),
-                    }}>
+                  <ToggleChip key={p.name} active={active} accent="green"
+                    onClick={() => { if (!savingMulti) void toggleDefaultMulti(p.name); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', opacity: savingMulti ? 0.6 : 1 }}>
                     <Zap size={12} style={{ color: active ? 'var(--co-green)' : 'var(--co-dim)', flexShrink: 0 }} aria-hidden="true" />
                     {p.name}
-                  </button>
+                  </ToggleChip>
                 );
               })}
             </div>

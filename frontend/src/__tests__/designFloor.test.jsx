@@ -1,7 +1,7 @@
 /**
  * Regresje „design floor” — rzeczy, których axe i audit:contrast nie widzą:
  * stan rozwijanego panelu dla czytnika ekranu oraz animacja canvasu, która
- * pracuje poza ekranem. Zasady i ich źródła opisuje DESIGN-SKILLS.md.
+ * pracuje poza ekranem. Zasady i ich źródła opisuje docs/DESIGN-SKILLS.md.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act, cleanup } from '@testing-library/react';

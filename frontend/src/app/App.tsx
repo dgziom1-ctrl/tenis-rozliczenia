@@ -7,7 +7,7 @@ import { ToastProvider } from '@/components/common/Toast';
 import { hardResetApp, signalAppReady } from '@/utils/bootRecovery';
 import { Z, CLIP } from '@/constants/styles';
 import Layout from './Layout';
-import { routes } from './routes';
+import { routes, prefetchTabs } from './routes';
 import BrandMark from '@/components/common/BrandMark';
 import { Skull, Zap } from 'lucide-react';
 
@@ -160,7 +160,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
 function AppShell() {
   const { isLoading, slowLoading, bootTimedOut, subscriptionError, hasData, retry } = useConnectionStatus();
 
-  useEffect(() => { signalAppReady(); }, []);
+  useEffect(() => { signalAppReady(); prefetchTabs(); }, []);
 
   if (subscriptionError && !hasData) {
     return <CyberErrorScreen onRetry={retry} />;

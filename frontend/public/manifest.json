@@ -1,7 +1,7 @@
 {
   "name": "Cyber-Ponk",
   "short_name": "Cyber-Ponk",
-  "description": "Rozliczenia kortu i frekwencja grupy tenisowej",
+  "description": "Rozliczenia kortu i frekwencja grupy",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

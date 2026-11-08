@@ -329,7 +329,6 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 onAddPayment={handleAddPayment}
                 onRemovePayment={handleRemovePayment}
                 playSound={playSound}
-                playerIndex={idx}
                 allPlayers={isOrg ? data.players : undefined}
               />
             </div>
