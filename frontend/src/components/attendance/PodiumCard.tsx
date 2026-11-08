@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FONT, TEXT, TRACK, CLIP } from '../../constants/styles';
+import { FONT, TEXT, CLIP } from '../../constants/styles';
 import StreakBadge from './StreakBadge';
 import MedalGlyph from '../common/icons/MedalGlyph';
 import type { RankedPlayer } from '@/types/ui';
@@ -31,10 +31,12 @@ const PLACE_STYLES: Record<number, PlaceStyle> = {
 interface PodiumCardProps {
   podiumEntry: PodiumEntry;
   onSelect: (name: string) => void;
+  /** Pozycja wizualna kolumny (CSS `order`); DOM jest w kolejności 1-2-3. */
+  order?: number;
 }
 
 // ─── Podium Card ─────────────────────────────────────────────────
-export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
+export default function PodiumCard({ podiumEntry, onSelect, order }: PodiumCardProps) {
   const players = podiumEntry.players;
   const exAequo = players.length > 1;
   const [shimmerKey, setShimmerKey] = useState(0);
@@ -66,7 +68,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
   };
 
   return (
-    <div className="podium-column" data-podium-place={podiumEntry.place} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: 'min(100%, 190px)', minWidth: 0 }}>
+    <div className="podium-column" data-podium-place={podiumEntry.place} style={{ order, display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: 'min(100%, 190px)', minWidth: 0 }}>
       <div style={{
         width: '100%', minHeight: s.cardHeight, padding: exAequo ? '10px 8px' : '14px 10px',
         textAlign: 'center',
@@ -138,7 +140,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
               >
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{
-                    ...FONT.display(TEXT.small, TRACK.tight), color: s.border,
+                    ...FONT.display(TEXT.small), color: s.border,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
                     {player.name}
@@ -147,7 +149,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
                     {player.attendanceCount}/{player.eligibleWeeks}
                   </div>
                 </div>
-                <span style={{ ...FONT.display(TEXT.lead, TRACK.tight), color: s.border, flexShrink: 0 }}>
+                <span style={{ ...FONT.display(TEXT.lead), color: s.border, flexShrink: 0 }}>
                   {player.attendancePercentage}%
                 </span>
               </div>
@@ -162,19 +164,19 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
                 karta ma `overflow: hidden` — dłuższe imię było ucinane
                 w połowie znaku, zamiast dostać wielokropek. */}
             <div style={{
-              ...FONT.display(TEXT.h3, TRACK.tight), color: s.border, marginBottom: 3,
+              ...FONT.display(TEXT.h3), color: s.border, marginBottom: 3,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
               {players[0].name}
             </div>
             <div style={{
-              ...FONT.display(TEXT.h2, TRACK.tight),
+              ...FONT.display(TEXT.h2),
               color: s.border, lineHeight: 1,
               textShadow: podiumEntry.place === 1 ? 'var(--glow-gold-md)' : 'none',
             }}>
               {players[0].attendancePercentage}%
             </div>
-            <div style={{ ...FONT.monoSmall, marginTop: 4, marginBottom: 6, letterSpacing: TRACK.normal }}>
+            <div style={{ ...FONT.monoSmall, marginTop: 4, marginBottom: 6, letterSpacing: 'normal' }}>
               {players[0].attendanceCount}/{players[0].eligibleWeeks} sesji
             </div>
             {players[0].currentStreak >= 2 && <StreakBadge streak={players[0].currentStreak} />}
@@ -192,14 +194,16 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
         position: 'relative', overflow: 'hidden',
       }}>
         {/* Ambient scan */}
-        {podiumEntry.place === 1 && <div aria-hidden="true" style={{
+        {/* Skan biegnie raz na trafienie piłki (jak shimmer), a nie bez końca
+            przez cały czas, gdy ranking jest na ekranie. */}
+        {podiumEntry.place === 1 && shimmerKey > 0 && <div aria-hidden="true" key={shimmerKey} style={{
           position: 'absolute', left: 0, right: 0, height: '1px',
           background: `linear-gradient(90deg, transparent, ${s.border}, transparent)`,
-          animation: 'podium-scan 2.5s ease-in-out infinite',
+          animation: 'podium-scan 2.5s ease-out 1 forwards',
           pointerEvents: 'none',
         }} />}
         <span style={{
-          ...FONT.display(TEXT.h2, TRACK.wide), color: s.border,
+          ...FONT.display(TEXT.h2), color: s.border,
           textShadow: podiumEntry.place === 1 ? 'var(--glow-gold-md)' : 'none',
         }}>{s.label}</span>
         {/* Etykieta remisu siedziała między kartami a podestem, więc kolumna
@@ -207,7 +211,7 @@ export default function PodiumCard({ podiumEntry, onSelect }: PodiumCardProps) {
             odwracało. Teraz jest w podeście, który ma stałą wysokość. */}
         {exAequo && (
           <span style={{
-            ...FONT.monoSmall, fontSize: '0.75rem', letterSpacing: TRACK.tight,
+            ...FONT.monoSmall, fontSize: '0.75rem', letterSpacing: 'normal',
             textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.1,
           }}>
             remis ×{players.length}

@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { CSSProperties } from 'react';
-import { ChevronLeft, Trophy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 import SportGlyph from '../common/icons/SportGlyph';
 import MedalGlyph from '../common/icons/MedalGlyph';
 import Modal from '../common/Modal';
 import { useModalExit } from '@/hooks/useModalExit';
 import { CornerBrackets } from '../dashboard/CornerBrackets';
-import { FONT, TEXT, TRACK, CLIP, Z } from '@/constants/styles';
+import { FONT, TEXT, CLIP, Z } from '@/constants/styles';
 import { plural } from '@/utils/format';
 import type { WrappedStats } from '@/types/ui';
 
@@ -44,7 +44,7 @@ const MONTH_FULL: Record<string, string> = {
 // Cienkie nakładki na wspólne tokeny — plik miał wcześniej własną, równoległą
 // kopię FONT.display/FONT.mono z zaszytym na sztywno krojem i trackingiem.
 const display = (size: string, extra?: CSSProperties): CSSProperties => ({
-  ...FONT.display(size, TRACK.tight), lineHeight: 1.1, ...extra,
+  ...FONT.display(size), lineHeight: 1.1, ...extra,
 });
 const mono = (size: string, extra?: CSSProperties): CSSProperties => ({
   ...FONT.mono(size), ...extra,
@@ -97,7 +97,10 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
       close();
       return;
     }
-    if (e.key === 'ArrowRight' || e.key === ' ') { advance(); e.preventDefault(); }
+    // Spacja na przycisku („Wstecz”, „Dalej”, „Zamknij”) ma go aktywować,
+    // a nie przewijać slajd — klawisz bąbelkuje z dziecka do powłoki.
+    const onControl = e.target instanceof HTMLElement && e.target.closest('button, a, input') !== null;
+    if (e.key === 'ArrowRight' || (e.key === ' ' && !onControl)) { advance(); e.preventDefault(); }
     if (e.key === 'ArrowLeft') { goBack(); e.preventDefault(); }
   }, [advance, goBack, close]);
 
@@ -121,7 +124,8 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
             <div style={{
               ...display('clamp(5rem, 18vw, 12rem)'),
               color: 'var(--co-cyan)',
-              animation: 'wm-glow 3s ease-in-out infinite',
+              textShadow: 'var(--glow-cyan-md)',
+              animation: 'wm-glow 3s ease-in-out 4',
               marginBottom: 16,
             }}>
               {stats.year}
@@ -136,7 +140,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
             <div style={{
               ...mono('clamp(0.6rem, 2vw, 0.8rem)'),
               color: 'var(--co-dim)',
-              animation: 'wm-pulse 2s ease-in-out infinite',
+              animation: 'wm-pulse 2s ease-in-out 5',
             }}>
               Dotknij aby kontynuować →
             </div>
@@ -260,7 +264,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
                   ...display('clamp(1.6rem, 6vw, 3rem)'),
                   color: i === 0 ? 'var(--co-cyan)' : 'var(--co-green)',
                   textShadow: i === 0 ? 'var(--glow-cyan-md)' : 'var(--glow-green-md)',
-                  animation: `wm-float 3s ease-in-out ${i * 0.5}s infinite`,
+                  animation: `wm-float 3s ease-in-out ${i * 0.5}s 3`,
                 }}>
                   {name}
                 </div>
@@ -385,14 +389,15 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
               MISTRZ ROKU {stats.year}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8, animation: 'wm-float 3s ease-in-out infinite', color: 'var(--co-gold)' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8, animation: 'wm-float 3s ease-in-out 3', color: 'var(--co-gold)' }}>
               <Trophy size={68} strokeWidth={1.6} aria-hidden="true" focusable="false" />
             </div>
 
             <div style={{
               ...display('clamp(2.2rem, 9vw, 5rem)'),
               color: 'var(--co-cyan)',
-              animation: 'wm-glow 2.5s ease-in-out infinite',
+              textShadow: 'var(--glow-cyan-md)',
+              animation: 'wm-glow 2.5s ease-in-out 4',
               marginBottom: 24,
             }}>
               {ch.name}
@@ -525,7 +530,7 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
       <div style={{
         position: 'absolute', top: 20, right: 24,
         ...mono(TEXT.small),
-        color: 'var(--co-dim)', letterSpacing: TRACK.normal,
+        color: 'var(--co-dim)', letterSpacing: 'normal',
         zIndex: 4,
       }}>
         {currentSlide + 1}/{totalSlides}
@@ -552,6 +557,31 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
           <ChevronLeft size={16} aria-hidden="true" /> Wstecz
         </button>
       )}
+
+      {/* Prawdziwy przycisk „Dalej” — powłoka to `role="presentation"`, więc
+          czytnik ekranu i przełączniki nie miały czym przejść do następnego
+          slajdu. Klik w powłokę nadal przewija jak dotąd. */}
+      <button
+        onClick={(e) => { e.stopPropagation(); advance(); }}
+        className="icon-btn"
+        style={{
+          position: 'absolute', bottom: 'clamp(16px, 4vh, 32px)', right: 24, zIndex: 4,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          minHeight: 44, padding: '10px 14px',
+          background: 'transparent', border: '1px solid var(--co-border)',
+          color: 'var(--co-dim)', cursor: 'pointer',
+          clipPath: CLIP.badge,
+          ...display(TEXT.small),
+        }}
+      >
+        {currentSlide >= totalSlides - 1 ? 'Zamknij' : 'Dalej'}
+        {currentSlide < totalSlides - 1 && <ChevronRight size={16} aria-hidden="true" />}
+      </button>
+
+      {/* Zmiana slajdu dla czytnika ekranu. */}
+      <div className="sr-only" role="status" aria-live="polite">
+        Slajd {currentSlide + 1} z {totalSlides}
+      </div>
       </div>
   );
 

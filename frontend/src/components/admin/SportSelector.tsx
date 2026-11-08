@@ -1,7 +1,7 @@
 import { SPORT, SPORT_LABEL } from '@/constants';
 import SportGlyph from '../common/icons/SportGlyph';
 import type { Sport } from '@/types/domain';
-import { CLIP } from '@/constants/styles';
+import { CLIP, FONT, TEXT } from '@/constants/styles';
 
 const SPORTS: readonly Sport[] = [SPORT.PINGPONG, SPORT.SQUASH, SPORT.BADMINTON, SPORT.PADEL];
 
@@ -23,7 +23,7 @@ export default function SportSelector({ value, onChange }: SportSelectorProps) {
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
               minHeight: 44,
               padding: '10px 6px', cursor: 'pointer', transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-              fontFamily: 'var(--font-display)', fontSize: '0.8125rem', 
+              ...FONT.display(TEXT.small), 
               letterSpacing: 'normal', textTransform: 'none',
               clipPath: CLIP.badge,
               ...(active ? {

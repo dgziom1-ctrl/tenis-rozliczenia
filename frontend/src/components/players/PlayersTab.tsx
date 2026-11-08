@@ -6,7 +6,8 @@ import PlayerProfileCard from './PlayerProfileCard';
 import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } from '@/lib/firebase';
 import { SOUND_TYPES, ORGANIZER_NAME } from '@/constants';
 import { createPlayerColorMap } from '@/constants/colors';
-import { FONT, TEXT, TRACK, CLIP, CONTENT_WIDTH } from '@/constants/styles';
+import { FONT, TEXT, CLIP, CONTENT_WIDTH } from '@/constants/styles';
+import { MAX_PLAYER_NAME_LENGTH } from '@/utils/validation';
 import { useToast } from '../common/Toast';
 import { PasswordModal, SectionHeader, PanelHeader } from '../common/SharedUI';
 import { InlineSpinner } from '../common/LoadingSkeleton';
@@ -27,7 +28,9 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
   const [pwModal,       setPwModal]       = useState<string | null>(null);
   const [isAddingPlayer, setIsAddingPlayer] = useState(false);
   const [processingPlayer, setProcessingPlayer] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const newPlayerId = useId();
+  const nameErrorId = useId();
   const { showSuccess, showError } = useToast();
 
   const currentMulti = localMulti ?? (defaultMultiPlayers || []);
@@ -54,17 +57,33 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
     }
   };
 
+  // Komunikat pod polem zamiast cichego `return`: puste, za długie i zdublowane
+  // imię mają jasną odpowiedź zamiast „nic się nie stało”.
+  const trimmedName = newPlayerName.trim();
+  const knownNames = [...(players ?? []).map(p => p.name), ...(deletedPlayers ?? [])];
+  const nameError = !submitted ? null
+    : trimmedName === '' ? 'Wpisz imię gracza'
+      : trimmedName.length > MAX_PLAYER_NAME_LENGTH ? `Imię może mieć najwyżej ${MAX_PLAYER_NAME_LENGTH} znaków`
+        : knownNames.some(n => n.toLowerCase() === trimmedName.toLowerCase())
+          ? ((deletedPlayers ?? []).some(n => n.toLowerCase() === trimmedName.toLowerCase())
+            ? 'Taki gracz jest w rezerwie — przywróć go z listy poniżej'
+            : 'Taki gracz już jest w grupie')
+          : null;
+
   const handleAddPlayer = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!newPlayerName.trim()) return;
+    setSubmitted(true);
+    const duplicate = knownNames.some(n => n.toLowerCase() === trimmedName.toLowerCase());
+    if (!trimmedName || trimmedName.length > MAX_PLAYER_NAME_LENGTH || duplicate) return;
     if (isAddingPlayer) return;
     setIsAddingPlayer(true);
     try {
-      const result = await addPlayer(newPlayerName.trim());
+      const result = await addPlayer(trimmedName);
       if (!result.success) { showError(result.error || 'Nie udało się dodać gracza'); return; }
       playSound(SOUND_TYPES.SUCCESS);
-      showSuccess(`✓ Dodano: ${newPlayerName.trim()}`);
+      showSuccess(`Dodano: ${trimmedName}`);
       setNewPlayerName('');
+      setSubmitted(false);
     } finally {
       setIsAddingPlayer(false);
     }
@@ -91,7 +110,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
       const result = await restorePlayer(playerName);
       if (!result.success) { showError(result.error || 'Nie udało się przywrócić gracza'); return; }
       playSound(SOUND_TYPES.SUCCESS);
-      showSuccess(`✓ Przywrócono: ${playerName}`);
+      showSuccess(`Przywrócono: ${playerName}`);
     } finally {
       setProcessingPlayer(null);
     }
@@ -128,11 +147,18 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
           <SectionHeader icon={UserPlus} title="Dodaj nowego gracza" />
           <form onSubmit={handleAddPlayer} style={{ display: 'flex', gap: 8 }}>
             <label htmlFor={newPlayerId} className="sr-only">Imię nowego gracza</label>
-            <input id={newPlayerId} type="text" value={newPlayerName} onChange={e => setNewPlayerName(e.target.value)}
-              placeholder="Imię gracza..."
-              className="cyber-input"
+            <input id={newPlayerId} type="text" value={newPlayerName}
+              onChange={e => setNewPlayerName(e.target.value)}
+              placeholder="Imię gracza…"
+              maxLength={MAX_PLAYER_NAME_LENGTH}
+              autoCapitalize="words"
+              autoComplete="off"
+              autoCorrect="off"
+              enterKeyHint="done"
+              aria-invalid={nameError !== null}
+              aria-describedby={nameError ? nameErrorId : undefined}
+              className={nameError ? 'cyber-input input-error' : 'cyber-input'}
               style={{ flex: 1, padding: '10px 14px', clipPath: CLIP.tag }}
-              required
               disabled={isAddingPlayer}
             />
             <button
@@ -141,9 +167,14 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
               className="cyber-button-yellow"
               style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', whiteSpace: 'nowrap', flexShrink: 0, opacity: isAddingPlayer ? 0.7 : 1, cursor: isAddingPlayer ? 'not-allowed' : 'pointer' }}
             >
-              {isAddingPlayer ? <InlineSpinner size="sm" /> : <UserPlus size={14} />} {isAddingPlayer ? 'Dodaję...' : 'Dodaj'}
+              {isAddingPlayer ? <InlineSpinner size="sm" /> : <UserPlus size={14} />} {isAddingPlayer ? 'Dodaję…' : 'Dodaj'}
             </button>
           </form>
+          {nameError && (
+            <p id={nameErrorId} role="alert" style={{ margin: '8px 0 0', ...FONT.display(TEXT.base), color: 'var(--co-rose)' }}>
+              ⚠ {nameError}
+            </p>
+          )}
         </div>
 
         {/* Player list */}
@@ -175,7 +206,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
         {players && players.length > 0 && (
           <div style={{ marginBottom: 28 }}>
             <SectionHeader icon={Zap} title="Multisport domyślny" accent="var(--co-green)" />
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-text)', marginBottom: 12 }}>
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-text)', marginBottom: 12 }}>
               Zaznaczeni będą automatycznie oznaczeni jako Multisport przy każdej nowej sesji.
             </p>
             <div className="player-grid">
@@ -206,10 +237,10 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                       padding: '14px', background: 'var(--co-tint-rose)', border: '1px solid var(--co-rose)',
                       clipPath: CLIP.smallCard,
                     }}>
-                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: 'normal', color: 'var(--co-rose)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'none' }}>
+                      <p style={{ ...FONT.display(TEXT.lead), color: 'var(--co-rose)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4, textTransform: 'none' }}>
                         <AlertTriangle size={12} /> Usunąć na zawsze?
                       </p>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-text)', marginBottom: 12 }}>{name}</p>
+                      <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-text)', marginBottom: 12 }}>{name}</p>
                       <div style={{ display: 'flex', gap: 8 }}>
                         {/* `disabled`, nie samo pointerEvents — inaczej Enter na
                             zafokusowanym przycisku i tak wysyłał drugie żądanie. */}
@@ -231,7 +262,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
                     }}>
                       {/* `--co-close-btn` to token przycisku zamknięcia, nie koloru
                           treści — w ciemnym motywie miał ~2:1 na nazwie gracza. */}
-                      <span style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-text)', display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                      <span style={{ ...FONT.display(TEXT.base), color: 'var(--co-text)', display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
                         <Cpu size={14} style={{ color: 'var(--co-dim)', flexShrink: 0 }} aria-hidden="true" />
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
                       </span>

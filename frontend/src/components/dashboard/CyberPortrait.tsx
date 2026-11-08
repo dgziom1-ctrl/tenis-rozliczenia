@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { FONT, TEXT, TRACK } from '@/constants/styles';
+import { FONT, TEXT } from '@/constants/styles';
 
 /**
  * Deterministyczny mini-portret z imienia — ten sam gracz zawsze dostaje
@@ -86,7 +86,7 @@ export function CyberPortrait({ name, color, size = 60 }: CyberPortraitProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        ...FONT.display(size >= 56 ? TEXT.h3 : size >= 40 ? TEXT.lead : TEXT.base, TRACK.tight),
+        ...FONT.display(size >= 56 ? TEXT.h3 : size >= 40 ? TEXT.lead : TEXT.base),
         color: 'var(--co-text-hi)',
         textShadow: '0 1px 8px var(--co-void)',
         pointerEvents: 'none',

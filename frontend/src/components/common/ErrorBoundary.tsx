@@ -2,7 +2,7 @@ import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { hardResetApp, isStaleBuildError, recoverFromStaleBuild, signalAppReady } from '@/utils/bootRecovery';
-import { Z, CLIP, FONT, TEXT, TRACK } from '@/constants/styles';
+import { Z, CLIP, FONT, TEXT } from '@/constants/styles';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -70,7 +70,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
             <AlertTriangle size={24} style={{ color: 'var(--co-rose)', flexShrink: 0 }} aria-hidden="true" />
             <h1 style={{
-              ...FONT.display(TEXT.h3, TRACK.normal),
+              ...FONT.display(TEXT.h3),
               color: 'var(--co-rose)', margin: 0,
               textShadow: 'var(--glow-rose-md)',
             }}>
@@ -95,7 +95,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             }}>
               <summary style={{
                 ...FONT.mono(TEXT.tiny),
-                color: 'var(--co-rose)', cursor: 'pointer', letterSpacing: TRACK.tight,
+                color: 'var(--co-rose)', cursor: 'pointer', letterSpacing: 'normal',
               }}>
                 Szczegóły błędu (dev mode)
               </summary>
@@ -134,7 +134,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               background: 'transparent', border: '1px solid var(--co-tint-rose-line)',
               color: 'var(--co-dim)',
               ...FONT.mono(TEXT.tiny),
-              letterSpacing: TRACK.normal, textTransform: 'none',
+              letterSpacing: 'normal', textTransform: 'none',
             }}
           >
             Wyczyść cache i uruchom od nowa

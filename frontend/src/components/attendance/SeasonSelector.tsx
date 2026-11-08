@@ -1,4 +1,4 @@
-import { CLIP, FONT, TEXT, TRACK } from '../../constants/styles';
+import { CLIP, FONT, TEXT } from '../../constants/styles';
 
 const ALL_TIME = null;
 
@@ -20,12 +20,12 @@ export default function SeasonSelector({ seasons, selected, onChange }: SeasonSe
   return (
     // Odstęp bierze rodzic (gap 20 w AttendanceTab) — własny marginBottom 16
     // dawał pod tym paskiem inny rytm niż pod każdym innym elementem zakładki.
-    <div style={{
+    <div role="group" aria-label="Sezon" style={{
       display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap',
     }}>
       {/* Etykieta była mono, a przyciski obok display — dwa kroje w jednym
           pasku kontrolek. */}
-      <span style={{ ...FONT.display(TEXT.tiny, TRACK.wide), color: 'var(--co-dim)', marginRight: 4 }}>
+      <span style={{ ...FONT.display(TEXT.tiny), color: 'var(--co-dim)', marginRight: 4 }}>
         Sezon:
       </span>
       {options.map(opt => {
@@ -33,11 +33,12 @@ export default function SeasonSelector({ seasons, selected, onChange }: SeasonSe
         return (
           <button
             key={opt.label}
+            type="button"
             onClick={() => onChange(opt.value)}
             aria-pressed={active}
             style={{
               minHeight: 44, padding: '8px 12px',
-              ...FONT.display(TEXT.base, TRACK.normal),
+              ...FONT.display(TEXT.base),
               background: active ? 'var(--co-tint-hi)' : 'transparent',
               border: `1px solid ${active ? 'var(--co-tint-line)' : 'var(--co-border)'}`,
               color: active ? 'var(--co-cyan)' : 'var(--co-text)',

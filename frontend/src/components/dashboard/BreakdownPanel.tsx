@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { formatDate, formatAmountShort, plural } from '@/utils/format';
-import { FONT, TEXT, TRACK } from '@/constants/styles';
+import { FONT, TEXT } from '@/constants/styles';
 import { TerminalPanel, TerminalSectionHeader, TerminalRow, TerminalFooter } from './TerminalPanel';
 import type { DebtCarryOver, DebtDisplayData } from '@/types/ui';
 import type { TransactionResult } from '@/types/domain';
@@ -135,7 +135,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           ))}
           {breakdown.sessions.length > 1 && (
             <TerminalRow highlight="var(--co-tint-rose)">
-              <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)' }}>Razem sesje</span>
+              <span style={{ ...FONT.display(TEXT.tiny), color: 'var(--co-dim)' }}>Razem sesje</span>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-rose)' }}>
                 -{formatAmountShort(breakdown.totalSessions)} zł
               </span>
@@ -188,7 +188,7 @@ export default function BreakdownPanel({ playerName, open, onToggle, breakdown, 
           ))}
           {breakdown.payments.length > 1 && (
             <TerminalRow highlight="var(--co-tint)">
-              <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)' }}>Razem wpłacono</span>
+              <span style={{ ...FONT.display(TEXT.tiny), color: 'var(--co-dim)' }}>Razem wpłacono</span>
               <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-cyan)' }}>
                 +{formatAmountShort(breakdown.totalPaid)} zł
               </span>

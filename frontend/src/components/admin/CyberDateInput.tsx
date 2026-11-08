@@ -11,6 +11,13 @@ interface CyberDateInputProps {
   compact?: boolean;
 }
 
+/** Dziś w lokalnej strefie (nie UTC), żeby wieczorna sesja nie była „z przyszłości”. */
+function todayIso(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 // iOS Safari: showPicker() nie istnieje i rzuca TypeError.
 // opacity:0 na iOS blokuje zdarzenia dotknięcia — używamy opacity:0.01
 // zamiast 0, co sprawia że input jest "widoczny" dla silnika zdarzeń iOS.
@@ -21,7 +28,9 @@ export default function CyberDateInput({ value, onChange, label, compact = false
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    // `:focus-within` na wrapperze: natywny input jest niewidoczny (opacity
+    // 0.01), więc to dekoracyjna warstwa pokazuje pierścień fokusa.
+    <div className="cyber-date-wrap" style={{ position: 'relative' }}>
       <div aria-hidden="true" className="cyber-input" style={{
         width: '100%', padding: compact ? '10px 12px' : '10px 14px', display: 'flex',
         alignItems: 'center', justifyContent: 'space-between', gap: 10,
@@ -35,6 +44,7 @@ export default function CyberDateInput({ value, onChange, label, compact = false
         type="date"
         aria-label={label}
         value={value}
+        max={todayIso()}
         onChange={e => onChange(e.target.value)}
         onClick={handleClick}
         style={{

@@ -1,13 +1,15 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { Terminal, CalendarDays, Search, Download, ArrowUpDown } from 'lucide-react';
+import { Terminal, CalendarDays, Search, Download, ArrowUpDown, Pencil } from 'lucide-react';
 import { updateWeek, deleteWeekWithSnapshot, restoreWeek } from '@/lib/firebase';
 import { groupHistoryByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
 import SeasonSelector from '../attendance/SeasonSelector';
 import { parseAmount, isValidAmount, formatDate, plural } from '@/utils/format';
 import { getCourtAmount, getRacketSelection, getTotalWithRackets, inferRacketPricing } from '@/utils/sessionCost';
+import { costError } from '@/utils/costMessages';
 import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
 import UndoBar from '../common/UndoBar';
+import Modal from '../common/Modal';
 import ToggleChip from '../common/ToggleChip';
 import { SOUND_TYPES, SPORT, SPORT_LABEL, RACKET_PRICE, UNDO_TIMEOUT_SECONDS } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -18,7 +20,7 @@ import LogEntry from './LogEntry';
 import AttendanceTrendChart from './AttendanceTrendChart';
 import EditSessionForm from './EditSessionForm';
 import PlayerFilterSheet from './PlayerFilterSheet';
-import { CLIP } from '@/constants/styles';
+import { CLIP, FONT, TEXT } from '@/constants/styles';
 
 /** Ile sesji pokazujemy na raz. 50 rekordów dawało 17 863 px strony na telefonie. */
 const SESSIONS_PAGE_SIZE = 12;
@@ -27,11 +29,17 @@ const SESSIONS_PAGE_SIZE = 12;
 interface EditState {
   id: string;
   form: SessionEditForm;
+  /** Migawka formularza z chwili otwarcia — do wykrycia niezapisanych zmian. */
+  initial: string;
 }
+
+const DISCARD_PROMPT = 'Masz niezapisane zmiany w edytowanej sesji. Odrzucić je?';
 
 interface PendingDeletedWeek {
   week: Week;
   token: number;
+  /** Wcześniejsze usunięcia, które też da się jeszcze cofnąć (najstarsze pierwsze). */
+  earlier: Week[];
 }
 
 interface HistoryTabProps {
@@ -66,9 +74,10 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   const editForm = editing?.form;
   const parsedEditCost = parseAmount(editForm?.cost ?? '');
   const isEditCostValid = isValidAmount(parsedEditCost, 0);
-  const editCostError = isEditCostValid
-    ? null
-    : (editForm?.cost === '' ? 'Wpisz koszt kortu' : 'Koszt musi być liczbą >= 0');
+  const editCostError = isEditCostValid ? null : costError(String(editForm?.cost ?? ''));
+  const isEditDirty = editing !== null && JSON.stringify(editing.form) !== editing.initial;
+  const undoToastRef = useRef<typeof undoToast>(null);
+  undoToastRef.current = undoToast;
 
   const seasons = useMemo(() => getAvailableSeasons(history), [history]);
   const selectedSeason = chosenSeason === undefined ? null : chosenSeason;
@@ -138,7 +147,14 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     }
   };
 
-  const requestEdit   = useCallback((row: HistoryEntry) => setPwModal({ type: 'edit', row }), []);
+  // Otwarcie edycji innego wiersza podmienia formularz, więc przy zmianach
+  // pytamy, zanim je stracimy.
+  const isEditDirtyRef = useRef(false);
+  isEditDirtyRef.current = isEditDirty;
+  const requestEdit   = useCallback((row: HistoryEntry) => {
+    if (isEditDirtyRef.current && !window.confirm(DISCARD_PROMPT)) return;
+    setPwModal({ type: 'edit', row });
+  }, []);
   const requestDelete = useCallback((id: string) => setPwModal({ type: 'delete', rowId: id }), []);
 
   const handleDelete = useCallback(async (id: string) => {
@@ -154,7 +170,11 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
       if (result.deletedWeek) {
         const token = ++undoSequenceRef.current;
         activeUndoTokenRef.current = token;
-        startUndo({ week: result.deletedWeek, token });
+        // Drugie usunięcie w oknie cofania nie może kasować możliwości cofnięcia
+        // pierwszego — poprzednie sesje trafiają na stos.
+        const previous = undoToastRef.current?.payload;
+        const earlier = previous ? [...previous.earlier, previous.week] : [];
+        startUndo({ week: result.deletedWeek, token, earlier });
       }
       playSound(SOUND_TYPES.DELETE);
     } catch {
@@ -169,7 +189,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     if (!undoToast || undoingRef.current) return;
     undoingRef.current = true;
     try {
-      const { week, token } = undoToast.payload;
+      const { week, token, earlier } = undoToast.payload;
       const result = await restoreWeek(week);
       if (!result.success) {
         playSound(SOUND_TYPES.ERROR);
@@ -177,8 +197,15 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         return;
       }
       if (activeUndoTokenRef.current === token) {
-        activeUndoTokenRef.current = null;
-        dismissUndo();
+        if (earlier.length > 0) {
+          // Po cofnięciu ostatniego usunięcia wraca opcja cofnięcia poprzedniego.
+          const nextToken = ++undoSequenceRef.current;
+          activeUndoTokenRef.current = nextToken;
+          startUndo({ week: earlier[earlier.length - 1], token: nextToken, earlier: earlier.slice(0, -1) });
+        } else {
+          activeUndoTokenRef.current = null;
+          dismissUndo();
+        }
       }
       playSound(SOUND_TYPES.SUCCESS);
       showSuccess('Sesja przywrócona');
@@ -188,7 +215,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     } finally {
       undoingRef.current = false;
     }
-  }, [undoToast, dismissUndo, playSound, showError, showSuccess]);
+  }, [undoToast, dismissUndo, startUndo, playSound, showError, showSuccess]);
 
   const handlePasswordConfirm = () => {
     if (!pwModal) return;
@@ -200,9 +227,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         row.racketCost,
         Math.max(0, row.presentPlayers.length - ownRacketCount),
       );
-      setEditing({
-        id: row.id,
-        form: {
+      const form: SessionEditForm = {
           date: row.datePlayed,
           // Formularz pyta o sam kort — tak jak przy dodawaniu. Rakiety
           // dokładamy dopiero przy zapisie, więc edycja bez zmian nie zmienia
@@ -218,15 +243,18 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           // zapis nie włączył im po cichu limitu kart MultiSport.
           courtCount: row.courtCount,
           durationHours: row.durationHours,
-        },
-      });
+      };
+      setEditing({ id: row.id, form, initial: JSON.stringify(form) });
     } else {
       void handleDelete(pwModal.rowId);
     }
     setPwModal(null);
   };
 
-  const cancelEdit = useCallback(() => setEditing(null), []);
+  const cancelEdit = useCallback(() => {
+    if (isEditDirtyRef.current && !window.confirm(DISCARD_PROMPT)) return;
+    setEditing(null);
+  }, []);
 
   /** Aktualizuje wyłącznie formularz, zachowując identyfikator edytowanej sesji. */
   const setEditForm = useCallback<React.Dispatch<React.SetStateAction<SessionEditForm>>>(update => {
@@ -309,12 +337,40 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     <>
       {pwModal && (
         <PasswordModal
-          action={pwModal.type === 'edit' ? 'Podaj kod dostępu aby edytować sesję.' : `Podaj kod dostępu, aby usunąć sesję. Przez ${UNDO_TIMEOUT_SECONDS} s można ją cofnąć.`}
+          action={pwModal.type === 'edit' ? 'Podaj hasło, aby edytować sesję.' : `Podaj hasło, aby usunąć sesję. Przez ${UNDO_TIMEOUT_SECONDS} s można ją cofnąć.`}
           onConfirm={handlePasswordConfirm}
           onCancel={() => setPwModal(null)}
           playSound={playSound}
         />
       )}
+
+      {/* Edycja w oknie zamiast inline w liście: jeden punkt zapisu/odrzucenia,
+          pułapka fokusu, Escape i brak skoku listy po otwarciu. Zamknięcie
+          (Escape, „Anuluj”) przechodzi przez pytanie o niezapisane zmiany. */}
+      <Modal
+        open={editing !== null}
+        onClose={cancelEdit}
+        title="Edytuj sesję"
+        icon={Pencil}
+        align={isMobile ? 'bottom' : 'center'}
+        maxWidth={560}
+        closeOnBackdrop={false}
+      >
+        {editing && (
+          <EditSessionForm
+            editForm={editing.form}
+            setEditForm={setEditForm}
+            playerNames={playerNames}
+            isSaving={isSaving}
+            isEditCostValid={isEditCostValid}
+            editCostError={editCostError}
+            onSave={saveEdit}
+            onCancel={cancelEdit}
+            onTogglePresent={togglePresent}
+            onToggleMulti={toggleMulti}
+          />
+        )}
+      </Modal>
 
       <PlayerFilterSheet
         isOpen={isFilterOpen}
@@ -327,11 +383,13 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
       {undoToast && (
         <div style={{ marginBottom: 12 }}>
           <UndoBar
-            message={<>Sesja z {formatDate(undoToast.payload.week.date)} usunięta</>}
+            message={<>
+              Sesja z {formatDate(undoToast.payload.week.date)} usunięta
+              {undoToast.payload.earlier.length > 0 && ` (+${undoToast.payload.earlier.length} wcześniejsze do cofnięcia)`}
+            </>}
             secondsLeft={undoToast.secondsLeft}
             progressPct={progressPct}
             onUndo={() => { void handleUndoDelete(); }}
-            buttonLabel="cofnij"
           />
         </div>
       )}
@@ -348,7 +406,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           title="Historia"
           accent="var(--co-green)"
           aside={
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+            <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
               {filteredHistory.length}{selectedSeason || filterPlayer ? ` z ${history.length}` : ''} {plural(filteredHistory.length, 'rekord', 'rekordy', 'rekordów')}
             </span>
           }
@@ -364,13 +422,13 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         )}
 
         {/* ── 4. PASEK KONTROLEK (filtr + sort + CSV) ─────────────── */}
-        {playerNames && playerNames.length > 0 && (
+        {history.length > 0 && (
           <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
 
             {/* Etykieta filtra */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'var(--co-tint)', border: '1px solid var(--co-tint-hi)', clipPath: CLIP.badge, flexShrink: 0 }}>
               <Search size={11} style={{ color: 'var(--co-dim)' }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: 'normal' }}>Filtr</span>
+              <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Filtr</span>
             </div>
 
             {isMobile ? (
@@ -384,6 +442,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                     fontFamily: 'var(--font-display)',
                     fontSize: '0.8125rem',
                     letterSpacing: 'normal',
+                    minHeight: 44,
                     padding: '6px 10px',
                     cursor: 'pointer',
                     border: '1px solid',
@@ -399,7 +458,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 </button>
 
                 {filterPlayer && (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+                  <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
                     {filteredHistory.length} sesji
                   </span>
                 )}
@@ -417,7 +476,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 ))}
 
                 {filterPlayer && (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+                  <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
                     {filteredHistory.length} sesji
                   </span>
                 )}
@@ -460,7 +519,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
                 clipPath: CLIP.badge,
-                fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: 'normal',
+                ...FONT.mono(TEXT.tiny), letterSpacing: 'normal',
                 flexShrink: 0,
               }}
             >
@@ -481,7 +540,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
                 background: 'transparent', border: '1px solid var(--co-border)',
                 color: 'var(--co-dim)',
                 clipPath: CLIP.badge,
-                fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: 'normal',
+                ...FONT.mono(TEXT.tiny), letterSpacing: 'normal',
                 flexShrink: 0,
               }}
             >
@@ -498,19 +557,9 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             gap: 12, flexWrap: 'wrap', margin: '0 0 16px',
           }}>
-            <p aria-live="polite" style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+            <p aria-live="polite" style={{ margin: 0, ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
               Pokazano <span style={{ color: 'var(--co-cyan)' }}>{visibleHistory.length}</span> z {filteredHistory.length} sesji
             </p>
-            {hasMoreSessions && (
-              <button
-                type="button"
-                onClick={() => setVisibleCount(count => Math.min(count + SESSIONS_PAGE_SIZE, filteredHistory.length))}
-                className="cyber-button-outline"
-                style={{ minHeight: 44, padding: '6px 12px', fontSize: '0.75rem' }}
-              >
-                Pokaż więcej
-              </button>
-            )}
           </div>
         )}
 
@@ -518,10 +567,10 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
         {history.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
             <CalendarDays style={{ margin: '0 auto 16px', color: 'var(--co-dim)' }} size={40} />
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: 'normal', color: 'var(--co-dim)', textTransform: 'none' }}>
+            <p style={{ ...FONT.display(TEXT.tiny), color: 'var(--co-dim)', textTransform: 'none' }}>
               Brak danych
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', marginTop: 8 }}>
+            <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', marginTop: 8 }}>
               Dodaj pierwszą sesję w zakładce Dodaj.
             </p>
           </div>
@@ -529,7 +578,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
 
         {history.length > 0 && filteredHistory.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>
+            <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)' }}>
               Brak sesji dla wybranych filtrów.
             </p>
           </div>
@@ -542,35 +591,17 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
               {/* Month header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'var(--co-dark)', border: '1px solid var(--co-border)', clipPath: CLIP.tag }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-cyan)' }}>{label}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>[{rows.length}x]</span>
+                  <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-cyan)' }}>{label}</span>
+                  <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)' }}>[{rows.length}x]</span>
                 </div>
                 <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, var(--co-tint-line), transparent)' }} />
               </div>
 
               {/* Log entries */}
               <div>
-                {rows.map((row) => {
-                  if (editing?.id === row.id) return (
-                    <EditSessionForm
-                      key={row.id}
-                      editForm={editing.form}
-                      setEditForm={setEditForm}
-                      playerNames={playerNames}
-                      isSaving={isSaving}
-                      isEditCostValid={isEditCostValid}
-                      editCostError={editCostError}
-                      onSave={saveEdit}
-                      onCancel={cancelEdit}
-                      onTogglePresent={togglePresent}
-                      onToggleMulti={toggleMulti}
-                    />
-                  );
-
-                  return (
-                    <LogEntry key={row.id} row={row} onEdit={requestEdit} onDelete={requestDelete} />
-                  );
-                })}
+                {rows.map((row) => (
+                  <LogEntry key={row.id} row={row} onEdit={requestEdit} onDelete={requestDelete} />
+                ))}
               </div>
             </div>
           ))}
@@ -588,7 +619,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
           </button>
         )}
         {!hasMoreSessions && filteredHistory.length > SESSIONS_PAGE_SIZE && (
-          <p style={{ margin: '16px 0 0', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+          <p style={{ margin: '16px 0 0', textAlign: 'center', ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
             To wszystkie sesje w tym widoku.
           </p>
         )}

@@ -25,7 +25,7 @@ vi.mock('react-router', () => ({ useNavigate: () => vi.fn() }));
 
 import DashboardTab from '../components/dashboard/DashboardTab';
 import ArenaCanvas from '../components/layout/ArenaCanvas';
-import { FONT, TRACK } from '../constants/styles';
+import { FONT } from '../constants/styles';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { ToastProvider } from '../components/common/Toast';
@@ -143,10 +143,9 @@ describe('typografia — zdania, nie wersaliki', () => {
     }
   });
 
-  it('FONT.monoLabel i skala TRACK są naturalne', () => {
+  it('FONT.monoLabel jest naturalny (zdanie, bez trackingu)', () => {
     expect(FONT.monoLabel.textTransform).toBe('none');
     expect(FONT.monoLabel.letterSpacing).toBe('normal');
-    expect(Object.values(TRACK).every((value) => value === 'normal')).toBe(true);
   });
 });
 

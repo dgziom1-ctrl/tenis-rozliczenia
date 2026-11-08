@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Play, Pause, RotateCcw, ChevronDown } from 'lucide-react';
 import { computeRankingHistory } from '@/utils/rankings';
 import { createPlayerColorMap } from '@/constants/colors';
-import { FONT, TEXT, TRACK, CLIP, PANEL } from '@/constants/styles';
+import { FONT, TEXT, CLIP, PANEL } from '@/constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { HistoryEntry, PlayerStats } from '@/types/ui';
@@ -82,7 +82,7 @@ export default function RankingReplay({ players, history }: RankingReplayProps) 
               {monthLabel(frame.month)}
             </span>
             {leader && (
-              <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: TRACK.tight }}>
+              <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', letterSpacing: 'normal' }}>
                 lider: {leader.name}
               </span>
             )}

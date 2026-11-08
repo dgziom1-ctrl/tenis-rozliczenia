@@ -1,5 +1,5 @@
 import { Flame } from 'lucide-react';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
 
 interface StreakBadgeProps {
   streak: number;
@@ -19,7 +19,7 @@ export default function StreakBadge({ streak }: StreakBadgeProps) {
       clipPath: CLIP.badge,
     }}>
       <Flame size={11} style={{ color: 'var(--co-amber)' }} aria-hidden="true" />
-      <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-amber)' }}>
+      <span style={{ ...FONT.display(TEXT.tiny), color: 'var(--co-amber)' }}>
         seria {streak}
       </span>
     </div>

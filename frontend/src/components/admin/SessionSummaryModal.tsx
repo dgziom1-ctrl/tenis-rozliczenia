@@ -3,14 +3,14 @@ import { CheckCircle2, Copy, Flame, Trophy, Gamepad2, Zap } from 'lucide-react';
 import { SPORT_LABEL, hasRacketRental } from '@/constants';
 import SportGlyph from '../common/icons/SportGlyph';
 import { useToast } from '../common/Toast';
-import { formatDate, formatAmountShort } from '@/utils/format';
+import { formatDate, formatAmountShort, plural } from '@/utils/format';
 import { buildGroupMessage } from '@/utils/message';
 import { getShareGroups } from '@/utils/sessionCost';
 import { copyToClipboard } from '@/utils/clipboard';
 import Modal from '../common/Modal';
 import { useModalExit } from '@/hooks/useModalExit';
 
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
 import type { Sport } from '@/types/domain';
 import type { SessionHighlight } from '@/types/ui';
 
@@ -103,11 +103,11 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
         }}>
           <SportGlyph sport={sport} size={44} strokeWidth={1.5} />
         </div>
-        <p style={{ ...FONT.display(TEXT.h2, TRACK.tight), color: 'var(--co-text-hi)', margin: 0 }}>
+        <p style={{ ...FONT.display(TEXT.h2), color: 'var(--co-text-hi)', margin: 0 }}>
           {(SPORT_LABEL[sport] ?? 'Ping-Pong')}
         </p>
         <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', margin: '6px 0 0' }}>
-          {formatDate(date)} · {presentCount} {presentCount === 1 ? 'gracz' : 'graczy'}
+          {formatDate(date)} · {presentCount} {plural(presentCount, 'gracz', 'gracze', 'graczy')}
         </p>
       </div>
 
@@ -119,7 +119,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
             return (
               <div key={`${h.kind}-${h.name}`} className="matchday-highlight" style={{ clipPath: CLIP.badge }}>
                 <Icon size={14} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} aria-hidden="true" />
-                <span style={{ ...FONT.display(TEXT.small, TRACK.tight), color: 'var(--co-text-hi)', flex: 1 }}>
+                <span style={{ ...FONT.display(TEXT.small), color: 'var(--co-text-hi)', flex: 1 }}>
                   {h.name}
                 </span>
                 <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-cyan)' }}>{h.label}</span>
@@ -173,7 +173,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
             </p>
           ))}
           {hasRackets && (
-            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6, letterSpacing: TRACK.tight }}>
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6, letterSpacing: 'normal' }}>
               Kort: {formatAmountShort(totalCost - racketCost)} zł · Rakiety: {formatAmountShort(racketCost)} zł
             </p>
           )}

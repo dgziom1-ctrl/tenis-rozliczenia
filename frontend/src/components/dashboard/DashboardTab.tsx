@@ -12,7 +12,7 @@ import PlayerCard from './PlayerCard';
 import { Zap, ChevronDown } from 'lucide-react';
 import PushPermissionBanner from '../common/PushPermissionBanner';
 import type { UIData, HistoryEntry, PlayerStats, SoundType } from '@/types/ui';
-import { CLIP } from '@/constants/styles';
+import { CLIP, FONT, TEXT } from '@/constants/styles';
 import BrandMark from '../common/BrandMark';
 import RankGlyph from '../common/icons/RankGlyph';
 
@@ -118,10 +118,10 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18, filter: 'var(--glow-drop-cyan)' }}>
             <BrandMark size={64} />
           </div>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: 'normal', color: 'var(--co-cyan)', marginBottom: 10 }}>
+          <p style={{ ...FONT.display(TEXT.h2), color: 'var(--co-cyan)', marginBottom: 10 }}>
             Brak rozgrywek
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.7, marginBottom: 20 }}>
+          <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', lineHeight: 1.7, marginBottom: 20 }}>
             {sortedPlayers.length === 0
               ? 'Najpierw dodaj graczy, potem pierwszą sesję.'
               : 'Dodaj pierwszą sesję — reszta policzy się sama.'}
@@ -161,7 +161,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
           clipPath: CLIP.badge,
         }}>
           <Zap size={9} aria-hidden="true" style={{ color: 'var(--co-cyan)' }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', letterSpacing: 'normal' }}>
+          <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: 'normal' }}>
             sesji: <span style={{ color: 'var(--co-cyan)' }}>{seasonHistory.length}</span>
           </span>
         </div>
@@ -186,20 +186,20 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
               gap: 2, flex: 1, minWidth: 0, textAlign: 'left',
             }}>
               <span style={{
-                fontFamily: 'var(--font-display)', fontSize: '0.875rem',
+                ...FONT.display(TEXT.base),
                 color: 'var(--co-text-hi)', letterSpacing: 'normal', textTransform: 'none',
               }}>
                 Jak czytać OVR, rangę i rzadkość kart?
               </span>
               <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                ...FONT.mono(TEXT.tiny),
                 color: 'var(--co-dim)', lineHeight: 1.4,
               }}>
                 OVR uwzględnia frekwencję, serię i zagrane sesje; ranga zależy od frekwencji, a rzadkość karty wynika z rangi.
               </span>
             </span>
             <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+              ...FONT.mono(TEXT.tiny),
               color: 'var(--co-cyan)', flexShrink: 0,
             }}>
               {showRankGuide ? 'Ukryj' : 'Szczegóły'}
@@ -222,13 +222,13 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
               clipPath: CLIP.smallCard,
             }}>
               <p style={{
-                fontFamily: 'var(--font-display)', fontSize: '0.875rem',
+                ...FONT.display(TEXT.base),
                 color: 'var(--co-text-hi)', letterSpacing: 'normal', margin: '0 0 4px',
               }}>
                 OVR — ocena z bieżącego sezonu
               </p>
               <p style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                ...FONT.mono(TEXT.tiny),
                 color: 'var(--co-dim)', lineHeight: 1.5, margin: 0,
               }}>
                 Każdy zaczyna od <strong style={{ color: 'var(--co-text)' }}>40 pkt</strong>. Do wyniku dochodzą:
@@ -244,7 +244,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 ].map(([label, detail]) => (
                   <li key={label} style={{
                     display: 'flex', gap: 7,
-                    fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                    ...FONT.mono(TEXT.tiny),
                     color: 'var(--co-dim)', lineHeight: 1.5,
                   }}>
                     <span aria-hidden="true" style={{ color: 'var(--co-cyan)' }}>•</span>
@@ -253,7 +253,7 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 ))}
               </ul>
               <p style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                ...FONT.mono(TEXT.tiny),
                 color: 'var(--co-dim)', lineHeight: 1.5, margin: 0,
               }}>
                 Wynik zaokrągla się do całości i nie przekracza 99. Ranga zależy wyłącznie od frekwencji.
@@ -268,13 +268,13 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
               clipPath: CLIP.smallCard,
             }}>
               <p style={{
-                fontFamily: 'var(--font-display)', fontSize: '0.875rem',
+                ...FONT.display(TEXT.base),
                 color: 'var(--co-text-hi)', letterSpacing: 'normal', margin: '0 0 4px',
               }}>
                 Rzadkość karty
               </p>
               <p style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                ...FONT.mono(TEXT.tiny),
                 color: 'var(--co-dim)', lineHeight: 1.5, margin: 0,
               }}>
                 To wizualna klasa przypisana do rangi, nie osobny wynik — nie zmienia OVR. Efekt holo/foil jest dekoracyjny.
@@ -289,8 +289,8 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 }}>
                   <RankGlyph rank={r} size={18} />
                   <div>
-                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', color: r.hex, margin: 0, letterSpacing: 'normal' }}>{r.name}</p>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: 0 }}>
+                    <p style={{ ...FONT.display(TEXT.small), color: r.hex, margin: 0, letterSpacing: 'normal' }}>{r.name}</p>
+                    <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: 0 }}>
                       {i === RANKS.length - 1 ? '<20%' : `${r.min}%+`} · karta {RARITY_LABEL[rarityOf(r)]}
                     </p>
                   </div>

@@ -112,7 +112,7 @@ Skala żyje w `src/constants/styles.ts` jako `TEXT`. Podłoga czytelności to
 
 | Stopień | Rozmiar | Zastosowanie |
 |---|---|---|
-| `micro`/`tiny` | 12 px | etykiety pól, znaczniki, podpisy osi |
+| `tiny` | 12 px | etykiety pól, znaczniki, podpisy osi |
 | `small` | 13 px | treść drugorzędna |
 | `base` | 14 px | treść podstawowa |
 | `lead` | 16 px | wyróżnienie, tytuł sekcji |

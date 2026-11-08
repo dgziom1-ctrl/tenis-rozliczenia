@@ -1,7 +1,7 @@
 import { Zap } from 'lucide-react';
 import SportGlyph from './icons/SportGlyph';
 import { formatAmount } from '@/utils/format';
-import { TEXT, TRACK } from '@/constants/styles';
+import { TEXT } from '@/constants/styles';
 import type { ShareGroup } from '@/utils/sessionCost';
 
 interface ShareBreakdownProps {
@@ -50,8 +50,8 @@ export default function ShareBreakdown({ groups, sport = 'pingpong', size = 'md'
                 nieistniejące nigdzie indziej w aplikacji. */}
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 4,
-              fontFamily: 'var(--font-display)', letterSpacing: TRACK.normal, color,
-              fontSize: isSmall ? TEXT.micro : TEXT.small, minWidth: 0,
+              fontFamily: 'var(--font-display)', letterSpacing: 'normal', color,
+              fontSize: isSmall ? TEXT.tiny : TEXT.small, minWidth: 0,
             }}>
               {marker === 'card' && <Zap size={iconSize} aria-hidden="true" style={{ flexShrink: 0 }} />}
               {(marker === 'racket' || marker === 'card+racket') && (

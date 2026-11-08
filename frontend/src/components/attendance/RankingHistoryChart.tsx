@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { computeRankingHistory } from '@/utils/rankings';
 import { createPlayerColorMap } from '@/constants/colors';
-import { FONT, TEXT, TRACK, CLIP, PANEL } from '@/constants/styles';
+import { FONT, TEXT, CLIP, PANEL } from '@/constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import { useElementWidth } from '@/hooks/useElementWidth';
 import { CHART_WIDTH, CHART_LABEL_SIZE, CHART_GRID_DASH, linePath, spacedLabelIndices, type ChartPoint } from '@/utils/chart';
@@ -11,6 +11,22 @@ import type { HistoryEntry, PlayerStats } from '@/types/ui';
 interface RankingHistoryChartProps {
   players: PlayerStats[];
   history: HistoryEntry[];
+}
+
+/** Wzory linii (ciągła, kreskowana, kropkowana, kreska-kropka) obok koloru. */
+const SERIES_DASH: (string | undefined)[] = [undefined, '7 3', '2 3', '8 3 2 3'];
+
+/** Marker punktu: koło, kwadrat albo romb — kolejna cecha poza barwą. */
+function SeriesMarker({ shape, x, y, color, title }: { shape: number; x: number; y: number; color: string; title?: string }) {
+  const common = { fill: 'var(--co-panel)', stroke: color, strokeWidth: 1.5 } as const;
+  const titleNode = title ? <title>{title}</title> : null;
+  if (shape === 1) {
+    return <rect x={x - 3.2} y={y - 3.2} width={6.4} height={6.4} {...common}>{titleNode}</rect>;
+  }
+  if (shape === 2) {
+    return <polygon points={`${x},${y - 4.4} ${x + 4.4},${y} ${x},${y + 4.4} ${x - 4.4},${y}`} {...common}>{titleNode}</polygon>;
+  }
+  return <circle cx={x} cy={y} r={3.5} {...common}>{titleNode}</circle>;
 }
 
 // ─── Ranking History Chart ────────────────────────────────────────
@@ -86,10 +102,13 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
                 opacity: isHidden ? 0.55 : 1,
               }}
             >
-              <span aria-hidden="true" style={{
-                width: 16, height: 2, flexShrink: 0,
-                background: colorAt(i), borderRadius: 1,
-              }} />
+              {/* Próbka powtarza wzór linii z wykresu, więc serie da się
+                  odróżnić bez polegania na samym kolorze. */}
+              <svg aria-hidden="true" width="22" height="10" style={{ flexShrink: 0 }}>
+                <line x1="0" y1="5" x2="22" y2="5" stroke={colorAt(i)} strokeWidth="2"
+                  strokeDasharray={SERIES_DASH[i % SERIES_DASH.length]} />
+                <SeriesMarker shape={i % 3} x={11} y={5} color={colorAt(i)} />
+              </svg>
               <span style={{ ...FONT.mono(TEXT.small), textDecoration: isHidden ? 'line-through' : 'none' }}>
                 {name}
               </span>
@@ -97,7 +116,7 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
           );
         })}
       </div>
-      <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '0 0 10px', letterSpacing: TRACK.tight }}>
+      <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '0 0 10px', letterSpacing: 'normal' }}>
         Dotknij nazwę, aby ukryć linię
       </p>
       <div ref={chartRef} style={{ position: 'relative', background: 'var(--co-tint)', border: '1px solid var(--co-border)', clipPath: CLIP.smallCard, overflow: 'hidden' }}>
@@ -131,11 +150,11 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
             const col = colorAt(i);
             return (
               <g key={name}>
-                <path d={linePath(pts)} fill="none" stroke={col} strokeWidth="2" opacity="0.85" />
+                <path d={linePath(pts)} fill="none" stroke={col} strokeWidth="2" opacity="0.85"
+                  strokeDasharray={SERIES_DASH[i % SERIES_DASH.length]} />
                 {points.map((point, pi) => (
-                  <circle key={pi} cx={point.x} cy={point.y} r="3.5" fill="var(--co-panel)" stroke={col} strokeWidth="1.5">
-                    <title>{`${name} — ${point.month}: #${point.place}`}</title>
-                  </circle>
+                  <SeriesMarker key={pi} shape={i % 3} x={point.x} y={point.y} color={col}
+                    title={`${name} — ${point.month}: #${point.place}`} />
                 ))}
               </g>
             );
@@ -152,7 +171,7 @@ export default function RankingHistoryChart({ players, history }: RankingHistory
         </svg>
       </div>
       <p className="sr-only">Ostatnie pozycje: {finalSummary}</p>
-      <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 8, letterSpacing: TRACK.tight }}>
+      <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 8, letterSpacing: 'normal' }}>
         * pozycja liczona na podstawie frekwencji po każdym miesiącu
       </p>
     </div>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useId, type MouseEvent } from 'react';
 import { RANKS, rankTint } from '@/constants';
-import { FONT, CLIP, Z, TEXT, TRACK } from '../../constants/styles';
+import { FONT, CLIP, Z, TEXT } from '../../constants/styles';
 import RankGlyph from '../common/icons/RankGlyph';
 import type { Rank } from '@/types/ui';
 
@@ -25,19 +25,37 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
   const [tapped, setTapped] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tooltipId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const handleTap = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setTapped(true);
     clearTimeout(timerRef.current ?? undefined);
     setVisible(true);
-    timerRef.current = setTimeout(() => setVisible(false), HINT_VISIBLE_MS);
+    // Dymek zamyka się sam tylko na dotyku; mysz i klawiatura trzymają go do
+    // blur / Escape / kliknięcia poza (WCAG 1.4.13 — odrzucalny i trwały).
+    const touch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
+    if (touch) timerRef.current = setTimeout(() => setVisible(false), HINT_VISIBLE_MS);
   };
 
   useEffect(() => () => clearTimeout(timerRef.current ?? undefined), []);
 
+  useEffect(() => {
+    if (!visible) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setVisible(false); };
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target instanceof Node) || !rootRef.current?.contains(e.target)) setVisible(false);
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onDown);
+    };
+  }, [visible]);
+
   return (
-    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+    <div ref={rootRef} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
       {/* <button>, a nie <div onClick> — dymek z progiem następnej rangi
           był wcześniej nieosiągalny z klawiatury. */}
       <button
@@ -55,7 +73,7 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
         }}
       >
         <RankGlyph rank={rank} size={13} />
-        <span style={{ ...FONT.display(TEXT.tiny, TRACK.tight), color: col }}>
+        <span style={{ ...FONT.display(TEXT.tiny), color: col }}>
           {rank.name}
         </span>
         {/* Bez `opacity`: procent to treść, a półprzezroczysty tekst na szkle
@@ -67,7 +85,7 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
       {/* Tap hint — visible "?" label until first tap */}
       {showHint && !tapped && (
         <span aria-hidden="true" style={{
-          fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+          ...FONT.mono(TEXT.tiny),
           color: col, opacity: 0.7,
           letterSpacing: 0,
           lineHeight: 1,
@@ -91,15 +109,15 @@ export function RankBadge({ rank, pct, showHint = true }: RankBadgeProps) {
           boxShadow: 'var(--glow-box-cyan)',
           animation: 'slide-in-up 0.15s ease-out',
         }}>
-          <p style={{ ...FONT.display(TEXT.tiny, TRACK.tight), color: col, margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <p style={{ ...FONT.display(TEXT.tiny), color: col, margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
             <RankGlyph rank={rank} size={12} /> {rank.name} · {rank.min}%+
           </p>
           {nextRank ? (
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '3px 0 0', display: 'flex', alignItems: 'center', gap: 3 }}>
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '3px 0 0', display: 'flex', alignItems: 'center', gap: 3 }}>
               do <RankGlyph rank={nextRank} size={11} /> {nextRank.name}: <span style={{ color: nextRank.hex }}>+{Math.max(0, nextRank.min - pct)}%</span>
             </p>
           ) : (
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: col, margin: '3px 0 0' }}>
+            <p style={{ ...FONT.mono(TEXT.tiny), color: col, margin: '3px 0 0' }}>
               ★ to jest max ranga
             </p>
           )}

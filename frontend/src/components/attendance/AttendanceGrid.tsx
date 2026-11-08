@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { FONT, TEXT, TRACK } from '@/constants/styles';
+import { FONT, TEXT } from '@/constants/styles';
 import { formatDate } from '@/utils/format';
 import { buildAttendanceGrid, type GridCell } from '@/utils/attendanceGrid';
 import type { HistoryEntry, PlayerColor } from '@/types/ui';
@@ -26,6 +26,10 @@ export default function AttendanceGrid({ history, playerName, color, weeks = 26,
       : c.state === 'missed' ? 'var(--co-dim)'
         : 'var(--co-border)';
 
+  // Stan nie może zależeć tylko od koloru: „nieobecny” dostaje kreskowanie,
+  // „obecny” pełne wypełnienie, a „brak grania” zostaje gładki i blady.
+  const hatch = 'repeating-linear-gradient(135deg, transparent 0 3px, var(--co-void) 3px 5px)';
+
   return (
     <div style={{ padding: '10px 16px', borderBottom: `1px solid ${color.border}15` }}>
       <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>Siatka frekwencji · ostatnie {weeks} tyg. (1 pole = 1 tydzień)</p>
@@ -44,7 +48,8 @@ export default function AttendanceGrid({ history, playerName, color, weeks = 26,
             className={c.latest ? 'attendance-cell attendance-cell-latest' : 'attendance-cell'}
             style={{
               aspectRatio: '1', display: 'block',
-              background: fill(c),
+              backgroundColor: fill(c),
+              backgroundImage: c.state === 'missed' ? hatch : undefined,
               opacity: c.state === 'none' ? 0.45 : c.state === 'missed' ? 0.7 : 1,
               boxShadow: c.state === 'present' ? `0 0 6px ${color.border}` : 'none',
               // Pulsuje kolor poświaty ostatniej obecności (zmienna dla keyframes).
@@ -53,19 +58,19 @@ export default function AttendanceGrid({ history, playerName, color, weeks = 26,
           />
         ))}
       </div>
-      <div style={{ display: 'flex', gap: 14, marginTop: 8, flexWrap: 'wrap', ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: TRACK.tight }}>
+      <div style={{ display: 'flex', gap: 14, marginTop: 8, flexWrap: 'wrap', ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: 'normal' }}>
         <Legend swatch={color.border} label="obecny" />
-        <Legend swatch="var(--co-dim)" label="nieobecny" />
+        <Legend swatch="var(--co-dim)" hatch={hatch} label="nieobecny" />
         <Legend swatch="var(--co-border)" label="brak grania w tygodniu" />
       </div>
     </div>
   );
 }
 
-function Legend({ swatch, label }: { swatch: string; label: string }) {
+function Legend({ swatch, hatch, label }: { swatch: string; hatch?: string; label: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-      <span aria-hidden="true" style={{ width: 10, height: 10, background: swatch, display: 'inline-block' }} />
+      <span aria-hidden="true" style={{ width: 10, height: 10, backgroundColor: swatch, backgroundImage: hatch, display: 'inline-block' }} />
       {label}
     </span>
   );
