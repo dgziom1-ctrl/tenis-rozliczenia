@@ -1,3 +1,5 @@
+import { roundToTwoDecimals } from './money';
+
 export function formatDate(isoDate: string | null | undefined): string {
   if (!isoDate) return '';
   const [y, m, d] = isoDate.split('-');
@@ -35,13 +37,13 @@ export function plural(count: number, one: string, few: string, many: string): s
  */
 export function parseAmount(input: string | number | null | undefined): number {
   if (typeof input === 'number') {
-    return Number.isFinite(input) ? Math.round(input * 100) / 100 : NaN;
+    return Number.isFinite(input) ? roundToTwoDecimals(input) : NaN;
   }
   if (typeof input !== 'string') return NaN;
   const normalized = input.trim().replace(/\s/g, '').replace(',', '.');
   if (normalized === '') return NaN;
   const n = Number(normalized);
-  return Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN;
+  return Number.isFinite(n) ? roundToTwoDecimals(n) : NaN;
 }
 
 /** Czy `value` jest poprawną kwotą >= min (domyślnie 0). */

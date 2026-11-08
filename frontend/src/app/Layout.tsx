@@ -238,13 +238,13 @@ export default function Layout() {
 
   return (
     <div
-      className="app-shell px-2 md:px-8 py-2 md:py-8 relative z-10"
+      className="app-shell"
       style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', position: 'relative' }}
     >
       <BootSequence />
       <CyberBackground />
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{routeAnnouncement}</p>
-      <div className="max-w-7xl mx-auto relative">
+      <div className="app-content">
         <Header
           isMuted={isMuted}
           setIsMuted={setIsMuted}

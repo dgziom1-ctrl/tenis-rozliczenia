@@ -1,14 +1,15 @@
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { Check, X, Zap, Users, Hand } from 'lucide-react';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import ShareBreakdown from '../common/ShareBreakdown';
 import CyberDateInput from '../admin/CyberDateInput';
 import SportSelector from '../admin/SportSelector';
 import PlayerToggleGrid from '../admin/PlayerToggleGrid';
-import { RACKET_PRICE, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
+import MultisportLimitWarning from '../admin/MultisportLimitWarning';
+import { RACKET_PRICE, MULTISPORT_DISCOUNT, hasRacketRental } from '@/constants';
 import { CLIP } from '@/constants/styles';
 import { parseAmount, formatAmountShort } from '@/utils/format';
-import { getRacketSelection, getShareGroups, getTotalWithRackets } from '@/utils/sessionCost';
+import { getMaxMulti, getMultisportPerCourtHour, getRacketSelection, getShareGroups, getTotalWithRackets } from '@/utils/sessionCost';
 import type { Sport } from '@/types/domain';
 import type { SessionEditForm } from '../../types/ui';
 
@@ -69,13 +70,21 @@ export default function EditSessionForm({
   );
   const totalWithRackets = getTotalWithRackets(parsedCost, racketSelection.cost);
 
-  const perCourtHour = MULTISPORT_PER_COURT_HOUR[editForm.sport] ?? MULTISPORT_PER_COURT_HOUR.pingpong;
+  // Pole ceny pokazuje tekst wpisany przez użytkownika (da się je wyczyścić i
+  // wpisać przecinek). Gdy cena zmieni się z zewnątrz — zmiana sportu albo
+  // „Przywróć” — pokazujemy ją w miejsce nieaktualnego tekstu.
+  const [racketPriceText, setRacketPriceText] = useState(String(racketSelection.price));
+  const shownPriceText = (parseAmount(racketPriceText) || 0) === racketSelection.price
+    ? racketPriceText
+    : String(racketSelection.price);
+
+  const perCourtHour = getMultisportPerCourtHour(editForm.sport);
   const hasCourtConfig = editForm.courtCount != null && editForm.durationHours != null;
   const maxMulti = hasCourtConfig
-    ? editForm.courtCount! * editForm.durationHours! * perCourtHour
+    ? getMaxMulti(editForm.sport, editForm.courtCount!, editForm.durationHours!)
     : null;
   const multiPresentCount = multiPlayers.filter(p => present.includes(p)).length;
-  const multiOverLimit = maxMulti != null && multiPresentCount > maxMulti && multiPresentCount > 0;
+  const multiOverLimit = maxMulti != null && multiPresentCount > maxMulti;
   const isPresentValid = present.length > 0;
 
   // Podgląd liczy tym samym silnikiem co zapisane salda, więc po zmianie kwoty
@@ -263,11 +272,7 @@ export default function EditSessionForm({
             <Zap size={11} /> Multisport (zniżka -{MULTISPORT_DISCOUNT} zł)
           </p>
           <PlayerToggleGrid names={present} selected={multiPlayers} onToggle={onToggleMulti} accent="green" />
-          {multiOverLimit && (
-            <p role="alert" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', marginTop: 8 }}>
-              ⚠ Limit {maxMulti} kart przekroczony — zniżka zostanie proporcjonalnie podzielona na {multiPresentCount} osób ({Math.floor((maxMulti ?? 0) * MULTISPORT_DISCOUNT / multiPresentCount)} zł/os. zamiast {MULTISPORT_DISCOUNT} zł)
-            </p>
-          )}
+          {multiOverLimit && <MultisportLimitWarning maxMulti={maxMulti} cardCount={multiPresentCount} />}
         </div>
       )}
 
@@ -297,11 +302,13 @@ export default function EditSessionForm({
             </label>
             <input
               id={racketPriceId}
-              type="number"
-              min="0"
-              step="0.5"
-              value={racketSelection.price}
-              onChange={e => setEditForm(p => ({ ...p, racketPrice: parseAmount(e.target.value) || 0 }))}
+              type="text"
+              inputMode="decimal"
+              value={shownPriceText}
+              onChange={e => {
+                setRacketPriceText(e.target.value);
+                setEditForm(p => ({ ...p, racketPrice: parseAmount(e.target.value) || 0 }));
+              }}
               className="cyber-input"
               style={{ width: 78, padding: '8px', textAlign: 'center', fontFamily: 'var(--font-mono)', clipPath: CLIP.badge }}
             />

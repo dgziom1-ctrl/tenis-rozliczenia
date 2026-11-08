@@ -6,7 +6,7 @@ interface BarcodeProps {
 // ── Pseudo-barcode (seeded by name) ─────────────────────────────
 export function Barcode({ name, color }: BarcodeProps) {
   const bars = Array.from({ length: 28 }, (_, i) => {
-    const code = name.charCodeAt(i % name.length) + i * 7;
+    const code = (name.charCodeAt(i % (name.length || 1)) || 0) + i * 7;
     return { width: (code % 3) + 1, gap: (code % 5) === 0 };
   });
   return (

@@ -21,6 +21,26 @@ afterEach(() => {
   console.error = originalError;
 });
 
+// ─── Web Storage ─────────────────────────────────────────────────────────────
+// Node 25+ ma wbudowany `localStorage`, który bez `--localstorage-file` jest
+// bezużyteczny i przesłania ten z jsdom. Podstawiamy prosty magazyn w pamięci,
+// żeby testy nie zależały od wersji Node.
+for (const name of ['localStorage', 'sessionStorage']) {
+  if (typeof globalThis[name]?.clear === 'function') continue;
+  const data = new Map();
+  Object.defineProperty(globalThis, name, {
+    configurable: true,
+    value: {
+      get length() { return data.size; },
+      key: (i) => [...data.keys()][i] ?? null,
+      getItem: (k) => (data.has(String(k)) ? data.get(String(k)) : null),
+      setItem: (k, v) => { data.set(String(k), String(v)); },
+      removeItem: (k) => { data.delete(String(k)); },
+      clear: () => data.clear(),
+    },
+  });
+}
+
 // ─── Domyślne mocki dla API przeglądarki niedostępnych w jsdom ───────────────
 
 // Audio API (jsdom go nie ma)

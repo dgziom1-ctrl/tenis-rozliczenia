@@ -43,15 +43,14 @@ function readToken(entry) {
 }
 
 /**
- * Tokeny do wysyłki. Bez argumentu — wszyscy; z listą graczy — tylko ich
- * urządzenia (i urządzenia bez przypisanego gracza). Duplikaty odsiewa
- * `selectTokens`: ta sama przeglądarka potrafi zapisać się pod kilkoma kluczami
- * (np. po reinstalacji PWA) i dostawałaby tyle powiadomień, ile ma wpisów.
+ * Wszystkie wpisy tokenów z bazy (jeden odczyt). Wybór adresatów robi
+ * `selectTokens`: z listą graczy — tylko ich urządzenia (i urządzenia bez
+ * przypisanego gracza), bez duplikatów — ta sama przeglądarka potrafi zapisać
+ * się pod kilkoma kluczami (np. po reinstalacji PWA).
  */
-async function getTokens(playerNames = null) {
+async function getTokenEntries() {
   const snap = await getDatabase().ref('fcmTokens').get();
-  if (!snap.exists()) return [];
-  return selectTokens(snap.val() || {}, playerNames);
+  return snap.exists() ? (snap.val() || {}) : {};
 }
 
 const PERMANENT_INVALID_CODES = new Set([
@@ -206,10 +205,11 @@ exports.onSessionAdded = onValueUpdated(
     // „Nowa sesja" dotyczy tych, którzy grali — reszta nie dostaje powiadomienia
     // o rozliczeniu, w którym nie uczestniczy. Ogłoszenia dla grupy (serie,
     // nowy gracz) idą do wszystkich.
-    const allTokens = await getTokens();
+    const tokenEntries = await getTokenEntries();
+    const allTokens = selectTokens(tokenEntries);
     console.log(`Tokenów FCM w bazie: ${allTokens.length}`);
     if (!allTokens.length) return;
-    const sessionTokens = await getTokens(present);
+    const sessionTokens = selectTokens(tokenEntries, present);
 
     await sendToAll(
       sessionTokens,
@@ -218,14 +218,13 @@ exports.onSessionAdded = onValueUpdated(
       { type: 'new_session', date, url: '/?tab=dashboard', tag: `session-${date}` }
     );
 
-    const tokens = allTokens;
     for (const playerName of present) {
       const streak = computeStreak(weeksAfter, playerName);
       console.log(`  ${playerName}: seria ${streak}`);
       if (STREAK_MILESTONES.includes(streak)) {
         const emoji = streak >= 50 ? '🏆' : streak >= 20 ? '🔥' : '⚡';
         await sendToAll(
-          tokens,
+          allTokens,
           `${emoji} Seria ${streak}!`,
           `${sanitizeName(playerName)} ma ${streak} sesji z rzędu!`,
           {
@@ -249,15 +248,16 @@ exports.onPlayerAdded = onValueUpdated(
     const before = event.data.before.val() || {};
     const after  = event.data.after.val()  || {};
 
-    const playersBefore = new Set(toArray(before.players));
-    const playersAfter  = toArray(after.players);
-    const newPlayers    = playersAfter.filter(p => !playersBefore.has(p));
+    // Przywrócenie gracza z `deletedPlayers` też dodaje go do `players`, ale to
+    // nie jest nowy gracz — nie wysyłamy wtedy „Nowy gracz!”.
+    const knownBefore = new Set([...toArray(before.players), ...toArray(before.deletedPlayers)]);
+    const newPlayers  = toArray(after.players).filter(p => !knownBefore.has(p));
 
     if (newPlayers.length === 0) return;
 
     console.log(`Nowi gracze: ${newPlayers.join(', ')}`);
 
-    const tokens = await getTokens();
+    const tokens = selectTokens(await getTokenEntries());
     if (!tokens.length) return;
 
     for (const playerName of newPlayers) {

@@ -537,12 +537,24 @@ describe('EditSessionForm — pełna edycja', () => {
     render(<EditSessionFormHarness initial={baseForm} />);
 
     expect(screen.getByText(/wypożyczone rakiety/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Cena/)).toHaveValue(5);
+    expect(screen.getByLabelText(/Cena/)).toHaveValue('5');
     expect(screen.getByText(/2 × 5,00 zł = 10,00 zł/)).toBeInTheDocument();
 
     const racketThree = screen.getAllByRole('button', { name: /Liczba wypożyczonych rakiet: 3/ }).at(-1);
     await user.click(racketThree);
     expect(screen.getByText(/3 × 5,00 zł = 15,00 zł/)).toBeInTheDocument();
+  });
+
+  it('cenę rakiety da się wyczyścić i wpisać z przecinkiem', async () => {
+    const user = userEvent.setup();
+    render(<EditSessionFormHarness initial={baseForm} />);
+
+    const price = screen.getByLabelText(/Cena/);
+    await user.clear(price);
+    expect(price).toHaveValue('');
+    await user.type(price, '7,5');
+    expect(price).toHaveValue('7,5');
+    expect(screen.getByText(/2 × 7,50 zł = 15,00 zł/)).toBeInTheDocument();
   });
 
   it('pozwala wypożyczyć rakietę każdemu z sześciu graczy', async () => {

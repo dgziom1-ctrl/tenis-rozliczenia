@@ -1,7 +1,7 @@
 import { calculateDebt, roundToTwoDecimals } from '@/utils/debt';
 import { getSessionShares } from '@/utils/sessionCost';
 import { isValidISODate, isValidMoney } from '@/utils/validation';
-import { ORGANIZER_NAME, SPORT, SPORT_LABEL } from '@/constants';
+import { ORGANIZER_NAME, SPORT, isSport } from '@/constants';
 import type { Week, NormalizedData, Payment, PlayerJoinDates, Sport } from '@/types/domain';
 import type { PlayerStats, HistoryEntry, Summary, UIData } from '@/types/ui';
 
@@ -173,12 +173,8 @@ function sanitizeNames(value: unknown): string[] {
   return [...seen];
 }
 
-const SPORT_VALUES = new Set(Object.keys(SPORT_LABEL));
-
 function sanitizeSport(value: unknown): Sport {
-  return typeof value === 'string' && SPORT_VALUES.has(value)
-    ? value as Sport
-    : SPORT.PINGPONG;
+  return isSport(value) ? value : SPORT.PINGPONG;
 }
 
 /** Liczba kortów/godzin: całkowita 1–12, inaczej `undefined` (stare sesje bez limitu). */

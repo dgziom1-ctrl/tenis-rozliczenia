@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useSyncExternalStore } from 'react';
 import { BREAKPOINT } from '@/constants/styles';
 
 export function useIsMobile(breakpoint: number = BREAKPOINT.mobile): boolean {
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.innerWidth <= breakpoint : false,
+  const query = `(max-width: ${breakpoint}px)`;
+  return useSyncExternalStore(
+    (onChange) => {
+      const mql = window.matchMedia(query);
+      mql.addEventListener('change', onChange);
+      return () => mql.removeEventListener('change', onChange);
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
   );
-  useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
-  }, [breakpoint]);
-  return isMobile;
 }

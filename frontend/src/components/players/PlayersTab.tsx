@@ -37,18 +37,19 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
   );
 
   const toggleDefaultMulti = async (name: string) => {
-    const previous = currentMulti;
-    const next = previous.includes(name) ? previous.filter(p => p !== name) : [...previous, name];
+    const next = currentMulti.includes(name) ? currentMulti.filter(p => p !== name) : [...currentMulti, name];
     setLocalMulti(next);
     setSavingMulti(true);
     try {
       const result = await saveDefaultMulti(next);
-      if (!result.success) { showError(result.error || 'Nie udało się zapisać'); setLocalMulti(previous); }
+      if (!result.success) showError(result.error || 'Nie udało się zapisać');
     } catch {
       // Bez tego wyjątek zostawiał `savingMulti` na true i blokował całą listę.
       showError('Nie udało się zapisać');
-      setLocalMulti(previous);
     } finally {
+      // Nakładka optymistyczna działa tylko do końca zapisu — potem źródłem
+      // prawdy znów jest baza (przy błędzie to poprzednia wartość).
+      setLocalMulti(null);
       setSavingMulti(false);
     }
   };

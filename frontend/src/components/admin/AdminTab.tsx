@@ -3,13 +3,13 @@ import type { FormEvent } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
 import { PanelHeader, FieldGroup } from '../common/SharedUI';
 import { addSession } from '@/lib/firebase';
-import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, RACKET_PRICE, MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, hasRacketRental } from '@/constants';
+import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, RACKET_PRICE, MULTISPORT_DISCOUNT, hasRacketRental } from '@/constants';
 import { CLIP, CONTENT_WIDTH } from '@/constants/styles';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { parseAmount, isValidAmount, plural } from '@/utils/format';
 import { todayISO } from '@/utils/id';
-import { getRacketSelection, getTotalWithRackets } from '@/utils/sessionCost';
+import { getMaxMulti, getMultisportPerCourtHour, getRacketSelection, getTotalWithRackets } from '@/utils/sessionCost';
 import { getLastSessionDefaults } from '@/utils/sessions';
 import type { Sport } from '@/types/domain';
 import type { HistoryEntry, PlayerStats, SessionHighlight, SoundType } from '@/types/ui';
@@ -18,6 +18,7 @@ import { detectSessionHighlights } from '@/utils/celebrations';
 import SessionSummaryModal from './SessionSummaryModal';
 import LiveCostPreview from './LiveCostPreview';
 import PlayerToggleGrid from './PlayerToggleGrid';
+import MultisportLimitWarning from './MultisportLimitWarning';
 import ToggleChip from '../common/ToggleChip';
 import SportSelector from './SportSelector';
 import CyberDateInput from './CyberDateInput';
@@ -73,7 +74,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
   } = getRacketSelection(sport, presentPlayers, ownRacketPlayers, racketCount, racketPrice);
 
   // Duplikat to ta sama data i ten sam sport — drugi sport tego dnia jest OK.
-  const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed && (s.sport ?? 'pingpong') === sport);
+  const isDuplicateDate = (history || []).some(s => s.datePlayed === datePlayed && (s.sport ?? SPORT.PINGPONG) === sport);
   const parsedTotalCost = parseAmount(totalCost);
   const isCostValid = isValidAmount(parsedTotalCost, 0);
   const isPresentValid = presentPlayers.length > 0;
@@ -82,8 +83,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
     : (totalCost === '' ? 'Wpisz koszt sesji żeby kontynuować' : 'Koszt musi być liczbą >= 0');
 
   // Limit kart MultiSport: korty × godziny × limit/sport.
-  const perCourtHour = MULTISPORT_PER_COURT_HOUR[sport] ?? MULTISPORT_PER_COURT_HOUR[SPORT.PINGPONG];
-  const maxMulti = courtCount * durationHours * perCourtHour;
+  const perCourtHour = getMultisportPerCourtHour(sport);
+  const maxMulti = getMaxMulti(sport, courtCount, durationHours);
   const multiPresentCount = multisportPlayers.filter(p => presentPlayers.includes(p)).length;
   const multiOverLimit = multiPresentCount > maxMulti && multiPresentCount > 0;
 
@@ -114,15 +115,14 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
 
   const togglePresent = useCallback((name: string) => {
     playSound(SOUND_TYPES.CLICK);
-    setPresentPlayers(prev => {
-      if (prev.includes(name)) {
-        setMultisportPlayers(m => m.filter(p => p !== name));
-        setOwnRacketPlayers(m => m.filter(p => p !== name));
-        return prev.filter(p => p !== name);
-      }
-      return [...prev, name];
-    });
-  }, [playSound]);
+    if (presentPlayers.includes(name)) {
+      setPresentPlayers(prev => prev.filter(p => p !== name));
+      setMultisportPlayers(prev => prev.filter(p => p !== name));
+      setOwnRacketPlayers(prev => prev.filter(p => p !== name));
+    } else {
+      setPresentPlayers(prev => [...prev, name]);
+    }
+  }, [playSound, presentPlayers]);
 
   const toggleOwnRacket = useCallback((name: string) => {
     playSound(SOUND_TYPES.CLICK);
@@ -323,11 +323,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                 counterColor="var(--co-green)"
               >
                 <PlayerToggleGrid names={presentPlayers} selected={multisportPlayers} onToggle={toggleMulti} accent="green" />
-                {multiOverLimit && (
-                  <p role="alert" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-amber)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    ⚠ Limit {maxMulti} kart przekroczony — zniżka zostanie proporcjonalnie podzielona na {multiPresentCount} osób ({Math.floor(maxMulti * MULTISPORT_DISCOUNT / multiPresentCount)} zł/os. zamiast {MULTISPORT_DISCOUNT} zł)
-                  </p>
-                )}
+                {multiOverLimit && <MultisportLimitWarning maxMulti={maxMulti} cardCount={multiPresentCount} />}
               </FieldGroup>
             )}
 

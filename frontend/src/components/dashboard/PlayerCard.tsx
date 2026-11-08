@@ -17,7 +17,7 @@ import Modal from '../common/Modal';
 import TreasurerPanel from './TreasurerPanel';
 
 import StreakBadge from '../attendance/StreakBadge';
-import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerColor, PlayerStats, SoundType } from '@/types/ui';
+import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerColor, PlayerStats } from '@/types/ui';
 import type { AddPaymentResult, TransactionResult } from '@/types/domain';
 import type { StyleWithVars } from '@/types/css';
 import { useAnimatedValue } from './useAnimatedValue';
@@ -38,16 +38,28 @@ interface PlayerCardProps {
   breakdown: DebtDisplayData | null;
   onAddPayment: (playerName: string, amount: number, paymentId: string) => Promise<AddPaymentResult>;
   onRemovePayment: (playerName: string, paymentId: string) => Promise<TransactionResult>;
-  playSound: (type: SoundType) => void;
   /** Podawane tylko dla skarbnika — zasila panel „kto ile winien”. */
   allPlayers?: PlayerStats[];
+}
+
+/** Stopka karty: pseudo-kod kreskowy z nazwą gracza (tylko na desktopie). */
+function CardBarcode({ name, color, marginTop }: { name: string; color: string; marginTop: number | string }) {
+  return (
+    <div style={{ marginTop, paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
+      <Barcode name={name} color={color} />
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2 }}>
+        <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
+          {name.toUpperCase().replace(/\s/g, '')}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 function PlayerCard({
   player, playerColor, history, meta,
   openDetails, onToggleDetails, breakdown,
   onAddPayment, onRemovePayment,
-  playSound,
   allPlayers,
 }: PlayerCardProps) {
   const isMobile = useIsMobile();
@@ -113,7 +125,7 @@ function PlayerCard({
       // Dźwięk przy płatności gra już wcześniej (COIN) — drugi byłby nadmiarowy.
     }, reducedMotion ? 0 : 900);
     return () => clearTimeout(t);
-  }, [settling, debt, reducedMotion, playSound]);
+  }, [settling, debt, reducedMotion]);
 
   const { lastPayment, secondsLeft, progressPct, startPaymentUndo, handleUndoPayment } =
     usePaymentUndo({ playerName: player.name, onRemovePayment });
@@ -190,10 +202,11 @@ function PlayerCard({
     await handleUndoPayment();
   }, [handleUndoPayment]);
 
-  const accentColor = c.border;
   const cardBorder = isSettled && !isOrganizer
     ? `${c.border}25`
     : `${c.border}30`;
+  // Kropki ostatnich sesji (od najnowszej); na telefonie mieści się mniej.
+  const recentSessions = (history ?? []).slice(0, isMobile ? 6 : 10);
   // Etykieta musi zawierać widoczny tekst (kwotę i stan), inaczej osoby
   // korzystające z rozpoznawania mowy nie mogą aktywować elementu po nazwie.
   const amountText = `${hasCredit ? '+' : ''}${formatAmountShort(Math.abs(debt))}zł`;
@@ -318,7 +331,7 @@ function PlayerCard({
       onPointerLeave={resetCardTilt}
     >
       <div ref={foilRef} className={RARITY_FOIL_CLASS[meta.rarity]} style={foilStyle} aria-hidden="true" />
-      <CornerBrackets color={accentColor} size={14} thickness={1} />
+      <CornerBrackets color={c.border} size={14} thickness={1} />
       <div className="glass-shine-overlay" aria-hidden="true" />
       <span className="sr-only" role="status" aria-live="polite">
         {isSaving ? 'Zapisywanie wpłaty…' : settling ? 'Rozliczanie…' : justCleared ? 'Wpłata zapisana. Karta rozliczona.' : ''}
@@ -417,9 +430,9 @@ function PlayerCard({
             </div>
             {history && history.length > 0 && (
               <div
-                title={`Ostatnie ${[...history].slice(0, isMobile ? 6 : 10).length} sesji`}
+                title={`Ostatnie ${recentSessions.length} sesji`}
                 style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                {[...history].slice(0, isMobile ? 6 : 10).reverse().map((session, i) => {
+                {[...recentSessions].reverse().map((session, i) => {
                   const attended = session.presentPlayers.includes(player.name);
                   return (
                     <div
@@ -606,14 +619,7 @@ function PlayerCard({
           )}
 
           {!isMobile && (
-            <div style={{ marginTop: modal === null ? 12 : 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
-              <Barcode name={player.name} color={accentColor} />
-              <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2 }}>
-                <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
-                  {player.name.toUpperCase().replace(/\s/g, '')}
-                </span>
-              </div>
-            </div>
+            <CardBarcode name={player.name} color={c.border} marginTop={modal === null ? 12 : 'auto'} />
           )}
         </div>
       )}
@@ -680,14 +686,7 @@ function PlayerCard({
           )}
 
           {!isMobile && (
-            <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
-              <Barcode name={player.name} color={c.border} />
-              <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2 }}>
-                <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
-                  {player.name.toUpperCase().replace(/\s/g, '')}
-                </span>
-              </div>
-            </div>
+            <CardBarcode name={player.name} color={c.border} marginTop="auto" />
           )}
         </div>
       )}

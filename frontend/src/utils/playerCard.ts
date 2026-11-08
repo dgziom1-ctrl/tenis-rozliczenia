@@ -1,4 +1,4 @@
-import { getRank, SPORT } from '@/constants';
+import { getRank, SPORT, SPORTS, isSport } from '@/constants';
 import { getPlayerAchievements } from '@/utils/achievements';
 import { filterHistorySinceJoin } from '@/utils/playerHistory';
 import type { Sport } from '@/types/domain';
@@ -11,8 +11,6 @@ import type {
   Rank,
   SportCount,
 } from '@/types/ui';
-
-const SPORT_ORDER: readonly Sport[] = [SPORT.PINGPONG, SPORT.SQUASH, SPORT.BADMINTON, SPORT.PADEL];
 
 export const RARITY_BY_RANK: Record<string, CardRarity> = {
   LEGENDA: 'legend',
@@ -76,10 +74,10 @@ export function playerSportMix(playerName: string, history: HistoryEntry[]): Spo
   for (const session of history) {
     if (!session.presentPlayers.includes(playerName)) continue;
     const raw = session.sport;
-    const sport: Sport = (SPORT_ORDER as readonly string[]).includes(raw) ? raw : SPORT.PINGPONG;
+    const sport: Sport = isSport(raw) ? raw : SPORT.PINGPONG;
     counts[sport] += 1;
   }
-  return SPORT_ORDER
+  return SPORTS
     .map(sport => ({ sport, count: counts[sport] }))
     .filter(row => row.count > 0);
 }

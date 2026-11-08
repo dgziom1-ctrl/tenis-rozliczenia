@@ -1,4 +1,5 @@
 import type { TabId } from '@/types/ui';
+import type { Sport } from '@/types/domain';
 
 /**
  * Hasło do operacji nieodwracalnych. Jest wkompilowane w paczkę JS, więc nie
@@ -24,6 +25,11 @@ export const UNDO_TIMEOUT_SECONDS = 8;
 export const MODAL_EXIT_MS = 280;
 export const REDUCED_MOTION_MODAL_EXIT_MS = 180;
 export const SPORT = { PINGPONG: 'pingpong', SQUASH: 'squash', BADMINTON: 'badminton', PADEL: 'padel' } as const;
+
+/** Wszystkie dyscypliny, w kolejności wyświetlania. Jedyne źródło listy sportów. */
+export const SPORTS: readonly Sport[] = Object.values(SPORT);
+export const isSport = (value: unknown): value is Sport =>
+  typeof value === 'string' && (SPORTS as readonly string[]).includes(value);
 
 /**
  * Sporty, w których wypożyczamy rakiety. To JEDYNA różnica między dyscyplinami —

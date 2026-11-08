@@ -70,13 +70,15 @@ export default function WrappedModal({ stats, onClose, embedded = false }: Wrapp
     else closeWithExit();
   }, [embedded, onClose, closeWithExit]);
 
-  // Build ordered slide list (skip bestPair slide when null)
+  // Kolejność slajdów; pary i mistrza pomijamy, gdy nie ma ich w danych
+  // (pusty slajd mistrza wyglądałby jak błąd).
   const slideList = useMemo(() => {
     const base = [0, 1, 2];
     if (stats.bestPair) base.push(3);
-    base.push(4, 5);
+    base.push(4);
+    if (stats.champion) base.push(5);
     return base;
-  }, [stats.bestPair]);
+  }, [stats.bestPair, stats.champion]);
   const totalSlides = slideList.length;
   const activeSlideId = slideList[currentSlide] ?? 0;
 

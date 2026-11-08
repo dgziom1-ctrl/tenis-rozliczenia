@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { onValue, ref } from 'firebase/database';
-import { subscribeToData, database, loadSnapshot, buildUIData, setCurrentData } from '@/lib/firebase';
+import { subscribeToData, database, loadSnapshot, buildUIData } from '@/lib/firebase';
 import { useToast } from '@/components/common/Toast';
 import type { UIData } from '@/types/ui';
 import { AppDataContext, INITIAL_APP_DATA, type AppDataContextValue } from './appDataContext';
@@ -23,7 +23,6 @@ function readCachedData(): UIData | null {
     const cached = loadSnapshot();
     if (!cached) return null;
     const ui = buildUIData(cached);
-    setCurrentData(cached);
     return ui;
   } catch (error) {
     console.warn('Zapamiętane dane są nieczytelne — startuję bez nich:', error);

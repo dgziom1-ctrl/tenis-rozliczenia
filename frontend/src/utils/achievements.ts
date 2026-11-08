@@ -1,5 +1,5 @@
 import type { ExtendedPlayerStats, Achievement, HistoryEntry } from '@/types/ui';
-import { filterHistorySinceJoin } from './playerHistory';
+import { filterHistorySinceJoin, longestStreakOf } from './playerHistory';
 
 // Ta sama lista jest w `functions/index.js` (STREAK_MILESTONES) — pilnuje jej
 // `functionsParity.test.js`.
@@ -89,11 +89,7 @@ export function getPlayerAchievements(
     }
   }
 
-  let maxStreak = 0, cur = 0;
-  for (const s of [...eligibleHistory].reverse()) {
-    if (s.presentPlayers.includes(player.name)) { cur++; maxStreak = Math.max(maxStreak, cur); }
-    else cur = 0;
-  }
+  const maxStreak = longestStreakOf(player.name, eligibleHistory);
   for (const milestone of STREAK_MILESTONES) {
     if (maxStreak >= milestone) {
       earned.push({

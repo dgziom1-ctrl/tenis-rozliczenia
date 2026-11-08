@@ -1,5 +1,5 @@
 import { SPORT } from '@/constants';
-import { filterHistorySinceJoin } from './playerHistory';
+import { filterHistorySinceJoin, longestStreakOf } from './playerHistory';
 import type { PlayerStats, HistoryEntry } from '@/types/ui';
 import type { WrappedStats, WrappedPlayerStats } from '@/types/ui';
 
@@ -21,18 +21,12 @@ export function computeWrappedStats(
     const attended = eligible.filter(s => s.presentPlayers.includes(player.name));
     const missed = eligible.length - attended.length;
 
-    let maxStreak = 0, cur = 0;
-    for (const s of [...eligible].reverse()) {
-      if (s.presentPlayers.includes(player.name)) { cur++; maxStreak = Math.max(maxStreak, cur); }
-      else cur = 0;
-    }
-
     return {
       name: player.name,
       attended: attended.length,
       missed,
       percentage: eligible.length > 0 ? Math.round((attended.length / eligible.length) * 100) : 0,
-      longestStreak: maxStreak,
+      longestStreak: longestStreakOf(player.name, eligible),
     };
   }).filter(p => p.attended > 0);
 

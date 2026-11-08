@@ -13,3 +13,25 @@ export function filterHistorySinceJoin<T extends { datePlayed: string }>(
   if (!joinDate) return history;
   return history.filter(session => session.datePlayed >= joinDate);
 }
+
+/**
+ * Najdłuższa seria kolejnych sesji z obecnością gracza.
+ * `history` jest posortowana od najnowszej do najstarszej (jak w całej apce),
+ * więc liczymy od końca — od najstarszej sesji.
+ */
+export function longestStreakOf(
+  playerName: string,
+  history: ReadonlyArray<{ presentPlayers: string[] }>,
+): number {
+  let longest = 0;
+  let current = 0;
+  for (let i = history.length - 1; i >= 0; i--) {
+    if (history[i].presentPlayers.includes(playerName)) {
+      current++;
+      if (current > longest) longest = current;
+    } else {
+      current = 0;
+    }
+  }
+  return longest;
+}

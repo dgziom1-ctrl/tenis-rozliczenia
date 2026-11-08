@@ -1,5 +1,5 @@
 import { useOutletContext, useSearchParams } from 'react-router';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useAttendanceData } from '@/app/providers/appDataContext';
 import AttendanceTab from '@/components/attendance/AttendanceTab';
 import type { SoundType } from '@/types/ui';
@@ -11,14 +11,15 @@ export default function AttendancePage() {
 
   // `searchParams.get` już zdekodował wartość — drugie `decodeURIComponent`
   // wywalało się błędem URIError na nazwie z `%`.
-  const initialPlayer = searchParams.get('player') || null;
-  const [notifPlayer, setNotifPlayer] = useState<string | null>(initialPlayer);
+  // Czytamy parametr na bieżąco (bez kopii w stanie), żeby link z powiadomienia
+  // otwarty przy zamontowanej stronie też wybierał gracza.
+  const notifPlayer = searchParams.get('player') || null;
 
   const handleNotifPlayerConsumed = useCallback(() => {
-    setNotifPlayer(null);
     setSearchParams(prev => {
-      prev.delete('player');
-      return prev;
+      const next = new URLSearchParams(prev);
+      next.delete('player');
+      return next;
     });
   }, [setSearchParams]);
 

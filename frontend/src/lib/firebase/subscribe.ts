@@ -1,6 +1,5 @@
 import { onValue } from 'firebase/database';
 import { dataRef } from './config';
-import { setCurrentData } from './state';
 import { saveSnapshot } from './snapshotCache';
 import { buildUIData, normalizeRawData } from './transforms';
 import type { NormalizedData } from '@/types/domain';
@@ -22,7 +21,6 @@ export function subscribeToData(
         const normalized = normalizeRawData(raw);
         const ui = buildUIData(normalized);
 
-        setCurrentData(normalized);
         // Dopiero po `buildUIData`: zapamiętujemy wyłącznie stan, który dał się
         // przetworzyć bez błędu, więc uszkodzone dane nigdy nie trafiają do
         // pamięci podręcznej i nie zepsują następnego uruchomienia.

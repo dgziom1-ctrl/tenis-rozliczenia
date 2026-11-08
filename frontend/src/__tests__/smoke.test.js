@@ -154,22 +154,6 @@ describe('constants/index.js — struktura', () => {
 // FIREBASE — MODUŁY
 // ════════════════════════════════════════════════════════════════════════════
 
-describe('lib/firebase/state.ts — eksporty', () => {
-  it('eksportuje setCurrentData i getCurrentData', async () => {
-    const m = await import('../lib/firebase/state');
-    expect(m.setCurrentData).toBeTypeOf('function');
-    expect(m.getCurrentData).toBeTypeOf('function');
-  });
-
-  it('set/get działa jak para', async () => {
-    const { setCurrentData, getCurrentData } = await import('../lib/firebase/state');
-    const testData = { players: ['Alice'], weeks: [] };
-    setCurrentData(testData);
-    expect(getCurrentData()).toBe(testData);
-    setCurrentData(null); // przywróć do null po teście
-  });
-});
-
 describe('lib/firebase/transforms.ts — eksporty', () => {
   it('eksportuje buildUIData i normalizeRawData', async () => {
     const m = await import('../lib/firebase/transforms');

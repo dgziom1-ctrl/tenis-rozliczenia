@@ -328,7 +328,6 @@ export default function DashboardTab({ data, history, playSound }: DashboardTabP
                 breakdown={(!isOrg && showBreakdown) ? getBreakdown(player) : null}
                 onAddPayment={handleAddPayment}
                 onRemovePayment={handleRemovePayment}
-                playSound={playSound}
                 allPlayers={isOrg ? data.players : undefined}
               />
             </div>

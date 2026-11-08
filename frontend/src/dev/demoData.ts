@@ -1,3 +1,4 @@
+import { SPORT, SPORTS } from '@/constants';
 import { buildUIData } from '@/lib/firebase/transforms';
 import { getPlayerSessionCost } from '@/utils/sessionCost';
 import type { NormalizedData, Payment, Sport, Week } from '@/types/domain';
@@ -26,8 +27,6 @@ const ORGANIZER = 'Kamil';
 
 const CARD_HOLDERS = ['Ala', 'Celina', 'Ewa', 'Gosia'];
 const OWN_RACKET = ['Bartek', 'Dawid'];
-
-const SPORTS: Sport[] = ['pingpong', 'squash', 'badminton', 'padel'];
 
 const COURT_COST: Record<Sport, number> = {
   pingpong: 100,
@@ -92,7 +91,7 @@ export function buildDemoRawData(): NormalizedData {
     if (i % 5 === 0 && !present.includes('Gosia')) present.push('Gosia');
 
     const multiPlayers = present.filter(name => CARD_HOLDERS.includes(name) && random() > 0.3);
-    const racketSport = sport !== 'pingpong';
+    const racketSport = sport !== SPORT.PINGPONG;
     const ownRacketPlayers = racketSport ? present.filter(name => OWN_RACKET.includes(name)) : [];
     const racketCount = racketSport ? 2 : 0;
 
@@ -104,7 +103,7 @@ export function buildDemoRawData(): NormalizedData {
       present,
       multiPlayers,
       courtCount: sport === 'badminton' ? 2 : 1,
-      durationHours: sport === 'pingpong' ? 1 : 1.5,
+      durationHours: sport === 'pingpong' ? 1 : 2,
       ...(racketCount > 0 ? { racketCost: racketCount * 8, ownRacketPlayers } : {}),
     });
 

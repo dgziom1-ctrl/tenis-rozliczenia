@@ -62,9 +62,10 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
 
   // Domyślnie tylko sesje z obecnością. Nieobecności są na żądanie, bo przy
   // długiej historii dominowały widok i mnożyły węzły w DOM-ie.
-  const visibleSessions = useMemo(
-    () => (showMissed ? eligibleHistory : eligibleHistory.filter(s => s.presentPlayers.includes(player?.name ?? ''))),
-    [eligibleHistory, showMissed, player],
+  const visibleSessions = showMissed ? eligibleHistory : sessions;
+  const sessionPosition = useMemo(
+    () => new Map(eligibleHistory.map((s, i) => [s, i])),
+    [eligibleHistory],
   );
 
   if (!player) return null;
@@ -239,7 +240,7 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
             // Numer liczony z pozycji w pełnej, ale już przyciętej dołączeniem
             // historii — nie w przefiltrowanej liście, żeby po ukryciu
             // nieobecności numeracja się nie przesuwała.
-            const sessionNo = eligibleHistory.length - eligibleHistory.indexOf(session);
+            const sessionNo = eligibleHistory.length - (sessionPosition.get(session) ?? 0);
 
             // Każdy obecny płaci swój udział; posiadacze karty Multisport mają
             // od niego stałą zniżkę, więc czasem wychodzi im dokładnie 0 zł.

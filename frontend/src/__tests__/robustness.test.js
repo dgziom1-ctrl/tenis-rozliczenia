@@ -10,11 +10,17 @@ import { buildUIData } from '../lib/firebase/transforms';
 import { formatDate, formatAmount } from '../utils/format';
 import { getMonthLabel } from '../utils/sessions';
 import { allocateExact } from '../utils/money';
-import * as stateModule from '../lib/firebase/state';
 
 // ─── vi.hoisted: runs BEFORE vi.mock factories ────────────────────────────────
-const { mockSaveData, runTransactionImpl } = vi.hoisted(() => {
+const { mockSaveData, runTransactionImpl, stateModule } = vi.hoisted(() => {
   const mockSaveData = vi.fn().mockResolvedValue(undefined);
+
+  // Atrapa bazy: prosty magazyn w pamięci, na którym działa fałszywe runTransaction.
+  let data = null;
+  const stateModule = {
+    setCurrentData: (next) => { data = next; },
+    getCurrentData: () => data,
+  };
 
   // runTransaction reads from stateModule.getCurrentData(), applies the update fn,
   // persists result into state and captures it via mockSaveData.
@@ -29,7 +35,7 @@ const { mockSaveData, runTransactionImpl } = vi.hoisted(() => {
     }
   });
 
-  return { mockSaveData, runTransactionImpl };
+  return { mockSaveData, runTransactionImpl, stateModule };
 });
 
 vi.mock('firebase/app', () => ({ initializeApp: vi.fn(() => ({})) }));
