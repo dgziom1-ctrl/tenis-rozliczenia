@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { FONT, TEXT, TRACK } from '@/constants/styles';
+import { FONT, TEXT } from '@/constants/styles';
 
 const BOOT_KEY = 'cyberponk.boot.v1';
-const LINE_MS = 280;
-const FADE_MS = 320;
+// Łącznie ok. 1 s zamiast 1,7 s: sekwencja jest ozdobą i nie może opóźniać
+// pierwszego kontaktu z danymi przy każdym zimnym starcie.
+const LINE_MS = 170;
+const FADE_MS = 280;
+/** Zainstalowana aplikacja pokazuje sekwencję tylko przy pierwszym uruchomieniu. */
+const BOOT_SEEN_KEY = 'cyberponk.boot.seen.v1';
 
 const LINES = [
   'łączenie z bazą…',
@@ -17,7 +21,12 @@ const LINES = [
 
 /** Raz na sesję przeglądarki. Brak storage (tryb prywatny) = pokaż, nic nie psuje. */
 function alreadyBooted(): boolean {
-  try { return sessionStorage.getItem(BOOT_KEY) === '1'; } catch { return false; }
+  try {
+    if (sessionStorage.getItem(BOOT_KEY) === '1') return true;
+    // Tryb standalone (PWA) = częsty zimny start; po pierwszym razu pomijamy.
+    const standalone = window.matchMedia?.('(display-mode: standalone)').matches;
+    return Boolean(standalone) && localStorage.getItem(BOOT_SEEN_KEY) === '1';
+  } catch { return false; }
 }
 
 // ─── Sekwencja startowa ───────────────────────────────────────────
@@ -33,7 +42,10 @@ export default function BootSequence() {
 
   useEffect(() => {
     if (!active) return undefined;
-    try { sessionStorage.setItem(BOOT_KEY, '1'); } catch { /* bez zapisu pokaże się ponownie */ }
+    try {
+      sessionStorage.setItem(BOOT_KEY, '1');
+      localStorage.setItem(BOOT_SEEN_KEY, '1');
+    } catch { /* bez zapisu pokaże się ponownie */ }
     const timers: number[] = [];
     LINES.forEach((_, i) => timers.push(window.setTimeout(() => setCount(i + 1), LINE_MS * (i + 1))));
     timers.push(window.setTimeout(() => setLeaving(true), LINE_MS * (LINES.length + 1)));
@@ -66,7 +78,7 @@ export default function BootSequence() {
           Cyber-Ponk
         </p>
         {LINES.slice(0, count).map((line, i) => (
-          <p key={line} style={{ ...FONT.mono(TEXT.small), letterSpacing: TRACK.tight, margin: '0 0 6px', color: i === LINES.length - 1 ? 'var(--co-green)' : 'var(--co-text)' }}>
+          <p key={line} style={{ ...FONT.mono(TEXT.small), letterSpacing: 'normal', margin: '0 0 6px', color: i === LINES.length - 1 ? 'var(--co-green)' : 'var(--co-text)' }}>
             <span style={{ color: 'var(--co-dim)' }}>&gt; </span>{line}
           </p>
         ))}

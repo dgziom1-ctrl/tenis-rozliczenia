@@ -5,7 +5,7 @@ import ArenaCanvas from './ArenaCanvas';
 import { copyToClipboard } from '@/utils/clipboard';
 import { BLIK_NUMBER } from '@/utils/blik';
 import { useToast } from '@/components/common/Toast';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
 import { DEMO_MODE } from '@/constants';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { StyleWithVars } from '@/types/css';
@@ -202,7 +202,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
             transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
             <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
             <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-              letterSpacing:TRACK.wide,color:'var(--co-cyan)',padding:'2px 6px',
+              letterSpacing: 'normal',color:'var(--co-cyan)',padding:'2px 6px',
               background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>{' '}
             <span className="header-blik-number" style={{ ...FONT.data(blikNumber, TEXT.base),color: copied ? 'var(--co-green)' : 'var(--co-text)' }}>
               {copied ? <><Check size={14} aria-hidden="true" style={{ verticalAlign:'-2px', marginRight:4 }}/>Skopiowano</> : blikNumber}
@@ -245,18 +245,6 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
           </div>
         </div>
 
-        {/* Mobilny pasek BLIK: na telefonie nagłówek ma być kompaktowy, więc
-            numer dostaje własny, pełnowymiarowy wiersz zamiast rozpychać górę. */}
-        <button type="button" onClick={handleCopy} className="header-blik-mobile"
-          aria-label={`Skopiuj numer BLIK ${blikNumber}`}>
-          <Smartphone size={14} aria-hidden="true" style={{ color:'var(--co-dim)', flexShrink:0 }}/>
-          <span className="header-blik-label">Blik</span>{' '}
-          <span style={{ ...FONT.data(blikNumber, TEXT.base),color:'var(--co-text)',flex:1,textAlign:'left' }}>
-            {blikNumber}
-          </span>
-          {copied ? <Check size={14} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
-        </button>
-
         <div className="header-hero" style={{ position:'relative',zIndex:10,padding: '12px 16px 14px',
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
@@ -274,7 +262,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
                 tak jak w nagłówkach sekcji (animacja CSS biegnie raz przy montowaniu). */}
             <span key={location.pathname} className="glitch-text" data-text="CYBER-PONK" style={{
               display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
-              fontSize:'clamp(1.7rem,6.4vw,3.2rem)',letterSpacing:TRACK.tight,lineHeight:1,textAlign:'center',
+              fontSize:'clamp(1.7rem,6.4vw,3.2rem)',letterSpacing: 'normal',lineHeight:1,textAlign:'center',
               position:'relative',
               transition:'text-shadow 0.06s, transform 0.06s',
               ...(chaosMode
@@ -301,7 +289,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
                   title="Dane demonstracyjne — nie pochodzą z bazy Firebase"
                   style={{
                     fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-amber)',
-                    border:'1px solid var(--co-amber)',padding:'0 4px',letterSpacing:TRACK.tight,
+                    border:'1px solid var(--co-amber)',padding:'0 4px',letterSpacing: 'normal',
                   }}
                 >Demo</span>
               </div>
@@ -317,7 +305,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
           cursor:'pointer',display:'flex',alignItems:'center',gap:'6px' }}>
           <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
           <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
-            letterSpacing:TRACK.normal,color:'var(--co-cyan)',padding: '2px 4px',
+            letterSpacing: 'normal',color:'var(--co-cyan)',padding: '2px 4px',
             background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>
           <span style={{ ...FONT.data(blikNumber, TEXT.small),color:'var(--co-text)' }}>
             {blikNumber}

@@ -5,7 +5,7 @@ import { getShareGroups } from '@/utils/sessionCost';
 import ShareBreakdown from '../common/ShareBreakdown';
 import SportGlyph from '../common/icons/SportGlyph';
 import type { HistoryEntry } from '../../types/ui';
-import { FONT, CLIP } from '@/constants/styles';
+import { FONT, CLIP, TEXT } from '@/constants/styles';
 
 interface LogEntryProps {
   row: HistoryEntry;
@@ -32,7 +32,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
   const groups = getShareGroups(row);
 
   return (
-    <div className="scan-hover log-entry glass-card glass-hover-lift tap-press" style={{
+    <div className="scan-hover log-entry glass-card glass-hover-lift" style={{
       clipPath: CLIP.card,
       padding: '12px 14px', marginBottom: 4,
     }}>
@@ -40,16 +40,16 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
         {/* Top row: date + actions */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', opacity: 0.5 }}>{'>'}</span>
-            <span style={{ ...FONT.tech('0.8125rem', 500), color: 'var(--co-green)' }}>
+            <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-cyan)', opacity: 0.5 }}>{'>'}</span>
+            <span aria-hidden="true" style={{ ...FONT.tech('0.8125rem', 500), color: 'var(--co-green)' }}>
               SESSION_{String(row.id).slice(-4).toUpperCase()}
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)' }}>
+            <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)' }}>
               {formatDate(row.datePlayed)}
             </span>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 4,
-              fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+              ...FONT.mono(TEXT.tiny),
               padding: '2px 6px',
               background: isCourt ? 'var(--co-tint-green)' : 'var(--co-tint)',
               border: `1px solid ${isCourt ? 'var(--co-green)' : 'var(--co-tint-line)'}`,
@@ -88,11 +88,11 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
         <div className="log-entry-grid" style={{ paddingLeft: 16 }}>
           <div>
             <p style={labelStyle}>Koszt</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--co-cyan)', textShadow: 'var(--glow-cyan-sm)' }}>
+            <p style={{ ...FONT.mono(TEXT.lead), color: 'var(--co-cyan)', textShadow: 'var(--glow-cyan-sm)' }}>
               {formatAmount(row.totalCost)}
             </p>
             {racketCost > 0 && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 2 }}>
+              <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 2 }}>
                 kort {formatAmountShort(row.totalCost - racketCost)} · rakiety {formatAmountShort(racketCost)}
               </p>
             )}
@@ -114,7 +114,7 @@ export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
               return (
                 <span key={name} aria-label={`${name}${hasCard ? ', karta MultiSport' : ''}${hasOwnRacket ? ', własna rakietka' : ''}`} style={{
                   display: 'inline-flex', alignItems: 'center', gap: 3,
-                  fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+                  ...FONT.mono(TEXT.tiny),
                   padding: '2px 6px',
                   color: hasCard ? 'var(--co-green)' : 'var(--co-text)',
                   background: hasCard ? 'var(--co-tint-green)' : 'transparent',

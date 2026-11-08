@@ -1,6 +1,6 @@
 import { useId, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
 
 /**
  * Rozwijana lista w stylu terminala.
@@ -37,7 +37,7 @@ export function TerminalPanel({ open, onToggle, toggleLabel, children, footer }:
           background: 'transparent', border: '1px solid var(--co-border)',
           cursor: 'pointer',
           clipPath: CLIP.badge,
-          ...FONT.display(TEXT.base, TRACK.normal),
+          ...FONT.display(TEXT.base),
           color: 'var(--co-cyan)',
         }}
       >
@@ -70,7 +70,7 @@ export function TerminalSectionHeader({ label }: { label: string }) {
     <div style={{
       padding: '6px 12px',
       borderBottom: '1px solid var(--co-border)',
-      ...FONT.display(TEXT.tiny, TRACK.wide),
+      ...FONT.display(TEXT.tiny),
       color: 'var(--co-dim)',
       display: 'flex', alignItems: 'center', gap: 6,
     }}>
@@ -113,7 +113,7 @@ export function TerminalFooter({ label, value, valueColor, tint = 'var(--co-tint
       background: tint,
       borderTop: '1px solid var(--co-border)',
     }}>
-      <span style={{ ...FONT.display(TEXT.tiny, TRACK.wide), color: 'var(--co-dim)' }}>
+      <span style={{ ...FONT.display(TEXT.tiny), color: 'var(--co-dim)' }}>
         ◈ {label}
       </span>
       <span style={{ ...FONT.mono(TEXT.small), color: valueColor }}>

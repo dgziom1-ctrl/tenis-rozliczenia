@@ -1,6 +1,6 @@
 import { Filter } from 'lucide-react';
 import Modal from '../common/Modal';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
 
 interface PlayerFilterSheetProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ export default function PlayerFilterSheet({ isOpen, onClose, playerNames, filter
                 background: selected ? 'var(--co-tint-hi)' : 'transparent',
                 color: selected ? 'var(--co-cyan)' : 'var(--co-text)',
                 clipPath: CLIP.tag,
-                ...FONT.display(TEXT.base, TRACK.normal),
+                ...FONT.display(TEXT.base),
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,

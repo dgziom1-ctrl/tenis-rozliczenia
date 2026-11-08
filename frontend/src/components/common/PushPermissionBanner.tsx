@@ -5,7 +5,7 @@ import { Bell, X, RefreshCw, CheckCircle2, TriangleAlert, Zap } from 'lucide-rea
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { ref, get } from 'firebase/database';
 import { database } from '@/lib/firebase/config';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
 
 const DISMISS_KEY   = 'push-banner-dismissed';
 const PLAYER_KEY    = 'push-registered-player';
@@ -25,6 +25,25 @@ async function deviceHasToken() {
   } catch {
     return false;
   }
+}
+
+/**
+ * Publikuje realną wysokość banera jako `--banner-h` na <body>. Baner jest
+ * `position: fixed` (chipy graczy + dwa przyciski czynią go wysokim), więc bez
+ * tej zmiennej zasłaniał ostatnią kartę — `.main-content` rezerwuje ją w
+ * `padding-bottom`. Stabilna funkcja na poziomie modułu: ref nie odpala się
+ * ponownie przy każdym renderze.
+ */
+function trackBannerHeight(el: HTMLDivElement | null) {
+  if (!el) return undefined;
+  const publish = () => document.body.style.setProperty('--banner-h', `${el.offsetHeight}px`);
+  publish();
+  const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(publish) : null;
+  observer?.observe(el);
+  return () => {
+    observer?.disconnect();
+    document.body.style.removeProperty('--banner-h');
+  };
 }
 
 interface PushPermissionBannerProps {
@@ -127,7 +146,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
   const accentColor = showReregister || showManual ? 'var(--co-amber)' : 'var(--co-cyan)';
 
   return createPortal(
-    <div style={bannerStyle} className="push-banner-sheet bottom-banner glass-surface">
+    <div ref={trackBannerHeight} style={bannerStyle} className="push-banner-sheet bottom-banner glass-surface">
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
         <div style={{
           padding: '8px', flexShrink: 0,
@@ -145,12 +164,12 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
 
         <div style={{ flex: 1, minWidth: 0 }}>
           {status === 'success' ? (
-            <p role="status" style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-green)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <p role="status" style={{ ...FONT.display(TEXT.base), color: 'var(--co-green)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
               <CheckCircle2 size={15} aria-hidden="true" /> Powiadomienia włączone!
             </p>
           ) : (
             <>
-              <p style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-text-hi)', margin: '0 0 4px' }}>
+              <p style={{ ...FONT.display(TEXT.base), color: 'var(--co-text-hi)', margin: '0 0 4px' }}>
                 {showReregister ? 'Rejestracja wygasła — odnów' : 'Włącz powiadomienia'}
               </p>
               {/* Cały opis banera miał 0.6rem, czyli 9,6px. */}
@@ -174,7 +193,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
                         onClick={() => setSelectedPlayer(name)}
                         aria-pressed={selectedPlayer === name}
                         style={{
-                          ...FONT.display(TEXT.small, TRACK.tight),
+                          ...FONT.display(TEXT.small),
                           minHeight: 44, padding: '4px 12px',
                           border: `1px solid ${selectedPlayer === name ? 'var(--co-cyan)' : 'var(--co-border)'}`,
                           color: selectedPlayer === name ? 'var(--co-cyan)' : 'var(--co-text)',

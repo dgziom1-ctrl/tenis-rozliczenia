@@ -7,8 +7,10 @@ import SportSelector from '../admin/SportSelector';
 import PlayerToggleGrid from '../admin/PlayerToggleGrid';
 import MultisportLimitWarning from '../admin/MultisportLimitWarning';
 import { RACKET_PRICE, MULTISPORT_DISCOUNT, hasRacketRental } from '@/constants';
-import { CLIP } from '@/constants/styles';
+import { CLIP, FONT, TEXT } from '@/constants/styles';
+import ToggleChip from '../common/ToggleChip';
 import { parseAmount, formatAmountShort } from '@/utils/format';
+import { racketPriceError } from '@/utils/costMessages';
 import { getMaxMulti, getMultisportPerCourtHour, getRacketSelection, getShareGroups, getTotalWithRackets } from '@/utils/sessionCost';
 import type { Sport } from '@/types/domain';
 import type { SessionEditForm } from '../../types/ui';
@@ -54,6 +56,7 @@ export default function EditSessionForm({
   const costId = useId();
   const costErrorId = useId();
   const racketPriceId = useId();
+  const racketPriceErrorId = useId();
 
   const present = editForm.present ?? [];
   const multiPlayers = editForm.multiPlayers ?? [];
@@ -77,6 +80,9 @@ export default function EditSessionForm({
   const shownPriceText = (parseAmount(racketPriceText) || 0) === racketSelection.price
     ? racketPriceText
     : String(racketSelection.price);
+  // Błędny tekst („abc”, puste) nie może po cichu stać się 0 zł — pokazujemy
+  // komunikat i blokujemy zapis.
+  const racketPriceMsg = withRackets ? racketPriceError(shownPriceText) : null;
 
   const perCourtHour = getMultisportPerCourtHour(editForm.sport);
   const hasCourtConfig = editForm.courtCount != null && editForm.durationHours != null;
@@ -143,12 +149,11 @@ export default function EditSessionForm({
     });
   };
 
+  // Formularz mieszka w `Modal` (HistoryTab), który ma własny panel, pułapkę
+  // fokusu i przywracanie fokusu — dlatego sam nie rysuje ramki ani nie kradnie
+  // fokusu.
   return (
-    <div style={{
-      background: 'var(--co-dark)', border: '1px solid var(--co-tint-line)',
-      clipPath: CLIP.smallCard,
-      padding: 16, marginBottom: 4, display: 'flex', flexDirection: 'column', gap: 14,
-    }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Sport */}
       <div>
         <span style={sectionLabel}>Sport</span>
@@ -157,11 +162,11 @@ export default function EditSessionForm({
 
       <div className="field-pair">
         <div>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'none' }}>Data</span>
+          <span style={{ ...FONT.display(TEXT.base), color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'none' }}>Data</span>
           <CyberDateInput compact label="Data sesji" value={editForm.date} onChange={v => setEditForm(p => ({ ...p, date: v }))} />
         </div>
         <div>
-          <label htmlFor={costId} style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'none' }}>
+          <label htmlFor={costId} style={{ ...FONT.display(TEXT.base), color: 'var(--co-cyan)', display: 'block', marginBottom: 6, textTransform: 'none' }}>
             Koszt kortu
           </label>
           <input id={costId} type="text" inputMode="decimal" value={editForm.cost}
@@ -172,11 +177,11 @@ export default function EditSessionForm({
             style={{ width: '100%', padding: '10px 12px', clipPath: CLIP.tag }}
           />
           {!isEditCostValid ? (
-            <p id={costErrorId} role="alert" style={{ margin: '8px 0 0', fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-rose)' }}>
+            <p id={costErrorId} role="alert" style={{ margin: '8px 0 0', ...FONT.display(TEXT.base), color: 'var(--co-rose)' }}>
               ⚠ {editCostError}
             </p>
           ) : (
-            <p style={{ margin: '6px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+            <p style={{ margin: '6px 0 0', ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
               {racketSelection.cost > 0
                 ? `Kwota za kort. Rakiety ${formatAmountShort(racketSelection.cost)} zł doliczone osobno — razem ${formatAmountShort(totalWithRackets)} zł`
                 : 'Kwota za kort, po odliczeniu kart Multisport'}
@@ -190,27 +195,15 @@ export default function EditSessionForm({
         <div style={{ flex: 1 }}>
           <span style={{ ...sectionLabel, marginBottom: 6 }}>Korty / stoły</span>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[1, 2, 3].map(n => {
-              const active = editForm.courtCount === n;
-              return (
-                <button type="button" key={n} onClick={() => handleCourtCount(n)}
-                  style={{
-                    flex: 1, padding: '8px 4px', cursor: 'pointer',
-                    fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
-                    clipPath: CLIP.badge,
-                    ...(active ? {
-                      background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
-                      color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
-                    } : {
-                      background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-                    }),
-                  }}>
-                  {n}
-                </button>
-              );
-            })}
+            {[1, 2, 3].map(n => (
+              <ToggleChip key={n} font="mono" active={editForm.courtCount === n}
+                style={{ flex: 1, padding: '8px 4px' }}
+                onClick={() => handleCourtCount(n)}>
+                {n}
+              </ToggleChip>
+            ))}
           </div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
+          <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6 }}>
             {maxMulti != null
               ? `> Limit kart: ${maxMulti} (${perCourtHour}/kort/h)`
               : '> Stara sesja: bez limitu kart'}
@@ -219,27 +212,15 @@ export default function EditSessionForm({
         <div style={{ flex: 1 }}>
           <span style={{ ...sectionLabel, marginBottom: 6 }}>Godziny</span>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[1, 2, 3].map(n => {
-              const active = editForm.durationHours === n;
-              return (
-                <button type="button" key={n} onClick={() => handleDuration(n)}
-                  style={{
-                    flex: 1, padding: '8px 4px', cursor: 'pointer',
-                    fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
-                    clipPath: CLIP.badge,
-                    ...(active ? {
-                      background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
-                      color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
-                    } : {
-                      background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-                    }),
-                  }}>
-                  {n}h
-                </button>
-              );
-            })}
+            {[1, 2, 3].map(n => (
+              <ToggleChip key={n} font="mono" active={editForm.durationHours === n}
+                style={{ flex: 1, padding: '8px 4px' }}
+                onClick={() => handleDuration(n)}>
+                {n}h
+              </ToggleChip>
+            ))}
           </div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
+          <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6 }}>
             {hasCourtConfig
               ? `> ${editForm.durationHours}h × ${perCourtHour}/kort/h = ${maxMulti} kart`
               : '> Wybierz korty i godziny, aby włączyć limit'}
@@ -259,7 +240,7 @@ export default function EditSessionForm({
           accent="yellow"
         />
         {!isPresentValid && (
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
+          <p style={{ ...FONT.display(TEXT.base), color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
             ⚠ Wybierz przynajmniej jednego gracza
           </p>
         )}
@@ -283,7 +264,7 @@ export default function EditSessionForm({
             <Hand size={11} /> Własna rakietka
           </p>
           <PlayerToggleGrid names={present} selected={ownRacketPlayers} onToggle={toggleOwnRacket} accent="amber" />
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
+          <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 8 }}>
             Zaznacz graczy, którzy przynieśli własną rakietkę — nie płacą za wypożyczenie
           </p>
         </div>
@@ -297,7 +278,7 @@ export default function EditSessionForm({
           </p>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <label htmlFor={racketPriceId} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
+            <label htmlFor={racketPriceId} style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
               Cena / szt.:
             </label>
             <input
@@ -309,50 +290,43 @@ export default function EditSessionForm({
                 setRacketPriceText(e.target.value);
                 setEditForm(p => ({ ...p, racketPrice: parseAmount(e.target.value) || 0 }));
               }}
-              className="cyber-input"
+              aria-invalid={racketPriceMsg !== null}
+              aria-describedby={racketPriceMsg ? racketPriceErrorId : undefined}
+              className={racketPriceMsg ? 'cyber-input input-error' : 'cyber-input'}
               style={{ width: 78, padding: '8px', textAlign: 'center', fontFamily: 'var(--font-mono)', clipPath: CLIP.badge }}
             />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>zł</span>
+            <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>zł</span>
             {racketSelection.price !== RACKET_PRICE && (
               <button
                 type="button"
-                onClick={() => setEditForm(p => ({ ...p, racketPrice: RACKET_PRICE }))}
+                onClick={() => { setRacketPriceText(String(RACKET_PRICE)); setEditForm(p => ({ ...p, racketPrice: RACKET_PRICE })); }}
                 style={{
-                  fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)',
+                  ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)',
                   background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-                  padding: '2px 8px', clipPath: CLIP.badge,
+                  padding: '2px 8px', minHeight: 44, clipPath: CLIP.badge,
                 }}
               >
                 Przywróć {RACKET_PRICE} zł
               </button>
             )}
           </div>
+          {racketPriceMsg && (
+            <p id={racketPriceErrorId} role="alert" style={{ margin: '0 0 10px', ...FONT.display(TEXT.base), color: 'var(--co-rose)' }}>
+              ⚠ {racketPriceMsg}
+            </p>
+          )}
 
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {Array.from({ length: racketSelection.maxRackets + 1 }, (_, i) => i).map(n => {
-              const active = racketSelection.effectiveCount === n;
-              return (
-                <button type="button" key={n}
-                  aria-label={`Liczba wypożyczonych rakiet: ${n}`}
-                  aria-pressed={active}
-                  onClick={() => setEditForm(p => ({ ...p, racketCount: n }))}
-                  style={{
-                    flex: 1, minWidth: 40, padding: '8px 4px', cursor: 'pointer',
-                    fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
-                    clipPath: CLIP.badge,
-                    ...(active ? {
-                      background: 'var(--co-tint-hi)', border: '1px solid var(--co-tint-line)',
-                      color: 'var(--co-cyan)', boxShadow: 'var(--glow-box-cyan)',
-                    } : {
-                      background: 'var(--co-dark)', border: '1px solid var(--co-border)', color: 'var(--co-dim)',
-                    }),
-                  }}>
-                  {n}
-                </button>
-              );
-            })}
+            {Array.from({ length: racketSelection.maxRackets + 1 }, (_, i) => i).map(n => (
+              <ToggleChip key={n} font="mono" active={racketSelection.effectiveCount === n}
+                ariaLabel={`Liczba wypożyczonych rakiet: ${n}`}
+                style={{ flex: 1, minWidth: 44, padding: '8px 4px' }}
+                onClick={() => setEditForm(p => ({ ...p, racketCount: n }))}>
+                {n}
+              </ToggleChip>
+            ))}
           </div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
+          <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 8 }}>
             {racketSelection.effectiveCount > 0
               ? `${racketSelection.effectiveCount} × ${formatAmountShort(racketSelection.price)} zł = ${formatAmountShort(racketSelection.cost)} zł, dzielone między graczy bez własnej rakietki`
               : '0 zł — nikt nie wypożycza rakiet'}
@@ -362,7 +336,7 @@ export default function EditSessionForm({
 
       {previewGroups.length > 0 && (
         <div style={{ padding: '10px 12px', background: 'var(--co-tint)', border: '1px solid var(--co-tint-line)', clipPath: CLIP.tag }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-dim)', marginBottom: 6, textTransform: 'none' }}>
+          <p style={{ ...FONT.display(TEXT.base), color: 'var(--co-dim)', marginBottom: 6, textTransform: 'none' }}>
             Po zmianie na osobę
           </p>
           <ShareBreakdown groups={previewGroups} sport={editForm.sport} size="sm" />
@@ -370,7 +344,7 @@ export default function EditSessionForm({
       )}
 
       <div style={{ display: 'flex', gap: 10 }}>
-        <button onClick={onSave} disabled={isSaving || !isEditCostValid || !isPresentValid}
+        <button onClick={onSave} disabled={isSaving || !isEditCostValid || !isPresentValid || racketPriceMsg !== null}
           aria-label="Zapisz zmiany"
           className="cyber-button-yellow" style={{ flex: 1, padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           {isSaving ? <><InlineSpinner size="sm" /> Zapisuję...</> : <><Check size={14} aria-hidden="true" /> Zapisz</>}

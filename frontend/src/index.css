@@ -312,6 +312,9 @@ video {
 ═══════════════════════════════════════════════════════════════════ */
 
 :root {
+  /* Natywne kontrolki (scrollbar, suwak, picker daty) w schemacie motywu. */
+  color-scheme: dark;
+
   /* ── Backgrounds — cold, dark ── */
   --co-void:     #030508;   /* deepest bg */
   --co-dark:     #060C12;   /* secondary bg */
@@ -599,10 +602,20 @@ html {
   position: relative;
   z-index: 10;
   padding: 0.5rem;
+  /* Poziomo na telefonie z notchem treść nie może wchodzić pod wycięcie. */
+  padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
 }
 @media (min-width: 768px) {
   .app-shell { padding: 2rem; }
 }
+
+/* Pole daty jest przykryte niewidocznym inputem, więc pierścień fokusa
+   rysujemy na dekoracyjnej warstwie, gdy input ma fokus. */
+.cyber-date-wrap:focus-within > .cyber-input {
+  filter: drop-shadow(0 0 1px var(--co-cyan)) drop-shadow(0 0 3px var(--co-cyan));
+}
+.cyber-date-wrap > input:focus-visible { outline: none; }
 .app-content {
   position: relative;
   max-width: 80rem;
@@ -866,7 +879,7 @@ body.theme-switching *::after {
    Były wstrzykiwane do <head> w runtime i zostawały tam po odmontowaniu okna.
    Poświata jedzie tokenami, więc w trybie jasnym animacja jest pustym przebiegiem. */
 @keyframes wm-fadeScale { 0% { transform: scale(.88) translateY(24px); } 100% { transform: scale(1) translateY(0); } }
-@keyframes wm-glow      { 0%, 100% { text-shadow: var(--glow-cyan-sm); } 50% { text-shadow: var(--glow-cyan-lg); } }
+@keyframes wm-glow      { 0%, 100% { opacity: .82; } 50% { opacity: 1; } }
 @keyframes wm-pulse     { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
 @keyframes wm-slideUp   { 0% { transform: translateY(40px); } 100% { transform: translateY(0); } }
 @keyframes wm-float     { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
@@ -1128,7 +1141,7 @@ body.theme-switching *::after {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.35; }
 }
-.attendance-cell-latest { animation: attendance-cell-pulse 1.6s ease-in-out infinite; }
+.attendance-cell-latest { animation: attendance-cell-pulse 1.6s ease-in-out 3; }
 
 @media (prefers-reduced-motion: reduce) {
   .attendance-cell-latest { animation: none; }
@@ -1574,7 +1587,13 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
    również na telefonie — w zmniejszonej skali. Pasek marki, akcje i osobny
    wiersz BLIK trzymają górę kompaktowo, a hero nie dominuje nad treścią. */
 .header-wordmark { display: none; }
-.header-blik-mobile { display: none; }
+
+/* Dotykowy ekran dowolnej szerokości (tablet, duży telefon) też dostaje cele
+   44 px — wcześniej tylko poniżej 640 px. */
+@media (pointer: coarse) {
+  .header-action-btn { width: 44px !important; height: 44px !important; }
+  .header-blik { min-height: 44px; }
+}
 
 /* Błysk „ghost” przy trafieniu piłką. Treść w pseudo-elemencie nie jest
    osobnym węzłem tekstowym, więc nazwa dostępna przycisku pozostaje spójna
@@ -1618,7 +1637,7 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   /* Chip BLIK jest przyciskiem kopiującym numer — na telefonie dostaje
      pełne 44 px wysokości, tak jak przyciski akcji obok. */
   .header-blik { display: flex !important; min-height: 44px; }
-  .compact-header button { min-height: 44px; }
+  .compact-header button { min-height: 44px; min-width: 44px; }
   .header-wordmark {
     display: none !important;
     font-family: var(--font-stencil);
@@ -1640,33 +1659,8 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
      Ikona kopiowania jest zbędna — cały chip kopiuje numer, a robi to również
      jego aria-label. */
   .header-blik { gap: 6px !important; padding: 6px 10px !important; white-space: nowrap; }
-  .header-blik-label,
   .header-blik-copy { display: none !important; }
   .header-blik-number { font-size: 0.8125rem !important; white-space: nowrap; }
-  .header-blik-mobile {
-    display: none !important;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    min-height: 44px;
-    padding: 8px 14px;
-    background: var(--co-tint);
-    border: none;
-    border-bottom: 1px solid var(--co-separator);
-    cursor: pointer;
-    text-align: left;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .header-blik-label {
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    letter-spacing: normal;
-    color: var(--co-cyan);
-    padding: 2px 6px;
-    background: var(--co-tint);
-    border: 1px solid var(--co-tint-line);
-    flex-shrink: 0;
-  }
 }
 
 /* ══ MAIN CONTENT ════════════════════════════════════════════════ */
@@ -1676,13 +1670,15 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 @media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
   /* Wysokość nawigacji plus oddech, żeby ostatni element nie kończył się
      tuż pod jej krawędzią. */
-  .main-content { padding-bottom: calc(var(--nav-height) + 1rem + env(safe-area-inset-bottom, 16px)); }
+  /* `--banner-h` ustawia PushPermissionBanner (jego realna wysokość), żeby
+     stały baner nie zasłaniał ostatniej karty. */
+  .main-content { padding-bottom: calc(var(--nav-height) + var(--banner-h, 0px) + 1rem + env(safe-area-inset-bottom, 0px)); }
 
   /* Fokus w polu przy dolnej krawędzi (albo przejście do kotwicy) nie może
      wylądować pod przyklejonym paskiem lub kompaktowym nagłówkiem. */
   html {
     scroll-padding-top: calc(64px + env(safe-area-inset-top, 0px));
-    scroll-padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
+    scroll-padding-bottom: calc(var(--nav-height) + var(--banner-h, 0px) + env(safe-area-inset-bottom, 0px) + 12px);
   }
 }
 
@@ -1761,6 +1757,9 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   bottom: 0;
   top: auto;
   width: 100%;
+  /* Poziomo na telefonie z notchem ikony nie mogą wejść pod wycięcie. */
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+  box-sizing: border-box;
   z-index: var(--z-nav);
   display: flex; align-items: stretch;
   border-top: 0;
@@ -1884,6 +1883,21 @@ body.has-push-banner .pwa-banner { display: none; }
   .bottom-banner { bottom: 0; }
 }
 
+/* Baner braku połączenia pojawia się w trakcie pracy (4 s po utracie sieci).
+   W przepływie strony przesuwał całą treść — dlatego jest stały u góry i nie
+   zmienia układu. */
+.offline-banner {
+  position: fixed;
+  z-index: var(--z-banner);
+  top: calc(8px + env(safe-area-inset-top, 0px));
+  left: max(8px, env(safe-area-inset-left, 0px));
+  right: max(8px, env(safe-area-inset-right, 0px));
+  max-width: 640px;
+  margin-inline: auto;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
 /* ══ TOASTY ══════════════════════════════════════════════════════
    Układ musi mieszkać tutaj, a nie w styleu inline komponentu. Toast miał
    pozycję wpisaną inline i klasy `sm:bottom-auto sm:top-4 sm:right-4` obok —
@@ -1898,8 +1912,8 @@ body.has-push-banner .pwa-banner { display: none; }
   display: flex;
   flex-direction: column;
   gap: 8px;
-  left: 8px;
-  right: 8px;
+  left: max(8px, env(safe-area-inset-left, 0px));
+  right: max(8px, env(safe-area-inset-right, 0px));
   bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
   max-width: 400px;
 }
@@ -1912,6 +1926,13 @@ body.has-push-banner .pwa-banner { display: none; }
   }
 }
 
+/* Banery i toasty zakotwiczone nad paskiem zostałyby nad klawiaturą z dziurą
+   po nawigacji — chowamy baner, a toast schodzi na dół widocznego obszaru.
+   Reguły stoją po definicjach `.bottom-banner` i `.toast-stack`, żeby je
+   nadpisywały. */
+body.keyboard-open .bottom-banner { display: none; }
+body.keyboard-open .toast-stack { bottom: 12px; }
+
 /* ══ COMPACT HEADER ══════════════════════════════════════════════ */
 .compact-header { display: none; }
 /* Także telefon w poziomie: ma szerokość desktopu, ale wysokością nadal
@@ -1920,7 +1941,7 @@ body.has-push-banner .pwa-banner { display: none; }
   .compact-header {
     display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-header);
     align-items: center; justify-content: space-between;
-    padding-left: 16px; padding-right: 16px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
     padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px;
     border-bottom: 1px solid var(--co-tint-line);
     background-color: var(--co-glass-hi);
@@ -1928,10 +1949,12 @@ body.has-push-banner .pwa-banner { display: none; }
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
     box-shadow: 0 1px 0 var(--glass-edge-top) inset, 0 2px 20px rgba(0,0,0,0.9);
-    transition: transform 0.25s ease, opacity 0.25s ease;
+    transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s linear 0s;
   }
-  .compact-header.hidden-bar  { transform: translateY(-100%); opacity: 0; }
-  .compact-header.visible-bar { transform: translateY(0); opacity: 1; }
+  /* `visibility` (z opóźnieniem do końca animacji) wyjmuje schowany pasek
+     z kolejności tabulacji — sam `transform` zostawiał go fokusowalnym. */
+  .compact-header.hidden-bar  { transform: translateY(-100%); opacity: 0; visibility: hidden; transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s linear 0.25s; }
+  .compact-header.visible-bar { transform: translateY(0); opacity: 1; visibility: visible; }
 }
 
 /* ══ FORM CONTROLS ═══════════════════════════════════════════════
@@ -2074,6 +2097,8 @@ body.has-push-banner .pwa-banner { display: none; }
 body.theme-light {
   background-color: #F8FAFC;
   color: #334155;
+  /* Natywne kontrolki (scrollbar, suwak, picker daty) w schemacie motywu. */
+  color-scheme: light;
 
   /* ── Backgrounds — warm slate ── */
   --co-void:      #F8FAFC;
@@ -2432,46 +2457,21 @@ body.theme-light .app-shell {
   border-radius: 9999px;
   filter: blur(60px);
   opacity: 0.30;
-  will-change: transform;
-  animation: blob-drift 22s ease-in-out infinite;
+  /* Plamy są statyczne: wcześniej deklarowały `blob-drift`/`fluid-float`/
+     `neon-pulse`, ale żadna z tych animacji nie miała @keyframes, więc nic się
+     nie ruszało, a `will-change` tylko trzymał niepotrzebną warstwę. */
   mix-blend-mode: screen;
 }
-.fluid-blob-cyan   { background: radial-gradient(circle, rgba(0,229,255,0.55) 0%, rgba(0,229,255,0) 70%); }
-.fluid-blob-rose   { background: radial-gradient(circle, rgba(255,32,144,0.45) 0%, rgba(255,32,144,0) 70%); }
-.fluid-blob-green  { background: radial-gradient(circle, rgba(0,255,136,0.40) 0%, rgba(0,255,136,0) 70%); }
-.fluid-blob-amber  { background: radial-gradient(circle, rgba(245,158,11,0.40) 0%, rgba(245,158,11,0) 70%); }
-.fluid-blob-float  { animation: fluid-float 14s ease-in-out infinite; }
-.fluid-blob-pulse  { animation: neon-pulse 3s ease-in-out infinite; }
+/* Kolory plam z tokenów akcentu — w jasnym motywie nie zostają neonowe. */
+.fluid-blob-cyan   { background: radial-gradient(circle, color-mix(in srgb, var(--co-cyan) 55%, transparent) 0%, transparent 70%); }
+.fluid-blob-rose   { background: radial-gradient(circle, color-mix(in srgb, var(--co-rose) 45%, transparent) 0%, transparent 70%); }
+.fluid-blob-green  { background: radial-gradient(circle, color-mix(in srgb, var(--co-green) 40%, transparent) 0%, transparent 70%); }
+.fluid-blob-amber  { background: radial-gradient(circle, color-mix(in srgb, var(--co-amber) 40%, transparent) 0%, transparent 70%); }
 .fluid-grid {
   position: absolute; inset: 0;
   background-image: radial-gradient(circle at 1px 1px, var(--dot-color, var(--co-tint)) 1px, transparent 0);
   background-size: 28px 28px;
   opacity: 0.6;
-}
-
-/* Neon status accents */
-.neon-status-debt {
-  color: var(--co-rose);
-  text-shadow: var(--glow-rose-md);
-  border-color: var(--co-rose);
-  box-shadow: var(--glow-box-rose);
-}
-.neon-status-credit {
-  color: var(--co-green);
-  text-shadow: var(--glow-green-md);
-  border-color: var(--co-green);
-  box-shadow: 0 0 14px rgba(0,255,136,0.25);
-}
-.neon-status-multisport {
-  color: var(--co-amber);
-  text-shadow: 0 0 12px rgba(245,158,11,0.45);
-  border-color: var(--co-amber);
-}
-.neon-status-streak {
-  color: var(--co-cyan);
-  text-shadow: var(--glow-cyan-md);
-  border-color: var(--co-cyan);
-  box-shadow: var(--glow-box-cyan);
 }
 
 /* Microinteractions */
@@ -2506,9 +2506,16 @@ body.theme-light .app-shell {
   position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
   background-size: 200% 100%;
-  animation: shimmer 4s linear infinite;
+  /* Statyczny refleks: `shimmer` nie miał @keyframes, a `mix-blend-mode`
+     kosztował kompozycję na każdej karcie bez widocznego efektu. */
   opacity: 0.35;
-  mix-blend-mode: overlay;
+}
+
+/* Szkielet strony (PageSkeleton): tylko `opacity`, bez ruchu przy reduced-motion. */
+@keyframes skeleton-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.skeleton-card { animation: skeleton-pulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-card { animation: none; }
 }
 
 /* ══ TELEFON — BUDŻET KLATEK ═══════════════════════════════════════
@@ -2520,13 +2527,9 @@ body.theme-light .app-shell {
    `prefers-reduced-motion` nadal ma pierwszeństwo: tam ruch i tak znika. */
 @media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
   .fluid-blob {
-    animation: none;
-    will-change: auto;
     filter: blur(44px);
     opacity: 0.24;
   }
-  .fluid-blob-float,
-  .fluid-blob-pulse { animation: none; }
 }
 
 /* Musi stać po bloku `body.theme-light`, bo ten sam selektor ustawia 24px —
@@ -2535,4 +2538,18 @@ body.theme-light .app-shell {
   :root,
   body.theme-light,
   body.theme-oled { --glass-blur: 18px; }
+}
+
+/* Na telefonie karty nie rozmywają tła (backdrop-filter na kilkunastu
+   kartach naraz to najdroższa część przewijania); dostają gęstsze, pełniejsze
+   tło szkła. Rozmycie zostaje tam, gdzie jest pod spodem treść: nagłówek,
+   nawigacja, banery, toasty i modale. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  .glass-card,
+  .cyber-box,
+  .glass-panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: var(--co-glass-hi);
+  }
 }

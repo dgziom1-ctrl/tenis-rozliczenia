@@ -1,8 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import { Download, Share, X } from 'lucide-react';
-import { TEXT, CLIP } from '@/constants/styles';
+import { TEXT, CLIP, FONT } from '@/constants/styles';
 import BrandMark from './BrandMark';
+
+const DISMISS_KEY = 'pwa-dismissed';
+/** Jak długo „×” ukrywa baner instalacji. */
+const DISMISS_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 /** Ile czekamy na iOS, zanim pokażemy podpowiedź instalacji. */
 const IOS_BANNER_DELAY_MS = 2000;
@@ -30,13 +34,23 @@ export default function PWAInstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [show,           setShow]           = useState(false);
   const [isIOS,          setIsIOS]          = useState(false);
+  const [isIPad,         setIsIPad]         = useState(false);
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches) return undefined;
-    try { if (localStorage.getItem('pwa-dismissed')) return undefined; } catch { /* localStorage unavailable */ }
+    try {
+      // Odrzucenie obowiązuje 30 dni, a nie na zawsze — inaczej jedno kliknięcie
+      // „×” na stałe odcinało drogę do instalacji z banera.
+      const dismissedAt = Number(localStorage.getItem(DISMISS_KEY));
+      if (dismissedAt && Date.now() - dismissedAt < DISMISS_TTL_MS) return undefined;
+    } catch { /* localStorage unavailable */ }
 
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    const ua = navigator.userAgent;
+    // iPadOS 13+ podaje się jako Mac, więc rozpoznajemy go po ekranie dotykowym.
+    const ipad = /ipad/i.test(ua) || (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+    const ios = (/iphone|ipad|ipod/i.test(ua) || ipad) && !window.MSStream;
     setIsIOS(ios);
+    setIsIPad(ipad);
     // iOS nie zna `beforeinstallprompt`, więc baner pokazujemy z opóźnieniem.
     // Timer MUSI być sprzątany — bez tego wyjście z ekranu w ciągu tych 2 s
     // ustawiało stan na odmontowanym komponencie.
@@ -52,7 +66,7 @@ export default function PWAInstallBanner() {
 
   const dismiss = useCallback(() => {
     setShow(false);
-    try { localStorage.setItem('pwa-dismissed', '1'); } catch { /* localStorage unavailable */ }
+    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch { /* localStorage unavailable */ }
   }, []);
 
   const handleInstall = async () => {
@@ -74,7 +88,7 @@ export default function PWAInstallBanner() {
   // Pozycjonowanie (fixed, odstęp od nawigacji, warstwa, rozmycie) bierze klasa
   // `.bottom-banner`, wspólna z banerem powiadomień.
   const bannerStyle: CSSProperties = {
-    left: 10, right: 10,
+    left: 'max(10px, env(safe-area-inset-left, 0px))', right: 'max(10px, env(safe-area-inset-right, 0px))',
     border: '1px solid var(--co-tint-line)',
     clipPath: CLIP.card,
     boxShadow: 'var(--glass-shadow)',
@@ -95,10 +109,10 @@ export default function PWAInstallBanner() {
             <BrandMark size={26} />
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: 'normal', color: 'var(--co-cyan)', margin: 0, textTransform: 'none' }}>
+            <p style={{ ...FONT.display(TEXT.small), color: 'var(--co-cyan)', margin: 0, textTransform: 'none' }}>
               Dodaj do ekranu głównego
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '2px 0 0' }}>
               Otwieraj jak natywna aplikacja
             </p>
           </div>
@@ -124,7 +138,7 @@ export default function PWAInstallBanner() {
 
   // iOS steps
   const steps = [
-    { n: '01', content: <span>Stuknij ikonę <span style={{ color: 'var(--co-cyan)' }}>Udostępnij</span> na dole Safari <Share size={11} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 2 }} /></span> },
+    { n: '01', content: <span>Stuknij ikonę <span style={{ color: 'var(--co-cyan)' }}>Udostępnij</span> {isIPad ? 'u góry Safari' : 'na dole Safari'} <Share size={11} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 2 }} /></span> },
     { n: '02', content: <span>Wybierz <span style={{ color: 'var(--co-cyan)' }}>"Dodaj do ekranu głównego"</span></span> },
     { n: '03', content: <span>Stuknij <span style={{ color: 'var(--co-cyan)' }}>"Dodaj"</span> w prawym górnym rogu</span> },
   ];
@@ -136,10 +150,10 @@ export default function PWAInstallBanner() {
           <BrandMark size={22} />
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: 'normal', color: 'var(--co-cyan)', margin: 0, textTransform: 'none' }}>
+          <p style={{ ...FONT.display(TEXT.small), color: 'var(--co-cyan)', margin: 0, textTransform: 'none' }}>
             Dodaj do ekranu głównego
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '2px 0 0' }}>
+          <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '2px 0 0' }}>
             Działa jak natywna aplikacja
           </p>
         </div>
@@ -162,7 +176,7 @@ export default function PWAInstallBanner() {
             }}>
               <span style={{ fontFamily: 'var(--font-display)', color: 'var(--co-cyan)', fontSize: '0.875rem', letterSpacing: 'normal' }}>{step.n}</span>
             </div>
-            <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--co-dim)', lineHeight: 1.4 }}>{step.content}</p>
+            <p style={{ margin: 0, ...FONT.mono(TEXT.small), color: 'var(--co-dim)', lineHeight: 1.4 }}>{step.content}</p>
           </div>
         ))}
       </div>

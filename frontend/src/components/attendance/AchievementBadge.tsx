@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FONT, TEXT, TRACK, CLIP, Z } from '@/constants/styles';
+import { FONT, TEXT, CLIP, Z } from '@/constants/styles';
 import type { Achievement } from '@/types/ui';
 import AchievementGlyph from '../common/icons/AchievementGlyph';
 
@@ -40,7 +40,7 @@ export default function AchievementBadge({ achievement: a, accentColor }: Achiev
         }}
       >
         <AchievementGlyph id={a.id} color={accentColor} size={15} />
-        <span style={{ ...FONT.display(TEXT.small, TRACK.tight), color: accentColor }}>
+        <span style={{ ...FONT.display(TEXT.small), color: accentColor }}>
           {a.label}
         </span>
       </button>

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { SPORT_LABEL } from '@/constants';
-import { FONT, TEXT, TRACK } from '@/constants/styles';
+import { FONT, TEXT } from '@/constants/styles';
 import { CHART_LABEL_SIZE } from '@/utils/chart';
 import { buildSportProfile, RADAR_SPORTS } from '@/utils/sportProfile';
 import type { HistoryEntry, PlayerColor } from '@/types/ui';
@@ -94,7 +94,7 @@ export default function SportRadar({ history, playerName, color }: SportRadarPro
           );
         })}
       </svg>
-      <div style={{ display: 'flex', gap: 14, justifyContent: 'center', ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: TRACK.tight }}>
+      <div style={{ display: 'flex', gap: 14, justifyContent: 'center', ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: 'normal' }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
           <span aria-hidden="true" style={{ width: 10, height: 10, background: color.border, display: 'inline-block' }} />
           {playerName}

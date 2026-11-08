@@ -301,6 +301,6 @@ describe('constants/styles.ts — skala', () => {
   it('najmniejszy stopień typografii nie schodzi poniżej czytelności', async () => {
     const { TEXT } = await import('../constants/styles');
     // 0.7rem = 11.2px. Wcześniej `monoMicro` miało 0.42rem, czyli ~6.7px.
-    expect(parseFloat(TEXT.micro)).toBeGreaterThanOrEqual(0.7);
+    expect(parseFloat(TEXT.tiny)).toBeGreaterThanOrEqual(0.7);
   });
 });

@@ -1,4 +1,5 @@
 import type React from 'react';
+import { FONT, TEXT } from '@/constants/styles';
 
 interface FieldLabelProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ export default function FieldLabel({ children, htmlFor }: FieldLabelProps) {
   return (
     <Tag htmlFor={htmlFor} style={{
       display: 'block',
-      fontFamily: 'var(--font-display)', fontSize: '1rem',
+      ...FONT.display(TEXT.lead),
       letterSpacing: 'normal', textTransform: 'none',
       color: 'var(--co-dim)', marginBottom: 8,
     }}>

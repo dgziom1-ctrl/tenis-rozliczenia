@@ -5,7 +5,7 @@ import { useConnectionStatus } from './providers/appDataContext';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { ToastProvider } from '@/components/common/Toast';
 import { hardResetApp, signalAppReady } from '@/utils/bootRecovery';
-import { Z, CLIP } from '@/constants/styles';
+import { Z, CLIP, FONT, TEXT } from '@/constants/styles';
 import Layout from './Layout';
 import { routes, prefetchTabs } from './routes';
 import BrandMark from '@/components/common/BrandMark';
@@ -43,7 +43,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
             margin: 0, lineHeight: 1,
           }}>CYBER-PONK</p>
           <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: 'normal',
+            ...FONT.mono(TEXT.tiny), letterSpacing: 'normal',
             color: 'var(--co-cyan)', textTransform: 'none', marginTop: 4,
           }}>Uruchamiam aplikację...</p>
         </div>
@@ -55,7 +55,7 @@ function CyberLoadingScreen({ slow = false, onRetry }: { slow?: boolean; onRetry
         }}>
           {['> Start systemu', '> Wczytuję bazę graczy...', '> Łączę z Firebase...'].map((line, i) => (
             <p key={i} style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+              ...FONT.mono(TEXT.tiny),
               color: i < 2 ? 'var(--co-green)' : 'var(--co-cyan)',
               letterSpacing: 'normal', margin: '2px 0',
             }}>{line}</p>
@@ -119,7 +119,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
             <Skull size={44} aria-hidden="true" style={{ color: 'var(--co-rose)' }} />
           </div>
           <p style={{
-            fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: 'normal',
+            ...FONT.display(TEXT.h2),
             color: 'var(--co-rose)', marginBottom: 6, textTransform: 'none',
             textShadow: 'var(--glow-rose-md)',
           }}>Brak połączenia</p>
@@ -129,7 +129,7 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
             clipPath: CLIP.badge,
           }}>
             <p style={{
-              fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)',
+              ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)',
               letterSpacing: 'normal', lineHeight: 1.7,
             }}>
               Baza nie odpowiada: przekroczono czas połączenia.<br />

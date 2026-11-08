@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation } from 'react-router';
+import { Outlet, useNavigate, useLocation, useNavigationType, NavigationType } from 'react-router';
 import { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import Header from '@/components/layout/Header';
@@ -18,7 +18,7 @@ import { useKeyboardOpen } from '@/hooks/useKeyboardOpen';
 import { routeFromNotificationUrl } from '@/utils/notificationRoute';
 import { SOUND_TYPES, TAB_PATHS } from '@/constants';
 import { TriangleAlert } from 'lucide-react';
-import { CLIP } from '@/constants/styles';
+import { CLIP, FONT, TEXT } from '@/constants/styles';
 
 /**
  * `NotificationOptions` z lib.dom nie zna pól obsługiwanych tylko przez
@@ -91,13 +91,31 @@ export default function Layout() {
 
   // useLayoutEffect resetuje pozycję przewinięcia synchronicznie przed renderem/paintem,
   // co eliminuje asynchroniczny skok scrolla przy pierwszym i kolejnym montowaniu widoku.
+  // Wstecz/Dalej w historii przeglądarki (POP) wraca na zapamiętane miejsce
+  // zakładki; zwykłe wejście w zakładkę (PUSH) zaczyna od góry.
+  const navigationType = useNavigationType();
+  const scrollPositions = useRef(new Map<string, number>());
+  const scrollPathRef = useRef(location.pathname);
+
+  useEffect(() => {
+    const remember = () => {
+      scrollPositions.current.set(scrollPathRef.current, document.documentElement.scrollTop);
+    };
+    window.addEventListener('scroll', remember, { passive: true });
+    return () => window.removeEventListener('scroll', remember);
+  }, []);
+
   useLayoutEffect(() => {
     const root = document.documentElement;
     const previousBehavior = root.style.scrollBehavior;
     root.style.scrollBehavior = 'auto';
-    root.scrollTop = 0;
+    scrollPathRef.current = location.pathname;
+    const target = navigationType === NavigationType.Pop ? (scrollPositions.current.get(location.pathname) ?? 0) : 0;
+    root.scrollTop = target;
     document.body.scrollTop = 0;
     root.style.scrollBehavior = previousBehavior;
+    // `navigationType` celowo poza zależnościami: liczy się tylko zmiana ścieżki.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   const [showGuide, setShowGuide] = useState(false);
@@ -283,8 +301,8 @@ function OfflineBanner({ hasData, onRetry }: { hasData: boolean; onRetry: () => 
   return (
     <div
       role="status"
+      className="offline-banner"
       style={{
-        margin: '0 0 16px',
         padding: '10px 14px',
         display: 'flex', alignItems: 'center', gap: 10,
         background: 'var(--co-amber-dim)',
@@ -301,7 +319,7 @@ function OfflineBanner({ hasData, onRetry }: { hasData: boolean; onRetry: () => 
           Brak połączenia
         </p>
         <p style={{
-          margin: '2px 0 0', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+          margin: '2px 0 0', ...FONT.mono(TEXT.tiny),
           color: 'var(--co-dim)', letterSpacing: 'normal', lineHeight: 1.5,
         }}>
           {hasData
@@ -322,10 +340,10 @@ function OfflineBanner({ hasData, onRetry }: { hasData: boolean; onRetry: () => 
 function CyberBackground() {
   return (
     <div className="fluid-bg" aria-hidden="true">
-      <div className="fluid-blob fluid-blob-cyan fluid-blob-float" style={{ top: '-15%', left: '50%', width: '90vw', height: '70vh', transform: 'translateX(-50%)' }} />
-      <div className="fluid-blob fluid-blob-rose fluid-blob-pulse" style={{ bottom: '-10%', left: '-5%', width: '55vw', height: '55vh' }} />
+      <div className="fluid-blob fluid-blob-cyan" style={{ top: '-15%', left: '50%', width: '90vw', height: '70vh', transform: 'translateX(-50%)' }} />
+      <div className="fluid-blob fluid-blob-rose" style={{ bottom: '-10%', left: '-5%', width: '55vw', height: '55vh' }} />
       <div className="fluid-blob fluid-blob-green" style={{ top: '40%', right: '-5%', width: '35vw', height: '40vh' }} />
-      <div className="fluid-blob fluid-blob-amber fluid-blob-float" style={{ bottom: '-6%', right: '6%', width: '48vw', height: '46vh' }} />
+      <div className="fluid-blob fluid-blob-amber" style={{ bottom: '-6%', right: '6%', width: '48vw', height: '46vh' }} />
       <div className="fluid-grid" />
       <div style={{
         position: 'absolute', inset: 0,

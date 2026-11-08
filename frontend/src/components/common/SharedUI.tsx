@@ -3,7 +3,7 @@ import type { FormEvent, ReactNode } from 'react';
 import { Lock, Check, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ADMIN_PASSWORD, isAdminPasswordConfigured, SOUND_TYPES } from '@/constants';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
 import Modal from './Modal';
 import { useModalExit } from '@/hooks/useModalExit';
 import type { SoundType } from '@/types/ui';
@@ -71,7 +71,8 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
           type="password"
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="// Access code..."
+          placeholder="// Wpisz hasło…"
+          enterKeyHint="go"
           autoFocus
           autoComplete="current-password"
           aria-invalid={error}
@@ -80,7 +81,7 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
           style={{ width: '100%', padding: '12px 14px', clipPath: CLIP.tag }}
         />
         {error && (
-          <p id={errorId} role="alert" style={{ ...FONT.display(TEXT.base, TRACK.normal), color: 'var(--co-rose)', textAlign: 'center', margin: 0 }}>
+          <p id={errorId} role="alert" style={{ ...FONT.display(TEXT.base), color: 'var(--co-rose)', textAlign: 'center', margin: 0 }}>
             {configured ? '⚠ Złe hasło' : '⚠ Hasło admina nie jest skonfigurowane'}
           </p>
         )}
@@ -123,7 +124,7 @@ export function PanelHeader({ icon: Icon, title, sub, accent = 'var(--co-cyan)',
         <Icon size={16} style={{ color: accent, display: 'block' }} aria-hidden="true" />
       </div>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <h2 className="glitch-text" data-text={title} style={{ ...FONT.display(TEXT.lead, TRACK.wide), color: accent, margin: 0 }}>{title}</h2>
+        <h2 className="glitch-text" data-text={title} style={{ ...FONT.display(TEXT.lead), color: accent, margin: 0 }}>{title}</h2>
         {sub && (
           <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '2px 0 0' }}>{sub}</p>
         )}
@@ -155,7 +156,7 @@ export function FieldGroup({ icon: Icon, label, counter, counterColor = 'var(--c
     }}>
       <p style={{
         display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
-        ...FONT.display(TEXT.base, TRACK.wide), color: 'var(--co-text)',
+        ...FONT.display(TEXT.base), color: 'var(--co-text)',
       }}>
         <Icon size={14} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} aria-hidden="true" />
         {label}
@@ -192,14 +193,14 @@ export function SectionHeader({ icon: Icon, title, accent = 'var(--co-cyan)', su
         }}>
           <Icon size={14} style={{ color: accent, display: 'block' }} aria-hidden="true" />
         </div>
-        <span className="glitch-text" data-text={title} style={{ ...FONT.display(TEXT.h3, TRACK.normal), color: accent }}>{title}</span>
+        <span className="glitch-text" data-text={title} style={{ ...FONT.display(TEXT.h3), color: accent }}>{title}</span>
         {/* Jedna moc kreski dla wszystkich separatorów — było ich trzy
             (0.133, 0.2 i 0.25 krycia), dwie w tym samym pliku. */}
         <div aria-hidden="true" style={{ flex: 1, minWidth: 20, height: 1, background: 'linear-gradient(to right, var(--co-tint-line), transparent)' }} />
         {aside && <div style={{ flexShrink: 0 }}>{aside}</div>}
       </div>
       {sub && (
-        <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: TRACK.normal, paddingLeft: 36, margin: 0 }}>
+        <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: 'normal', paddingLeft: 36, margin: 0 }}>
           {sub}
         </p>
       )}

@@ -7,10 +7,10 @@ const STORAGE_KEY = 'cyber-ponk-theme';
 const THEME_TRANSITION_MS = 400;
 
 /**
- * Kolor paska przeglądarki/statusu. Musi odpowiadać `--co-void` obu motywów —
- * inaczej na telefonie nad ciemną aplikacją świeci jasny pasek (albo odwrotnie)
- * i wygląda to jak niedokończona aplikacja. `index.html` ma wartość ciemną,
- * bo taki motyw startuje domyślnie; JS przełącza ją razem z motywem.
+ * Zapasowy kolor paska przeglądarki/statusu. Zwykle czytamy go prosto z tokenu
+ * `--co-void` (żeby zmiana tokenu nie rozjechała paska); ta mapa działa tylko
+ * wtedy, gdy token jest niedostępny. `index.html` ma wartość ciemną, bo taki
+ * motyw startuje domyślnie.
  */
 const THEME_COLOR: Record<Theme, string> = { oled: '#000000', dark: '#030508', light: '#F8FAFC' };
 
@@ -50,7 +50,10 @@ export function useTheme() {
     document.body.classList.toggle('theme-light', theme === 'light');
     document.body.classList.toggle('theme-oled', theme === 'oled');
     document.body.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[theme]);
+    // Źródłem prawdy jest token `--co-void` po przełączeniu klas; mapa zostaje
+    // tylko zapasem (jsdom i środowiska bez arkusza zwracają pusty token).
+    const voidToken = getComputedStyle(document.body).getPropertyValue('--co-void').trim();
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', voidToken || THEME_COLOR[theme]);
 
     const themeChanged = previousTheme.current !== theme;
     previousTheme.current = theme;

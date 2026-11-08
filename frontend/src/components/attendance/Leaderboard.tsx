@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { getRank } from '@/constants';
-import { FONT, TEXT, TRACK, CLIP, PANEL } from '../../constants/styles';
+import { FONT, TEXT, CLIP, PANEL } from '../../constants/styles';
 import { SectionHeader } from '../common/SharedUI';
 import StreakBadge from './StreakBadge';
 import RankGlyph from '../common/icons/RankGlyph';
@@ -29,7 +29,9 @@ function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
   const accent = placeAccent(place);
 
   return (
-    <div
+    <li style={{ listStyle: 'none', marginBottom: 3 }}>
+    <button
+      type="button"
       className={`leaderboard-row ${isTop3 ? 'top3' : 'rest'}`}
       // Tło żyje w `.leaderboard-row.top3` / `.rest` w index.css — inline
       // przegrywało z nadpisaniem `!important` dla trybu jasnego, które
@@ -38,17 +40,14 @@ function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
         display: 'flex', alignItems: 'center', gap: 10,
         minHeight: 44, padding: '10px 14px',
         border: `1px solid ${isTop3 ? 'var(--co-tint-line)' : 'var(--co-border)'}`,
-        marginBottom: 3,
+        width: '100%', textAlign: 'left', font: 'inherit', color: 'inherit', margin: 0,
         clipPath: CLIP.card,
         cursor: 'pointer',
       }}
-      role="button"
-      tabIndex={0}
       onClick={onClick}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(); } }}
     >
       <span style={{
-        fontFamily: 'var(--font-mono)', fontSize: '0.8125rem',
+        ...FONT.mono(TEXT.small),
         color: isTop3 ? accent.color : 'var(--co-text)',
         width: 28, flexShrink: 0,
       }}>
@@ -56,28 +55,29 @@ function LeaderboardRow({ player, place, onClick }: LeaderboardRowProps) {
       </span>
       <RankGlyph rank={rank} size={16} />
       <span style={{
-        ...FONT.display(TEXT.lead, TRACK.tight), flex: 1, minWidth: 0,
+        ...FONT.display(TEXT.lead), flex: 1, minWidth: 0,
         textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap',
         color: isTop3 ? 'var(--co-text-hi)' : 'var(--co-text)',
       }}>{player.name}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {player.currentStreak >= 2 && <StreakBadge streak={player.currentStreak} />}
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+        <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
           {player.attendanceCount}/{player.eligibleWeeks}
         </span>
         {/* Frekwencja to najważniejsza liczba w rankingu — poza podium szła
             w --co-dim, który miał 2:1 kontrastu i był najmniej czytelnym
             elementem na ekranie. */}
         <span style={{
-          fontFamily: 'var(--font-display)', fontSize: '1.25rem',
+          ...FONT.display(TEXT.h3),
           color: isTop3 ? accent.color : 'var(--co-text-hi)',
           minWidth: 56, textAlign: 'right',
           textShadow: isTop3 ? accent.glow : 'none',
         }}>
           {player.attendancePercentage}%
         </span>
-      </div>
-    </div>
+      </span>
+    </button>
+    </li>
   );
 }
 
@@ -110,11 +110,11 @@ export default function Leaderboard({ ranked, podiumPlayers, onSelect, seasonLab
         <SectionHeader icon={TrendingUp} title="Ranking" sub={seasonLabel ? `frekwencja · sezon ${seasonLabel}` : 'frekwencja · wszystkie sesje'} />
         <Podium podiumPlayers={podiumPlayers} onSelect={onSelect} />
         {theRest.length > 0 && (
-          <div style={{ borderTop: '1px solid var(--co-border)', paddingTop: 14 }}>
+          <ul aria-label="Pozostali gracze w rankingu" style={{ listStyle: 'none', margin: 0, padding: '14px 0 0', borderTop: '1px solid var(--co-border)' }}>
             {theRest.map(player => (
               <LeaderboardRow key={player.name} player={player} place={player.place} onClick={() => onSelect(player.name)} />
             ))}
-          </div>
+          </ul>
         )}
         {ranked.length === 0 && (
           <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', textAlign: 'center', padding: '40px 0' }}>

@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { CheckCircle2, AlertCircle, X, Terminal } from 'lucide-react';
-import { CLIP } from '@/constants/styles';
+import { CLIP, FONT, TEXT } from '@/constants/styles';
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -67,6 +67,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Wstrzymanie licznika na czas najechania/fokusu: komunikat, który właśnie
+  // czytasz, nie ma znikać spod kursora.
+  const pauseToast = useCallback((id: string) => {
+    const timer = timers.current.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      timers.current.delete(id);
+    }
+  }, []);
+
+  const resumeToast = useCallback((id: string, duration: number) => {
+    if (duration <= 0 || timers.current.has(id)) return;
+    timers.current.set(id, setTimeout(() => removeToast(id), Math.min(duration, 3000)));
+  }, [removeToast]);
+
   const showSuccess = useCallback((msg: ReactNode, dur?: number) => addToast(msg, 'success', dur), [addToast]);
   const showError   = useCallback((msg: ReactNode, dur?: number) => addToast(msg, 'error',   dur), [addToast]);
   const showInfo    = useCallback((msg: ReactNode, dur?: number) => addToast(msg, 'info',    dur), [addToast]);
@@ -74,7 +89,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast, showSuccess, showError, showInfo }}>
       {children}
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      <ToastContainer toasts={toasts} removeToast={removeToast} pauseToast={pauseToast} resumeToast={resumeToast} />
     </ToastContext.Provider>
   );
 }
@@ -89,14 +104,22 @@ export function useToast(): ToastContextValue {
 interface ToastContainerProps {
   toasts: ToastItem[];
   removeToast: (id: string) => void;
+  pauseToast: (id: string) => void;
+  resumeToast: (id: string, duration: number) => void;
 }
 
-function ToastContainer({ toasts, removeToast }: ToastContainerProps) {
+function ToastContainer({ toasts, removeToast, pauseToast, resumeToast }: ToastContainerProps) {
   if (toasts.length === 0) return null;
   return (
     <div className="toast-stack">
       {toasts.map(toast => (
-        <Toast key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />
+        <Toast
+          key={toast.id}
+          toast={toast}
+          onClose={() => removeToast(toast.id)}
+          onPause={() => pauseToast(toast.id)}
+          onResume={() => resumeToast(toast.id, toast.duration)}
+        />
       ))}
     </div>
   );
@@ -150,10 +173,24 @@ const STYLES: Record<ToastType, ToastStyle> = {
   },
 };
 
-function Toast({ toast, onClose }: { toast: ToastItem; onClose: () => void }) {
+interface ToastProps {
+  toast: ToastItem;
+  onClose: () => void;
+  onPause: () => void;
+  onResume: () => void;
+}
+
+function Toast({ toast, onClose, onPause, onResume }: ToastProps) {
   const s = STYLES[toast.type] ?? STYLES.info;
   return (
-    <div role="alert" className="accent-top glass-surface" style={{
+    <div
+      role={toast.type === 'error' ? 'alert' : 'status'}
+      className="accent-top glass-surface"
+      onMouseEnter={onPause}
+      onMouseLeave={onResume}
+      onFocus={onPause}
+      onBlur={onResume}
+      style={{
       /* `backgroundColor`, nie skrót `background`: skrót kasuje warstwy
          refleksu i ziarna wniesione klasą `.glass-surface`. */
       backgroundColor: s.bg,
@@ -172,7 +209,7 @@ function Toast({ toast, onClose }: { toast: ToastItem; onClose: () => void }) {
           {s.icon}
           {/* Etykieta była większa (0.82rem) od samej treści (0.75rem) —
               odwrócona hierarchia w komunikacie. */}
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.8125rem', letterSpacing: 'normal', color: s.accent, textTransform: 'none' }}>
+          <span style={{ ...FONT.display(TEXT.small), color: s.accent, textTransform: 'none' }}>
             {s.prefix}
           </span>
         </div>
@@ -180,7 +217,7 @@ function Toast({ toast, onClose }: { toast: ToastItem; onClose: () => void }) {
         {/* Message */}
         <p style={{
           flex: 1, margin: 0,
-          fontFamily: 'var(--font-mono)', fontSize: '0.875rem',
+          ...FONT.mono(TEXT.base),
           color: 'var(--co-toast-text)', lineHeight: 1.5,
         }}>
           {toast.message}

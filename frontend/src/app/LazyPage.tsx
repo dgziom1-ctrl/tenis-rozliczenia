@@ -1,15 +1,18 @@
 import { Component, Suspense } from 'react';
 import type { ComponentType, LazyExoticComponent, ReactNode } from 'react';
 import { isStaleBuildError, recoverFromStaleBuild } from '@/utils/bootRecovery';
-import { CLIP } from '@/constants/styles';
+import { CLIP, FONT, TEXT } from '@/constants/styles';
+import { PageSkeleton } from '@/components/common/LoadingSkeleton';
 
 // Pusty fallback zamiast spinnera: strony ładują się z tego samego bundla w
 // ułamku sekundy, a migający placeholder byłby bardziej widoczny niż samo
 // oczekiwanie.
 // Rezerwuje wysokość, żeby dokument nie zapadał się na czas pobierania paczki
 // (inaczej dolny pasek nawigacji przeskakiwał przy pierwszym wejściu w zakładkę).
+// Szkielet kart (zamiast pustego miejsca) pokazuje, że coś się wczytuje, i nie
+// zmienia układu po pojawieniu się treści.
 function PageFallback() {
-  return <div aria-hidden="true" style={{ minHeight: '70vh' }} />;
+  return <PageSkeleton />;
 }
 
 /**
@@ -74,7 +77,7 @@ class RouteErrorBoundary extends Component<RouteErrorProps, RouteErrorState> {
       return (
         <p role="status" style={{
           padding: '24px 20px', textAlign: 'center', margin: 0,
-          fontFamily: 'var(--font-mono)', fontSize: '0.8125rem',
+          ...FONT.mono(TEXT.small),
           letterSpacing: 'normal', color: 'var(--co-dim)',
         }}>
           Naprawiam i przeładowuję...
@@ -97,7 +100,7 @@ class RouteErrorBoundary extends Component<RouteErrorProps, RouteErrorState> {
           Nie udało się otworzyć tej zakładki
         </p>
         <p style={{
-          margin: '6px 0 16px', fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+          margin: '6px 0 16px', ...FONT.mono(TEXT.tiny),
           color: 'var(--co-dim)', letterSpacing: 'normal', lineHeight: 1.6,
         }}>
           {offline

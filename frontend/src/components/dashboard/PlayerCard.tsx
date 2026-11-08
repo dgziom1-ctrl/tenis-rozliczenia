@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
 import type { KeyboardEvent, PointerEvent } from 'react';
-import { CheckCircle2, TriangleAlert } from 'lucide-react';
+import { CheckCircle2, Pencil, TriangleAlert } from 'lucide-react';
 import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, rankTint } from '@/constants';
-import { FONT, CLIP } from '../../constants/styles';
+import { FONT, CLIP, TEXT } from '../../constants/styles';
 import { formatAmountShort } from '@/utils/format';
 import { BLIK_NUMBER } from '@/utils/blik';
 import { makeId } from '@/utils/id';
@@ -348,7 +348,7 @@ function PlayerCard({
         position: 'relative', zIndex: 1,
       }}>
         <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: '0.75rem',
+          ...FONT.mono(TEXT.tiny),
           color: (!isOrganizer && isPending) ? `${c.border}99` : hasCredit ? 'var(--co-green)' : 'var(--co-dim)',
           letterSpacing: 'normal', textTransform: 'none',
         }}>
@@ -359,7 +359,7 @@ function PlayerCard({
             : '↑ Nadpłata'}
         </span>
         <span style={{
-          fontFamily: 'var(--font-display)', fontSize: '0.75rem',
+          ...FONT.display(TEXT.tiny),
           color: rank.hex, letterSpacing: 'normal',
         }}>{RARITY_LABEL[meta.rarity]}</span>
       </div>
@@ -409,7 +409,7 @@ function PlayerCard({
               <span style={{ ...FONT.monoLabel }}>
                 Obecność
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>
+              <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
                 {meta.attendanceCount}/{meta.eligibleWeeks}
               </span>
             </div>
@@ -489,12 +489,12 @@ function PlayerCard({
 
             {hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
+                <div style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
                   ↑ Nadpłata
                 </div>
                 <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-green)', margin: 0, lineHeight: 1 }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
+                  <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
                 </p>
               </div>
             ) : (
@@ -506,16 +506,35 @@ function PlayerCard({
                   textShadow: isPending ? 'var(--glow-rose-md)' : 'var(--glow-cyan-md)',
                 }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
+                  <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
                 </p>
               </div>
             )}
             {adminMode && (
-              <p style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-rose)', letterSpacing: 'normal', marginTop: 4, position: 'relative', zIndex: 1 }}>
+              <p style={{ display: 'inline-flex', alignItems: 'center', gap: 4, ...FONT.mono(TEXT.tiny), color: 'var(--co-rose)', letterSpacing: 'normal', marginTop: 4, position: 'relative', zIndex: 1 }}>
                 <TriangleAlert size={12} aria-hidden="true" /> Tryb edycji
               </p>
             )}
           </div>
+
+          {/* Widoczna ścieżka do trybu edycji wpłat — dotąd tylko pięć kliknięć
+              w kwotę (nieodkrywalne) albo Enter na kwocie (łatwo przypadkowy). */}
+          <button
+            type="button"
+            onClick={toggleAdminMode}
+            aria-pressed={adminMode}
+            className="icon-btn"
+            style={{
+              alignSelf: 'flex-end', display: 'inline-flex', alignItems: 'center', gap: 6,
+              minHeight: 44, padding: '6px 10px', marginBottom: 6,
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              color: adminMode ? 'var(--co-rose)' : 'var(--co-dim)',
+              ...FONT.mono(TEXT.small),
+            }}
+          >
+            <Pencil size={13} aria-hidden="true" />
+            {adminMode ? 'Zakończ edycję wpłat' : 'Edytuj wpłaty'}
+          </button>
 
           <BreakdownPanel
             playerName={player.name}
@@ -533,7 +552,6 @@ function PlayerCard({
                 secondsLeft={secondsLeft}
                 progressPct={progressPct}
                 onUndo={handleUndo}
-                buttonLabel="cofnij"
                 compact
               />
             </div>
@@ -600,7 +618,7 @@ function PlayerCard({
                     onConfirm={() => void savePayment(debt)}
                     onKeyboardRequest={() => setConfirmSettle(true)}
                   />
-                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', minHeight: 44 }} aria-label="+ Inna kwota — wpłać dowolną kwotę">
+                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', minHeight: 44 }}>
                     + Inna kwota
                   </button>
                 </>
@@ -644,33 +662,33 @@ function PlayerCard({
           >
             {hasCredit ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
+                <div style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
                   ↑ Do zebrania
                 </div>
                 <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-green)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-green-md)' }}>
                   +{formatAmountShort(animatedAbs)}
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
+                  <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
                 </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-green)', letterSpacing: 'normal', margin: '4px 0 0' }}>
+                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-green)', letterSpacing: 'normal', margin: '4px 0 0' }}>
                   suma wpłat do zebrania od graczy
                 </p>
               </div>
             ) : isPending ? (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: 'normal', marginBottom: 2 }}>
+                <div style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-cyan)', letterSpacing: 'normal', marginBottom: 2 }}>
                   ↕ Saldo
                 </div>
                 <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-cyan)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-md)' }}>
                   {formatAmountShort(animatedAbs)}
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
+                  <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
                 </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-cyan)', letterSpacing: 'normal', margin: '4px 0 0' }}>
+                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-cyan)', letterSpacing: 'normal', margin: '4px 0 0' }}>
                   nadwyżka ponad zaległości
                 </p>
               </div>
             ) : (
               <div style={{ position: 'relative', zIndex: 1 }}>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--co-green)', margin: 0, letterSpacing: 'normal', textShadow: 'var(--glow-green-md)' }}>
+                <p style={{ ...FONT.display(TEXT.h2), color: 'var(--co-green)', margin: 0, letterSpacing: 'normal', textShadow: 'var(--glow-green-md)' }}>
                   ✓ Wszyscy rozliczeni
                 </p>
               </div>
@@ -695,5 +713,5 @@ function PlayerCard({
 }
 
 /* Design system hooks (kept for lint:css reachability):
-   status-chip neon-status-debt neon-status-credit neon-status-multisport neon-status-streak */
+   status-chip */
 export default memo(PlayerCard);

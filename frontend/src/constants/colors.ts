@@ -56,8 +56,17 @@ function colorForHue(hue: number, luminanceTarget: number): PlayerColor {
 
   const rgb = hslToRgb(hue, SATURATION, (low + high) / 2);
   const border = `#${rgb.map(toHex).join('')}`;
-  return { bg: `${border}18`, border, text: border };
+  // Kolor tożsamości (pasek, ramka, awatar) zostaje stały — jedna luminancja
+  // nie da 4,5:1 jednocześnie na ciemnym panelu i na bieżącym tle jasnego
+  // motywu (ok. 3,8–4,5:1 i 4,2–5,0:1). Tekst dostaje więc ten sam odcień
+  // domieszany do `--co-text-hi`, który w ciemnym motywie jest jasny, a w
+  // jasnym ciemny — kontrast rośnie w obu, a barwa nadal jest rozpoznawalna.
+  const text = `color-mix(in srgb, ${border} ${TEXT_TINT_PERCENT}%, var(--co-text-hi))`;
+  return { bg: `${border}18`, border, text };
 }
+
+/** Ile koloru gracza zostaje w tekście (reszta to `--co-text-hi`). */
+export const TEXT_TINT_PERCENT = 62;
 
 const COLOR_CANDIDATES = TARGET_LUMINANCE.flatMap((luminance, variant) =>
   Array.from({ length: HUE_COUNT }, (_, hue) => ({

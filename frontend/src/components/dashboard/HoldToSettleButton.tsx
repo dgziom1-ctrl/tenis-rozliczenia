@@ -149,7 +149,7 @@ export default function HoldToSettleButton({ amount, disabled = false, onConfirm
         onKeyUp={handleKeyUp}
         onBlur={() => cancelHold()}
         disabled={disabled}
-        aria-label={`${formatAmountShort(amount)} zł ${sublabel}. Na klawiaturze naciśnij Enter, aby potwierdzić.`}
+        aria-label={`${formatAmountShort(amount)} zł — zapisz wpłatę`}
         aria-describedby={describedBy}
         style={{ padding: '10px 16px', width: '100%' }}
       >

@@ -5,7 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { MODAL_EXIT_MS, REDUCED_MOTION_MODAL_EXIT_MS } from '@/constants';
-import { FONT, TEXT, TRACK } from '@/constants/styles';
+import { FONT, TEXT } from '@/constants/styles';
 import { lockScroll, unlockScroll } from '@/utils/scrollLock';
 import type { StyleWithVars } from '@/types/css';
 
@@ -395,7 +395,7 @@ export default function Modal({
           {title && (
             <div className="modal-head">
               {Icon && <Icon size={16} style={{ color: accent, flexShrink: 0 }} aria-hidden="true" />}
-              <h2 id={titleId} style={{ ...FONT.display(TEXT.lead, TRACK.normal), color: accent, margin: 0, flex: 1 }}>
+              <h2 id={titleId} style={{ ...FONT.display(TEXT.lead), color: accent, margin: 0, flex: 1 }}>
                 {title}
               </h2>
               <button

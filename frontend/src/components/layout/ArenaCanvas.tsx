@@ -13,6 +13,13 @@ type Projected = [number, number, number];
 /** Funkcje rysujące czytają wyłącznie X i Y, więc przyjmują też punkty rzutowane. */
 type ScreenPoint = readonly [number, number, ...number[]];
 
+/** Dolna granica odstępu między klatkami (≈ 40 fps na 120 Hz, 30 fps na 60 Hz). */
+const MIN_FRAME_MS = 21;
+
+/** Na dotykowych ekranach poświata jest o połowę lżejsza — najdroższa część klatki. */
+const SHADOW_SCALE =
+  typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches ? 0.5 : 1;
+
 export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: ArenaCanvasProps) {
   const ref = useRef<HTMLCanvasElement>(null);
   const raf = useRef<number | null>(null);
@@ -271,7 +278,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
 
       /* Ball sphere */
       g.save();
-      g.shadowBlur = 13 * bq[2] * (1 + impact * 0.6);
+      g.shadowBlur = 13 * bq[2] * (1 + impact * 0.6) * SHADOW_SCALE;
       g.shadowColor = rgba(P.white, Math.min(1, 0.86 + 0.18 * impact));
       const bg = g.createRadialGradient(bq[0]-bR*.3,bq[1]-bR*.3,0, bq[0],bq[1],bR);
       bg.addColorStop(0, P.ballCore); bg.addColorStop(.46, P.ballMid); bg.addColorStop(1, P.ballEdge);
@@ -363,7 +370,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
 
       /* Layer 1: outer glow halo */
       g.save();
-      g.shadowBlur  = (hitting ? 20 : 8) * impactK;
+      g.shadowBlur  = (hitting ? 20 : 8) * impactK * SHADOW_SCALE;
       g.shadowColor = hitting
         ? rgba(P.accent, 0.90 + 0.15 * impact)
         : rgba(P.glowIdle, 0.40 + 0.08 * impact);
@@ -403,10 +410,16 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       g.lineCap = 'butt'; g.restore();
     };
 
+    // Cykl jest liczony z czasu, nie z liczby klatek, więc ograniczenie do
+    // ok. 30–40 fps nie zmienia tempa gry — tylko oszczędza pracę na ekranach
+    // 90/120 Hz (shadowBlur i gradienty radialne liczą się co klatkę).
+    let lastDrawTs = 0;
     const loop = (ts: number) => {
-      if (!t0.current) t0.current = ts;
-      draw(((ts - t0.current) % CYCLE) / CYCLE, ts);
       raf.current = requestAnimationFrame(loop);
+      if (!t0.current) t0.current = ts;
+      if (ts - lastDrawTs < MIN_FRAME_MS) return;
+      lastDrawTs = ts;
+      draw(((ts - t0.current) % CYCLE) / CYCLE, ts);
     };
 
     const startLoop = () => {

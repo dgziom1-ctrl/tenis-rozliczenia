@@ -4,11 +4,12 @@ import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
 import { PanelHeader, FieldGroup } from '../common/SharedUI';
 import { addSession } from '@/lib/firebase';
 import { TABS, SOUND_TYPES, SPORT, SPORT_ACCUSATIVE, RACKET_PRICE, MULTISPORT_DISCOUNT, hasRacketRental } from '@/constants';
-import { CLIP, CONTENT_WIDTH } from '@/constants/styles';
+import { CLIP, CONTENT_WIDTH, FONT, TEXT } from '@/constants/styles';
 import { useToast } from '../common/Toast';
 import { InlineSpinner } from '../common/LoadingSkeleton';
 import { parseAmount, isValidAmount, plural } from '@/utils/format';
 import { todayISO } from '@/utils/id';
+import { costError, racketPriceError } from '@/utils/costMessages';
 import { getMaxMulti, getMultisportPerCourtHour, getRacketSelection, getTotalWithRackets } from '@/utils/sessionCost';
 import { getLastSessionDefaults } from '@/utils/sessions';
 import type { Sport } from '@/types/domain';
@@ -34,7 +35,7 @@ interface AdminTabProps {
 }
 
 export default function AdminTab({ playerNames, defaultMultiPlayers, history, players, setActiveTab, playSound }: AdminTabProps) {
-  const { showError } = useToast();
+  const { showError, showInfo } = useToast();
 
   const today = todayISO();
   const [sport,             setSport]             = useState<Sport>(SPORT.PINGPONG as Sport);
@@ -63,6 +64,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
   const totalCostId      = useId();
   const totalCostErrorId = useId();
   const racketPriceId    = useId();
+  const racketPriceErrorId = useId();
 
   const withRackets = hasRacketRental(sport);
   const {
@@ -78,9 +80,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
   const parsedTotalCost = parseAmount(totalCost);
   const isCostValid = isValidAmount(parsedTotalCost, 0);
   const isPresentValid = presentPlayers.length > 0;
-  const totalCostError = isCostValid
-    ? null
-    : (totalCost === '' ? 'Wpisz koszt sesji żeby kontynuować' : 'Koszt musi być liczbą >= 0');
+  const totalCostError = isCostValid ? null : costError(totalCost);
+  const racketPriceMsg = withRackets ? racketPriceError(racketPriceText) : null;
 
   // Limit kart MultiSport: korty × godziny × limit/sport.
   const perCourtHour = getMultisportPerCourtHour(sport);
@@ -139,6 +140,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
     if (isSaving) return;
     if (!isPresentValid) { showError('Zaznacz co najmniej jednego gracza'); return; }
     if (!isCostValid) { showError(totalCostError || 'Wpisz poprawny koszt sesji'); return; }
+    if (racketPriceMsg) { showError(racketPriceMsg); return; }
     if (isDuplicateDate) { showError('Sesja z tą datą i sportem już istnieje'); return; }
     setIsSaving(true);
     const courtAmount = parsedTotalCost;
@@ -197,11 +199,23 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
       setPresentPlayers([...presentPlayers]);
       setMultisportPlayers(multisportPlayers.filter(p => presentPlayers.includes(p)));
     } finally { setIsSaving(false); }
-  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, parsedTotalCost, sport, withRackets, racketCost, players, history, courtCount, durationHours]);
+  }, [isSaving, datePlayed, presentPlayers, multisportPlayers, ownRacketPlayers, playSound, showError, isDuplicateDate, isPresentValid, isCostValid, totalCostError, racketPriceMsg, parsedTotalCost, sport, withRackets, racketCost, players, history, courtCount, durationHours]);
 
   const handleSummaryClose = useCallback(() => { setSavedSummary(null); setActiveTab(TABS.DASHBOARD); }, [setActiveTab]);
 
-  const isDisabled = isSaving || !isPresentValid || !isCostValid || isDuplicateDate;
+  const isDisabled = isSaving || !isPresentValid || !isCostValid || isDuplicateDate || racketPriceMsg !== null;
+
+  // Zmiana sportu zachowuje wpisaną kwotę kortu; rakietki czyścimy tylko wtedy,
+  // gdy nowy sport ich nie wypożycza — i mówimy o tym użytkownikowi.
+  const handleSportChange = (next: Sport) => {
+    setSport(next);
+    if (hasRacketRental(next)) return;
+    const hadRacketData = racketCount > 0 || ownRacketPlayers.length > 0 || racketPrice !== RACKET_PRICE;
+    setRacketCount(0);
+    setRacketPrice(RACKET_PRICE);
+    setOwnRacketPlayers([]);
+    if (hadRacketData) showInfo('Zmieniono sport — wyczyszczono ustawienia rakietek');
+  };
 
   return (
     <>
@@ -223,7 +237,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
             {/* Sport */}
             <div>
               <FieldLabel>Sport</FieldLabel>
-              <SportSelector value={sport} onChange={(s) => { setSport(s); setTotalCost(''); setRacketCount(0); setRacketPrice(RACKET_PRICE); setOwnRacketPlayers([]); }} />
+              <SportSelector value={sport} onChange={handleSportChange} />
             </div>
 
             {/* Korty + godziny */}
@@ -240,7 +254,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                     </ToggleChip>
                   ))}
                 </div>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
+                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6 }}>
                   Limit kart: {maxMulti} ({perCourtHour}/kort/h)
                 </p>
               </div>
@@ -256,7 +270,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                     </ToggleChip>
                   ))}
                 </div>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 6 }}>
+                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6 }}>
                   {durationHours > 1 ? `${durationHours}h × ` : ''}{perCourtHour}/kort/h = {maxMulti} {plural(maxMulti, 'karta', 'karty', 'kart')}
                 </p>
               </div>
@@ -267,7 +281,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
               <FieldLabel>Data gry</FieldLabel>
               <CyberDateInput label="Data gry" value={datePlayed} onChange={setDatePlayed} />
               {isDuplicateDate && (
-                <p role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', color: 'var(--co-amber)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <p role="alert" style={{ ...FONT.display(TEXT.base), color: 'var(--co-amber)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                   ⚠ Sesja z tą datą i tym sportem już istnieje
                 </p>
               )}
@@ -275,8 +289,8 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
 
             {/* Cost */}
             <div>
-              <FieldLabel htmlFor={totalCostId}>Zapłacone za kort (zł)</FieldLabel>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', margin: '0 0 8px' }}>
+              <FieldLabel htmlFor={totalCostId}>Koszt kortu (zł)</FieldLabel>
+              <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '0 0 8px' }}>
                 Kwota za kort po odliczeniu kart Multisport. Rakiety doliczysz osobno niżej.
               </p>
               <input id={totalCostId} type="text" inputMode="decimal" value={totalCost} onChange={e => setTotalCost(e.target.value)}
@@ -289,7 +303,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                 required
               />
               {costTouched && !isCostValid && (
-                <p id={totalCostErrorId} role="alert" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-rose)', marginTop: 8 }}>
+                <p id={totalCostErrorId} role="alert" style={{ ...FONT.display(TEXT.base), color: 'var(--co-rose)', marginTop: 8 }}>
                   ⚠ {totalCostError}
                 </p>
               )}
@@ -303,12 +317,12 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
             >
               <PlayerToggleGrid names={playerNames || []} selected={presentPlayers} onToggle={togglePresent} accent="yellow" />
               {sessionDefaults && (
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
+                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 8 }}>
                   Skład z ostatniej sesji — zmień, jeśli dziś gra ktoś inny
                 </p>
               )}
               {!isPresentValid && (
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', letterSpacing: 'normal', textTransform: 'none', color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
+                <p style={{ ...FONT.display(TEXT.base), color: 'var(--co-rose)', marginTop: 10, textAlign: 'center' }}>
                   ⚠ Wybierz przynajmniej jednego gracza
                 </p>
               )}
@@ -336,7 +350,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                 counterColor="var(--co-amber)"
               >
                 <PlayerToggleGrid names={presentPlayers} selected={ownRacketPlayers} onToggle={toggleOwnRacket} accent="amber" />
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
+                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 8 }}>
                   Zaznacz graczy, którzy przynieśli własną rakietkę — nie płacą za wypożyczenie
                 </p>
               </FieldGroup>
@@ -352,7 +366,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
 
                 {/* Price per racket */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <label htmlFor={racketPriceId} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
+                  <label htmlFor={racketPriceId} style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
                     Cena / szt.:
                   </label>
                   <input
@@ -361,28 +375,35 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                     inputMode="decimal"
                     value={racketPriceText}
                     onChange={e => { setRacketPriceText(e.target.value); setRacketPriceValue(parseAmount(e.target.value) || 0); }}
-                    className="cyber-input"
+                    aria-invalid={racketPriceMsg !== null}
+                    aria-describedby={racketPriceMsg ? racketPriceErrorId : undefined}
+                    className={racketPriceMsg ? 'cyber-input input-error' : 'cyber-input'}
                     style={{
                       width: 78, padding: '8px', textAlign: 'center',
                       fontFamily: 'var(--font-mono)',
                       clipPath: CLIP.badge,
                     }}
                   />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)' }}>zł</span>
+                  <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>zł</span>
                   {parsedRacketPrice !== RACKET_PRICE && (
                     <button
                       type="button"
                       onClick={() => setRacketPrice(RACKET_PRICE)}
                       style={{
-                        fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)',
+                        ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)',
                         background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-                        padding: '2px 8px', clipPath: CLIP.badge,
+                        padding: '2px 8px', minHeight: 44, clipPath: CLIP.badge,
                       }}
                     >
                       Przywróć {RACKET_PRICE} zł
                     </button>
                   )}
                 </div>
+                {racketPriceMsg && (
+                  <p id={racketPriceErrorId} role="alert" style={{ ...FONT.display(TEXT.base), color: 'var(--co-rose)', margin: '0 0 10px' }}>
+                    ⚠ {racketPriceMsg}
+                  </p>
+                )}
 
                 {/* Racket count buttons */}
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -396,7 +417,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                   ))}
                 </div>
                 {effectiveRacketCount > 0 && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', marginTop: 8 }}>
+                  <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 8 }}>
                     Koszt {effectiveRacketCount} × {parsedRacketPrice} zł dzielony między graczy bez własnej rakietki
                   </p>
                 )}
@@ -425,7 +446,7 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, history, pl
                   : <><CheckCircle2 size={16} /> Zapisz sesję</>}
               </button>
               {!isSaving && isDisabled && (
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--co-dim)', textAlign: 'center', marginTop: 8 }}>
+                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', textAlign: 'center', marginTop: 8 }}>
                   {isDuplicateDate ? '⚠ Zmień datę lub sport — sesja już istnieje' : !isCostValid ? totalCostError : 'Zaznacz co najmniej jednego gracza'}
                 </p>
               )}

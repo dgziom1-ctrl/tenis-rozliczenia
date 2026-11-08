@@ -1,6 +1,6 @@
 import { Trash2 } from 'lucide-react';
 import type { PlayerColor } from '@/types/ui';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
 import { PlayerAvatar } from '../dashboard/PlayerAvatar';
 
 interface PlayerProfileCardProps {
@@ -29,7 +29,7 @@ export default function PlayerProfileCard({ player, playerColor, onDelete, isOrg
 
       {/* Name */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ ...FONT.display(TEXT.base, TRACK.tight), color: 'var(--co-text-hi)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ ...FONT.display(TEXT.base), color: 'var(--co-text-hi)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {player.name}
         </p>
       </div>
@@ -57,7 +57,7 @@ export default function PlayerProfileCard({ player, playerColor, onDelete, isOrg
           <Trash2 size={16} aria-hidden="true" />
         </button>
       ) : (
-        <span style={{ ...FONT.display(TEXT.tiny, TRACK.normal), color: 'var(--co-dim)', padding: '4px 8px', border: '1px solid var(--co-border)', clipPath: CLIP.badge }}>
+        <span style={{ ...FONT.display(TEXT.tiny), color: 'var(--co-dim)', padding: '4px 8px', border: '1px solid var(--co-border)', clipPath: CLIP.badge }}>
           HQ
         </span>
       )}

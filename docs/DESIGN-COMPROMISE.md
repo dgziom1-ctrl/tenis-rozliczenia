@@ -53,7 +53,7 @@ też wykładnię.
 **Jedyna widoczna zmiana (z PR #14): zdania zamiast wersalików.**
 
 - Koniec z `text-transform: uppercase` w całym CSS i TSX.
-- `TRACK.* = 'normal'`, `FONT.display()` i `FONT.monoLabel` bez trackingu.
+- `FONT.display()` i `FONT.monoLabel` bez trackingu (`letterSpacing: 'normal'`; stała `TRACK` została usunięta jako martwa abstrakcja).
 - Wersalikowe stringi w copy → zdania (`START` → `Start`,
   `PODSUMOWANIE ROKU` → `Podsumowanie roku`, `PRZYTRZYMAJ DŁUŻEJ` →
   `Przytrzymaj dłużej`).
@@ -105,7 +105,7 @@ Zmiana nie jest tylko kosmetycznym „na razie tak". Ma dwie blokady:
    CSS/TS/TSX. Uruchamiane przez `npm run verify` → `audit:design`.
 2. **`src/__tests__/designFloor.test.jsx`** — test regresyjny sprawdza, że
    `FONT.display()` dla każdego rozmiaru ma `textTransform: 'none'`,
-   `letterSpacing: 'normal'`, a wszystkie wartości `TRACK` są `'normal'`.
+   `letterSpacing: 'normal'`, a `FONT.display()` zawsze zwraca `'normal'`.
 
 Reguła **6** w tym samym audycie pilnuje krojów z Cyberpunka (brak CDN,
 wymagane importy `@fontsource`, obecność `--font-tech`).
@@ -121,7 +121,7 @@ To jedna decyzja, nie revert całego PR:
 1. `index.css`: `text-transform: none` → `uppercase` w 7 regułach,
    `letter-spacing: normal` → dawne wartości, `--font-display` → Bebas Neue
    (trzeba go wtedy z powrotem zainstalować — patrz `CYBERPUNK-FONT.md`).
-2. `constants/styles.ts`: przywrócić `TRACK` i `displayTracking()`.
+2. `constants/styles.ts`: przywrócić `TRACK` i parametr odstępu w `FONT.display()` (obie rzeczy zostały usunięte po kompromisie).
 3. Usunąć regułę 5 z `audit-design.mjs` i test z `designFloor.test.jsx`.
 4. Zaktualizować `DESIGN.md` i ten plik.
 

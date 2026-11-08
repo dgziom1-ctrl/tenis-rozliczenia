@@ -2,7 +2,7 @@ import { CircleHelp, CheckCircle2, HandCoins } from 'lucide-react';
 import Modal from './Modal';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { BLIK_NUMBER } from '@/utils/blik';
-import { FONT, TEXT, TRACK } from '@/constants/styles';
+import { FONT, TEXT } from '@/constants/styles';
 
 interface FirstRunGuideProps {
   open: boolean;
@@ -64,7 +64,7 @@ export default function FirstRunGuide({ open, onClose }: FirstRunGuideProps) {
       }}>
         <HandCoins size={18} aria-hidden="true" style={{ color: 'var(--co-amber)', flexShrink: 0, marginTop: 1 }} />
         <div>
-          <p style={{ ...FONT.display(TEXT.small, TRACK.normal), color: 'var(--co-amber)', margin: 0 }}>
+          <p style={{ ...FONT.display(TEXT.small), color: 'var(--co-amber)', margin: 0 }}>
             Aby zapisać wpłatę, przytrzymaj przycisk z kwotą
           </p>
           <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '4px 0 0', lineHeight: 1.55 }}>
@@ -77,7 +77,7 @@ export default function FirstRunGuide({ open, onClose }: FirstRunGuideProps) {
         <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: 0 }}>
           Przelew BLIK wykonujesz sam w banku na numer:
         </p>
-        <p style={{ ...FONT.mono(TEXT.base), color: 'var(--co-cyan)', margin: '4px 0 0', letterSpacing: TRACK.normal }}>
+        <p style={{ ...FONT.mono(TEXT.base), color: 'var(--co-cyan)', margin: '4px 0 0', letterSpacing: 'normal' }}>
           {BLIK_NUMBER}
         </p>
       </div>

@@ -194,7 +194,7 @@ inaczej wraca do Space Mono (fallback BLIK to komunikat, nie numer).
 nałożyłaby na pochyły krój drugie, sztuczne pochylenie.
 
 **Zdania, nie wersaliki.** Zakaz `text-transform: uppercase` i trackingu
-etykiet (`TRACK.* = 'normal'`). Hierarchię buduje rozmiar i waga, nie
+etykiet (`letterSpacing: 'normal'`, `FONT.display()` nie przyjmuje odstępu). Hierarchię buduje rozmiar i waga, nie
 rozstrzelone litery. Wyjątek: wielkie litery w logo wynikają z treści znaku
 `CYBER-PONK`, nie ze stylu tekstu. Regułę egzekwuje `audit:design` (reguła 5)
 i test w `designFloor.test.jsx`; brak CDN i obecność krojów sprawdza reguła 6.

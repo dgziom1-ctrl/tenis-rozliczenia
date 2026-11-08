@@ -1,6 +1,6 @@
 import { RotateCcw } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { FONT, TEXT, TRACK, CLIP } from '@/constants/styles';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
 
 export interface UndoBarProps {
   message: ReactNode;
@@ -39,7 +39,7 @@ export default function UndoBar({ message, secondsLeft, progressPct, onUndo, but
 
       {/* Message */}
       <span style={{
-        ...(compact ? FONT.mono(TEXT.small) : FONT.display(TEXT.small, TRACK.tight)),
+        ...(compact ? FONT.mono(TEXT.small) : FONT.display(TEXT.small)),
         color: 'var(--co-text)',
         display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flexWrap: 'wrap',
       }}>

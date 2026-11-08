@@ -2,7 +2,7 @@ import { useMemo, useState, useId } from 'react';
 import { X } from 'lucide-react';
 import { RANKS, getRank, rankTint } from '@/constants';
 import RankGlyph from '../common/icons/RankGlyph';
-import { FONT, TEXT, TRACK, CLIP } from '../../constants/styles';
+import { FONT, TEXT, CLIP } from '../../constants/styles';
 import { formatDate } from '@/utils/format';
 import { getPlayerAchievements } from '@/utils/achievements';
 import { filterHistorySinceJoin } from '@/utils/playerHistory';
@@ -90,10 +90,10 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
         }}>
           <PlayerAvatar name={player.name} color={c} size={44} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p id={titleId} style={{ ...FONT.display(TEXT.h3, TRACK.tight), color: 'var(--co-text-hi)', margin: 0, lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p id={titleId} style={{ ...FONT.display(TEXT.h3), color: 'var(--co-text-hi)', margin: 0, lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {player.name}
             </p>
-            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: TRACK.normal }}>
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '4px 0 0', letterSpacing: 'normal' }}>
               {scopeLabel} · {player.attendanceCount}/{player.eligibleWeeks} sesji · {player.attendancePercentage}% frekwencja
             </p>
           </div>
@@ -119,11 +119,11 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
         }}>
           {[
             { label: 'Sesje', value: sessions.length, color: c.border },
-            { label: 'Opuszczone', value: missedSessions.length, color: 'var(--co-dim)' },
+            { label: 'Nieobecne', value: missedSessions.length, color: 'var(--co-dim)' },
             { label: 'Seria', value: currentStreak, color: currentStreak > 2 ? 'var(--co-cyan)' : 'var(--co-dim)' },
           ].map(stat => (
             <div key={stat.label} style={{ padding: '12px 8px', textAlign: 'center', background: 'var(--co-panel)' }}>
-              <p style={{ ...FONT.display(TEXT.h2, TRACK.tight), color: stat.color, margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-sm)' }}>
+              <p style={{ ...FONT.display(TEXT.h2), color: stat.color, margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-sm)' }}>
                 {stat.value}
               </p>
               <p style={{ ...FONT.monoLabel, margin: '4px 0 0' }}>
@@ -145,7 +145,7 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
           return (
             <div style={{ padding: '10px 16px', borderBottom: `1px solid ${c.border}15`, background: rankTint(currentRank, 2) }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ ...FONT.display(TEXT.base, TRACK.tight), color: currentRank.hex, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ ...FONT.display(TEXT.base), color: currentRank.hex, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                   <RankGlyph rank={currentRank} size={14} /> {currentRank.name}
                   {!seasonLabel && (
                     <span style={{ ...FONT.monoMicro, color: 'var(--co-dim)', marginLeft: 6 }}>
@@ -277,7 +277,7 @@ export default function PlayerSessionModal({ player, playerColor, history, seaso
                 </span>
                 {/* Multi badge */}
                 {isMulti && (
-                  <span title="Multisport" style={{ ...FONT.display(TEXT.micro, TRACK.normal), color: 'var(--co-green)', padding: '1px 4px', border: '1px solid var(--co-green)', background: 'var(--co-tint-green)' }}>
+                  <span title="Multisport" style={{ ...FONT.display(TEXT.tiny), color: 'var(--co-green)', padding: '1px 4px', border: '1px solid var(--co-green)', background: 'var(--co-tint-green)' }}>
                     M+
                   </span>
                 )}

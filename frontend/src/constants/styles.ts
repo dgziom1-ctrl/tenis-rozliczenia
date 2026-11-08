@@ -13,12 +13,11 @@ export const CLIP = {
  *
  * Wcześniej w kodzie krążyły 33 różne rozmiary, w tym jedenaście w pasmie
  * 0.58–0.72rem — różnice rzędu 0,3 piksela, których nikt nie widzi, a każda
- * była osobną decyzją do utrzymania. `micro` to podłoga czytelności: niżej
+ * była osobną decyzją do utrzymania. `tiny` to podłoga czytelności: niżej
  * schodzą już tylko elementy dekoracyjne (kod kreskowy, znaczniki osi).
  */
 export const TEXT = {
-  micro: '0.75rem',   // 12px — etykiety pól, znaczniki (podłoga czytelności)
-  tiny: '0.75rem',    // 12px — alias dla czytelności wywołań
+  tiny: '0.75rem',    // 12px — etykiety pól, znaczniki (podłoga czytelności)
   small: '0.8125rem', // 13px — treść drugorzędna
   base: '0.875rem',   // 14px — treść podstawowa
   lead: '1rem',       // 16px — wyróżnienie, tytuł sekcji
@@ -26,17 +25,6 @@ export const TEXT = {
   h2: '1.5rem',       // 24px
   h1: '2rem',         // 32px
   hero: '2.5rem',     // 40px — kwoty i liczby-bohaterowie
-} as const;
-
-/**
- * KOMPROMIS: koniec z rozstrzelonymi wersalikami. Trzy stopnie skali
- * zostają jako nazwy (komponenty ich używają), ale wszystkie dają naturalny
- * odstęp — hierarchię buduje rozmiar i waga, nie tracking liter.
- */
-export const TRACK = {
-  tight: 'normal',
-  normal: 'normal',
-  wide: 'normal',
 } as const;
 
 /**
@@ -96,17 +84,12 @@ export const Z = {
   toast: 9000,
 } as const;
 
-function displayTracking(): string {
-  // Zdania bez trackingu. Parametr `size` pozostaje w sygnaturze, żeby
-  // wszystkie wywołania FONT.display(size) dalej się kompilowały.
-  return 'normal';
-}
-
 export const FONT = {
-  display: (size: string = TEXT.lead, spacing?: string): CSSProperties => ({
+  // Zdania bez trackingu — hierarchię buduje rozmiar i waga, nie odstęp liter.
+  display: (size: string = TEXT.lead): CSSProperties => ({
     fontFamily: 'var(--font-display)',
     fontSize: size,
-    letterSpacing: spacing ?? displayTracking(),
+    letterSpacing: 'normal',
     textTransform: 'none',
   }),
   mono: (size: string = TEXT.small): CSSProperties => ({
@@ -153,7 +136,7 @@ export const FONT = {
   /** Najmniejszy czytelny stopień — tylko dane techniczne. */
   monoMicro: {
     fontFamily: 'var(--font-mono)',
-    fontSize: TEXT.micro,
+    fontSize: TEXT.tiny,
     color: 'var(--co-dim)',
   } as CSSProperties,
 };
