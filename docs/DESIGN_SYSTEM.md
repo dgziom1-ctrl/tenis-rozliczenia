@@ -146,7 +146,7 @@ wyłącznie wektorów (Lucide + własne glyphy w `src/components/common/icons`).
 | `RankGlyph` | karta zawodnika, ranking, okno gracza, legenda rang | kolor z `rank.hex`, ikona z nazwy rangi |
 | `MedalGlyph` | podium (także remisy), Wrapped | złoto/srebro/brąz z tokenów |
 | `AchievementGlyph` | odznaki gracza | mapowanie po `id`, nie po emoji |
-| `BrandMark` | ekran startowy, pusty stan, favikona, baner PWA | ten sam kształt co `public/brand-mark.svg` |
+| `BrandMark` | ekran startowy, pusty stan, baner PWA, favikona | ten sam obraz `public/icon-512v3.png` w całej aplikacji; PWA ma dodatkowo wersję 192 px |
 
 **Emoji zostają tylko tam, gdzie są treścią, nie ikoną:** w wiadomości
 kopiowanej do czatu (`utils/message.ts`) i w konfetti po pięciu kliknięciach
