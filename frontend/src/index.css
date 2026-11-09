@@ -1,5 +1,12 @@
 /* Reset przeglądarki (dawniej generowany przez Tailwind preflight). Zostaje jako
-   zwykły CSS — Tailwind nie był już używany do niczego poza dwoma klasami. */
+   zwykły CSS — Tailwind nie był już używany do niczego poza dwoma klasami.
+
+   Reset siedzi w warstwie `reset`, czyli najniższej w kaskadzie. Wcześniej był
+   poza warstwami, więc elementowe reguły typu `button { color: inherit }` i
+   `button { background: transparent }` biły style komponentów z
+   `@layer utilities` — primary i outline traciły wypełnienie oraz kolor. */
+
+@layer reset {
 
 *,
 ::before,
@@ -295,6 +302,8 @@ video {
 [hidden]:where(:not([hidden="until-found"])) {
   display: none;
 }
+
+} /* @layer reset */
 
 /* ═══════════════════════════════════════════════════════════════════
    COLD OPERATOR  ·  Military-Hacker Cyberpunk
