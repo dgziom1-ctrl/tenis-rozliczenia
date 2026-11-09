@@ -1591,6 +1591,19 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
     0 18px 44px -30px rgba(0,0,0,0.9);
 }
 
+/* Telefon: nagłówek nie jest przyklejony, więc blur ma za sobą wyłącznie
+   statyczne tło strony — nic nie wnosi, a przy animowanym canvasie w środku
+   WebKit potrafi przeliczać odtwarzanie tła co klatkę. Bez blura podnosimy
+   krycie, żeby szkło zostało czytelne. */
+@media (pointer: coarse), (max-width: 639px), (max-height: 479px) {
+  .glass-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: var(--co-glass-hi);
+  }
+  body.theme-oled .glass-header { background-color: rgba(2,4,6,0.92); }
+}
+
 /* ── Mobilny nagłówek ─────────────────────────────────────────────
    Arena z odbijającą piłką to znak rozpoznawczy aplikacji, więc zostaje
    również na telefonie — w zmniejszonej skali. Pasek marki, akcje i osobny
@@ -1628,6 +1641,19 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
 }
 .header-hero-title.is-hitting::before { opacity: 1; }
 
+/* Poświata areny. Na desktopie filtr jest tani, ale nad animowanym canvasem
+   `drop-shadow` kazał WebKitowi rozmywać całą arenę od nowa przy każdej
+   klatce. Canvas rysuje własne poświaty, więc na telefonie rezygnujemy
+   z filtra — to była główna przyczyna zacięć animacji. */
+.header-hero-arena { filter: var(--glow-drop-cyan); }
+.header-hero-arena.is-chaos { filter: none; }
+
+/* Dotyk to nie tylko wąski telefon: tablet też ma coarse pointer, a filtr
+   nad animowanym canvasem jest tam równie kosztowny. */
+@media (pointer: coarse) {
+  .header-hero-arena { filter: none; }
+}
+
 /* Potwierdzenie skopiowania numeru BLIK — widoczne także na telefonie,
    gdzie ikona kopiowania jest schowana. */
 .header-blik[data-copied="true"] {
@@ -1661,7 +1687,7 @@ body.theme-light .fifa-card-ghost  { --card-tint: none; }
   }
   /* Na telefonie zmniejszamy odstępy hero; arena, nazwa i status zostają widoczne. */
   .header-hero { padding: 10px 8px 12px !important; }
-  .header-hero-arena { max-width: 340px !important; margin-bottom: 4px !important; }
+  .header-hero-arena { max-width: 340px !important; margin-bottom: 4px !important; filter: none; }
   .header-hero-title { display: block !important; }
   .header-hero-meta { gap: 10px !important; }
   /* Numer BLIK nie może się łamać na dwie linie i wypychać akcji poza ekran.

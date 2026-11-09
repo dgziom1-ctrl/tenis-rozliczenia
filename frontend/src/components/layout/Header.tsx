@@ -248,8 +248,11 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
         <div className="header-hero" style={{ position:'relative',zIndex:10,padding: '12px 16px 14px',
           display:'flex',flexDirection:'column',alignItems:'center' }}>
 
-          <div className="header-hero-arena" style={{ width:'100%',maxWidth:460,marginBottom:8,
-            filter:chaosMode?'none':'var(--glow-drop-cyan)' }}>
+          {/* Poświata areny to klasa CSS, nie filtr inline — na telefonie jest
+              wyłączana (patrz `.header-hero-arena` w index.css), bo filtr
+              `drop-shadow` przelicza się przy każdej klatce animowanego canvasu. */}
+          <div className={`header-hero-arena${chaosMode ? ' is-chaos' : ''}`}
+            style={{ width:'100%',maxWidth:460,marginBottom:8 }}>
             <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit}/>
           </div>
 

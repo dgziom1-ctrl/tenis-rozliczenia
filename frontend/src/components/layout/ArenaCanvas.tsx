@@ -13,12 +13,19 @@ type Projected = [number, number, number];
 /** Funkcje rysujące czytają wyłącznie X i Y, więc przyjmują też punkty rzutowane. */
 type ScreenPoint = readonly [number, number, ...number[]];
 
-/** Dolna granica odstępu między klatkami (≈ 40 fps na 120 Hz, 30 fps na 60 Hz). */
-const MIN_FRAME_MS = 21;
+/**
+ * Docelowy odstęp klatek. Próg jest celowo niższy od 16,7 ms: na ekranie
+ * 120 Hz (iPhone) pozwala rysować co drugie odświeżenie, czyli stabilne
+ * 60 fps. Wcześniejsze 21 ms dawało nierówny rytm 25/16,7 ms — dokładnie to
+ * czytało się jako „algowanie” animacji, mimo że klatki były tanie.
+ */
+const FRAME_GATE_MS = 1000 / 75; // ≈ 13,3 ms
 
-/** Na dotykowych ekranach poświata jest o połowę lżejsza — najdroższa część klatki. */
-const SHADOW_SCALE =
-  typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches ? 0.5 : 1;
+/**
+ * Awaryjny rytm 30 fps. Włącza się, gdy rysowanie nie mieści się w budżecie
+ * 60 fps — równy rytm jest płynniejszy niż gubione klatki.
+ */
+const SLOW_FRAME_GATE_MS = 1000 / 34; // ≈ 29,4 ms
 
 export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: ArenaCanvasProps) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -78,10 +85,29 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
 
     const W = 560, H = 180, CX = 265, CY = 90;
 
-    const dpr = Math.min((typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1, 2);
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    /**
+     * Poświaty powstawały dotąd przez `shadowBlur` — na iOS to najdroższa
+     * operacja canvasu 2D, bo rozmycie liczone jest co klatkę. Rysujemy je
+     * raz do małego sprite'a, a w pętli tylko skalujemy `drawImage`.
+     */
+    const makeGlow = (rgb: string, strength: number) => {
+      const size = 96;
+      const sprite = document.createElement('canvas');
+      sprite.width = size;
+      sprite.height = size;
+      const cg = sprite.getContext('2d');
+      if (!cg) return null;
+      const grad = cg.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+      grad.addColorStop(0, rgba(rgb, strength));
+      grad.addColorStop(0.42, rgba(rgb, strength * 0.38));
+      grad.addColorStop(1, rgba(rgb, 0));
+      cg.fillStyle = grad;
+      cg.fillRect(0, 0, size, size);
+      return sprite;
+    };
+    const ballGlow = makeGlow(P.white, 0.62);
+    const hitGlow = makeGlow(P.accent, 0.70);
+    const idleGlow = makeGlow(P.glowIdle, 0.45);
 
     const RX = 0.471, RY = -0.349;
     const cX = Math.cos(RX), sX = Math.sin(RX);
@@ -145,11 +171,11 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
     const IMPACT_MS = 220;
 
     const staticCanvas = document.createElement('canvas');
-    staticCanvas.width = canvas.width;
-    staticCanvas.height = canvas.height;
     const sg = staticCanvas.getContext('2d');
-    if (sg) {
-      sg.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    /** Nieruchoma scena (stół, siatka, krawędzie) — malowana raz na rozmiar. */
+    const paintStatic = () => {
+      if (!sg) return;
 
       const quadS = (pts: ScreenPoint[], fill: string | CanvasGradient) => {
         sg.beginPath();
@@ -226,7 +252,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       sg.shadowColor = rgba(P.accent, lightMode ? 0.45 : 0.95);
       segS(nTN, nTF, lightMode ? rgba(P.accent, 0.75) : rgba(P.netTop, 0.95), 2.5);
       sg.restore();
-    }
+    };
 
     /* ── DRAW FRAME ── */
     const draw = (progress: number, nowTs: number) => {
@@ -276,15 +302,20 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       g.beginPath(); g.arc(tq[0], tq[1], 3.6*tq[2], 0, Math.PI*2);
       g.fillStyle = rgba(P.floorWash, 0.06); g.fill();
 
+      /* Poświata piłki — sprite zamiast `shadowBlur` (patrz `makeGlow`). */
+      if (ballGlow) {
+        const gr = bR * (3.1 + impact * 1.5);
+        g.save();
+        g.globalAlpha = Math.min(1, 0.62 + 0.38 * impact);
+        g.drawImage(ballGlow, bq[0] - gr, bq[1] - gr, gr * 2, gr * 2);
+        g.restore();
+      }
+
       /* Ball sphere */
-      g.save();
-      g.shadowBlur = 13 * bq[2] * (1 + impact * 0.6) * SHADOW_SCALE;
-      g.shadowColor = rgba(P.white, Math.min(1, 0.86 + 0.18 * impact));
       const bg = g.createRadialGradient(bq[0]-bR*.3,bq[1]-bR*.3,0, bq[0],bq[1],bR);
       bg.addColorStop(0, P.ballCore); bg.addColorStop(.46, P.ballMid); bg.addColorStop(1, P.ballEdge);
       g.beginPath(); g.arc(bq[0], bq[1], bR, 0, Math.PI*2);
       g.fillStyle = bg; g.fill();
-      g.restore();
 
       /* ── TOPSPIN STRIPE ── */
       const stripeScreenY = bq[1] + Math.sin(spinAngle) * bR * 0.80;
@@ -311,7 +342,6 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
     const drawPaddle = (px: number, progress: number, isLeft: boolean, impact: number) => {
       const hitT = isLeft ? Math.min(progress, 1-progress)*2 : Math.abs(progress-0.5)*2;
       const hitting = hitT < HIT_T;
-      const impactK = 1 + impact * (hitting ? 1.0 : 0.25);
 
       const isApproaching = isLeft ? (progress > 0.5) : (progress < 0.5);
       const signedT = isApproaching ? -hitT : hitT;
@@ -368,18 +398,24 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       const ry  = Math.hypot(pt[0]-pb[0], pt[1]-pb[1]) / 2;
       const ang = Math.atan2(pt[1]-pb[1], pt[0]-pb[0]) + Math.PI/2;
 
-      /* Layer 1: outer glow halo */
-      g.save();
-      g.shadowBlur  = (hitting ? 20 : 8) * impactK * SHADOW_SCALE;
-      g.shadowColor = hitting
-        ? rgba(P.accent, 0.90 + 0.15 * impact)
-        : rgba(P.glowIdle, 0.40 + 0.08 * impact);
+      /* Layer 1: outer glow halo — sprite zamiast `shadowBlur`. */
+      const halo = hitting ? hitGlow : idleGlow;
+      if (halo) {
+        const bump2 = hitting ? 1 + impact * 0.12 : 1;
+        const hw = rx * 1.9 * bump2;
+        const hh = ry * 1.9 * bump2;
+        g.save();
+        g.translate(cx, cy);
+        g.rotate(ang);
+        g.globalAlpha = hitting ? 0.72 + 0.20 * impact : 0.40 + 0.08 * impact;
+        g.drawImage(halo, -hw, -hh, hw * 2, hh * 2);
+        g.restore();
+      }
       g.strokeStyle = hitting
-        ? rgba(P.accent, 0.70 + 0.15 * impact)
-        : rgba(P.glow, 0.36 + 0.08 * impact);
-      g.lineWidth = 3.5;
-      ellipse(cx, cy, rx*1.1, ry*1.1, ang); g.stroke();
-      g.restore();
+        ? rgba(P.accent, 0.55 + 0.20 * impact)
+        : rgba(P.glow, 0.30 + 0.06 * impact);
+      g.lineWidth = 2.4;
+      ellipse(cx, cy, rx*1.06, ry*1.06, ang); g.stroke();
 
       /* Layer 2: dark body */
       const bdg = g.createRadialGradient(cx-rx*.16,cy-ry*.16,0, cx,cy,Math.max(rx,ry)*1.05);
@@ -410,16 +446,26 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       g.lineCap = 'butt'; g.restore();
     };
 
-    // Cykl jest liczony z czasu, nie z liczby klatek, więc ograniczenie do
-    // ok. 30–40 fps nie zmienia tempa gry — tylko oszczędza pracę na ekranach
-    // 90/120 Hz (shadowBlur i gradienty radialne liczą się co klatkę).
+    // Cykl jest liczony z czasu, nie z liczby klatek, więc zmiana rytmu nie
+    // zmienia tempa gry. Bramka czasu (a nie licznik klatek) wyrównuje rytm do
+    // odświeżania ekranu: na 60 Hz rysujemy co ramkę, na 120 Hz co drugą.
     let lastDrawTs = 0;
+    let frameGate = FRAME_GATE_MS;
+    let drawCostAvg = 0;
     const loop = (ts: number) => {
       raf.current = requestAnimationFrame(loop);
       if (!t0.current) t0.current = ts;
-      if (ts - lastDrawTs < MIN_FRAME_MS) return;
+      if (ts - lastDrawTs < frameGate) return;
       lastDrawTs = ts;
+
+      const startedAt = performance.now();
       draw(((ts - t0.current) % CYCLE) / CYCLE, ts);
+      const cost = performance.now() - startedAt;
+      // Wygładzona cena klatki. Dopiero gdy realnie wychodzi ponad budżet
+      // 60 fps, schodzimy na równe 30 fps — toczy się płynniej niż gubione
+      // klatki, a próg 10 ms nie karze zdrowych urządzeń za sam narzut API.
+      drawCostAvg += (cost - drawCostAvg) * 0.08;
+      if (drawCostAvg > 10) frameGate = SLOW_FRAME_GATE_MS;
     };
 
     const startLoop = () => {
@@ -440,6 +486,46 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
       stopLoop();
       draw(0.25, performance.now());
     };
+
+    /**
+     * Bufor canvasu dopasowany do realnej szerokości elementu. Wcześniej był
+     * zawsze 560 × dpr (1120 px), choć na telefonie arena ma ~340 px CSS —
+     * czyli ponad 3× nadpróbkowanie, płacone przy każdym `clearRect`
+     * i `drawImage`. Teraz bufor ma dokładnie tyle pikseli, ile widać.
+     */
+    let surfaceKey = '';
+    const syncSurface = () => {
+      const rect = canvas.getBoundingClientRect();
+      const cssWidth = Math.min(W, Math.max(1, rect.width || W));
+      const dpr = Math.min(
+        (typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1,
+        2,
+      );
+      const bw = Math.max(1, Math.round(cssWidth * dpr));
+      const bh = Math.max(1, Math.round(cssWidth * (H / W) * dpr));
+      const key = `${bw}x${bh}`;
+      if (key === surfaceKey) return;
+      surfaceKey = key;
+
+      canvas.width = bw;
+      canvas.height = bh;
+      staticCanvas.width = bw;
+      staticCanvas.height = bh;
+      const sx = bw / W, sy = bh / H;
+      g.setTransform(sx, 0, 0, sy, 0, 0);
+      sg?.setTransform(sx, 0, 0, sy, 0, 0);
+      paintStatic();
+      // Zmiana rozmiaru czyści bufor — w trybie bez ruchu od razu malujemy
+      // statyczną klatkę, żeby arena nie mrugała pustką.
+      if (reducedMotion) drawStaticFrame();
+    };
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(syncSurface);
+      resizeObserver.observe(canvas);
+    }
+    syncSurface();
 
     /**
      * rAF tylko wtedy, gdy canvas faktycznie widać. Sama zmiana widoczności
@@ -472,6 +558,7 @@ export default function ArenaCanvas({ chaosMode, lightMode = false, onHit }: Are
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
       observer?.disconnect();
+      resizeObserver?.disconnect();
       stopLoop();
     };
   }, [chaosMode, lightMode, onHit, reducedMotion]);
