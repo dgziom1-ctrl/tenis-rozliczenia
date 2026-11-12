@@ -43,6 +43,7 @@ import Navigation from '../components/layout/Navigation';
 import UndoBar from '../components/common/UndoBar';
 import LogEntry from '../components/history/LogEntry';
 import LiveCostPreview from '../components/admin/LiveCostPreview';
+import MultisportLimitWarning from '../components/admin/MultisportLimitWarning';
 import { PasswordModal } from '../components/common/SharedUI';
 import PlayerSessionModal from '../components/attendance/PlayerSessionModal';
 import AttendanceTab from '../components/attendance/AttendanceTab';
@@ -711,3 +712,26 @@ describe('HistoryTab — aria-pressed na filtrach', () => {
   });
 });
 
+
+// ════════════════════════════════════════════════════════════════════════════
+// MultisportLimitWarning — odmiana i kwota co do grosza
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('MultisportLimitWarning — odmiana i kwota co do grosza', () => {
+  it('3 osoby (nie „3 osób”) i pełna kwota z groszami', () => {
+    render(<MultisportLimitWarning maxMulti={2} cardCount={3} />);
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Limit 2 kart przekroczony — zniżka zostanie proporcjonalnie podzielona na 3 osoby (10,00 zł/os. zamiast 15,00 zł)',
+    );
+  });
+
+  it('nie zaokrągla zniżki w dół do pełnych złotych', () => {
+    render(<MultisportLimitWarning maxMulti={2} cardCount={7} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('na 7 osób (4,28 zł/os.');
+  });
+
+  it('limit jednej karty w liczbie pojedynczej', () => {
+    render(<MultisportLimitWarning maxMulti={1} cardCount={2} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Limit 1 karty przekroczony');
+  });
+});
