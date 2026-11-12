@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import type { Theme } from '@/types/ui';
+import { readStorage, writeStorage } from '@/utils/storage';
 
 const STORAGE_KEY = 'cyber-ponk-theme';
 
@@ -18,12 +19,8 @@ const THEME_COLOR: Record<Theme, string> = { oled: '#000000', dark: '#030508', l
 const THEME_CYCLE: Theme[] = ['oled', 'dark', 'light'];
 
 function readSavedTheme(): Theme | null {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved === 'light' || saved === 'dark' || saved === 'oled' ? saved : null;
-  } catch {
-    return null;
-  }
+  const saved = readStorage(STORAGE_KEY);
+  return saved === 'light' || saved === 'dark' || saved === 'oled' ? saved : null;
 }
 
 function readSystemTheme(): Theme {
@@ -90,7 +87,7 @@ export function useTheme() {
 
   const toggle = useCallback(() => {
     const next = THEME_CYCLE[(THEME_CYCLE.indexOf(theme) + 1) % THEME_CYCLE.length];
-    try { localStorage.setItem(STORAGE_KEY, next); } catch { /* prywatny tryb przeglądarki */ }
+    writeStorage(STORAGE_KEY, next);
     setPreference({ theme: next, hasExplicitChoice: true });
   }, [theme]);
 

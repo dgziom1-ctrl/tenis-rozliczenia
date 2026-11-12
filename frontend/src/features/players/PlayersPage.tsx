@@ -1,10 +1,9 @@
-import { useOutletContext } from 'react-router';
+import { useLayoutContext } from '@/app/layoutContext';
 import { usePlayersData } from '@/app/providers/appDataContext';
 import PlayersTab from '@/components/players/PlayersTab';
-import type { SoundType } from '@/types/ui';
 
 export default function PlayersPage() {
-  const { playSound } = useOutletContext<{ playSound: (type: SoundType) => void }>();
+  const { playSound } = useLayoutContext();
   const { players, deletedPlayers, defaultMultiPlayers } = usePlayersData();
 
   return (

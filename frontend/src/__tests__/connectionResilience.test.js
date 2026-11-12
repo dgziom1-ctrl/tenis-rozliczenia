@@ -23,7 +23,7 @@ vi.mock('firebase/database', () => ({
 }));
 vi.mock('../lib/firebase/config', () => ({ database: {}, dataRef: {} }));
 
-const { withTransaction } = await import('../lib/firebase/transaction');
+const { withTransaction, reject } = await import('../lib/firebase/transaction');
 const { saveSnapshot, loadSnapshot, clearSnapshot } = await import('../lib/firebase/snapshotCache');
 const { clearStaleTransportPreference } = await import('../lib/firebase/transport');
 
@@ -136,6 +136,74 @@ describe('pamięć ostatnich danych', () => {
     });
 
     expect(() => saveSnapshot(SAMPLE)).not.toThrow();
+  });
+});
+
+/**
+ * PRZERWANIE TRANSAKCJI PRZEZ REGUŁĘ BIZNESOWĄ
+ *
+ * SDK woła callback transakcji ponownie, gdy serwer odrzuci zapis z powodu
+ * cudzej zmiany — w obsłudze odpowiedzi serwera, bez `try`. Wyjątek z takiego
+ * ponowienia nie dochodził do `withTransaction`: transakcja zostawała w kolejce
+ * SDK, a użytkownik po 12 s dostawał „nie znamy wyniku”. Callback musi więc
+ * przerywać transakcję zwrotem `undefined`, nigdy wyjątkiem.
+ */
+describe('przerwanie transakcji', () => {
+  /** Wyjątki, które w prawdziwym SDK przepadłyby poza obietnicą transakcji. */
+  let escaped;
+  beforeEach(() => { escaped = []; });
+
+  /**
+   * Atrapa SDK: woła callback tyle razy, ile stanów podano. Jak prawdziwe SDK
+   * nie przekazuje dalej wyjątku z ponowienia — odnotowuje go jako „uciekły”.
+   */
+  function sdkRunningAttempts(...states) {
+    return async (_ref, update) => {
+      let last;
+      for (const [attempt, state] of states.entries()) {
+        try {
+          last = update(state);
+        } catch (error) {
+          if (attempt === 0) throw error;
+          escaped.push(error);
+          return { committed: false, snapshot: {} };
+        }
+        if (last === undefined) return { committed: false, snapshot: {} };
+      }
+      return { committed: true, snapshot: { val: () => last } };
+    };
+  }
+
+  it('callback nie rzuca — odrzucenie w ponowieniu wraca jako komunikat', async () => {
+    runTransactionMock.mockImplementation(sdkRunningAttempts(null, { weeks: [1] }));
+
+    const result = await withTransaction((current) => {
+      if (current?.weeks) reject('Sesja z tą datą i tym sportem już istnieje');
+      return { ...current, weeks: [2] };
+    }, 'Nie udało się');
+
+    expect(escaped).toEqual([]);
+    expect(result).toEqual({ success: false, error: 'Sesja z tą datą i tym sportem już istnieje' });
+  });
+
+  it('ponowienie, które przechodzi, kończy się sukcesem', async () => {
+    runTransactionMock.mockImplementation(sdkRunningAttempts(null, { players: ['Ala'] }));
+
+    const result = await withTransaction((current) => ({ ...current, ok: true }), 'Nie udało się');
+
+    expect(escaped).toEqual([]);
+    expect(result).toEqual({ success: true });
+  });
+
+  it('nieoczekiwany wyjątek w callbacku też przerywa transakcję, a nie wylatuje z SDK', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    runTransactionMock.mockImplementation(sdkRunningAttempts({}));
+
+    const result = await withTransaction(() => {
+      throw new TypeError('zły kształt danych');
+    }, 'Nie udało się');
+
+    expect(result).toEqual({ success: false, error: 'zły kształt danych' });
   });
 });
 

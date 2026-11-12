@@ -3,8 +3,7 @@ import { isValidMoney, isValidISODate, normalizePlayerList } from '@/utils/valid
 import { withTransaction, reject } from '../transaction';
 import { sortWeeksByDate } from '../transforms';
 import { SPORT, isSport } from '@/constants';
-import type { RawAppData, TransactionResult, Week } from '@/types/domain';
-import type { Sport } from '@/types/domain';
+import type { RawAppData, Sport, TransactionResult, Week } from '@/types/domain';
 
 interface SessionInput {
   totalCost: number;
@@ -30,13 +29,6 @@ interface NormalizedSession {
 }
 
 /**
- * Sprowadza dane sesji do postaci zapisywanej w bazie i odrzuca wszystko, co
- * mogłoby zepsuć rozliczenia: NaN, Infinity, kwoty ujemne, puste listy graczy,
- * duplikaty imion oraz graczy spoza listy obecnych.
- *
- * Zwraca komunikat błędu zamiast rzucać, żeby wywołujący mógł go pokazać.
- */
-/**
  * Liczba kortów/godzin musi być całkowita i mieścić się w 1–12 — dokładnie
  * taki zakres przepuszczają reguły bazy. Wcześniej `Math.max(1, value)`
  * przepuszczało `NaN`, ułamki i wartości powyżej 12, a wtedy cały zapis węzła
@@ -49,6 +41,13 @@ function normalizeCourtUnit(value: unknown, label: string): { value: number } | 
   return { value };
 }
 
+/**
+ * Sprowadza dane sesji do postaci zapisywanej w bazie i odrzuca wszystko, co
+ * mogłoby zepsuć rozliczenia: NaN, Infinity, kwoty ujemne, puste listy graczy,
+ * duplikaty imion oraz graczy spoza listy obecnych.
+ *
+ * Zwraca komunikat błędu zamiast rzucać, żeby wywołujący mógł go pokazać.
+ */
 function normalizeSession(
   input: SessionInput,
   options: { preserveMissingCourtConfig?: boolean; preserveMissingSport?: boolean } = {},
@@ -124,16 +123,15 @@ interface AddSessionParams extends SessionInput {
 
 const DUPLICATE_SESSION_ERROR = 'Sesja z tą datą i tym sportem już istnieje';
 
-/**
- * Ta sama data i ten sam sport to niemal na pewno podwójny wpis. Inny sport
- * tego samego dnia jest dozwolony (np. squash rano i ping-pong wieczorem).
- * Stare rekordy bez pola `sport` liczą się jako ping-pong.
- */
 /** Stare rekordy bez poprawnego pola `sport` liczą się jako ping-pong. */
 function effectiveSportOf(sport: unknown): Sport {
   return isSport(sport) ? sport : SPORT.PINGPONG;
 }
 
+/**
+ * Ta sama data i ten sam sport to niemal na pewno podwójny wpis. Inny sport
+ * tego samego dnia jest dozwolony (np. squash rano i ping-pong wieczorem).
+ */
 function isSameSlot(existing: { date: string; sport?: unknown }, date: string, sport: string): boolean {
   return existing.date === date && effectiveSportOf(existing.sport) === sport;
 }
@@ -254,16 +252,6 @@ export async function deleteWeekWithSnapshot(weekId: string): Promise<DeleteWeek
   }, 'Nie udało się usunąć sesji');
 
   return result.success && deletedWeek ? { ...result, deletedWeek } : result;
-}
-
-/** Wariant bez snapshotu zachowuje dotychczasowy kontrakt dla pozostałych wywołań. */
-export async function deleteWeek(weekId: string): Promise<TransactionResult> {
-  const result = await deleteWeekWithSnapshot(weekId);
-  return {
-    success: result.success,
-    ...(result.error ? { error: result.error } : {}),
-    ...(result.indeterminate ? { indeterminate: true } : {}),
-  };
 }
 
 /** Przywraca dokładnie usunięty rekord; kolizja daty chroni przed nadpisaniem nowszej sesji. */

@@ -61,7 +61,7 @@ vi.mock('firebase/database', () => ({
 vi.mock('../lib/firebase/config', () => ({ database: {}, dataRef: {} }));
 
 // ─── Import po atrapach ───────────────────────────────────────────────────────
-const { addSession, updateWeek, deleteWeek } = await import('../lib/firebase/mutations/sessions');
+const { addSession, updateWeek, deleteWeekWithSnapshot } = await import('../lib/firebase/mutations/sessions');
 const { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } =
   await import('../lib/firebase/mutations/players');
 const { addPayment, removePayment } = await import('../lib/firebase/mutations/payments');
@@ -274,11 +274,11 @@ describe('zgodność zapisów aplikacji z regułami bazy', () => {
 
   it('usunięcie sesji — także ostatniej — przechodzi reguły', async () => {
     seedLegacy();
-    await deleteWeek('w1');
+    await deleteWeekWithSnapshot('w1');
     expect(problemsIn(h.written.at(-1))).toEqual([]);
 
     // Ostatnia sesja: `weeks` staje się puste, więc węzeł znika z bazy.
-    await deleteWeek('w2');
+    await deleteWeekWithSnapshot('w2');
     const payload = h.written.at(-1);
     expect(payload.weeks ?? []).toEqual([]);
     expect(problemsIn(payload)).toEqual([]);

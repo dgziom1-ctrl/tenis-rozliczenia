@@ -1,10 +1,9 @@
-import { useOutletContext } from 'react-router';
+import { useLayoutContext } from '@/app/layoutContext';
 import { useHistoryData } from '@/app/providers/appDataContext';
 import HistoryTab from '@/components/history/HistoryTab';
-import type { SoundType } from '@/types/ui';
 
 export default function HistoryPage() {
-  const { playSound } = useOutletContext<{ playSound: (type: SoundType) => void }>();
+  const { playSound } = useLayoutContext();
   const { history, playerNames } = useHistoryData();
 
   return <HistoryTab history={history} playerNames={playerNames} playSound={playSound} />;

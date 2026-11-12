@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getMessaging, getToken } from 'firebase/messaging';
 import { ref, set } from 'firebase/database';
 import { database } from '@/lib/firebase/config';
+import { loadMessagingSdk } from '@/lib/firebase/messaging';
 import { registerServiceWorker } from '@/utils/serviceWorker';
 import { buildTokenEntry } from '@/utils/pushToken';
+import { STORAGE_KEYS, writeStorage } from '@/utils/storage';
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
@@ -104,8 +105,10 @@ export function usePushNotifications() {
       const activated = await waitForActivation();
       if (!activated) return { success: false, error: 'Service Worker nie uruchomił się w oczekiwanym czasie. Odśwież stronę.' };
 
-      const messaging = getMessaging();
-      const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
+      // SDK dociągamy dopiero tutaj — po `requestPermission`, więc nie zabiera
+      // okna interakcji, którego wymaga Safari.
+      const { getMessaging, getToken } = await loadMessagingSdk();
+      const token = await getToken(getMessaging(), { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
       if (!token) return { success: false, error: 'Nie udało się pobrać tokenu FCM' };
 
       const tokenKey = hashToken(token);
@@ -117,7 +120,7 @@ export function usePushNotifications() {
         ua: navigator.userAgent,
       }));
 
-      try { localStorage.setItem('push-token-key', tokenKey); } catch { /* */ }
+      writeStorage(STORAGE_KEYS.pushTokenKey, tokenKey);
       return { success: true };
     } catch (err) {
       console.error('Push registration error:', err);

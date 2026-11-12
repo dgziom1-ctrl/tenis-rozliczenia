@@ -6,6 +6,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { ref, get } from 'firebase/database';
 import { database } from '@/lib/firebase/config';
 import { FONT, TEXT, CLIP } from '@/constants/styles';
+import { STORAGE_KEYS, readStorage, writeStorage } from '@/utils/storage';
 
 const DISMISS_KEY   = 'push-banner-dismissed';
 const PLAYER_KEY    = 'push-registered-player';
@@ -18,7 +19,7 @@ const SUCCESS_DISMISS_MS = 2500;
 // wywoływania getToken() które mogłoby pokazać popup uprawnień.
 async function deviceHasToken() {
   try {
-    const tokenKey = localStorage.getItem('push-token-key');
+    const tokenKey = readStorage(STORAGE_KEYS.pushTokenKey);
     if (!tokenKey) return false;
     const snap = await get(ref(database, `fcmTokens/${tokenKey}`));
     return snap.exists();
@@ -62,11 +63,9 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    try {
-      if (localStorage.getItem(DISMISS_KEY)) setDismissed(true);
-      const saved = localStorage.getItem(PLAYER_KEY);
-      if (saved) setSelectedPlayer(saved);
-    } catch { /* localStorage unavailable */ }
+    if (readStorage(DISMISS_KEY)) setDismissed(true);
+    const saved = readStorage(PLAYER_KEY);
+    if (saved) setSelectedPlayer(saved);
   }, []);
 
   useEffect(() => () => { if (dismissTimer.current) clearTimeout(dismissTimer.current); }, []);
@@ -106,7 +105,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
     setDismissed(true);
     setTokenMissing(false);
     setStatus(null);
-    try { localStorage.setItem(DISMISS_KEY, '1'); } catch { /* localStorage unavailable */ }
+    writeStorage(DISMISS_KEY, '1');
   };
 
   const handleEnable = async () => {
@@ -121,7 +120,7 @@ export default function PushPermissionBanner({ playerNames }: PushPermissionBann
     if (result.success) {
       setStatus('success');
       setTokenMissing(false);
-      try { localStorage.setItem(PLAYER_KEY, selectedPlayer); } catch { /* localStorage unavailable */ }
+      writeStorage(PLAYER_KEY, selectedPlayer);
       dismissTimer.current = setTimeout(dismiss, SUCCESS_DISMISS_MS);
     } else {
       setErrorMsg(result.error || 'Nieznany błąd');

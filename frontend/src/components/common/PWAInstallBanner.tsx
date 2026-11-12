@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import { Download, Share, X } from 'lucide-react';
 import { TEXT, CLIP, FONT } from '@/constants/styles';
+import { readStorage, writeStorage } from '@/utils/storage';
 import BrandMark from './BrandMark';
 
 const DISMISS_KEY = 'pwa-dismissed';
@@ -38,12 +39,10 @@ export default function PWAInstallBanner() {
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches) return undefined;
-    try {
-      // Odrzucenie obowiązuje 30 dni, a nie na zawsze — inaczej jedno kliknięcie
-      // „×” na stałe odcinało drogę do instalacji z banera.
-      const dismissedAt = Number(localStorage.getItem(DISMISS_KEY));
-      if (dismissedAt && Date.now() - dismissedAt < DISMISS_TTL_MS) return undefined;
-    } catch { /* localStorage unavailable */ }
+    // Odrzucenie obowiązuje 30 dni, a nie na zawsze — inaczej jedno kliknięcie
+    // „×” na stałe odcinało drogę do instalacji z banera.
+    const dismissedAt = Number(readStorage(DISMISS_KEY));
+    if (dismissedAt && Date.now() - dismissedAt < DISMISS_TTL_MS) return undefined;
 
     const ua = navigator.userAgent;
     // iPadOS 13+ podaje się jako Mac, więc rozpoznajemy go po ekranie dotykowym.
@@ -66,7 +65,7 @@ export default function PWAInstallBanner() {
 
   const dismiss = useCallback(() => {
     setShow(false);
-    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch { /* localStorage unavailable */ }
+    writeStorage(DISMISS_KEY, String(Date.now()));
   }, []);
 
   const handleInstall = async () => {

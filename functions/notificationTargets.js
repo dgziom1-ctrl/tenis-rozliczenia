@@ -11,6 +11,7 @@ const STREAK_MILESTONES = [5, 10, 15, 20, 25, 30, 40, 50, 100];
 /** Token zapisany bez wybranego gracza dostaje `unknown` (patrz `buildTokenEntry`). */
 const NO_PLAYER = new Set(['', 'unknown']);
 
+/** Token z wpisu bazy — wpisy bywają puste albo w starym formacie (goły string). */
 function readToken(entry) {
   if (typeof entry === 'string') return entry;
   if (entry && typeof entry.token === 'string') return entry.token;
@@ -40,4 +41,4 @@ function selectTokens(entries, playerNames = null) {
   return [...new Set(tokens)];
 }
 
-module.exports = { STREAK_MILESTONES, selectTokens };
+module.exports = { STREAK_MILESTONES, readToken, selectTokens };

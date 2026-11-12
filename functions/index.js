@@ -3,7 +3,7 @@ const { initializeApp }   = require('firebase-admin/app');
 const { getMessaging }    = require('firebase-admin/messaging');
 const { getDatabase }     = require('firebase-admin/database');
 const { getSessionShares } = require('./sessionCost');
-const { STREAK_MILESTONES, selectTokens } = require('./notificationTargets');
+const { STREAK_MILESTONES, readToken, selectTokens } = require('./notificationTargets');
 
 initializeApp();
 
@@ -35,13 +35,6 @@ function toArray(val) {
 }
 
 // ─── Tokeny FCM ───────────────────────────────────────────────────────────────
-/** Token z wpisu bazy — wpisy bywają puste albo w starym formacie (goły string). */
-function readToken(entry) {
-  if (typeof entry === 'string') return entry;
-  if (entry && typeof entry.token === 'string') return entry.token;
-  return '';
-}
-
 /**
  * Wszystkie wpisy tokenów z bazy (jeden odczyt). Wybór adresatów robi
  * `selectTokens`: z listą graczy — tylko ich urządzenia (i urządzenia bez
