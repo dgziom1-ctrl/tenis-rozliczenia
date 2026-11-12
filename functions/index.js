@@ -7,6 +7,10 @@ const { STREAK_MILESTONES, readToken, selectTokens } = require('./notificationTa
 
 initializeApp();
 
+// Statystyki użycia: odczyt tylko przez tę funkcję (reguły bazy blokują go klientom).
+exports.stats = require('./stats').stats;
+exports.pruneAnalytics = require('./stats').pruneAnalytics;
+
 // Trzymane osobno od `frontend/src/constants` — Cloud Functions to inny pakiet.
 const SPORT_EMOJI = { pingpong: '🏓', squash: '🎾', badminton: '🏸', padel: '🥎' };
 const SPORT_LABEL = { pingpong: 'Ping-pong', squash: 'Squash', badminton: 'Badminton', padel: 'Padel' };

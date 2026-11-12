@@ -87,6 +87,7 @@ jobs:
           VITE_ADMIN_PASSWORD:               ${{ secrets.VITE_ADMIN_PASSWORD }}
           VITE_BLIK_NUMBER:                  ${{ secrets.VITE_BLIK_NUMBER }}
           VITE_FIREBASE_VAPID_KEY:           ${{ secrets.VITE_FIREBASE_VAPID_KEY }}
+          VITE_STATS_PATH:                   ${{ secrets.VITE_STATS_PATH }}
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -102,6 +103,6 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-sa.json"
           npx --yes firebase-tools@13 deploy \
-            --only database,functions:onSessionAdded,functions:onPlayerAdded \
+            --only database,functions:onSessionAdded,functions:onPlayerAdded,functions:stats,functions:pruneAnalytics \
             --project tenis-rozliczenia \
             --non-interactive --force

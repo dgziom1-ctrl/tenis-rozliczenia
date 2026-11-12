@@ -7,6 +7,8 @@
  * rozjeżdżająca się z pierwszą implementacja tego samego.
  */
 
+import { track, flush } from '@/lib/analytics/track';
+
 interface BootGuard {
   /** Aplikacja wstała — odwołaj czuwanie i wyczyść licznik prób. */
   ready: () => void;
@@ -55,6 +57,8 @@ export function recoverFromStaleBuild(reason: unknown): boolean {
 
 /** Naprawa na żądanie użytkownika, np. z przycisku na ekranie błędu. */
 export function hardResetApp(): void {
+  track('hard_reset');
+  void flush();
   const bootGuard = guard();
   if (bootGuard) bootGuard.hardReset();
   else window.location.reload();

@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import type { Theme } from '@/types/ui';
 import { readStorage, writeStorage } from '@/utils/storage';
+import { track } from '@/lib/analytics/track';
 
 const STORAGE_KEY = 'cyber-ponk-theme';
 
@@ -88,6 +89,7 @@ export function useTheme() {
   const toggle = useCallback(() => {
     const next = THEME_CYCLE[(THEME_CYCLE.indexOf(theme) + 1) % THEME_CYCLE.length];
     writeStorage(STORAGE_KEY, next);
+    track('theme_change', { theme: next });
     setPreference({ theme: next, hasExplicitChoice: true });
   }, [theme]);
 

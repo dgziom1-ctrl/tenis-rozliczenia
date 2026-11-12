@@ -1,5 +1,8 @@
-import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router';
+import { Suspense, lazy, useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router';
+import { useRouteTracking } from '@/hooks/useRouteTracking';
+import { track } from '@/lib/analytics/track';
+import { isStatsPath } from '@/lib/analytics/statsRoute';
 import { AppDataProvider } from './providers/AppDataProvider';
 import { useConnectionStatus } from './providers/appDataContext';
 import { ThemeProvider } from './providers/ThemeProvider';
@@ -159,8 +162,23 @@ function CyberErrorScreen({ onRetry }: { onRetry?: () => void }) {
 
 function AppShell() {
   const { isLoading, slowLoading, bootTimedOut, subscriptionError, hasData, retry } = useConnectionStatus();
+  useRouteTracking();
 
   useEffect(() => { signalAppReady(); prefetchTabs(); }, []);
+
+  // Jak szybko użytkownik widzi dane i czy po drodze coś szwankuje — raz na start.
+  const dataReadyTracked = useRef(false);
+  useEffect(() => {
+    if (hasData && !dataReadyTracked.current) {
+      dataReadyTracked.current = true;
+      track('data_ready', { ms: Math.round(performance.now()) });
+    }
+  }, [hasData]);
+  useEffect(() => { if (slowLoading) track('connection_slow'); }, [slowLoading]);
+  useEffect(() => { if (bootTimedOut) track('boot_timeout'); }, [bootTimedOut]);
+  useEffect(() => {
+    if (subscriptionError) track('connection_error', { msg: subscriptionError.message });
+  }, [subscriptionError]);
 
   if (subscriptionError && !hasData) {
     return <CyberErrorScreen onRetry={retry} />;
@@ -181,16 +199,37 @@ function AppShell() {
   );
 }
 
+const StatsPage = lazy(() => import('@/features/stats/StatsPage'));
+
+/**
+ * Ukryty panel statystyk żyje poza resztą aplikacji: bez nawigacji, bez
+ * subskrypcji bazy i bez śladu w menu. Zwykli użytkownicy nie pobierają nawet
+ * jego kodu (osobna paczka ładowana tylko pod tą ścieżką).
+ */
+function Root() {
+  const { pathname } = useLocation();
+  if (isStatsPath(pathname)) {
+    return (
+      <Suspense fallback={null}>
+        <StatsPage />
+      </Suspense>
+    );
+  }
+  return (
+    <ThemeProvider>
+      <ToastProvider>
+        <AppDataProvider>
+          <AppShell />
+        </AppDataProvider>
+      </ToastProvider>
+    </ThemeProvider>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider>
-        <ToastProvider>
-          <AppDataProvider>
-            <AppShell />
-          </AppDataProvider>
-        </ToastProvider>
-      </ThemeProvider>
+      <Root />
     </BrowserRouter>
   );
 }

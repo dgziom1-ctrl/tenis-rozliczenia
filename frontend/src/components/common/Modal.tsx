@@ -7,6 +7,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { MODAL_EXIT_MS, REDUCED_MOTION_MODAL_EXIT_MS } from '@/constants';
 import { FONT, TEXT } from '@/constants/styles';
 import { lockScroll, unlockScroll } from '@/utils/scrollLock';
+import { track } from '@/lib/analytics/track';
 import type { StyleWithVars } from '@/types/css';
 
 /**
@@ -121,6 +122,8 @@ export default function Modal({
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  // Jedno zdarzenie na otwarcie okna, z jego tytułem (bez treści).
+  useEffect(() => { if (open) track('modal_open', { name: title ?? ariaLabel }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const reducedMotion = useReducedMotion();
   const canDrag = dragToDismiss ?? align === 'bottom';
   const exitDuration = reducedMotion

@@ -6,6 +6,7 @@ import { ADMIN_PASSWORD, isAdminPasswordConfigured, SOUND_TYPES } from '@/consta
 import { FONT, TEXT, CLIP } from '@/constants/styles';
 import Modal from './Modal';
 import { useModalExit } from '@/hooks/useModalExit';
+import { track } from '@/lib/analytics/track';
 import type { SoundType } from '@/types/ui';
 
 /** Jak długo świeci komunikat o złym haśle. */
@@ -35,9 +36,11 @@ export function PasswordModal({ action, onConfirm, onCancel, playSound }: Passwo
     // Gdy hasła nie skonfigurowano, `input === ADMIN_PASSWORD` byłoby prawdą
     // dla pustego pola i puszczało dalej każdego — dlatego blokujemy wprost.
     if (configured && input === ADMIN_PASSWORD) {
+      track('admin_unlock', { ok: true });
       onConfirm();
       return;
     }
+    track('admin_unlock', { ok: false });
     setError(true);
     setInput('');
     playSound?.(SOUND_TYPES.ERROR);

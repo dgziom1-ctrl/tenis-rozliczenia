@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router';
 import ArenaCanvas from './ArenaCanvas';
 import { copyToClipboard } from '@/utils/clipboard';
+import { track } from '@/lib/analytics/track';
 import { BLIK_NUMBER } from '@/utils/blik';
 import { useToast } from '@/components/common/Toast';
 import { FONT, TEXT, CLIP } from '@/constants/styles';
@@ -111,6 +112,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
   const handleCopy = async () => {
     const ok = await copyToClipboard(blikNumber.replace(/\s/g, ''));
     if (ok) {
+      track('blik_copy', { from: 'header' });
       setCopied(true);
       showSuccess('Numer telefonu BLIK skopiowany');
       clearTimeout(copiedTimer.current ?? undefined);
@@ -128,6 +130,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
   };
 
   const activateChaos = () => {
+    track('easter_egg');
     setChaosMode(true);
     setChaosRun(run => run + 1);
     setConfetti(Array.from({ length: 44 }, (_, i) => ({

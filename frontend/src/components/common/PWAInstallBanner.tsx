@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { Download, Share, X } from 'lucide-react';
 import { TEXT, CLIP, FONT } from '@/constants/styles';
 import { readStorage, writeStorage } from '@/utils/storage';
+import { track } from '@/lib/analytics/track';
 import BrandMark from './BrandMark';
 
 const DISMISS_KEY = 'pwa-dismissed';
@@ -73,6 +74,7 @@ export default function PWAInstallBanner() {
     try {
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
+      track('pwa_prompt', { outcome });
       if (outcome === 'accepted') dismiss();
       else setShow(false);
     } catch {

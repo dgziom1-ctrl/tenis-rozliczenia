@@ -66,6 +66,7 @@ const { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveD
   await import('../lib/firebase/mutations/players');
 const { addPayment, removePayment } = await import('../lib/firebase/mutations/payments');
 const { buildTokenEntry } = await import('../utils/pushToken');
+const { buildEvent } = await import('../lib/analytics/track');
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  Mini-silnik reguł: tyle semantyki RTDB, ile trzeba, żeby wykryć rozjazd
@@ -331,6 +332,38 @@ describe('zgodność zapisów aplikacji z regułami bazy', () => {
     const problems = [];
     checkNode('fcmTokens', { [key]: entry }, RULES.fcmTokens, problems);
     expect(problems).toEqual([]);
+  });
+
+  it('zdarzenie statystyk przechodzi reguły (także po przycięciu właściwości)', () => {
+    const event = buildEvent('app_start', {
+      os: 'android',
+      msg: 'x'.repeat(500),
+      pwa: true,
+      dpr: 2.625,
+      'zły klucz!': 'ok',
+      brak: undefined,
+    }, 1790198411380);
+
+    // Przycięcie to zadanie klienta: reguły odrzucają dłuższe napisy, a cały
+    // zapis wsadowy pada przez jeden zły wpis.
+    expect(event.props.msg).toHaveLength(100);
+    expect(event.props.z_y_klucz_).toBe('ok');
+
+    const problems = [];
+    checkNode('analytics', { events: { '-Nabc': event, '-Nabd': buildEvent('page_view') } }, RULES.analytics, problems);
+    expect(problems).toEqual([]);
+  });
+
+  it('reguły statystyk odrzucają obce pola i blokują odczyt z przeglądarki', () => {
+    const event = { ...buildEvent('page_view'), extra: 'x' };
+    const problems = [];
+    checkNode('analytics', { events: { '-Nabc': event } }, RULES.analytics, problems);
+    expect(problems).toEqual([expect.stringContaining('analytics/events/-Nabc/extra')]);
+
+    // Odczyt tylko przez funkcję `stats` (Admin SDK pomija reguły).
+    expect(RULES.analytics['.read']).toBe(false);
+    // Tworzenie wpisów tak, ale nadpisywanie i kasowanie nie.
+    expect(RULES.analytics.events.$id['.write']).toContain('!data.exists()');
   });
 
   it('wykrywa pole, którego reguły nie znają — czyli błąd, który to spowodował', () => {

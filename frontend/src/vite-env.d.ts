@@ -15,6 +15,11 @@ interface ImportMetaEnv {
    */
   readonly VITE_ADMIN_PASSWORD?: string;
   readonly VITE_BLIK_NUMBER?: string;
+  /**
+   * Losowy slug ukrytego panelu statystyk (`/x/<slug>`, min. 8 znaków). Trafia
+   * do bundla, więc to ukrycie, nie zabezpieczenie — dane chroni klucz funkcji `stats`.
+   */
+  readonly VITE_STATS_PATH?: string;
 }
 
 interface ImportMeta {

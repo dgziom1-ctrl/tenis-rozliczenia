@@ -5,6 +5,8 @@ import { loadMessagingSdk } from '@/lib/firebase/messaging';
 import { registerServiceWorker } from '@/utils/serviceWorker';
 import { buildTokenEntry } from '@/utils/pushToken';
 import { STORAGE_KEYS, writeStorage } from '@/utils/storage';
+import { track } from '@/lib/analytics/track';
+import { setAnalyticsPlayer } from '@/lib/analytics/identity';
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
@@ -91,6 +93,7 @@ export function usePushNotifications() {
       // błędem, który wygląda jak zupełnie inna awaria.
       const perm = await Notification.requestPermission();
       setPermission(perm);
+      track('push_permission', { result: perm });
       if (perm !== 'granted') return { success: false, error: 'Brak zgody na powiadomienia' };
 
       // Korzystamy z workera zarejestrowanego przy starcie aplikacji. Poprzednia
@@ -121,9 +124,13 @@ export function usePushNotifications() {
       }));
 
       writeStorage(STORAGE_KEYS.pushTokenKey, tokenKey);
+      // Użytkownik sam wskazał, kim jest — dzięki temu statystyki pokażą imię.
+      setAnalyticsPlayer(playerName);
+      track('push_registered');
       return { success: true };
     } catch (err) {
       console.error('Push registration error:', err);
+      track('push_error', { code: errorField(err, 'code') || undefined, msg: errorField(err, 'message') });
       return { success: false, error: friendlyPushError(err) };
     } finally {
       setIsRegistering(false);

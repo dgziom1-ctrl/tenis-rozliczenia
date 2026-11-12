@@ -5,6 +5,7 @@ import { useToast } from './Toast';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { BLIK_NUMBER } from '@/utils/blik';
 import { copyToClipboard } from '@/utils/clipboard';
+import { track } from '@/lib/analytics/track';
 import { FONT, TEXT } from '@/constants/styles';
 
 interface FirstRunGuideProps {
@@ -32,6 +33,7 @@ export default function FirstRunGuide({ open, onClose }: FirstRunGuideProps) {
   const handleCopy = async () => {
     const ok = await copyToClipboard(BLIK_NUMBER.replace(/\s/g, ''));
     if (ok) {
+      track('blik_copy', { from: 'guide' });
       setCopied(true);
       showSuccess('Numer BLIK skopiowany');
       clearTimeout(copiedTimer.current ?? undefined);

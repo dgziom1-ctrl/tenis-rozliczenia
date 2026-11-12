@@ -119,6 +119,32 @@
       "$other": { ".validate": false }
     },
 
+    "analytics": {
+      ".read": false,
+      "events": {
+        ".indexOn": ["ts"],
+        "$id": {
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['ts', 'type', 'did', 'sid'])",
+
+          "ts":   { ".validate": "newData.isNumber() && newData.val() > 1500000000000 && newData.val() < 4102444800000" },
+          "type": { ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{1,32}$/)" },
+          "did":  { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64" },
+          "sid":  { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64" },
+          "name": { ".validate": "newData.isString() && newData.val().length <= 40" },
+
+          "props": {
+            ".validate": "newData.hasChildren()",
+            "$key": {
+              ".validate": "(newData.isString() && newData.val().length <= 100) || newData.isNumber() || newData.isBoolean()"
+            }
+          },
+
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
     "fcmTokens": {
       "$tokenKey": {
         ".read": true,

@@ -7,6 +7,7 @@ import { formatDate, formatAmountShort, plural } from '@/utils/format';
 import { buildGroupMessage } from '@/utils/message';
 import { getShareGroups } from '@/utils/sessionCost';
 import { copyToClipboard } from '@/utils/clipboard';
+import { track } from '@/lib/analytics/track';
 import Modal from '../common/Modal';
 import { useModalExit } from '@/hooks/useModalExit';
 
@@ -59,6 +60,7 @@ export default function SessionSummaryModal({ summary, highlights = [], onClose 
   const handleCopy = async () => {
     const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, courtCount, durationHours });
     if (await copyToClipboard(msg)) {
+      track('share_copy', { kind: 'session_message' });
       setCopied(true);
       if (copiedTimer.current) clearTimeout(copiedTimer.current);
       copiedTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS);

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { loadMessagingSdk } from '@/lib/firebase/messaging';
 import { routeFromNotificationUrl } from '@/utils/notificationRoute';
+import { track } from '@/lib/analytics/track';
 
 const NOTIFICATION_ICON = '/icon-192v3.png';
 
@@ -147,7 +148,10 @@ export function useNotificationNavigation(): void {
       }
 
       const target = routeFromNotificationUrl(url);
-      if (target) void navigate(target);
+      if (target) {
+        track('push_open', { mode: 'warm', tab: url.searchParams.get('tab') });
+        void navigate(target);
+      }
     };
 
     swContainer.addEventListener('message', handleSwMessage);
@@ -159,7 +163,10 @@ export function useNotificationNavigation(): void {
   // powiadomienie przy zamkniętej apce zawsze lądowało na ekranie startowym.
   useEffect(() => {
     const target = routeFromNotificationUrl(new URL(window.location.href));
-    if (target) void navigate(target, { replace: true });
+    if (target) {
+      track('push_open', { mode: 'cold', tab: new URL(window.location.href).searchParams.get('tab') });
+      void navigate(target, { replace: true });
+    }
     // Tylko przy pierwszym montowaniu.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

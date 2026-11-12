@@ -36,4 +36,10 @@ export function writeStorage(key: string, value: string): boolean {
 export const STORAGE_KEYS = {
   /** Skrót tokenu FCM tego urządzenia — klucz wpisu w `fcmTokens`. */
   pushTokenKey: 'push-token-key',
+  /** Losowe, anonimowe ID urządzenia dla statystyk użycia (`lib/analytics`). */
+  analyticsDevice: 'cp-device-id',
+  /** Gracz, z którym to urządzenie się utożsamiło (przy rejestracji push). */
+  analyticsPlayer: 'cp-analytics-player',
+  /** `1` = nie zbieraj statystyk z tego urządzenia (ustawiane przez ukryty panel). */
+  analyticsOptOut: 'cp-no-track',
 } as const;

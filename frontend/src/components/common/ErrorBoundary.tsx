@@ -3,6 +3,7 @@ import type { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { hardResetApp, isStaleBuildError, recoverFromStaleBuild, signalAppReady } from '@/utils/bootRecovery';
 import { Z, CLIP, FONT, TEXT } from '@/constants/styles';
+import { track, flush } from '@/lib/analytics/track';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -25,6 +26,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.setState({ error, errorInfo });
+    track('react_error', {
+      msg: error.message,
+      stale: isStaleBuildError(error),
+      where: errorInfo.componentStack?.trim().split('\n')[0],
+    });
+    void flush();
 
     // Aplikacja została wdrożona na nowo, a przeglądarka trzyma stary
     // `index.html` i szuka paczek, których już nie ma. Świeży start naprawia to

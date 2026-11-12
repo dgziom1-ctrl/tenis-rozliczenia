@@ -7,6 +7,7 @@ import { parseAmount, isValidAmount, formatDate, plural } from '@/utils/format';
 import { getCourtAmount, getRacketSelection, getTotalWithRackets, inferRacketPricing } from '@/utils/sessionCost';
 import { costError } from '@/utils/costMessages';
 import { buildSessionsCsv, downloadCsv, safeFileName } from '@/utils/csv';
+import { track } from '@/lib/analytics/track';
 import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
 import UndoBar from '../common/UndoBar';
@@ -109,6 +110,7 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
     try {
       const fileName = filterPlayer ? `sesje_${safeFileName(filterPlayer)}.csv` : 'sesje.csv';
       downloadCsv(fileName, buildSessionsCsv(filteredHistory));
+      track('csv_export', { rows: filteredHistory.length, filtered: Boolean(filterPlayer) });
       showSuccess(`Wyeksportowano ${filteredHistory.length} sesji`);
     } catch (err) {
       console.warn('CSV export failed:', err);
