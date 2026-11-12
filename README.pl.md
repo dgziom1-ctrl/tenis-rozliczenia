@@ -74,7 +74,7 @@ W CI `npm run build` nie zbuduje paczki bez `VITE_FIREBASE_API_KEY`, `VITE_FIREB
 
 GitHub Actions uruchamia kontrole dla pull requestów, a po pushu do `main` wdraża aplikację. Wdrożenie publikuje frontend w Firebase Hosting, reguły Realtime Database oraz dwie funkcje z `functions/index.js` (`onSessionAdded` i `onPlayerAdded`). Wymaga sekretów Firebase skonfigurowanych w repozytorium.
 
-Zaplanowany workflow uruchamia się w niedzielę o 00:00 UTC i zapisuje kopię Realtime Database jako artefakt GitHub Actions z 90-dniowym okresem przechowywania. Z kopii usuwane są `fcmTokens`, ale pozostają w niej nazwiska graczy, sesje i wpłaty — traktuj ją jako dane wrażliwe.
+Zaplanowany workflow uruchamia się codziennie o 00:00 UTC i zapisuje kopię Realtime Database jako artefakt GitHub Actions z 90-dniowym okresem przechowywania. Z kopii usuwane są `fcmTokens`, ale pozostają w niej nazwiska graczy, sesje i wpłaty — traktuj ją jako dane wrażliwe.
 
 ## Bezpieczeństwo i dane
 

@@ -74,7 +74,7 @@ In CI, `npm run build` refuses to produce a bundle unless `VITE_FIREBASE_API_KEY
 
 GitHub Actions is configured to run checks on pull requests and deploy on pushes to `main`. The deployment publishes the frontend to Firebase Hosting, the Realtime Database rules and the two functions in `functions/index.js` (`onSessionAdded` and `onPlayerAdded`). It requires the Firebase secrets configured in the repository.
 
-A scheduled workflow runs on Sundays at 00:00 UTC and uploads a Realtime Database backup as a GitHub Actions artifact with 90-day retention. It removes `fcmTokens`; player names, sessions and payment records remain in the backup, so treat the artifact as sensitive.
+A scheduled workflow runs daily at 00:00 UTC and uploads a Realtime Database backup as a GitHub Actions artifact with 90-day retention. It removes `fcmTokens`; player names, sessions and payment records remain in the backup, so treat the artifact as sensitive.
 
 ## Security and data
 

@@ -2,7 +2,7 @@ name: Automatyczny Backup Realtime Database
 
 on:
   schedule:
-    - cron: '0 0 * * 0'   # każda niedziela o północy UTC
+    - cron: '0 0 * * *'   # codziennie o północy UTC
   workflow_dispatch:
 
 # Nie potrzebujemy już write na contents — nic nie commitujemy
