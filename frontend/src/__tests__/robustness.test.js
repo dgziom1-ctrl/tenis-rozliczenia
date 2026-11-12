@@ -49,7 +49,7 @@ vi.mock('firebase/database', () => ({
 vi.mock('../lib/firebase/config', () => ({ database: {}, dataRef: {} }));
 
 // ─── Import Firebase modules AFTER mocks ─────────────────────────────────────
-const { addSession, deleteWeek, deleteWeekWithSnapshot, restoreWeek, updateWeek } = await import('../lib/firebase/mutations/sessions');
+const { addSession, deleteWeekWithSnapshot, restoreWeek, updateWeek } = await import('../lib/firebase/mutations/sessions');
 const { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } = await import('../lib/firebase/mutations/players');
 const { addPayment, removePayment } = await import('../lib/firebase/mutations/payments');
 
@@ -350,28 +350,28 @@ describe('buildUIData — integration', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// deleteWeek
+// deleteWeekWithSnapshot
 // ══════════════════════════════════════════════════════════════════════════════
 
-describe('deleteWeek', () => {
+describe('deleteWeekWithSnapshot — usuwanie', () => {
   beforeEach(() => mockSaveData.mockClear());
 
   it('removes only the requested week', async () => {
     seed({ weeks: [{ id: 'w1' }, { id: 'w2' }, { id: 'w3' }] });
-    await deleteWeek('w2');
+    await deleteWeekWithSnapshot('w2');
     expect(mockSaveData.mock.calls[0][0].weeks.map(w => w.id)).toEqual(['w1', 'w3']);
   });
 
   it('leaves the payments ledger untouched', async () => {
     const payments = { Alice: [{ id: 'p1', amount: 30, date: '2025-01-02' }] };
     seed({ weeks: [{ id: 'w1' }, { id: 'w2' }], payments });
-    await deleteWeek('w1');
+    await deleteWeekWithSnapshot('w1');
     expect(mockSaveData.mock.calls[0][0].payments).toEqual(payments);
   });
 
   it('non-existent weekId returns error', async () => {
     seed({ weeks: [{ id: 'w1' }] });
-    const result = await deleteWeek('FAKE_ID');
+    const result = await deleteWeekWithSnapshot('FAKE_ID');
     expect(result.success).toBe(false);
     expect(result.error).toBeTruthy();
   });
