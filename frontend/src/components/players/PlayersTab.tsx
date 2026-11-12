@@ -7,7 +7,7 @@ import { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, save
 import { SOUND_TYPES, ORGANIZER_NAME } from '@/constants';
 import { createPlayerColorMap } from '@/constants/colors';
 import { FONT, TEXT, CLIP, CONTENT_WIDTH } from '@/constants/styles';
-import { MAX_PLAYER_NAME_LENGTH } from '@/utils/validation';
+import { MAX_PLAYER_NAME_LENGTH, hasForbiddenKeyChars, FORBIDDEN_NAME_CHARS_MESSAGE } from '@/utils/validation';
 import { useToast } from '../common/Toast';
 import { PasswordModal, SectionHeader, PanelHeader } from '../common/SharedUI';
 import { InlineSpinner } from '../common/LoadingSkeleton';
@@ -64,6 +64,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
   const nameError = !submitted ? null
     : trimmedName === '' ? 'Wpisz imię gracza'
       : trimmedName.length > MAX_PLAYER_NAME_LENGTH ? `Imię może mieć najwyżej ${MAX_PLAYER_NAME_LENGTH} znaków`
+        : hasForbiddenKeyChars(trimmedName) ? FORBIDDEN_NAME_CHARS_MESSAGE
         : knownNames.some(n => n.toLowerCase() === trimmedName.toLowerCase())
           ? ((deletedPlayers ?? []).some(n => n.toLowerCase() === trimmedName.toLowerCase())
             ? 'Taki gracz jest w rezerwie — przywróć go z listy poniżej'
@@ -74,7 +75,7 @@ export default function PlayersTab({ players, deletedPlayers, defaultMultiPlayer
     e.preventDefault();
     setSubmitted(true);
     const duplicate = knownNames.some(n => n.toLowerCase() === trimmedName.toLowerCase());
-    if (!trimmedName || trimmedName.length > MAX_PLAYER_NAME_LENGTH || duplicate) return;
+    if (!trimmedName || trimmedName.length > MAX_PLAYER_NAME_LENGTH || hasForbiddenKeyChars(trimmedName) || duplicate) return;
     if (isAddingPlayer) return;
     setIsAddingPlayer(true);
     try {

@@ -42,6 +42,26 @@ export function normalizePlayerName(value: unknown): string | null {
   return trimmed;
 }
 
+/**
+ * Komunikat dla imienia ze znakiem, którego Firebase nie przyjmie w kluczu.
+ * Jedno zdanie dla formularza i mutacji, żeby nie rozjechały się ze sobą.
+ */
+export const FORBIDDEN_NAME_CHARS_MESSAGE =
+  'Imię nie może zawierać znaków . # $ / [ ] — wpisz np. „Kuba K” zamiast „Kuba K.”';
+
+/**
+ * Czy imię zawiera znak niedozwolony w kluczu Firebase (`. # $ / [ ]` i znaki
+ * sterujące). Imię jest kluczem w `payments` i `playerJoinDate`, więc bez tej
+ * kontroli „Kuba K.” kończyło się surowym, angielskim błędem SDK.
+ */
+export function hasForbiddenKeyChars(name: string): boolean {
+  for (const ch of name) {
+    const code = ch.charCodeAt(0);
+    if (code < 32 || code === 127 || '.#$/[]'.includes(ch)) return true;
+  }
+  return false;
+}
+
 /** Lista graczy bez duplikatów, pustych wpisów i wartości nie-tekstowych. */
 export function normalizePlayerList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];

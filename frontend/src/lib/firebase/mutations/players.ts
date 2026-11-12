@@ -1,5 +1,7 @@
 import { todayISO } from '@/utils/id';
-import { normalizePlayerName, normalizePlayerList } from '@/utils/validation';
+import {
+  normalizePlayerName, normalizePlayerList, hasForbiddenKeyChars, FORBIDDEN_NAME_CHARS_MESSAGE,
+} from '@/utils/validation';
 import { calculateDebt } from '@/utils/debt';
 import { withTransaction, reject } from '../transaction';
 import type { RawAppData, TransactionResult } from '@/types/domain';
@@ -15,6 +17,9 @@ export async function addPlayer(name: string): Promise<TransactionResult> {
   const trimmed = normalizePlayerName(name);
   if (!trimmed) {
     return { success: false, error: 'Nazwa gracza nie może być pusta' };
+  }
+  if (hasForbiddenKeyChars(trimmed)) {
+    return { success: false, error: FORBIDDEN_NAME_CHARS_MESSAGE };
   }
 
   // Liczone PRZED transakcją: Firebase może uruchomić callback wielokrotnie,

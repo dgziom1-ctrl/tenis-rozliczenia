@@ -6,7 +6,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   isValidMoney, isPositiveMoney, isValidISODate,
-  normalizePlayerName, normalizePlayerList, MAX_PLAYER_NAME_LENGTH,
+  normalizePlayerName, normalizePlayerList, MAX_PLAYER_NAME_LENGTH, hasForbiddenKeyChars,
 } from '../utils/validation';
 import { routeFromNotificationUrl } from '../utils/notificationRoute';
 import { copyToClipboard } from '../utils/clipboard';
@@ -51,6 +51,17 @@ describe('nazwy graczy', () => {
     expect(normalizePlayerName(42)).toBeNull();
     expect(normalizePlayerName('x'.repeat(MAX_PLAYER_NAME_LENGTH))).toHaveLength(MAX_PLAYER_NAME_LENGTH);
     expect(normalizePlayerName('x'.repeat(MAX_PLAYER_NAME_LENGTH + 1))).toBeNull();
+  });
+
+  // Imię jest kluczem w `payments` i `playerJoinDate` — Firebase odrzuca w
+  // kluczach `. # $ / [ ]` i znaki sterujące surowym błędem po angielsku.
+  it('wykrywa znaki niedozwolone w kluczu Firebase', () => {
+    for (const bad of ['Kuba K.', 'A#1', 'Ola$', 'Ala/Ola', '[Ala]', 'Ala\tOla']) {
+      expect(hasForbiddenKeyChars(bad)).toBe(true);
+    }
+    for (const ok of ['Kuba K', 'Łukasz', 'Ana-María', "O'Neil", 'Ala (rezerwa)']) {
+      expect(hasForbiddenKeyChars(ok)).toBe(false);
+    }
   });
 
   it('lista bez duplikatów (także po przycięciu), pustych wpisów i nie-tekstów', () => {

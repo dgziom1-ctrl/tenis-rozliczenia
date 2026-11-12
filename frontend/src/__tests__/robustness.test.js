@@ -507,6 +507,13 @@ describe('addPlayer — robustness', () => {
   it('rejects whitespace-only',                 async () => expect((await addPlayer('   ')).success).toBe(false));
   it('rejects null',                            async () => expect((await addPlayer(null)).success).toBe(false));
 
+  it('odrzuca imię z kropką po polsku, zanim dotknie bazy', async () => {
+    const r = await addPlayer('Kuba K.');
+    expect(r.success).toBe(false);
+    expect(r.error).toMatch(/nie może zawierać znaków/);
+    expect(mockSaveData).not.toHaveBeenCalled();
+  });
+
   // Data zamiast indeksu sesji: indeks przestawał się zgadzać po każdym
   // usunięciu lub wstecznym dopisaniu sesji, więc frekwencja liczyła się
   // od złego momentu.
