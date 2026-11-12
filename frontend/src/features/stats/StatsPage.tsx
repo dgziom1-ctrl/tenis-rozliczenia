@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate } from 'react-router';
 import { readStorage, writeStorage } from '@/utils/storage';
+import { signalAppReady } from '@/utils/bootRecovery';
 import { isOptedOut, setOptOut } from '@/lib/analytics/identity';
 import { STATS_PATH } from '@/lib/analytics/statsRoute';
 import { fetchStats, StatsAuthError, type StatsData } from './statsApi';
@@ -71,6 +72,10 @@ export default function StatsPage() {
     const timer = setInterval(() => { if (document.visibilityState === 'visible') void load(); }, REFRESH_MS);
     return () => { clearInterval(timer); abortRef.current?.abort(); };
   }, [load]);
+
+  // Panel żyje poza `AppShell`, który normalnie zgłasza udany start. Bez tego straż
+  // startu (`boot-guard.js`) po 15 s uznaje start za nieudany i pokazuje ekran naprawy.
+  useEffect(() => { signalAppReady(); }, []);
 
   useEffect(() => {
     document.title = 'Statystyki';
