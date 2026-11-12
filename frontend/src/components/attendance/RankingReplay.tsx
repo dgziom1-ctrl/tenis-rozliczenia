@@ -96,8 +96,9 @@ export default function RankingReplay({ players, history }: RankingReplayProps) 
   const [playing, setPlaying] = useState(false);
   // Domyślnie pokazujemy stan końcowy (aktualny ranking); Play odtwarza od początku.
   const [t, setT] = useState(Math.max(0, last));
+  // Pętla rAF czyta aktualny czas z refa; synchronizujemy go po renderze, nie w trakcie.
   const tRef = useRef(t);
-  tRef.current = t;
+  useEffect(() => { tRef.current = t; }, [t]);
 
   // Zmiana zakresu danych (np. inny sezon) ustawia replay na koniec nowego zakresu.
   useEffect(() => { setT(Math.max(0, frames.length - 1)); setPlaying(false); }, [frames]);
@@ -109,6 +110,7 @@ export default function RankingReplay({ players, history }: RankingReplayProps) 
       // Bez animacji: skok co tydzień.
       const id = window.setInterval(() => {
         const next = Math.floor(tRef.current) + 1;
+        tRef.current = Math.min(next, last);
         if (next >= last) { setT(last); setPlaying(false); } else setT(next);
       }, stepMs);
       return () => window.clearInterval(id);
@@ -121,6 +123,7 @@ export default function RankingReplay({ players, history }: RankingReplayProps) 
       const dt = prev === null ? 0 : Math.min(64, now - prev);
       prev = now;
       const next = tRef.current + dt / stepMs;
+      tRef.current = Math.min(next, last);
       if (next >= last) { setT(last); setPlaying(false); return; }
       setT(next);
       raf = requestAnimationFrame(tick);
