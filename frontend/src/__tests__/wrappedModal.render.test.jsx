@@ -3,18 +3,11 @@ import WrappedModal from '../components/attendance/WrappedModal';
 import { WRAPPED_DEMO_STATS } from './fixtures/wrappedDemoStats';
 
 describe('WrappedModal render', () => {
-  it('renders slide intro text in portal', () => {
+  it('renderuje pierwszy slajd w portalu pełnoekranowego okna', () => {
     render(<WrappedModal stats={WRAPPED_DEMO_STATS} onClose={() => {}} />);
-    const overlay = document.querySelector('.modal-overlay');
-    const bare = document.querySelector('.modal-bare-fill');
-    expect(overlay).toBeTruthy();
-    expect(bare).toBeTruthy();
+    expect(document.querySelector('.modal-overlay')).toBeTruthy();
+    expect(document.querySelector('.modal-bare-fill')).toBeTruthy();
     expect(document.body.textContent).toContain('2025');
     expect(document.body.textContent).toMatch(/podsumowanie roku/i);
-
-    const slideWrap = bare?.querySelector('[style*="wm-fadeScale"]') ?? bare?.children[2];
-    const styles = slideWrap instanceof HTMLElement ? getComputedStyle(slideWrap) : null;
-    // eslint-disable-next-line no-console
-    console.log('slide opacity', styles?.opacity, 'display', styles?.display);
   });
 });

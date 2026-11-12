@@ -1,15 +1,12 @@
 /**
- * SMOKE TESTS — IMPORTY I EKSPORTY
+ * SMOKE TESTS — STAŁE I NORMALIZACJA DANYCH
  *
- * Cel: upewnić się, że żaden moduł nie ma błędu składni, pustego importu
- * ani brakującego eksportu. Ten plik testów złapałby błąd `import {  } from 'lucide-react'`
- * który powodował crash apki — mimo że logika biznesowa była poprawna.
- *
- * Zasada: jeśli moduł ma błąd, vitest nie zdoła go zaimportować i test
- * automatycznie przepada z czytelnym komunikatem.
+ * Brakujące eksporty i puste importy łapie `npm run typecheck` (krok CI przed
+ * testami), więc tu zostają tylko sprawdzenia, których typy nie widzą:
+ * kolejność rang, normalizacja uszkodzonych danych z bazy, skale stylów.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 
 // ─── Mocki Firebase (wymagane przez wszystkie moduły firebase/*) ─────────────
 vi.mock('firebase/app',      () => ({ initializeApp: vi.fn(() => ({})) }));
@@ -30,60 +27,23 @@ vi.mock('firebase/messaging', () => ({
 // UTILITIES
 // ════════════════════════════════════════════════════════════════════════════
 
-describe('utils — eksporty modułów obliczeniowych', () => {
-  it.each([
-    ['../utils/money', ['roundToTwoDecimals', 'allocateExact', 'splitEqually', 'allocateNonNegative']],
-    ['../utils/sessionCost', ['getSessionShares', 'getPlayerSessionCost', 'getShareGroups']],
-    ['../utils/debt', ['calculateDebt', 'buildDebtDisplayData']],
-    ['../utils/rankings', ['calculatePlayerStats', 'assignRankingPlaces', 'computeRankingHistory']],
-    ['../utils/sessions', ['groupSessionsByMonth', 'groupHistoryByMonth']],
-    ['../utils/achievements', ['getPlayerAchievements']],
-  ])('%s eksportuje oczekiwane funkcje', async (path, expected) => {
-    const m = await import(/* @vite-ignore */ path);
-    for (const fn of expected) {
-      expect(m[fn], `brakuje eksportu: ${fn}`).toBeTypeOf('function');
-    }
-  });
-});
+describe('utils/id — identyfikatory i dzisiejsza data', () => {
+  afterEach(() => vi.useRealTimers());
 
-describe('utils/format.js — eksporty', () => {
-  it('eksportuje formatDate, formatAmount, formatAmountShort', async () => {
-    const m = await import('../utils/format');
-    expect(m.formatDate).toBeTypeOf('function');
-    expect(m.formatAmount).toBeTypeOf('function');
-    expect(m.formatAmountShort).toBeTypeOf('function');
-  });
-});
-
-describe('utils/id.js — eksporty i podstawowe działanie', () => {
-  it('eksportuje makeId i todayISO', async () => {
-    const { makeId, todayISO } = await import('../utils/id');
-    expect(makeId).toBeTypeOf('function');
-    expect(todayISO).toBeTypeOf('function');
-  });
-
-  it('makeId zwraca unikalny string przy każdym wywołaniu', async () => {
+  it('makeId zwraca niepusty, unikalny string przy każdym wywołaniu', async () => {
     const { makeId } = await import('../utils/id');
-    const ids = new Set(Array.from({ length: 100 }, () => makeId()));
-    expect(ids.size).toBe(100); // żadne dwa nie mogą być takie same
+    const ids = Array.from({ length: 100 }, () => makeId());
+    expect(ids.every(id => typeof id === 'string' && id.length > 0)).toBe(true);
+    expect(new Set(ids).size).toBe(100);
   });
 
-  it('makeId zwraca niepusty string', async () => {
-    const { makeId } = await import('../utils/id');
-    const id = makeId();
-    expect(typeof id).toBe('string');
-    expect(id.length).toBeGreaterThan(0);
-  });
-
-  it('todayISO zwraca format YYYY-MM-DD', async () => {
+  // Data lokalna, nie UTC: tuż po północy w Polsce `toISOString()` daje
+  // jeszcze wczorajszy dzień, a sesja zapisałaby się z błędną datą.
+  it('todayISO zwraca lokalną datę w formacie YYYY-MM-DD', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 0, 5, 0, 30));
     const { todayISO } = await import('../utils/id');
-    expect(todayISO()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-  });
-
-  it('todayISO zwraca dzisiejszą datę', async () => {
-    const { todayISO } = await import('../utils/id');
-    const today = new Date().toISOString().split('T')[0];
-    expect(todayISO()).toBe(today);
+    expect(todayISO()).toBe('2026-01-05');
   });
 });
 
@@ -92,20 +52,6 @@ describe('utils/id.js — eksporty i podstawowe działanie', () => {
 // ════════════════════════════════════════════════════════════════════════════
 
 describe('constants/index.js — struktura', () => {
-  it('TABS ma wszystkie zakładki', async () => {
-    const { TABS } = await import('../constants/index');
-    expect(Object.keys(TABS)).toEqual(
-      expect.arrayContaining(['DASHBOARD', 'ATTENDANCE', 'ADMIN', 'HISTORY', 'PLAYERS'])
-    );
-  });
-
-  it('SOUND_TYPES ma wszystkie typy dźwięków', async () => {
-    const { SOUND_TYPES } = await import('../constants/index');
-    expect(Object.keys(SOUND_TYPES)).toEqual(
-      expect.arrayContaining(['TAB', 'CLICK', 'SUCCESS', 'DELETE', 'COIN', 'ERROR', 'RANK1', 'STREAK'])
-    );
-  });
-
   it('RANKS ma 6 rang posortowanych malejąco po min', async () => {
     const { RANKS } = await import('../constants/index');
     expect(RANKS).toHaveLength(6);
@@ -130,12 +76,6 @@ describe('constants/index.js — struktura', () => {
     expect(MONTHS[11]).toBe('Grudzień');
   });
 
-  it('ORGANIZER_NAME jest niepustym stringiem', async () => {
-    const { ORGANIZER_NAME } = await import('../constants/index');
-    expect(ORGANIZER_NAME).toBeTypeOf('string');
-    expect(ORGANIZER_NAME.length).toBeGreaterThan(0);
-  });
-
   it('getRank zwraca rangę pasującą do procentu', async () => {
     const { getRank, RANKS } = await import('../constants/index');
     expect(getRank(100)).toBe(RANKS[0]); // najwyższa
@@ -143,24 +83,13 @@ describe('constants/index.js — struktura', () => {
     expect(getRank(75)).toBeDefined();
   });
 
-  it('SETTLED_THRESHOLD jest małą liczbą dodatnią', async () => {
-    const { SETTLED_THRESHOLD } = await import('../constants/index');
-    expect(SETTLED_THRESHOLD).toBeGreaterThan(0);
-    expect(SETTLED_THRESHOLD).toBeLessThan(1);
-  });
 });
 
 // ════════════════════════════════════════════════════════════════════════════
 // FIREBASE — MODUŁY
 // ════════════════════════════════════════════════════════════════════════════
 
-describe('lib/firebase/transforms.ts — eksporty', () => {
-  it('eksportuje buildUIData i normalizeRawData', async () => {
-    const m = await import('../lib/firebase/transforms');
-    expect(m.buildUIData).toBeTypeOf('function');
-    expect(m.normalizeRawData).toBeTypeOf('function');
-  });
-
+describe('lib/firebase/transforms.ts — normalizeRawData', () => {
   it('normalizeRawData zwraca kompletny obiekt gdy wejście jest puste', async () => {
     const { normalizeRawData } = await import('../lib/firebase/transforms');
     const result = normalizeRawData({});
@@ -247,33 +176,11 @@ describe('lib/firebase/transforms.ts — eksporty', () => {
   });
 });
 
-describe('lib/firebase/index.ts — eksporty', () => {
-  it('eksportuje wszystkie publiczne funkcje', async () => {
-    const m = await import('../lib/firebase/index');
-    const expected = [
-      'subscribeToData',
-      'database',
-      'addSession', 'updateWeek', 'deleteWeek',
-      'addPlayer', 'softDeletePlayer', 'restorePlayer', 'permanentDeletePlayer', 'saveDefaultMulti',
-      'addPayment', 'removePayment',
-    ];
-    for (const name of expected) {
-      expect(m[name], `brakuje eksportu: ${name}`).toBeDefined();
-    }
-  });
-});
-
 // ════════════════════════════════════════════════════════════════════════════
 // CONTEXT
 // ════════════════════════════════════════════════════════════════════════════
 
-describe('app/providers/themeContext.ts — eksporty', () => {
-  it('eksportuje ThemeContext i useThemeContext', async () => {
-    const m = await import('../app/providers/themeContext');
-    expect(m.ThemeContext).toBeDefined();
-    expect(m.useThemeContext).toBeTypeOf('function');
-  });
-
+describe('app/providers/themeContext.ts — bez równoległych tokenów', () => {
   // Kolory motywu żyją wyłącznie w zmiennych CSS. Równoległy zestaw tokenów
   // w TypeScripcie został usunięty: z 27 pól realnie czytane były 4, a te,
   // które miały ujednolicić modale, nie były używane w ogóle. Test pilnuje,

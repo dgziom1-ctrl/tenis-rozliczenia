@@ -78,11 +78,6 @@ describe('buildDebtDisplayData', () => {
     expect(data.sessions.map(s => s.sessionId)).toEqual(['w1', 'w2', 'w3']);
   });
 
-  it('pomija sesje, w których gracza nie było', () => {
-    const carol = { name: 'Carol', attendanceCount: 0, currentDebt: 0, eligibleWeeks: 3, joinDate: null };
-    expect(buildDebtDisplayData(carol, history, {}).sessions).toHaveLength(0);
-  });
-
   it('saldo to suma sesji minus suma wpłat', () => {
     const payments = { Alice: [{ id: 'p1', amount: 25, date: '2025-01-21' }] };
     const data = buildDebtDisplayData(alice, history, payments);

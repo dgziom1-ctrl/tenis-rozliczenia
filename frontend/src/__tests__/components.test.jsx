@@ -11,7 +11,7 @@
  */
 
 import { useState } from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -64,13 +64,8 @@ const alaColor = createPlayerColorMap(['Ala']).get('Ala');
 describe('App — smoke test', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('🔴 renderuje się bez crashu', () => {
-    // Najważniejszy test w całej apce.
-    // Gdyby istniał przed naszą naprawą, od razu by wykrył problem.
-    expect(() => render(<App />)).not.toThrow();
-  });
-
-  it('pokazuje ekran ładowania na starcie (zanim Firebase odpowie)', () => {
+  it('🔴 renderuje się i pokazuje ekran ładowania, zanim Firebase odpowie', () => {
+    // Najważniejszy test w całej apce: jeśli `render(<App />)` rzuci, przepada.
     render(<App />);
     // Tekst na ekranie ładowania
     expect(screen.getByText('CYBER-PONK')).toBeInTheDocument();
@@ -90,6 +85,10 @@ describe('App — smoke test', () => {
 // ════════════════════════════════════════════════════════════════════════════
 
 describe('ErrorBoundary — zachowanie', () => {
+  // Błędy rzucane tu celowo — React i ErrorBoundary logują je do konsoli.
+  beforeEach(() => { vi.spyOn(console, 'error').mockImplementation(() => {}); });
+  afterEach(() => { vi.restoreAllMocks(); });
+
   it('renderuje children gdy nie ma błędu', () => {
     render(
       <ErrorBoundary>
@@ -119,16 +118,29 @@ describe('ErrorBoundary — zachowanie', () => {
   });
 
   it('ukrywa szczegóły błędu w trybie produkcyjnym', () => {
-    // jsdom domyślnie nie ustawia NODE_ENV=development
+    // Vitest działa w trybie `test`, więc gałąź `MODE === 'development'` jest wyłączona.
     const Throw = () => { throw new Error('sekretny błąd'); };
 
     render(<ErrorBoundary><Throw /></ErrorBoundary>);
-    // Szczegóły błędu powinny być ukryte (process.env.NODE_ENV !== 'development')
     expect(screen.queryByText(/sekretny błąd/)).not.toBeInTheDocument();
   });
 
-  it('nie crashuje bez children', () => {
-    expect(() => render(<ErrorBoundary />)).not.toThrow();
+  // Po wdrożeniu stara powłoka szuka nieistniejących paczek. Bez strażnika
+  // startu (`window.__cpBoot`) naprawa się nie uruchomi, więc użytkownik musi
+  // zobaczyć, że to aktualizacja, a nie zwykły błąd w kodzie.
+  it('nieaktualny build opisuje jako aktualizację, nie awarię', () => {
+    window.__cpBoot = {
+      isStaleBuildError: () => true, heal: () => false,
+      ready: vi.fn(), hardReset: vi.fn(), rescue: vi.fn(), stage: () => 0,
+    };
+    const Throw = () => { throw new Error('Failed to fetch dynamically imported module'); };
+    try {
+      render(<ErrorBoundary><Throw /></ErrorBoundary>);
+      expect(screen.getByText('Aplikacja się zaktualizowała')).toBeInTheDocument();
+      expect(screen.queryByText('Coś poszło nie tak')).not.toBeInTheDocument();
+    } finally {
+      delete window.__cpBoot;
+    }
   });
 });
 
@@ -137,13 +149,6 @@ describe('ErrorBoundary — zachowanie', () => {
 // ════════════════════════════════════════════════════════════════════════════
 
 describe('Navigation — renderowanie zakładek', () => {
-  it('renderuje się bez crashu', () => {
-    const setTab = vi.fn();
-    expect(() => render(
-      <Navigation activeTab={TABS.DASHBOARD} setActiveTab={setTab} />
-    )).not.toThrow();
-  });
-
   it('pokazuje wszystkie 5 zakładek', () => {
     render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={vi.fn()} />);
     // Komponent renderuje dwie nawigacje (desktop + mobile) — obie zawierają te same
@@ -153,16 +158,6 @@ describe('Navigation — renderowanie zakładek', () => {
     expect(screen.getAllByText(/^dodaj$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^historia$/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/^gracze$/i).length).toBeGreaterThan(0);
-  });
-
-  it('wywołuje setActiveTab po kliknięciu zakładki', async () => {
-    const user = userEvent.setup();
-    const setTab = vi.fn();
-
-    render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={setTab} />);
-    // Klikamy pierwszy znaleziony przycisk z tym tekstem (desktop nav)
-    await user.click(screen.getAllByText(/^historia$/i)[0]);
-    expect(setTab).toHaveBeenCalledWith(TABS.HISTORY);
   });
 
   it('zmienia aktywną zakładkę po kliknięciu każdej', async () => {
@@ -194,10 +189,6 @@ describe('UndoBar — wyświetlanie i interakcja', () => {
     onUndo: vi.fn(),
   };
 
-  it('renderuje się bez crashu', () => {
-    expect(() => render(<UndoBar {...defaultProps} />)).not.toThrow();
-  });
-
   it('pokazuje wiadomość', () => {
     render(<UndoBar {...defaultProps} />);
     expect(screen.getByText('Opłacono: Alice')).toBeInTheDocument();
@@ -214,7 +205,7 @@ describe('UndoBar — wyświetlanie i interakcja', () => {
 
   it('pokazuje licznik sekund', () => {
     render(<UndoBar {...defaultProps} secondsLeft={4} />);
-    expect(screen.getByText(/4/)).toBeInTheDocument();
+    expect(screen.getByText('(4s)')).toBeInTheDocument();
   });
 
   it('pasek postępu skaluje się przez transform, nie przez width', () => {

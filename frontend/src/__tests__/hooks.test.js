@@ -56,16 +56,7 @@ describe('usePushNotifications — ochrona przed brakiem API', () => {
     }
   });
 
-  it('🔴 NIE CRASHUJE gdy Notification API jest niedostępne (useState)', async () => {
-    // Scenariusz: iOS Safari w trybie przeglądarki (nie PWA).
-    // useState(Notification.permission) bez guard exploduje przy inicjalizacji.
-    delete globalThis.Notification;
-
-    const { usePushNotifications } = await import('../hooks/usePushNotifications');
-    expect(() => renderHook(() => usePushNotifications())).not.toThrow();
-  });
-
-  it('🔴 NIE CRASHUJE gdy Notification API jest niedostępne (useEffect)', async () => {
+  it('🔴 bez Notification API nie rzuca ani przy starcie, ani w efekcie', async () => {
     // Drugi bug: setPermission(Notification.permission) wewnątrz useEffect
     // wykonuje się po zamontowaniu — bez guard też rzucał TypeError na iOS.
     delete globalThis.Notification;
@@ -79,22 +70,6 @@ describe('usePushNotifications — ochrona przed brakiem API', () => {
     // Jeśli doszliśmy tutaj — useEffect nie rzucił wyjątku
     expect(hook.result.current.permission).toBe('default');
     expect(hook.result.current.isSupported).toBe(false);
-  });
-
-  it('zwraca permission="default" gdy Notification API jest niedostępne', async () => {
-    delete globalThis.Notification;
-
-    const { usePushNotifications } = await import('../hooks/usePushNotifications');
-    const { result } = renderHook(() => usePushNotifications());
-    expect(result.current.permission).toBe('default');
-  });
-
-  it('zwraca isSupported=false gdy brakuje Notification', async () => {
-    delete globalThis.Notification;
-
-    const { usePushNotifications } = await import('../hooks/usePushNotifications');
-    const { result } = renderHook(() => usePushNotifications());
-    expect(result.current.isSupported).toBe(false);
   });
 
   it('zwraca isSupported=false gdy brakuje PushManager', async () => {
@@ -121,12 +96,6 @@ describe('usePushNotifications — ochrona przed brakiem API', () => {
     const { usePushNotifications } = await import('../hooks/usePushNotifications');
     const { result } = renderHook(() => usePushNotifications());
     expect(result.current.permission).toBe('denied');
-  });
-
-  it('zwraca registerToken jako funkcję', async () => {
-    const { usePushNotifications } = await import('../hooks/usePushNotifications');
-    const { result } = renderHook(() => usePushNotifications());
-    expect(result.current.registerToken).toBeTypeOf('function');
   });
 
   it('registerToken zwraca error gdy isSupported=false', async () => {
@@ -324,5 +293,62 @@ describe('useUndoTimer — odliczanie i resetowanie', () => {
     // Nowy timer zaczyna od 5, nie kontynuuje od 3
     expect(result.current.undoToast.secondsLeft).toBe(5);
     expect(result.current.undoToast.payload.playerName).toBe('Bob');
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// usePaymentUndo — cofnięcie zapisanej wpłaty
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('usePaymentUndo — cofnięcie wpłaty', () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  async function setup(onRemovePayment) {
+    const { usePaymentUndo } = await import('../hooks/usePaymentUndo');
+    return renderHook(() => usePaymentUndo({ playerName: 'Ala', onRemovePayment }));
+  }
+
+  it('udane cofnięcie usuwa dokładnie tę wpłatę i chowa pasek', async () => {
+    const onRemovePayment = vi.fn().mockResolvedValue({ success: true });
+    const { result } = await setup(onRemovePayment);
+
+    act(() => result.current.startPaymentUndo({ id: 'p1', amount: 30 }));
+    expect(result.current.isActive).toBe(true);
+    expect(result.current.secondsLeft).toBe(8);
+
+    await act(async () => { await result.current.handleUndoPayment(); });
+    expect(onRemovePayment).toHaveBeenCalledWith('Ala', 'p1');
+    expect(result.current.isActive).toBe(false);
+    expect(result.current.lastPayment).toBeNull();
+  });
+
+  // Gdyby po błędzie pasek zniknął, wpłata zostałaby w bazie bez możliwości
+  // cofnięcia — a użytkownik myślałby, że ją cofnął.
+  it('nieudane cofnięcie przywraca pasek z pełnym czasem', async () => {
+    const onRemovePayment = vi.fn().mockResolvedValue({ success: false, error: 'offline' });
+    const { result } = await setup(onRemovePayment);
+
+    act(() => result.current.startPaymentUndo({ id: 'p1', amount: 30 }));
+    act(() => vi.advanceTimersByTime(3000));
+    await act(async () => { await result.current.handleUndoPayment(); });
+
+    expect(result.current.isActive).toBe(true);
+    expect(result.current.secondsLeft).toBe(8);
+    expect(result.current.lastPayment).toEqual({ id: 'p1', amount: 30 });
+    expect(result.current.isUndoing).toBe(false);
+  });
+
+  it('po upływie czasu zapomina wpłatę i nic nie usuwa', async () => {
+    const onRemovePayment = vi.fn();
+    const { result } = await setup(onRemovePayment);
+
+    act(() => result.current.startPaymentUndo({ id: 'p1', amount: 30 }));
+    act(() => vi.advanceTimersByTime(8000));
+
+    expect(result.current.isActive).toBe(false);
+    expect(result.current.lastPayment).toBeNull();
+    await act(async () => { await result.current.handleUndoPayment(); });
+    expect(onRemovePayment).not.toHaveBeenCalled();
   });
 });

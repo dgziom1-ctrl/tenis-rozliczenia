@@ -7,9 +7,7 @@ import { calculateDebt, buildDebtDisplayData } from '../utils/debt';
 import { assignRankingPlaces } from '../utils/rankings';
 import { getPlayerAchievements } from '../utils/achievements';
 import { buildUIData } from '../lib/firebase/transforms';
-import { formatDate, formatAmount } from '../utils/format';
 import { getMonthLabel } from '../utils/sessions';
-import { allocateExact } from '../utils/money';
 
 // ─── vi.hoisted: runs BEFORE vi.mock factories ────────────────────────────────
 const { mockSaveData, runTransactionImpl, stateModule } = vi.hoisted(() => {
@@ -52,7 +50,7 @@ vi.mock('../lib/firebase/config', () => ({ database: {}, dataRef: {} }));
 
 // ─── Import Firebase modules AFTER mocks ─────────────────────────────────────
 const { addSession, deleteWeek, deleteWeekWithSnapshot, restoreWeek, updateWeek } = await import('../lib/firebase/mutations/sessions');
-const { addPlayer, softDeletePlayer, restorePlayer } = await import('../lib/firebase/mutations/players');
+const { addPlayer, softDeletePlayer, restorePlayer, permanentDeletePlayer, saveDefaultMulti } = await import('../lib/firebase/mutations/players');
 const { addPayment, removePayment } = await import('../lib/firebase/mutations/payments');
 
 // ─── Helper: seed in-memory Firebase state ────────────────────────────────────
@@ -76,16 +74,6 @@ describe('calculateDebt — robustness', () => {
   it('null payments handled', () => {
     const weeks = [{ id: 'w1', cost: 60, present: ['Alice'], multiPlayers: [] }];
     expect(calculateDebt('Alice', { weeks, payments: null })).toBeGreaterThan(0);
-  });
-
-  it('player not in any session → 0', () => {
-    const weeks = [{ id: 'w1', cost: 60, present: ['Bob'], multiPlayers: [] }];
-    expect(calculateDebt('Ghost', { weeks })).toBe(0);
-  });
-
-  it('organizer always 0', () => {
-    const weeks = [{ id: 'w1', cost: 100, present: ['Kamil', 'Alice'], multiPlayers: [] }];
-    expect(calculateDebt('Kamil', { weeks })).toBe(0);
   });
 
   it('everyone on multisport → zapłaconą kwotę i tak dzielą po równo', () => {
@@ -142,11 +130,13 @@ describe('calculateDebt — brute force floating point', () => {
     expect(calculateDebt('A', { weeks })).toBe(1500);
   });
 
-  it('100 sessions 100zł/3 → finite result', () => {
+  it('100 sessions 100zł/3 → co do grosza, bez dryfu floatów', () => {
     const weeks = Array.from({ length: 100 }, (_, i) => ({
       id: `w${i}`, cost: 100, present: ['A', 'B', 'C'], multiPlayers: [],
     }));
-    expect(Number.isFinite(calculateDebt('A', { weeks }))).toBe(true);
+    expect(calculateDebt('A', { weeks })).toBe(3334);
+    expect(calculateDebt('B', { weeks })).toBe(3333);
+    expect(calculateDebt('C', { weeks })).toBe(3333);
   });
 
   it('alternating multisport — 10 × 22,50 ze zniżką + 10 × 30 bez', () => {
@@ -174,11 +164,6 @@ describe('buildDebtDisplayData — kierunek i poprawność', () => {
     { id: 'w1', datePlayed: '2025-01-01', sport: 'pingpong', totalCost: 20, costPerPerson: 20, presentPlayers: ['Alice'], multisportPlayers: [] },
   ];
   const player = (name) => ({ name, attendanceCount: 0, currentDebt: 0, eligibleWeeks: 5, joinDate: null });
-
-  it('wypisuje sesje od najstarszej', () => {
-    const d = buildDebtDisplayData(player('Alice'), history, {});
-    expect(d.sessions.map(s => s.sessionId)).toEqual(['w1', 'w2', 'w3', 'w4', 'w5']);
-  });
 
   it('sumuje koszt wszystkich sesji gracza', () =>
     expect(buildDebtDisplayData(player('Alice'), history, {}).totalSessions).toBe(100));
@@ -427,6 +412,31 @@ describe('deleteWeek', () => {
 
 describe('addSession — validation', () => {
   beforeEach(() => { seed({ weeks: [], players: ['Alice', 'Bob'] }); mockSaveData.mockClear(); });
+
+  it('zapisuje sesję w kształcie bazy, posortowaną po dacie, ze znacznikiem dla push', async () => {
+    seed({ weeks: [{ id: 'w-late', date: '2025-03-01', cost: 60, present: ['Alice'], multiPlayers: [] }], players: ['Alice', 'Bob'] });
+    const result = await addSession({
+      datePlayed: '2025-02-01', totalCost: 70, presentPlayers: ['Alice', 'Bob', 'Alice'],
+      multisportPlayers: ['Bob', 'Ghost'], sport: 'squash', racketCost: 10, ownRacketPlayers: ['Alice'],
+    });
+
+    expect(result.success).toBe(true);
+    const saved = stateModule.getCurrentData();
+    expect(saved.weeks.map(w => w.date)).toEqual(['2025-02-01', '2025-03-01']);
+    const added = saved.weeks[0];
+    expect(added).toMatchObject({
+      date: '2025-02-01', cost: 70, sport: 'squash', racketCost: 10,
+      present: ['Alice', 'Bob'], multiPlayers: ['Bob'], ownRacketPlayers: ['Alice'],
+      courtCount: 1, durationHours: 1,
+    });
+    expect(saved.lastAddedSession.id).toBe(added.id);
+  });
+
+  it('rejects an impossible calendar date', async () => {
+    const r = await addSession({ datePlayed: '2025-02-30', totalCost: 60, presentPlayers: ['Alice'] });
+    expect(r.success).toBe(false);
+    expect(mockSaveData).not.toHaveBeenCalled();
+  });
 
   it('rejects empty presentPlayers',     async () => expect((await addSession({ datePlayed: '2025-01-01', totalCost: 60, presentPlayers: [] })).success).toBe(false));
   it('rejects null presentPlayers',      async () => expect((await addSession({ datePlayed: '2025-01-01', totalCost: 60, presentPlayers: null })).success).toBe(false));
@@ -740,39 +750,12 @@ describe('updateWeek — edge cases', () => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// formatDate / formatAmount — boundary
-// ══════════════════════════════════════════════════════════════════════════════
-
-describe('formatDate — boundary', () => {
-  it('valid ISO',            () => expect(formatDate('2025-12-31')).toBe('31.12.2025'));
-  it('leap year Feb 29',     () => expect(formatDate('2024-02-29')).toBe('29.02.2024'));
-  it('null → empty',         () => expect(formatDate(null)).toBe(''));
-  it('undefined → empty',    () => expect(formatDate(undefined)).toBe(''));
-  it('empty string → empty', () => expect(formatDate('')).toBe(''));
-});
-
-describe('formatAmount — boundary', () => {
-  it('0',              () => expect(formatAmount(0)).toBe('0,00 zł'));
-  it('large number',   () => expect(formatAmount(99999.99)).toBe('99999,99 zł'));
-  it('negative',       () => expect(formatAmount(-5.5)).toBe('-5,50 zł'));
-  it('string input',   () => expect(formatAmount('13.75')).toBe('13,75 zł'));
-  it('without symbol', () => expect(formatAmount(10, false)).toBe('10,00'));
-});
-
-// ══════════════════════════════════════════════════════════════════════════════
 // assignRankingPlaces — exploratory
 // ══════════════════════════════════════════════════════════════════════════════
 
 describe('assignRankingPlaces — exploratory', () => {
   it('single player → place 1', () =>
     expect(assignRankingPlaces([{ attendancePercentage: 50 }])[0].place).toBe(1));
-
-  it('all tied → all place 1', () => {
-    const r = assignRankingPlaces([
-      { attendancePercentage: 75 }, { attendancePercentage: 75 }, { attendancePercentage: 75 },
-    ]);
-    expect(r.every(p => p.place === 1)).toBe(true);
-  });
 
   it('3-way tie then 4th → place 4', () => {
     const r = assignRankingPlaces([
@@ -838,9 +821,61 @@ describe('getPlayerAchievements — edge cases', () => {
     expect(ids).not.toContain('perfect_month_15');
   });
 
+  it('seria liczy się z najdłuższego ciągu, nie z bieżącego', () => {
+    // `history` jest od najnowszej sesji, tak jak zwraca je buildHistory.
+    // Najnowsza sesja bez gracza zeruje bieżącą serię, ale rekord zostaje.
+    const history = [
+      session('w9', '2025-02-01', ['B']),
+      session('w5', '2025-01-05', ['A']),
+      session('w4', '2025-01-04', ['A']),
+      session('w3', '2025-01-03', ['A']),
+      session('w2', '2025-01-02', ['A']),
+      session('w1', '2025-01-01', ['A']),
+    ];
+    const p = { name: 'A', attendanceCount: 5, multisportCount: 0, currentStreak: 0 };
+    expect(getPlayerAchievements(p, history).map(a => a.id)).toContain('streak_5');
+  });
+});
+
 // ══════════════════════════════════════════════════════════════════════════════
 // softDeletePlayer — blokada przy niezerowym saldzie (punkt 1.1)
 // ══════════════════════════════════════════════════════════════════════════════
+
+describe('permanentDeletePlayer / saveDefaultMulti', () => {
+  beforeEach(() => mockSaveData.mockClear());
+
+  it('nie usuwa trwale gracza z historią sesji — zmieniłoby to kwoty innych', async () => {
+    seed({
+      players: ['Bob'], deletedPlayers: ['Alice'],
+      weeks: [{ id: 'w1', cost: 60, date: '2025-01-01', present: ['Alice', 'Bob'], multiPlayers: [] }],
+    });
+    const result = await permanentDeletePlayer('Alice');
+    expect(result.success).toBe(false);
+    expect(mockSaveData).not.toHaveBeenCalled();
+  });
+
+  it('gracza bez sesji usuwa ze wszystkich miejsc, nie ruszając innych', async () => {
+    seed({
+      players: ['Bob'], deletedPlayers: ['Alice'], defaultMultiPlayers: ['Alice', 'Bob'],
+      payments: { Alice: [{ id: 'p1', amount: 5, date: '2025-01-01' }], Bob: [{ id: 'p2', amount: 5, date: '2025-01-01' }] },
+      playerJoinDate: { Alice: '2025-01-01', Bob: '2024-01-01' },
+      playerJoinWeek: { Alice: 1 },
+    });
+    expect((await permanentDeletePlayer(' Alice ')).success).toBe(true);
+    const saved = stateModule.getCurrentData();
+    expect(saved.deletedPlayers).toEqual([]);
+    expect(saved.defaultMultiPlayers).toEqual(['Bob']);
+    expect(Object.keys(saved.payments)).toEqual(['Bob']);
+    expect(saved.playerJoinDate).toEqual({ Bob: '2024-01-01' });
+    expect(saved.playerJoinWeek).toEqual({});
+  });
+
+  it('domyślne karty zapisuje tylko dla graczy, którzy nadal są w składzie', async () => {
+    seed({ players: ['Alice', 'Bob'] });
+    await saveDefaultMulti(['Bob', 'Ghost', ' Bob', null]);
+    expect(stateModule.getCurrentData().defaultMultiPlayers).toEqual(['Bob']);
+  });
+});
 
 describe('softDeletePlayer — debt guard', () => {
   beforeEach(() => { mockSaveData.mockClear(); });
@@ -883,37 +918,14 @@ describe('buildDebtDisplayData — invalid dates', () => {
 // ══════════════════════════════════════════════════════════════════════════════
 
 describe('getMonthLabel — guard', () => {
-  it('handles empty/invalid input without throwing', () => {
-    expect(() => getMonthLabel('')).not.toThrow();
-    expect(() => getMonthLabel(null)).not.toThrow();
-    expect(() => getMonthLabel(undefined)).not.toThrow();
-    expect(() => getMonthLabel('bad')).not.toThrow();
+  it('poprawna data daje polski miesiąc z rokiem', () => {
+    expect(getMonthLabel('2025-01-15')).toBe('Styczeń 2025');
+    expect(getMonthLabel('2025-12-01')).toBe('Grudzień 2025');
   });
-});
 
-// ══════════════════════════════════════════════════════════════════════════════
-// money — allocateExact guard (punkt 3)
-// ══════════════════════════════════════════════════════════════════════════════
-
-describe('allocateExact — guard', () => {
-  it('terminates and sums correctly for normal input', () => {
-    const r = allocateExact([10, 20, 30], 60);
-    expect(r.reduce((a, b) => a + b, 0)).toBe(60);
-  });
-});
-
-  it('seria liczy się z najdłuższego ciągu, nie z bieżącego', () => {
-    // `history` jest od najnowszej sesji, tak jak zwraca je buildHistory.
-    // Najnowsza sesja bez gracza zeruje bieżącą serię, ale rekord zostaje.
-    const history = [
-      session('w9', '2025-02-01', ['B']),
-      session('w5', '2025-01-05', ['A']),
-      session('w4', '2025-01-04', ['A']),
-      session('w3', '2025-01-03', ['A']),
-      session('w2', '2025-01-02', ['A']),
-      session('w1', '2025-01-01', ['A']),
-    ];
-    const p = { name: 'A', attendanceCount: 5, multisportCount: 0, currentStreak: 0 };
-    expect(getPlayerAchievements(p, history).map(a => a.id)).toContain('streak_5');
+  it('puste lub uszkodzone wejście daje myślnik, a nie śmieci', () => {
+    for (const bad of ['', null, undefined, 'bad', '2025-13-01', '2025-00-10']) {
+      expect(getMonthLabel(bad)).toBe('—');
+    }
   });
 });

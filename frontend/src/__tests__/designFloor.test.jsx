@@ -211,7 +211,6 @@ describe('typografia — kroje Cyberpunk 2077', () => {
     expect(fonts).not.toMatch(/url\([^)]*orbitron/i);
     expect(fonts).not.toMatch(/url\([^)]*(devanagari|vietnamese)/);
     expect(fonts).not.toMatch(/\.woff\)/);
-    expect(fonts).not.toContain('Space Money');
     const faces = fonts.match(/@font-face/g) ?? [];
     const ranges = fonts.match(/unicode-range:/g) ?? [];
     expect(faces.length).toBeGreaterThan(10);

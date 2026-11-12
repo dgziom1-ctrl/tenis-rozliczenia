@@ -42,9 +42,10 @@ export function getLastSessionDefaults(
 
 export function getMonthLabel(dateStr: string): string {
   if (!dateStr || typeof dateStr !== 'string') return '—';
-  const [y, m] = dateStr.split('-');
-  const monthName = MONTHS[parseInt(m, 10) - 1];
-  return `${monthName ?? '—'} ${y ?? ''}`.trim();
+  const match = /^(\d{4})-(\d{2})/.exec(dateStr);
+  const monthName = match ? MONTHS[Number(match[2]) - 1] : undefined;
+  // Uszkodzona data dawała wcześniej etykiety w rodzaju „— bad”.
+  return match && monthName ? `${monthName} ${match[1]}` : '—';
 }
 
 function getMonthKey(dateStr: string): string {

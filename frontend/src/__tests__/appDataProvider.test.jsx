@@ -90,6 +90,8 @@ describe('start z ostatnich znanych danych', () => {
    * Najważniejszy test tej zmiany. Bez pamięci podręcznej użytkownik bez zasięgu
    * czekał 15 sekund na ekranie startowym, po czym dostawał puste listy.
    */
+  // `hasData` otwiera bramkę renderowania w `AppShell`, więc ekran startowy
+  // nie ma prawa się pojawić, skoro jest co pokazać.
   it('pokazuje zapamiętane dane od razu, gdy baza milczy', () => {
     localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({ version: 1, savedAt: Date.now(), data: SAMPLE }));
 
@@ -98,16 +100,6 @@ describe('start z ostatnich znanych danych', () => {
     expect(screen.getByTestId('hasData').textContent).toBe('true');
     expect(screen.getByTestId('players').textContent).toContain('Krzysiek');
     expect(screen.getByTestId('weeks').textContent).toBe('2');
-  });
-
-  // `hasData` otwiera bramkę renderowania w `AppShell`, więc ekran startowy
-  // nie ma prawa się pojawić, skoro jest co pokazać.
-  it('nie zatrzymuje się na ekranie startowym, mając zapamiętane dane', () => {
-    localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({ version: 1, savedAt: Date.now(), data: SAMPLE }));
-
-    renderApp();
-
-    expect(screen.getByTestId('hasData').textContent).toBe('true');
   });
 
   it('bez zapamiętanych danych czeka na bazę jak dotąd', () => {
