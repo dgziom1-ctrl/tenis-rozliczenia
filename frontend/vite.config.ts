@@ -85,6 +85,33 @@ function prepareServiceWorker(): Plugin {
 }
 
 /**
+ * Podział zależności na paczki.
+ *
+ * React i Firebase zmieniają się raz na kilka miesięcy, a kod aplikacji przy
+ * każdym wydaniu. Osobne paczki pozwalają przeglądarce trzymać je w cache,
+ * zamiast pobierać od nowa z każdym buildem.
+ *
+ * Dopasowanie po ścieżce, a nie po nazwach wejść pakietów: lista
+ * `['react-dom', …]` łapała tylko moduł `react-dom`, a nie `react-dom/client`,
+ * którego naprawdę używa aplikacja — przez to cały React DOM (~180 kB) lądował
+ * w paczce aplikacji i był pobierany na nowo po każdym wdrożeniu.
+ *
+ * Messaging (z `installations`) ma osobną paczkę, bo jest wczytywany
+ * leniwie (`lib/firebase/messaging.ts`) — w paczce bazy byłby pobierany przy
+ * każdym starcie, także przez osoby bez powiadomień.
+ */
+function vendorChunk(id: string): string | undefined {
+  const path = id.replace(/\\/g, '/');
+  if (!path.includes('/node_modules/')) return undefined;
+  if (/\/node_modules\/(react|react-dom|react-router|scheduler)\//.test(path)) return 'vendor-react';
+  if (/\/node_modules\/@?firebase\/(messaging|installations)\//.test(path)) return 'vendor-firebase-messaging';
+  // `idb` należy do bazowej paczki — używa go też `@firebase/app` (heartbeat),
+  // a w paczce messagingu tworzyłby cykl wymuszający jej wczytanie na starcie.
+  if (/\/node_modules\/(@?firebase|idb)\//.test(path)) return 'vendor-firebase';
+  return undefined;
+}
+
+/**
  * Bez tych zmiennych `initializeApp`/`getDatabase` rzuca wyjątek jeszcze przed
  * zamontowaniem Reacta — zamiast komunikatu użytkownik widzi biały ekran.
  *
@@ -147,13 +174,7 @@ export default defineConfig(({ command, mode }) => {
     build: {
       rollupOptions: {
         output: {
-          // Firebase (~400 kB) zmienia się raz na kilka miesięcy, a kod aplikacji
-          // przy każdym wydaniu. Osobne paczki pozwalają przeglądarce zachować
-          // dużą zależność w cache, zamiast pobierać ją od nowa z każdym buildem.
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom', 'react-router'],
-            'vendor-firebase': ['firebase/app', 'firebase/database', 'firebase/messaging'],
-          },
+          manualChunks: vendorChunk,
         },
       },
     },

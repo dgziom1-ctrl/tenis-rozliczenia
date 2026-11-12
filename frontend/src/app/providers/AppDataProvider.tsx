@@ -3,7 +3,9 @@ import { onValue, ref } from 'firebase/database';
 import { subscribeToData, database, loadSnapshot, buildUIData } from '@/lib/firebase';
 import { useToast } from '@/components/common/Toast';
 import type { UIData } from '@/types/ui';
-import { AppDataContext, INITIAL_APP_DATA, type AppDataContextValue } from './appDataContext';
+import {
+  AppDataContext, ConnectionStatusContext, INITIAL_APP_DATA, type ConnectionStatus,
+} from './appDataContext';
 import { DEMO_MODE } from '@/constants';
 
 const SLOW_LOADING_AFTER_MS = 8000;
@@ -21,9 +23,7 @@ const SLOW_LOADING_AFTER_MS = 8000;
 function readCachedData(): UIData | null {
   try {
     const cached = loadSnapshot();
-    if (!cached) return null;
-    const ui = buildUIData(cached);
-    return ui;
+    return cached ? buildUIData(cached) : null;
   } catch (error) {
     console.warn('Zapamiętane dane są nieczytelne — startuję bez nich:', error);
     return null;
@@ -60,8 +60,10 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   // Bez tego: zmiana referencji showError (np. po re-renderze ToastProvider)
   // resetowałaby cały efekt — Firebase unsubscribe + nowy subscribe — co przy
   // każdym zapisie sesji tworzyło drugi subscriber i dawało podwójne powiadomienie.
+  // Aktualizacja w efekcie, nie w trakcie renderu — render ma być czysty
+  // (StrictMode i przerwane renderowanie współbieżne mogą go powtórzyć).
   const showErrorRef = useRef(showError);
-  showErrorRef.current = showError;
+  useEffect(() => { showErrorRef.current = showError; }, [showError]);
 
   const retry = useCallback(() => setRetryNonce(n => n + 1), []);
 
@@ -159,9 +161,13 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
    * ponowienia. Wolniej, ale bez ryzyka, że aplikacja nie wstanie wcale.
    */
 
-  const value = useMemo<AppDataContextValue>(() => ({
-    appData, hasData, isConnected, isLoading, slowLoading, bootTimedOut, subscriptionError, retry,
-  }), [appData, hasData, isConnected, isLoading, slowLoading, bootTimedOut, subscriptionError, retry]);
+  const connection = useMemo<ConnectionStatus>(() => ({
+    hasData, isConnected, isLoading, slowLoading, bootTimedOut, subscriptionError, retry,
+  }), [hasData, isConnected, isLoading, slowLoading, bootTimedOut, subscriptionError, retry]);
 
-  return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
+  return (
+    <ConnectionStatusContext.Provider value={connection}>
+      <AppDataContext.Provider value={appData}>{children}</AppDataContext.Provider>
+    </ConnectionStatusContext.Provider>
+  );
 }

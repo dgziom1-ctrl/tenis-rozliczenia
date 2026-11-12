@@ -1,6 +1,5 @@
 import { Outlet, useNavigate, useLocation, useNavigationType, NavigationType } from 'react-router';
-import { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
-import { getMessaging, onMessage } from 'firebase/messaging';
+import { useState, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PWAInstallBanner from '@/components/common/PWAInstallBanner';
@@ -15,35 +14,24 @@ import { useScrolled } from '@/hooks/useScrolled';
 import { useSettledFlag } from '@/hooks/useSettledFlag';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useKeyboardOpen } from '@/hooks/useKeyboardOpen';
-import { routeFromNotificationUrl } from '@/utils/notificationRoute';
-import { SOUND_TYPES, TAB_PATHS } from '@/constants';
+import { useForegroundNotifications, useNotificationNavigation } from '@/hooks/useNotifications';
+import { readStorage, writeStorage } from '@/utils/storage';
+import { SOUND_TYPES, TABS, TAB_PATHS } from '@/constants';
 import { TriangleAlert } from 'lucide-react';
 import { CLIP, FONT, TEXT } from '@/constants/styles';
+import type { LayoutContext } from './layoutContext';
 
 /**
- * `NotificationOptions` z lib.dom nie zna pól obsługiwanych tylko przez
- * Service Workera (wibracje, ponowne powiadomienie o tym samym tagu).
+ * Kolejność zakładek w nawigacji — wyznacza kierunek animacji wejścia
+ * (w prawo do dalszej zakładki, w lewo do wcześniejszej).
  */
-interface SwNotificationOptions extends NotificationOptions {
-  vibrate?: number[];
-  renotify?: boolean;
-}
-
-/** Wiadomość, którą Service Worker wysyła po kliknięciu w powiadomienie. */
-interface NotificationClickMessage {
-  type: 'NOTIFICATION_CLICK';
-  url: string;
-}
-
-/**
- * `MessageEvent.data` to `any` — cokolwiek może przysłać dowolny worker
- * z tego origin. Sprawdzamy kształt, zanim cokolwiek z tego przeczytamy.
- */
-function isNotificationClick(data: unknown): data is NotificationClickMessage {
-  if (typeof data !== 'object' || data === null) return false;
-  const message = data as Record<string, unknown>;
-  return message.type === 'NOTIFICATION_CLICK' && typeof message.url === 'string';
-}
+const TAB_ORDER: Record<string, number> = {
+  [TABS.DASHBOARD]: 0,
+  [TABS.ATTENDANCE]: 1,
+  [TABS.ADMIN]: 2,
+  [TABS.HISTORY]: 3,
+  [TABS.PLAYERS]: 4,
+};
 
 /**
  * Tyle musi trwać brak połączenia z bazą, zanim pokażemy o nim baner. Na starcie
@@ -67,6 +55,12 @@ export default function Layout() {
   const keyboardOpen = useKeyboardOpen();
   const { playSound } = useAudio(isMuted);
   useGlassPointer();
+  useForegroundNotifications();
+  useNotificationNavigation();
+
+  // Stały obiekt kontekstu: nowy przy każdym renderze Layoutu (np. przy
+  // przewijaniu, które zmienia `scrolled`) przerenderowywał bieżącą zakładkę.
+  const outletContext = useMemo<LayoutContext>(() => ({ playSound }), [playSound]);
 
   // Dolny pasek jest `position: fixed`, więc na iOS z otwartą klawiaturą
   // potrafi wylądować w połowie ekranu (fixed liczy się od layout viewportu,
@@ -127,9 +121,7 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
-    let alreadySeen = false;
-    try { alreadySeen = localStorage.getItem(GUIDE_STORAGE_KEY) === '1'; } catch { /* brak dostępu do storage */ }
-    if (alreadySeen) { setGuideReady(true); return undefined; }
+    if (readStorage(GUIDE_STORAGE_KEY) === '1') { setGuideReady(true); return undefined; }
 
     // Po pierwszym renderze, żeby nie przykrywać ekranu startowego i nie
     // otwierać dialogu w trakcie animacji wejścia.
@@ -142,7 +134,7 @@ export default function Layout() {
     // Poczekaj na animację przewodnika, żeby dwa dialogi nie nachodziły na siebie.
     if (guideExitTimer.current !== null) clearTimeout(guideExitTimer.current);
     guideExitTimer.current = setTimeout(() => setGuideReady(true), 350);
-    try { localStorage.setItem(GUIDE_STORAGE_KEY, '1'); } catch { /* brak dostępu do storage */ }
+    writeStorage(GUIDE_STORAGE_KEY, '1');
   }, []);
 
   const { tab: activeTab, announced } = usePageTitle();
@@ -163,9 +155,6 @@ export default function Layout() {
     setRouteAnnouncement(announced);
   }, [announced]);
 
-  const tabOrder: Record<string, number> = {
-    dashboard: 0, attendance: 1, admin: 2, history: 3, players: 4,
-  };
   const [navigation, setNavigation] = useState<{
     tab: string;
     direction: 'forward' | 'backward';
@@ -176,7 +165,7 @@ export default function Layout() {
   if (navigation.tab !== activeTab) {
     setNavigation({
       tab: activeTab,
-      direction: tabOrder[activeTab] >= tabOrder[navigation.tab] ? 'forward' : 'backward',
+      direction: TAB_ORDER[activeTab] >= TAB_ORDER[navigation.tab] ? 'forward' : 'backward',
     });
   }
   const pageDirection = navigation.tab === activeTab ? navigation.direction : 'forward';
@@ -185,74 +174,6 @@ export default function Layout() {
     playSound(SOUND_TYPES.TAB);
     void navigate(TAB_PATHS[id] ?? '/', { preventScrollReset: true });
   }, [playSound, navigate]);
-
-  useEffect(() => {
-    let unsubFcm: (() => void) | null = null;
-
-    const showForegroundNotification = async (title: string, body: string, data: Record<string, string>) => {
-      try {
-        const reg = await navigator.serviceWorker?.ready;
-        const options: SwNotificationOptions = {
-          body,
-          icon: '/icon-192v3.png',
-          badge: '/icon-192v3.png',
-          vibrate: [100, 50, 100],
-          tag: data.tag || data.type || 'default',
-          renotify: true,
-          data: { ...data, url: data.url || '/?tab=dashboard' },
-        };
-        await reg?.showNotification(title, options);
-      } catch (err) {
-        console.warn('showNotification failed:', err);
-        try { new Notification(title, { body, icon: '/icon-192v3.png' }); } catch { /* powiadomienia niedostępne */ }
-      }
-    };
-
-    try {
-      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-        unsubFcm = onMessage(getMessaging(), (payload) => {
-          const { title, body } = payload.notification || {};
-          if (!title) return;
-          void showForegroundNotification(title, body || '', payload.data ?? {});
-        });
-      }
-    } catch (err) {
-      console.warn('getMessaging() failed:', err);
-    }
-    return () => { if (unsubFcm) unsubFcm(); };
-  }, []);
-
-  useEffect(() => {
-    const swContainer = navigator.serviceWorker;
-    if (!swContainer) return undefined;
-
-    const handleSwMessage = (event: MessageEvent) => {
-      if (!isNotificationClick(event.data)) return;
-
-      let url: URL;
-      try {
-        url = new URL(event.data.url, window.location.origin);
-      } catch {
-        return; // uszkodzony adres z workera — ignorujemy zamiast wywracać aplikację
-      }
-
-      const target = routeFromNotificationUrl(url);
-      if (target) void navigate(target);
-    };
-
-    swContainer.addEventListener('message', handleSwMessage);
-    return () => swContainer.removeEventListener('message', handleSwMessage);
-  }, [navigate]);
-
-  // Zimny start z powiadomienia: worker otwiera okno pod `/?tab=…`, a wiadomość
-  // z workera trafia tylko do już otwartej apki. Bez tego kliknięcie w
-  // powiadomienie przy zamkniętej apce zawsze lądowało na ekranie startowym.
-  useEffect(() => {
-    const target = routeFromNotificationUrl(new URL(window.location.href));
-    if (target) void navigate(target, { replace: true });
-    // Tylko przy pierwszym montowaniu.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div
@@ -279,7 +200,7 @@ export default function Layout() {
           className={`main-content ${pageDirection === 'forward' ? 'page-enter-forward' : 'page-enter-backward'}`}
           key={location.pathname}
         >
-          <Outlet context={{ playSound }} />
+          <Outlet context={outletContext} />
         </main>
       </div>
       <PWAInstallBanner />

@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo, type Context } from 'react';
 import type { UIData } from '@/types/ui';
 
 // Kontekst i selektory trzymamy poza plikiem providera, żeby ten eksportował
@@ -15,8 +15,7 @@ export const INITIAL_APP_DATA: UIData = {
   payments: {},
 };
 
-export interface AppDataContextValue {
-  appData: UIData;
+export interface ConnectionStatus {
   hasData: boolean;
   isConnected: boolean;
   isLoading: boolean;
@@ -27,33 +26,34 @@ export interface AppDataContextValue {
   retry: () => void;
 }
 
-export const AppDataContext = createContext<AppDataContextValue | null>(null);
+/**
+ * Dane i stan połączenia żyją w osobnych kontekstach.
+ *
+ * Wspólny kontekst zmieniał wartość przy każdym mignięciu połączenia
+ * (`isConnected`, `slowLoading`), a wtedy React przerenderowywał każdą zakładkę
+ * czytającą dane — choć same dane się nie zmieniły. Teraz zmiana stanu łącza
+ * dociera tylko do tych, którzy go czytają (powłoka aplikacji i baner offline).
+ */
+export const AppDataContext = createContext<UIData | null>(null);
+export const ConnectionStatusContext = createContext<ConnectionStatus | null>(null);
 
-function useAppDataContext(hookName: string): AppDataContextValue {
-  const ctx = useContext(AppDataContext);
-  if (!ctx) throw new Error(`${hookName} must be used within AppDataProvider`);
-  return ctx;
+function useRequiredContext<T>(context: Context<T | null>, hookName: string): T {
+  const value = useContext(context);
+  if (value === null) throw new Error(`${hookName} must be used within AppDataProvider`);
+  return value;
 }
 
 function useAppData(): UIData {
-  return useAppDataContext('useAppData').appData;
+  return useRequiredContext(AppDataContext, 'useAppData');
 }
 
-export function useConnectionStatus() {
-  const ctx = useAppDataContext('useConnectionStatus');
-  return {
-    hasData: ctx.hasData,
-    isConnected: ctx.isConnected,
-    isLoading: ctx.isLoading,
-    slowLoading: ctx.slowLoading,
-    bootTimedOut: ctx.bootTimedOut,
-    subscriptionError: ctx.subscriptionError,
-    retry: ctx.retry,
-  };
+export function useConnectionStatus(): ConnectionStatus {
+  return useRequiredContext(ConnectionStatusContext, 'useConnectionStatus');
 }
 
-// Każdy widok pobiera tylko ten wycinek danych, którego naprawdę używa —
-// dzięki temu zmiana wpłaty nie przerenderowuje np. rankingu.
+// Każdy widok pobiera tylko ten wycinek danych, którego naprawdę używa, a wynik
+// jest stabilny, dopóki te pola się nie zmienią — dzięki temu memoizowane
+// komponenty niżej nie renderują się bez potrzeby.
 
 export function useDashboard() {
   const data = useAppData();

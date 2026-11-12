@@ -1,11 +1,11 @@
-import { useOutletContext, useSearchParams } from 'react-router';
 import { useCallback } from 'react';
+import { useSearchParams } from 'react-router';
+import { useLayoutContext } from '@/app/layoutContext';
 import { useAttendanceData } from '@/app/providers/appDataContext';
 import AttendanceTab from '@/components/attendance/AttendanceTab';
-import type { SoundType } from '@/types/ui';
 
 export default function AttendancePage() {
-  const { playSound } = useOutletContext<{ playSound: (type: SoundType) => void }>();
+  const { playSound } = useLayoutContext();
   const { players, history, summary } = useAttendanceData();
   const [searchParams, setSearchParams] = useSearchParams();
 

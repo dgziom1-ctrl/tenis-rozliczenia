@@ -1,13 +1,12 @@
-import { useOutletContext } from 'react-router';
+import { useLayoutContext } from '@/app/layoutContext';
 import { useDashboard } from '@/app/providers/appDataContext';
 import DashboardTab from '@/components/dashboard/DashboardTab';
-import type { SoundType } from '@/types/ui';
 
 export default function DashboardPage() {
-  const { playSound } = useOutletContext<{ playSound: (type: SoundType) => void }>();
-  const { summary, players, payments, history } = useDashboard();
+  const { playSound } = useLayoutContext();
+  // Obiekt z `useDashboard` jest memoizowany — przekazujemy go wprost, zamiast
+  // składać nowy `{ summary, players, payments }` przy każdym renderze.
+  const dashboard = useDashboard();
 
-  const data = { summary, players, payments };
-
-  return <DashboardTab data={data} history={history} playSound={playSound} />;
+  return <DashboardTab data={dashboard} history={dashboard.history} playSound={playSound} />;
 }
