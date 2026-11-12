@@ -92,7 +92,9 @@ do `ASSET_CACHE` razem z resztą wydania — apka wygląda tak samo offline.
 2. `frontend/src/__tests__/designFloor.test.jsx` — 6 testów sprawdza helpery
    `FONT.tech()` / `FONT.data()`, brak CDN, importy, podzbiory, kursywę
    i tokeny.
-3. `tailwind.config.js` (`font-cyber`, `font-tech`) wskazuje na nowy krój.
+3. Content-Security-Policy w `firebase.json` ma `font-src 'self'` i `style-src`
+   bez obcych hostów — font z CDN zostałby zablokowany na produkcji, nawet
+   gdyby przeszedł audyt.
 
 ## Gdyby jednak wrócić do innego kroju
 

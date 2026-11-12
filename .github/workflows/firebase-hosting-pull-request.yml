@@ -24,14 +24,10 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Typecheck
-        run: npm run typecheck
-      - name: Lint
-        run: npm run lint
-      - name: Martwy kod (CSS + osierocone moduły)
-        run: npm run lint:css && npm run lint:orphans
-      - name: Uruchom testy
-        run: npm test
+      # Typecheck, lint, martwy kod, audyty (a11y, kontrast, design) i testy —
+      # ten sam zestaw co lokalne `npm run verify`.
+      - name: Weryfikacja
+        run: npm run verify
 
   build_and_preview:
     name: Build & Preview
@@ -52,15 +48,18 @@ jobs:
         run: npm ci
         working-directory: frontend
 
+      # Sekrety idą przez zmienne środowiskowe, a skrypt zatrzymuje wdrożenie,
+      # gdy brakuje wymaganej wartości (bez tego push cicho przestawał działać).
       - name: Inject Firebase config into Service Worker
-        run: |
-          sed -i "s|PLACEHOLDER_API_KEY|${{ secrets.VITE_FIREBASE_API_KEY }}|g"                       frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_AUTH_DOMAIN|${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}|g"               frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_DATABASE_URL|${{ secrets.VITE_FIREBASE_DATABASE_URL }}|g"             frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_PROJECT_ID|${{ secrets.VITE_FIREBASE_PROJECT_ID }}|g"                 frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_STORAGE_BUCKET|${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}|g"         frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_MESSAGING_SENDER_ID|${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}|g" frontend/public/firebase-messaging-sw.js
-          sed -i "s|PLACEHOLDER_APP_ID|${{ secrets.VITE_FIREBASE_APP_ID }}|g"                         frontend/public/firebase-messaging-sw.js
+        run: node .github/scripts/inject-sw-config.mjs frontend/public/firebase-messaging-sw.js
+        env:
+          VITE_FIREBASE_API_KEY:             ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN:         ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_DATABASE_URL:        ${{ secrets.VITE_FIREBASE_DATABASE_URL }}
+          VITE_FIREBASE_PROJECT_ID:          ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET:      ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID:              ${{ secrets.VITE_FIREBASE_APP_ID }}
 
       - name: Build Project
         run: npm run build

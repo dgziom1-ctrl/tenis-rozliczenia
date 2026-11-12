@@ -21,7 +21,7 @@ Enter the amount actually paid for the court, after any MultiSport reductions. T
 
 | Area | Technology |
 | --- | --- |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS |
+| Frontend | React 19, TypeScript, Vite, CSS with design tokens |
 | Routing | React Router |
 | Data | Firebase Realtime Database |
 | Push and backend | Firebase Cloud Messaging, Cloud Functions (Node.js 22) |

@@ -21,7 +21,7 @@ W formularzu wpisuje się kwotę faktycznie zapłaconą za kort, już po odlicze
 
 | Obszar | Technologia |
 | --- | --- |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS |
+| Frontend | React 19, TypeScript, Vite, CSS z tokenami designu |
 | Routing | React Router |
 | Dane | Firebase Realtime Database |
 | Powiadomienia i backend | Firebase Cloud Messaging, Cloud Functions (Node.js 22) |
