@@ -6,6 +6,7 @@ import SeasonSelector from '../attendance/SeasonSelector';
 import { parseAmount, isValidAmount, formatDate, plural } from '@/utils/format';
 import { getCourtAmount, getRacketSelection, getTotalWithRackets, inferRacketPricing } from '@/utils/sessionCost';
 import { costError } from '@/utils/costMessages';
+import { buildSessionsCsv, downloadCsv, safeFileName } from '@/utils/csv';
 import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
 import UndoBar from '../common/UndoBar';
@@ -105,45 +106,13 @@ export default function HistoryTab({ history, playerNames, playSound }: HistoryT
   useEffect(() => { setVisibleCount(SESSIONS_PAGE_SIZE); }, [filterPlayer, filterSport, searchQuery, sortOrder, selectedSeason]);
 
   const handleExportCSV = () => {
-    let url: string | undefined;
     try {
-      const rows = [
-        ['Data', 'Sport', 'Koszt całkowity', 'Koszt rakiet', 'Bez karty (zł/os.)', 'Z kartą (zł/os.)', 'Liczba graczy', 'Obecni', 'Multisport'],
-        ...filteredHistory.map(s => [
-          s.datePlayed,
-          (SPORT_LABEL[s.sport] ?? 'Ping-Pong').toLowerCase(),
-          s.totalCost,
-          s.racketCost ?? 0,
-          s.costPerPerson?.toFixed(2) ?? '',
-          s.costPerPersonMulti?.toFixed(2) ?? '',
-          s.presentPlayers.length,
-          s.presentPlayers.join('; '),
-          s.multisportPlayers.join('; '),
-        ]),
-      ];
-      // Ochrona przed CSV injection: wartości zaczynające się od znaku formuły
-      // („=", „+", „-", „@") mogą być wykonane przez arkusz kalkulacyjny.
-      const sanitizeCsvCell = (value: string | number | null | undefined): string => {
-        const str = String(value ?? '');
-        return /^[=+\-@\t\r]/.test(str.trim()) ? `'${str}` : str;
-      };
-      const csv = rows.map(r => r.map(v => `"${sanitizeCsvCell(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      url  = URL.createObjectURL(blob);
-      const safeName = filterPlayer.replace(/[/\\:*?"<>|]/g, '_');
-      const a    = Object.assign(document.createElement('a'), {
-        href: url,
-        download: filterPlayer ? `sesje_${safeName}.csv` : 'sesje.csv',
-      });
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const fileName = filterPlayer ? `sesje_${safeFileName(filterPlayer)}.csv` : 'sesje.csv';
+      downloadCsv(fileName, buildSessionsCsv(filteredHistory));
       showSuccess(`Wyeksportowano ${filteredHistory.length} sesji`);
     } catch (err) {
       console.warn('CSV export failed:', err);
       showError('Nie udało się wyeksportować pliku CSV');
-    } finally {
-      if (url) URL.revokeObjectURL(url);
     }
   };
 

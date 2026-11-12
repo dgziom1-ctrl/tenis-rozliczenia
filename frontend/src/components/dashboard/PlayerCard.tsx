@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, memo } from 'react';
-import type { KeyboardEvent, PointerEvent } from 'react';
+import type { KeyboardEvent } from 'react';
 import { CheckCircle2, Pencil, TriangleAlert } from 'lucide-react';
 import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, rankTint } from '@/constants';
 import { FONT, CLIP, TEXT } from '../../constants/styles';
@@ -21,6 +21,7 @@ import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerColor, Player
 import type { AddPaymentResult, TransactionResult } from '@/types/domain';
 import type { StyleWithVars } from '@/types/css';
 import { useAnimatedValue } from './useAnimatedValue';
+import { useCardTilt } from './useCardTilt';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Barcode } from './Barcode';
 import { CornerBrackets } from './CornerBrackets';
@@ -87,12 +88,6 @@ function PlayerCard({
   const clickCount = useRef(0);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevDebt   = useRef(debt);
-  const cardRef    = useRef<HTMLDivElement | null>(null);
-  const foilRef    = useRef<HTMLDivElement | null>(null);
-  const tiltFrameRef = useRef<number | null>(null);
-  const releaseTiltTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingPointerRef = useRef<{ x: number; y: number } | null>(null);
-  const touchTiltActiveRef = useRef(false);
   const savingRef  = useRef(false);
   const pendingPaymentIdRef = useRef<string | null>(null);
 
@@ -212,94 +207,13 @@ function PlayerCard({
   const amountText = `${hasCredit ? '+' : ''}${formatAmountShort(Math.abs(debt))}zł`;
   const amountAriaLabel = `${hasCredit ? '↑ Nadpłata ' : ''}${amountText}${adminMode ? ' Tryb edycji' : ''} — ${adminMode ? 'wyłącz' : 'włącz'} tryb edycji wpłat`;
 
-  const scheduleCardTilt = useCallback((clientX: number, clientY: number) => {
-    if (reducedMotion) return;
-    pendingPointerRef.current = { x: clientX, y: clientY };
-    if (tiltFrameRef.current !== null) return;
-
-    tiltFrameRef.current = requestAnimationFrame(() => {
-      tiltFrameRef.current = null;
-      const point = pendingPointerRef.current;
-      const card = cardRef.current;
-      if (!point || !card) return;
-
-      const rect = card.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-      const x = Math.max(0, Math.min(1, (point.x - rect.left) / rect.width));
-      const y = Math.max(0, Math.min(1, (point.y - rect.top) / rect.height));
-
-      if (releaseTiltTimerRef.current) clearTimeout(releaseTiltTimerRef.current);
-      card.style.transition = 'border-color 0.2s ease, box-shadow 0.2s ease, transform 0s';
-      card.style.transform = `perspective(920px) rotateX(${(0.5 - y) * 7}deg) rotateY(${(x - 0.5) * 9}deg)`;
-      card.style.borderColor = `${c.border}70`;
-      card.style.boxShadow = isPending && !isOrganizer
-        ? 'var(--glow-box-rose)'
-        : 'var(--glow-box-cyan)';
-      foilRef.current?.style.setProperty('--foil-x', `${x * 100}%`);
-      foilRef.current?.style.setProperty('--foil-y', `${y * 100}%`);
-    });
-  }, [c.border, isOrganizer, isPending, reducedMotion]);
-
-  const handleCardPointerMove = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === 'touch' && !touchTiltActiveRef.current) return;
-    scheduleCardTilt(event.clientX, event.clientY);
-  }, [scheduleCardTilt]);
-
-  const handleCardPointerDown = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== 'touch' || reducedMotion) return;
-    touchTiltActiveRef.current = true;
-    scheduleCardTilt(event.clientX, event.clientY);
-  }, [reducedMotion, scheduleCardTilt]);
-
-  const resetCardTilt = useCallback(() => {
-    touchTiltActiveRef.current = false;
-    pendingPointerRef.current = null;
-    if (tiltFrameRef.current !== null) {
-      cancelAnimationFrame(tiltFrameRef.current);
-      tiltFrameRef.current = null;
-    }
-    if (releaseTiltTimerRef.current) clearTimeout(releaseTiltTimerRef.current);
-
-    const card = cardRef.current;
-    if (!card) return;
-    foilRef.current?.style.setProperty('--foil-x', '50%');
-    foilRef.current?.style.setProperty('--foil-y', '22%');
-
-    if (reducedMotion) {
-      // Przy zmianie preferencji resetuj bez animacji i bez pozostawiania timera.
-      card.style.removeProperty('transition');
-      card.style.removeProperty('transform');
-      card.style.removeProperty('border-color');
-      card.style.removeProperty('box-shadow');
-      return;
-    }
-
-    card.style.transition = 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms ease, box-shadow 200ms ease';
-    card.style.transform = 'none';
-    card.style.borderColor = cardBorder;
-    card.style.boxShadow = isPending && !isOrganizer ? 'var(--glow-box-rose)' : 'none';
-
-    releaseTiltTimerRef.current = setTimeout(() => {
-      card.style.removeProperty('transition');
-      card.style.removeProperty('transform');
-      card.style.removeProperty('border-color');
-      card.style.removeProperty('box-shadow');
-      releaseTiltTimerRef.current = null;
-    }, 300);
-  }, [cardBorder, isOrganizer, isPending, reducedMotion]);
-
-  const handleCardPointerUp = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === 'touch') resetCardTilt();
-  }, [resetCardTilt]);
-
-  useEffect(() => {
-    if (reducedMotion) resetCardTilt();
-  }, [reducedMotion, resetCardTilt]);
-
-  useEffect(() => () => {
-    if (tiltFrameRef.current !== null) cancelAnimationFrame(tiltFrameRef.current);
-    if (releaseTiltTimerRef.current) clearTimeout(releaseTiltTimerRef.current);
-  }, []);
+  const { cardRef, foilRef, handlers: tiltHandlers } = useCardTilt({
+    reducedMotion,
+    activeBorder: `${c.border}70`,
+    restBorder: cardBorder,
+    activeShadow: isPending && !isOrganizer ? 'var(--glow-box-rose)' : 'var(--glow-box-cyan)',
+    restShadow: isPending && !isOrganizer ? 'var(--glow-box-rose)' : 'none',
+  });
 
   const foilStyle: StyleWithVars = {
     '--foil-x': '50%',
@@ -324,11 +238,7 @@ function PlayerCard({
           ? 'var(--glass-shadow), var(--glass-rim), var(--glow-box-rose)'
           : 'var(--glass-shadow), var(--glass-rim)',
       }}
-      onPointerMove={handleCardPointerMove}
-      onPointerDown={handleCardPointerDown}
-      onPointerUp={handleCardPointerUp}
-      onPointerCancel={handleCardPointerUp}
-      onPointerLeave={resetCardTilt}
+      {...tiltHandlers}
     >
       <div ref={foilRef} className={RARITY_FOIL_CLASS[meta.rarity]} style={foilStyle} aria-hidden="true" />
       <CornerBrackets color={c.border} size={14} thickness={1} />
