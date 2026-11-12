@@ -62,6 +62,20 @@ function isPermissionDenied(error: unknown): boolean {
     || (typeof message === 'string' && /permission[ _]?denied/i.test(message));
 }
 
+/**
+ * Wynik transakcji przerwanej w callbacku. Odrzucenie przez regułę biznesową
+ * niesie gotowe zdanie dla użytkownika; każdy inny wyjątek to błąd programu
+ * (np. nieoczekiwany kształt danych), więc trafia też do konsoli.
+ */
+function abortedResult(reason: unknown, fallbackErrorMsg: string): TransactionResult {
+  if (reason instanceof MutationError) return { success: false, error: reason.message };
+  console.error(reason);
+  return {
+    success: false,
+    error: reason instanceof Error && reason.message ? reason.message : fallbackErrorMsg,
+  };
+}
+
 export async function withTransaction(
   fn: (current: RawAppData | null) => RawAppData,
   fallbackErrorMsg: string,
@@ -91,18 +105,44 @@ export async function withTransaction(
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
+  /**
+   * Powód przerwania z OSTATNIEGO przebiegu callbacku (albo `null`).
+   *
+   * Callback nie może rzucać. SDK woła go ponownie, gdy serwer odrzuci zapis
+   * z powodu cudzej zmiany (albo gdy pierwszy przebieg widział jeszcze pusty
+   * cache) — i robi to w obsłudze odpowiedzi serwera, bez żadnego `try`.
+   * Wyjątek z takiego ponowienia nie dochodził do naszego `await`: transakcja
+   * zostawała w kolejce SDK, obietnica nie rozstrzygała się nigdy, a po 12 s
+   * użytkownik dostawał „nie znamy wyniku” zamiast np. „Sesja z tą datą już
+   * istnieje”. Wisząca transakcja wstrzymuje też dane z serwera dla węzła.
+   *
+   * Dlatego błąd zapamiętujemy, a transakcję przerywamy oficjalnie — zwracając
+   * `undefined`. Pole czyścimy na starcie każdego przebiegu, żeby liczyła się
+   * wyłącznie decyzja z próby, która zakończyła transakcję.
+   */
+  let abortReason: unknown = null;
+  const update = (current: RawAppData | null): RawAppData | undefined => {
+    abortReason = null;
+    try {
+      return withoutLegacyFields(fn(current));
+    } catch (error) {
+      abortReason = error;
+      return undefined;
+    }
+  };
+
   try {
     await Promise.race([
-      runTransaction(dataRef, (current: RawAppData | null) => withoutLegacyFields(fn(current))),
+      runTransaction(dataRef, update),
       new Promise((_, reject) => {
         timeoutId = setTimeout(() => reject(new Error('__WRITE_TIMEOUT__')), WRITE_TIMEOUT_MS);
       }),
     ]);
+    if (abortReason !== null) return abortedResult(abortReason, fallbackErrorMsg);
     return { success: true };
   } catch (error) {
-    if (error instanceof MutationError) {
-      return { success: false, error: error.message };
-    }
+    // Tu trafiają wyłącznie błędy samego zapisu (sieć, reguły bazy, limit czasu) —
+    // odrzucenia z callbacku obsługuje `abortReason` powyżej.
 
     // Odmowa reguł bazy: pokazujemy zdanie po polsku, a oryginał (z nazwą
     // odrzuconego pola, jeśli SDK ją poda) zostaje w konsoli dla administratora.
@@ -131,7 +171,7 @@ export async function withTransaction(
       };
     }
 
-    // Błędy walidacji rzucone wewnątrz transakcji (np. „Sesja z tą datą już istnieje”).
+    // Pozostałe błędy SDK (np. przerwanie transakcji przez inny zapis).
     return {
       success: false,
       error: error instanceof Error ? error.message : fallbackErrorMsg,
