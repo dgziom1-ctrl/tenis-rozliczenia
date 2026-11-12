@@ -1,4 +1,4 @@
-import type { PlayerStats, ExtendedPlayerStats, RankedPlayer, RankingHistoryEntry, HistoryEntry } from '@/types/ui';
+import type { PlayerStats, ExtendedPlayerStats, RankedPlayer, RankingHistoryEntry, WeeklyRankingEntry, HistoryEntry } from '@/types/ui';
 import { filterHistorySinceJoin } from './playerHistory';
 
 /** Procent całkowity; 0 sesji do rozegrania to 0%, nie NaN. */
@@ -113,6 +113,33 @@ export function calculateSeasonCardStats(
   return seasonStatsOf(players, seasonHistory);
 }
 
+type RankingSnapshot = RankingHistoryEntry['rankings'];
+
+/** Ranking „na dzień”: wszystkie sesje z `sessionsUpTo`, mianownik liczony od dołączenia gracza. */
+function rankingSnapshot(players: PlayerStats[], sessionsUpTo: HistoryEntry[]): RankingSnapshot | null {
+  if (sessionsUpTo.length === 0) return null;
+
+  // Każdy gracz ma własny mianownik: tylko sesje od jego dołączenia.
+  // Przed dołączeniem nie ma go jeszcze w rankingu — zamiast wieszać go
+  // na 0%, po prostu nie pojawia się na wykresie.
+  const stats = players.flatMap(player => {
+    const eligible = filterHistorySinceJoin(sessionsUpTo, player.joinDate);
+    if (eligible.length === 0) return [];
+    const attended = eligible.filter(s => s.presentPlayers.includes(player.name)).length;
+    return [{ name: player.name, pct: percentage(attended, eligible.length), attended }];
+  });
+  if (stats.length === 0) return null;
+
+  // Remis rozstrzygamy imieniem, żeby ten sam zestaw danych zawsze dawał
+  // ten sam wykres — bez tego kolejność zależałaby od kolejności graczy.
+  stats.sort((a, b) => b.pct - a.pct || b.attended - a.attended || a.name.localeCompare(b.name, 'pl'));
+  let place = 1;
+  return stats.map((p, i) => {
+    if (i > 0 && p.pct < stats[i - 1].pct) place = i + 1;
+    return { ...p, place };
+  });
+}
+
 export function computeRankingHistory(
   players: PlayerStats[],
   history: HistoryEntry[],
@@ -123,30 +150,43 @@ export function computeRankingHistory(
   history.forEach(s => { if (s.datePlayed) monthSet.add(s.datePlayed.slice(0, 7)); });
   const months = [...monthSet].sort();
 
-  return months.map(month => {
-    const sessionsUpTo = history.filter(s => s.datePlayed?.slice(0, 7) <= month);
-    if (sessionsUpTo.length === 0) return null;
+  return months.flatMap(month => {
+    const rankings = rankingSnapshot(players, history.filter(s => s.datePlayed?.slice(0, 7) <= month));
+    return rankings ? [{ month, rankings }] : [];
+  });
+}
 
-    // Każdy gracz ma własny mianownik: tylko sesje od jego dołączenia.
-    // Przed dołączeniem nie ma go jeszcze w rankingu — zamiast wieszać go
-    // na 0%, po prostu nie pojawia się na wykresie.
-    const stats = players.flatMap(player => {
-      const eligible = filterHistorySinceJoin(sessionsUpTo, player.joinDate);
-      if (eligible.length === 0) return [];
-      const attended = eligible.filter(s => s.presentPlayers.includes(player.name)).length;
-      return [{ name: player.name, pct: percentage(attended, eligible.length), attended }];
+/** Poniedziałek tygodnia (ISO) dla daty `YYYY-MM-DD`, liczony w UTC, żeby strefa czasowa nie przesuwała dni. */
+export function weekStartOf(date: string): string {
+  const d = new Date(`${date.slice(0, 10)}T00:00:00Z`);
+  const offset = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - offset);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * To samo co computeRankingHistory, ale klatka na każdy tydzień z sesją.
+ * `date` to ostatnia sesja w danym tygodniu — tak podpisujemy klatkę.
+ */
+export function computeWeeklyRankingHistory(
+  players: PlayerStats[],
+  history: HistoryEntry[],
+): WeeklyRankingEntry[] {
+  if (!history || history.length === 0 || !players || players.length === 0) return [];
+
+  const lastDateOfWeek = new Map<string, string>();
+  history.forEach(s => {
+    if (!s.datePlayed) return;
+    const date = s.datePlayed.slice(0, 10);
+    const week = weekStartOf(date);
+    const prev = lastDateOfWeek.get(week);
+    if (!prev || date > prev) lastDateOfWeek.set(week, date);
+  });
+
+  return [...lastDateOfWeek.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .flatMap(([week, date]) => {
+      const rankings = rankingSnapshot(players, history.filter(s => s.datePlayed && s.datePlayed.slice(0, 10) <= date));
+      return rankings ? [{ week, date, rankings }] : [];
     });
-    if (stats.length === 0) return null;
-
-    // Remis rozstrzygamy imieniem, żeby ten sam zestaw danych zawsze dawał
-    // ten sam wykres — bez tego kolejność zależałaby od kolejności graczy.
-    stats.sort((a, b) => b.pct - a.pct || b.attended - a.attended || a.name.localeCompare(b.name, 'pl'));
-    let place = 1;
-    const rankings = stats.map((p, i) => {
-      if (i > 0 && p.pct < stats[i - 1].pct) place = i + 1;
-      return { ...p, place };
-    });
-
-    return { month, rankings };
-  }).filter((x): x is RankingHistoryEntry => x !== null);
 }

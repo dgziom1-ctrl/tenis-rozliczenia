@@ -135,6 +135,14 @@ export interface MonthlySessionData {
   players: Record<string, number>;
 }
 
+export interface WeeklyRankingEntry {
+  /** Poniedziałek tygodnia, YYYY-MM-DD. */
+  week: string;
+  /** Ostatnia sesja w tym tygodniu, YYYY-MM-DD. */
+  date: string;
+  rankings: RankingHistoryEntry['rankings'];
+}
+
 export interface RankingHistoryEntry {
   month: string;
   rankings: Array<{
