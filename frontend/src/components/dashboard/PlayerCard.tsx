@@ -599,7 +599,7 @@ function PlayerCard({
               Zapisać <strong style={{ color: 'var(--co-green)' }}>{formatAmountShort(debt)} zł</strong> jako wpłatę od {player.name}?
             </p>
             <p style={{ ...FONT.monoMicro, color: 'var(--co-dim)', margin: 0, lineHeight: 1.6 }}>
-              To tylko wpis w aplikacji — nie wykonuje przelewu. Przelew BLIK zrób osobno na numer {BLIK_NUMBER}.
+              To tylko odhaczenie w aplikacji — przelew na telefon BLIK zrobisz w banku na numer {BLIK_NUMBER}.
             </p>
             {paymentError && (
               <p role="alert" style={{ ...FONT.monoMicro, color: 'var(--co-rose)', margin: '10px 0 0', lineHeight: 1.6 }}>

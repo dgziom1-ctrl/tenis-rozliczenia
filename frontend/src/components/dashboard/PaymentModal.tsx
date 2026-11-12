@@ -83,7 +83,7 @@ export default function PaymentModal({ type, hasCredit, customAmt, onAmtChange, 
       footer={footer}
     >
       <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', lineHeight: 1.55, margin: '0 0 12px' }}>
-        To tylko wpis w aplikacji — nie wykonuje przelewu. BLIK zrób osobno na numer {BLIK_NUMBER}.
+        To tylko odhaczenie w aplikacji — przelew na telefon BLIK zrobisz w banku na numer {BLIK_NUMBER}.
       </p>
 
       <label htmlFor={inputId} className="sr-only">Kwota w złotych</label>

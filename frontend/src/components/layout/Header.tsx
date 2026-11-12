@@ -112,11 +112,11 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
     const ok = await copyToClipboard(blikNumber.replace(/\s/g, ''));
     if (ok) {
       setCopied(true);
-      showSuccess('Numer BLIK skopiowany');
+      showSuccess('Numer telefonu BLIK skopiowany');
       clearTimeout(copiedTimer.current ?? undefined);
       copiedTimer.current = setTimeout(() => setCopied(false), 2000);
     } else {
-      showError('Nie udało się skopiować numeru BLIK');
+      showError('Nie udało się skopiować numeru telefonu BLIK');
     }
   };
 
@@ -197,7 +197,7 @@ function Header({ isMuted, setIsMuted, scrolled, theme, onToggleTheme, onShowGui
         <div className="header-topbar" style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
           <span className="header-wordmark">CYBER-PONK</span>
-          <button type="button" onClick={handleCopy} className="glass-chip header-blik" data-copied={copied ? 'true' : undefined} aria-label={copied ? 'Numer BLIK skopiowany' : `Skopiuj numer BLIK ${blikNumber}`} style={{ display:'flex',alignItems:'center',gap:'8px',
+          <button type="button" onClick={handleCopy} className="glass-chip header-blik" data-copied={copied ? 'true' : undefined} aria-label={copied ? 'Numer telefonu BLIK skopiowany' : `Skopiuj numer BLIK ${blikNumber}`} style={{ display:'flex',alignItems:'center',gap:'8px',
             border:'1px solid var(--co-tint-line)',padding: '6px 12px',cursor:'pointer',
             transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
             <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
