@@ -1,4 +1,4 @@
-import type { Sport, Payment } from './domain';
+import type { DiscountModel, Sport, Payment } from './domain';
 
 export interface PlayerStats {
   name: string;
@@ -40,7 +40,7 @@ export interface HistoryEntry {
   durationHours?: number;
   /** Medicover w tej sesji (⊆ multisportPlayers). */
   singleScanPlayers?: string[];
-  discountModel?: 'perScan';
+  discountModel?: DiscountModel;
   /** Cena kortu przed zwrotem za karty (bez rakiet) — tylko sesje z nowym sposobem wpisywania. */
   courtGross?: number;
 }
@@ -140,7 +140,7 @@ export interface SessionEditForm {
   /** Medicover w tej sesji (⊆ multiPlayers). */
   singleScanPlayers?: string[];
   /** Zasada podziału zniżek sesji — tylko do odczytu, edycja jej nie zmienia. */
-  discountModel?: 'perScan';
+  discountModel?: DiscountModel;
   /** Cena kortu przed zwrotem (tekst pola). Obecna tylko w sesjach z nowym sposobem wpisywania. */
   courtGross?: string | number;
   /** Ręcznie wpisany zwrot z portfela; `undefined` = zwrot liczony automatycznie. */

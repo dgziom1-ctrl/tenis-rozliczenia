@@ -1,5 +1,6 @@
 import { MULTISPORT_DISCOUNT, MULTISPORT_PER_COURT_HOUR, RACKET_PRICE, SPORT, hasRacketRental } from '@/constants';
 import { toGrosze, toZloty, allocateExact, allocateNonNegative, splitEqually } from './money';
+import type { DiscountModel } from '@/types/domain';
 
 /**
  * Akceptuje zarówno surową sesję z bazy (`present` / `multiPlayers` / `cost`),
@@ -40,7 +41,8 @@ export interface SessionLike {
   courtGross?: number;
 }
 
-export type DiscountModel = 'perScan';
+/** Typ żyje w `types/domain`; reeksport zostaje, bo to część publicznego API silnika. */
+export type { DiscountModel };
 /** Zasada podziału zniżek dla nowo zapisywanych sesji. */
 export const CURRENT_DISCOUNT_MODEL: DiscountModel = 'perScan';
 

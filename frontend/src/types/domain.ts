@@ -1,5 +1,11 @@
 export type Sport = 'pingpong' | 'squash' | 'badminton' | 'padel';
 
+/**
+ * Zasada podziału zniżek za karty. `'perScan'` — każde odbicie karty idzie do tego,
+ * kto się odbił. Brak pola w sesji oznacza dawną zasadę (sesje sprzed zmiany).
+ */
+export type DiscountModel = 'perScan';
+
 export interface Week {
   id: string;
   date: string;
@@ -28,7 +34,7 @@ export interface Week {
    * Zasada podziału zniżek. `'perScan'` — każde odbicie karty dla tego, kto się
    * odbił. Brak pola — dawna zasada (sesje sprzed zmiany).
    */
-  discountModel?: 'perScan';
+  discountModel?: DiscountModel;
   /**
    * Cena kortu przed zwrotem za karty (bez rakiet), z rezerwacji. `cost` to
    * kwota po zwrocie plus rakiety; faktyczny zwrot = `courtGross − (cost − racketCost)`.
