@@ -1,7 +1,6 @@
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { Terminal, CalendarDays, Search, Download, ArrowUpDown, Pencil } from 'lucide-react';
+import { useState, useCallback, useRef } from 'react';
+import { Terminal, CalendarDays, Pencil } from 'lucide-react';
 import { updateWeek, deleteWeekWithSnapshot, restoreWeek } from '@/lib/firebase';
-import { groupHistoryByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
 import SeasonSelector from '../attendance/SeasonSelector';
 import { parseAmount, isValidAmount, formatDate, plural } from '@/utils/format';
 import { getRacketSelection, getTotalWithRackets } from '@/utils/sessionCost';
@@ -14,8 +13,7 @@ import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
 import UndoBar from '../common/UndoBar';
 import Modal from '../common/Modal';
-import ToggleChip from '../common/ToggleChip';
-import { SOUND_TYPES, SPORT, SPORT_LABEL, RACKET_PRICE, UNDO_TIMEOUT_SECONDS } from '@/constants';
+import { SOUND_TYPES, SPORT, RACKET_PRICE, UNDO_TIMEOUT_SECONDS } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useUndoTimer } from '@/hooks/useUndoTimer';
 import type { Week } from '@/types/domain';
@@ -24,10 +22,9 @@ import LogEntry from './LogEntry';
 import AttendanceTrendChart from './AttendanceTrendChart';
 import EditSessionForm from './EditSessionForm';
 import PlayerFilterSheet from './PlayerFilterSheet';
+import HistoryFilterBar from './HistoryFilterBar';
+import { useHistoryFilters, SESSIONS_PAGE_SIZE } from './useHistoryFilters';
 import { CLIP, FONT, TEXT } from '@/constants/styles';
-
-/** Ile sesji pokazujemy na raz. 50 rekordów dawało 17 863 px strony na telefonie. */
-const SESSIONS_PAGE_SIZE = 12;
 
 /** Edytowana sesja razem z jej identyfikatorem — jedno albo drugie nigdy nie występuje osobno. */
 interface EditState {
@@ -60,13 +57,12 @@ export default function HistoryTab({ history, playerNames, singleScanPlayers = N
   const [editing,      setEditing]      = useState<EditState | null>(null);
   const [isSaving,     setIsSaving]     = useState(false);
   const [pwModal,      setPwModal]      = useState<{ type: 'edit'; row: HistoryEntry } | { type: 'delete'; rowId: string } | null>(null);
-  const [filterPlayer, setFilterPlayer] = useState('');
-  const [filterSport, setFilterSport] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [chosenSeason, setChosenSeason] = useState<number | null | undefined>(undefined);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [sortOrder,    setSortOrder]    = useState<'desc' | 'asc'>('desc');
-  const [visibleCount, setVisibleCount] = useState(SESSIONS_PAGE_SIZE);
+  const {
+    filterPlayer, setFilterPlayer, filterSport, setFilterSport, searchQuery, setSearchQuery,
+    sortOrder, toggleSort, seasons, selectedSeason, setChosenSeason,
+    seasonHistory, filteredHistory, visibleHistory, hasMoreSessions, grouped, showMore,
+  } = useHistoryFilters(history);
   const { showError, showSuccess } = useToast();
   const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer<PendingDeletedWeek>();
   const isMobile = useIsMobile();
@@ -93,31 +89,6 @@ export default function HistoryTab({ history, playerNames, singleScanPlayers = N
   const isEditDirty = editing !== null && JSON.stringify(editing.form) !== editing.initial;
   const undoToastRef = useRef<typeof undoToast>(null);
   undoToastRef.current = undoToast;
-
-  const seasons = useMemo(() => getAvailableSeasons(history), [history]);
-  const selectedSeason = chosenSeason === undefined ? null : chosenSeason;
-  const seasonHistory = useMemo(
-    () => filterHistoryByYear(history, selectedSeason),
-    [history, selectedSeason],
-  );
-
-  const filteredHistory = useMemo(() => {
-    let h = seasonHistory;
-    if (filterPlayer) h = h.filter(s => s.presentPlayers.includes(filterPlayer));
-    if (filterSport) h = h.filter(s => s.sport === filterSport);
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      h = h.filter(s =>
-        s.datePlayed.toLowerCase().includes(q) ||
-        (SPORT_LABEL[s.sport] ?? '').toLowerCase().includes(q) ||
-        s.presentPlayers.some(p => p.toLowerCase().includes(q)) ||
-        s.multisportPlayers.some(p => p.toLowerCase().includes(q)),
-      );
-    }
-    return sortOrder === 'asc' ? [...h].reverse() : h;
-  }, [seasonHistory, filterPlayer, filterSport, searchQuery, sortOrder]);
-
-  useEffect(() => { setVisibleCount(SESSIONS_PAGE_SIZE); }, [filterPlayer, filterSport, searchQuery, sortOrder, selectedSeason]);
 
   const handleExportCSV = () => {
     try {
@@ -303,10 +274,6 @@ export default function HistoryTab({ history, playerNames, singleScanPlayers = N
     });
   }, [setEditForm, singleScanPlayers]);
 
-  const visibleHistory = filteredHistory.slice(0, visibleCount);
-  const hasMoreSessions = visibleCount < filteredHistory.length;
-  const grouped = groupHistoryByMonth(visibleHistory);
-
   return (
     <>
       {pwModal && (
@@ -397,132 +364,21 @@ export default function HistoryTab({ history, playerNames, singleScanPlayers = N
 
         {/* ── 4. PASEK KONTROLEK (filtr + sort + CSV) ─────────────── */}
         {history.length > 0 && (
-          <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-
-            {/* Etykieta filtra */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'var(--co-tint)', border: '1px solid var(--co-tint-hi)', clipPath: CLIP.badge, flexShrink: 0 }}>
-              <Search size={11} style={{ color: 'var(--co-dim)' }} />
-              <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', letterSpacing: 'normal' }}>Filtr</span>
-            </div>
-
-            {isMobile ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setIsFilterOpen(true)}
-                  aria-haspopup="dialog"
-                  aria-label={filterPlayer ? `Filtr gracza: ${filterPlayer}` : 'Filtr gracza: wszyscy'}
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '0.8125rem',
-                    letterSpacing: 'normal',
-                    minHeight: 44,
-                    padding: '6px 10px',
-                    cursor: 'pointer',
-                    border: '1px solid',
-                    borderColor: 'var(--co-border)',
-                    color: filterPlayer ? 'var(--co-cyan)' : 'var(--co-dim)',
-                    background: 'transparent',
-                    clipPath: CLIP.badge,
-                    transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
-                    flexShrink: 0,
-                  }}
-                >
-                  {filterPlayer || 'Wszyscy'}
-                </button>
-
-                {filterPlayer && (
-                  <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
-                    {filteredHistory.length} sesji
-                  </span>
-                )}
-              </>
-            ) : (
-              <>
-                <ToggleChip compact active={!filterPlayer} onClick={() => setFilterPlayer('')}>
-                  Wszyscy
-                </ToggleChip>
-                {playerNames.map(name => (
-                  <ToggleChip compact key={name} active={filterPlayer === name}
-                    onClick={() => setFilterPlayer(prev => prev === name ? '' : name)}>
-                    {name}
-                  </ToggleChip>
-                ))}
-
-                {filterPlayer && (
-                  <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
-                    {filteredHistory.length} sesji
-                  </span>
-                )}
-              </>
-            )}
-
-            {/* Rozpychacz i separator były zwykłymi elementami zawijanego
-                kontenera: gdy chipy graczy przechodziły do drugiej linii,
-                rozpychacz spadał do własnego rzędu, a kreska zostawała sama
-                na początku linii. Akcje mają teraz osobną, nierozdzielną grupę. */}
-            {/* Filtr po sporcie */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <ToggleChip compact active={!filterSport} onClick={() => setFilterSport('')} style={{ fontSize: '0.75rem', padding: '4px 8px' }}>Wszystkie sporty</ToggleChip>
-              {Object.entries(SPORT_LABEL).map(([key, label]) => (
-                <ToggleChip compact key={key} active={filterSport === key} onClick={() => setFilterSport(prev => prev === key ? '' : key)} style={{ fontSize: '0.75rem', padding: '4px 8px' }}>{label}</ToggleChip>
-              ))}
-            </div>
-
-            {/* Wyszukiwarka tekstowa */}
-            {/* Bez lokalnego `fontSize`: 13 px zmuszało iOS do automatycznego
-                przybliżenia strony przy każdym dotknięciu pola. 16 px z
-                `.cyber-input` jest progiem, poniżej którego Safari zoomuje. */}
-            <input type="search" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Szukaj (data, gracz, sport)..." aria-label="Szukaj w historii" className="cyber-input" style={{ flex: '1 1 160px', minWidth: 140, padding: '6px 10px', fontFamily: 'var(--font-mono)', clipPath: CLIP.badge }} />
-
-            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <div aria-hidden="true" style={{ width: 1, height: 18, background: 'var(--co-border)' }} />
-
-            {/* Sort */}
-            <button
-              type="button"
-              onClick={() => setSortOrder(o => o === 'desc' ? 'asc' : 'desc')}
-              title={sortOrder === 'desc' ? 'Najnowsze pierwsze' : 'Najstarsze pierwsze'}
-              aria-label={sortOrder === 'desc'
-                ? 'Sortowanie: najnowsze pierwsze — zmień na najstarsze'
-                : 'Sortowanie: najstarsze pierwsze — zmień na najnowsze'}
-              className="icon-btn"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                minHeight: 44, padding: '8px 10px', cursor: 'pointer',
-                background: 'transparent', border: '1px solid var(--co-border)',
-                color: 'var(--co-dim)',
-                clipPath: CLIP.badge,
-                ...FONT.mono(TEXT.tiny), letterSpacing: 'normal',
-                flexShrink: 0,
-              }}
-            >
-              <ArrowUpDown size={12} aria-hidden="true" />
-              {sortOrder === 'desc' ? 'Nowe' : 'Stare'}
-            </button>
-
-            {/* CSV */}
-            <button
-              type="button"
-              onClick={handleExportCSV}
-              title="Pobierz CSV"
-              aria-label="Eksportuj CSV"
-              className="icon-btn"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                minHeight: 44, padding: '8px 10px', cursor: 'pointer',
-                background: 'transparent', border: '1px solid var(--co-border)',
-                color: 'var(--co-dim)',
-                clipPath: CLIP.badge,
-                ...FONT.mono(TEXT.tiny), letterSpacing: 'normal',
-                flexShrink: 0,
-              }}
-            >
-              <Download size={12} aria-hidden="true" />
-              CSV
-            </button>
-            </div>
-          </div>
+          <HistoryFilterBar
+            playerNames={playerNames}
+            isMobile={isMobile}
+            filterPlayer={filterPlayer}
+            onFilterPlayer={setFilterPlayer}
+            filterSport={filterSport}
+            onFilterSport={setFilterSport}
+            searchQuery={searchQuery}
+            onSearch={setSearchQuery}
+            sortOrder={sortOrder}
+            onToggleSort={toggleSort}
+            matchCount={filteredHistory.length}
+            onOpenPlayerSheet={() => setIsFilterOpen(true)}
+            onExportCsv={handleExportCSV}
+          />
         )}
 
         {/* ── 5. LICZNIK STRONY ─────────────────────────────────────── */}
@@ -585,7 +441,7 @@ export default function HistoryTab({ history, playerNames, singleScanPlayers = N
         {hasMoreSessions && (
           <button
             type="button"
-            onClick={() => setVisibleCount(count => Math.min(count + SESSIONS_PAGE_SIZE, filteredHistory.length))}
+            onClick={showMore}
             className="cyber-button-outline"
             style={{ display: 'block', width: '100%', marginTop: 16, minHeight: 44, padding: '12px' }}
           >
