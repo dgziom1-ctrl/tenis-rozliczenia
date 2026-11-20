@@ -1,0 +1,2611 @@
+{
+  "addSession: ping-pong z domyślnymi korty i godzinami": {
+    "results": [
+      {
+        "success": true
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        },
+        {
+          "id": "id-1",
+          "date": "2025-04-02",
+          "cost": 40,
+          "present": [
+            "Kamil",
+            "Ola"
+          ],
+          "multiPlayers": [],
+          "sport": "pingpong",
+          "courtCount": 1,
+          "durationHours": 1,
+          "discountModel": "perScan"
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "id-1",
+        "ts": 1750000000000
+      }
+    }
+  },
+  "addSession: squash z rakietami, Medicoverem, courtGross i 2 kortami na 2 h": {
+    "results": [
+      {
+        "success": true
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        },
+        {
+          "id": "id-1",
+          "date": "2025-04-03",
+          "cost": 110.5,
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "sport": "squash",
+          "courtCount": 2,
+          "durationHours": 2,
+          "racketCost": 12.5,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "courtGross": 150,
+          "discountModel": "perScan"
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "id-1",
+        "ts": 1750000000000
+      }
+    }
+  },
+  "addSession: odrzucenia (duplikat, brak graczy, rakiety > koszt, zwrot > cena, data, sport)": {
+    "results": [
+      {
+        "success": false,
+        "error": "Sesja z tą datą i tym sportem już istnieje"
+      },
+      {
+        "success": false,
+        "error": "Zaznacz przynajmniej jednego obecnego gracza"
+      },
+      {
+        "success": false,
+        "error": "Koszt rakiet nie może przekraczać kosztu sesji"
+      },
+      {
+        "success": false,
+        "error": "Zwrot za karty nie może być większy niż cena kortu"
+      },
+      {
+        "success": false,
+        "error": "Nieprawidłowa data sesji"
+      },
+      {
+        "success": false,
+        "error": "Nieznana dyscyplina sportu"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "paidUntilWeek": {
+        "Ola": 2
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "addSession: ta sama data, inny sport jest dozwolona": {
+    "results": [
+      {
+        "success": true
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "id-1",
+          "date": "2025-03-12",
+          "cost": 30,
+          "present": [
+            "Kamil"
+          ],
+          "multiPlayers": [],
+          "sport": "pingpong",
+          "courtCount": 1,
+          "durationHours": 1,
+          "discountModel": "perScan"
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "id-1",
+        "ts": 1750000000000
+      }
+    }
+  },
+  "updateWeek: stara sesja z dogrywką scala dogrywkę z kosztem i zachowuje brak konfiguracji": {
+    "results": [
+      {
+        "success": true
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 60,
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "sport": "pingpong"
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "updateWeek: sesja perScan — nowa cena, skład, Medicover i rakiety": {
+    "results": [
+      {
+        "success": true
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 100,
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "sport": "squash",
+          "courtCount": 2,
+          "durationHours": 1,
+          "racketCost": 8,
+          "ownRacketPlayers": [
+            "Ola"
+          ],
+          "courtGross": 125,
+          "discountModel": "perScan"
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "updateWeek: sesja bez discountModel nie dostaje courtGross ani zasady": {
+    "results": [
+      {
+        "success": true
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "present": [
+            "Kamil",
+            "Ola"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "sport": "badminton",
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "updateWeek: zmiana sportu, daty i odrzucenia (duplikat, brak sesji, błędny koszt)": {
+    "results": [
+      {
+        "success": true
+      },
+      {
+        "success": false,
+        "error": "Sesja z tą datą i tym sportem już istnieje"
+      },
+      {
+        "success": false,
+        "error": "Nie znaleziono sesji"
+      },
+      {
+        "success": false,
+        "error": "Koszt sesji musi być liczbą nieujemną"
+      },
+      {
+        "success": false,
+        "error": "Brak identyfikatora sesji"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-06",
+          "cost": 60,
+          "present": [
+            "Kamil"
+          ],
+          "multiPlayers": [],
+          "sport": "padel"
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "deleteWeekWithSnapshot + restoreWeek: rekord legacy wraca z polami legacy": {
+    "results": [
+      {
+        "success": true,
+        "deletedWeek": {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        }
+      },
+      {
+        "success": true
+      },
+      {
+        "success": true
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "deleteWeekWithSnapshot: odrzucenie dla nieznanego id": {
+    "results": [
+      {
+        "success": false,
+        "error": "Nie znaleziono sesji do usunięcia"
+      },
+      {
+        "success": false,
+        "error": "Brak identyfikatora sesji"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "paidUntilWeek": {
+        "Ola": 2
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "restoreWeek: kolizja daty i sportu oraz niepoprawny rekord": {
+    "results": [
+      {
+        "success": false,
+        "error": "Nie można przywrócić sesji — istnieje już inna sesja z tą datą i sportem"
+      },
+      {
+        "success": false,
+        "error": "Nieprawidłowe dane sesji do przywrócenia"
+      },
+      {
+        "success": false,
+        "error": "Zaznacz przynajmniej jednego obecnego gracza"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "paidUntilWeek": {
+        "Ola": 2
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "addPlayer: nowy gracz dostaje datę dołączenia": {
+    "results": [
+      {
+        "success": true
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy",
+        "Marta"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01",
+        "Marta": "2025-06-15"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "addPlayer: odrzucenia (duplikat, lista usuniętych, historia, znaki, pusta nazwa)": {
+    "results": [
+      {
+        "success": false,
+        "error": "Gracz o tej nazwie już istnieje"
+      },
+      {
+        "success": false,
+        "error": "Gracz o tej nazwie jest na liście usuniętych — przywróć go zamiast dodawać ponownie"
+      },
+      {
+        "success": false,
+        "error": "Gracz o tej nazwie już istnieje"
+      },
+      {
+        "success": false,
+        "error": "Imię nie może zawierać znaków . # $ / [ ] — wpisz np. „Kuba K” zamiast „Kuba K.”"
+      },
+      {
+        "success": false,
+        "error": "Nazwa gracza nie może być pusta"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "paidUntilWeek": {
+        "Ola": 2
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "softDeletePlayer: bez salda trafia na listę usuniętych, z saldem jest odrzucony": {
+    "results": [
+      {
+        "success": true
+      },
+      {
+        "success": false,
+        "error": "Nie można usunąć gracza z niezerowym saldem (77.83 zł) — najpierw rozlicz go"
+      },
+      {
+        "success": false,
+        "error": "Nie znaleziono gracza"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia"
+      ],
+      "deletedPlayers": [
+        "Stary",
+        "Nowy"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "restorePlayer: wraca na listę i nie dubluje się": {
+    "results": [
+      {
+        "success": true
+      },
+      {
+        "success": true
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy",
+        "Stary"
+      ],
+      "deletedPlayers": [],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "permanentDeletePlayer: bez sesji czyści wszystkie ślady, z sesjami jest odrzucony": {
+    "results": [
+      {
+        "success": true
+      },
+      {
+        "success": false,
+        "error": "Nie można trwale usunąć gracza, który brał udział w sesjach — pozostaw go na liście usuniętych"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "setPlayerCard: none / multi / single zmienia obie listy naraz": {
+    "results": [
+      {
+        "success": true
+      },
+      {
+        "success": true
+      },
+      {
+        "success": true
+      },
+      {
+        "success": true
+      },
+      {
+        "success": false,
+        "error": "Nieznany rodzaj karty"
+      },
+      {
+        "success": false,
+        "error": "Nie znaleziono gracza"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Bartek",
+        "Kamil",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Bartek"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "addPayment: nowa wpłata, ponowienie tym samym id nie dubluje, kwota jest zaokrąglana": {
+    "results": [
+      {
+        "success": true,
+        "paymentId": "pay-1"
+      },
+      {
+        "success": true,
+        "paymentId": "pay-1"
+      },
+      {
+        "success": true,
+        "paymentId": "id-1"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          },
+          {
+            "id": "id-1",
+            "amount": 30,
+            "date": "2025-06-15"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ],
+        "Kamil": [
+          {
+            "id": "pay-1",
+            "amount": 12.35,
+            "date": "2025-06-15"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "addPayment: odrzucenia (zero, ujemna, brak gracza)": {
+    "results": [
+      {
+        "success": false,
+        "error": "Wpisz poprawną kwotę (większą od 0)"
+      },
+      {
+        "success": false,
+        "error": "Wpisz poprawną kwotę (większą od 0)"
+      },
+      {
+        "success": false,
+        "error": "Nie wybrano gracza"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "paidUntilWeek": {
+        "Ola": 2
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [
+          {
+            "id": "p1",
+            "amount": 20,
+            "date": "2025-02-01"
+          }
+        ],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  },
+  "removePayment: usuwa wskazaną wpłatę, brakującą odrzuca": {
+    "results": [
+      {
+        "success": true
+      },
+      {
+        "success": false,
+        "error": "Nie znaleziono wpłaty do cofnięcia"
+      },
+      {
+        "success": false,
+        "error": "Nie znaleziono wpłaty do cofnięcia"
+      }
+    ],
+    "state": {
+      "players": [
+        "Kamil",
+        "Ola",
+        "Bartek",
+        "Zosia",
+        "Nowy"
+      ],
+      "deletedPlayers": [
+        "Stary"
+      ],
+      "defaultMultiPlayers": [
+        "Ola",
+        "Zosia"
+      ],
+      "singleScanPlayers": [
+        "Zosia"
+      ],
+      "playerJoinDate": {
+        "Kamil": "2025-01-01",
+        "Ola": "2025-01-01",
+        "Bartek": "2025-02-10",
+        "Zosia": "2025-03-01",
+        "Nowy": "2025-06-01"
+      },
+      "playerJoinWeek": {
+        "Stary": 1,
+        "Ola": 0
+      },
+      "weeks": [
+        {
+          "id": "w-legacy",
+          "date": "2025-01-08",
+          "cost": 45,
+          "sport": "pingpong",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "overtimeCost": 15,
+          "overtimePlayers": [
+            "Ola"
+          ]
+        },
+        {
+          "id": "w-mid",
+          "date": "2025-02-05",
+          "cost": 60,
+          "sport": "badminton",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola"
+          ],
+          "courtCount": 2,
+          "durationHours": 1
+        },
+        {
+          "id": "w-scan",
+          "date": "2025-03-12",
+          "cost": 97.33,
+          "sport": "squash",
+          "present": [
+            "Kamil",
+            "Ola",
+            "Zosia",
+            "Bartek"
+          ],
+          "multiPlayers": [
+            "Ola",
+            "Zosia"
+          ],
+          "singleScanPlayers": [
+            "Zosia"
+          ],
+          "racketCost": 10,
+          "ownRacketPlayers": [
+            "Kamil"
+          ],
+          "courtCount": 1,
+          "durationHours": 2,
+          "discountModel": "perScan",
+          "courtGross": 120
+        }
+      ],
+      "payments": {
+        "Ola": [],
+        "Bartek": [
+          {
+            "id": "p2",
+            "amount": 5.5,
+            "date": "2025-03-01"
+          }
+        ]
+      },
+      "lastAddedSession": {
+        "id": "w-scan",
+        "ts": 1741000000000
+      }
+    }
+  }
+}
