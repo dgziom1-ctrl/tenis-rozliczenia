@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import ToggleChip from '../common/ToggleChip';
 import { RACKET_PRICE } from '@/constants';
-import { CLIP, FONT, TEXT } from '@/constants/styles';
+import { CLIP, FONT, SMALL_OUTLINE_BUTTON, TEXT } from '@/constants/styles';
 
 interface RacketRentalFieldsProps {
   /** Tekst pola ceny — trzymany przez rodzica, żeby dało się go wyczyścić i wpisać przecinek. */
@@ -55,11 +55,7 @@ export default function RacketRentalFields({
           <button
             type="button"
             onClick={onPriceReset}
-            style={{
-              ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)',
-              background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-              padding: '2px 8px', minHeight: 44, clipPath: CLIP.badge,
-            }}
+            style={SMALL_OUTLINE_BUTTON}
           >
             Przywróć {RACKET_PRICE} zł
           </button>

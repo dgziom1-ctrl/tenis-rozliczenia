@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { MULTISPORT_DISCOUNT } from '@/constants';
-import { CLIP, FONT, TEXT } from '@/constants/styles';
+import { CLIP, FONT, SMALL_OUTLINE_BUTTON, TEXT } from '@/constants/styles';
 import { formatAmountShort } from '@/utils/format';
 import { grossError } from '@/utils/courtRefund';
 import type { CourtRefundResolution } from '@/utils/courtRefund';
@@ -103,11 +103,7 @@ export default function CourtPriceFields({
             <button
               type="button"
               onClick={() => onOverrideChange(String(resolution.autoRefund))}
-              style={{
-                ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)',
-                background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-                padding: '2px 8px', minHeight: 44, clipPath: CLIP.badge,
-              }}
+              style={SMALL_OUTLINE_BUTTON}
             >
               Zmień
             </button>
@@ -130,11 +126,7 @@ export default function CourtPriceFields({
               <button
                 type="button"
                 onClick={() => onOverrideChange(undefined)}
-                style={{
-                  ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)',
-                  background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-                  padding: '2px 8px', minHeight: 44, clipPath: CLIP.badge,
-                }}
+                style={SMALL_OUTLINE_BUTTON}
               >
                 Wróć do automatu
               </button>

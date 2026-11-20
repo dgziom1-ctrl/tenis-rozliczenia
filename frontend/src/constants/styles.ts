@@ -141,6 +141,16 @@ export const FONT = {
   } as CSSProperties,
 };
 
+/**
+ * Mały przycisk z obrysem przy polach formularza („Przywróć 5 zł", „Zmień",
+ * „Wróć do automatu"). Cel dotyku ma 44 px wysokości mimo małego tekstu.
+ */
+export const SMALL_OUTLINE_BUTTON: CSSProperties = {
+  ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)',
+  background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
+  padding: '2px 8px', minHeight: 44, clipPath: CLIP.badge,
+};
+
 export const PANEL = {
   cyberCut: {
     background: 'var(--co-panel)',

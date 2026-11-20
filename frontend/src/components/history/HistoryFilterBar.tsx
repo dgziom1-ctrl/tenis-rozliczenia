@@ -1,8 +1,19 @@
-import type { Dispatch, SetStateAction } from 'react';
+import type { CSSProperties, Dispatch, SetStateAction } from 'react';
 import { Search, Download, ArrowUpDown } from 'lucide-react';
 import ToggleChip from '../common/ToggleChip';
 import { SPORT_LABEL } from '@/constants';
 import { CLIP, FONT, TEXT } from '@/constants/styles';
+
+/** Przyciski akcji po prawej stronie paska: sortowanie i eksport. */
+const ACTION_BUTTON_STYLE: CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 4,
+  minHeight: 44, padding: '8px 10px', cursor: 'pointer',
+  background: 'transparent', border: '1px solid var(--co-border)',
+  color: 'var(--co-dim)',
+  clipPath: CLIP.badge,
+  ...FONT.mono(TEXT.tiny), letterSpacing: 'normal',
+  flexShrink: 0,
+};
 
 interface HistoryFilterBarProps {
   playerNames: string[];
@@ -118,15 +129,7 @@ export default function HistoryFilterBar({
           ? 'Sortowanie: najnowsze pierwsze — zmień na najstarsze'
           : 'Sortowanie: najstarsze pierwsze — zmień na najnowsze'}
         className="icon-btn"
-        style={{
-          display: 'flex', alignItems: 'center', gap: 4,
-          minHeight: 44, padding: '8px 10px', cursor: 'pointer',
-          background: 'transparent', border: '1px solid var(--co-border)',
-          color: 'var(--co-dim)',
-          clipPath: CLIP.badge,
-          ...FONT.mono(TEXT.tiny), letterSpacing: 'normal',
-          flexShrink: 0,
-        }}
+        style={ACTION_BUTTON_STYLE}
       >
         <ArrowUpDown size={12} aria-hidden="true" />
         {sortOrder === 'desc' ? 'Nowe' : 'Stare'}
@@ -139,15 +142,7 @@ export default function HistoryFilterBar({
         title="Pobierz CSV"
         aria-label="Eksportuj CSV"
         className="icon-btn"
-        style={{
-          display: 'flex', alignItems: 'center', gap: 4,
-          minHeight: 44, padding: '8px 10px', cursor: 'pointer',
-          background: 'transparent', border: '1px solid var(--co-border)',
-          color: 'var(--co-dim)',
-          clipPath: CLIP.badge,
-          ...FONT.mono(TEXT.tiny), letterSpacing: 'normal',
-          flexShrink: 0,
-        }}
+        style={ACTION_BUTTON_STYLE}
       >
         <Download size={12} aria-hidden="true" />
         CSV
