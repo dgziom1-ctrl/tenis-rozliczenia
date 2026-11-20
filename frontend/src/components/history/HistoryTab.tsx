@@ -4,9 +4,10 @@ import { updateWeek, deleteWeekWithSnapshot, restoreWeek } from '@/lib/firebase'
 import { groupHistoryByMonth, getAvailableSeasons, filterHistoryByYear } from '@/utils/sessions';
 import SeasonSelector from '../attendance/SeasonSelector';
 import { parseAmount, isValidAmount, formatDate, plural } from '@/utils/format';
-import { getCourtAmount, getRacketSelection, getTotalWithRackets, inferRacketPricing } from '@/utils/sessionCost';
+import { getRacketSelection, getTotalWithRackets } from '@/utils/sessionCost';
+import { buildEditForm } from '@/utils/editForm';
 import { costError } from '@/utils/costMessages';
-import { grossError, resolveCourtRefund, expectedRefundForForm, resolveEditRefund } from '@/utils/courtRefund';
+import { grossError, resolveEditRefund } from '@/utils/courtRefund';
 import { buildSessionsCsv, downloadCsv, safeFileName } from '@/utils/csv';
 import { track } from '@/lib/analytics/track';
 import { useToast } from '../common/Toast';
@@ -204,40 +205,7 @@ export default function HistoryTab({ history, playerNames, singleScanPlayers = N
     if (!pwModal) return;
     if (pwModal.type === 'edit') {
       const row = pwModal.row;
-      const ownRacketCount = (row.ownRacketPlayers ?? [])
-        .filter(p => row.presentPlayers.includes(p)).length;
-      const racketPricing = inferRacketPricing(
-        row.racketCost,
-        Math.max(0, row.presentPlayers.length - ownRacketCount),
-      );
-      const form: SessionEditForm = {
-          date: row.datePlayed,
-          // Formularz pyta o sam kort — tak jak przy dodawaniu. Rakiety
-          // dokładamy dopiero przy zapisie, więc edycja bez zmian nie zmienia
-          // kwoty sesji.
-          cost: getCourtAmount(row.totalCost, row.racketCost),
-          present: [...row.presentPlayers],
-          multiPlayers: [...row.multisportPlayers],
-          sport: row.sport || SPORT.PINGPONG,
-          racketCount: racketPricing.racketCount,
-          racketPrice: racketPricing.racketPrice,
-          ownRacketPlayers: row.ownRacketPlayers ? [...row.ownRacketPlayers] : [],
-          // Stare sesje nie mają tych pól — zostawiamy `undefined`, żeby
-          // zapis nie włączył im po cichu limitu kart MultiSport.
-          courtCount: row.courtCount,
-          durationHours: row.durationHours,
-          singleScanPlayers: row.singleScanPlayers ? [...row.singleScanPlayers] : [],
-          discountModel: row.discountModel,
-      };
-      // Nowy sposób wpisywania: cena kortu przed zwrotem + zwrot. Zwrot zostaje
-      // „automatyczny”, jeśli zapisany równa się oczekiwanemu; inaczej — ręczny.
-      if (row.discountModel === 'perScan' && row.courtGross !== undefined) {
-        const net = getCourtAmount(row.totalCost, row.racketCost);
-        const stored = Math.round((row.courtGross - net) * 100) / 100;
-        const auto = resolveCourtRefund(row.courtGross, undefined, expectedRefundForForm(form)).autoRefund;
-        form.courtGross = row.courtGross;
-        form.refundOverride = Math.round(auto * 100) === Math.round(stored * 100) ? undefined : stored;
-      }
+      const form = buildEditForm(row);
       setEditing({ id: row.id, form, initial: JSON.stringify(form) });
     } else {
       void handleDelete(pwModal.rowId);
