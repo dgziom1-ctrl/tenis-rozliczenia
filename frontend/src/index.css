@@ -1,0 +1,2645 @@
+/* Reset przeglądarki (dawniej generowany przez Tailwind preflight). Zostaje jako
+   zwykły CSS — Tailwind nie był już używany do niczego poza dwoma klasami.
+
+   Reset siedzi w warstwie `reset`, czyli najniższej w kaskadzie. Wcześniej był
+   poza warstwami, więc elementowe reguły typu `button { color: inherit }` i
+   `button { background: transparent }` biły style komponentów z
+   `@layer utilities` — primary i outline traciły wypełnienie oraz kolor. */
+
+@layer reset {
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+
+  border-width: 0;
+
+  border-style: solid;
+
+  border-color: #e5e7eb;
+
+}
+
+::before,
+::after {
+  --tw-content: '';
+}
+
+html,
+:host {
+  line-height: 1.5;
+
+  -webkit-text-size-adjust: 100%;
+
+  -moz-tab-size: 4;
+
+  -o-tab-size: 4;
+     tab-size: 4;
+
+  font-family: "Rajdhani", system-ui, sans-serif;
+
+  font-feature-settings: normal;
+
+  font-variation-settings: normal;
+
+  -webkit-tap-highlight-color: transparent;
+
+}
+
+body {
+  margin: 0;
+
+  line-height: inherit;
+
+}
+
+hr {
+  height: 0;
+
+  color: inherit;
+
+  border-top-width: 1px;
+
+}
+
+abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: "Space Mono", monospace;
+
+  font-feature-settings: normal;
+
+  font-variation-settings: normal;
+
+  font-size: 1em;
+
+}
+
+small {
+  font-size: 80%;
+}
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+table {
+  text-indent: 0;
+
+  border-color: inherit;
+
+  border-collapse: collapse;
+
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+
+  font-feature-settings: inherit;
+
+  font-variation-settings: inherit;
+
+  font-size: 100%;
+
+  font-weight: inherit;
+
+  line-height: inherit;
+
+  letter-spacing: inherit;
+
+  color: inherit;
+
+  margin: 0;
+
+  padding: 0;
+
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit']) {
+  -webkit-appearance: button;
+
+  background-color: transparent;
+
+  background-image: none;
+
+}
+
+:-moz-focusring {
+  outline: auto;
+}
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+progress {
+  vertical-align: baseline;
+}
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+[type='search'] {
+  -webkit-appearance: textfield;
+
+  outline-offset: -2px;
+
+}
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+
+  font: inherit;
+
+}
+
+summary {
+  display: list-item;
+}
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+dialog {
+  padding: 0;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input::-moz-placeholder, textarea::-moz-placeholder {
+  opacity: 1;
+
+  color: #9ca3af;
+
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1;
+
+  color: #9ca3af;
+
+}
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+:disabled {
+  cursor: default;
+}
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+
+  vertical-align: middle;
+
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none;
+}
+
+} /* @layer reset */
+
+/* ═══════════════════════════════════════════════════════════════════
+   COLD OPERATOR  ·  Military-Hacker Cyberpunk
+   Dominant:  Electric Cyan  #00E5FF
+   Support:   Electric Blue  #0080FF
+   Rose:      Rose           #FF2090  (neutral payment status)
+   Amber:     Amber          #F59E0B  (warnings, alerts)
+   Positive:  Matrix Green   #00FF88
+   Accent:    Neon Pink      #FF00FF  (<5% – micro-accents only)
+   Base:      #030508 near-black with cold blue tint
+
+   KOMPROMIS (po PR #14): klimat wraca w 100% (szkło, neon, canvas, skany,
+   ścięcia, konfetti), ale etykiety są zdaniami — bez wymuszania wielkich liter
+   i bez trackingu. Szczegóły: ../../docs/DESIGN-COMPROMISE.md.
+═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Natywne kontrolki (scrollbar, suwak, picker daty) w schemacie motywu. */
+  color-scheme: dark;
+
+  /* ── Backgrounds — cold, dark ── */
+  --co-void:     #030508;   /* deepest bg */
+  --co-dark:     #060C12;   /* secondary bg */
+  --co-panel:    #090F18;   /* card/panel */
+  --co-raised:   #0C1420;   /* elevated element */
+  --co-border:   #122034;   /* default border */
+  --co-border-hi:#1A3050;   /* highlighted border */
+
+  /* ── Primary — Electric Cyan (dominant) ── */
+  --co-cyan:     #00E5FF;   /* main accent */
+  --co-cyan-mid: #00B4D8;   /* secondary cyan */
+  --co-cyan-dim: #003A4A;   /* muted cyan bg */
+  --co-ice:      #0080FF;   /* electric blue — replaces old ice pastel */
+
+  /* ── Rose — payment status (neutral, not aggressive) ── */
+  --co-rose:     #FF2090;   /* "do rozliczenia" */
+  --co-rose-mid: #CC1A74;   /* dimmer rose */
+  --co-rose-dim: #1A0012;   /* rose bg tint */
+
+  /* ── Amber — warnings, informational alerts ── */
+  --co-amber:    #F59E0B;
+  --co-amber-mid:#D97706;
+  --co-amber-dim:#1A1200;
+
+  /* ── Medal podium — gold / silver / bronze (nie cyan na #1) ── */
+  --co-gold:     #B8860B;
+  --co-gold-mid: #9A7209;
+  --co-gold-dim: #1A1400;
+  --co-silver:   #C0C8D4;
+  --co-bronze:   #CD7F32;
+  --co-tint-gold: rgba(184,134,11,0.10);
+  --co-tint-bronze: rgba(205,127,50,0.10);
+  --glow-gold-md:  0 0 14px rgba(184,134,11,0.45);
+  --glow-box-gold: 0 0 16px rgba(184,134,11,0.22);
+
+  /* ── Kolory rang ──
+     Nie mogą być jedną wartością na oba motywy. Aby kolor przechodził 4,5:1
+     jednocześnie na prawie czarnym i prawie białym tle, jego luminancja
+     musiałaby leżeć w przedziale 0,183–0,199 — wąskim jak włos i niemożliwym
+     dla nasyconych barw. Dlatego ranga ma osobny token na motyw; komponenty
+     czytają `var(--rank-*)`, a nie literał. Wartości pilnuje
+     `npm run audit:contrast`. */
+  --rank-legenda: #D4A017;
+  --rank-mistrz:  #F0509A;
+  --rank-weteran: #B37FEB;
+  --rank-staly:   #22B8CF;
+  --rank-gosc:    #8AA3B8;
+  --rank-duch:    #7C93A6;
+
+  /* ── Positive — Matrix Green ── */
+  --co-green:    #00FF88;   /* settled / positive */
+  --co-green-dim:#003320;   /* green bg tint */
+
+  /* ── Micro-accent — Neon Pink (<5% use) ── */
+  --co-pink:     #FF00FF;   /* SPARINGLY: only critical micro-accents */
+
+  /* ── Neutrals ──
+     --co-dim carries most of the secondary copy in the app (labels, counts,
+     dates), so it has to clear WCAG AA not only on --co-void, but also on the
+     raised panel it usually sits on: #64869F is 5,30:1 on void and 4,80:1 on
+     --co-raised. --co-dim2 is a large-text/decorative token only (3,80:1) —
+     body copy uses --co-dim. `npm run audit:contrast` guards both. */
+  --co-text:     #A8C4D4;   /* main text — cool blue-grey */
+  --co-text-hi:  #D0E8F5;   /* headings */
+  --co-dim:      #64869F;   /* muted text — 5,30:1 on void, 4,80:1 on raised */
+  --co-dim2:     #4B6E8C;   /* very muted — 3,80:1, large/decorative only */
+
+  /* ── Accent tints ──
+     The dominant surface treatment is "a wash of the accent colour". Inline
+     styles used to hardcode rgba(0,229,255,0.0x), which the light theme could
+     never remap — so light mode got electric-cyan washes under teal borders. */
+  --co-tint:      rgba(0,229,255,0.04);   /* subtle panel wash */
+  --co-tint-hi:   rgba(0,229,255,0.08);   /* active / selected */
+  --co-tint-line: rgba(0,229,255,0.25);   /* hairline, chip border */
+  --co-tint-rose: rgba(255,32,144,0.06);
+  /* Różowy odpowiednik `--co-tint-line`. Ekrany błędu składały tę kreskę
+     z literału `rgba(200,0,30,0.2)` — czwartej czerwieni w aplikacji, której
+     tryb jasny nie mógł przemapować. */
+  --co-tint-rose-line: rgba(255,32,144,0.30);
+  --co-tint-green:rgba(0,255,136,0.05);
+
+  /* ── Glow tokens ──
+     A CSS override cannot reach an inline `textShadow`, so every glow in the
+     app reads a variable instead of a literal. Light mode sets them to `none`
+     and the neon disappears without touching a single component. */
+  --glow-cyan-sm:   0 0 8px rgba(0,229,255,0.30);
+  --glow-cyan-md:   0 0 14px rgba(0,229,255,0.40);
+  --glow-cyan-lg:   0 0 20px rgba(0,229,255,0.50);
+  --glow-rose-md:   0 0 14px rgba(255,32,144,0.45);
+  --glow-green-md:  0 0 14px rgba(0,255,136,0.40);
+  --glow-box-cyan:  0 0 16px rgba(0,229,255,0.20);
+  --glow-box-rose:  0 0 18px rgba(255,32,144,0.13);
+  --glow-box-panel: 0 1px 0 rgba(255,255,255,0.04) inset, 0 30px 70px -30px rgba(0,0,0,0.92), 0 6px 18px -8px rgba(0,0,0,0.70);
+  /* Filter rysuje cień poza clip-path, w przeciwieństwie do box-shadow. */
+  --glow-drop-panel: drop-shadow(0 30px 60px rgba(0,0,0,0.70));
+  --modal-blur: 8px;
+  /* `filter` nie przyjmuje wartości box-shadow, więc poświata canvasu w
+     nagłówku potrzebuje własnego tokenu. */
+  --glow-drop-cyan: drop-shadow(0 0 20px rgba(0,229,255,0.12));
+  --glow-drop-rose: drop-shadow(0 0 8px rgba(255,32,144,0.50));
+  /* Poświata marki w nagłówku — żyje w trybie jasnym, gdy reszta neonu gaśnie. */
+  --glow-brand-sm: 0 0 8px rgba(0,229,255,0.30);
+  --glow-brand-md: 0 0 14px rgba(0,229,255,0.40);
+  --glow-brand-lg: 0 0 20px rgba(0,229,255,0.50);
+
+  /* ── Layer scale ──
+     Was an ad-hoc ladder of 38/39/40/45/49/50/70/100/200/1000/1001/9000, with
+     the film grain painting on top of every dialog. */
+  --z-header: 39;
+  --z-nav:    40;
+  --z-banner: 45;
+  --z-grain:  50;
+  --z-popover:60;
+  --z-modal:  100;
+  --z-confetti: 110;
+  --z-boot:   1000;
+  --z-toast:  9000;
+
+  /* ── Dialogi ──
+     Ciemny motyw jest kanciasty (ścięte narożniki), jasny — zaokrąglony.
+     Wcześniej dwa modale wpisywały `12px` na sztywno w obu motywach. */
+  --modal-radius: 0px;
+  --modal-bg:     var(--co-glass-hi);
+  /* ── Kształty ścięć ──
+     Muszą odpowiadać `CLIP` w constants/styles.ts — TypeScript nie czyta
+     zmiennych CSS, więc te same kształty muszą żyć w obu miejscach.
+     Wcześniej klasy przycisków wpisywały wielokąty wprost i rozjechały się:
+     przycisk główny i destrukcyjny miały ścięcie 8px, a outline 6px, więc
+     każda para POTWIERDŹ/ANULUJ stała obok siebie z różnym kątem narożnika. */
+  --clip-panel:   polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+  --clip-tag:     polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  --clip-badge:   polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+
+  /* Kolor tekstu na wypełnieniu akcentem — zależy od jasności tego akcentu.
+     `--co-on-accent` dotyczy cyanu (przycisk główny, skip link), `--co-on-rose`
+     przycisku destrukcyjnego. Oba mają osobne wartości w trybie jasnym, bo ten
+     sam akcent jest tam znacznie ciemniejszy. */
+  --co-on-rose:   #030508;
+  --co-on-accent: #030508;
+
+  /* ── Theme-switchable inline helpers ── */
+  --co-bar-track:    rgba(255,255,255,0.06);
+  --co-dot-empty:    rgba(255,255,255,0.15);
+  --co-close-btn:    #3a3a3a;
+  --co-toast-success:rgba(3,18,8,0.78);
+  --co-toast-error:  rgba(14,6,6,0.78);
+  --co-toast-info:   rgba(8,8,8,0.78);
+  --co-toast-text:   #c8c8c8;
+  --co-separator:    rgba(255,255,255,0.05);
+  /* Powierzchnia wewnętrzna — --co-separator to hairline i użyty jako tło
+     dawał pudełka bez widocznej krawędzi (to samo 5% na tle i obramowaniu). */
+  --co-surface-2:    #0C1420;
+
+  /* ── Glass surfaces (iOS-style liquid glass) ──
+     Panele są półprzezroczyste i rozmywają tło pod sobą. Trzy stopnie krycia:
+     `--co-glass` na duże panele, `--co-glass-hi` na dialogi (czytelność tekstu
+     nad rozmytym tłem), `--co-glass-chip` na małe kontrolki (pola, chipy).
+
+     Efekt „premium" składa się z czterech warstw, tak jak w Liquid Glass:
+       1. rozmycie + nasycenie tła pod panelem (`--glass-blur`, `--glass-sat`),
+       2. refleks na górnej krawędzi (`--glass-sheen`),
+       3. świetlna plama podążająca za kursorem (`--glass-light`, rysowana
+          w `::after` paneli — patrz sekcja PREMIUM GLASS),
+       4. krawędziowy specular i cień objętościowy (`--glass-edge-top`,
+          `--glass-edge-bottom`, `--glass-shadow`).
+     Wszystkie kolory żyją w tokenach, więc tryb jasny podmienia je jednym
+     blokiem, a `prefers-reduced-transparency` wyłącza całość bez ruszania
+     komponentów. */
+  --co-glass:      rgba(6,12,20,0.56);
+  --co-glass-hi:   rgba(6,12,20,0.78);
+  --co-glass-chip: rgba(6,12,20,0.46);
+  --glass-blur:    26px;
+  --glass-sat:     190%;
+  --glass-hi-line: rgba(180,240,255,0.08);
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0) 34%);
+  /* Refleks (warstwa 3) jest cyjanowy, nie biały — biała plama na granatowym
+     tle dawała „siwy" plastik. Kolor czyta się jak światło w szkle. */
+  --glass-light:   rgba(0,229,255,0.10);
+  /* Krawędzie szkła: jasna góra (światło), ciemny dół (grubość tafli). */
+  --glass-edge-top:    rgba(190,245,255,0.26);
+  --glass-edge-bottom: rgba(0,0,0,0.55);
+  --glass-rim:         inset 0 0 0 1px rgba(0,229,255,0.05);
+  --glass-border:      rgba(0,229,255,0.13);
+  /* Ziarno wyłączone — na ciemnej tafli dodawało szarą mgłę zamiast tekstury.
+     Token zostaje, bo czytają go nagłówek, nawigacja i dialog. */
+  --glass-noise: none;
+  /* Wgłębienie pola tekstowego — jasny motyw ma własną, jasną wersję. */
+  --input-inset:
+    inset 0 1px 2px rgba(0,0,0,0.45),
+    inset 0 -1px 0 rgba(255,255,255,0.045),
+    inset 0 0 0 1px rgba(255,255,255,0.02);
+  /* Cień szkła: refleks górnej krawędzi + grubość tafli + miękki cień pod panelem. */
+  --glass-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 20px 50px -26px rgba(0,0,0,0.90),
+    0 2px 8px -4px rgba(0,0,0,0.60);
+
+  /* ── Fonts ── */
+  /* TYPOGRAFIA — klimat Night City bez kwadratowego HUD-u.
+     Rajdhani to główny krój UI Cyberpunk 2077 (HUD, menu, dziennik) i zostaje
+     na tekście. Dane techniczne składa Chakra Petch Italic: ostre ścięte
+     narożniki i pochył, bliżej liternictwa z logo gry niż poprzedni,
+     geometryczny krój. Wszystkie kroje są self-hosted (@fontsource, patrz fonts.css).
+     Chakra Petch ma pełny latin-ext, więc polszczyzna jest bezpieczna. */
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body:    'Rajdhani', sans-serif;
+  --font-mono:    'Space Mono', 'Courier New', monospace;
+  --font-tech:    'Chakra Petch', 'Rajdhani', sans-serif;
+  --font-stencil: var(--font-tech);
+
+  /* ── Misc ── */
+  --co-overlay:    rgba(0,0,0,0.88);
+  --dot-color:     rgba(0,229,255,0.07);
+
+  /* Wysokość dolnej nawigacji (`min-height` w `.mobile-nav-btn`).
+     Wszystko, co kotwiczy się nad nawigacją, liczy się od tej jednej wartości.
+     Wcześniej krążyła w trzech zapisach — 56px w banerach, 72px w toaście
+     i 4.5rem w treści — więc toast nachodził na baner instalacji PWA. */
+  --nav-height:    56px;
+
+  /* ── Winieta tła ──
+     Ostatnia warstwa `CyberBackground`. Literał w komponencie nie zmieniał się
+     z motywem, więc jasny ekran dostawał czarną ramkę. */
+  --bg-vignette:  rgba(0,0,0,0.42);
+
+  /* ── Canvas nagłówka (ArenaCanvas) ──────────────────────────────────
+     Canvas 2D nie rozumie `var()`, ale może przeczytać tokeny przez
+     `getComputedStyle(document.body)`. Wartości RGB są bez `rgb()`, żeby
+     w pętli składać `rgba(...)` z własnym alpha. Dzięki temu każdy kolor
+     dekoracji ma jedno źródło prawdy i reaguje na zmianę motywu — Hallmark
+     „every colour goes through a token”, Canvas UI bez twardych literałów. */
+  --canvas-accent:          0,229,255;
+  --canvas-accent-deep:     0,140,220;
+  --canvas-grid:            0,180,255;
+  --canvas-edge:            0,200,255;
+  --canvas-deep-shade:      0,100,200;
+  --canvas-table-from:      #020810;
+  --canvas-table-to:        #041828;
+  --canvas-body-from:       #062038;
+  --canvas-body-mid:        #031428;
+  --canvas-body-to:         #010C1C;
+  --canvas-ball-core:       #ffffff;
+  --canvas-ball-mid:        #d8f5ff;
+  --canvas-ball-edge:       #80c8e0;
+  --canvas-shadow:          0,50,120;
+  --canvas-floor-wash:      0,200,255;
+  --canvas-ice-stripe:      0,220,255;
+  --canvas-handle:          2,12,28;
+  --canvas-handle-line:     0,80,140;
+  --canvas-net-top:         200,248,255;
+  --canvas-glow:            0,160,255;
+  --canvas-glow-idle:       0,180,255;
+  --canvas-rubber-hit:      0,229,255;
+  --canvas-rubber-idle:     0,180,220;
+  --canvas-rubber-hit-end:  0,160,210;
+  --canvas-rubber-idle-end: 0,120,180;
+  --canvas-white:           255,255,255;
+}
+
+/* ══ RESET ═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+/* Hallmark floor: `overflow-x: clip`, nigdy `hidden`. `hidden` tworzy kontener
+   przewijania na <body>, przez co `position: fixed` wewnątrz elementu z
+   transformem kotwiczy się względem niego (baner powiadomień wypadał poza
+   ekran), a `position: sticky` traci punkt odniesienia. `clip` tnie
+   poziome wystawanie dekoracji bez zmiany containing blocku. */
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  /* iOS potrafi samodzielnie powiększać tekst przy obrocie telefonu. Efekt:
+     po zdjęciu z pionu interfejs wygląda jak inna aplikacja. 100% zostawia
+     decyzję o rozmiarze autorowi arkusza. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Powłoka aplikacji. `100vh` na telefonie mierzy viewport razem z paskiem
+   adresu, więc strona zawsze ma kilka–kilkadziesiąt pikseli nadmiaru i dolna
+   nawigacja „ucieka” przy chowaniu paska. `svh` to najmniejszy stabilny
+   viewport — bez skoków przy przewijaniu. `vh` zostaje jako fallback. */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100svh;
+  position: relative;
+  z-index: 10;
+  padding: 0.5rem;
+  /* Poziomo na telefonie z notchem treść nie może wchodzić pod wycięcie. */
+  padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 768px) {
+  .app-shell { padding: 2rem; }
+}
+
+/* Pole daty jest przykryte niewidocznym inputem, więc pierścień fokusa
+   rysujemy na dekoracyjnej warstwie, gdy input ma fokus. */
+.cyber-date-wrap:focus-within > .cyber-input {
+  filter: drop-shadow(0 0 1px var(--co-cyan)) drop-shadow(0 0 3px var(--co-cyan));
+}
+.cyber-date-wrap > input:focus-visible { outline: none; }
+.app-content {
+  position: relative;
+  max-width: 80rem;
+  margin-inline: auto;
+}
+#root { min-height: 100%; }
+
+/* Kursor na wszystkim, co klikalne. Wcześniej zależało to od tego, czy autor
+   komponentu pamiętał o `cursor: pointer` — część przycisków pokazywała
+   domyślną strzałkę, co czyta się jak „to nie jest aktywne”. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+summary { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+body {
+  background-color: var(--co-void);
+  color: var(--co-text);
+  font-family: var(--font-body);
+  font-weight: 500;
+  overflow-x: clip;
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: normal;
+  /* `background-image` nie przechodzi płynnie między gradientami — wpisanie go
+     do transitionu obiecywało animację, której przeglądarka i tak nie robi. */
+  transition: background-color 0.4s ease, color 0.4s ease;
+
+  /* Cold operator background: cyan top bloom + rose/blue depth below + fine grid */
+  background-image:
+    radial-gradient(ellipse 75% 45% at 50% -8%, rgba(0,229,255,0.05) 0%, transparent 65%),
+    radial-gradient(ellipse 52% 42% at 84% 110%, rgba(255,32,144,0.025) 0%, transparent 62%),
+    radial-gradient(ellipse 44% 34% at 10% 104%, rgba(0,180,216,0.025) 0%, transparent 60%),
+    radial-gradient(circle at 1px 1px, rgba(0,229,255,0.03) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
+  background-attachment: fixed;
+}
+
+/* `background-attachment: fixed` na telefonie kosztuje przemalowanie całego
+   tła przy każdym przewinięciu (iOS i tak je ignoruje). Wersja `scroll`
+   wygląda identycznie na krótkim ekranie, a przestaje rywalizować z dolnym
+   paskiem o klatki. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  body { background-attachment: scroll; }
+}
+
+/* ══ MOTYW OLED ═════════════════════════════════════════════════════
+   Prawdziwa czerń (#000 = piksele wyłączone na AMOLED) zamiast granatowego
+   near-blacka. Dziedziczy wszystko z ciemnego motywu (`:root`) i podmienia
+   tylko to, co zasłaniało czerń: tło, siatkę, ziarno, winietę i krycie szkła.
+   Szkło jest tu bardziej przezroczyste, a krawędzie jaśniejsze — na czerni
+   panel czyta się przez światło na krawędzi i delikatną poświatę pod spodem,
+   a nie przez szare wypełnienie. `--glass-shadow` trzeba zadeklarować ponownie:
+   `var()` w tokenie rozwiązuje się tam, gdzie token jest zadeklarowany. */
+body.theme-oled {
+  --co-void:      #000000;
+  --co-dark:      #000000;
+  --co-panel:     #050709;
+  --co-raised:    #0A0D12;
+  --co-surface-2: #0A0D12;
+  --co-border:    #0F1722;
+  --co-border-hi: #182739;
+
+  --co-glass:      rgba(8,12,18,0.42);
+  --co-glass-hi:   rgba(6,9,14,0.72);
+  --co-glass-chip: rgba(8,12,18,0.36);
+  --glass-blur:    30px;
+  --glass-sat:     210%;
+  /* Refleks w pikselach, nie w procentach: 36% wysokości na panelu 3500px
+     (Historia, Gracze) to 1250px szarej mgły — dokładnie to, czego OLED ma unikać. */
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.075) 0, rgba(255,255,255,0.02) 16px, rgba(255,255,255,0) 40px);
+  --glass-light:   rgba(0,229,255,0.13);
+  --glass-edge-top:    rgba(215,248,255,0.34);
+  --glass-edge-bottom: rgba(0,0,0,0.8);
+  --glass-rim:         inset 0 0 0 1px rgba(0,229,255,0.07);
+  --glass-border:      rgba(0,229,255,0.17);
+  --glass-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 0 0 1px rgba(255,255,255,0.025),
+    0 22px 56px -28px rgba(0,229,255,0.10),
+    0 2px 8px -4px rgba(0,0,0,0.9);
+  --co-overlay:    rgba(0,0,0,0.92);
+  --bg-vignette:   rgba(0,0,0,0);
+
+  /* Tylko lokalny bloom u góry — reszta ekranu to czysta czerń. */
+  background-image:
+    radial-gradient(ellipse 70% 32% at 50% -10%, rgba(0,229,255,0.035) 0%, transparent 65%);
+  background-size: 100% 100%;
+}
+/* Szkło na OLED. Wspólna receptura ma refleks i plamę światła liczone w % wysokości
+   panelu — na dużych panelach (Historia, Gracze, Admin) rozlewało się to w szary
+   całopanelowy filtr, więc te zakładki wyglądały jak stary motyw. Tu światło jest
+   w pikselach: jasny pas na górnej krawędzi i ciasna plama pod kursorem, a reszta
+   panelu to czysta czerń. Kontener jest ciemniejszy niż karty w środku, żeby
+   warstwy czytały się głębią (karta „unosi się" nad tłem), a nie obwódką. */
+body.theme-oled .glass-card,
+body.theme-oled .cyber-box,
+body.theme-oled .glass-panel,
+body.theme-oled .glass-surface {
+  background-color: rgba(9,13,19,0.76);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(ellipse 220px 44px at var(--glass-x) var(--glass-y), var(--glass-light) 0%, transparent 100%),
+    var(--card-tint, linear-gradient(transparent, transparent));
+}
+body.theme-oled .cyber-box {
+  background-color: rgba(2,4,6,0.80);
+}
+/* Nagłówek ma wysokość ~290px na telefonie — jego poświata 120%×140% zalewała
+   cały baner szarozielonym filtrem. Tu jest ciasna i słabsza. */
+body.theme-oled .glass-header {
+  background-color: rgba(2,4,6,0.72);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(70% 60% at 50% -12%, rgba(0,229,255,0.07) 0%, transparent 70%);
+}
+/* Folia rzadkości (color-dodge) i połysk karty na czerni robią szarą mgłę —
+   dlatego karty graczy prawie nie zmieniały się względem starego motywu.
+   Zostaje delikatny błysk, który podkreśla kolor rzadkości, nie rozjaśnia karty. */
+body.theme-oled .card-foil         { opacity: 0.10; }
+body.theme-oled .card-foil-legend  { opacity: 0.22; }
+body.theme-oled .card-foil-elite   { opacity: 0.18; }
+body.theme-oled .card-foil-epic    { opacity: 0.15; }
+body.theme-oled .card-foil-rare    { opacity: 0.12; }
+body.theme-oled .card-foil-common  { opacity: 0.07; }
+body.theme-oled .card-foil-ghost   { opacity: 0.05; }
+body.theme-oled .glass-shine-overlay { opacity: 0.10; }
+/* Karta gracza: czarne wnętrze, kolor rzadkości tylko jako poświata przy rogu. */
+body.theme-oled .fifa-card-legend { --card-tint: linear-gradient(165deg, rgba(184,134,11,0.22) 0%, transparent 34%); }
+body.theme-oled .fifa-card-elite  { --card-tint: linear-gradient(165deg, rgba(224,25,122,0.20) 0%, transparent 34%); }
+body.theme-oled .fifa-card-epic   { --card-tint: linear-gradient(165deg, rgba(155,77,224,0.20) 0%, transparent 34%); }
+body.theme-oled .fifa-card-rare   { --card-tint: linear-gradient(165deg, rgba(20,138,156,0.18) 0%, transparent 34%); }
+body.theme-oled .fifa-card-common { --card-tint: linear-gradient(165deg, rgba(100,116,139,0.10) 0%, transparent 30%); }
+body.theme-oled .fifa-card-ghost  { --card-tint: linear-gradient(165deg, rgba(85,102,119,0.08) 0%, transparent 30%); }
+/* Ziarno rozjaśnia czerń i daje banding na OLED. */
+body.theme-oled::before { display: none; }
+body.theme-oled .fluid-blob { opacity: 0.12; }
+body.theme-oled .fluid-grid { opacity: 0.15; }
+
+/* ── Płynna zmiana motywu ──
+   Ta reguła obowiązuje TYLKO w trakcie przełączania motywu (klasę zdejmuje
+   useTheme po zakończeniu przejścia). Wcześniej wisiała na `*` na stałe, więc
+   każdy hover, focus i podświetlenie w całej aplikacji dochodziło do stanu
+   docelowego przez 400 ms i interfejs wydawał się ociężały. */
+body.theme-switching,
+body.theme-switching *,
+body.theme-switching *::before,
+body.theme-switching *::after {
+  transition-property: background-color, color, border-color, box-shadow, fill, stroke;
+  transition-duration: 0.4s;
+  transition-timing-function: ease;
+}
+
+/* ── Film grain (desktop only — skipped on mobile to reduce rendering overhead) ──
+   Sam `min-width` nie wystarcza: tablet 1024×768 i telefon w poziomie też go
+   przekraczają, a warstwa z `mix-blend-mode` nad całym ekranem jest wtedy
+   kosztowna przy każdym przewinięciu. Precyzyjny wskaźnik zostawia ziarno
+   tylko tam, gdzie faktycznie mamy mysz. */
+@media (min-width: 768px) and (pointer: fine) {
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    mix-blend-mode: overlay;
+  }
+}
+
+/* ══ ANIMATIONS ══════════════════════════════════════════════════ */
+
+@keyframes neon-cyan {
+  0%, 100% { box-shadow: 0 0 4px var(--co-cyan), 0 0 14px rgba(0,229,255,0.2), inset 0 0 6px rgba(0,229,255,0.03); }
+  50%       { box-shadow: 0 0 12px var(--co-cyan), 0 0 32px rgba(0,229,255,0.38), inset 0 0 14px rgba(0,229,255,0.06); }
+}
+/* Rose — calm pulse for pending status */
+@keyframes neon-rose {
+  0%, 100% { box-shadow: 0 0 3px rgba(255,32,144,0.35), 0 0 10px rgba(255,32,144,0.12); }
+  50%       { box-shadow: 0 0 8px rgba(255,32,144,0.55), 0 0 20px rgba(255,32,144,0.22); }
+}
+/* Ruch po `transform`, nie po `top`: `top` przelicza layout w każdej klatce,
+   a ten efekt odpala się na hoverze na wielu kartach naraz. */
+@keyframes scan-sweep {
+  0%   { transform: translateY(-100%); opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+@keyframes slide-in-up {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes chaosFlash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ── Easter egg: konfetti po pięciu kliknięciach w tytuł ─────────────
+   Reguła `confettiBurst` była wpisana w komponencie, ale brakowało samego
+   `@keyframes` w arkuszu — przeglądarka odrzucała deklarację, więc emoji
+   pojawiały się w górnej krawędzi i tam zostawały. Obrót i dryf jadą
+   zmiennymi, bo `transform` z animacji i tak nadpisuje styl inline. */
+@keyframes confettiBurst {
+  0%   { opacity: 0; transform: translate3d(0, -14vh, 0) rotate(0deg) scale(0.5); }
+  12%  { opacity: 1; }
+  78%  { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--drift, 0px), 106vh, 0) rotate(var(--spin, 360deg)) scale(1); }
+}
+
+.chaos-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-confetti);
+  pointer-events: none;
+  overflow: hidden;   /* dryf nie może wywołać poziomego przewijania */
+  contain: strict;    /* warstwa nie wpływa na layout strony */
+}
+.chaos-piece {
+  position: absolute;
+  top: 0;
+  left: 0;
+  line-height: 1;
+  will-change: transform, opacity;
+}
+/* Wariant dla `prefers-reduced-motion`: statyczna posypka, zero ruchu. */
+.chaos-piece-static { opacity: 0.9; }
+.chaos-flash {
+  position: absolute;
+  inset: 0;
+  animation: chaosFlash 0.6s ease-out forwards;
+  background: radial-gradient(ellipse at 50% 30%, var(--co-tint-hi) 0%, var(--co-tint) 60%, transparent 80%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .chaos-flash { display: none; }
+}
+@keyframes headerBounce {
+  0%,100% { transform: translateY(0); }
+  20%     { transform: translateY(-6px); }
+  40%     { transform: translateY(4px); }
+  60%     { transform: translateY(-3px); }
+  80%     { transform: translateY(2px); }
+}
+@keyframes pending-flash {
+  0%   { background: rgba(255,32,144,0.10); }
+  100% { background: transparent; }
+}
+@keyframes loading-bar {
+  0%   { transform: translateX(-200%); }
+  100% { transform: translateX(700%); }
+}
+@keyframes tabBounce {
+  0% { transform: translateY(0); }
+  35% { transform: translateY(-3px); }
+  65% { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
+}
+@keyframes pwaSlideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* ── Wrapped (podsumowanie sezonu) ──
+   Były wstrzykiwane do <head> w runtime i zostawały tam po odmontowaniu okna.
+   Poświata jedzie tokenami, więc w trybie jasnym animacja jest pustym przebiegiem. */
+@keyframes wm-fadeScale { 0% { transform: scale(.88) translateY(24px); } 100% { transform: scale(1) translateY(0); } }
+@keyframes wm-glow      { 0%, 100% { opacity: .82; } 50% { opacity: 1; } }
+@keyframes wm-pulse     { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+@keyframes wm-slideUp   { 0% { transform: translateY(40px); } 100% { transform: translateY(0); } }
+@keyframes wm-float     { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* ══ UTILITIES ═══════════════════════════════════════════════════ */
+@layer utilities {
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+
+  /* Nie ma tu `.font-display`. Nic go nie używało (komponenty sięgają wprost po
+     `var(--font-display)`), a wnosił czwarty stopień odstępu literowego, 0.05em,
+     poza skalą TRACK. `lint:css` go nie wyłapał, bo szuka nazwy w źródłach,
+     a `var(--font-display)` zawiera ten sam napis. */
+
+  .crt-card { position: relative; overflow: hidden; }
+
+  .scan-hover { position: relative; overflow: hidden; }
+  .scan-hover::before {
+    /* Pełna wysokość + linia jako `background-size`: `translateY(100%)` jest
+       wtedy równe wysokości karty, więc skan przejeżdża od góry do dołu. */
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.55), transparent)
+      top center / 100% 2px no-repeat;
+    transform: translateY(-100%);
+    pointer-events: none; z-index: 3;
+  }
+  /* `will-change` tylko w momencie animacji. Na stałe promowałoby do warstwy
+     każdą kartę na ekranie, nawet tej, której nikt nie dotknął. */
+  .scan-hover:hover::before {
+    animation: scan-sweep 0.5s ease-out forwards;
+    will-change: transform;
+  }
+
+  /* Wspólna receptura szkła. Wszystkie powierzchnie — karty, panele, modale,
+     nagłówek, nawigacja, toasty i banery — czytają te same tokeny, więc
+     „premium" zmienia się w jednym miejscu, a nie w jedenastu komponentach. */
+  .glass-card,
+  .cyber-box,
+  .glass-panel,
+  .glass-surface {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--co-glass);
+    /* Warstwy od góry: ziarno → sheen → kolor rzadkości karty (jeśli jest). */
+    background-image:
+      var(--glass-noise),
+      var(--glass-sheen),
+      var(--card-tint, linear-gradient(transparent, transparent));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), var(--glass-rim);
+  }
+
+  .cyber-box {
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  /* Neonowa kreska na górnej krawędzi szkła — sygnatura „premium cyber". */
+  .cyber-box::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--co-tint-line), transparent);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .cyber-input {
+    background: var(--co-glass-chip);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    border: 1px solid var(--co-border-hi);
+    color: var(--co-text);
+    font-family: var(--font-mono);
+    /* 16px to podłoga, poniżej której iOS Safari przybliża stronę przy
+       tapnięciu w pole. Komponenty nie nadpisują już tego inline. */
+    font-size: 16px;
+    box-shadow: var(--input-inset);
+    transition: border-color 0.18s, box-shadow 0.18s, background-color 0.18s;
+  }
+  .cyber-input:focus {
+    border-color: var(--co-cyan);
+    box-shadow: 0 0 0 2px var(--co-tint-hi), var(--glow-cyan-sm);
+    outline: none;
+  }
+  /* Stan błędu klasą, nie inline: styl inline bije `:focus` i pole traciło
+     wtedy jakąkolwiek widoczną oznakę fokusu. */
+  .cyber-input.input-error {
+    border-color: var(--co-rose);
+    box-shadow: 0 0 0 2px var(--co-tint-rose), var(--glow-rose-md);
+  }
+  /* Rozmiar dziedziczony po polu — przypięte 0.8rem sprawiało, że w polu kwoty
+     (1.3rem) podpowiedź była o 40% mniejsza od wpisywanego tekstu. */
+  .cyber-input::placeholder { color: var(--co-dim); font-size: inherit; opacity: 1; }
+
+  /* Primary button — Cyan dominant */
+  .cyber-button-yellow {
+    background: linear-gradient(135deg, var(--co-cyan), var(--co-cyan-mid));
+    color: var(--co-on-accent);
+    font-family: var(--font-display);
+    font-size: 0.875rem; letter-spacing: normal; text-transform: none;
+    border: none; cursor: pointer; position: relative; overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), var(--glow-brand-sm);
+    transition: box-shadow 0.18s, transform 0.1s;
+    clip-path: var(--clip-tag);
+  }
+  /* Przebłysk po najechaniu. Szedł 0.4s, gdy poświata i wciśnięcie tego samego
+     przycisku jadą 0.18s i 0.1s — blask pojawiał się od razu, a smuga wlokła
+     się za nim i najechanie rozpadało się na dwa osobne zdarzenia. */
+  .cyber-button-yellow::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: translateX(-100%); transition: transform 0.25s ease;
+  }
+  .cyber-button-yellow:hover {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.40), var(--glow-brand-md), var(--glow-brand-lg);
+  }
+  .cyber-button-yellow:hover::before { transform: translateX(100%); }
+  .cyber-button-yellow:active { transform: scale(0.96); }
+
+  /* Destructive button — cztery komponenty budowały go inline, każdy z innym
+     rozmiarem i każdy z czarnym tekstem. Czerń ma 5,9:1 na ciemnej róży, ale
+     tylko 3,5:1 na jaśniejszej — dlatego kolor tekstu jedzie tokenem. */
+  .cyber-button-danger {
+    background: var(--co-rose);
+    color: var(--co-on-rose);
+    font-family: var(--font-display);
+    font-size: 0.875rem; letter-spacing: normal; text-transform: none;
+    border: none; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.20), var(--glow-rose-md);
+    transition: box-shadow 0.18s, transform 0.1s;
+    clip-path: var(--clip-tag);
+  }
+  .cyber-button-danger:hover:not(:disabled) { box-shadow: var(--glow-box-rose); }
+  .cyber-button-danger:disabled {
+    background: var(--co-panel);
+    color: var(--co-dim);
+    cursor: not-allowed;
+  }
+
+  /* Outline button */
+  .cyber-button-outline {
+    background: var(--co-glass-chip); color: var(--co-cyan);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: var(--font-display); font-size: 0.875rem;
+    letter-spacing: normal; text-transform: none;
+    border: 1px solid var(--co-tint-line); cursor: pointer;
+    box-shadow: inset 0 1px 0 var(--glass-hi-line);
+    transition: color 0.18s, background-color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.1s;
+    clip-path: var(--clip-tag);
+  }
+  .cyber-button-outline:hover {
+    background: var(--co-tint); border-color: var(--co-cyan);
+    box-shadow: inset 0 1px 0 var(--glass-hi-line), var(--glow-box-cyan);
+  }
+
+  /* Wspólny stan wyłączony. Bez tego komponenty zdejmowały klasę warunkowo,
+     tracąc razem z nią ścięty narożnik — przycisk robił się zwykłym prostokątem. */
+  .cyber-button-yellow:disabled,
+  .cyber-button-outline:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .cyber-button-yellow:disabled:hover,
+  .cyber-button-outline:disabled:hover { box-shadow: none; background: transparent; }
+  .cyber-button-yellow:disabled:hover { background: linear-gradient(135deg, var(--co-cyan), var(--co-cyan-mid)); }
+
+
+  .debt-flash   { animation: pending-flash 0.75s ease-out; }
+
+  button:active:not(:disabled) { transform: scale(0.97); transition: transform 0.08s ease !important; }
+}
+
+/* ── Przytrzymanie, aby zapisać wpłatę ───────────────────────────── */
+.hold-confirm-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.hold-confirm-btn:active:not(:disabled) { transform: none !important; }
+.hold-confirm-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: rgba(4, 10, 14, 0.22);
+  pointer-events: none;
+}
+
+@keyframes settle-pulse {
+  0%   { box-shadow: inset 0 0 0 0 rgba(0, 229, 255, 0); }
+  35%  { box-shadow: inset 0 0 24px 0 rgba(0, 229, 255, 0.20); }
+  100% { box-shadow: inset 0 0 0 0 rgba(0, 229, 255, 0); }
+}
+.debt-settling { animation: settle-pulse 0.85s ease-out; }
+
+/* ── Glitch nagłówków i sekwencja startowa ──
+   Tylko transform/opacity (motion floor). Efekt to dwie kopie tekstu z
+   `data-text`, rozsunięte w cyan i róż na ułamek sekundy przy montowaniu —
+   czyli przy każdej zmianie zakładki, bo `main` dostaje nowy klucz. */
+.glitch-text { position: relative; }
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text) / "";
+  position: absolute; left: 0; top: 0; width: 100%;
+  pointer-events: none; opacity: 0;
+  will-change: transform, opacity;
+}
+.glitch-text::before { color: var(--co-cyan); animation: glitch-a 0.42s steps(2, end) 1 both; }
+.glitch-text::after  { color: var(--co-rose); animation: glitch-b 0.42s steps(2, end) 1 both; }
+@keyframes glitch-a {
+  0%   { opacity: 0;   transform: translate(0, 0); }
+  20%  { opacity: 0.8; transform: translate(-3px, 1px); }
+  45%  { opacity: 0.6; transform: translate(2px, -1px); }
+  70%  { opacity: 0.8; transform: translate(-2px, 0); }
+  100% { opacity: 0;   transform: translate(0, 0); }
+}
+@keyframes glitch-b {
+  0%   { opacity: 0;   transform: translate(0, 0); }
+  25%  { opacity: 0.8; transform: translate(3px, -1px); }
+  50%  { opacity: 0.6; transform: translate(-2px, 1px); }
+  75%  { opacity: 0.8; transform: translate(2px, 0); }
+  100% { opacity: 0;   transform: translate(0, 0); }
+}
+
+.boot-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--co-void);
+  opacity: 1; transition: opacity 0.32s ease;
+  overflow: hidden;
+}
+.boot-overlay-leaving { opacity: 0; pointer-events: none; }
+.boot-scan {
+  position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: var(--co-cyan); opacity: 0.35;
+  animation: boot-scan 1.6s linear infinite;
+}
+@keyframes boot-scan {
+  from { transform: translateY(-4px); }
+  to   { transform: translateY(100vh); }
+}
+.boot-cursor {
+  display: inline-block; width: 8px; height: 14px; background: var(--co-cyan);
+  animation: boot-blink 0.8s steps(1, end) infinite;
+}
+@keyframes boot-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .glitch-text::before, .glitch-text::after, .boot-scan, .boot-cursor { animation: none; }
+}
+
+/* Siatka frekwencji: ostatnia obecność pulsuje. Tylko opacity (motion floor);
+   globalny reduced-motion niżej skraca animację do jednej klatki. */
+@keyframes attendance-cell-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+.attendance-cell-latest { animation: attendance-cell-pulse 1.6s ease-in-out 3; }
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-cell-latest { animation: none; }
+  .debt-settling { animation: none; }
+  .hold-confirm-fill { transition: none !important; }
+}
+
+
+/* ── Card entry animation ── */
+@keyframes card-enter {
+  0%   { opacity: 0; transform: translateY(18px) scale(0.97); }
+  60%  { opacity: 1; transform: translateY(-3px) scale(1.005); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Podium scanline sweep ── */
+@keyframes podium-scan {
+  0%   { transform: translateY(-100%); opacity: 0.6; }
+  100% { transform: translateY(400%); opacity: 0; }
+}
+
+/* ── Inline spinner ── */
+@keyframes cyber-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Gold shimmer ── */
+@keyframes gold-shimmer {
+  0%   { transform: translateX(-120%); opacity: 1; }
+  100% { transform: translateX(220%);  opacity: 0; }
+}
+
+/* ── FIFA-style player cards ── */
+
+.fifa-card { position: relative; }
+/* Rzadkość karty to już nie `background-image` (biłoby recepturę szkła z
+   `@layer utilities`), a zmienna dokładana jako spodnia warstwa stosu. Dzięki
+   temu karta zachowuje ziarno, sheen i refleks, a kolor rangi dalej ją barwi. */
+.fifa-card-legend { --card-tint: linear-gradient(165deg, rgba(184,134,11,0.20) 0%, transparent 44%); }
+.fifa-card-elite  { --card-tint: linear-gradient(165deg, rgba(224,25,122,0.16) 0%, transparent 44%); }
+.fifa-card-epic   { --card-tint: linear-gradient(165deg, rgba(155,77,224,0.16) 0%, transparent 44%); }
+.fifa-card-rare   { --card-tint: linear-gradient(165deg, rgba(20,138,156,0.14) 0%, transparent 44%); }
+.fifa-card-common { --card-tint: linear-gradient(165deg, rgba(100,116,139,0.10) 0%, transparent 44%); }
+.fifa-card-ghost  { --card-tint: linear-gradient(165deg, rgba(85,102,119,0.10) 0%, transparent 44%); }
+
+.card-foil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.28;
+  mix-blend-mode: color-dodge;
+  background:
+    radial-gradient(circle at var(--foil-x, 50%) var(--foil-y, 22%), rgba(255,255,255,0.32) 0%, transparent 42%),
+    linear-gradient(115deg, transparent 18%, rgba(255,255,255,0.14) 42%, var(--foil-tint, rgba(0,229,255,0.22)) 52%, transparent 72%);
+  background-size: 100% 100%, 220% 220%;
+}
+.card-foil-legend { opacity: 0.48; }
+.card-foil-elite  { opacity: 0.40; }
+.card-foil-epic   { opacity: 0.34; }
+.card-foil-rare   { opacity: 0.26; }
+.card-foil-common { opacity: 0.18; }
+.card-foil-ghost  { opacity: 0.12; }
+
+.card-ovr {
+  font-family: var(--font-tech);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 2.15rem;
+  line-height: 0.85;
+  letter-spacing: normal;
+  text-shadow: var(--glow-cyan-md);
+}
+
+
+.matchday-hero {
+  text-align: center;
+  padding: 8px 0 16px;
+}
+.matchday-kicker {
+  /* Zdanie, nie dana — czyta się je w Rajdhani, nie w kroju do liczb. */
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: normal;
+  color: var(--co-cyan);
+  font-size: 0.75rem;
+  text-shadow: var(--glow-cyan-sm);
+}
+.matchday-highlight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  background: var(--co-tint);
+  border: 1px solid var(--co-tint-line);
+}
+
+body.theme-light .card-foil {
+  mix-blend-mode: multiply;
+  opacity: 0.14;
+}
+body.theme-light .fifa-card-legend { --card-tint: linear-gradient(165deg, rgba(154,114,9,0.14) 0%, transparent 44%); }
+body.theme-light .fifa-card-elite  { --card-tint: linear-gradient(165deg, rgba(190,24,93,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-epic   { --card-tint: linear-gradient(165deg, rgba(155,77,224,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-rare   { --card-tint: linear-gradient(165deg, rgba(15,118,110,0.10) 0%, transparent 44%); }
+body.theme-light .fifa-card-common { --card-tint: none; }
+body.theme-light .fifa-card-ghost  { --card-tint: none; }
+
+/* ── Modal overlay ──
+   Scrim i blur żyją na nieinteraktywnym pseudoelemencie. Ich opacity zmienia się
+   razem z panelem, a nie pojawia się przed nim. */
+.modal-overlay {
+  isolation: isolate;
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  justify-content: center;
+  /* Gdy palec dojdzie do krawędzi treści okna, gest nie może „przejść"
+     na stronę pod spodem (scroll chaining). */
+  overscroll-behavior: contain;
+  padding: max(16px, env(safe-area-inset-top, 0px))
+           max(16px, env(safe-area-inset-right, 0px))
+           max(16px, env(safe-area-inset-bottom, 0px))
+           max(16px, env(safe-area-inset-left, 0px));
+  --scrim-progress: 0;
+  --modal-motion-duration: 280ms;
+}
+.modal-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--co-overlay);
+  opacity: var(--scrim-progress);
+  backdrop-filter: blur(var(--modal-blur));
+  -webkit-backdrop-filter: blur(var(--modal-blur));
+  transition: opacity var(--modal-motion-duration) ease-out;
+  pointer-events: none;
+}
+.modal-overlay.is-open { --scrim-progress: 1; }
+.modal-overlay.is-open { pointer-events: auto; }
+.modal-overlay.is-closing { pointer-events: none; }
+.modal-overlay.align-center { align-items: center; }
+.modal-overlay.align-bottom { align-items: flex-end; padding-bottom: 0; }
+
+/* Pełnoekranowe okna (Wrapped, szczegóły gracza) — bez scrimu, ale z fade'em. */
+.modal-overlay.modal-bare {
+  display: block;
+  padding: 0;
+  background: transparent;
+}
+/* Wariant `bare` nie ma własnego tła ani paddingu, ale zostawia rozmycie:
+   panel jest półprzezroczysty i bez niego treść pod nim prześwituje przez
+   tekst (kontrast spadał poniżej progu czytelności). */
+.modal-overlay.modal-bare::before {
+  display: block;
+  background: transparent;
+  backdrop-filter: blur(14px) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(14px) saturate(var(--glass-sat));
+}
+.modal-bare-fill {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top, 0px));
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  left: max(16px, env(safe-area-inset-left, 0px));
+  display: flex;
+  /* `safe` zamiast zwykłego center: przy treści wyższej niż okno flex
+     centrowanie odcinało górę poza obszar przewijania — nie dało się do
+     niej wrócić palcem. */
+  align-items: safe center;
+  justify-content: safe center;
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+}
+.modal-overlay.is-open .modal-bare-fill { opacity: 1; }
+
+/* Panel dialogu — cień jako drop-shadow, bo box-shadow był ucinany przez clip-path.
+   Tło jest półprzezroczyste: scrim pod spodem już rozmywa tło, więc panel
+   czyta się jak szkło bez własnego `backdrop-filter` (który gryzłby się z `filter`).
+   Warstwy: ziarno → sheen → refleks powierzchni (ten sam zestaw co reszta szkła). */
+.modal-panel {
+  --glass-x: 50%;
+  --glass-y: 0%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  /* Żeby dzieci (.modal-body) mogły się skurczyć poniżej rozmiaru treści
+     i oddać nadmiar do własnego overflow-y. */
+  min-height: 0;
+  position: relative;
+  background-color: var(--modal-bg);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(
+      80% 70% at var(--glass-x) var(--glass-y),
+      var(--glass-light) 0%,
+      transparent 58%
+    );
+  border: 1px solid var(--co-tint-line);
+  border-radius: var(--modal-radius);
+  box-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset;
+  filter: var(--glow-drop-panel);
+  max-height: 100%;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.97) translateY(8px);
+  transition: opacity 220ms ease-out, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.modal-overlay.is-open .modal-panel {
+  opacity: 1;
+  transform: none;
+}
+.modal-panel.cut-corners { clip-path: var(--clip-panel); }
+.modal-panel.sheet {
+  border-bottom: none;
+  border-radius: var(--modal-radius) var(--modal-radius) 0 0;
+  /* Android z gestami zwraca `env(...) = 0`; bez minimalnego odstępu stopka
+     arkusza dotyka samej krawędzi i trudno w nią trafić kciukiem. */
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  transform: translate3d(0, 100%, 0);
+  transition: opacity 220ms ease-out, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.modal-overlay.is-open .modal-panel.sheet { transform: translate3d(0, 0, 0); }
+.sheet-drag-handle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 28px;
+  flex: 0 0 28px;
+  touch-action: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+.sheet-drag-handle:active { cursor: grabbing; }
+.sheet-drag-handle > span {
+  display: block;
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--co-dim);
+  opacity: 0.62;
+}
+
+.modal-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--co-border);
+  background: var(--co-tint);
+  flex-shrink: 0;
+}
+/* Jedyny przewijalny obszar zwykłego dialogu. Bez `min-height: 0` flex
+   trzymał naturalną wysokość treści i panel zamiast przewijać rósł,
+   aż `overflow: hidden` ucinał jego dół. */
+.modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+.modal-foot {
+  display: flex; gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--co-border);
+  flex-shrink: 0;
+}
+.modal-foot > * { flex: 1; }
+
+/* Kreska akcentu na górnej krawędzi panelu. Była powtórzona inline w toaście
+   i dwa razy w banerze instalacji PWA — dwa z tych bloków znak w znak. */
+.accent-top { position: relative; }
+.accent-top::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, var(--co-cyan), transparent);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ── Stagger helpers (applied dynamically as `card-stagger-${n}`) ── */
+/* Wszystkie stopnie mają ten sam czas trwania — pierwszy szedł 0.45s przy 0.4s
+   pozostałych, więc karta bez opóźnienia kończyła wejście po sąsiadce. */
+.card-stagger-1 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.card-stagger-2 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.06s both; }
+.card-stagger-3 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.12s both; }
+.card-stagger-4 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.18s both; }
+.card-stagger-5 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.24s both; }
+.card-stagger-6 { animation: card-enter 0.4s cubic-bezier(0.22,1,0.36,1) 0.30s both; }
+
+/* ══ PREMIUM GLASS ════════════════════════════════════════════════
+   Warstwa „liquid glass" nad wspólną recepturą szkła. Trzy efekty:
+
+   1. Refleks powierzchni — radialna plama światła w tle panelu, ustawiana
+      zmiennymi `--glass-x`/`--glass-y` (hook `useGlassPointer` prowadzi je za
+      kursorem na urządzeniach z myszą). Leży w `background-image`, więc jest
+      POD treścią i nigdy nie podmywa tekstu.
+   2. Krawędziowy specular — `::after` z maską pokazującą wyłącznie 1px ramki.
+      Światło „ślizga się" po krawędzi zamiast zalewać powierzchnię.
+   3. Grubość tafli — ciemna dolna krawędź i jasna górna (tokeny w `:root`).
+
+   Efekt jest czysto dekoracyjny: `pointer-events: none`, `aria-hidden`
+   nie jest potrzebne, bo pseudoelementy nie trafiają do drzewa dostępności. */
+
+.glass-card,
+.cyber-box,
+.glass-panel,
+.glass-surface,
+.glass-header,
+.desktop-nav-inner,
+.modal-panel {
+  --glass-x: 50%;
+  --glass-y: 0%;
+}
+
+/* Refleks powierzchni. Kolejność warstw: ziarno → sheen → plama światła →
+   kolor rzadkości karty (spód). */
+.glass-card,
+.cyber-box,
+.glass-panel,
+.glass-surface {
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(
+      80% 70% at var(--glass-x) var(--glass-y),
+      var(--glass-light) 0%,
+      transparent 58%
+    ),
+    var(--card-tint, linear-gradient(transparent, transparent));
+}
+
+/* Krawędziowy specular — tylko ramka, dzięki masce `content-box exclude`. */
+.glass-card::after,
+.glass-panel::after,
+.cyber-box::after,
+.glass-surface::after,
+.glass-header::after,
+.desktop-nav-inner::after,
+.modal-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  padding: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background:
+    radial-gradient(
+      220px circle at var(--glass-x) var(--glass-y),
+      var(--glass-edge-top) 0%,
+      transparent 72%
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .glass-card:hover::after,
+  .glass-panel:hover::after,
+  .cyber-box:hover::after,
+  .glass-surface:hover::after,
+  .glass-header:hover::after,
+  .desktop-nav-inner:hover::after,
+  .modal-panel:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Na wąskich ekranach rozmycie jest najdroższą warstwą — schodzimy z 22 do
+   16px, zachowując refleks i krawędzie (te są darmowe). */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  :root { --glass-blur: 16px; }
+}
+
+/* Bez `backdrop-filter` (stary Firefox, wyłączone wsparcie) szkło musi być
+   czytelne samo z siebie — podnosimy krycie zamiast zostawiać przezroczystą
+   plamę z tekstem na przypadkowym tle. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --co-glass:      rgba(9,15,24,0.94);
+    --co-glass-hi:   rgba(9,15,24,0.97);
+    --co-glass-chip: rgba(9,15,24,0.90);
+  }
+  body.theme-light {
+    --co-glass:      rgba(255,255,255,0.95);
+    --co-glass-hi:   rgba(255,255,255,0.98);
+    --co-glass-chip: rgba(255,255,255,0.92);
+  }
+}
+
+/* Małe kontrolki (chipy, przyciski konturowe) — cieńsza tafla i lżejszy blur;
+   refleks powierzchni byłby na nich tylko plamą pod etykietą. */
+.glass-chip {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--co-glass-chip);
+  background-image: var(--glass-sheen);
+  backdrop-filter: blur(12px) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(12px) saturate(var(--glass-sat));
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge-top),
+    inset 0 -1px 0 var(--glass-edge-bottom);
+}
+
+/* Nagłówek — kiedyś miał tło i blur wpisane inline, przez co tryb jasny musiał
+   nadpisywać je z `!important`. Teraz to zwykła powierzchnia szklana. */
+.glass-header {
+  background-color: var(--co-glass);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(120% 140% at 50% -10%, var(--co-tint-hi) 0%, transparent 58%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border-bottom: 1px solid var(--co-tint-line);
+  box-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 18px 44px -30px rgba(0,0,0,0.9);
+}
+
+/* Telefon: nagłówek nie jest przyklejony, więc blur ma za sobą wyłącznie
+   statyczne tło strony — nic nie wnosi, a przy animowanym canvasie w środku
+   WebKit potrafi przeliczać odtwarzanie tła co klatkę. Bez blura podnosimy
+   krycie, żeby szkło zostało czytelne. */
+@media (pointer: coarse), (max-width: 639px), (max-height: 479px) {
+  .glass-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: var(--co-glass-hi);
+  }
+  body.theme-oled .glass-header { background-color: rgba(2,4,6,0.92); }
+}
+
+/* ── Mobilny nagłówek ─────────────────────────────────────────────
+   Arena z odbijającą piłką to znak rozpoznawczy aplikacji, więc zostaje
+   również na telefonie — w zmniejszonej skali. Pasek marki, akcje i osobny
+   wiersz BLIK trzymają górę kompaktowo, a hero nie dominuje nad treścią. */
+.header-wordmark { display: none; }
+
+/* Dotykowy ekran dowolnej szerokości (tablet, duży telefon) też dostaje cele
+   44 px — wcześniej tylko poniżej 640 px. */
+@media (pointer: coarse) {
+  .header-action-btn { width: 44px !important; height: 44px !important; }
+  .header-blik { min-height: 44px; }
+}
+
+/* Błysk „ghost” przy trafieniu piłką. Treść w pseudo-elemencie nie jest
+   osobnym węzłem tekstowym, więc nazwa dostępna przycisku pozostaje spójna
+   z tym, co widzi użytkownik — także w trakcie animacji. */
+.header-hero-title::before {
+  content: 'CYBER-PONK';
+  position: absolute;
+  inset: 0;
+  display: block;
+  font-family: var(--font-stencil);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(1.7rem, 6.4vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: normal;
+  text-align: center;
+  color: transparent;
+  text-shadow: -4px 0 var(--co-rose), 4px 0 var(--co-cyan);
+  clip-path: polygon(0 20%, 100% 20%, 100% 52%, 0 52%);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+}
+.header-hero-title.is-hitting::before { opacity: 1; }
+
+/* Poświata areny. Na desktopie filtr jest tani, ale nad animowanym canvasem
+   `drop-shadow` kazał WebKitowi rozmywać całą arenę od nowa przy każdej
+   klatce. Canvas rysuje własne poświaty, więc na telefonie rezygnujemy
+   z filtra — to była główna przyczyna zacięć animacji. */
+.header-hero-arena { filter: var(--glow-drop-cyan); }
+.header-hero-arena.is-chaos { filter: none; }
+
+/* Arena jest przyciskiem: stuknięcie pokazuje następną dyscyplinę. Reset
+   wyglądu przycisku, krótkie wciśnięcie (bez przesuwania sąsiadów) i fokus
+   odsunięty od canvasu, żeby obwódka nie zlewała się z poświatą. */
+.header-hero-arena {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 90ms ease-out;
+}
+.header-hero-arena:active { transform: scale(0.985); }
+.header-hero-arena:focus-visible { outline-offset: 4px; }
+
+/* Plakietka HUD z nazwą dyscypliny po zmianie sceny. Wjeżdża, stoi i gaśnie
+   sama — klucz Reacta restartuje animację przy każdej zmianie. */
+.arena-badge {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--co-cyan);
+  background: var(--co-tint);
+  border: 1px solid var(--co-tint-line);
+  pointer-events: none;
+  opacity: 0;
+  animation: arenaBadge 1.8s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes arenaBadge {
+  0%   { opacity: 0; transform: translateY(-4px); }
+  12%  { opacity: 1; transform: translateY(0); }
+  78%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-2px); }
+}
+@keyframes arenaBadgeFade {
+  0%   { opacity: 0; }
+  12%  { opacity: 1; }
+  78%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-badge { animation-name: arenaBadgeFade; }
+  .header-hero-arena { transition: none; }
+  .header-hero-arena:active { transform: none; }
+}
+
+/* Dotyk to nie tylko wąski telefon: tablet też ma coarse pointer, a filtr
+   nad animowanym canvasem jest tam równie kosztowny. */
+@media (pointer: coarse) {
+  .header-hero-arena { filter: none; }
+}
+
+/* Potwierdzenie skopiowania numeru BLIK — widoczne także na telefonie,
+   gdzie ikona kopiowania jest schowana. */
+.header-blik[data-copied="true"] {
+  border-color: var(--co-green) !important;
+  box-shadow: 0 0 0 1px var(--co-green) inset;
+}
+
+/* Telefon w poziomie ma szerokość desktopu, ale nadal jest telefonem —
+   kciuki potrzebują 44 px, a hero musi się zmieścić nad treścią. Sam
+   `pointer: coarse` tu nie wystarcza: tablet ma dość miejsca na pełny
+   nagłówek, więc redukujemy go tylko na wąskich i niskich ekranach. */
+@media (max-width: 639px), (max-height: 479px) {
+  .header-topbar { padding: 8px 12px !important; }
+  /* Ikony w nagłówku są dotykane kciukiem; 36 px było poniżej progu 44 px. */
+  .header-action-btn { width: 44px !important; height: 44px !important; }
+  /* Chip BLIK jest przyciskiem kopiującym numer — na telefonie dostaje
+     pełne 44 px wysokości, tak jak przyciski akcji obok. */
+  .header-blik { display: flex !important; min-height: 44px; }
+  .compact-header button { min-height: 44px; min-width: 44px; }
+  .header-wordmark {
+    display: none !important;
+    font-family: var(--font-stencil);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1;
+    letter-spacing: normal;
+    color: var(--co-cyan);
+    text-shadow: var(--glow-brand-sm);
+    text-transform: none;
+  }
+  /* Na telefonie zmniejszamy odstępy hero; arena, nazwa i status zostają widoczne. */
+  .header-hero { padding: 10px 8px 12px !important; }
+  .header-hero-arena { max-width: 340px !important; margin-bottom: 4px !important; filter: none; }
+  .header-hero-title { display: block !important; }
+  .header-hero-meta { gap: 10px !important; }
+  /* Numer BLIK nie może się łamać na dwie linie i wypychać akcji poza ekran.
+     Ikona kopiowania jest zbędna — cały chip kopiuje numer, a robi to również
+     jego aria-label. */
+  .header-blik { gap: 6px !important; padding: 6px 10px !important; white-space: nowrap; }
+  .header-blik-copy { display: none !important; }
+  .header-blik-number { font-size: 0.8125rem !important; white-space: nowrap; }
+}
+
+/* ══ MAIN CONTENT ════════════════════════════════════════════════ */
+/* Ten sam warunek co widoczność dolnego paska. Wcześniej był tylko
+   `max-width: 639px`, więc na tablecie z mobilnym paskiem ostatnia karta
+   chowała się pod nawigacją. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  /* Wysokość nawigacji plus oddech, żeby ostatni element nie kończył się
+     tuż pod jej krawędzią. */
+  /* `--banner-h` ustawia PushPermissionBanner (jego realna wysokość), żeby
+     stały baner nie zasłaniał ostatniej karty. */
+  .main-content { padding-bottom: calc(var(--nav-height) + var(--banner-h, 0px) + 1rem + env(safe-area-inset-bottom, 0px)); }
+
+  /* Fokus w polu przy dolnej krawędzi (albo przejście do kotwicy) nie może
+     wylądować pod przyklejonym paskiem lub kompaktowym nagłówkiem. */
+  html {
+    scroll-padding-top: calc(64px + env(safe-area-inset-top, 0px));
+    scroll-padding-bottom: calc(var(--nav-height) + var(--banner-h, 0px) + env(safe-area-inset-bottom, 0px) + 12px);
+  }
+}
+
+/* Kierunek zakładki określa, z której strony nowa treść wchodzi w układ. */
+@keyframes page-enter-forward {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes page-enter-backward {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.page-enter-forward {
+  animation: page-enter-forward 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.page-enter-backward {
+  animation: page-enter-backward 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ══ NAVIGATION ══════════════════════════════════════════════════ */
+.desktop-nav { display: none; }
+.desktop-nav-inner {
+  display: flex; align-items: center; gap: 3px; padding: 5px;
+  margin-bottom: 2.5rem;
+  position: relative;
+  isolation: isolate;
+  background-color: var(--co-glass);
+  background-image:
+    var(--glass-noise),
+    var(--glass-sheen),
+    radial-gradient(
+      90% 130% at var(--glass-x) var(--glass-y),
+      var(--glass-light) 0%,
+      transparent 60%
+    );
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border: 1px solid var(--glass-border); border-top: none;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 10px 100%);
+  box-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 18px 40px -26px rgba(0,0,0,0.85);
+}
+.desktop-tab {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 8px;
+  font-family: var(--font-display); font-size: 0.875rem !important; letter-spacing: normal;
+  border: 1px solid transparent; cursor: pointer;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  white-space: nowrap; background: transparent; color: var(--co-dim);
+  text-transform: none; position: relative; overflow: hidden;
+  clip-path: var(--clip-badge);
+}
+.desktop-tab.active {
+  background: var(--co-tint); border-color: var(--co-tint-line);
+  color: var(--co-cyan);
+  box-shadow: var(--glow-box-cyan);
+}
+.desktop-tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: var(--co-cyan);
+  box-shadow: var(--glow-cyan-sm);
+}
+.desktop-tab:not(.active):hover {
+  background: var(--co-tint); border-color: var(--co-tint-line);
+  color: var(--co-cyan);
+}
+
+/* Mobile nav */
+.mobile-nav {
+  /* `inset-inline` zamiast `left/right` — pasek nie wystaje przy RTL i nie
+     tworzy poziomego przewijania, gdy przeglądarka doliczy pasek systemowy. */
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  top: auto;
+  width: 100%;
+  /* Poziomo na telefonie z notchem ikony nie mogą wejść pod wycięcie. */
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+  box-sizing: border-box;
+  z-index: var(--z-nav);
+  display: flex; align-items: stretch;
+  border-top: 0;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  background-color: var(--co-glass-hi);
+  background-image: var(--glass-noise), var(--glass-sheen);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow:
+    0 -1px 0 var(--glass-edge-top) inset,
+    0 -8px 28px rgba(0,0,0,0.35);
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease;
+  /* Bez tego podwójne tapnięcie w zakładkę potrafi przybliżyć stronę. */
+  touch-action: manipulation;
+}
+
+/* Klawiatura zasłania dół visual viewportu, a `fixed` dalej liczy się od
+   layout viewportu — dlatego pasek chowa się na czas pisania zamiast wisieć
+   w połowie ekranu. `visibility` odcina go też od czytników i fokusu. */
+body.keyboard-open .mobile-nav {
+  transform: translate3d(0, 110%, 0);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+.mobile-nav::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--co-border-hi), transparent);
+  opacity: 0.65;
+  pointer-events: none;
+}
+.mobile-nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 4px; padding: 10px 4px 8px; min-height: var(--nav-height);
+  min-width: 48px;
+  border: none; cursor: pointer; transition: color 0.2s, transform 0.2s; background: transparent;
+  position: relative; color: var(--co-dim); font-family: var(--font-display);
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-btn::before {
+  content: ''; position: absolute; top: -1px; left: 50%;
+  /* Wskaźnik ma stałą szerokość i rośnie przez `scaleX` — transform jedzie na
+     kompozytorze, a zmiana `width` wywoływała layout przy każdej zmianie
+     zakładki. */
+  width: 24px; height: 3px; border-radius: 0 0 3px 3px;
+  background: var(--co-cyan);
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: none;
+}
+.mobile-nav-btn .lucide {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mobile-nav-btn.active {
+  color: var(--co-cyan);
+  animation: tabBounce 0.28s ease-out;
+}
+.mobile-nav-btn.active .lucide {
+  transform: scale(1.12);
+}
+.mobile-nav-btn.active::before {
+  transform: translateX(-50%) scaleX(1);
+  background: var(--co-cyan);
+  box-shadow: var(--glow-box-cyan);
+}
+.mobile-nav-btn:active { transform: scale(0.95); }
+.mobile-nav-label {
+  font-size: 0.75rem; letter-spacing: normal; line-height: 1;
+  margin-top: 1px; font-family: var(--font-display); text-transform: none;
+}
+
+/*
+ * Szerokość to nie to samo co „desktop”. Telefon obrócony do poziomu ma
+ * 700–950 px szerokości, więc stary warunek `min-width: 640px` zamieniał
+ * przyklejony dolny pasek na nawigację w przepływie strony — wyglądało to
+ * dokładnie tak, jakby dock „przeskoczył” na środek ekranu. Desktopowa
+ * nawigacja dostaje więc dodatkowo zapas wysokości i precyzyjny wskaźnik;
+ * każdy dotykowy (albo niski) ekran zachowuje dolny pasek.
+ */
+@media (min-width: 640px) and (min-height: 480px) {
+  .desktop-nav { display: block; }
+  .mobile-nav { display: none; }
+}
+
+/* Ta reguła musi stać po desktopowej — przy tablecie 1024×768 z `pointer:
+   coarse` wygrywa mobilny pasek, a nie nawigacja w nagłówku. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  .desktop-nav { display: none; }
+  .mobile-nav { display: flex; }
+}
+
+/* Push banner sits above mobile nav on mobile, at screen bottom on desktop */
+@media (min-width: 640px) and (min-height: 480px) and (pointer: fine) {
+  .push-banner-sheet {
+    bottom: 0 !important;
+    border-radius: 0;
+  }
+}
+
+/* Dwa banery zakotwiczone u dołu potrafiły pokazać się jednocześnie i na siebie
+   nachodzić. Prośba o powiadomienia ma pierwszeństwo — instalacja PWA poczeka,
+   aż użytkownik ją odrzuci. */
+body.has-push-banner .pwa-banner { display: none; }
+
+/* Wspólne zakotwiczenie banerów nad dolną nawigacją. Oba pliki liczyły je
+   osobno, każdy z inną liczbą (56px i 72px), stąd nachodzenie. */
+.bottom-banner {
+  position: fixed;
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-banner);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+@media (min-width: 640px) and (min-height: 480px) and (pointer: fine) {
+  /* Na desktopie nie ma dolnej nawigacji — banery siadają na krawędzi ekranu. */
+  .bottom-banner { bottom: 0; }
+}
+
+/* Baner braku połączenia pojawia się w trakcie pracy (4 s po utracie sieci).
+   W przepływie strony przesuwał całą treść — dlatego jest stały u góry i nie
+   zmienia układu. */
+.offline-banner {
+  position: fixed;
+  z-index: var(--z-banner);
+  top: calc(8px + env(safe-area-inset-top, 0px));
+  left: max(8px, env(safe-area-inset-left, 0px));
+  right: max(8px, env(safe-area-inset-right, 0px));
+  max-width: 640px;
+  margin-inline: auto;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ══ TOASTY ══════════════════════════════════════════════════════
+   Układ musi mieszkać tutaj, a nie w styleu inline komponentu. Toast miał
+   pozycję wpisaną inline i klasy `sm:bottom-auto sm:top-4 sm:right-4` obok —
+   a styl inline bije każdy selektor klasy, więc te klasy nigdy nie działały:
+   na desktopie komunikat siedział w lewym dolnym rogu, unosząc się nad
+   nieistniejącą tam nawigacją, zamiast w prawym górnym.
+   Kotwica na dole jest ta sama co w `.bottom-banner`, żeby oba
+   powiadomienia dogadywały się co do jednej krawędzi. */
+.toast-stack {
+  position: fixed;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  left: max(8px, env(safe-area-inset-left, 0px));
+  right: max(8px, env(safe-area-inset-right, 0px));
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+  max-width: 400px;
+}
+@media (min-width: 640px) and (min-height: 480px) and (pointer: fine) {
+  .toast-stack {
+    left: auto;
+    right: 16px;
+    bottom: auto;
+    top: 16px;
+  }
+}
+
+/* Banery i toasty zakotwiczone nad paskiem zostałyby nad klawiaturą z dziurą
+   po nawigacji — chowamy baner, a toast schodzi na dół widocznego obszaru.
+   Reguły stoją po definicjach `.bottom-banner` i `.toast-stack`, żeby je
+   nadpisywały. */
+body.keyboard-open .bottom-banner { display: none; }
+body.keyboard-open .toast-stack { bottom: 12px; }
+
+/* ══ COMPACT HEADER ══════════════════════════════════════════════ */
+.compact-header { display: none; }
+/* Także telefon w poziomie: ma szerokość desktopu, ale wysokością nadal
+   zasługuje na kompaktowy nagłówek po przewinięciu. */
+@media (max-width: 639px), (max-height: 479px) {
+  .compact-header {
+    display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-header);
+    align-items: center; justify-content: space-between;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px;
+    border-bottom: 1px solid var(--co-tint-line);
+    background-color: var(--co-glass-hi);
+    background-image: var(--glass-noise), var(--glass-sheen);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    box-shadow: 0 1px 0 var(--glass-edge-top) inset, 0 2px 20px rgba(0,0,0,0.9);
+    transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s linear 0s;
+  }
+  /* `visibility` (z opóźnieniem do końca animacji) wyjmuje schowany pasek
+     z kolejności tabulacji — sam `transform` zostawiał go fokusowalnym. */
+  .compact-header.hidden-bar  { transform: translateY(-100%); opacity: 0; visibility: hidden; transition: transform 0.25s ease, opacity 0.25s ease, visibility 0s linear 0.25s; }
+  .compact-header.visible-bar { transform: translateY(0); opacity: 1; visibility: visible; }
+}
+
+/* ══ FORM CONTROLS ═══════════════════════════════════════════════
+   Natywne strzałki spinnera nie dają się ostylować i rozwalały wyśrodkowanie
+   w 72-pikselowym polu liczby rakiet. */
+.cyber-input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+.cyber-input[type="number"]::-webkit-outer-spin-button,
+.cyber-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ══ SCROLLBAR ═══════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--co-void); }
+::-webkit-scrollbar-thumb { background: var(--co-border-hi); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--co-cyan); }
+
+/* ══ FOCUS ═══════════════════════════════════════════════════════
+   2px to minimum z WCAG 2.4.13; kolor bierzemy z tokenu, żeby w trybie jasnym
+   pierścień był stonowaną zielenią morską, a nie elektrycznym cyanem. */
+*:focus-visible { outline: 2px solid var(--co-cyan); outline-offset: 2px; }
+
+/* Outline jest obcinany przez clip-path. Drop-shadow śledzi widoczny kształt,
+   więc działa na przyciskach, polach i wierszach filtra z ciętymi narożnikami. */
+.cyber-button-yellow:focus-visible,
+.cyber-button-danger:focus-visible,
+.cyber-button-outline:focus-visible,
+.desktop-tab:focus-visible,
+.filter-player-option:focus-visible,
+:focus-visible[style*="clip-path"] {
+  outline: none;
+  filter: drop-shadow(0 0 1px var(--co-cyan)) drop-shadow(0 0 3px var(--co-cyan));
+}
+.modal-panel.cut-corners:focus-visible {
+  outline: none;
+  filter: var(--glow-drop-panel) drop-shadow(0 0 1px var(--co-cyan)) drop-shadow(0 0 3px var(--co-cyan));
+}
+
+/* ══ CARD HOVER GLOW ════════════════════════════════════════════ */
+.player-card-wrap {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), filter 0.2s ease;
+  position: relative;
+}
+/* The inner card element gets the border glow via JS inline style
+   but we make the wrapper lift and add a subtle brightness bump */
+.player-card-wrap:hover {
+  transform: translateY(-4px);
+  filter: brightness(1.06) saturate(1.08);
+  z-index: 2;
+}
+.player-card-wrap:active {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+/* ══ LEADERBOARD ROW ════════════════════════════════════════════
+   Tło top-3 żyje tutaj, a nie inline — wcześniej nadpisanie dla trybu jasnego
+   równało wszystkie wiersze i wyróżnienie podium znikało. */
+.leaderboard-row {
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+.leaderboard-row.top3 { background: var(--co-tint); }
+.leaderboard-row.rest { background: transparent; }
+.leaderboard-row:hover {
+  border-color: var(--co-tint-line) !important;
+  transform: translateX(3px);
+}
+.leaderboard-row.top3:hover { background: var(--co-tint-hi); }
+.leaderboard-row.rest:hover { background: var(--co-tint); }
+
+/* ══ LOG ENTRY HOVER ══ */
+.log-entry {
+  transition: border-color 0.2s;
+}
+.log-entry:hover {
+  border-color: var(--co-tint-line) !important;
+}
+
+/* Koszt obok stawek na osobę; na wąskich ekranach jedno pod drugim, żeby
+   kwoty nigdy nie łamały się w połowie. */
+.log-entry-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+@media (min-width: 480px) {
+  .log-entry-grid {
+    grid-template-columns: minmax(110px, 0.75fr) minmax(0, 1.25fr);
+    gap: 16px;
+  }
+}
+
+/* Data + koszt w edycji sesji. Na sztywno `1fr 1fr` etykieta „KOSZT CAŁKOWITY"
+   zawijała się do dwóch linii, gdy „DATA" zostawała w jednej — pola kończyły
+   wyrównane w pionie w różnych miejscach. */
+.field-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+@media (min-width: 480px) {
+  .field-pair { grid-template-columns: 1fr 1fr; }
+}
+
+/* Siatka graczy — liczba kolumn była przypięta na sztywno (2 lub 3) na każdej
+   szerokości, więc na wąskim telefonie imiona się nie mieściły, a na desktopie
+   zostawało puste miejsce. */
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 6px;
+}
+
+/* ══ ICON BUTTON HOVER ══ */
+.icon-btn {
+  transition: border-color 0.15s, color 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.modal-close-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  .icon-btn:hover,
+  .modal-close-btn:hover {
+    border-color: var(--co-tint-line) !important;
+    color: var(--co-cyan) !important;
+  }
+  .icon-btn.danger:hover {
+    border-color: var(--co-rose) !important;
+    color: var(--co-rose) !important;
+  }
+}
+
+/* ══ LIGHT MODE ════════════════════════════════════════════════
+   Warm-slate palette · no neon glows · muted teal/rose accents
+   ════════════════════════════════════════════════════════════ */
+body.theme-light {
+  background-color: #F8FAFC;
+  color: #334155;
+  /* Natywne kontrolki (scrollbar, suwak, picker daty) w schemacie motywu. */
+  color-scheme: light;
+
+  /* ── Backgrounds — warm slate ── */
+  --co-void:      #F8FAFC;
+  --co-dark:      #F1F5F9;
+  --co-panel:     #FFFFFF;
+  --co-raised:    #FFFFFF;
+  --co-border:    #CBD5E1;
+  --co-border-hi: #94A3B8;
+
+  /* ── Primary — Muted Teal ── */
+  --co-cyan:      #0F766E;
+  --co-cyan-mid:  #115E59;
+  --co-cyan-dim:  #CCFBF1;
+  --co-ice:       #0369A1;
+
+  /* ── Accent — Rose ── */
+  --co-rose:      #BE185D;
+  --co-rose-mid:  #9D174D;
+  --co-rose-dim:  #FCE7F3;
+
+  /* ── Amber — warnings ── */
+  --co-amber:     #B45309;
+  --co-amber-mid: #92400E;
+  --co-amber-dim: #FEF3C7;
+
+  --co-gold:      #7A5A07;
+  --co-gold-mid:  #5F4606;
+  --co-gold-dim:  #FEF9E7;
+  --co-silver:    #5B6B80;
+  --co-bronze:    #8C5A2B;
+  --co-tint-gold: rgba(122,90,7,0.12);
+  --co-tint-bronze: rgba(140,90,43,0.10);
+  --glow-gold-md: none;
+  --glow-box-gold: 0 1px 3px rgba(0,0,0,0.08);
+
+  /* ── Positive — Leafy green ── */
+  --co-green:     #15803D;
+  --co-green-dim: #DCFCE7;
+
+  /* ── Micro-accent — Soft purple ── */
+  --co-pink:      #7E22CE;
+
+  /* ── Neutrals ── */
+  --co-text:      #475569;
+  --co-text-hi:   #0F172A;
+  --co-dim:       #5B6B80;
+  --co-dim2:      #6B7F94;
+
+  /* ── Kolory rang — ciemniejsze odpowiedniki dla jasnego tła ── */
+  --rank-legenda: #7A5A07;
+  --rank-mistrz:  #BE185D;
+  --rank-weteran: #7E22CE;
+  --rank-staly:   #0F766E;
+  --rank-gosc:    #5F7085;
+  --rank-duch:    #566B80;
+
+  --co-overlay:   rgba(15,23,42,0.45);
+  --dot-color:    rgba(15,118,110,0.04);
+
+  /* ── Theme-switchable helpers (light overrides) ── */
+  --co-bar-track:    rgba(0,60,100,0.06);
+  --co-dot-empty:    rgba(0,60,100,0.18);
+  --co-close-btn:    #64748B;
+  --co-toast-success:rgba(240,253,244,0.86);
+  --co-toast-error:  rgba(254,242,242,0.86);
+  --co-toast-info:   rgba(240,249,255,0.86);
+  --co-toast-text:   #334155;
+  --co-separator:    rgba(0,60,100,0.08);
+  --co-surface-2:    #F1F5F9;
+
+  /* ── Glass — jasny wariant (iOS Control Center) ──
+     Mleczne, białe szkło: wysoka biel, niskie nasycenie, ciemna (a nie biała)
+     krawędź górna, bo światło w jasnym motywie odbija się od ciemniejszego
+     obramowania. Chipy w ciemnym motywie są granatowe; tutaj muszą być
+     białawe, inaczej np. przycisk konturowy robi się ciemną plamą. */
+  --co-glass:      rgba(255,255,255,0.68);
+  --co-glass-hi:   rgba(255,255,255,0.84);
+  --co-glass-chip: rgba(255,255,255,0.60);
+  --glass-blur:    24px;
+  --glass-sat:     180%;
+  --glass-hi-line: rgba(255,255,255,0.80);
+  --glass-sheen:   linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0) 40%);
+  --glass-light:   rgba(255,255,255,0.28);
+  --glass-edge-top:    rgba(255,255,255,0.92);
+  --glass-edge-bottom: rgba(15,23,42,0.12);
+  --glass-rim:         inset 0 0 0 1px rgba(15,23,42,0.04);
+  --glass-border:      rgba(15,23,42,0.10);
+  --glass-shadow:
+    0 1px 0 var(--glass-edge-top) inset,
+    0 -1px 0 var(--glass-edge-bottom) inset,
+    0 12px 32px -20px rgba(15,23,42,0.30),
+    0 2px 6px -3px rgba(15,23,42,0.10);
+  --input-inset:
+    inset 0 1px 2px rgba(15,23,42,0.05),
+    inset 0 -1px 0 rgba(255,255,255,0.80),
+    inset 0 0 0 1px rgba(15,23,42,0.02);
+
+  /* ── Accent tints — teal, matching --co-cyan above ──
+     Akcenty w trybie jasnym są ciemniejsze niż w ciemnym: ten sam kolor, który
+     świeci na czerni, na białym tle dawał 3,0–3,9:1 i łamał AA dla etykiet
+     12–14 px. Wartości poniżej przechodzą 4,5:1 na każdej powierzchni
+     (patrz `npm run audit:contrast`). */
+  --co-tint:      rgba(15,118,110,0.05);
+  --co-tint-hi:   rgba(15,118,110,0.10);
+  --co-tint-line: rgba(15,118,110,0.32);
+  --co-tint-rose: rgba(190,24,93,0.06);
+  --co-tint-rose-line: rgba(190,24,93,0.30);
+  --co-tint-green:rgba(21,128,61,0.07);
+
+  /* ── Glows off ──
+     Jedno miejsce, w którym gaśnie cały neon. Komponenty czytają te tokeny
+     inline, więc nie trzeba ich znać ani po kolei poprawiać. */
+  --glow-cyan-sm:   none;
+  --glow-cyan-md:   none;
+  --glow-cyan-lg:   none;
+  --glow-rose-md:   none;
+  --glow-green-md:  none;
+  --glow-box-cyan:  0 1px 3px rgba(0,0,0,0.08);
+  --glow-box-rose:  0 1px 3px rgba(0,0,0,0.08);
+  --glow-box-panel: 0 4px 24px rgba(0,0,0,0.12);
+  --glow-drop-panel: drop-shadow(0 4px 24px rgba(0,0,0,0.12));
+  --modal-blur: 10px;
+  --glow-drop-cyan: drop-shadow(0 0 12px rgba(15,118,110,0.12));
+  --glow-drop-rose: none;
+  --glow-brand-sm: 0 0 10px rgba(15,118,110,0.35);
+  --glow-brand-md: 0 0 14px rgba(15,118,110,0.45);
+  --glow-brand-lg: 0 0 20px rgba(15,118,110,0.55);
+
+  --modal-radius: 12px;
+  /* Mleczne, półprzezroczyste tło dialogu — scrim pod spodem już rozmywa
+     stronę, więc panel czyta się jak tafla szkła, a nie biała kartka. */
+  --modal-bg:     rgba(255,255,255,0.84);
+  --co-on-rose:   #FFFFFF;
+  --co-on-accent: #FFFFFF;
+  /* Zaokrąglenie i ścinanie narożników wykluczają się — w jasnym motywie
+     wygrywa promień, więc ścięcie musi zniknąć. */
+  --clip-panel:   none;
+
+  /* ── Canvas w jasnym motywie: teal zamiast neonu, jasny blat ── */
+  --bg-vignette:            rgba(15,23,42,0.10);
+  --canvas-accent:          13,148,136;
+  --canvas-accent-deep:     13,148,136;
+  --canvas-grid:            13,148,136;
+  --canvas-edge:            13,148,136;
+  --canvas-deep-shade:      13,148,136;
+  --canvas-table-from:      #F1F5F9;
+  --canvas-table-to:        #E2E8F0;
+  --canvas-net-top:         13,148,136;
+}
+
+/* ── Body background — soft teal bloom + fine dot grid ── */
+body.theme-light {
+  background-image:
+    radial-gradient(ellipse 75% 45% at 50% -8%, rgba(15,118,110,0.04) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 30% at 50% 110%, rgba(15,118,110,0.02) 0%, transparent 60%),
+    radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
+}
+
+/* ── Film grain — almost invisible in light mode ── */
+@media (min-width: 768px) and (pointer: fine) {
+  body.theme-light::before {
+    opacity: 0.015;
+    mix-blend-mode: multiply;
+  }
+}
+
+/* ══ COMPONENT OVERRIDES ══════════════════════════════════════ */
+
+/* ── Cyber input ──
+   Tło jest jedyną rzeczą, której token nie załatwia: bazowa reguła ma
+   półprzejrzysty granat, żeby przepuszczać blask spod pola. */
+body.theme-light .cyber-input {
+  background: var(--co-surface-2);
+  color: var(--co-text-hi);
+}
+
+
+/* ── Log entries ── */
+body.theme-light .log-entry {
+  background: var(--co-panel) !important;
+}
+
+/* ── Scrollbar ── */
+body.theme-light ::-webkit-scrollbar-track { background: var(--co-surface-2); }
+body.theme-light ::-webkit-scrollbar-thumb { background: var(--co-border); }
+body.theme-light ::-webkit-scrollbar-thumb:hover { background: var(--co-border-hi); }
+
+/* ── Main page background ── */
+body.theme-light .app-shell {
+  background: var(--co-void);
+}
+
+/* ══ REDUCED MOTION ═══════════════════════════════════════════════
+   Ruch przestrzenny zastępujemy krótkim crossfade'em; preferencja obejmuje
+   również rAF w hookach i canvasie, nie tylko CSS keyframes.
+   ═════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .modal-overlay::before { transition-duration: 180ms !important; }
+  .modal-overlay .modal-panel,
+  .modal-overlay .modal-bare-fill {
+    transition-property: opacity !important;
+    transition-duration: 180ms !important;
+    transform: none;
+  }
+}
+
+/* Nie używaj blur/translucency, gdy system prosi o ograniczenie przezroczystości. */
+@media (prefers-reduced-transparency: reduce) {
+  :root { --glass-border: var(--co-border); }
+  body.theme-light { --glass-border: var(--co-border); }
+  .glass-card,
+  .glass-panel,
+  .glass-surface,
+  .glass-chip,
+  .glass-header,
+  .desktop-nav-inner,
+  .cyber-box,
+  .modal-panel {
+    background-color: var(--co-panel) !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  /* Krawędziowy specular to też „szkło" — bez niego powierzchnia zostaje
+     płaska, ale czytelna, co jest celem tej preferencji. */
+  .glass-card::after,
+  .glass-panel::after,
+  .cyber-box::after,
+  .glass-surface::after,
+  .glass-header::after,
+  .desktop-nav-inner::after,
+  .modal-panel::after {
+    display: none;
+  }
+  /* Pola i przycisk konturowy też używają szkła — bez tego zostawał blur,
+     mimo że reszta interfejsu już z niego rezygnuje. Nagłówek dodatkowo
+     wraca do pełnego krycia (jego tło jest wpisane inline). */
+  .cyber-input,
+  .cyber-button-outline {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  header {
+    background: var(--co-panel) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .modal-overlay::before {
+    background: var(--co-void);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .mobile-nav,
+  .compact-header,
+  .bottom-banner {
+    background: var(--co-panel) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  body.theme-light .modal-overlay::before { background: #0F172A; }
+  body.theme-light .mobile-nav,
+  body.theme-light .compact-header,
+  body.theme-light .bottom-banner,
+  body.theme-light .desktop-nav-inner,
+  body.theme-light .glass-card,
+  body.theme-light .glass-panel,
+  body.theme-light .glass-surface,
+  body.theme-light .glass-chip,
+  body.theme-light .glass-header,
+  body.theme-light .cyber-box,
+  body.theme-light .modal-panel {
+    background-color: #FFFFFF !important;
+  }
+}
+
+/* Dodatkowy kontrast dla granic kontrolek i tekstów pomocniczych. */
+@media (prefers-contrast: more) {
+  :root {
+    --co-dim: #A8C4D4;
+    --co-border: #49657C;
+    --co-border-hi: #7895AA;
+    --co-tint-line: rgba(0,229,255,0.62);
+    --glass-border: rgba(0,229,255,0.62);
+  }
+  body.theme-light {
+    --co-dim: #334155;
+    --co-border: #64748B;
+    --co-border-hi: #475569;
+    --co-tint-line: rgba(15,118,110,0.68);
+    --glass-border: #64748B;
+  }
+  .cyber-button-outline { border-width: 2px; }
+  .modal-panel { border-width: 2px; }
+  *:focus-visible { outline-width: 3px; }
+
+  .glass-card,
+  .glass-panel,
+  .glass-surface,
+  .glass-chip,
+  .glass-header,
+  .desktop-nav-inner,
+  .cyber-box,
+  .modal-panel,
+  .mobile-nav,
+  .compact-header,
+  .bottom-banner {
+    background-color: var(--co-panel) !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .cyber-input,
+  .cyber-button-outline {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  header {
+    background: var(--co-panel) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .modal-overlay::before {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  body.theme-light .glass-card,
+  body.theme-light .glass-panel,
+  body.theme-light .glass-surface,
+  body.theme-light .glass-chip,
+  body.theme-light .glass-header,
+  body.theme-light .desktop-nav-inner,
+  body.theme-light .cyber-box,
+  body.theme-light .modal-panel,
+  body.theme-light .mobile-nav,
+  body.theme-light .compact-header,
+  body.theme-light .bottom-banner {
+    background-color: #FFFFFF !important;
+  }
+}
+
+/* ============================================================
+   CYBER-PONK LIQUID GLASS REDESIGN — fluid background + neon
+   status accents + microinteractions
+   ============================================================ */
+
+/* Fluid animated background blobs (neon sport accents) */
+.fluid-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.fluid-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.30;
+  /* Plamy są statyczne: wcześniej deklarowały `blob-drift`/`fluid-float`/
+     `neon-pulse`, ale żadna z tych animacji nie miała @keyframes, więc nic się
+     nie ruszało, a `will-change` tylko trzymał niepotrzebną warstwę. */
+  mix-blend-mode: screen;
+}
+/* Kolory plam z tokenów akcentu — w jasnym motywie nie zostają neonowe. */
+.fluid-blob-cyan   { background: radial-gradient(circle, color-mix(in srgb, var(--co-cyan) 55%, transparent) 0%, transparent 70%); }
+.fluid-blob-rose   { background: radial-gradient(circle, color-mix(in srgb, var(--co-rose) 45%, transparent) 0%, transparent 70%); }
+.fluid-blob-green  { background: radial-gradient(circle, color-mix(in srgb, var(--co-green) 40%, transparent) 0%, transparent 70%); }
+.fluid-blob-amber  { background: radial-gradient(circle, color-mix(in srgb, var(--co-amber) 40%, transparent) 0%, transparent 70%); }
+.fluid-grid {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, var(--dot-color, var(--co-tint)) 1px, transparent 0);
+  background-size: 28px 28px;
+  opacity: 0.6;
+}
+
+/* Microinteractions */
+.glass-hover-lift {
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s ease, filter 0.22s ease;
+}
+.glass-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glass-shadow), var(--glass-rim), var(--glow-box-cyan);
+  filter: brightness(1.05) saturate(1.08);
+}
+.glass-hover-lift:active {
+  transform: translateY(-1px) scale(0.99);
+  filter: brightness(1.02);
+}
+.tap-press { transition: transform 0.08s ease; }
+.tap-press:active { transform: scale(0.96); }
+.status-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: normal;
+  text-transform: none;
+  border: 1px solid var(--glass-border);
+  background: var(--co-glass-chip);
+  backdrop-filter: blur(12px) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(12px) saturate(var(--glass-sat));
+  clip-path: var(--clip-badge);
+}
+.glass-shine-overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+  background-size: 200% 100%;
+  /* Statyczny refleks: `shimmer` nie miał @keyframes, a `mix-blend-mode`
+     kosztował kompozycję na każdej karcie bez widocznego efektu. */
+  opacity: 0.35;
+}
+
+/* Szkielet strony (PageSkeleton): tylko `opacity`, bez ruchu przy reduced-motion. */
+@keyframes skeleton-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.skeleton-card { animation: skeleton-pulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-card { animation: none; }
+}
+
+/* ══ TELEFON — BUDŻET KLATEK ═══════════════════════════════════════
+   Cztery rozmyte plamy pod animacją + `backdrop-filter` na każdej karcie to
+   najdroższe warstwy interfejsu. Na telefonie zostawiamy ten sam obraz, ale
+   bez pracy co klatkę: plamy przestają dryfować (statyczny blur jest
+   cache'owany), a szkło rozmywa tło słabiej — na 6-calowym ekranie różnicy
+   nie widać, a przewijanie listy 8 kart przestaje gubić klatki.
+   `prefers-reduced-motion` nadal ma pierwszeństwo: tam ruch i tak znika. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  .fluid-blob {
+    filter: blur(44px);
+    opacity: 0.24;
+  }
+}
+
+/* Musi stać po bloku `body.theme-light`, bo ten sam selektor ustawia 24px —
+   przy równej specyficzności wygrywa reguła późniejsza. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  :root,
+  body.theme-light,
+  body.theme-oled { --glass-blur: 18px; }
+}
+
+/* Na telefonie karty nie rozmywają tła (backdrop-filter na kilkunastu
+   kartach naraz to najdroższa część przewijania); dostają gęstsze, pełniejsze
+   tło szkła. Rozmycie zostaje tam, gdzie jest pod spodem treść: nagłówek,
+   nawigacja, banery, toasty i modale. */
+@media (max-width: 639px), (max-height: 479px), (pointer: coarse) {
+  .glass-card,
+  .cyber-box,
+  .glass-panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: var(--co-glass-hi);
+  }
+}

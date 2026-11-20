@@ -1,0 +1,170 @@
+import { todayISO } from '@/utils/id';
+import {
+  normalizePlayerName, hasForbiddenKeyChars, FORBIDDEN_NAME_CHARS_MESSAGE,
+} from '@/utils/validation';
+import { calculateDebt } from '@/utils/debt';
+import { withTransaction, reject } from '../transaction';
+import type { RawAppData, TransactionResult } from '@/types/domain';
+import type { CardKind } from '@/utils/sessionCost';
+
+/** Czy pod tym imieniem wisi jakakolwiek historia finansowa lub frekwencyjna. */
+function hasLedgerHistory(data: RawAppData, name: string): boolean {
+  const hasPayments = (data.payments?.[name] ?? []).length > 0;
+  const wasPresent = (data.weeks || []).some(w => (w.present || []).includes(name));
+  return hasPayments || wasPresent;
+}
+
+export async function addPlayer(name: string): Promise<TransactionResult> {
+  const trimmed = normalizePlayerName(name);
+  if (!trimmed) {
+    return { success: false, error: 'Nazwa gracza nie może być pusta' };
+  }
+  if (hasForbiddenKeyChars(trimmed)) {
+    return { success: false, error: FORBIDDEN_NAME_CHARS_MESSAGE };
+  }
+
+  // Liczone PRZED transakcją: Firebase może uruchomić callback wielokrotnie,
+  // a wtedy zapis tuż po północy dostałby różne daty przy kolejnych próbach.
+  const joinDate = todayISO();
+
+  return withTransaction((current) => {
+    const data = (current || {}) as RawAppData;
+    const players = data.players || [];
+    const deleted = data.deletedPlayers || [];
+
+    if (players.includes(trimmed)) reject('Gracz o tej nazwie już istnieje');
+    if (deleted.includes(trimmed)) {
+      reject('Gracz o tej nazwie jest na liście usuniętych — przywróć go zamiast dodawać ponownie');
+    }
+    // Imię jest kluczem gracza, więc ponowne użycie imienia z historii
+    // odziedziczyłoby cudze saldo i wpłaty.
+    if (hasLedgerHistory(data, trimmed)) {
+      reject('Gracz o tej nazwie występuje już w historii rozliczeń — wybierz inne imię');
+    }
+
+    return {
+      ...data,
+      players: [...players, trimmed],
+      // Frekwencję liczymy od dnia dołączenia, nie od pozycji w tablicy sesji —
+      // inaczej usunięcie albo wsteczne dopisanie sesji przesuwałoby próg.
+      playerJoinDate: {
+        ...(data.playerJoinDate || {}),
+        [trimmed]: joinDate,
+      },
+    } as RawAppData;
+  }, 'Nie udało się dodać gracza');
+}
+
+export async function softDeletePlayer(playerName: string): Promise<TransactionResult> {
+  const name = normalizePlayerName(playerName);
+  if (!name) return { success: false, error: 'Nie wybrano gracza' };
+
+  return withTransaction((current) => {
+    const data = (current || {}) as RawAppData;
+    const players = data.players || [];
+    if (!players.includes(name)) reject('Nie znaleziono gracza');
+
+    // Miękkie usunięcie nie może zniknąć długu z sum — blokujemy, gdy saldo
+    // gracza jest niezerowe. Inaczej skarbnik widzi „znikające" pieniądze,
+    // a dług nadal istnieje w historii.
+    const debt = calculateDebt(name, { weeks: data.weeks || [], payments: data.payments || {} });
+    if (Math.abs(debt) > 0.01) {
+      reject(`Nie można usunąć gracza z niezerowym saldem (${debt.toFixed(2)} zł) — najpierw rozlicz go`);
+    }
+
+    const deleted = data.deletedPlayers || [];
+    return {
+      ...data,
+      players: players.filter(p => p !== name),
+      deletedPlayers: deleted.includes(name) ? deleted : [...deleted, name],
+      // Bez tego usunięty gracz zostawał w domyślnym składzie Multisport
+      // i wracał zaznaczony w formularzu nowej sesji.
+      defaultMultiPlayers: (data.defaultMultiPlayers || []).filter(p => p !== name),
+      singleScanPlayers: (data.singleScanPlayers || []).filter(p => p !== name),
+    } as RawAppData;
+  }, 'Nie udało się usunąć gracza');
+}
+
+export async function restorePlayer(playerName: string): Promise<TransactionResult> {
+  const name = normalizePlayerName(playerName);
+  if (!name) return { success: false, error: 'Nie wybrano gracza' };
+
+  return withTransaction((current) => {
+    const data = (current || {}) as RawAppData;
+    const players = data.players || [];
+
+    return {
+      ...data,
+      deletedPlayers: (data.deletedPlayers || []).filter(p => p !== name),
+      // Bez tego sprawdzenia gracz mógł trafić na listę dwa razy i liczyć się podwójnie.
+      players: players.includes(name) ? players : [...players, name],
+    } as RawAppData;
+  }, 'Nie udało się przywrócić gracza');
+}
+
+/**
+ * Trwale usuwa gracza razem z jego wpłatami i datą dołączenia.
+ *
+ * Blokujemy usunięcie, gdy gracz brał udział w sesjach — jego udział jest
+ * wliczony w koszty tamtych rozgrywek, a usunięcie zapisu przeliczyłoby
+ * historyczne kwoty pozostałych graczy.
+ */
+export async function permanentDeletePlayer(playerName: string): Promise<TransactionResult> {
+  const name = normalizePlayerName(playerName);
+  if (!name) return { success: false, error: 'Nie wybrano gracza' };
+
+  return withTransaction((current) => {
+    const data = (current || {}) as RawAppData;
+
+    if ((data.weeks || []).some(w => (w.present || []).includes(name))) {
+      reject('Nie można trwale usunąć gracza, który brał udział w sesjach — pozostaw go na liście usuniętych');
+    }
+
+    const payments = { ...(data.payments || {}) };
+    delete payments[name];
+    const playerJoinDate = { ...(data.playerJoinDate || {}) };
+    delete playerJoinDate[name];
+    const playerJoinWeek = { ...(data.playerJoinWeek || {}) };
+    delete playerJoinWeek[name];
+
+    return {
+      ...data,
+      players: (data.players || []).filter(p => p !== name),
+      deletedPlayers: (data.deletedPlayers || []).filter(p => p !== name),
+      defaultMultiPlayers: (data.defaultMultiPlayers || []).filter(p => p !== name),
+      singleScanPlayers: (data.singleScanPlayers || []).filter(p => p !== name),
+      payments,
+      playerJoinDate,
+      playerJoinWeek,
+    } as RawAppData;
+  }, 'Nie udało się trwale usunąć gracza');
+}
+
+/**
+ * Ustawia kartę gracza: Multisport (odbija się co godzinę), Medicover (raz na
+ * sesję) albo żadną. Gracz ma jedną kartę, więc obie listy w bazie zmieniamy
+ * w jednej transakcji — przy dwóch osobnych zapisach przerwany drugi zostawiał
+ * gracza z obiema kartami naraz.
+ *
+ * `defaultMultiPlayers` to „gracze z jakąkolwiek kartą” (podpowiedź przy nowej
+ * sesji), a `singleScanPlayers` zaznacza spośród nich Medicover.
+ */
+export async function setPlayerCard(playerName: string, card: CardKind): Promise<TransactionResult> {
+  const name = normalizePlayerName(playerName);
+  if (!name) return { success: false, error: 'Nie wybrano gracza' };
+  if (card !== 'none' && card !== 'multi' && card !== 'single') {
+    return { success: false, error: 'Nieznany rodzaj karty' };
+  }
+
+  return withTransaction((current) => {
+    const data = (current || {}) as RawAppData;
+    if (!(data.players || []).includes(name)) reject('Nie znaleziono gracza');
+
+    const without = (list: string[] | undefined) => (list || []).filter(p => p !== name);
+    return {
+      ...data,
+      defaultMultiPlayers: card === 'none' ? without(data.defaultMultiPlayers) : [...without(data.defaultMultiPlayers), name],
+      singleScanPlayers: card === 'single' ? [...without(data.singleScanPlayers), name] : without(data.singleScanPlayers),
+    } as RawAppData;
+  }, 'Nie udało się zapisać karty gracza');
+}

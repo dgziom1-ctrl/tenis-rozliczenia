@@ -1,0 +1,139 @@
+import { Pencil, Ticket, Trash2, Zap } from 'lucide-react';
+import { formatDate, formatAmount, formatAmountShort } from '@/utils/format';
+import { SPORT_LABEL, hasRacketRental } from '@/constants';
+import { getPlayerCard, getShareGroups } from '@/utils/sessionCost';
+import { CARD_COLOR, CARD_NAME } from '@/utils/cardLabels';
+import ShareBreakdown from '../common/ShareBreakdown';
+import SportGlyph from '../common/icons/SportGlyph';
+import type { HistoryEntry } from '../../types/ui';
+import { FONT, CLIP, TEXT } from '@/constants/styles';
+
+interface LogEntryProps {
+  row: HistoryEntry;
+  onEdit: (row: HistoryEntry) => void;
+  onDelete: (id: string) => void;
+}
+
+// Etykieta („Koszt", „Obecni") była większa od danych, które opisuje — nazwy
+// graczy pod nią renderowały się w 0.62rem, a sam nagłówek w 0.8rem.
+const labelStyle = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '0.75rem',
+  letterSpacing: 'normal',
+  color: 'var(--co-dim)',
+  marginBottom: 4,
+  textTransform: 'none',
+} as const;
+
+export default function LogEntry({ row, onEdit, onDelete }: LogEntryProps) {
+  const isCourt = hasRacketRental(row.sport);
+  const racketCost = row.racketCost ?? 0;
+  const ownRacketPlayers = row.ownRacketPlayers ?? [];
+  // Te same stawki, które widać w podglądzie przy dodawaniu i na grupie.
+  const groups = getShareGroups(row);
+
+  return (
+    <div className="scan-hover log-entry glass-card glass-hover-lift" style={{
+      clipPath: CLIP.card,
+      padding: '12px 14px', marginBottom: 4,
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Top row: date + actions */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+            <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-cyan)', opacity: 0.5 }}>{'>'}</span>
+            <span aria-hidden="true" style={{ ...FONT.tech('0.8125rem', 500), color: 'var(--co-green)' }}>
+              SESSION_{String(row.id).slice(-4).toUpperCase()}
+            </span>
+            <span style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)' }}>
+              {formatDate(row.datePlayed)}
+            </span>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              ...FONT.mono(TEXT.tiny),
+              padding: '2px 6px',
+              background: isCourt ? 'var(--co-tint-green)' : 'var(--co-tint)',
+              border: `1px solid ${isCourt ? 'var(--co-green)' : 'var(--co-tint-line)'}`,
+              color: isCourt ? 'var(--co-green)' : 'var(--co-cyan)',
+              clipPath: CLIP.badge,
+            }}>
+              <SportGlyph sport={row.sport} size={12} />
+              {SPORT_LABEL[row.sport] ?? 'Ping-Pong'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button onClick={() => onEdit(row)} className="icon-btn" aria-label="Edytuj sesję" style={{
+              minWidth: 44, minHeight: 44,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '8px 10px', background: 'transparent',
+              border: '1px solid var(--co-border)', cursor: 'pointer',
+              color: 'var(--co-dim)', touchAction: 'manipulation',
+              clipPath: CLIP.badge,
+            }}>
+              <Pencil size={15} />
+            </button>
+            <button onClick={() => onDelete(row.id)} className="icon-btn danger" aria-label="Usuń sesję" style={{
+              minWidth: 44, minHeight: 44,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '8px 10px', background: 'transparent',
+              border: '1px solid var(--co-border)', cursor: 'pointer',
+              color: 'var(--co-dim)', touchAction: 'manipulation',
+              clipPath: CLIP.badge,
+            }}>
+              <Trash2 size={15} />
+            </button>
+          </div>
+        </div>
+
+        {/* Koszt + podział na stawki */}
+        <div className="log-entry-grid" style={{ paddingLeft: 16 }}>
+          <div>
+            <p style={labelStyle}>Koszt</p>
+            <p style={{ ...FONT.mono(TEXT.lead), color: 'var(--co-cyan)', textShadow: 'var(--glow-cyan-sm)' }}>
+              {formatAmount(row.totalCost)}
+            </p>
+            {racketCost > 0 && (
+              <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 2 }}>
+                kort {formatAmountShort(row.totalCost - racketCost)} · rakiety {formatAmountShort(racketCost)}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <p style={labelStyle}>Na osobę</p>
+            <ShareBreakdown groups={groups} sport={row.sport} size="sm" />
+          </div>
+        </div>
+
+        {/* Obecni — Multisport, Medicover i własna rakietka oznaczone przy nazwisku */}
+        <div style={{ paddingLeft: 16 }}>
+          <p style={labelStyle}>Obecni ({row.presentPlayers.length})</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {row.presentPlayers.map(name => {
+              const card = getPlayerCard(row, name);
+              const hasCard = card !== 'none';
+              const hasOwnRacket = racketCost > 0 && ownRacketPlayers.includes(name);
+              const color = CARD_COLOR[card];
+              return (
+                <span key={name} aria-label={`${name}${hasCard ? `, ${CARD_NAME[card]}` : ''}${hasOwnRacket ? ', własna rakietka' : ''}`} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 3,
+                  ...FONT.mono(TEXT.tiny),
+                  padding: '2px 6px',
+                  color: hasCard ? color : 'var(--co-text)',
+                  background: card === 'multi' ? 'var(--co-tint-green)' : card === 'single' ? 'var(--co-amber-dim)' : 'transparent',
+                  border: `1px solid ${hasCard ? color : 'var(--co-border)'}`,
+                  clipPath: CLIP.badge,
+                }}>
+                  {card === 'multi' && <Zap size={10} aria-hidden="true" />}
+                  {card === 'single' && <Ticket size={10} aria-hidden="true" />}
+                  {hasOwnRacket && <SportGlyph sport={row.sport} size={10} />}
+                  {name}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

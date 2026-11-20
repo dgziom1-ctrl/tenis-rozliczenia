@@ -1,0 +1,403 @@
+import { Volume2, VolumeX, Smartphone, Check, Sun, Moon, HelpCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router';
+import ArenaCanvas from './ArenaCanvas';
+import { copyToClipboard } from '@/utils/clipboard';
+import { track } from '@/lib/analytics/track';
+import { BLIK_NUMBER } from '@/utils/blik';
+import { useToast } from '@/components/common/Toast';
+import { FONT, TEXT, CLIP } from '@/constants/styles';
+import { DEMO_MODE, SPORTS, SPORT_EMOJI, SPORT_LABEL } from '@/constants';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import SportGlyph from '@/components/common/icons/SportGlyph';
+import type { StyleWithVars } from '@/types/css';
+import type { Sport } from '@/types/domain';
+
+
+/* ═══════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════ */
+const CopyIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+    aria-hidden="true" focusable="false"
+    style={{ color:'var(--co-dim)' }}>
+    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+  </svg>
+);
+
+interface ChaosConfettiPiece {
+  id: number;
+  emoji: string;
+  /** Pozycja pozioma w % szerokości ekranu. */
+  x: number;
+  /** Pozycja pionowa — używana tylko w wariancie bez ruchu. */
+  y: number;
+  delay: number;
+  dur: number;
+  size: number;
+  /** Obrót w stopniach — animacja nadpisuje `transform`, więc jedzie zmienną. */
+  spin: number;
+  drift: number;
+}
+
+/**
+ * Ile kliknięć w tytuł uruchamia niespodziankę i ile wolno czekać między nimi.
+ * Trzymane razem, bo zmiana jednej liczby bez drugiej zmienia próg trudności.
+ */
+const CHAOS_CLICKS = 5;
+const CHAOS_CLICK_WINDOW_MS = 2000;
+
+/**
+ * Czas życia efektu. Musi pokryć najdłuższy kawałek konfetti
+ * (maks. opóźnienie 0,9 s + maks. czas 2,6 s) z zapasem na wygaszenie.
+ */
+const CHAOS_DURATION_MS = 4000;
+
+/** Co leci z góry. Dekoracja, nie ikona interfejsu — emoji jest tu treścią. */
+const CHAOS_EMOJI = ['🏓', '⚡', '💀', '🎮', '💥', '🔥', '🎯', '💣', '🌊', '👑'];
+
+interface HeaderProps {
+  isMuted: boolean;
+  setIsMuted: (muted: boolean) => void;
+  scrolled: boolean;
+  theme: string;
+  /** Dyscyplina ostatniej sesji — scena areny. */
+  sport?: Sport;
+  onToggleTheme: () => void;
+  onShowGuide: () => void;
+}
+
+/**
+ * Podgląd innej dyscypliny po stuknięciu w arenę. `base` to sport ostatniej
+ * sesji z chwili stuknięcia: gdy pojawi się sesja w innym sporcie, podgląd
+ * sam przestaje obowiązywać i arena wraca do prawdy z danych.
+ */
+interface ArenaPreview {
+  base: Sport;
+  sport: Sport;
+}
+
+/** Przełącznik cyklicznie: OLED → ciemny → jasny → OLED. Etykieta mówi, co włączy następne kliknięcie. */
+const THEME_NEXT_LABEL: Record<string, string> = {
+  oled: 'Włącz tryb ciemny',
+  dark: 'Włącz tryb jasny',
+  light: 'Włącz tryb OLED (czarny)',
+};
+
+function Header({ isMuted, setIsMuted, scrolled, theme, sport = 'pingpong', onToggleTheme, onShowGuide }: HeaderProps) {
+  const [preview, setPreview] = useState<ArenaPreview | null>(null);
+  const shownSport: Sport = preview && preview.base === sport ? preview.sport : sport;
+  /*
+   * Plakietka z nazwą sportu po każdej zmianie sceny — ale nie przy starcie.
+   * Poprzednia scena żyje w stanie, a porównanie w renderze to wzorzec
+   * „informacja z poprzedniego renderu” z dokumentacji Reacta: bez efektu,
+   * więc plakietka pojawia się w tej samej klatce co nowa scena.
+   */
+  const [lastShown, setLastShown] = useState<Sport>(shownSport);
+  const [badge, setBadge] = useState<{ sport: Sport; run: number } | null>(null);
+  if (lastShown !== shownSport) {
+    setLastShown(shownSport);
+    setBadge(prev => ({ sport: shownSport, run: (prev?.run ?? 0) + 1 }));
+  }
+  const [copied,    setCopied]    = useState(false);
+  const [chaosMode, setChaosMode] = useState(false);
+  const [confetti,  setConfetti]  = useState<ChaosConfettiPiece[]>([]);
+  /**
+   * Numer uruchomienia. Ten sam zestaw kawałków (id 0–43) w kolejnym odpaleniu
+   * dostawał te same klucze Reacta, więc węzły były tylko aktualizowane —
+   * a animacja z `forwards` stała już na końcu i konfetti nie ruszało się
+   * z miejsca. Numer w kluczu wymusza nowe węzły, czyli start od zera.
+   */
+  const [chaosRun,  setChaosRun]  = useState(0);
+  const [hitting,   setHitting]   = useState(false);
+  const reducedMotion = useReducedMotion();
+  const chaosTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clickCount = useRef(0);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { showError, showSuccess } = useToast();
+  const location = useLocation();
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const blikNumber = BLIK_NUMBER;
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(chaosTimer.current ?? undefined);
+      clearTimeout(clickTimer.current ?? undefined);
+      clearTimeout(copiedTimer.current ?? undefined);
+    };
+  }, []);
+
+  /* Stable callback — avoids re-mounting canvas on every render */
+  const handleHit = useCallback((state: boolean) => {
+    setHitting(state);
+    if (state) window.dispatchEvent(new CustomEvent('paddleHit'));
+  }, []);
+
+  const handleCopy = async () => {
+    const ok = await copyToClipboard(blikNumber.replace(/\s/g, ''));
+    if (ok) {
+      track('blik_copy', { from: 'header' });
+      setCopied(true);
+      showSuccess('Numer telefonu BLIK skopiowany');
+      clearTimeout(copiedTimer.current ?? undefined);
+      copiedTimer.current = setTimeout(() => setCopied(false), 2000);
+    } else {
+      showError('Nie udało się skopiować numeru telefonu BLIK');
+    }
+  };
+
+  const handleTitleClick = () => {
+    clickCount.current += 1;
+    clearTimeout(clickTimer.current ?? undefined);
+    if (clickCount.current >= CHAOS_CLICKS) { clickCount.current = 0; activateChaos(); }
+    else clickTimer.current = setTimeout(() => { clickCount.current = 0; }, CHAOS_CLICK_WINDOW_MS);
+  };
+
+  const handleArenaTap = () => {
+    const next = SPORTS[(SPORTS.indexOf(shownSport) + 1) % SPORTS.length];
+    setPreview({ base: sport, sport: next });
+    track('arena_switch', { sport: next });
+  };
+
+  const activateChaos = () => {
+    track('easter_egg');
+    setChaosMode(true);
+    setChaosRun(run => run + 1);
+    // Pierwsze emoji puli to dyscyplina, która właśnie jest na arenie.
+    const pool = [SPORT_EMOJI[shownSport] ?? CHAOS_EMOJI[0], ...CHAOS_EMOJI.slice(1)];
+    setConfetti(Array.from({ length: 44 }, (_, i) => ({
+      id: i,
+      emoji: pool[Math.floor(Math.random() * pool.length)],
+      x: Math.random() * 100,
+      y: 6 + Math.random() * 80,
+      delay: Math.random() * 0.9,
+      dur: 1.6 + Math.random() * 1.0,
+      size: 16 + Math.random() * 22,
+      spin: 180 + Math.random() * 540,
+      drift: (Math.random() - 0.5) * 160,
+    })));
+    clearTimeout(chaosTimer.current ?? undefined);
+    chaosTimer.current = setTimeout(() => { setChaosMode(false); setConfetti([]); }, CHAOS_DURATION_MS);
+  };
+
+  return (
+    <>
+      {chaosMode && (
+        // Jedna warstwa na cały efekt: `position: fixed` + `overflow: hidden`.
+        // Wcześniej każdy kawałek był osobnym `fixed` bez klucza animacji
+        // (`confettiBurst` nie istniało w arkuszu), więc 40 emoji zostawało
+        // w górnej krawędzi na całe 4 sekundy.
+        <div className="chaos-layer" aria-hidden="true">
+          {!reducedMotion && <div className="chaos-flash" />}
+          {confetti.map(piece => {
+            // Bez ruchu: statyczna posypka na tym samym obszarze zamiast
+            // spadającego konfetti (prefers-reduced-motion).
+            if (reducedMotion) {
+              return (
+                <span
+                  key={`${chaosRun}-${piece.id}`}
+                  className="chaos-piece chaos-piece-static"
+                  style={{ left: `${piece.x}%`, top: `${piece.y}%`, fontSize: `${piece.size}px` }}
+                >
+                  {piece.emoji}
+                </span>
+              );
+            }
+            const style: StyleWithVars = {
+              left: `${piece.x}%`,
+              top: 0,
+              fontSize: `${piece.size}px`,
+              animation: `confettiBurst ${piece.dur}s ${piece.delay}s cubic-bezier(.2,.8,.4,1) forwards`,
+              '--drift': `${piece.drift}px`,
+              '--spin': `${piece.spin}deg`,
+            };
+            return (
+              <span key={`${chaosRun}-${piece.id}`} className="chaos-piece" style={style}>
+                {piece.emoji}
+              </span>
+            );
+          })}
+        </div>
+      )}
+
+      <header className="glass-header" style={{ position:'relative',overflow:'visible' }}>
+
+        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,right:0,height:1,
+          background:'linear-gradient(90deg, transparent, var(--glass-hi-line), transparent)',zIndex:2 }}/>
+        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
+        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:80,height:2,background:'var(--co-cyan)',boxShadow:'var(--glow-box-cyan)',zIndex:2 }}/>
+        <div aria-hidden="true" style={{ position:'absolute',top:0,left:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
+        <div aria-hidden="true" style={{ position:'absolute',top:0,right:0,width:2,height:52,background:'linear-gradient(to bottom,var(--co-cyan),transparent)',zIndex:2 }}/>
+
+        <div className="header-topbar" style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',
+          justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid var(--co-separator)' }}>
+          <span className="header-wordmark">CYBER-PONK</span>
+          <button type="button" onClick={handleCopy} className="glass-chip header-blik" data-copied={copied ? 'true' : undefined} aria-label={copied ? 'Numer telefonu BLIK skopiowany' : `Skopiuj numer BLIK ${blikNumber}`} style={{ display:'flex',alignItems:'center',gap:'8px',
+            border:'1px solid var(--co-tint-line)',padding: '6px 12px',cursor:'pointer',
+            transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',clipPath:CLIP.tag }}>
+            <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
+            <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
+              letterSpacing: 'normal',color:'var(--co-cyan)',padding:'2px 6px',
+              background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>{' '}
+            <span className="header-blik-number" style={{ ...FONT.data(blikNumber, TEXT.base),color: copied ? 'var(--co-green)' : 'var(--co-text)' }}>
+              {copied ? <><Check size={14} aria-hidden="true" style={{ verticalAlign:'-2px', marginRight:4 }}/>Skopiowano</> : blikNumber}
+            </span>
+            <span className="header-blik-copy" style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <span aria-hidden="true" style={{ width:1,height:14,background:'var(--co-border)',margin:'0 2px' }}/>
+              {copied ? <Check size={13} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
+            </span>
+          </button>
+          <div style={{ display:'flex',alignItems:'center',gap:6 }}>
+            <button type="button" onClick={onShowGuide}
+              aria-label="Pomoc — jak to działa"
+              className="header-action-btn"
+              style={{ display:'flex',alignItems:'center',
+              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',
+              border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
+              clipPath:CLIP.badge }}>
+              <HelpCircle size={17} aria-hidden="true"/>
+            </button>
+            <button type="button" onClick={() => setIsMuted(!isMuted)}
+              aria-label={isMuted ? 'Włącz dźwięki' : 'Wycisz dźwięki'} aria-pressed={isMuted}
+              className="header-action-btn"
+              style={{ display:'flex',alignItems:'center',
+              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',
+              border:isMuted?'1px solid var(--co-rose)':'1px solid var(--co-border)',
+              color:isMuted?'var(--co-rose)':'var(--co-dim)',
+              background:isMuted?'var(--co-tint-rose)':'transparent',
+              clipPath:CLIP.badge }}>
+              {isMuted ? <VolumeX size={17} aria-hidden="true"/> : <Volume2 size={17} aria-hidden="true"/>}
+            </button>
+            <button type="button" onClick={onToggleTheme}
+              aria-label={THEME_NEXT_LABEL[theme] ?? 'Zmień motyw'}
+              className="header-action-btn"
+              style={{ display:'flex',alignItems:'center',
+              justifyContent:'center',width:36,height:36,cursor:'pointer',transition:'color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease',
+              border:'1px solid var(--co-border)',color:'var(--co-dim)',background:'transparent',
+              clipPath:CLIP.badge }}>
+              {theme === 'light' ? <Moon size={17} aria-hidden="true"/> : <Sun size={17} aria-hidden="true"/>}
+            </button>
+          </div>
+        </div>
+
+        <div className="header-hero" style={{ position:'relative',zIndex:10,padding: '12px 16px 14px',
+          display:'flex',flexDirection:'column',alignItems:'center' }}>
+
+          {/* Poświata areny to klasa CSS, nie filtr inline — na telefonie jest
+              wyłączana (patrz `.header-hero-arena` w index.css), bo filtr
+              `drop-shadow` przelicza się przy każdej klatce animowanego canvasu. */}
+          {/* Stuknięcie w arenę pokazuje następną dyscyplinę — tylko lokalnie,
+              do odświeżenia strony; nic nie trafia do bazy. */}
+          <button type="button"
+            className={`header-hero-arena${chaosMode ? ' is-chaos' : ''}`}
+            onClick={handleArenaTap}
+            aria-label={`Arena: ${SPORT_LABEL[shownSport]}. Pokaż następny sport`}
+            style={{ width:'100%',maxWidth:460,marginBottom:8 }}>
+            <ArenaCanvas chaosMode={chaosMode} lightMode={theme==='light'} onHit={handleHit} sport={shownSport}/>
+            {badge && (
+              <span key={badge.run} className="arena-badge" aria-hidden="true" style={{ clipPath: CLIP.tag }}>
+                <SportGlyph sport={badge.sport} size={13} />
+                {SPORT_LABEL[badge.sport]}
+              </span>
+            )}
+          </button>
+
+          <button className={`header-hero-title${!chaosMode && hitting ? ' is-hitting' : ''}`}
+            onClick={handleTitleClick} aria-label="CYBER-PONK"
+            style={{ background:'transparent',border:'none',padding:0,cursor:'pointer',position:'relative' }}>
+            {/* Ghost flash is a CSS pseudo-element: a second visible text node
+                made axe report a label/visible-text mismatch during the hit. */}
+            {/* `key` na ścieżce: glitch odtwarza się przy każdej zmianie zakładki,
+                tak jak w nagłówkach sekcji (animacja CSS biegnie raz przy montowaniu). */}
+            <span key={location.pathname} className="glitch-text" data-text="CYBER-PONK" style={{
+              display:'block',fontFamily:'var(--font-stencil)',fontStyle:'italic',fontWeight:700,
+              fontSize:'clamp(1.7rem,6.4vw,3.2rem)',letterSpacing: 'normal',lineHeight:1,textAlign:'center',
+              position:'relative',
+              transition:'text-shadow 0.06s, transform 0.06s',
+              ...(chaosMode
+                ? { color:'var(--co-cyan)',animation:'headerBounce .4s ease-in-out 3',
+                    textShadow:'var(--glow-brand-lg)' }
+                : hitting
+                ? { color:'var(--co-cyan)',
+                    textShadow:'var(--glow-brand-lg)',
+                    transform:'translateX(1px)' }
+                : { color:'var(--co-cyan)',
+                    textShadow:'var(--glow-brand-sm)',
+                  }),
+            }}>CYBER-PONK</span>
+          </button>
+
+          {DEMO_MODE && (
+            <>
+              <div style={{ width:'100%',maxWidth:'22rem',height:1,margin:'10px 0 8px',
+                background:'linear-gradient(90deg,transparent,var(--co-tint-line) 40%,var(--co-tint-line) 60%,transparent)' }}/>
+              <div className="header-hero-meta" style={{ display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap',justifyContent:'center' }}>
+                {/* W trybie demo dane nie pochodzą z bazy — bez tej plakietki łatwo
+                    pomylić podgląd projektu z prawdziwymi rozliczeniami grupy. */}
+                <span
+                  title="Dane demonstracyjne — nie pochodzą z bazy Firebase"
+                  style={{
+                    fontFamily:'var(--font-mono)',fontSize:TEXT.tiny,color:'var(--co-amber)',
+                    border:'1px solid var(--co-amber)',padding:'0 4px',letterSpacing: 'normal',
+                  }}
+                >Demo</span>
+              </div>
+            </>
+          )}
+        </div>
+      </header>
+
+      <div style={{ height:2,background:'linear-gradient(90deg,transparent,var(--co-cyan) 50%,transparent)',opacity:.6 }}/>
+
+      <div className={`compact-header ${scrolled ? 'visible-bar' : 'hidden-bar'}`}>
+        <button onClick={handleCopy} style={{ background:'transparent',border:'none',padding:0,
+          cursor:'pointer',display:'flex',alignItems:'center',gap:'6px' }}>
+          <Smartphone size={14} style={{ color:'var(--co-dim)' }}/>
+          <span style={{ fontFamily:'var(--font-display)',fontSize:TEXT.tiny,fontWeight:400,
+            letterSpacing: 'normal',color:'var(--co-cyan)',padding: '2px 4px',
+            background:'var(--co-tint)',border:'1px solid var(--co-tint-line)' }}>Blik</span>
+          <span style={{ ...FONT.data(blikNumber, TEXT.small),color:'var(--co-text)' }}>
+            {blikNumber}
+          </span>
+          {copied ? <Check size={12} style={{ color:'var(--co-green)' }}/> : <CopyIcon/>}
+        </button>
+        <div style={{ display:'flex',alignItems:'center',gap:'10px' }}>
+          <button type="button" onClick={onShowGuide}
+            aria-label="Pomoc — jak to działa"
+            style={{ display:'flex',alignItems:'center',
+            border:'1px solid var(--co-border)',color:'var(--co-dim)',
+            background:'transparent',cursor:'pointer',
+            justifyContent:'center',width:40,height:40,
+            clipPath:CLIP.badge }}>
+            <HelpCircle size={16} aria-hidden="true"/>
+          </button>
+          <button type="button" onClick={() => setIsMuted(!isMuted)}
+            aria-label={isMuted ? 'Włącz dźwięki' : 'Wycisz dźwięki'} aria-pressed={isMuted}
+            style={{ display:'flex',alignItems:'center',
+            border:isMuted?'1px solid var(--co-rose)':'1px solid var(--co-border)',
+            color:isMuted?'var(--co-rose)':'var(--co-dim)',
+            background:'transparent',cursor:'pointer',
+            justifyContent:'center',width:40,height:40,
+            clipPath:CLIP.badge }}>
+            {isMuted ? <VolumeX size={16} aria-hidden="true"/> : <Volume2 size={16} aria-hidden="true"/>}
+          </button>
+          <button onClick={onToggleTheme}
+            aria-label={THEME_NEXT_LABEL[theme] ?? 'Zmień motyw'}
+            style={{ display:'flex',alignItems:'center',
+            border:'1px solid var(--co-border)',color:'var(--co-dim)',
+            background:'transparent',cursor:'pointer',
+            justifyContent:'center',width:40,height:40,
+            clipPath:CLIP.badge }}>
+            {theme === 'light' ? <Moon size={16} aria-hidden="true"/> : <Sun size={16} aria-hidden="true"/>}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default React.memo(Header);

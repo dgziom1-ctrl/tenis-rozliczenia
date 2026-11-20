@@ -1,0 +1,90 @@
+import { Calculator } from 'lucide-react';
+import { MULTISPORT_DISCOUNT, SPORT_LABEL } from '@/constants';
+import { formatAmountShort, parseAmount } from '@/utils/format';
+import { CURRENT_DISCOUNT_MODEL, getSessionShares, getShareGroups, getTotalWithRackets } from '@/utils/sessionCost';
+import type { DiscountModel } from '@/utils/sessionCost';
+import ShareBreakdown from '../common/ShareBreakdown';
+import type { Sport } from '@/types/domain';
+import { CLIP, FONT, TEXT } from '@/constants/styles';
+
+interface LiveCostPreviewProps {
+  totalCost: string;
+  presentPlayers: string[];
+  multisportPlayers: string[];
+  sport: Sport;
+  racketCost?: number;
+  ownRacketPlayers?: string[];
+  racketCount?: number;
+  courtCount?: number;
+  durationHours?: number;
+  singleScanPlayers?: string[];
+  /** Podgląd nowej sesji liczy zawsze wg bieżącej zasady. */
+  discountModel?: DiscountModel;
+  /** Cena kortu przed zwrotem — podgląd liczy wtedy z faktycznego zwrotu, tak jak zapis. */
+  courtGross?: number;
+}
+
+export default function LiveCostPreview({ courtGross, totalCost, presentPlayers, multisportPlayers, sport, racketCost = 0, ownRacketPlayers = [], racketCount = 0, courtCount = 1, durationHours = 1, singleScanPlayers = [], discountModel = CURRENT_DISCOUNT_MODEL }: LiveCostPreviewProps) {
+  const courtCost = parseAmount(totalCost);
+  if (!totalCost || isNaN(courtCost) || courtCost < 0 || presentPlayers.length === 0) return null;
+  const totalWithRackets = getTotalWithRackets(courtCost, racketCost);
+
+  // Dokładnie ten sam podział, który trafi do bazy i sald graczy. Podgląd nie
+  // liczy własnym wzorem, bo wtedy potrafił pokazać stawki, które nie sumowały
+  // się do kwoty zapłaconej w recepcji.
+  const session = {
+    totalCost: totalWithRackets,
+    racketCost,
+    presentPlayers,
+    multisportPlayers,
+    ownRacketPlayers,
+    courtCount,
+    durationHours,
+    sport,
+    singleScanPlayers,
+    discountModel,
+    courtGross,
+  };
+  const { discountCapped, multiCapped, maxMulti, effectiveCards } = getSessionShares(session);
+  const groups = getShareGroups(session);
+  const hasRackets = racketCost > 0;
+
+  return (
+    <div style={{
+      padding: '12px 16px',
+      background: 'var(--co-tint)',
+      border: '1px solid var(--co-tint-line)',
+      clipPath: CLIP.tag,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <Calculator size={14} style={{ color: 'var(--co-dim)' }} />
+        <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-dim)', textTransform: 'none' }}>
+          Podział kosztów · {SPORT_LABEL[sport] ?? 'Ping-Pong'}
+        </span>
+        {hasRackets && (
+          <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-cyan)', marginLeft: 'auto' }}>
+            Σ {formatAmountShort(totalWithRackets)} zł
+          </span>
+        )}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <ShareBreakdown groups={groups} sport={sport} />
+        {multiCapped && (
+          <div role="status" style={{ marginTop: 4, ...FONT.mono(TEXT.tiny), color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
+            ⚠ Limit {maxMulti} odbić — zadziałało {effectiveCards}, zniżka proporcjonalnie podzielona
+          </div>
+        )}
+        {discountCapped && !multiCapped && (
+          <div role="status" style={{ marginTop: 4, ...FONT.mono(TEXT.tiny), color: 'var(--co-amber)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
+            ⚠ Zniżki z kart nie zmieściły się w udziale na osobę (wychodzi mniej niż pełne {MULTISPORT_DISCOUNT} zł za odbicie). Sprawdź, czy kwota się zgadza.
+          </div>
+        )}
+        {hasRackets && (
+          <div style={{ marginTop: 4, ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', borderTop: '1px solid var(--co-border)', paddingTop: 4 }}>
+            Kort: {formatAmountShort(courtCost)} zł · Rakiety ({racketCount} szt.): {formatAmountShort(racketCost)} zł
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

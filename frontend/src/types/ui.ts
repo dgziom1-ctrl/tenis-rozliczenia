@@ -1,0 +1,235 @@
+import type { Sport, Payment } from './domain';
+
+export interface PlayerStats {
+  name: string;
+  attendanceCount: number;
+  currentDebt: number;
+  /**
+   * Ile sesji w ogóle mogło się temu graczowi policzyć — czyli tych rozegranych
+   * od jego dołączenia. To mianownik frekwencji: gracz, który dołączył w połowie
+   * sezonu i był na każdej sesji od tamtej pory, ma 100%, a nie 50%.
+   */
+  eligibleWeeks: number;
+  /** Data pierwszej sesji, która się graczowi liczy (YYYY-MM-DD), albo null gdy liczą się wszystkie. */
+  joinDate: string | null;
+}
+
+export interface ExtendedPlayerStats extends PlayerStats {
+  attendancePercentage: number;
+  currentStreak: number;
+}
+
+export interface RankedPlayer extends ExtendedPlayerStats {
+  place: number;
+}
+
+export interface HistoryEntry {
+  id: string;
+  datePlayed: string;
+  totalCost: number;
+  sport: Sport;
+  costPerPerson: number;
+  costPerPersonMulti: number;
+  /** Stawka z Medicoverem — tylko w sesjach liczonych nową zasadą, gdy ktoś go miał. */
+  costPerPersonSingle?: number;
+  presentPlayers: string[];
+  multisportPlayers: string[];
+  racketCost?: number;
+  ownRacketPlayers?: string[];
+  courtCount?: number;
+  durationHours?: number;
+  /** Medicover w tej sesji (⊆ multisportPlayers). */
+  singleScanPlayers?: string[];
+  discountModel?: 'perScan';
+  /** Cena kortu przed zwrotem za karty (bez rakiet) — tylko sesje z nowym sposobem wpisywania. */
+  courtGross?: number;
+}
+
+export interface Summary {
+  totalToCollect: number;
+  settledPlayers: number;
+  totalPlayers: number;
+  totalWeeks: number;
+}
+
+export interface UIData {
+  summary: Summary;
+  players: PlayerStats[];
+  playerNames: string[];
+  defaultMultiPlayers: string[];
+  /** Gracze z kartą jednorazową (Medicover): 1 odbicie na sesję. */
+  singleScanPlayers: string[];
+  deletedPlayers: string[];
+  history: HistoryEntry[];
+  payments: Record<string, Payment[]>;
+}
+
+export interface DebtSession {
+  sessionId: string;
+  date: string;
+  amount: number;
+}
+
+export interface DebtDisplayPayment {
+  id: string;
+  amount: number;
+  date: string;
+}
+
+/**
+ * Zwinięte rozliczenie sezonów sprzed bieżącego.
+ *
+ * `amount` to saldo zamknięcia tamtych lat: koszty minus wpłaty. Dodatnie
+ * znaczy zaległość, ujemne nadpłatę, zero — rok zamknięty na czysto.
+ */
+export interface DebtCarryOver {
+  amount: number;
+  fromYear: number;
+  toYear: number;
+  sessions: DebtSession[];
+  payments: DebtDisplayPayment[];
+  totalSessions: number;
+  totalPaid: number;
+}
+
+export interface DebtDisplayData {
+  /** Sesje bieżącego sezonu. Starsze siedzą w `carryOver`. */
+  sessions: DebtSession[];
+  /** Wpłaty bieżącego sezonu. Starsze siedzą w `carryOver`. */
+  payments: DebtDisplayPayment[];
+  /** `null`, gdy cała historia gracza mieści się w bieżącym sezonie. */
+  carryOver: DebtCarryOver | null;
+  totalSessions: number;
+  totalPaid: number;
+  balance: number;
+}
+
+export interface Rank {
+  min: number;
+  name: string;
+  hex: string;
+}
+
+export interface Achievement {
+  id: string;
+  label: string;
+  desc: string;
+}
+
+export interface MonthGroup {
+  label: string;
+  rows: HistoryEntry[];
+}
+
+/**
+ * Formularz edycji sesji. Kwoty są tu tekstem, bo pochodzą wprost z pól
+ * wejściowych — na liczby zamienia je dopiero walidacja przed zapisem.
+ */
+export interface SessionEditForm {
+  date: string;
+  cost: string | number;
+  present: string[];
+  multiPlayers: string[];
+  sport: Sport;
+  /** Liczba wypożyczonych rakiet i cena za sztukę — edytowalne jak przy dodawaniu. */
+  racketCount?: number;
+  racketPrice?: number;
+  ownRacketPlayers?: string[];
+  courtCount?: number;
+  durationHours?: number;
+  /** Medicover w tej sesji (⊆ multiPlayers). */
+  singleScanPlayers?: string[];
+  /** Zasada podziału zniżek sesji — tylko do odczytu, edycja jej nie zmienia. */
+  discountModel?: 'perScan';
+  /** Cena kortu przed zwrotem (tekst pola). Obecna tylko w sesjach z nowym sposobem wpisywania. */
+  courtGross?: string | number;
+  /** Ręcznie wpisany zwrot z portfela; `undefined` = zwrot liczony automatycznie. */
+  refundOverride?: string | number;
+}
+
+export interface MonthlySessionData {
+  total: number;
+  players: Record<string, number>;
+}
+
+export interface WeeklyRankingEntry {
+  /** Poniedziałek tygodnia, YYYY-MM-DD. */
+  week: string;
+  /** Ostatnia sesja w tym tygodniu, YYYY-MM-DD. */
+  date: string;
+  rankings: RankingHistoryEntry['rankings'];
+}
+
+export interface RankingHistoryEntry {
+  month: string;
+  rankings: Array<{
+    name: string;
+    pct: number;
+    attended: number;
+    place: number;
+  }>;
+}
+
+export interface PlayerColor {
+  bg: string;
+  border: string;
+  text: string;
+}
+
+export type SoundType = 'tab' | 'click' | 'success' | 'delete' | 'coin' | 'rank1' | 'error' | 'streak';
+
+export type CardRarity = 'legend' | 'elite' | 'epic' | 'rare' | 'common' | 'ghost';
+
+export interface SportCount {
+  sport: Sport;
+  count: number;
+}
+
+export interface PlayerCardMeta {
+  overall: number;
+  rank: Rank;
+  rarity: CardRarity;
+  sports: SportCount[];
+  currentStreak: number;
+  attendancePercentage: number;
+  /** Sesje z obecnością w tym samym zakresie, z którego jest `history`. */
+  attendanceCount: number;
+  /** Ile sesji w ogóle mogło się policzyć — mianownik „Obecność”. */
+  eligibleWeeks: number;
+  topAchievements: Achievement[];
+}
+
+export type SessionHighlightKind = 'debut' | 'streak' | 'rankup';
+
+export interface SessionHighlight {
+  name: string;
+  kind: SessionHighlightKind;
+  label: string;
+}
+export type Theme = 'dark' | 'light' | 'oled';
+export type TabId = 'dashboard' | 'attendance' | 'admin' | 'history' | 'players';
+
+export interface WrappedPlayerStats {
+  name: string;
+  attended: number;
+  missed: number;
+  percentage: number;
+  longestStreak: number;
+  place?: number;
+}
+
+export interface WrappedStats {
+  year: number;
+  totalSessions: number;
+  avgPlayersPerSession: number;
+  pingpongSessions: number;
+  squashSessions: number;
+  badmintonSessions: number;
+  padelSessions: number;
+  busiestMonthName: string | null;
+  busiestMonthCount: number;
+  bestPair: [string, string] | null;
+  bestPairCount: number;
+  champion: WrappedPlayerStats | null;
+  players: WrappedPlayerStats[];
+}

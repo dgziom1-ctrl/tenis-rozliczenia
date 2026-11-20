@@ -1,0 +1,354 @@
+/**
+ * TESTY HOOKÓW — API PRZEGLĄDARKI
+ *
+ * Cel: testowanie hooków, które dotykają API przeglądarki (Notification,
+ * localStorage, AudioContext). To jest kategoria testów, która BY ZŁAPAŁA
+ * oryginalnego buga — `useState(Notification.permission)` bez sprawdzenia
+ * czy API w ogóle istnieje.
+ *
+ * Każdy test w sekcji "browser API guards" sprawdza, czy hook nie eksploduje
+ * gdy odpowiednie API przeglądarki jest niedostępne.
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+
+// ─── Mocki Firebase ──────────────────────────────────────────────────────────
+vi.mock('firebase/app',      () => ({ initializeApp: vi.fn(() => ({})) }));
+vi.mock('firebase/database', () => ({
+  getDatabase: vi.fn(() => ({})),
+  ref:         vi.fn(() => ({})),
+  set:         vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock('firebase/messaging', () => ({
+  getMessaging: vi.fn(() => ({})),
+  getToken:     vi.fn().mockResolvedValue('mock-fcm-token'),
+  onMessage:    vi.fn(),
+}));
+vi.mock('../lib/firebase/config', () => ({ database: {}, dataRef: {} }));
+
+// ════════════════════════════════════════════════════════════════════════════
+// usePushNotifications
+// Ten hook złapałby oryginalny bug — dostęp do Notification.permission
+// bez sprawdzenia czy API istnieje
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('usePushNotifications — ochrona przed brakiem API', () => {
+  let originalNotification;
+  let originalPushManager;
+
+  beforeEach(() => {
+    originalNotification = globalThis.Notification;
+    originalPushManager  = globalThis.PushManager;
+  });
+
+  afterEach(() => {
+    // Zawsze przywróć oryginalne API po każdym teście
+    if (originalNotification !== undefined) {
+      globalThis.Notification = originalNotification;
+    } else {
+      delete globalThis.Notification;
+    }
+    if (originalPushManager !== undefined) {
+      globalThis.PushManager = originalPushManager;
+    } else {
+      delete globalThis.PushManager;
+    }
+  });
+
+  it('🔴 bez Notification API nie rzuca ani przy starcie, ani w efekcie', async () => {
+    // Drugi bug: setPermission(Notification.permission) wewnątrz useEffect
+    // wykonuje się po zamontowaniu — bez guard też rzucał TypeError na iOS.
+    delete globalThis.Notification;
+
+    const { usePushNotifications } = await import('../hooks/usePushNotifications');
+    let hook;
+    // act() zapewnia że useEffect wykona się przed asercją
+    await act(async () => {
+      hook = renderHook(() => usePushNotifications());
+    });
+    // Jeśli doszliśmy tutaj — useEffect nie rzucił wyjątku
+    expect(hook.result.current.permission).toBe('default');
+    expect(hook.result.current.isSupported).toBe(false);
+  });
+
+  it('zwraca isSupported=false gdy brakuje PushManager', async () => {
+    delete globalThis.PushManager;
+
+    const { usePushNotifications } = await import('../hooks/usePushNotifications');
+    const { result } = renderHook(() => usePushNotifications());
+    expect(result.current.isSupported).toBe(false);
+  });
+
+  it('czyta permission gdy Notification API jest dostępne', async () => {
+    globalThis.Notification = { permission: 'granted' };
+    globalThis.PushManager  = {};
+
+    const { usePushNotifications } = await import('../hooks/usePushNotifications');
+    const { result } = renderHook(() => usePushNotifications());
+    expect(result.current.permission).toBe('granted');
+  });
+
+  it('czyta permission="denied" gdy użytkownik odrzucił', async () => {
+    globalThis.Notification = { permission: 'denied' };
+    globalThis.PushManager  = {};
+
+    const { usePushNotifications } = await import('../hooks/usePushNotifications');
+    const { result } = renderHook(() => usePushNotifications());
+    expect(result.current.permission).toBe('denied');
+  });
+
+  it('registerToken zwraca error gdy isSupported=false', async () => {
+    delete globalThis.Notification;
+
+    const { usePushNotifications } = await import('../hooks/usePushNotifications');
+    const { result } = renderHook(() => usePushNotifications());
+
+    let outcome;
+    await act(async () => {
+      outcome = await result.current.registerToken('Alice');
+    });
+    expect(outcome.success).toBe(false);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// useTheme
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('useTheme — localStorage i klasy body', () => {
+  let originalMatchMedia;
+  beforeEach(() => {
+    originalMatchMedia = globalThis.matchMedia;
+    localStorage.clear();
+    document.body.className = '';
+  });
+  afterEach(() => { globalThis.matchMedia = originalMatchMedia; });
+
+  it('domyślnie zwraca motyw "oled" przy systemowym ustawieniu ciemnym', async () => {
+    const { useTheme } = await import('../hooks/useTheme');
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe('oled');
+    expect(document.body.classList.contains('theme-oled')).toBe(true);
+  });
+
+  it('na pierwszym uruchomieniu szanuje systemowy motyw jasny, ale go nie zapisuje', async () => {
+    let systemLight = true;
+    const listeners = new Set();
+    globalThis.matchMedia = vi.fn(query => ({
+      get matches() { return query === '(prefers-color-scheme: light)' && systemLight; },
+      addEventListener: (_type, listener) => listeners.add(listener),
+      removeEventListener: (_type, listener) => listeners.delete(listener),
+    }));
+
+    const { useTheme } = await import('../hooks/useTheme');
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe('light');
+    expect(localStorage.getItem('cyber-ponk-theme')).toBeNull();
+
+    systemLight = false;
+    act(() => listeners.forEach(listener => listener()));
+    expect(result.current.theme).toBe('oled');
+    expect(localStorage.getItem('cyber-ponk-theme')).toBeNull();
+  });
+
+  it('toggle przechodzi cyklicznie oled → dark → light → oled', async () => {
+    const { useTheme } = await import('../hooks/useTheme');
+    const { result } = renderHook(() => useTheme());
+
+    act(() => result.current.toggle());
+    expect(result.current.theme).toBe('dark');
+    act(() => result.current.toggle());
+    expect(result.current.theme).toBe('light');
+    act(() => result.current.toggle());
+    expect(result.current.theme).toBe('oled');
+  });
+
+  it('dodaje klasę theme-light do body przy motywie light', async () => {
+    const { useTheme } = await import('../hooks/useTheme');
+    const { result } = renderHook(() => useTheme());
+
+    act(() => result.current.toggle()); // → dark
+    act(() => result.current.toggle()); // → light
+    expect(document.body.classList.contains('theme-light')).toBe(true);
+    expect(document.body.classList.contains('theme-oled')).toBe(false);
+  });
+
+  it('usuwa klasę theme-light przy powrocie do oled', async () => {
+    const { useTheme } = await import('../hooks/useTheme');
+    const { result } = renderHook(() => useTheme());
+
+    act(() => result.current.toggle()); // → dark
+    act(() => result.current.toggle()); // → light
+    act(() => result.current.toggle()); // → oled
+    expect(document.body.classList.contains('theme-light')).toBe(false);
+    expect(document.body.classList.contains('theme-oled')).toBe(true);
+  });
+
+  it('zapisuje wybór do localStorage', async () => {
+    const { useTheme } = await import('../hooks/useTheme');
+    const { result } = renderHook(() => useTheme());
+
+    act(() => result.current.toggle()); // → dark
+    expect(localStorage.getItem('cyber-ponk-theme')).toBe('dark');
+  });
+
+  it('odczytuje zapisany motyw z localStorage', async () => {
+    localStorage.setItem('cyber-ponk-theme', 'light');
+    const { useTheme } = await import('../hooks/useTheme');
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe('light');
+  });
+
+  it('nie crashuje gdy localStorage jest niedostępny', async () => {
+    // Symulacja przeglądarki z zablokowanym localStorage (prywatne okno, iframe)
+    const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('QuotaExceededError'); });
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('QuotaExceededError'); });
+
+    const { useTheme } = await import('../hooks/useTheme');
+    expect(() => renderHook(() => useTheme())).not.toThrow();
+
+    getItem.mockRestore();
+    setItem.mockRestore();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// useUndoTimer
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('useUndoTimer — odliczanie i resetowanie', () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('undoToast jest null na początku', async () => {
+    const { useUndoTimer } = await import('../hooks/useUndoTimer');
+    const { result } = renderHook(() => useUndoTimer(5));
+    expect(result.current.undoToast).toBeNull();
+  });
+
+  it('startUndo ustawia undoToast z payload', async () => {
+    const { useUndoTimer } = await import('../hooks/useUndoTimer');
+    const { result } = renderHook(() => useUndoTimer(5));
+
+    act(() => result.current.startUndo({ playerName: 'Alice' }));
+    expect(result.current.undoToast).not.toBeNull();
+    expect(result.current.undoToast.payload.playerName).toBe('Alice');
+  });
+
+  it('odlicza sekundy co sekundę', async () => {
+    const { useUndoTimer } = await import('../hooks/useUndoTimer');
+    const { result } = renderHook(() => useUndoTimer(5));
+
+    act(() => result.current.startUndo({ playerName: 'Bob' }));
+    expect(result.current.undoToast.secondsLeft).toBe(5);
+
+    act(() => vi.advanceTimersByTime(1000));
+    expect(result.current.undoToast.secondsLeft).toBe(4);
+
+    act(() => vi.advanceTimersByTime(1000));
+    expect(result.current.undoToast.secondsLeft).toBe(3);
+  });
+
+  it('resetuje do null po wygaśnięciu czasu', async () => {
+    const { useUndoTimer } = await import('../hooks/useUndoTimer');
+    const { result } = renderHook(() => useUndoTimer(3));
+
+    act(() => result.current.startUndo({}));
+    act(() => vi.advanceTimersByTime(3000));
+    expect(result.current.undoToast).toBeNull();
+  });
+
+  it('dismissUndo natychmiast resetuje stan', async () => {
+    const { useUndoTimer } = await import('../hooks/useUndoTimer');
+    const { result } = renderHook(() => useUndoTimer(5));
+
+    act(() => result.current.startUndo({ playerName: 'Carol' }));
+    act(() => result.current.dismissUndo());
+    expect(result.current.undoToast).toBeNull();
+  });
+
+  it('progressPct zaczyna od 100 i spada', async () => {
+    const { useUndoTimer } = await import('../hooks/useUndoTimer');
+    const { result } = renderHook(() => useUndoTimer(4));
+
+    act(() => result.current.startUndo({}));
+    expect(result.current.progressPct).toBe(100);
+
+    act(() => vi.advanceTimersByTime(1000));
+    expect(result.current.progressPct).toBe(75);
+
+    act(() => vi.advanceTimersByTime(1000));
+    expect(result.current.progressPct).toBe(50);
+  });
+
+  it('startUndo anuluje poprzedni timer', async () => {
+    const { useUndoTimer } = await import('../hooks/useUndoTimer');
+    const { result } = renderHook(() => useUndoTimer(5));
+
+    act(() => result.current.startUndo({ playerName: 'Alice' }));
+    act(() => vi.advanceTimersByTime(2000));
+    act(() => result.current.startUndo({ playerName: 'Bob' })); // nowy timer
+
+    // Nowy timer zaczyna od 5, nie kontynuuje od 3
+    expect(result.current.undoToast.secondsLeft).toBe(5);
+    expect(result.current.undoToast.payload.playerName).toBe('Bob');
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// usePaymentUndo — cofnięcie zapisanej wpłaty
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('usePaymentUndo — cofnięcie wpłaty', () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  async function setup(onRemovePayment) {
+    const { usePaymentUndo } = await import('../hooks/usePaymentUndo');
+    return renderHook(() => usePaymentUndo({ playerName: 'Ala', onRemovePayment }));
+  }
+
+  it('udane cofnięcie usuwa dokładnie tę wpłatę i chowa pasek', async () => {
+    const onRemovePayment = vi.fn().mockResolvedValue({ success: true });
+    const { result } = await setup(onRemovePayment);
+
+    act(() => result.current.startPaymentUndo({ id: 'p1', amount: 30 }));
+    expect(result.current.isActive).toBe(true);
+    expect(result.current.secondsLeft).toBe(8);
+
+    await act(async () => { await result.current.handleUndoPayment(); });
+    expect(onRemovePayment).toHaveBeenCalledWith('Ala', 'p1');
+    expect(result.current.isActive).toBe(false);
+    expect(result.current.lastPayment).toBeNull();
+  });
+
+  // Gdyby po błędzie pasek zniknął, wpłata zostałaby w bazie bez możliwości
+  // cofnięcia — a użytkownik myślałby, że ją cofnął.
+  it('nieudane cofnięcie przywraca pasek z pełnym czasem', async () => {
+    const onRemovePayment = vi.fn().mockResolvedValue({ success: false, error: 'offline' });
+    const { result } = await setup(onRemovePayment);
+
+    act(() => result.current.startPaymentUndo({ id: 'p1', amount: 30 }));
+    act(() => vi.advanceTimersByTime(3000));
+    await act(async () => { await result.current.handleUndoPayment(); });
+
+    expect(result.current.isActive).toBe(true);
+    expect(result.current.secondsLeft).toBe(8);
+    expect(result.current.lastPayment).toEqual({ id: 'p1', amount: 30 });
+    expect(result.current.isUndoing).toBe(false);
+  });
+
+  it('po upływie czasu zapomina wpłatę i nic nie usuwa', async () => {
+    const onRemovePayment = vi.fn();
+    const { result } = await setup(onRemovePayment);
+
+    act(() => result.current.startPaymentUndo({ id: 'p1', amount: 30 }));
+    act(() => vi.advanceTimersByTime(8000));
+
+    expect(result.current.isActive).toBe(false);
+    expect(result.current.lastPayment).toBeNull();
+    await act(async () => { await result.current.handleUndoPayment(); });
+    expect(onRemovePayment).not.toHaveBeenCalled();
+  });
+});

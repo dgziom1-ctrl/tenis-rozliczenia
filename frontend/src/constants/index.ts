@@ -1,0 +1,96 @@
+import type { TabId } from '@/types/ui';
+import type { Sport } from '@/types/domain';
+
+/**
+ * Hasło do operacji nieodwracalnych. Jest wkompilowane w paczkę JS, więc nie
+ * jest sekretem — chroni tylko przed przypadkowym kliknięciem, nie przed
+ * kimś, kto chce się dostać do danych (patrz README, sekcja Security).
+ */
+export const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? '';
+
+/** Czy w ogóle da się potwierdzić hasłem — puste hasło NIE odblokowuje niczego. */
+export const isAdminPasswordConfigured = (): boolean => ADMIN_PASSWORD.length > 0;
+/**
+ * Czy aplikacja działa na danych demo (`src/dev/demoData.ts`).
+ *
+ * Włącza się wyłącznie w buildzie deweloperskim i tylko po `VITE_DEMO_DATA=1`.
+ * W produkcji warunek zwija się do `false`, więc gałęzie demo znikają
+ * z paczki. Mutacje sprawdzają tę stałą, żeby podgląd UI nie próbował
+ * zapisywać do nieistniejącej bazy i nie pokazywał błędów uprawnień.
+ */
+export const DEMO_MODE = import.meta.env.DEV && import.meta.env.VITE_DEMO_DATA === '1';
+
+export const SETTLED_THRESHOLD = 0.01;
+export const UNDO_TIMEOUT_SECONDS = 8;
+export const MODAL_EXIT_MS = 280;
+export const REDUCED_MOTION_MODAL_EXIT_MS = 180;
+export const SPORT = { PINGPONG: 'pingpong', SQUASH: 'squash', BADMINTON: 'badminton', PADEL: 'padel' } as const;
+
+/** Wszystkie dyscypliny, w kolejności wyświetlania. Jedyne źródło listy sportów. */
+export const SPORTS: readonly Sport[] = Object.values(SPORT);
+export const isSport = (value: unknown): value is Sport =>
+  typeof value === 'string' && (SPORTS as readonly string[]).includes(value);
+
+/**
+ * Sporty, w których wypożyczamy rakiety. To JEDYNA różnica między dyscyplinami —
+ * sam podział kosztu kortu jest identyczny wszędzie (patrz `utils/sessionCost`).
+ */
+const RACKET_RENTAL_SPORTS: readonly string[] = [SPORT.SQUASH, SPORT.BADMINTON, SPORT.PADEL];
+export const hasRacketRental = (sport?: string): boolean => RACKET_RENTAL_SPORTS.includes(sport ?? '');
+
+/**
+ * Emoji dyscypliny — WYŁĄCZNIE do treści kopiowanej do czatu (`utils/message`).
+ *
+ * W interfejsie dyscyplina jest rysowana przez `SportGlyph`: emoji ma inną
+ * szerokość i baseline na każdym systemie, przez co rozjeżdżało wiersze
+ * historii i podpisy pod ikonami. W wiadomości do grupy emoji jest treścią,
+ * nie ikoną — tam zostaje.
+ */
+export const SPORT_EMOJI: Record<string, string> = { pingpong: '🏓', squash: '🎾', badminton: '🏸', padel: '🥎' };
+export const SPORT_LABEL: Record<string, string> = { pingpong: 'Ping-Pong', squash: 'Squash', badminton: 'Badminton', padel: 'Padel' };
+/** Biernik do zdania „Graliśmy w …" w wiadomości na grupę. */
+export const SPORT_ACCUSATIVE: Record<string, string> = { pingpong: 'ping-ponga', squash: 'squasha', badminton: 'badmintona', padel: 'padla' };
+
+/**
+ * Karta Multisport obniża rachunek w recepcji o stałą kwotę za każdą okazaną
+ * kartę. W aplikacji wpisujemy kwotę już po tym odliczeniu, więc zniżka wraca
+ * do rozliczenia jako rabat dla jej posiadacza (patrz `utils/sessionCost`).
+ */
+export const MULTISPORT_DISCOUNT = 15;
+
+/**
+ * Maksymalna liczba kart MultiSport honorowanych przez obiekt na 1 kort/stół
+ * na 1 godzinę. Przy sesjach wielogodzinnych limit obowiązuje per godzina —
+ * np. badminton 1 kort × 2 godziny = 2 × 4 = 8 kart łącznie.
+ */
+export const MULTISPORT_PER_COURT_HOUR: Record<string, number> = {
+  pingpong: 2,
+  squash: 2,
+  badminton: 4,
+  padel: 4,
+};
+export const RACKET_PRICE = 5;
+export const SOUND_TYPES = { TAB: 'tab', CLICK: 'click', SUCCESS: 'success', DELETE: 'delete', COIN: 'coin', RANK1: 'rank1', ERROR: 'error', STREAK: 'streak' } as const;
+export const TABS = { DASHBOARD: 'dashboard', ATTENDANCE: 'attendance', ADMIN: 'admin', HISTORY: 'history', PLAYERS: 'players' } as const;
+
+/** Jedyne odwzorowanie zakładka ↔ adres. Trzymane w jednym miejscu, żeby nawigacja z różnych ekranów nie mogła się rozjechać. */
+export const TAB_PATHS: Record<string, string> = {
+  [TABS.DASHBOARD]: '/',
+  [TABS.ATTENDANCE]: '/attendance',
+  [TABS.ADMIN]: '/admin',
+  [TABS.HISTORY]: '/history',
+  [TABS.PLAYERS]: '/players',
+};
+
+export const PATH_TO_TAB: Record<string, TabId> = {
+  '/': TABS.DASHBOARD,
+  '/attendance': TABS.ATTENDANCE,
+  '/admin': TABS.ADMIN,
+  '/history': TABS.HISTORY,
+  '/players': TABS.PLAYERS,
+};
+export const ORGANIZER_NAME = 'Kamil';
+export const PAYMENT_MODAL = { EXACT: 'exact', CUSTOM: 'custom' } as const;
+export const MONTHS = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+
+export { RANKS, getRank, rankTint, PODIUM_ORDER } from './ranks';

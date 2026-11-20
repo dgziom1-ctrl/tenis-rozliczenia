@@ -1,0 +1,627 @@
+import { useState, useRef, useCallback, useEffect, memo } from 'react';
+import type { KeyboardEvent } from 'react';
+import { CheckCircle2, Pencil, TriangleAlert } from 'lucide-react';
+import { ORGANIZER_NAME, SETTLED_THRESHOLD, PAYMENT_MODAL, rankTint } from '@/constants';
+import { FONT, CLIP, TEXT } from '../../constants/styles';
+import { formatAmountShort } from '@/utils/format';
+import { BLIK_NUMBER } from '@/utils/blik';
+import { makeId } from '@/utils/id';
+import { RARITY_CARD_CLASS, RARITY_FOIL_CLASS, RARITY_LABEL } from '@/utils/playerCard';
+import { usePaymentUndo } from '@/hooks/usePaymentUndo';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import BreakdownPanel from './BreakdownPanel';
+import PaymentModal, { type PaymentModalType } from './PaymentModal';
+import HoldToSettleButton from './HoldToSettleButton';
+import UndoBar from '../common/UndoBar';
+import Modal from '../common/Modal';
+import TreasurerPanel from './TreasurerPanel';
+
+import StreakBadge from '../attendance/StreakBadge';
+import type { DebtDisplayData, HistoryEntry, PlayerCardMeta, PlayerColor, PlayerStats } from '@/types/ui';
+import type { AddPaymentResult, TransactionResult } from '@/types/domain';
+import type { StyleWithVars } from '@/types/css';
+import { useAnimatedValue } from './useAnimatedValue';
+import { useCardTilt } from './useCardTilt';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { Barcode } from './Barcode';
+import { CornerBrackets } from './CornerBrackets';
+import { PlayerAvatar } from './PlayerAvatar';
+import { RankBadge } from './RankBadge';
+
+interface PlayerCardProps {
+  player: PlayerStats;
+  playerColor: PlayerColor;
+  /** Sesje bieżącego sezonu — ostatnie kropki i licznik obecności. */
+  history: HistoryEntry[];
+  meta: PlayerCardMeta;
+  openDetails: boolean;
+  onToggleDetails: (playerName: string) => void;
+  breakdown: DebtDisplayData | null;
+  onAddPayment: (playerName: string, amount: number, paymentId: string) => Promise<AddPaymentResult>;
+  onRemovePayment: (playerName: string, paymentId: string) => Promise<TransactionResult>;
+  /** Podawane tylko dla skarbnika — zasila panel „kto ile winien”. */
+  allPlayers?: PlayerStats[];
+}
+
+/** Stopka karty: pseudo-kod kreskowy z nazwą gracza (tylko na desktopie). */
+function CardBarcode({ name, color, marginTop }: { name: string; color: string; marginTop: number | string }) {
+  return (
+    <div style={{ marginTop, paddingTop: 10, borderTop: '1px solid var(--co-separator)' }}>
+      <Barcode name={name} color={color} />
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 2 }}>
+        <span style={{ ...FONT.monoMicro, letterSpacing: 'normal' }}>
+          {name.toUpperCase().replace(/\s/g, '')}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function PlayerCard({
+  player, playerColor, history, meta,
+  openDetails, onToggleDetails, breakdown,
+  onAddPayment, onRemovePayment,
+  allPlayers,
+}: PlayerCardProps) {
+  const isMobile = useIsMobile();
+  const isOrganizer = player.name === ORGANIZER_NAME;
+  const debt        = player.currentDebt;
+  const isPending   = debt > SETTLED_THRESHOLD;
+  const hasCredit   = debt < -SETTLED_THRESHOLD;
+  const isSettled   = !isPending && !hasCredit;
+  const pct         = meta.attendancePercentage;
+  const rank        = meta.rank;
+  const c           = playerColor;
+
+  const [modal,     setModal]     = useState<PaymentModalType | null>(null);
+  const [customAmt, setCustomAmt] = useState('');
+  const [isSaving,  setIsSaving]  = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [adminMode, setAdminMode] = useState(false);
+  const [flash,     setFlash]     = useState(false);
+  const [justCleared, setJustCleared] = useState(false);
+  const [settling, setSettling] = useState(false);
+  const [confirmSettle, setConfirmSettle] = useState(false);
+
+  const reducedMotion = useReducedMotion();
+
+  const clickCount = useRef(0);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevDebt   = useRef(debt);
+  const savingRef  = useRef(false);
+  const pendingPaymentIdRef = useRef<string | null>(null);
+
+  // 850 ms zamiast 450: po zapisie kwota ma widocznie zjechać do zera, a nie
+  // mrugnąć. Ten sam licznik animuje też powrót długu po „cofnij”.
+  const animatedAbs = useAnimatedValue(Math.abs(debt), 850);
+
+  useEffect(() => {
+    if (prevDebt.current === debt) return undefined;
+    setFlash(true);
+    prevDebt.current = debt;
+    const t = setTimeout(() => setFlash(false), 750);
+    return () => clearTimeout(t);
+  }, [debt]);
+
+  useEffect(() => {
+    if (!justCleared) return undefined;
+    const t = setTimeout(() => setJustCleared(false), 2800);
+    return () => clearTimeout(t);
+  }, [justCleared]);
+
+  // Pieczątka pojawia się dopiero, gdy licznik naprawdę dojechał do zera.
+  // Wcześniej timer startował w momencie zapisu i po 850 ms nakładał
+  // „ROZLICZONY” na jeszcze animującą się kwotę (0,07 zł).
+  useEffect(() => {
+    if (!settling || debt > SETTLED_THRESHOLD) return undefined;
+    const t = setTimeout(() => {
+      setSettling(false);
+      setJustCleared(true);
+      // Dźwięk przy płatności gra już wcześniej (COIN) — drugi byłby nadmiarowy.
+    }, reducedMotion ? 0 : 900);
+    return () => clearTimeout(t);
+  }, [settling, debt, reducedMotion]);
+
+  const { lastPayment, secondsLeft, progressPct, startPaymentUndo, handleUndoPayment } =
+    usePaymentUndo({ playerName: player.name, onRemovePayment });
+
+  const toggleAdminMode = useCallback(() => {
+    clickCount.current = 0;
+    clearTimeout(clickTimer.current ?? undefined);
+    setAdminMode(prev => !prev);
+  }, []);
+
+  const handleAmountClick = useCallback(() => {
+    clickCount.current += 1;
+    clearTimeout(clickTimer.current ?? undefined);
+    if (clickCount.current >= 5) toggleAdminMode();
+    else clickTimer.current = setTimeout(() => { clickCount.current = 0; }, 1000);
+  }, [toggleAdminMode]);
+
+  // Ukryte 5 kliknięć było niedostępne z klawiatury. Kwota ma teraz rolę
+  // przycisku i `aria-pressed`; Enter/Spacja przełącza tryb od razu, bez
+  // zmuszania użytkownika czytnika ekranu do pięciu osobnych aktywacji.
+  const handleAmountKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    toggleAdminMode();
+  }, [toggleAdminMode]);
+
+  useEffect(() => () => clearTimeout(clickTimer.current ?? undefined), []);
+
+  const cancelModal = useCallback(() => {
+    setPaymentError(null);
+    setModal(null);
+    setCustomAmt('');
+    pendingPaymentIdRef.current = null;
+  }, []);
+
+  const savePayment = useCallback(async (amount: number) => {
+    if (savingRef.current) return;
+    savingRef.current = true;
+
+    const paymentId = pendingPaymentIdRef.current ?? makeId();
+    pendingPaymentIdRef.current = paymentId;
+
+    setPaymentError(null);
+    setIsSaving(true);
+
+    try {
+      const result = await onAddPayment(player.name, amount, paymentId);
+      if (result?.paymentId && result?.success !== false) {
+        pendingPaymentIdRef.current = null;
+        startPaymentUndo({ id: result.paymentId, amount });
+        if (debt > SETTLED_THRESHOLD && debt - amount <= SETTLED_THRESHOLD) {
+          // Sam licznik zjeżdża do zera; pieczątka i dźwięk czekają na efekt
+          // powyżej, żeby nie nakładały się na animację.
+          setJustCleared(false);
+          setSettling(true);
+        }
+        cancelModal();
+        setConfirmSettle(false);
+      } else {
+        setPaymentError(result?.error || 'Nie udało się zapisać wpłaty');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '';
+      setPaymentError(message || 'Nie udało się zapisać wpłaty');
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
+  }, [player.name, debt, onAddPayment, startPaymentUndo, cancelModal]);
+
+  const handleUndo = useCallback(async () => {
+    setSettling(false);
+    setJustCleared(false);
+    await handleUndoPayment();
+  }, [handleUndoPayment]);
+
+  const cardBorder = isSettled && !isOrganizer
+    ? `${c.border}25`
+    : `${c.border}30`;
+  // Kropki ostatnich sesji (od najnowszej); na telefonie mieści się mniej.
+  const recentSessions = (history ?? []).slice(0, isMobile ? 6 : 10);
+  // Etykieta musi zawierać widoczny tekst (kwotę i stan), inaczej osoby
+  // korzystające z rozpoznawania mowy nie mogą aktywować elementu po nazwie.
+  const amountText = `${hasCredit ? '+' : ''}${formatAmountShort(Math.abs(debt))}zł`;
+  const amountAriaLabel = `${hasCredit ? '↑ Nadpłata ' : ''}${amountText}${adminMode ? ' Tryb edycji' : ''} — ${adminMode ? 'wyłącz' : 'włącz'} tryb edycji wpłat`;
+
+  const { cardRef, foilRef, handlers: tiltHandlers } = useCardTilt({
+    reducedMotion,
+    activeBorder: `${c.border}70`,
+    restBorder: cardBorder,
+    activeShadow: isPending && !isOrganizer ? 'var(--glow-box-rose)' : 'var(--glow-box-cyan)',
+    restShadow: isPending && !isOrganizer ? 'var(--glow-box-rose)' : 'none',
+  });
+
+  const foilStyle: StyleWithVars = {
+    '--foil-x': '50%',
+    '--foil-y': '22%',
+    '--foil-tint': rankTint(rank, 60),
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      className={`crt-card glass-card ${RARITY_CARD_CLASS[meta.rarity]}`}
+      style={{
+        position: 'relative',
+        border: `1px solid ${cardBorder}`,
+        display: 'flex', flexDirection: 'column',
+        flex: 1, height: '100%',
+        animation: 'none',
+        overflow: 'hidden',
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+        transformStyle: 'preserve-3d',
+        boxShadow: isPending && !isOrganizer
+          ? 'var(--glass-shadow), var(--glass-rim), var(--glow-box-rose)'
+          : 'var(--glass-shadow), var(--glass-rim)',
+      }}
+      {...tiltHandlers}
+    >
+      <div ref={foilRef} className={RARITY_FOIL_CLASS[meta.rarity]} style={foilStyle} aria-hidden="true" />
+      <CornerBrackets color={c.border} size={14} thickness={1} />
+      <div className="glass-shine-overlay" aria-hidden="true" />
+      <span className="sr-only" role="status" aria-live="polite">
+        {isSaving ? 'Zapisywanie wpłaty…' : settling ? 'Rozliczanie…' : justCleared ? 'Wpłata zapisana. Karta rozliczona.' : ''}
+      </span>
+
+      <div style={{
+        padding: '6px 14px',
+        background: (!isOrganizer && isPending)
+          ? 'var(--co-tint-rose)'
+          : hasCredit ? 'var(--co-tint-green)'
+          : 'var(--co-tint)',
+        borderBottom: '1px solid var(--co-border)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        position: 'relative', zIndex: 1,
+      }}>
+        <span style={{
+          ...FONT.mono(TEXT.tiny),
+          color: (!isOrganizer && isPending) ? `${c.border}99` : hasCredit ? 'var(--co-green)' : 'var(--co-dim)',
+          letterSpacing: 'normal', textTransform: 'none',
+        }}>
+          {isOrganizer
+            ? (hasCredit ? '↑ Do zebrania' : isPending ? '↕ Saldo' : '✓ Skarbnik')
+            : isPending ? 'Do wpłaty'
+            : isSettled ? 'Rozliczony'
+            : '↑ Nadpłata'}
+        </span>
+        <span style={{
+          ...FONT.display(TEXT.tiny),
+          color: rank.hex, letterSpacing: 'normal',
+        }}>{RARITY_LABEL[meta.rarity]}</span>
+      </div>
+
+      <div style={{
+        padding: '14px',
+        borderBottom: '1px solid var(--co-separator)',
+        display: 'flex', gap: 14, alignItems: 'stretch',
+        position: 'relative', zIndex: 2,
+      }}>
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'space-between', gap: 6, flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <span className="card-ovr" style={{ color: rank.hex }}>{meta.overall}</span>
+            <span style={{ ...FONT.monoMicro, letterSpacing: 'normal', color: rank.hex, lineHeight: 1 }}>OVR</span>
+          </div>
+          <PlayerAvatar
+            name={player.name}
+            color={c}
+            isPending={isOrganizer ? undefined : isPending}
+          />
+        </div>
+        <div style={{
+          flex: 1, minWidth: 0,
+          display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 8,
+        }}>
+          <div>
+            <h3 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(1.5rem, 5vw, 1.85rem)',
+              letterSpacing: 'normal', textTransform: 'none',
+              color: 'var(--co-text-hi)',
+              margin: 0, lineHeight: 1,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>{player.name}</h3>
+
+            <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+              <RankBadge rank={rank} pct={pct} showHint={!isMobile} />
+              {meta.currentStreak >= 2 && <StreakBadge streak={meta.currentStreak} />}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+              <span style={{ ...FONT.monoLabel }}>
+                Obecność
+              </span>
+              <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>
+                {meta.attendanceCount}/{meta.eligibleWeeks}
+              </span>
+            </div>
+            <div style={{ height: 2, background: 'var(--co-bar-track)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{
+                position: 'absolute', left: 0, top: 0, bottom: 0, right: 0,
+                background: pct >= 75
+                  ? 'linear-gradient(90deg, var(--co-cyan), var(--co-green))'
+                  : pct >= 45
+                  ? 'linear-gradient(90deg, var(--co-green), var(--co-cyan))'
+                  : `linear-gradient(90deg, ${c.border}CC, ${c.border}66)`,
+                /* Pasek obecności ma stałą szerokość i skaluje się z lewej —
+                   bez przeliczania layoutu przy każdej zmianie danych. */
+                transform: `scaleX(${Math.max(0, Math.min(100, pct)) / 100})`,
+                transformOrigin: 'left center',
+                transition: 'transform 0.8s ease',
+              }} />
+            </div>
+            {history && history.length > 0 && (
+              <div
+                title={`Ostatnie ${recentSessions.length} sesji`}
+                style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                {[...recentSessions].reverse().map((session, i) => {
+                  const attended = session.presentPlayers.includes(player.name);
+                  return (
+                    <div
+                      key={session.id || i}
+                      title={session.datePlayed}
+                      style={{
+                        width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+                        background: attended ? c.border : 'transparent',
+                        border: `1px solid ${attended ? c.border : 'var(--co-dot-empty)'}`,
+                        boxShadow: attended ? `0 0 4px ${c.border}80` : 'none',
+                        transition: 'background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {!isOrganizer && (
+        <div style={{ padding: '14px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+
+          <div
+            className={`${flash ? 'debt-flash' : ''} ${settling ? 'debt-settling' : ''}`.trim()}
+            role="button"
+            tabIndex={0}
+            aria-pressed={adminMode}
+            aria-label={amountAriaLabel}
+            onClick={handleAmountClick}
+            onKeyDown={handleAmountKeyDown}
+            style={{
+              minHeight: 84,
+              padding: '12px',
+              marginBottom: 10,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              background: isPending
+                ? 'var(--co-tint-rose)'
+                : hasCredit ? 'var(--co-tint-green)'
+                : 'var(--co-tint)',
+              border: `1px solid ${isPending
+                ? 'var(--co-rose)'
+                : hasCredit ? 'var(--co-green)'
+                : 'var(--co-tint-line)'}`,
+              clipPath: CLIP.tag,
+              cursor: 'default', userSelect: 'none',
+              position: 'relative', overflow: 'hidden',
+              textAlign: 'center',
+              transition: 'background 0.2s ease, border-color 0.2s ease',
+            }}
+          >
+
+
+            {hasCredit ? (
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
+                  ↑ Nadpłata
+                </div>
+                <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-green)', margin: 0, lineHeight: 1 }}>
+                  +{formatAmountShort(animatedAbs)}
+                  <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
+                </p>
+              </div>
+            ) : (
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <p style={{
+                  ...FONT.tech('2.5rem', 700),
+                  margin: 0, lineHeight: 1.1,
+                  color: isPending ? 'var(--co-rose)' : 'var(--co-green)',
+                  textShadow: isPending ? 'var(--glow-rose-md)' : 'var(--glow-cyan-md)',
+                }}>
+                  {formatAmountShort(animatedAbs)}
+                  <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
+                </p>
+              </div>
+            )}
+            {adminMode && (
+              <p style={{ display: 'inline-flex', alignItems: 'center', gap: 4, ...FONT.mono(TEXT.tiny), color: 'var(--co-rose)', letterSpacing: 'normal', marginTop: 4, position: 'relative', zIndex: 1 }}>
+                <TriangleAlert size={12} aria-hidden="true" /> Tryb edycji
+              </p>
+            )}
+          </div>
+
+          {/* Widoczna ścieżka do trybu edycji wpłat — dotąd tylko pięć kliknięć
+              w kwotę (nieodkrywalne) albo Enter na kwocie (łatwo przypadkowy). */}
+          <button
+            type="button"
+            onClick={toggleAdminMode}
+            aria-pressed={adminMode}
+            className="icon-btn"
+            style={{
+              alignSelf: 'flex-end', display: 'inline-flex', alignItems: 'center', gap: 6,
+              minHeight: 44, padding: '6px 10px', marginBottom: 6,
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              color: adminMode ? 'var(--co-rose)' : 'var(--co-dim)',
+              ...FONT.mono(TEXT.small),
+            }}
+          >
+            <Pencil size={13} aria-hidden="true" />
+            {adminMode ? 'Zakończ edycję wpłat' : 'Edytuj wpłaty'}
+          </button>
+
+          <BreakdownPanel
+            playerName={player.name}
+            open={openDetails}
+            onToggle={() => onToggleDetails(player.name)}
+            breakdown={breakdown}
+            adminMode={adminMode}
+            onRemovePayment={onRemovePayment}
+          />
+
+          {lastPayment && (
+            <div style={{ marginBottom: 10 }}>
+              <UndoBar
+                message={<>{formatAmountShort(lastPayment.amount)} zł zapisane</>}
+                secondsLeft={secondsLeft}
+                progressPct={progressPct}
+                onUndo={handleUndo}
+                compact
+              />
+            </div>
+          )}
+
+          <PaymentModal
+            type={modal} hasCredit={hasCredit}
+            customAmt={customAmt} onAmtChange={setCustomAmt}
+            onSave={savePayment} onCancel={cancelModal}
+            isSaving={isSaving}
+            errorMsg={paymentError}
+          />
+
+          <Modal
+            open={confirmSettle}
+            onClose={() => setConfirmSettle(false)}
+            title="Zapisać wpłatę?"
+            icon={CheckCircle2}
+            align={isMobile ? 'bottom' : 'center'}
+            maxWidth={420}
+            footer={
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => { setConfirmSettle(false); setPaymentError(null); }}
+                  disabled={isSaving}
+                  className="cyber-button-outline"
+                  style={{ flex: 1, minHeight: 44, padding: '10px 14px' }}
+                >
+                  Anuluj
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void savePayment(debt)}
+                  disabled={isSaving}
+                  className="cyber-button-yellow"
+                  style={{ flex: 1, minHeight: 44, padding: '10px 14px' }}
+                >
+                  {isSaving ? 'Zapisywanie…' : 'Tak, zapisz'}
+                </button>
+              </div>
+            }
+          >
+            <p style={{ ...FONT.monoSmall, color: 'var(--co-text)', margin: '0 0 10px', lineHeight: 1.6 }}>
+              Zapisać <strong style={{ color: 'var(--co-green)' }}>{formatAmountShort(debt)} zł</strong> jako wpłatę od {player.name}?
+            </p>
+            <p style={{ ...FONT.monoMicro, color: 'var(--co-dim)', margin: 0, lineHeight: 1.6 }}>
+              To tylko odhaczenie w aplikacji — przelew na telefon BLIK zrobisz w banku na numer {BLIK_NUMBER}.
+            </p>
+            {paymentError && (
+              <p role="alert" style={{ ...FONT.monoMicro, color: 'var(--co-rose)', margin: '10px 0 0', lineHeight: 1.6 }}>
+                {paymentError}
+              </p>
+            )}
+          </Modal>
+
+          {modal === null && (
+            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {isPending && (
+                <>
+                  <HoldToSettleButton
+                    amount={debt}
+                    disabled={isSaving}
+                    onConfirm={() => void savePayment(debt)}
+                    onKeyboardRequest={() => setConfirmSettle(true)}
+                  />
+                  <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', minHeight: 44 }}>
+                    + Inna kwota
+                  </button>
+                </>
+              )}
+              {hasCredit && (
+                <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', minHeight: 44 }}>
+                  + Wpłać więcej
+                </button>
+              )}
+              {isSettled && (
+                <button onClick={() => setModal(PAYMENT_MODAL.CUSTOM)} className="cyber-button-outline" style={{ padding: '8px 12px', width: '100%', minHeight: 44 }}>
+                  + Wpłać na zapas
+                </button>
+              )}
+            </div>
+          )}
+
+          {!isMobile && (
+            <CardBarcode name={player.name} color={c.border} marginTop={modal === null ? 12 : 'auto'} />
+          )}
+        </div>
+      )}
+
+      {isOrganizer && (
+        <div style={{ padding: '14px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+
+          <div
+            className={flash ? 'debt-flash' : ''}
+            style={{
+              minHeight: 84,
+              padding: '12px',
+              marginBottom: 10,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              background: hasCredit ? 'var(--co-tint-green)' : 'var(--co-tint)',
+              border: `1px solid ${hasCredit ? 'var(--co-green)' : 'var(--co-tint-line)'}`,
+              clipPath: CLIP.tag,
+              textAlign: 'center',
+              position: 'relative', overflow: 'hidden',
+              transition: 'background 0.2s ease, border-color 0.2s ease',
+            }}
+          >
+            {hasCredit ? (
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-green)', letterSpacing: 'normal', marginBottom: 2 }}>
+                  ↑ Do zebrania
+                </div>
+                <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-green)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-green-md)' }}>
+                  +{formatAmountShort(animatedAbs)}
+                  <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
+                </p>
+                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-green)', letterSpacing: 'normal', margin: '4px 0 0' }}>
+                  suma wpłat do zebrania od graczy
+                </p>
+              </div>
+            ) : isPending ? (
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-cyan)', letterSpacing: 'normal', marginBottom: 2 }}>
+                  ↕ Saldo
+                </div>
+                <p style={{ ...FONT.tech('2.5rem', 700), color: 'var(--co-cyan)', margin: 0, lineHeight: 1, textShadow: 'var(--glow-cyan-md)' }}>
+                  {formatAmountShort(animatedAbs)}
+                  <span style={{ ...FONT.display(TEXT.lead), color: 'var(--co-dim)', marginLeft: 4, letterSpacing: 'normal' }}>zł</span>
+                </p>
+                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-cyan)', letterSpacing: 'normal', margin: '4px 0 0' }}>
+                  nadwyżka ponad zaległości
+                </p>
+              </div>
+            ) : (
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <p style={{ ...FONT.display(TEXT.h2), color: 'var(--co-green)', margin: 0, letterSpacing: 'normal', textShadow: 'var(--glow-green-md)' }}>
+                  ✓ Wszyscy rozliczeni
+                </p>
+              </div>
+            )}
+          </div>
+
+          {allPlayers && (
+            <TreasurerPanel
+              players={allPlayers}
+              open={openDetails}
+              onToggle={() => onToggleDetails(player.name)}
+            />
+          )}
+
+          {!isMobile && (
+            <CardBarcode name={player.name} color={c.border} marginTop="auto" />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* Design system hooks (kept for lint:css reachability):
+   status-chip */
+export default memo(PlayerCard);

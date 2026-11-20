@@ -1,0 +1,173 @@
+import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
+import { onValue, ref } from 'firebase/database';
+import { subscribeToData, database, loadSnapshot, buildUIData } from '@/lib/firebase';
+import { useToast } from '@/components/common/Toast';
+import type { UIData } from '@/types/ui';
+import {
+  AppDataContext, ConnectionStatusContext, INITIAL_APP_DATA, type ConnectionStatus,
+} from './appDataContext';
+import { DEMO_MODE } from '@/constants';
+
+const SLOW_LOADING_AFTER_MS = 8000;
+
+/* Flaga `DEMO_MODE` żyje w `constants` — jedno źródło prawdy dla providera,
+   nagłówka i mutacji. W produkcji zwija się do `false`. */
+
+/**
+ * Ostatnie znane dane, odczytane z pamięci urządzenia.
+ *
+ * Liczone raz, poza komponentem: to jednorazowy odczyt na start, a nie stan,
+ * który mógłby się zmieniać. Odczyt jest w bloku `try`, bo uszkodzony wpis
+ * w magazynie nie może stać się nowym sposobem na zepsucie uruchomienia.
+ */
+function readCachedData(): UIData | null {
+  try {
+    const cached = loadSnapshot();
+    return cached ? buildUIData(cached) : null;
+  } catch (error) {
+    console.warn('Zapamiętane dane są nieczytelne — startuję bez nich:', error);
+    return null;
+  }
+}
+
+/**
+ * Po tym czasie interfejs wchodzi na ekran, nawet jeśli baza jeszcze nie
+ * odpowiedziała.
+ *
+ * `onValue` z Firebase nie zgłasza błędu, gdy nie da się nawiązać połączenia —
+ * SDK po cichu ponawia próbę bez końca. Bez tego terminu ani wywołanie sukcesu,
+ * ani błędu nigdy nie przychodzi i aplikacja zostaje na ekranie startowym na
+ * zawsze, z przyciskiem „Retry”, który zakłada dokładnie ten sam nasłuch.
+ */
+const BOOT_GATE_DEADLINE_MS = 15000;
+
+export function AppDataProvider({ children }: { children: ReactNode }) {
+  // Start od ostatnich znanych danych. Dzięki temu apka otwiera się z treścią
+  // nawet bez sieci, zamiast pokazywać puste listy i wyglądać na zepsutą.
+  // `hasData` jest wtedy od razu prawdziwe, więc ekran startowy w ogóle nie mruga,
+  // a baner nad treścią informuje, że dane mogą nie być świeże.
+  const [cachedData] = useState(readCachedData);
+  const [appData, setAppData] = useState<UIData>(cachedData ?? INITIAL_APP_DATA);
+  const [hasData, setHasData] = useState(cachedData !== null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [slowLoading, setSlowLoading] = useState(false);
+  const [bootTimedOut, setBootTimedOut] = useState(false);
+  const [subscriptionError, setSubscriptionError] = useState<Error | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
+  const { showError } = useToast();
+  // Ref zapobiega wchodzeniu showError do dependency array efektu subskrypcji.
+  // Bez tego: zmiana referencji showError (np. po re-renderze ToastProvider)
+  // resetowałaby cały efekt — Firebase unsubscribe + nowy subscribe — co przy
+  // każdym zapisie sesji tworzyło drugi subscriber i dawało podwójne powiadomienie.
+  // Aktualizacja w efekcie, nie w trakcie renderu — render ma być czysty
+  // (StrictMode i przerwane renderowanie współbieżne mogą go powtórzyć).
+  const showErrorRef = useRef(showError);
+  useEffect(() => { showErrorRef.current = showError; }, [showError]);
+
+  const retry = useCallback(() => setRetryNonce(n => n + 1), []);
+
+  // ── Tryb demo ────────────────────────────────────────────────────
+  // Osobny efekt, bo dane są importowane dynamicznie: paczka demo nie jedzie
+  // w głównym bundlu i nie obciąża normalnego startu aplikacji.
+  useEffect(() => {
+    if (!DEMO_MODE) return undefined;
+    let cancelled = false;
+    void import('@/dev/demoData')
+      .then(({ buildDemoUIData }) => {
+        if (cancelled) return;
+        setAppData(buildDemoUIData());
+        setHasData(true);
+        setIsLoading(false);
+        setIsConnected(true);
+      })
+      .catch(error => {
+        console.warn('Nie udało się wczytać danych demo:', error);
+        setIsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (DEMO_MODE) return undefined;
+    setIsLoading(true);
+    setSlowLoading(false);
+    setSubscriptionError(null);
+    // `bootTimedOut` celowo nie wraca do `false` przy ponowieniu: kto raz zobaczył
+    // interfejs, nie powinien po kliknięciu „Ponów” wrócić na pełnoekranowy ekran
+    // startowy. Ponowienie działa w tle, a o stanie mówi baner nad treścią.
+
+    const slowTimer = setTimeout(() => setSlowLoading(true), SLOW_LOADING_AFTER_MS);
+    const gateTimer = setTimeout(() => setBootTimedOut(true), BOOT_GATE_DEADLINE_MS);
+    const stopWaiting = () => {
+      clearTimeout(slowTimer);
+      clearTimeout(gateTimer);
+    };
+
+    const unsub = subscribeToData(
+      (data) => {
+        stopWaiting();
+        setAppData(data);
+        setHasData(true);
+        setIsLoading(false);
+        setSlowLoading(false);
+        setSubscriptionError(null);
+      },
+      (error, kind) => {
+        stopWaiting();
+        if (kind === 'data') {
+          // Połączenie działa, ale jeden snapshot był wadliwy — NIE kasujemy
+          // działającej aplikacji, pokazujemy tylko dyskretny komunikat.
+          console.error('Data processing error:', error);
+          showErrorRef.current('Nie udało się przetworzyć części danych — pokazuję ostatni poprawny stan.');
+          setIsLoading(false);
+          setSlowLoading(false);
+          return;
+        }
+        // Błąd połączenia — pełny ekran błędu tylko wtedy, gdy nie mamy żadnych danych.
+        setSubscriptionError(error);
+        setIsLoading(false);
+        setSlowLoading(false);
+      },
+    );
+
+    return () => {
+      stopWaiting();
+      if (typeof unsub === 'function') unsub();
+    };
+  }, [retryNonce]);
+
+  // Rzeczywisty stan połączenia z bazą (nie polega na niepewnym navigator.onLine).
+  useEffect(() => {
+    if (DEMO_MODE) return undefined;
+    const connRef = ref(database, '.info/connected');
+    const unsub = onValue(connRef, (snap) => setIsConnected(snap.val() === true));
+    return () => { if (typeof unsub === 'function') unsub(); };
+  }, []);
+
+  /**
+   * O połączenie NIE walczymy na siłę — i to jest decyzja, nie przeoczenie.
+   *
+   * Była tu warstwa, która przy braku połączenia sama zamykała je i otwierała od
+   * nowa (`goOffline` + `goOnline`), żeby obudzić SDK po powrocie sieci. Skutek
+   * był odwrotny do zamierzonego: przy starcie połączenia jeszcze nie ma, więc
+   * mechanizm uruchamiał się od razu i przerywał SDK dokładnie w chwili
+   * uzgadniania łącza. Na telefonie, gdzie uzgadnianie trwa dłużej niż odstęp
+   * między próbami, aplikacja nie łączyła się już nigdy — na żadnym urządzeniu,
+   * także po wyczyszczeniu danych.
+   *
+   * SDK samo ponawia próby i po powrocie sieci połączy się w ciągu kilkudziesięciu
+   * sekund. Do tego czasu widać ostatnie znane dane i baner z przyciskiem
+   * ponowienia. Wolniej, ale bez ryzyka, że aplikacja nie wstanie wcale.
+   */
+
+  const connection = useMemo<ConnectionStatus>(() => ({
+    hasData, isConnected, isLoading, slowLoading, bootTimedOut, subscriptionError, retry,
+  }), [hasData, isConnected, isLoading, slowLoading, bootTimedOut, subscriptionError, retry]);
+
+  return (
+    <ConnectionStatusContext.Provider value={connection}>
+      <AppDataContext.Provider value={appData}>{children}</AppDataContext.Provider>
+    </ConnectionStatusContext.Provider>
+  );
+}

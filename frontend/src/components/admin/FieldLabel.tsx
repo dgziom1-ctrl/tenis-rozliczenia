@@ -1,0 +1,26 @@
+import type React from 'react';
+import { FONT, TEXT } from '@/constants/styles';
+
+interface FieldLabelProps {
+  children: React.ReactNode;
+  /**
+   * `id` pola, które ta etykieta opisuje. Pomijamy je tylko tam, gdzie pod
+   * spodem nie ma jednego pola formularza (np. grupa przycisków wyboru sportu)
+   * — wtedy renderujemy zwykły nagłówek, żeby nie tworzyć etykiety donikąd.
+   */
+  htmlFor?: string;
+}
+
+export default function FieldLabel({ children, htmlFor }: FieldLabelProps) {
+  const Tag = htmlFor ? 'label' : 'span';
+  return (
+    <Tag htmlFor={htmlFor} style={{
+      display: 'block',
+      ...FONT.display(TEXT.lead),
+      letterSpacing: 'normal', textTransform: 'none',
+      color: 'var(--co-dim)', marginBottom: 8,
+    }}>
+      {children}
+    </Tag>
+  );
+}

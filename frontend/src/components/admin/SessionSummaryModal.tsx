@@ -1,0 +1,202 @@
+import { useEffect, useRef, useState } from 'react';
+import { CheckCircle2, Copy, Flame, Trophy, Gamepad2, Ticket, Zap } from 'lucide-react';
+import { CARD_COLOR, shareGroupLabel } from '@/utils/cardLabels';
+import { SPORT_LABEL, hasRacketRental } from '@/constants';
+import SportGlyph from '../common/icons/SportGlyph';
+import { useToast } from '../common/Toast';
+import { formatDate, formatAmountShort, plural } from '@/utils/format';
+import { buildGroupMessage } from '@/utils/message';
+import { getShareGroups } from '@/utils/sessionCost';
+import type { DiscountModel } from '@/utils/sessionCost';
+import { copyToClipboard } from '@/utils/clipboard';
+import { track } from '@/lib/analytics/track';
+import Modal from '../common/Modal';
+import { useModalExit } from '@/hooks/useModalExit';
+
+import { FONT, TEXT, CLIP } from '@/constants/styles';
+import type { Sport } from '@/types/domain';
+import type { SessionHighlight } from '@/types/ui';
+
+interface SessionSummary {
+  date: string;
+  totalCost: number;
+  sport: Sport;
+  presentPlayers: string[];
+  multisportPlayers: string[];
+  racketCost: number;
+  ownRacketPlayers: string[];
+  courtCount: number;
+  durationHours: number;
+  singleScanPlayers?: string[];
+  discountModel?: DiscountModel;
+  courtGross?: number;
+}
+
+interface SessionSummaryModalProps {
+  /** Komponent montuje się dopiero razem z podsumowaniem — patrz AdminTab. */
+  summary: SessionSummary;
+  highlights?: SessionHighlight[];
+  onClose: () => void;
+}
+
+const COPIED_RESET_MS = 2500;
+
+function highlightIcon(kind: SessionHighlight['kind']) {
+  if (kind === 'streak') return Flame;
+  if (kind === 'rankup') return Trophy;
+  return Gamepad2;
+}
+
+export default function SessionSummaryModal({ summary, highlights = [], onClose }: SessionSummaryModalProps) {
+  const [copied, setCopied] = useState(false);
+  const { open, close } = useModalExit(onClose);
+  const { showError } = useToast();
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (copiedTimer.current) clearTimeout(copiedTimer.current); }, []);
+
+  const { date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, courtCount, durationHours, singleScanPlayers, discountModel, courtGross } = summary;
+  const withRackets = hasRacketRental(sport);
+  const hasRackets = withRackets && racketCost > 0;
+  const presentCount = presentPlayers.length;
+  const groups = getShareGroups({ totalCost, racketCost, presentPlayers, multisportPlayers, ownRacketPlayers, courtCount, durationHours, sport, singleScanPlayers, discountModel, courtGross });
+  const headline = groups[0];
+
+  const handleCopy = async () => {
+    const msg = buildGroupMessage({ date, totalCost, presentPlayers, multisportPlayers, sport, racketCost, ownRacketPlayers, courtCount, durationHours, singleScanPlayers, discountModel, courtGross });
+    if (await copyToClipboard(msg)) {
+      track('share_copy', { kind: 'session_message' });
+      setCopied(true);
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+      copiedTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS);
+    } else {
+      showError('Nie udało się skopiować tekstu');
+    }
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Podsumowanie sesji"
+      icon={CheckCircle2}
+      accent="var(--co-cyan)"
+      maxWidth={420}
+      footer={
+        <>
+          <button
+            onClick={handleCopy}
+            aria-live="polite"
+            className={copied ? 'cyber-button-yellow' : 'cyber-button-outline'}
+            style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            {copied ? <><CheckCircle2 size={14} aria-hidden="true" /> Skopiowano!</> : <><Copy size={14} aria-hidden="true" /> Kopiuj na grupkę</>}
+          </button>
+          <button onClick={close} className="cyber-button-yellow" style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            OK
+          </button>
+        </>
+      }
+    >
+
+
+      <div className="matchday-hero">
+        <p className="matchday-kicker">Sesja zapisana</p>
+        <div style={{
+          display: 'flex', justifyContent: 'center',
+          margin: '8px 0 6px', lineHeight: 1,
+          color: 'var(--co-cyan)',
+          filter: 'drop-shadow(0 0 10px var(--co-cyan))',
+        }}>
+          <SportGlyph sport={sport} size={44} strokeWidth={1.5} />
+        </div>
+        <p style={{ ...FONT.display(TEXT.h2), color: 'var(--co-text-hi)', margin: 0 }}>
+          {(SPORT_LABEL[sport] ?? 'Ping-Pong')}
+        </p>
+        <p style={{ ...FONT.mono(TEXT.small), color: 'var(--co-dim)', margin: '6px 0 0' }}>
+          {formatDate(date)} · {presentCount} {plural(presentCount, 'gracz', 'gracze', 'graczy')}
+        </p>
+      </div>
+
+      {highlights.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <p style={{ ...FONT.monoLabel, marginBottom: 8 }}>Wyróżnienia</p>
+          {highlights.map(h => {
+            const Icon = highlightIcon(h.kind);
+            return (
+              <div key={`${h.kind}-${h.name}`} className="matchday-highlight" style={{ clipPath: CLIP.badge }}>
+                <Icon size={14} style={{ color: 'var(--co-cyan)', flexShrink: 0 }} aria-hidden="true" />
+                <span style={{ ...FONT.display(TEXT.small), color: 'var(--co-text-hi)', flex: 1 }}>
+                  {h.name}
+                </span>
+                <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-cyan)' }}>{h.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+        {[
+          { label: 'Sport', value: (SPORT_LABEL[sport] ?? 'Ping-Pong'), color: withRackets ? 'var(--co-green)' : 'var(--co-cyan)' },
+          { label: 'Data', value: formatDate(date), color: 'var(--co-text)' },
+          { label: 'Koszt', value: `${formatAmountShort(totalCost)} zł`, color: 'var(--co-cyan)' },
+          { label: 'Obecni', value: presentCount, color: 'var(--co-text)' },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{
+            padding: '10px 12px', background: 'var(--co-surface-2)',
+            border: '1px solid var(--co-border)',
+            clipPath: CLIP.badge,
+          }}>
+            <p style={{ ...FONT.monoLabel, marginBottom: 4 }}>{label}</p>
+            <p style={{ ...FONT.mono(TEXT.base), color, margin: 0 }}>{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {headline && (
+        <div style={{
+          padding: '16px', textAlign: 'center',
+          background: 'var(--co-tint)',
+          border: '1px solid var(--co-tint-line)',
+          clipPath: CLIP.smallCard,
+        }}>
+          <p style={{ ...FONT.monoLabel, marginBottom: 6 }}>Podział kosztów</p>
+          <p style={{ ...FONT.mono(TEXT.h2), color: 'var(--co-cyan)', textShadow: 'var(--glow-cyan-lg)', margin: 0 }}>
+            {formatAmountShort(headline.perPerson)}
+            <span style={{ fontSize: TEXT.base, color: 'var(--co-dim)', marginLeft: 4 }}>zł / os.</span>
+          </p>
+          {/* Duża kwota to pierwsza grupa — bez podpisu nie wiadomo, czy to
+              stawka bez karty, czy z Multisportem. */}
+          {groups.length > 1 && (
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', margin: '2px 0 4px' }}>
+              {shareGroupLabel(headline)}
+            </p>
+          )}
+          {groups.slice(1).map(group => (
+            <p key={group.names.join()} style={{
+              ...FONT.mono(TEXT.small), marginTop: 4,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              color: group.card === 'none' ? (group.ownRacket ? 'var(--co-amber)' : CARD_COLOR.none) : CARD_COLOR[group.card],
+            }}>
+              {group.card === 'multi' && <Zap size={12} aria-hidden="true" />}
+              {group.card === 'single' && <Ticket size={12} aria-hidden="true" />}
+              {group.ownRacket && <SportGlyph sport={sport} size={12} />}
+              {shareGroupLabel(group)} ({group.names.join(', ')}): {formatAmountShort(group.perPerson)} zł
+            </p>
+          ))}
+          {courtGross !== undefined && courtGross > totalCost - racketCost && (
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6, letterSpacing: 'normal' }}>
+              Kort {formatAmountShort(courtGross)} zł · zwrot za karty −{formatAmountShort(courtGross - (totalCost - racketCost))} zł
+            </p>
+          )}
+          {hasRackets && (
+            <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6, letterSpacing: 'normal' }}>
+              Kort: {formatAmountShort(totalCost - racketCost)} zł · Rakiety: {formatAmountShort(racketCost)} zł
+            </p>
+          )}
+        </div>
+      )}
+    </Modal>
+  );
+}

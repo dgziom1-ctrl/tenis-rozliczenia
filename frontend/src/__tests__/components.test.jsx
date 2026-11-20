@@ -1,0 +1,737 @@
+/**
+ * TESTY KOMPONENTÓW — RENDEROWANIE
+ *
+ * Cel: sprawdzić że komponenty renderują się bez crashu i pokazują
+ * oczekiwane elementy UI. To jest poziom testów, który BY ZŁAPAŁ
+ * oryginalny błąd — apka nie mogła się w ogóle wyrenderować.
+ *
+ * Zasada: jeśli `render(<App />)` rzuci wyjątek, test przepada.
+ * Nie trzeba sprawdzać całego UI — sam fakt że coś się wyrenderowało
+ * już jest wartościową informacją.
+ */
+
+import { useState } from 'react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+// ─── Mocki Firebase (muszą być przed importami komponentów) ─────────────────
+vi.mock('firebase/app',      () => ({ initializeApp: vi.fn(() => ({})) }));
+vi.mock('firebase/database', () => ({
+  getDatabase:    vi.fn(() => ({})),
+  ref:            vi.fn(() => ({})),
+  onValue:        vi.fn(),
+  runTransaction: vi.fn(),
+  set:            vi.fn(),
+}));
+vi.mock('firebase/messaging', () => ({
+  getMessaging: vi.fn(),
+  getToken:     vi.fn(),
+  onMessage:    vi.fn(),
+}));
+
+// subscribeToData nigdy nie wywołuje callbacku → apka zostaje w stanie ładowania
+vi.mock('../lib/firebase/index', async (importOriginal) => {
+  const original = await importOriginal();
+  return { ...original, subscribeToData: vi.fn(() => () => {}) };
+});
+
+// ─── Importy komponentów ────────────────────────────────────────────────────
+import App from '../app/App';
+import { ErrorBoundary } from '../components/common/ErrorBoundary';
+import Navigation from '../components/layout/Navigation';
+import UndoBar from '../components/common/UndoBar';
+import LogEntry from '../components/history/LogEntry';
+import LiveCostPreview from '../components/admin/LiveCostPreview';
+import MultisportLimitWarning from '../components/admin/MultisportLimitWarning';
+import { PasswordModal } from '../components/common/SharedUI';
+import PlayerSessionModal from '../components/attendance/PlayerSessionModal';
+import AttendanceTab from '../components/attendance/AttendanceTab';
+import EditSessionForm from '../components/history/EditSessionForm';
+import PlayerCard from '../components/dashboard/PlayerCard';
+import HistoryTab from '../components/history/HistoryTab';
+import { ToastProvider } from '../components/common/Toast';
+import { buildPlayerCardMeta } from '../utils/playerCard';
+import { getShareGroups } from '../utils/sessionCost';
+import { createPlayerColorMap } from '../constants/colors';
+import { TABS } from '../constants';
+
+const alaColor = createPlayerColorMap(['Ala']).get('Ala');
+
+// ════════════════════════════════════════════════════════════════════════════
+// App — smoke test
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('App — smoke test', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('🔴 renderuje się i pokazuje ekran ładowania, zanim Firebase odpowie', () => {
+    // Najważniejszy test w całej apce: jeśli `render(<App />)` rzuci, przepada.
+    render(<App />);
+    // Tekst na ekranie ładowania
+    expect(screen.getByText('CYBER-PONK')).toBeInTheDocument();
+  });
+
+  it('nie pokazuje zakładek dopóki dane nie są gotowe', () => {
+    render(<App />);
+    // Nawigacja pojawia się dopiero po załadowaniu danych
+    expect(screen.queryByText(/^start$/i)).not.toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// ErrorBoundary
+// Ten komponent widzą użytkownicy gdy coś się zepsuje.
+// Ważne żeby sam nie był zepsuty.
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('ErrorBoundary — zachowanie', () => {
+  // Błędy rzucane tu celowo — React i ErrorBoundary logują je do konsoli.
+  beforeEach(() => { vi.spyOn(console, 'error').mockImplementation(() => {}); });
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  it('renderuje children gdy nie ma błędu', () => {
+    render(
+      <ErrorBoundary>
+        <div>Wszystko OK</div>
+      </ErrorBoundary>
+    );
+    expect(screen.getByText('Wszystko OK')).toBeInTheDocument();
+  });
+
+  it('pokazuje komunikat błędu gdy child rzuca wyjątek', () => {
+    const Throw = () => { throw new Error('test crash'); };
+
+    render(
+      <ErrorBoundary>
+        <Throw />
+      </ErrorBoundary>
+    );
+
+    expect(screen.getByText('Coś poszło nie tak')).toBeInTheDocument();
+  });
+
+  it('pokazuje przycisk odświeżenia po błędzie', () => {
+    const Throw = () => { throw new Error('test'); };
+
+    render(<ErrorBoundary><Throw /></ErrorBoundary>);
+    expect(screen.getByRole('button', { name: /odśwież/i })).toBeInTheDocument();
+  });
+
+  it('ukrywa szczegóły błędu w trybie produkcyjnym', () => {
+    // Vitest działa w trybie `test`, więc gałąź `MODE === 'development'` jest wyłączona.
+    const Throw = () => { throw new Error('sekretny błąd'); };
+
+    render(<ErrorBoundary><Throw /></ErrorBoundary>);
+    expect(screen.queryByText(/sekretny błąd/)).not.toBeInTheDocument();
+  });
+
+  // Po wdrożeniu stara powłoka szuka nieistniejących paczek. Bez strażnika
+  // startu (`window.__cpBoot`) naprawa się nie uruchomi, więc użytkownik musi
+  // zobaczyć, że to aktualizacja, a nie zwykły błąd w kodzie.
+  it('nieaktualny build opisuje jako aktualizację, nie awarię', () => {
+    window.__cpBoot = {
+      isStaleBuildError: () => true, heal: () => false,
+      ready: vi.fn(), hardReset: vi.fn(), rescue: vi.fn(), stage: () => 0,
+    };
+    const Throw = () => { throw new Error('Failed to fetch dynamically imported module'); };
+    try {
+      render(<ErrorBoundary><Throw /></ErrorBoundary>);
+      expect(screen.getByText('Aplikacja się zaktualizowała')).toBeInTheDocument();
+      expect(screen.queryByText('Coś poszło nie tak')).not.toBeInTheDocument();
+    } finally {
+      delete window.__cpBoot;
+    }
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// Navigation
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('Navigation — renderowanie zakładek', () => {
+  it('pokazuje wszystkie 5 zakładek', () => {
+    render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={vi.fn()} />);
+    // Komponent renderuje dwie nawigacje (desktop + mobile) — obie zawierają te same
+    // etykiety, więc getAllByText zamiast getByText (które rzuciłoby "multiple elements").
+    expect(screen.getAllByText(/^start$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^ranking$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^dodaj$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^historia$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^gracze$/i).length).toBeGreaterThan(0);
+  });
+
+  it('zmienia aktywną zakładkę po kliknięciu każdej', async () => {
+    const user = userEvent.setup();
+    const setTab = vi.fn();
+    render(<Navigation activeTab={TABS.DASHBOARD} setActiveTab={setTab} />);
+
+    for (const [label, tabId] of [
+      [/^ranking$/i,  TABS.ATTENDANCE],
+      [/^dodaj$/i,    TABS.ADMIN],
+      [/^historia$/i, TABS.HISTORY],
+      [/^gracze$/i,   TABS.PLAYERS],
+    ]) {
+      await user.click(screen.getAllByText(label)[0]);
+      expect(setTab).toHaveBeenLastCalledWith(tabId);
+    }
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// UndoBar
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('UndoBar — wyświetlanie i interakcja', () => {
+  const defaultProps = {
+    message: 'Opłacono: Alice',
+    secondsLeft: 6,
+    progressPct: 75,
+    onUndo: vi.fn(),
+  };
+
+  it('pokazuje wiadomość', () => {
+    render(<UndoBar {...defaultProps} />);
+    expect(screen.getByText('Opłacono: Alice')).toBeInTheDocument();
+  });
+
+  it('wywołuje onUndo po kliknięciu przycisku COFNIJ', async () => {
+    const user = userEvent.setup();
+    const onUndo = vi.fn();
+
+    render(<UndoBar {...defaultProps} onUndo={onUndo} />);
+    await user.click(screen.getByRole('button', { name: /cofnij/i }));
+    expect(onUndo).toHaveBeenCalledTimes(1);
+  });
+
+  it('pokazuje licznik sekund', () => {
+    render(<UndoBar {...defaultProps} secondsLeft={4} />);
+    expect(screen.getByText('(4s)')).toBeInTheDocument();
+  });
+
+  it('pasek postępu skaluje się przez transform, nie przez width', () => {
+    render(<UndoBar {...defaultProps} progressPct={42} />);
+    const bar = screen.getByTestId('undo-progress');
+    expect(bar.style.transform).toBe('scaleX(0.42)');
+    expect(bar.style.transition).toContain('transform');
+    expect(bar.style.transition).not.toContain('width');
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// Stawki na ekranie — muszą się zgadzać z podziałem, który trafia do sald
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('LogEntry — koszt i stawki w historii', () => {
+  // Kort 100 zł + rakiety 16 zł. Ada ma kartę i własną rakietkę, Bartek kartę
+  // i wypożycza, Celina z Dawidem płacą pełną stawkę z rakietką.
+  const row = {
+    id: 'sesja-1234',
+    datePlayed: '2026-08-25',
+    sport: 'badminton',
+    totalCost: 116,
+    racketCost: 16,
+    costPerPerson: 37.83,
+    costPerPersonMulti: 20.17,
+    presentPlayers: ['Ada', 'Bartek', 'Celina', 'Dawid'],
+    multisportPlayers: ['Ada', 'Bartek'],
+    ownRacketPlayers: ['Ada'],
+  };
+
+  const renderRow = () => render(<LogEntry row={row} onEdit={vi.fn()} onDelete={vi.fn()} />);
+
+  it('pokazuje koszt całkowity razem z rozbiciem na kort i rakiety', () => {
+    renderRow();
+    expect(screen.getByText('116,00 zł')).toBeInTheDocument();
+    expect(screen.getByText('kort 100,00 · rakiety 16,00')).toBeInTheDocument();
+  });
+
+  it('pokazuje stawkę i liczbę osób w każdej grupie', () => {
+    renderRow();
+    expect(screen.getByText('Bez karty')).toBeInTheDocument();
+    expect(screen.getByText('37,83 zł')).toBeInTheDocument();
+    expect(screen.getByText('Multisport')).toBeInTheDocument();
+    expect(screen.getByText('22,84 zł')).toBeInTheDocument();
+    expect(screen.getByText('17,50 zł')).toBeInTheDocument();
+    expect(screen.getByText('· 2 os.')).toBeInTheDocument();
+  });
+
+  // 2 × 37,83 + 22,84 + 17,50 = 116,00 — dokładnie tyle, ile kosztowała sesja.
+  it('stawki razy liczba osób dają koszt całkowity', () => {
+    const groups = getShareGroups(row);
+    const collected = groups.reduce((acc, g) => acc + g.perPerson * g.names.length, 0);
+    expect(collected).toBeCloseTo(row.totalCost, 2);
+  });
+
+  it('oznacza posiadaczy karty przy nazwisku', () => {
+    renderRow();
+    // Informacja o karcie/rakiecie nie może być tylko ikoną — czytnik
+    // ekranu dostaje ją w `aria-label` chipa.
+    expect(screen.getByText('Ada').closest('[aria-label]')).toHaveAttribute('aria-label', 'Ada, Multisport, własna rakietka');
+    expect(screen.getByText('Bartek').closest('[aria-label]')).toHaveAttribute('aria-label', 'Bartek, Multisport');
+    expect(screen.getByText('Celina').closest('[aria-label]')).toHaveAttribute('aria-label', 'Celina');
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PasswordModal — regresja: nie dało się nic wpisać
+// Pułapka fokusu przenosiła fokus na kontener okna JUŻ PO tym, jak autoFocus
+// ustawił go na polu hasła. Pole traciło fokus, klawiatura na telefonie się
+// nie otwierała, a wpisywanie nic nie dawało. Dotyczyło edycji sesji,
+// usuwania sesji i usuwania gracza — wszystkich miejsc z tym oknem.
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('PasswordModal — pole hasła musi trzymać fokus', () => {
+  it('po otwarciu fokus jest na polu hasła, a nie na kontenerze', () => {
+    render(<PasswordModal action="Test" onConfirm={vi.fn()} onCancel={vi.fn()} />);
+
+    const input = screen.getByLabelText('Hasło admina');
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('da się wpisać tekst i trafia on do pola', async () => {
+    const user = userEvent.setup();
+    render(<PasswordModal action="Test" onConfirm={vi.fn()} onCancel={vi.fn()} />);
+
+    // Bez click() — piszemy od razu, bo fokus ma już być na polu.
+    await user.keyboard('sekret');
+
+    expect(screen.getByLabelText('Hasło admina')).toHaveValue('sekret');
+  });
+
+  it('Escape zamyka okno, mimo że fokus jest w polu', async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+    render(<PasswordModal action="Test" onConfirm={vi.fn()} onCancel={onCancel} />);
+
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(onCancel).toHaveBeenCalled(), { timeout: 600 });
+  });
+
+  it('przycisk ANULUJ uruchamia animację wyjścia przed callbackiem', async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+    render(<PasswordModal action="Test" onConfirm={vi.fn()} onCancel={onCancel} />);
+
+    await waitFor(() => expect(document.body.querySelector('.modal-overlay')).toHaveClass('is-open'));
+    await user.click(screen.getByRole('button', { name: /ANULUJ/i }));
+    expect(onCancel).not.toHaveBeenCalled();
+    await waitFor(() => expect(onCancel).toHaveBeenCalled(), { timeout: 600 });
+  });
+
+  it('blokuje przewijanie strony pod otwartym oknem', () => {
+    const { unmount } = render(<PasswordModal onConfirm={vi.fn()} onCancel={vi.fn()} />);
+    expect(document.body.style.overflow).toBe('hidden');
+    unmount();
+    expect(document.body.style.overflow).not.toBe('hidden');
+  });
+});
+
+describe('LiveCostPreview — podgląd nie może obiecać innej kwoty niż zapłacona', () => {
+  // Regresja: przy zniżkach większych niż rachunek podgląd pokazywał 7,67 zł
+  // od osoby, czyli 23 zł do zebrania z 1 zł zostawionego w recepcji.
+  const props = {
+    totalCost: '1',
+    presentPlayers: ['Rafał', 'Kamil', 'Przemek', 'Mariusz', 'Arek', 'Krzysiek'],
+    multisportPlayers: ['Rafał', 'Kamil', 'Krzysiek'],
+    sport: 'badminton',
+  };
+
+  it('pokazuje stawki, które sumują się do wpisanej kwoty', () => {
+    render(<LiveCostPreview {...props} />);
+    expect(screen.getByText('0,33 zł')).toBeInTheDocument();
+    expect(screen.getByText('0,00 zł')).toBeInTheDocument();
+    expect(screen.queryByText('7,67 zł')).not.toBeInTheDocument();
+  });
+
+  it('ostrzega, że zniżki z kart nie zmieściły się w udziale', () => {
+    render(<LiveCostPreview {...props} />);
+    expect(screen.getByRole('status')).toHaveTextContent(/Zniżki z kart nie zmieściły się w udziale na osobę/);
+  });
+
+  // Kort 156 zł, trzy karty zbijają go do 111 zł: 156/6 = 26 zł pełnej stawki,
+  // 11 zł dla posiadaczy kart. 3 × 26 + 3 × 11 = 111.
+  it('przy normalnej kwocie nie ostrzega i daje pełne 15 zł różnicy', () => {
+    render(<LiveCostPreview {...props} totalCost="111" />);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByText('26,00 zł')).toBeInTheDocument();
+    expect(screen.getByText('11,00 zł')).toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PlayerSessionModal — dane zgodne z wybranym sezonem
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('PlayerSessionModal — zakres idzie za wybranym sezonem', () => {
+  const session = (id, datePlayed) => ({
+    id, datePlayed,
+    sport: 'pingpong',
+    totalCost: 30, costPerPerson: 30, costPerPersonMulti: 15,
+    presentPlayers: ['Ala'], multisportPlayers: [],
+  });
+
+  // 5 grudniowych sesji 2026 (Ala na każdej) + jedna w 2027.
+  const fullHistory = [
+    session('s6', '2027-01-12'),
+    session('s5', '2026-12-15'),
+    session('s4', '2026-12-08'),
+    session('s3', '2026-12-01'),
+    session('s2', '2026-11-24'),
+    session('s1', '2026-11-17'),
+  ];
+  const season2027 = fullHistory.filter(s => s.datePlayed.startsWith('2027'));
+
+  const basePlayer = {
+    name: 'Ala', currentDebt: 0, joinDate: null,
+    attendanceCount: 6, eligibleWeeks: 6, attendancePercentage: 100, currentStreak: 6,
+  };
+
+  it('sezon 2027: sesje, odznaki i seria tylko z 2027', () => {
+    render(
+      <PlayerSessionModal
+        player={{ ...basePlayer, attendanceCount: 1, eligibleWeeks: 1, currentStreak: 1 }}
+        playerColor={alaColor}
+        history={season2027}
+        seasonLabel="2027"
+        onClose={() => {}}
+      />,
+    );
+
+    expect(screen.getByText(/2027 · 1\/1 sesji/)).toBeInTheDocument();
+    // Debiut odblokowuje się w każdym sezonie, w którym gracz zagrał...
+    expect(screen.getByLabelText(/Debiut/)).toBeInTheDocument();
+    // ...ale seria 5 z grudnia do stycznia nie przechodzi.
+    expect(screen.queryByLabelText(/Seria 5/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Osiągnięcia · 2027/)).toBeInTheDocument();
+  });
+
+  it('wszystkie sezony: pełen dorobek z kariery', () => {
+    render(
+      <PlayerSessionModal
+        player={basePlayer}
+        playerColor={alaColor}
+        history={fullHistory}
+        seasonLabel={null}
+        onClose={() => {}}
+      />,
+    );
+
+    expect(screen.getByText(/wszystkie sezony · 6\/6 sesji/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Debiut/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Seria 5/)).toBeInTheDocument();
+    expect(screen.getByText(/Osiągnięcia · wszystkie sezony/)).toBeInTheDocument();
+  });
+
+  it('joinDate: sesje sprzed dołączenia nie są nieobecnościami', () => {
+    const joined = {
+      ...basePlayer,
+      joinDate: '2026-12-01',
+      attendanceCount: 2,
+      eligibleWeeks: 2,
+      attendancePercentage: 100,
+      currentStreak: 2,
+    };
+    const history = [
+      session('d2', '2026-12-08'),
+      session('d1', '2026-12-01'),
+      // Sesja sprzed dołączenia — Ala nie mogła jej opuścić.
+      { ...session('pre', '2026-11-24'), presentPlayers: [] },
+    ];
+
+    render(
+      <PlayerSessionModal
+        player={joined}
+        playerColor={alaColor}
+        history={history}
+        seasonLabel={null}
+        onClose={() => {}}
+      />,
+    );
+
+    expect(screen.getByText(/wszystkie sezony · 2\/2 sesji/)).toBeInTheDocument();
+    expect(screen.getByText(/obecny na 2 z 2/)).toBeInTheDocument();
+    expect(screen.getByText(/Pokaż nieobecne \(0\)/)).toBeInTheDocument();
+  });
+});
+
+describe('AttendanceTab — Wrapped tylko dla zakończonego sezonu', () => {
+  const currentYear = new Date().getFullYear();
+  const previousYear = currentYear - 1;
+  const session = (id, datePlayed) => ({
+    id, datePlayed,
+    sport: 'pingpong',
+    totalCost: 30, costPerPerson: 30, costPerPersonMulti: 15,
+    presentPlayers: ['Ala'], multisportPlayers: [],
+  });
+  const history = [
+    session('c2', `${currentYear}-10-08`),
+    session('c1', `${currentYear}-10-01`),
+    session('p1', `${previousYear}-12-18`),
+  ];
+  const players = [{
+    name: 'Ala', currentDebt: 0, joinDate: null,
+    attendanceCount: 3, eligibleWeeks: 3, attendancePercentage: 100, currentStreak: 3,
+  }];
+
+  it('nie pokazuje przycisku dla nieukończonego bieżącego sezonu', () => {
+    render(<AttendanceTab players={players} history={history} summary={{ totalWeeks: 3 }} />);
+    expect(screen.queryByText(new RegExp(`Podsumowanie ${currentYear}`))).toBeNull();
+  });
+
+  it('po wybraniu starszego sezonu pokazuje jego Wrapped', async () => {
+    const user = userEvent.setup();
+    render(<AttendanceTab players={players} history={history} summary={{ totalWeeks: 3 }} />);
+
+    await user.click(screen.getByRole('button', { name: String(previousYear) }));
+    expect(screen.getByText(new RegExp(`Podsumowanie ${previousYear}`))).toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// EditSessionForm — pełna edycja sesji
+// ════════════════════════════════════════════════════════════════════════════
+
+function EditSessionFormHarness({ initial }) {
+  const [form, setForm] = useState(initial);
+  return (
+    <EditSessionForm
+      editForm={form}
+      setEditForm={setForm}
+      playerNames={['Ala', 'Bolek', 'Celina', 'Dawid']}
+      isSaving={false}
+      isEditCostValid
+      editCostError={null}
+      onSave={() => {}}
+      onCancel={() => {}}
+      onTogglePresent={() => {}}
+      onToggleMulti={() => {}}
+    />
+  );
+}
+
+describe('EditSessionForm — pełna edycja', () => {
+  const baseForm = {
+    date: '2026-08-25',
+    cost: 70,
+    present: ['Ala', 'Bolek', 'Celina', 'Dawid'],
+    multiPlayers: ['Ala'],
+    sport: 'squash',
+    racketCount: 2,
+    racketPrice: 5,
+    ownRacketPlayers: ['Ala'],
+    courtCount: 1,
+    durationHours: 1,
+  };
+
+  it('pozwala zmienić liczbę wypożyczonych rakiet', async () => {
+    const user = userEvent.setup();
+    render(<EditSessionFormHarness initial={baseForm} />);
+
+    expect(screen.getByText(/wypożyczone rakiety/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Cena/)).toHaveValue('5');
+    expect(screen.getByText(/2 × 5,00 zł = 10,00 zł/)).toBeInTheDocument();
+
+    const racketThree = screen.getAllByRole('button', { name: /Liczba wypożyczonych rakiet: 3/ }).at(-1);
+    await user.click(racketThree);
+    expect(screen.getByText(/3 × 5,00 zł = 15,00 zł/)).toBeInTheDocument();
+  });
+
+  it('cenę rakiety da się wyczyścić i wpisać z przecinkiem', async () => {
+    const user = userEvent.setup();
+    render(<EditSessionFormHarness initial={baseForm} />);
+
+    const price = screen.getByLabelText(/Cena/);
+    await user.clear(price);
+    expect(price).toHaveValue('');
+    await user.type(price, '7,5');
+    expect(price).toHaveValue('7,5');
+    expect(screen.getByText(/2 × 7,50 zł = 15,00 zł/)).toBeInTheDocument();
+  });
+
+  it('pozwala wypożyczyć rakietę każdemu z sześciu graczy', async () => {
+    const user = userEvent.setup();
+    render(
+      <EditSessionFormHarness
+        initial={{
+          ...baseForm,
+          present: ['Ala', 'Bolek', 'Celina', 'Dawid', 'Ewa', 'Filip'],
+          ownRacketPlayers: [],
+          racketCount: 4,
+        }}
+      />,
+    );
+
+    const sixRackets = screen.getByRole('button', { name: /Liczba wypożyczonych rakiet: 6/ });
+    await user.click(sixRackets);
+    expect(screen.getByText(/6 × 5,00 zł = 30,00 zł/)).toBeInTheDocument();
+  });
+
+  it('stara sesja bez kortów/godzin nie włącza limitu bez wyboru', async () => {
+    const user = userEvent.setup();
+    render(
+      <EditSessionFormHarness
+        initial={{ ...baseForm, courtCount: undefined, durationHours: undefined }}
+      />,
+    );
+
+    expect(screen.getByText(/Stara sesja: bez limitu odbić/)).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole('button', { name: '1' })[0]);
+    expect(screen.getByText(/Limit odbić: 2/)).toBeInTheDocument();
+  });
+
+  it('blokuje zapis bez obecnych graczy', () => {
+    render(<EditSessionFormHarness initial={{ ...baseForm, present: [] }} />);
+    expect(screen.getByRole('button', { name: /Zapisz zmiany/ })).toBeDisabled();
+    expect(screen.getByText(/Wybierz przynajmniej jednego gracza/)).toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PlayerCard — karta FIFA z paskiem obecności i kropkami sesji
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('PlayerCard — karta gracza z obecnością i kropkami sesji', () => {
+  const player = {
+    name: 'Ala',
+    currentDebt: 45,
+    joinDate: null,
+    attendanceCount: 5,
+    eligibleWeeks: 6,
+    attendancePercentage: 83,
+    currentStreak: 3,
+  };
+  const history = [
+    {
+      id: 's1',
+      datePlayed: '2026-03-01',
+      sport: 'pingpong',
+      totalCost: 60,
+      costPerPerson: 30,
+      costPerPersonMulti: 15,
+      presentPlayers: ['Ala'],
+      multisportPlayers: [],
+    },
+  ];
+  const meta = buildPlayerCardMeta(player, history);
+
+  it('pokazuje OVR, imię, rangę, serię oraz pasek i kropki obecności (bez sportów i odznak)', () => {
+    render(
+      <PlayerCard
+        player={player}
+        playerColor={alaColor}
+        history={history}
+        meta={meta}
+        openDetails={false}
+        onToggleDetails={vi.fn()}
+        breakdown={null}
+        onAddPayment={vi.fn()}
+        onRemovePayment={vi.fn()}
+        playSound={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(String(meta.overall))).toBeInTheDocument();
+    expect(screen.getByText('OVR')).toBeInTheDocument();
+    expect(screen.getByText('Ala')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /MISTRZ 83%/ })).toHaveAccessibleName(/MISTRZ 83%/);
+    expect(screen.getByText(/SERIA 3/i)).toBeInTheDocument();
+    expect(screen.getByText('Obecność')).toBeInTheDocument();
+    expect(screen.getByText('5/6')).toBeInTheDocument();
+    expect(screen.getByTitle('2026-03-01')).toBeInTheDocument();
+
+    // Usunięte sporty i odznaki nie zaśmiecają karty
+    expect(screen.queryByLabelText('Osiągnięcia')).not.toBeInTheDocument();
+  });
+
+  it('tryb edycji wpłat daje się włączyć z klawiatury', async () => {
+    const user = userEvent.setup();
+    render(
+      <PlayerCard
+        player={player}
+        playerColor={alaColor}
+        history={history}
+        meta={meta}
+        openDetails={false}
+        onToggleDetails={vi.fn()}
+        breakdown={null}
+        onAddPayment={vi.fn()}
+        onRemovePayment={vi.fn()}
+        playSound={vi.fn()}
+      />,
+    );
+
+    const amount = screen.getByRole('button', { name: /45,00zł.*włącz tryb edycji wpłat/ });
+    expect(amount).toHaveAttribute('aria-pressed', 'false');
+
+    amount.focus();
+    await user.keyboard('{Enter}');
+
+    expect(amount).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('Tryb edycji')).toBeInTheDocument();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// HistoryTab — filtry są przełącznikami, więc muszą mówić o stanie
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('HistoryTab — aria-pressed na filtrach', () => {
+  const history = [{
+    id: 's1', datePlayed: '2026-10-01', sport: 'squash', totalCost: 60,
+    costPerPerson: 30, costPerPersonMulti: 15,
+    presentPlayers: ['Ala'], multisportPlayers: [],
+  }];
+
+  it('aktualizuje stan po wybraniu gracza i sportu', async () => {
+    const user = userEvent.setup();
+    render(
+      <ToastProvider>
+        <HistoryTab history={history} playerNames={['Ala', 'Bolek']} playSound={vi.fn()} />
+      </ToastProvider>,
+    );
+
+    const allPlayers = screen.getByRole('button', { name: 'Wszyscy' });
+    const ala = screen.getByRole('button', { name: 'Ala' });
+    expect(allPlayers).toHaveAttribute('aria-pressed', 'true');
+    expect(ala).toHaveAttribute('aria-pressed', 'false');
+
+    await user.click(ala);
+    expect(ala).toHaveAttribute('aria-pressed', 'true');
+    expect(allPlayers).toHaveAttribute('aria-pressed', 'false');
+
+    const allSports = screen.getByRole('button', { name: 'Wszystkie sporty' });
+    const squash = screen.getByRole('button', { name: 'Squash' });
+    expect(allSports).toHaveAttribute('aria-pressed', 'true');
+    expect(squash).toHaveAttribute('aria-pressed', 'false');
+
+    await user.click(squash);
+    expect(squash).toHaveAttribute('aria-pressed', 'true');
+    expect(allSports).toHaveAttribute('aria-pressed', 'false');
+  });
+});
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// MultisportLimitWarning — odmiana i kwota co do grosza
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('MultisportLimitWarning — odmiana i kwota co do grosza', () => {
+  it('3 osoby (nie „3 osób”) i pełna kwota z groszami', () => {
+    render(<MultisportLimitWarning maxMulti={2} cardCount={3} />);
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Limit 2 odbić przekroczony — zniżka zostanie proporcjonalnie podzielona na 3 osoby (10,00 zł/os. zamiast 15,00 zł)',
+    );
+  });
+
+  it('nie zaokrągla zniżki w dół do pełnych złotych', () => {
+    render(<MultisportLimitWarning maxMulti={2} cardCount={7} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('na 7 osób (4,28 zł/os.');
+  });
+
+  it('limit jednego odbicia w liczbie pojedynczej', () => {
+    render(<MultisportLimitWarning maxMulti={1} cardCount={2} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Limit 1 odbicia przekroczony');
+  });
+});

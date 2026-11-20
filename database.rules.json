@@ -1,0 +1,177 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "appData": {
+      ".read": true,
+      ".write": "newData.exists()",
+
+      "players": {
+        ".validate": "newData.hasChildren()",
+        "$index": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+        }
+      },
+
+      "deletedPlayers": {
+        ".validate": "newData.hasChildren()",
+        "$index": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+        }
+      },
+
+      "defaultMultiPlayers": {
+        ".validate": "newData.hasChildren()",
+        "$index": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+        }
+      },
+
+      "singleScanPlayers": {
+        ".validate": "newData.hasChildren()",
+        "$index": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+        }
+      },
+
+      "playerJoinDate": {
+        ".validate": "newData.hasChildren()",
+        "$playerName": {
+          ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+        }
+      },
+
+      "playerJoinWeek": {
+        ".validate": "newData.hasChildren()",
+        "$playerName": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+        }
+      },
+
+      "weeks": {
+        ".validate": "newData.hasChildren()",
+        "$index": {
+          ".validate": "newData.hasChildren(['id', 'date', 'cost', 'present'])",
+
+          "id":   { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64" },
+          "date": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)" },
+          "cost": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
+
+          "sport": {
+            ".validate": "newData.isString() && (newData.val() === 'pingpong' || newData.val() === 'squash' || newData.val() === 'badminton' || newData.val() === 'padel')"
+          },
+
+          "courtCount": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 12 && newData.val() % 1 === 0"
+          },
+          "durationHours": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 12 && newData.val() % 1 === 0"
+          },
+
+          "present": {
+            ".validate": "newData.hasChildren()",
+            "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
+          },
+          "multiPlayers": {
+            ".validate": "newData.hasChildren()",
+            "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
+          },
+          "ownRacketPlayers": {
+            ".validate": "newData.hasChildren()",
+            "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
+          },
+          "overtimePlayers": {
+            ".validate": "newData.hasChildren()",
+            "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
+          },
+
+          "singleScanPlayers": {
+            ".validate": "newData.hasChildren()",
+            "$i": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
+          },
+          "discountModel": { ".validate": "newData.isString() && newData.val() === 'perScan'" },
+          "courtGross": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
+
+          "racketCost":  { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
+          "overtimeCost": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
+
+          "$other": { ".validate": false }
+        }
+      },
+
+      "payments": {
+        ".validate": "newData.hasChildren()",
+        "$playerName": {
+          ".validate": "newData.hasChildren()",
+          "$index": {
+            ".validate": "newData.hasChildren(['id', 'amount', 'date'])",
+
+            "id":     { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64" },
+            "amount": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000" },
+            "date":   { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)" },
+
+            "$other": { ".validate": false }
+          }
+        }
+      },
+
+      "lastAddedSession": {
+        ".validate": "newData.hasChildren()",
+        "id": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64" },
+        "ts": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      },
+
+      "paidUntilWeek": {
+        ".validate": "newData.hasChildren()",
+        "$playerName": {
+          ".validate": "newData.isNumber() || (newData.isString() && newData.val().length <= 64)"
+        }
+      },
+
+      "$other": { ".validate": false }
+    },
+
+    "analytics": {
+      ".read": false,
+      "events": {
+        ".indexOn": ["ts"],
+        "$id": {
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['ts', 'type', 'did', 'sid'])",
+
+          "ts":   { ".validate": "newData.isNumber() && newData.val() > 1500000000000 && newData.val() < 4102444800000" },
+          "type": { ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{1,32}$/)" },
+          "did":  { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64" },
+          "sid":  { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 64" },
+          "name": { ".validate": "newData.isString() && newData.val().length <= 40" },
+
+          "props": {
+            ".validate": "newData.hasChildren()",
+            "$key": {
+              ".validate": "(newData.isString() && newData.val().length <= 100) || newData.isNumber() || newData.isBoolean()"
+            }
+          },
+
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "fcmTokens": {
+      "$tokenKey": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['token'])",
+
+        "token":      { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 4096" },
+        "playerName": { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "updatedAt":  { ".validate": "newData.isNumber()" },
+        "ua":         { ".validate": "newData.isString() && newData.val().length <= 100" },
+
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}

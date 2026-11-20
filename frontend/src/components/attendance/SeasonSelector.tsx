@@ -1,0 +1,57 @@
+import { CLIP, FONT, TEXT } from '../../constants/styles';
+
+const ALL_TIME = null;
+
+interface SeasonSelectorProps {
+  seasons: number[];
+  selected: number | null;
+  onChange: (season: number | null) => void;
+}
+
+/**
+ * Cyberpunk-styled year/season selector.
+ * Shows "Wszystkie" + one button per available year.
+ */
+export default function SeasonSelector({ seasons, selected, onChange }: SeasonSelectorProps) {
+  if (!seasons || seasons.length <= 1) return null;
+
+  const options = [{ label: 'Wszystkie', value: ALL_TIME }, ...seasons.map(y => ({ label: String(y), value: y }))];
+
+  return (
+    // Odstęp bierze rodzic (gap 20 w AttendanceTab) — własny marginBottom 16
+    // dawał pod tym paskiem inny rytm niż pod każdym innym elementem zakładki.
+    <div role="group" aria-label="Sezon" style={{
+      display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap',
+    }}>
+      {/* Etykieta była mono, a przyciski obok display — dwa kroje w jednym
+          pasku kontrolek. */}
+      <span style={{ ...FONT.display(TEXT.tiny), color: 'var(--co-dim)', marginRight: 4 }}>
+        Sezon:
+      </span>
+      {options.map(opt => {
+        const active = opt.value === selected;
+        return (
+          <button
+            key={opt.label}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            aria-pressed={active}
+            style={{
+              minHeight: 44, padding: '8px 12px',
+              ...FONT.display(TEXT.base),
+              background: active ? 'var(--co-tint-hi)' : 'transparent',
+              border: `1px solid ${active ? 'var(--co-tint-line)' : 'var(--co-border)'}`,
+              color: active ? 'var(--co-cyan)' : 'var(--co-text)',
+              clipPath: CLIP.badge,
+              cursor: 'pointer',
+              transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+              textShadow: active ? 'var(--glow-cyan-sm)' : 'none',
+            }}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

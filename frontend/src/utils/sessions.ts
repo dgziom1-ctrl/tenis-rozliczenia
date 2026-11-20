@@ -1,0 +1,174 @@
+import { MONTHS } from '@/constants';
+import type { HistoryEntry, MonthGroup } from '@/types/ui';
+
+/**
+ * Wartości startowe formularza nowej sesji.
+ *
+ * Grupa gra prawie zawsze w tym samym składzie, więc każdorazowe odznaczanie
+ * połowy listy jest zbędną pracą i źródłem pomyłek. Bierzemy ostatnią sesję
+ * (najpóźniejszą datą), a nie „wszystkich”, i odsiewamy osoby, których nie ma
+ * już w aktywnym składzie.
+ */
+export interface SessionDefaults {
+  presentPlayers: string[];
+  multisportPlayers: string[];
+  courtCount: number;
+  durationHours: number;
+  sport: HistoryEntry['sport'];
+}
+
+export function getLastSessionDefaults(
+  history: HistoryEntry[],
+  playerNames: string[],
+): SessionDefaults | null {
+  if (!history?.length || !playerNames?.length) return null;
+
+  const latest = [...history]
+    .filter(session => Boolean(session?.datePlayed))
+    .sort((a, b) => b.datePlayed.localeCompare(a.datePlayed))[0];
+  if (!latest) return null;
+
+  const presentPlayers = latest.presentPlayers.filter(name => playerNames.includes(name));
+  if (presentPlayers.length === 0) return null;
+
+  return {
+    presentPlayers,
+    multisportPlayers: latest.multisportPlayers.filter(name => presentPlayers.includes(name)),
+    courtCount: latest.courtCount ?? 1,
+    durationHours: latest.durationHours ?? 1,
+    sport: latest.sport,
+  };
+}
+
+/**
+ * Cena za kort-godzinę z ostatniej sesji danego sportu, w której znamy cenę
+ * kortu przed zwrotem. Służy do podpowiedzi „jak ostatnio” — nigdy nie wypełnia
+ * pola sama, żeby nie zapisać starej ceny przez nieuwagę.
+ */
+export function getLastCourtRate(history: HistoryEntry[], sport: string): number | null {
+  let latest: HistoryEntry | null = null;
+  for (const session of history ?? []) {
+    if (!session?.datePlayed || session.sport !== sport) continue;
+    if (typeof session.courtGross !== 'number' || !(session.courtGross > 0)) continue;
+    if (!latest || session.datePlayed > latest.datePlayed) latest = session;
+  }
+  if (!latest || latest.courtGross === undefined) return null;
+  const units = (latest.courtCount ?? 1) * (latest.durationHours ?? 1);
+  return Math.round((latest.courtGross / units) * 100) / 100;
+}
+
+/**
+ * Dyscyplina najnowszej sesji — tę scenę pokazuje arena w nagłówku.
+ * Bierzemy największą datę, a nie pierwszy element: nie polegamy na tym,
+ * w jakiej kolejności przyszła historia. Bez sesji zostaje ping-pong,
+ * od którego aplikacja wzięła nazwę.
+ */
+export function getLatestSport(history: HistoryEntry[]): HistoryEntry['sport'] {
+  let latest: HistoryEntry | null = null;
+  for (const session of history ?? []) {
+    if (!session?.datePlayed) continue;
+    if (!latest || session.datePlayed > latest.datePlayed) latest = session;
+  }
+  return latest?.sport ?? 'pingpong';
+}
+
+export function getMonthLabel(dateStr: string): string {
+  if (!dateStr || typeof dateStr !== 'string') return '—';
+  const match = /^(\d{4})-(\d{2})/.exec(dateStr);
+  const monthName = match ? MONTHS[Number(match[2]) - 1] : undefined;
+  // Uszkodzona data dawała wcześniej etykiety w rodzaju „— bad”.
+  return match && monthName ? `${monthName} ${match[1]}` : '—';
+}
+
+function getMonthKey(dateStr: string): string {
+  return dateStr.slice(0, 7);
+}
+
+export function groupSessionsByMonth(history: HistoryEntry[]): [string, { total: number; players: Record<string, number> }][] {
+  const months: Record<string, { total: number; players: Record<string, number> }> = {};
+  history.forEach(session => {
+    const key = getMonthKey(session.datePlayed);
+    if (!months[key]) months[key] = { total: 0, players: {} };
+    months[key].total += 1;
+    session.presentPlayers.forEach(playerName => {
+      months[key].players[playerName] = (months[key].players[playerName] || 0) + 1;
+    });
+  });
+  return Object.entries(months).sort((a, b) => b[0].localeCompare(a[0]));
+}
+
+export function groupHistoryByMonth(history: HistoryEntry[]): MonthGroup[] {
+  const groups: MonthGroup[] = [];
+  let current: MonthGroup | null = null;
+  for (const row of history) {
+    const label = getMonthLabel(row.datePlayed);
+    if (!current || current.label !== label) {
+      current = { label, rows: [] };
+      groups.push(current);
+    }
+    current.rows.push(row);
+  }
+  return groups;
+}
+
+export function getAvailableSeasons(history: HistoryEntry[]): number[] {
+  if (!history || history.length === 0) return [];
+  const years = new Set<number>();
+  history.forEach(s => {
+    if (s.datePlayed) years.add(parseInt(s.datePlayed.slice(0, 4), 10));
+  });
+  return [...years].sort((a, b) => b - a);
+}
+
+/**
+ * Rok, dla którego proponujemy Wrapped — albo `null`, gdy nie ma czego podsumować.
+ *
+ * Zwykle to po prostu wybrany, zakończony sezon. Ale po przełomie roku
+ * podsumowanie ma się przypomnieć samo, bo inaczej nie pokazałoby się nigdy:
+ * przy jednym sezonie w danych filtr sezonów jest ukryty, a po pierwszej sesji
+ * nowego roku domyślnym sezonem jest już ten nowy.
+ *
+ * Po pierwszej sesji nowego roku wystarczy wybrać starszy sezon w rankingu.
+ * Jeśli w danych jest tylko jeden, pozostaje dostępny bez selektora.
+ */
+export function getWrappedSeason(
+  seasons: number[],
+  selectedSeason: number | null,
+  currentYear: number,
+): number | null {
+  if (!seasons.length) return null;
+  const latest = seasons[0];
+
+  // Wybrany sezon starszy niż najnowszy w danych — gotowe podsumowanie.
+  // Porównujemy z danymi, nie z kalendarzem: inaczej w sierpniu 2026, gdy w
+  // bazie są już sesje z „2027", Wrapped dla 2026 nigdy by się nie pokazał.
+  if (selectedSeason && (selectedSeason < latest || selectedSeason < currentYear)) return selectedSeason;
+
+  // Przy jednym sezonie selektor jest ukryty — nadal dajemy dostęp do archiwum.
+  if (seasons.length === 1 && latest < currentYear) return latest;
+
+  // 1 stycznia: w kalendarzu już nowy rok, w danych jeszcze tylko stary sezon.
+  const previous = currentYear - 1;
+  const seasonJustEnded = !seasons.includes(currentYear) && seasons.includes(previous);
+  return seasonJustEnded ? previous : null;
+}
+
+export function filterHistoryByYear(history: HistoryEntry[], year: number | null): HistoryEntry[] {
+  if (!year) return history;
+  const prefix = String(year);
+  return history.filter(s => s.datePlayed?.startsWith(prefix));
+}
+
+/**
+ * Rok bieżącego sezonu — najnowszy rok, w którym rozegrano choć jedną sesję.
+ *
+ * Bierzemy go z danych, a nie z zegara: sezon zaczyna się pierwszą rozegraną
+ * sesją, więc 1 stycznia, zanim ona padnie, apka wygląda dalej jak w grudniu.
+ *
+ * To jedno źródło prawdy dla wszystkich miejsc, które pokazują „tu i teraz" —
+ * dashboard i rozliczenia (bilans otwarcia) nie mogą się rozjechać w ocenie
+ * tego, który sezon właśnie trwa.
+ */
+export function getCurrentSeason(history: HistoryEntry[]): number | null {
+  return getAvailableSeasons(history)[0] ?? null;
+}

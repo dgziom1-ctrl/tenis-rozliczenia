@@ -1,0 +1,40 @@
+name: Automatyczny Backup Realtime Database
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # codziennie o północy UTC
+  workflow_dispatch:
+
+# Nie potrzebujemy już write na contents — nic nie commitujemy
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Pobierz backup RTDB
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT || secrets.FIREBASE_SERVICE_ACCOUNT_TENIS_ROZLICZENIA }}
+          DATABASE_URL: https://tenis-rozliczenia-default-rtdb.europe-west1.firebasedatabase.app
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          echo "OUTPUT_FILE=$RUNNER_TEMP/backup-out/backup_rtdb_${DATE}.json" >> "$GITHUB_ENV"
+          OUTPUT_FILE="$RUNNER_TEMP/backup-out/backup_rtdb_${DATE}.json" \
+            node .github/scripts/backup-rtdb.mjs
+
+      - name: Upload jako prywatny Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-rtdb-${{ github.run_id }}
+          path: ${{ env.OUTPUT_FILE }}
+          retention-days: 90   # GitHub kasuje automatycznie po 90 dniach
+          if-no-files-found: error
+          # Artefakty są widoczne TYLKO dla osób z dostępem do repo (czyli tylko Ciebie)
