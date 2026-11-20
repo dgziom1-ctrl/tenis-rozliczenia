@@ -4,7 +4,7 @@ import { formatAmountShort } from '@/utils/format';
 
 /** Czas przytrzymania. Długi na tyle, by wykluczyć przypadkowy dotyk, ale
  *  krótki, by nie zamieniać opłacenia w ćwiczenie z cierpliwości. */
-export const HOLD_TO_SETTLE_MS = 800;
+const HOLD_TO_SETTLE_MS = 800;
 
 interface HoldToSettleButtonProps {
   amount: number;

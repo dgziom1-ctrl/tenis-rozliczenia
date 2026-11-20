@@ -1,7 +1,5 @@
 import type { CSSProperties } from 'react';
 
-export type SportGlyphName = 'pingpong' | 'squash' | 'badminton' | 'padel';
-
 interface SportGlyphProps {
   sport?: string;
   size?: number;

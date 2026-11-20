@@ -18,7 +18,7 @@ interface AchievementDef {
 }
 
 /** Ile miesięcy z min. 3 sesjami gracz miał 100% frekwencji. */
-export function countPerfectMonths(playerName: string, history: HistoryEntry[]): number {
+function countPerfectMonths(playerName: string, history: HistoryEntry[]): number {
   const months: Record<string, { total: number; present: number }> = {};
   for (const s of history) {
     const key = s.datePlayed?.slice(0, 7);

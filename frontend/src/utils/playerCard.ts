@@ -12,7 +12,7 @@ import type {
   SportCount,
 } from '@/types/ui';
 
-export const RARITY_BY_RANK: Record<string, CardRarity> = {
+const RARITY_BY_RANK: Record<string, CardRarity> = {
   LEGENDA: 'legend',
   MISTRZ: 'elite',
   WETERAN: 'epic',

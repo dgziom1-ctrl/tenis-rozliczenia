@@ -66,7 +66,7 @@ export function readPalette(): ArenaPalette {
 export const rgba = (rgb: string, alpha: number) => `rgba(${rgb},${alpha})`;
 
 /** Mały, niezależny od DOM-u canvas na sprite. `null`, gdy brak kontekstu 2D. */
-export function cacheSprite(
+function cacheSprite(
   width: number,
   height: number,
   paint: (c: CanvasRenderingContext2D, width: number, height: number) => void,

@@ -2,7 +2,7 @@ import { readStorage, writeStorage, STORAGE_KEYS } from '@/utils/storage';
 import { MAX_PLAYER_NAME_LENGTH } from '@/utils/validation';
 
 /** Losowy identyfikator bez żadnych danych o użytkowniku. */
-export function randomId(): string {
+function randomId(): string {
   try {
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
       return crypto.randomUUID().replace(/-/g, '').slice(0, 20);
