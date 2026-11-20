@@ -8,10 +8,11 @@ import PlayerToggleGrid from '../admin/PlayerToggleGrid';
 import MultisportLimitWarning from '../admin/MultisportLimitWarning';
 import CardRulesHint from '../admin/CardRulesHint';
 import CourtPriceFields from '../admin/CourtPriceFields';
+import CourtHoursPicker from '../session-form/CourtHoursPicker';
+import RacketRentalFields from '../session-form/RacketRentalFields';
 import { expectedRefundForForm, resolveEditRefund } from '@/utils/courtRefund';
 import { RACKET_PRICE, MULTISPORT_DISCOUNT, hasRacketRental } from '@/constants';
 import { CLIP, FONT, TEXT } from '@/constants/styles';
-import ToggleChip from '../common/ToggleChip';
 import { parseAmount, formatAmountShort } from '@/utils/format';
 import { racketPriceError } from '@/utils/costMessages';
 import { getMaxMulti, getMultisportPerCourtHour, getRacketSelection, getShareGroups, getTotalWithRackets } from '@/utils/sessionCost';
@@ -58,8 +59,6 @@ export default function EditSessionForm({
 }: EditSessionFormProps) {
   const costId = useId();
   const costErrorId = useId();
-  const racketPriceId = useId();
-  const racketPriceErrorId = useId();
 
   const present = editForm.present ?? [];
   const multiPlayers = editForm.multiPlayers ?? [];
@@ -224,44 +223,21 @@ export default function EditSessionForm({
       )}
 
       {/* Korty + godziny — wpływają na limit Multisportu */}
-      <div style={{ display: 'flex', gap: 12 }}>
-        <div style={{ flex: 1 }}>
-          <span style={{ ...sectionLabel, marginBottom: 6 }}>Korty / stoły</span>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {[1, 2, 3].map(n => (
-              <ToggleChip key={n} font="mono" active={editForm.courtCount === n}
-                style={{ flex: 1, padding: '8px 4px' }}
-                onClick={() => handleCourtCount(n)}>
-                {n}
-              </ToggleChip>
-            ))}
-          </div>
-          <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6 }}>
-            {maxMulti != null
-              ? (perScan ? `> Limit odbić: ${perHourLimit}/h (${perCourtHour}/kort/h)` : `> Limit odbić: ${maxMulti} (${perCourtHour}/kort/h)`)
-              : '> Stara sesja: bez limitu odbić'}
-          </p>
-        </div>
-        <div style={{ flex: 1 }}>
-          <span style={{ ...sectionLabel, marginBottom: 6 }}>Godziny</span>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {[1, 2, 3].map(n => (
-              <ToggleChip key={n} font="mono" active={editForm.durationHours === n}
-                style={{ flex: 1, padding: '8px 4px' }}
-                onClick={() => handleDuration(n)}>
-                {n}h
-              </ToggleChip>
-            ))}
-          </div>
-          <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6 }}>
-            {hasCourtConfig
-              ? (perScan
-                ? `> ${editForm.durationHours}h × ${perHourLimit}/h = maks. ${maxMulti} odbić`
-                : `> ${editForm.durationHours}h × ${perCourtHour}/kort/h = ${maxMulti} odbić`)
-              : '> Wybierz korty i godziny, aby włączyć limit'}
-          </p>
-        </div>
-      </div>
+      <CourtHoursPicker
+        courtCount={editForm.courtCount}
+        durationHours={editForm.durationHours}
+        onCourtCountChange={handleCourtCount}
+        onDurationChange={handleDuration}
+        courtHint={maxMulti != null
+          ? (perScan ? `> Limit odbić: ${perHourLimit}/h (${perCourtHour}/kort/h)` : `> Limit odbić: ${maxMulti} (${perCourtHour}/kort/h)`)
+          : '> Stara sesja: bez limitu odbić'}
+        hoursHint={hasCourtConfig
+          ? (perScan
+            ? `> ${editForm.durationHours}h × ${perHourLimit}/h = maks. ${maxMulti} odbić`
+            : `> ${editForm.durationHours}h × ${perCourtHour}/kort/h = ${maxMulti} odbić`)
+          : '> Wybierz korty i godziny, aby włączyć limit'}
+        renderLabel={text => <span style={{ ...sectionLabel, marginBottom: 6 }}>{text}</span>}
+      />
 
       {/* Obecni */}
       <div>
@@ -317,60 +293,22 @@ export default function EditSessionForm({
             <Hand size={11} /> Wypożyczone rakiety
           </p>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <label htmlFor={racketPriceId} style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
-              Cena / szt.:
-            </label>
-            <input
-              id={racketPriceId}
-              type="text"
-              inputMode="decimal"
-              value={shownPriceText}
-              onChange={e => {
-                setRacketPriceText(e.target.value);
-                setEditForm(p => ({ ...p, racketPrice: parseAmount(e.target.value) || 0 }));
-              }}
-              aria-invalid={racketPriceMsg !== null}
-              aria-describedby={racketPriceMsg ? racketPriceErrorId : undefined}
-              className={racketPriceMsg ? 'cyber-input input-error' : 'cyber-input'}
-              style={{ width: 78, padding: '8px', textAlign: 'center', fontFamily: 'var(--font-mono)', clipPath: CLIP.badge }}
-            />
-            <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>zł</span>
-            {racketSelection.price !== RACKET_PRICE && (
-              <button
-                type="button"
-                onClick={() => { setRacketPriceText(String(RACKET_PRICE)); setEditForm(p => ({ ...p, racketPrice: RACKET_PRICE })); }}
-                style={{
-                  ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)',
-                  background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-                  padding: '2px 8px', minHeight: 44, clipPath: CLIP.badge,
-                }}
-              >
-                Przywróć {RACKET_PRICE} zł
-              </button>
-            )}
-          </div>
-          {racketPriceMsg && (
-            <p id={racketPriceErrorId} role="alert" style={{ margin: '0 0 10px', ...FONT.display(TEXT.base), color: 'var(--co-rose)' }}>
-              ⚠ {racketPriceMsg}
-            </p>
-          )}
-
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {Array.from({ length: racketSelection.maxRackets + 1 }, (_, i) => i).map(n => (
-              <ToggleChip key={n} font="mono" active={racketSelection.effectiveCount === n}
-                ariaLabel={`Liczba wypożyczonych rakiet: ${n}`}
-                style={{ flex: 1, minWidth: 44, padding: '8px 4px' }}
-                onClick={() => setEditForm(p => ({ ...p, racketCount: n }))}>
-                {n}
-              </ToggleChip>
-            ))}
-          </div>
-          <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 8 }}>
-            {racketSelection.effectiveCount > 0
+          <RacketRentalFields
+            priceText={shownPriceText}
+            onPriceTextChange={text => {
+              setRacketPriceText(text);
+              setEditForm(p => ({ ...p, racketPrice: parseAmount(text) || 0 }));
+            }}
+            priceIsCustom={racketSelection.price !== RACKET_PRICE}
+            onPriceReset={() => { setRacketPriceText(String(RACKET_PRICE)); setEditForm(p => ({ ...p, racketPrice: RACKET_PRICE })); }}
+            priceError={racketPriceMsg}
+            maxRackets={racketSelection.maxRackets}
+            selectedCount={racketSelection.effectiveCount}
+            onCountChange={n => setEditForm(p => ({ ...p, racketCount: n }))}
+            caption={racketSelection.effectiveCount > 0
               ? `${racketSelection.effectiveCount} × ${formatAmountShort(racketSelection.price)} zł = ${formatAmountShort(racketSelection.cost)} zł, dzielone między graczy bez własnej rakietki`
               : '0 zł — nikt nie wypożycza rakiet'}
-          </p>
+          />
         </div>
       )}
 

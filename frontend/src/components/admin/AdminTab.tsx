@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useId, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { FormEvent } from 'react';
 import { CalendarPlus, CheckCircle2, Users, Zap, Hand } from 'lucide-react';
 import { PanelHeader, FieldGroup } from '../common/SharedUI';
@@ -25,10 +25,11 @@ import PlayerToggleGrid from './PlayerToggleGrid';
 import MultisportLimitWarning from './MultisportLimitWarning';
 import CardRulesHint from './CardRulesHint';
 import { cardCounter } from '@/utils/cardLabels';
-import ToggleChip from '../common/ToggleChip';
 import SportSelector from './SportSelector';
 import CyberDateInput from './CyberDateInput';
 import FieldLabel from './FieldLabel';
+import CourtHoursPicker from '../session-form/CourtHoursPicker';
+import RacketRentalFields from '../session-form/RacketRentalFields';
 
 interface AdminTabProps {
   playerNames: string[];
@@ -74,9 +75,6 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, singleScanP
     highlights: SessionHighlight[];
   } | null>(null);
   const [costTouched,       setCostTouched]       = useState(false);
-
-  const racketPriceId    = useId();
-  const racketPriceErrorId = useId();
 
   const withRackets = hasRacketRental(sport);
   const {
@@ -278,40 +276,16 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, singleScanP
             </div>
 
             {/* Korty + godziny */}
-            <div style={{ display: 'flex', gap: 12 }}>
-              <div style={{ flex: 1 }}>
-                <FieldLabel>Korty / stoły</FieldLabel>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {[1, 2, 3].map(n => (
-                    <ToggleChip key={n} font="mono" active={courtCount === n}
-                      ariaLabel={`Liczba kortów: ${n}`}
-                      style={{ flex: 1, padding: '8px 4px' }}
-                      onClick={() => { setCourtCount(n); playSound(SOUND_TYPES.CLICK); }}>
-                      {n}
-                    </ToggleChip>
-                  ))}
-                </div>
-                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6 }}>
-                  Limit odbić: {perHourLimit}/h ({perCourtHour}/kort/h)
-                </p>
-              </div>
-              <div style={{ flex: 1 }}>
-                <FieldLabel>Godziny</FieldLabel>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {[1, 2, 3].map(n => (
-                    <ToggleChip key={n} font="mono" active={durationHours === n}
-                      ariaLabel={`Czas gry: ${n} h`}
-                      style={{ flex: 1, padding: '8px 4px' }}
-                      onClick={() => { setDurationHours(n); playSound(SOUND_TYPES.CLICK); }}>
-                      {n}h
-                    </ToggleChip>
-                  ))}
-                </div>
-                <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 6 }}>
-                  {durationHours > 1 ? `${durationHours}h × ` : ''}{perHourLimit}/h = maks. {maxMulti} {plural(maxMulti, 'odbicie', 'odbicia', 'odbić')}
-                </p>
-              </div>
-            </div>
+            <CourtHoursPicker
+              courtCount={courtCount}
+              durationHours={durationHours}
+              onCourtCountChange={n => { setCourtCount(n); playSound(SOUND_TYPES.CLICK); }}
+              onDurationChange={n => { setDurationHours(n); playSound(SOUND_TYPES.CLICK); }}
+              courtHint={`Limit odbić: ${perHourLimit}/h (${perCourtHour}/kort/h)`}
+              hoursHint={`${durationHours > 1 ? `${durationHours}h × ` : ''}${perHourLimit}/h = maks. ${maxMulti} ${plural(maxMulti, 'odbicie', 'odbicia', 'odbić')}`}
+              renderLabel={text => <FieldLabel>{text}</FieldLabel>}
+              chipLabels={{ court: n => `Liczba kortów: ${n}`, hours: n => `Czas gry: ${n} h` }}
+            />
 
             {/* Date */}
             <div>
@@ -394,63 +368,19 @@ export default function AdminTab({ playerNames, defaultMultiPlayers, singleScanP
                 counter={effectiveRacketCount > 0 ? `${effectiveRacketCount} × ${parsedRacketPrice} = ${racketCost} zł` : undefined}
               >
 
-                {/* Price per racket */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <label htmlFor={racketPriceId} style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', whiteSpace: 'nowrap' }}>
-                    Cena / szt.:
-                  </label>
-                  <input
-                    id={racketPriceId}
-                    type="text"
-                    inputMode="decimal"
-                    value={racketPriceText}
-                    onChange={e => { setRacketPriceText(e.target.value); setRacketPriceValue(parseAmount(e.target.value) || 0); }}
-                    aria-invalid={racketPriceMsg !== null}
-                    aria-describedby={racketPriceMsg ? racketPriceErrorId : undefined}
-                    className={racketPriceMsg ? 'cyber-input input-error' : 'cyber-input'}
-                    style={{
-                      width: 78, padding: '8px', textAlign: 'center',
-                      fontFamily: 'var(--font-mono)',
-                      clipPath: CLIP.badge,
-                    }}
-                  />
-                  <span style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)' }}>zł</span>
-                  {parsedRacketPrice !== RACKET_PRICE && (
-                    <button
-                      type="button"
-                      onClick={() => setRacketPrice(RACKET_PRICE)}
-                      style={{
-                        ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)',
-                        background: 'transparent', border: '1px solid var(--co-border)', cursor: 'pointer',
-                        padding: '2px 8px', minHeight: 44, clipPath: CLIP.badge,
-                      }}
-                    >
-                      Przywróć {RACKET_PRICE} zł
-                    </button>
-                  )}
-                </div>
-                {racketPriceMsg && (
-                  <p id={racketPriceErrorId} role="alert" style={{ ...FONT.display(TEXT.base), color: 'var(--co-rose)', margin: '0 0 10px' }}>
-                    ⚠ {racketPriceMsg}
-                  </p>
-                )}
-
-                {/* Racket count buttons */}
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {Array.from({ length: maxRackets + 1 }, (_, i) => i).map(n => (
-                    <ToggleChip key={n} font="mono" active={effectiveRacketCount === n}
-                      ariaLabel={`Liczba wypożyczonych rakiet: ${n}`}
-                      style={{ flex: 1, minWidth: 44, padding: '8px 4px' }}
-                      onClick={() => { setRacketCount(n); playSound(SOUND_TYPES.CLICK); }}>
-                      {n}
-                    </ToggleChip>
-                  ))}
-                </div>
-                {effectiveRacketCount > 0 && (
-                  <p style={{ ...FONT.mono(TEXT.tiny), color: 'var(--co-dim)', marginTop: 8 }}>
-                    Koszt {effectiveRacketCount} × {parsedRacketPrice} zł dzielony między graczy bez własnej rakietki
-                  </p>
-                )}
+                <RacketRentalFields
+                  priceText={racketPriceText}
+                  onPriceTextChange={text => { setRacketPriceText(text); setRacketPriceValue(parseAmount(text) || 0); }}
+                  priceIsCustom={parsedRacketPrice !== RACKET_PRICE}
+                  onPriceReset={() => setRacketPrice(RACKET_PRICE)}
+                  priceError={racketPriceMsg}
+                  maxRackets={maxRackets}
+                  selectedCount={effectiveRacketCount}
+                  onCountChange={n => { setRacketCount(n); playSound(SOUND_TYPES.CLICK); }}
+                  caption={effectiveRacketCount > 0
+                    ? `Koszt ${effectiveRacketCount} × ${parsedRacketPrice} zł dzielony między graczy bez własnej rakietki`
+                    : null}
+                />
               </FieldGroup>
             )}
 
