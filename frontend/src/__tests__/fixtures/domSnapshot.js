@@ -8,11 +8,12 @@
 
 import { vi } from 'vitest';
 
-/** Atrybuty, które trzymają identyfikatory (lub ich listy) wygenerowane przez `useId`. */
-const ID_REFERENCES = ['id', 'for', 'aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns', 'list'];
-
-/** `useId` zwraca `:r0:`, `«r0»` albo `_r_0_` zależnie od wersji Reacta. */
-const GENERATED_ID = /^(?:[:«]r[0-9a-z]+[:»]|_r_[0-9a-z]+_)$/;
+/**
+ * Znacznik wygenerowany przez `useId`: `:r0:`, `«r0»` albo `_r_0_` zależnie od wersji
+ * Reacta. Bywa całym `id`, ale też częścią dłuższego (`cp-bg-_r_0_`), odwołaniem
+ * w `url(#...)`, `for` albo `aria-*` — dlatego podmieniamy go w każdej wartości atrybutu.
+ */
+const GENERATED_TOKEN = /[:«]r[0-9a-z]+[:»]|_r_[0-9a-z]+_/g;
 
 /** Dzieli deklaracje stylu po `;`, ale nie wewnątrz nawiasów (`calc(...)`, `url(...)`). */
 function splitDeclarations(css) {
@@ -43,30 +44,33 @@ function normalizeStyle(css) {
     .join('; ');
 }
 
-function collectGeneratedIds(root, ids) {
-  for (const el of root.querySelectorAll('[id]')) {
-    const id = el.getAttribute('id');
-    if (GENERATED_ID.test(id) && !ids.has(id)) ids.set(id, `#id${ids.size + 1}`);
+/** Numeruje znaczniki `useId` w kolejności pojawiania się w dokumencie (atrybuty po nazwach). */
+function collectGeneratedTokens(root, tokens) {
+  for (const el of root.querySelectorAll('*')) {
+    const attributes = Array.from(el.attributes).sort((a, b) => a.name.localeCompare(b.name));
+    for (const { value } of attributes) {
+      for (const token of value.match(GENERATED_TOKEN) ?? []) {
+        if (!tokens.has(token)) tokens.set(token, `~${tokens.size + 1}`);
+      }
+    }
   }
 }
 
-function mapIds(value, ids) {
-  return value.split(/\s+/).map(token => ids.get(token) ?? token).join(' ');
+function mapTokens(value, tokens) {
+  return value.replace(GENERATED_TOKEN, token => tokens.get(token) ?? token);
 }
 
-function attributesOf(el, ids) {
+function attributesOf(el, tokens) {
   const attrs = new Map();
   for (const { name, value } of Array.from(el.attributes)) {
     if (name === 'class') {
       const classes = value.split(/\s+/).filter(Boolean).sort().join(' ');
       if (classes) attrs.set(name, classes);
     } else if (name === 'style') {
-      const style = normalizeStyle(value);
+      const style = mapTokens(normalizeStyle(value), tokens);
       if (style) attrs.set(name, style);
-    } else if (ID_REFERENCES.includes(name)) {
-      attrs.set(name, mapIds(value, ids));
     } else {
-      attrs.set(name, value);
+      attrs.set(name, mapTokens(value, tokens));
     }
   }
   // Bieżąca wartość pola, nie tylko atrybut z pierwszego renderu.
@@ -80,7 +84,7 @@ function attributesOf(el, ids) {
   return [...attrs.entries()].sort(([a], [b]) => a.localeCompare(b));
 }
 
-function render(node, depth, ids, lines) {
+function render(node, depth, tokens, lines) {
   const pad = '  '.repeat(depth);
   const children = Array.from(node.childNodes);
   // Sąsiednie węzły tekstowe scalamy: React dzieli `{a} zł` na kilka, a to
@@ -102,12 +106,12 @@ function render(node, depth, ids, lines) {
       continue;
     }
     const tag = child.tagName.toLowerCase();
-    const attrs = attributesOf(child, ids).map(([name, value]) => ` ${name}=${JSON.stringify(value)}`).join('');
+    const attrs = attributesOf(child, tokens).map(([name, value]) => ` ${name}=${JSON.stringify(value)}`).join('');
     if (child.childNodes.length === 0) {
       lines.push(`${pad}<${tag}${attrs} />`);
     } else {
       lines.push(`${pad}<${tag}${attrs}>`);
-      render(child, depth + 1, ids, lines);
+      render(child, depth + 1, tokens, lines);
       lines.push(`${pad}</${tag}>`);
     }
   }
@@ -117,10 +121,10 @@ function render(node, depth, ids, lines) {
 export function serializeDom(...roots) {
   const wrapper = document.createElement('div');
   for (const root of roots) wrapper.appendChild(root.cloneNode(true));
-  const ids = new Map();
-  collectGeneratedIds(wrapper, ids);
+  const tokens = new Map();
+  collectGeneratedTokens(wrapper, tokens);
   const lines = [];
-  render(wrapper, 0, ids, lines);
+  render(wrapper, 0, tokens, lines);
   return `\n${lines.join('\n')}\n`;
 }
 

@@ -183,6 +183,33 @@ describe('PlayerCard — charakteryzacja', () => {
     await act(async () => { await Promise.resolve(); });
   });
 
+  it('wpłata domykająca dług uruchamia rozliczenie, a po spadku salda do zera — pieczątkę; cofnięcie je zrywa', async () => {
+    const { user, props, rerender } = renderCard({ debt: 45 });
+    const pay = async (amount) => {
+      await user.click(screen.getByRole('button', { name: '+ Inna kwota' }));
+      await user.type(await screen.findByLabelText('Kwota w złotych'), amount);
+      await user.click(screen.getByRole('button', { name: 'Zapisz wpłatę' }));
+    };
+
+    // Wpłata częściowa nie rozlicza karty.
+    await pay('10');
+    await waitFor(() => expect(props.onAddPayment).toHaveBeenCalledTimes(1));
+    await screen.findByText('10,00 zł zapisane');
+    expect(screen.queryByText('Rozliczanie…')).not.toBeInTheDocument();
+
+    // Wpłata na całą zaległość: licznik czeka na saldo z bazy, potem pojawia się pieczątka.
+    await pay('45');
+    await waitFor(() => expect(props.onAddPayment).toHaveBeenCalledTimes(2));
+    expect(await screen.findByText('Rozliczanie…')).toBeInTheDocument();
+    rerender(<PlayerCard {...props} player={{ ...props.player, currentDebt: 0 }} />);
+    expect(await screen.findByText('Wpłata zapisana. Karta rozliczona.')).toBeInTheDocument();
+
+    // Cofnięcie wpłaty zrywa animację rozliczenia.
+    await user.click(screen.getByRole('button', { name: /Cofnij/ }));
+    await waitFor(() => expect(props.onRemovePayment).toHaveBeenCalledWith('Ala', 'pay-1'));
+    await waitFor(() => expect(screen.queryByText('Wpłata zapisana. Karta rozliczona.')).not.toBeInTheDocument());
+  });
+
   it('tryb edycji wpłat: pięć kliknięć w kwotę, Enter i widoczny przycisk przełączają go', async () => {
     const { user } = renderCard({ debt: 45, openDetails: true, breakdown: BREAKDOWN });
     const amount = screen.getByRole('button', { name: /45,00zł.*tryb edycji wpłat/ });

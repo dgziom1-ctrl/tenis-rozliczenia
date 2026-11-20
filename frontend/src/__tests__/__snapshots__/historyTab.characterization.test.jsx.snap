@@ -1675,14 +1675,14 @@ exports[`HistoryTab — charakteryzacja > edycja sesji z nową zasadą: cena prz
     </button>
   </div>
 </div>
-<div aria-hidden="false" aria-labelledby="#id1" aria-modal="true" class="align-center is-open modal-overlay" role="dialog" style="--scrim-progress: 1" tabindex="-1">
+<div aria-hidden="false" aria-labelledby="~1" aria-modal="true" class="align-center is-open modal-overlay" role="dialog" style="--scrim-progress: 1" tabindex="-1">
   <div class="cut-corners modal-panel" style="max-width: 560px">
     <div class="modal-head">
       <svg aria-hidden="true" class="lucide lucide-pencil" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-cyan); flex-shrink: 0" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
         <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
         <path d="m15 5 4 4" />
       </svg>
-      <h2 id="#id1" style="color: var(--co-cyan); flex: 1 1 0%; font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin: 0px; text-transform: none">
+      <h2 id="~1" style="color: var(--co-cyan); flex: 1 1 0%; font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin: 0px; text-transform: none">
         "Edytuj sesję"
       </h2>
       <button aria-label="Zamknij" class="icon-btn modal-close-btn" style="align-items: center; background: transparent; color: var(--co-dim); cursor: pointer; display: flex; flex-shrink: 0; height: 44px; justify-content: center; margin-right: -10px; width: 44px" type="button">
@@ -1766,13 +1766,13 @@ exports[`HistoryTab — charakteryzacja > edycja sesji z nową zasadą: cena prz
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px">
           <div>
-            <label for="#id2" style="color: var(--co-dim); display: block; font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-bottom: 8px; text-transform: none">
+            <label for="~2" style="color: var(--co-dim); display: block; font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-bottom: 8px; text-transform: none">
               "Cena kortu z rezerwacji (zł)"
             </label>
             <p style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; margin: 0px 0px 8px 0px">
               "Kwota zapłacona przy rezerwacji, jeszcze przed zwrotem za karty. Rakiety doliczysz osobno."
             </p>
-            <input aria-invalid="false" class="cyber-input" id="#id2" inputmode="decimal" placeholder="np. 56" style="clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 10px 12px; width: 100%" type="text" value="115" />
+            <input aria-invalid="false" class="cyber-input" id="~2" inputmode="decimal" placeholder="np. 56" style="clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 10px 12px; width: 100%" type="text" value="115" />
           </div>
           <div style="background: var(--co-tint); border: 1px solid var(--co-tint-line); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 10px 12px">
             <div style="align-items: baseline; display: flex; gap: 8px; justify-content: space-between">
@@ -1924,10 +1924,10 @@ exports[`HistoryTab — charakteryzacja > edycja sesji z nową zasadą: cena prz
             "Wypożyczone rakiety"
           </p>
           <div style="align-items: center; display: flex; gap: 8px; margin-bottom: 10px">
-            <label for="#id3" style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; white-space: nowrap">
+            <label for="~3" style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; white-space: nowrap">
               "Cena / szt.:"
             </label>
-            <input aria-invalid="false" class="cyber-input" id="#id3" inputmode="decimal" style="clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); font-family: var(--font-mono); padding: 8px; text-align: center; width: 78px" type="text" value="5" />
+            <input aria-invalid="false" class="cyber-input" id="~3" inputmode="decimal" style="clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); font-family: var(--font-mono); padding: 8px; text-align: center; width: 78px" type="text" value="5" />
             <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
               "zł"
             </span>
@@ -3725,14 +3725,14 @@ exports[`HistoryTab — charakteryzacja > edycja starej sesji: formularz z koszt
     </button>
   </div>
 </div>
-<div aria-hidden="false" aria-labelledby="#id1" aria-modal="true" class="align-center is-open modal-overlay" role="dialog" style="--scrim-progress: 1" tabindex="-1">
+<div aria-hidden="false" aria-labelledby="~1" aria-modal="true" class="align-center is-open modal-overlay" role="dialog" style="--scrim-progress: 1" tabindex="-1">
   <div class="cut-corners modal-panel" style="max-width: 560px">
     <div class="modal-head">
       <svg aria-hidden="true" class="lucide lucide-pencil" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-cyan); flex-shrink: 0" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
         <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
         <path d="m15 5 4 4" />
       </svg>
-      <h2 id="#id1" style="color: var(--co-cyan); flex: 1 1 0%; font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin: 0px; text-transform: none">
+      <h2 id="~1" style="color: var(--co-cyan); flex: 1 1 0%; font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin: 0px; text-transform: none">
         "Edytuj sesję"
       </h2>
       <button aria-label="Zamknij" class="icon-btn modal-close-btn" style="align-items: center; background: transparent; color: var(--co-dim); cursor: pointer; display: flex; flex-shrink: 0; height: 44px; justify-content: center; margin-right: -10px; width: 44px" type="button">
@@ -3813,10 +3813,10 @@ exports[`HistoryTab — charakteryzacja > edycja starej sesji: formularz z koszt
             </div>
           </div>
           <div>
-            <label for="#id2" style="color: var(--co-cyan); display: block; font-family: var(--font-display); font-size: 0.875rem; letter-spacing: normal; margin-bottom: 6px; text-transform: none">
+            <label for="~2" style="color: var(--co-cyan); display: block; font-family: var(--font-display); font-size: 0.875rem; letter-spacing: normal; margin-bottom: 6px; text-transform: none">
               "Koszt kortu"
             </label>
-            <input aria-invalid="false" class="cyber-input" id="#id2" inputmode="decimal" style="clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 10px 12px; width: 100%" type="text" value="45" />
+            <input aria-invalid="false" class="cyber-input" id="~2" inputmode="decimal" style="clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 10px 12px; width: 100%" type="text" value="45" />
             <p style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; margin: 6px 0px 0px">
               "Kwota za kort po odliczeniu wszystkich odbić kart"
             </p>
@@ -7377,14 +7377,14 @@ exports[`HistoryTab — charakteryzacja > stara sesja z rakietami: pole kosztu p
     </button>
   </div>
 </div>
-<div aria-hidden="false" aria-labelledby="#id1" aria-modal="true" class="align-center is-open modal-overlay" role="dialog" style="--scrim-progress: 1" tabindex="-1">
+<div aria-hidden="false" aria-labelledby="~1" aria-modal="true" class="align-center is-open modal-overlay" role="dialog" style="--scrim-progress: 1" tabindex="-1">
   <div class="cut-corners modal-panel" style="max-width: 560px">
     <div class="modal-head">
       <svg aria-hidden="true" class="lucide lucide-pencil" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-cyan); flex-shrink: 0" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
         <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
         <path d="m15 5 4 4" />
       </svg>
-      <h2 id="#id1" style="color: var(--co-cyan); flex: 1 1 0%; font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin: 0px; text-transform: none">
+      <h2 id="~1" style="color: var(--co-cyan); flex: 1 1 0%; font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin: 0px; text-transform: none">
         "Edytuj sesję"
       </h2>
       <button aria-label="Zamknij" class="icon-btn modal-close-btn" style="align-items: center; background: transparent; color: var(--co-dim); cursor: pointer; display: flex; flex-shrink: 0; height: 44px; justify-content: center; margin-right: -10px; width: 44px" type="button">
@@ -7465,10 +7465,10 @@ exports[`HistoryTab — charakteryzacja > stara sesja z rakietami: pole kosztu p
             </div>
           </div>
           <div>
-            <label for="#id2" style="color: var(--co-cyan); display: block; font-family: var(--font-display); font-size: 0.875rem; letter-spacing: normal; margin-bottom: 6px; text-transform: none">
+            <label for="~2" style="color: var(--co-cyan); display: block; font-family: var(--font-display); font-size: 0.875rem; letter-spacing: normal; margin-bottom: 6px; text-transform: none">
               "Koszt kortu"
             </label>
-            <input aria-invalid="false" class="cyber-input" id="#id2" inputmode="decimal" style="clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 10px 12px; width: 100%" type="text" value="60" />
+            <input aria-invalid="false" class="cyber-input" id="~2" inputmode="decimal" style="clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding: 10px 12px; width: 100%" type="text" value="60" />
             <p style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; margin: 6px 0px 0px">
               "Kwota za kort. Rakiety 10,00 zł doliczone osobno — razem 70,00 zł"
             </p>
@@ -7597,10 +7597,10 @@ exports[`HistoryTab — charakteryzacja > stara sesja z rakietami: pole kosztu p
             "Wypożyczone rakiety"
           </p>
           <div style="align-items: center; display: flex; gap: 8px; margin-bottom: 10px">
-            <label for="#id3" style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; white-space: nowrap">
+            <label for="~3" style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; white-space: nowrap">
               "Cena / szt.:"
             </label>
-            <input aria-invalid="false" class="cyber-input" id="#id3" inputmode="decimal" style="clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); font-family: var(--font-mono); padding: 8px; text-align: center; width: 78px" type="text" value="5" />
+            <input aria-invalid="false" class="cyber-input" id="~3" inputmode="decimal" style="clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); font-family: var(--font-mono); padding: 8px; text-align: center; width: 78px" type="text" value="5" />
             <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
               "zł"
             </span>

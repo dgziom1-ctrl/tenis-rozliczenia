@@ -34,16 +34,16 @@ exports[`PlayerCard — charakteryzacja > stan: nadpłata 1`] = `
             <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
               <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
                 <defs>
-                  <lineargradient id="cp-bg-_r_8_" x1="0" x2="1" y1="0" y2="1">
+                  <lineargradient id="cp-bg-~1" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
                   </lineargradient>
-                  <clippath id="cp-clip-_r_8_">
+                  <clippath id="cp-clip-~1">
                     <rect height="80" width="80" x="0" y="0" />
                   </clippath>
                 </defs>
-                <rect fill="url(#cp-bg-_r_8_)" height="80" width="80" />
-                <g clip-path="url(#cp-clip-_r_8_)">
+                <rect fill="url(#cp-bg-~1)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-~1)">
                   <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
@@ -238,16 +238,16 @@ exports[`PlayerCard — charakteryzacja > stan: rozliczony 1`] = `
             <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
               <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
                 <defs>
-                  <lineargradient id="cp-bg-_r_f_" x1="0" x2="1" y1="0" y2="1">
+                  <lineargradient id="cp-bg-~1" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
                   </lineargradient>
-                  <clippath id="cp-clip-_r_f_">
+                  <clippath id="cp-clip-~1">
                     <rect height="80" width="80" x="0" y="0" />
                   </clippath>
                 </defs>
-                <rect fill="url(#cp-bg-_r_f_)" height="80" width="80" />
-                <g clip-path="url(#cp-clip-_r_f_)">
+                <rect fill="url(#cp-bg-~1)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-~1)">
                   <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
@@ -439,16 +439,16 @@ exports[`PlayerCard — charakteryzacja > stan: skarbnik: do zebrania 1`] = `
             <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
               <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
                 <defs>
-                  <lineargradient id="cp-bg-_r_u_" x1="0" x2="1" y1="0" y2="1">
+                  <lineargradient id="cp-bg-~1" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stop-color="#BE2ADF" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#BE2ADF" stop-opacity="0.08" />
                   </lineargradient>
-                  <clippath id="cp-clip-_r_u_">
+                  <clippath id="cp-clip-~1">
                     <rect height="80" width="80" x="0" y="0" />
                   </clippath>
                 </defs>
-                <rect fill="url(#cp-bg-_r_u_)" height="80" width="80" />
-                <g clip-path="url(#cp-clip-_r_u_)">
+                <rect fill="url(#cp-bg-~1)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-~1)">
                   <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="1" />
                   <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
                   <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="1" />
@@ -633,16 +633,16 @@ exports[`PlayerCard — charakteryzacja > stan: skarbnik: saldo dodatnie 1`] = `
             <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
               <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
                 <defs>
-                  <lineargradient id="cp-bg-_r_11_" x1="0" x2="1" y1="0" y2="1">
+                  <lineargradient id="cp-bg-~1" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stop-color="#BE2ADF" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#BE2ADF" stop-opacity="0.08" />
                   </lineargradient>
-                  <clippath id="cp-clip-_r_11_">
+                  <clippath id="cp-clip-~1">
                     <rect height="80" width="80" x="0" y="0" />
                   </clippath>
                 </defs>
-                <rect fill="url(#cp-bg-_r_11_)" height="80" width="80" />
-                <g clip-path="url(#cp-clip-_r_11_)">
+                <rect fill="url(#cp-bg-~1)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-~1)">
                   <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="1" />
                   <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
                   <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="1" />
@@ -827,16 +827,16 @@ exports[`PlayerCard — charakteryzacja > stan: skarbnik: wszyscy rozliczeni 1`]
             <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
               <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
                 <defs>
-                  <lineargradient id="cp-bg-_r_14_" x1="0" x2="1" y1="0" y2="1">
+                  <lineargradient id="cp-bg-~1" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stop-color="#BE2ADF" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#BE2ADF" stop-opacity="0.08" />
                   </lineargradient>
-                  <clippath id="cp-clip-_r_14_">
+                  <clippath id="cp-clip-~1">
                     <rect height="80" width="80" x="0" y="0" />
                   </clippath>
                 </defs>
-                <rect fill="url(#cp-bg-_r_14_)" height="80" width="80" />
-                <g clip-path="url(#cp-clip-_r_14_)">
+                <rect fill="url(#cp-bg-~1)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-~1)">
                   <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="1" />
                   <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
                   <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="1" />
@@ -926,7 +926,7 @@ exports[`PlayerCard — charakteryzacja > stan: skarbnik: wszyscy rozliczeni 1`]
         </div>
       </div>
       <div style="margin-bottom: 12px">
-        <button aria-controls="#id1" aria-expanded="true" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+        <button aria-controls="~2" aria-expanded="true" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
           <span aria-hidden="true" style="display: inline-flex; transform: rotate(180deg); transition: transform 0.25s">
             <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
               <path d="m6 9 6 6 6-6" />
@@ -934,7 +934,7 @@ exports[`PlayerCard — charakteryzacja > stan: skarbnik: wszyscy rozliczeni 1`]
           </span>
           "Zwiń szczegóły"
         </button>
-        <div id="#id1" style="background: var(--co-surface-2); border: 1px solid var(--co-border); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); margin-top: 4px; max-height: min(320px, 55vh); overflow-y: auto; overflow: hidden">
+        <div id="~2" style="background: var(--co-surface-2); border: 1px solid var(--co-border); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); margin-top: 4px; max-height: min(320px, 55vh); overflow-y: auto; overflow: hidden">
           <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
             <span aria-hidden="true" style="color: var(--co-green)">
               ">"
@@ -1064,16 +1064,16 @@ exports[`PlayerCard — charakteryzacja > stan: zaległość 1`] = `
             <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
               <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
                 <defs>
-                  <lineargradient id="cp-bg-_r_0_" x1="0" x2="1" y1="0" y2="1">
+                  <lineargradient id="cp-bg-~1" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
                   </lineargradient>
-                  <clippath id="cp-clip-_r_0_">
+                  <clippath id="cp-clip-~1">
                     <rect height="80" width="80" x="0" y="0" />
                   </clippath>
                 </defs>
-                <rect fill="url(#cp-bg-_r_0_)" height="80" width="80" />
-                <g clip-path="url(#cp-clip-_r_0_)">
+                <rect fill="url(#cp-bg-~1)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-~1)">
                   <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
@@ -1184,13 +1184,13 @@ exports[`PlayerCard — charakteryzacja > stan: zaległość 1`] = `
         </button>
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
-        <button aria-describedby="#id1" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
+        <button aria-describedby="~2" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
           <span aria-hidden="true" class="hold-confirm-fill" style="transform: scaleX(0); transition: transform 120ms ease-out" />
           <span style="align-items: center; display: flex; flex-direction: column; gap: 1px; position: relative; z-index: 1">
             <span style="font-family: var(--font-display); font-size: 1.25rem; letter-spacing: normal; line-height: 1">
               "45,00 zł"
             </span>
-            <span id="#id1" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
+            <span id="~2" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
               "Przytrzymaj, aby zapisać"
             </span>
           </span>
@@ -1277,16 +1277,16 @@ exports[`PlayerCard — charakteryzacja > stan: zaległość z rozwiniętym rozb
             <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
               <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
                 <defs>
-                  <lineargradient id="cp-bg-_r_m_" x1="0" x2="1" y1="0" y2="1">
+                  <lineargradient id="cp-bg-~1" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
                   </lineargradient>
-                  <clippath id="cp-clip-_r_m_">
+                  <clippath id="cp-clip-~1">
                     <rect height="80" width="80" x="0" y="0" />
                   </clippath>
                 </defs>
-                <rect fill="url(#cp-bg-_r_m_)" height="80" width="80" />
-                <g clip-path="url(#cp-clip-_r_m_)">
+                <rect fill="url(#cp-bg-~1)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-~1)">
                   <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
@@ -1387,7 +1387,7 @@ exports[`PlayerCard — charakteryzacja > stan: zaległość z rozwiniętym rozb
         "Edytuj wpłaty"
       </button>
       <div style="margin-bottom: 12px">
-        <button aria-controls="#id1" aria-expanded="true" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+        <button aria-controls="~2" aria-expanded="true" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
           <span aria-hidden="true" style="display: inline-flex; transform: rotate(180deg); transition: transform 0.25s">
             <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
               <path d="m6 9 6 6 6-6" />
@@ -1395,7 +1395,7 @@ exports[`PlayerCard — charakteryzacja > stan: zaległość z rozwiniętym rozb
           </span>
           "Zwiń szczegóły"
         </button>
-        <div id="#id1" style="background: var(--co-surface-2); border: 1px solid var(--co-border); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); margin-top: 4px; max-height: min(320px, 55vh); overflow-y: auto; overflow: hidden">
+        <div id="~2" style="background: var(--co-surface-2); border: 1px solid var(--co-border); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); margin-top: 4px; max-height: min(320px, 55vh); overflow-y: auto; overflow: hidden">
           <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
             <span aria-hidden="true" style="color: var(--co-green)">
               ">"
@@ -1453,13 +1453,13 @@ exports[`PlayerCard — charakteryzacja > stan: zaległość z rozwiniętym rozb
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
-        <button aria-describedby="#id2" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
+        <button aria-describedby="~3" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
           <span aria-hidden="true" class="hold-confirm-fill" style="transform: scaleX(0); transition: transform 120ms ease-out" />
           <span style="align-items: center; display: flex; flex-direction: column; gap: 1px; position: relative; z-index: 1">
             <span style="font-family: var(--font-display); font-size: 1.25rem; letter-spacing: normal; line-height: 1">
               "45,00 zł"
             </span>
-            <span id="#id2" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
+            <span id="~3" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
               "Przytrzymaj, aby zapisać"
             </span>
           </span>
@@ -1546,16 +1546,16 @@ exports[`PlayerCard — charakteryzacja > tryb edycji wpłat: pięć kliknięć 
             <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
               <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
                 <defs>
-                  <lineargradient id="cp-bg-_r_34_" x1="0" x2="1" y1="0" y2="1">
+                  <lineargradient id="cp-bg-~1" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
                   </lineargradient>
-                  <clippath id="cp-clip-_r_34_">
+                  <clippath id="cp-clip-~1">
                     <rect height="80" width="80" x="0" y="0" />
                   </clippath>
                 </defs>
-                <rect fill="url(#cp-bg-_r_34_)" height="80" width="80" />
-                <g clip-path="url(#cp-clip-_r_34_)">
+                <rect fill="url(#cp-bg-~1)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-~1)">
                   <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
@@ -1664,7 +1664,7 @@ exports[`PlayerCard — charakteryzacja > tryb edycji wpłat: pięć kliknięć 
         "Zakończ edycję wpłat"
       </button>
       <div style="margin-bottom: 12px">
-        <button aria-controls="#id1" aria-expanded="true" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+        <button aria-controls="~2" aria-expanded="true" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
           <span aria-hidden="true" style="display: inline-flex; transform: rotate(180deg); transition: transform 0.25s">
             <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
               <path d="m6 9 6 6 6-6" />
@@ -1672,7 +1672,7 @@ exports[`PlayerCard — charakteryzacja > tryb edycji wpłat: pięć kliknięć 
           </span>
           "Zwiń szczegóły"
         </button>
-        <div id="#id1" style="background: var(--co-surface-2); border: 1px solid var(--co-border); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); margin-top: 4px; max-height: min(320px, 55vh); overflow-y: auto; overflow: hidden">
+        <div id="~2" style="background: var(--co-surface-2); border: 1px solid var(--co-border); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); margin-top: 4px; max-height: min(320px, 55vh); overflow-y: auto; overflow: hidden">
           <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
             <span aria-hidden="true" style="color: var(--co-green)">
               ">"
@@ -1736,13 +1736,13 @@ exports[`PlayerCard — charakteryzacja > tryb edycji wpłat: pięć kliknięć 
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
-        <button aria-describedby="#id2" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
+        <button aria-describedby="~3" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
           <span aria-hidden="true" class="hold-confirm-fill" style="transform: scaleX(0); transition: transform 120ms ease-out" />
           <span style="align-items: center; display: flex; flex-direction: column; gap: 1px; position: relative; z-index: 1">
             <span style="font-family: var(--font-display); font-size: 1.25rem; letter-spacing: normal; line-height: 1">
               "45,00 zł"
             </span>
-            <span id="#id2" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
+            <span id="~3" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
               "Przytrzymaj, aby zapisać"
             </span>
           </span>
@@ -1829,16 +1829,16 @@ exports[`PlayerCard — charakteryzacja > wersja mobilna: bez kodu kreskowego, z
             <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
               <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
                 <defs>
-                  <lineargradient id="cp-bg-_r_17_" x1="0" x2="1" y1="0" y2="1">
+                  <lineargradient id="cp-bg-~1" x1="0" x2="1" y1="0" y2="1">
                     <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
                     <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
                   </lineargradient>
-                  <clippath id="cp-clip-_r_17_">
+                  <clippath id="cp-clip-~1">
                     <rect height="80" width="80" x="0" y="0" />
                   </clippath>
                 </defs>
-                <rect fill="url(#cp-bg-_r_17_)" height="80" width="80" />
-                <g clip-path="url(#cp-clip-_r_17_)">
+                <rect fill="url(#cp-bg-~1)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-~1)">
                   <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
                   <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
@@ -1946,13 +1946,13 @@ exports[`PlayerCard — charakteryzacja > wersja mobilna: bez kodu kreskowego, z
         </button>
       </div>
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
-        <button aria-describedby="#id1" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
+        <button aria-describedby="~2" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
           <span aria-hidden="true" class="hold-confirm-fill" style="transform: scaleX(0); transition: transform 120ms ease-out" />
           <span style="align-items: center; display: flex; flex-direction: column; gap: 1px; position: relative; z-index: 1">
             <span style="font-family: var(--font-display); font-size: 1.25rem; letter-spacing: normal; line-height: 1">
               "45,00 zł"
             </span>
-            <span id="#id1" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
+            <span id="~2" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
               "Przytrzymaj, aby zapisać"
             </span>
           </span>
