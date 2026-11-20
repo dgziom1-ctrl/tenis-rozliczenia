@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { Terminal, CalendarDays, Pencil } from 'lucide-react';
-import { updateWeek, deleteWeekWithSnapshot, restoreWeek } from '@/lib/firebase';
+import { updateWeek } from '@/lib/firebase';
 import SeasonSelector from '../attendance/SeasonSelector';
 import { parseAmount, isValidAmount, formatDate, plural } from '@/utils/format';
 import { getRacketSelection, getTotalWithRackets } from '@/utils/sessionCost';
@@ -13,10 +13,8 @@ import { useToast } from '../common/Toast';
 import { PasswordModal, PanelHeader } from '../common/SharedUI';
 import UndoBar from '../common/UndoBar';
 import Modal from '../common/Modal';
-import { SOUND_TYPES, SPORT, RACKET_PRICE, UNDO_TIMEOUT_SECONDS } from '@/constants';
+import { SPORT, RACKET_PRICE, UNDO_TIMEOUT_SECONDS } from '@/constants';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { useUndoTimer } from '@/hooks/useUndoTimer';
-import type { Week } from '@/types/domain';
 import type { HistoryEntry, SoundType, SessionEditForm } from '../../types/ui';
 import LogEntry from './LogEntry';
 import AttendanceTrendChart from './AttendanceTrendChart';
@@ -24,6 +22,7 @@ import EditSessionForm from './EditSessionForm';
 import PlayerFilterSheet from './PlayerFilterSheet';
 import HistoryFilterBar from './HistoryFilterBar';
 import { useHistoryFilters, SESSIONS_PAGE_SIZE } from './useHistoryFilters';
+import { useDeleteWithUndo } from './useDeleteWithUndo';
 import { CLIP, FONT, TEXT } from '@/constants/styles';
 
 /** Edytowana sesja razem z jej identyfikatorem — jedno albo drugie nigdy nie występuje osobno. */
@@ -35,13 +34,6 @@ interface EditState {
 }
 
 const DISCARD_PROMPT = 'Masz niezapisane zmiany w edytowanej sesji. Odrzucić je?';
-
-interface PendingDeletedWeek {
-  week: Week;
-  token: number;
-  /** Wcześniejsze usunięcia, które też da się jeszcze cofnąć (najstarsze pierwsze). */
-  earlier: Week[];
-}
 
 interface HistoryTabProps {
   history: HistoryEntry[];
@@ -64,16 +56,12 @@ export default function HistoryTab({ history, playerNames, singleScanPlayers = N
     seasonHistory, filteredHistory, visibleHistory, hasMoreSessions, grouped, showMore,
   } = useHistoryFilters(history);
   const { showError, showSuccess } = useToast();
-  const { undoToast, progressPct, startUndo, dismissUndo } = useUndoTimer<PendingDeletedWeek>();
+  const { undoToast, progressPct, handleDelete, handleUndoDelete } = useDeleteWithUndo(playSound);
   const isMobile = useIsMobile();
 
-  // Ref blokują zapis, zanim stan zdąży się przerysować — chroni przed dwoma
+  // Ref blokuje zapis, zanim stan zdąży się przerysować — chroni przed dwoma
   // szybkimi kliknięciami w ten sam przycisk.
   const savingRef = useRef(false);
-  const deletingRef = useRef(false);
-  const undoingRef = useRef(false);
-  const undoSequenceRef = useRef(0);
-  const activeUndoTokenRef = useRef<number | null>(null);
 
   const editForm = editing?.form;
   // Sesje z nowym sposobem wpisywania liczą kwotę kortu z ceny i zwrotu;
@@ -87,8 +75,6 @@ export default function HistoryTab({ history, playerNames, singleScanPlayers = N
       ? (grossError(editForm?.courtGross) ?? editRefund.error)
       : costError(String(editForm?.cost ?? ''));
   const isEditDirty = editing !== null && JSON.stringify(editing.form) !== editing.initial;
-  const undoToastRef = useRef<typeof undoToast>(null);
-  undoToastRef.current = undoToast;
 
   const handleExportCSV = () => {
     try {
@@ -111,66 +97,6 @@ export default function HistoryTab({ history, playerNames, singleScanPlayers = N
     setPwModal({ type: 'edit', row });
   }, []);
   const requestDelete = useCallback((id: string) => setPwModal({ type: 'delete', rowId: id }), []);
-
-  const handleDelete = useCallback(async (id: string) => {
-    if (deletingRef.current) return;
-    deletingRef.current = true;
-    try {
-      const result = await deleteWeekWithSnapshot(id);
-      if (!result.success) {
-        playSound(SOUND_TYPES.ERROR);
-        showError(result.error || 'Nie udało się usunąć sesji');
-        return;
-      }
-      if (result.deletedWeek) {
-        const token = ++undoSequenceRef.current;
-        activeUndoTokenRef.current = token;
-        // Drugie usunięcie w oknie cofania nie może kasować możliwości cofnięcia
-        // pierwszego — poprzednie sesje trafiają na stos.
-        const previous = undoToastRef.current?.payload;
-        const earlier = previous ? [...previous.earlier, previous.week] : [];
-        startUndo({ week: result.deletedWeek, token, earlier });
-      }
-      playSound(SOUND_TYPES.DELETE);
-    } catch {
-      playSound(SOUND_TYPES.ERROR);
-      showError('Nie udało się usunąć sesji');
-    } finally {
-      deletingRef.current = false;
-    }
-  }, [playSound, showError, startUndo]);
-
-  const handleUndoDelete = useCallback(async () => {
-    if (!undoToast || undoingRef.current) return;
-    undoingRef.current = true;
-    try {
-      const { week, token, earlier } = undoToast.payload;
-      const result = await restoreWeek(week);
-      if (!result.success) {
-        playSound(SOUND_TYPES.ERROR);
-        showError(result.error || 'Nie udało się przywrócić sesji');
-        return;
-      }
-      if (activeUndoTokenRef.current === token) {
-        if (earlier.length > 0) {
-          // Po cofnięciu ostatniego usunięcia wraca opcja cofnięcia poprzedniego.
-          const nextToken = ++undoSequenceRef.current;
-          activeUndoTokenRef.current = nextToken;
-          startUndo({ week: earlier[earlier.length - 1], token: nextToken, earlier: earlier.slice(0, -1) });
-        } else {
-          activeUndoTokenRef.current = null;
-          dismissUndo();
-        }
-      }
-      playSound(SOUND_TYPES.SUCCESS);
-      showSuccess('Sesja przywrócona');
-    } catch {
-      playSound(SOUND_TYPES.ERROR);
-      showError('Nie udało się przywrócić sesji');
-    } finally {
-      undoingRef.current = false;
-    }
-  }, [undoToast, dismissUndo, startUndo, playSound, showError, showSuccess]);
 
   const handlePasswordConfirm = () => {
     if (!pwModal) return;
