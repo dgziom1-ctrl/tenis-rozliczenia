@@ -1,4 +1,4 @@
-import type { SceneContext, Vec3 } from './types';
+import type { Projected, SceneContext, Vec3 } from './types';
 import { clamp01, rgba } from './kit';
 
 /*
@@ -254,45 +254,45 @@ interface DrawRacketOptions {
   charge?: number;
 }
 
-export function drawRacket(
-  g: CanvasRenderingContext2D,
-  { P, proj, glows, lightMode }: SceneContext,
-  spec: RacketSpec,
-  pose: RacketPose,
-  { hitting, impact, charge = 0 }: DrawRacketOptions,
-) {
-  const { model, headLen, headWid } = spec;
-  const C = add(pose.hand, scale(pose.dir, spec.shaft + headLen));
-  const pc = proj(C[0], C[1], C[2]);
-  const pv = proj(...add(C, scale(pose.dir, headLen)));
-  const pu = proj(...add(C, scale(pose.width, headWid)));
-  const ux = pu[0] - pc[0], uy = pu[1] - pc[1];
-  const vx = pv[0] - pc[0], vy = pv[1] - pc[1];
-  const map = ([a, b]: L2): L2 => [pc[0] + ux * a + vx * b, pc[1] + uy * a + vy * b];
-  const path = (pts: L2[], close: boolean) => {
-    g.beginPath();
-    pts.forEach((p, i) => {
-      const [x, y] = map(p);
-      if (i) g.lineTo(x, y); else g.moveTo(x, y);
-    });
-    if (close) g.closePath();
-  };
+/**
+ * Geometria jednego rysowania rakiety: środek głowy po rzucie, półosie głowy
+ * na ekranie (u — w poprzek, v — wzdłuż) i przekształcenie punktów lokalnych na
+ * ekran. Kolejne warstwy tylko je czytają.
+ */
+interface RacketFrame {
+  g: CanvasRenderingContext2D;
+  scene: SceneContext;
+  spec: RacketSpec;
+  pose: RacketPose;
+  hitting: boolean;
+  impact: number;
+  charge: number;
+  /** Środek głowy w świecie. */
+  center: Vec3;
+  /** Środek głowy po rzucie. */
+  pc: Projected;
+  ux: number; uy: number;
+  vx: number; vy: number;
+  map: (p: L2) => L2;
+  /** Ścieżka przez punkty lokalne (opcjonalnie zamknięta); nic nie rysuje. */
+  path: (pts: L2[], close: boolean) => void;
+}
 
-  const glowK = Math.max(hitting ? 1 : 0, charge * 0.6);
+/** Poświata pod głową — sprite rozciągnięty tym samym przekształceniem. */
+function drawRacketHalo({ g, scene, hitting, impact, charge, pc, ux, uy, vx, vy }: RacketFrame) {
+  const halo = hitting ? scene.glows.hit : scene.glows.idle;
+  if (!halo) return;
+  const k = 1.9 * (hitting ? 1 + impact * 0.12 : 1);
+  g.save();
+  g.transform(ux * k, uy * k, vx * k, vy * k, pc[0], pc[1]);
+  g.globalAlpha = hitting ? 0.7 + 0.2 * impact : 0.38 + 0.2 * charge;
+  g.drawImage(halo, -1, -1, 2, 2);
+  g.restore();
+}
 
-  /* Poświata pod głową — sprite rozciągnięty tym samym przekształceniem. */
-  const halo = hitting ? glows.hit : glows.idle;
-  if (halo) {
-    const k = 1.9 * (hitting ? 1 + impact * 0.12 : 1);
-    g.save();
-    g.transform(ux * k, uy * k, vx * k, vy * k, pc[0], pc[1]);
-    g.globalAlpha = hitting ? 0.7 + 0.2 * impact : 0.38 + 0.2 * charge;
-    g.drawImage(halo, -1, -1, 2, 2);
-    g.restore();
-  }
-
-  /* Uchwyt i trzonek — w świecie, żeby grubość szła za perspektywą. */
-  const headBase = add(C, scale(pose.dir, -headLen));
+/** Uchwyt i trzonek — w świecie, żeby grubość szła za perspektywą. */
+function drawRacketShaft({ g, scene: { P, proj }, spec, pose, hitting, charge, center }: RacketFrame) {
+  const headBase = add(center, scale(pose.dir, -spec.headLen));
   const gripEnd = add(pose.hand, scale(pose.dir, -spec.handle));
   const pHand = proj(...pose.hand), pBase = proj(...headBase), pGrip = proj(...gripEnd);
   g.save();
@@ -312,69 +312,80 @@ export function drawRacket(
   g.lineWidth = (spec.shaftWidth + 2.6) * 0.42 * pGrip[2];
   g.stroke();
   g.restore();
+}
 
-  /* Twarz: pełna (padel) albo przezroczysta z naciągiem. */
-  if (spec.solid) {
-    const r = Math.max(Math.hypot(ux, uy), Math.hypot(vx, vy));
-    const body = g.createRadialGradient(pc[0] - ux * 0.2 - vx * 0.2, pc[1] - uy * 0.2 - vy * 0.2, 0, pc[0], pc[1], r * 1.05);
-    body.addColorStop(0, P.bodyFrom); body.addColorStop(0.76, P.bodyMid); body.addColorStop(1, P.bodyTo);
-    path(model.outline, true);
-    g.fillStyle = body; g.fill();
-    /* Wewnętrzna płyta — jaśniejsza, jak okładzina w ping-pongu. */
-    const face = g.createRadialGradient(pc[0] - ux * 0.15 + vx * 0.2, pc[1] - uy * 0.15 + vy * 0.2, 0, pc[0], pc[1], r * 0.9);
-    face.addColorStop(0, hitting ? rgba(P.rubberHit, 0.9) : rgba(P.rubberIdle, 0.62 + 0.2 * charge));
-    face.addColorStop(1, hitting ? rgba(P.rubberHitEnd, 0.7) : rgba(P.rubberIdleEnd, 0.42));
-    const inset = spec.faceInset ?? 0.85;
-    path(insetOf(model, inset, inset + 0.02), true);
-    g.fillStyle = face; g.fill();
-    /* Otworki: gotowa ścieżka w układzie lokalnym, wypełniona pod tym samym
-       przekształceniem co głowa — jedno wywołanie zamiast kilkudziesięciu łuków,
-       a otworki skracają się w perspektywie razem z twarzą. */
-    g.fillStyle = lightMode ? rgba(P.handle, 0.32) : P.bodyTo;
-    const holes = holesPath(model);
-    if (holes) {
-      g.save();
-      g.transform(ux, uy, vx, vy, pc[0], pc[1]);
-      g.fill(holes);
-      g.restore();
-    } else {
-      const hr = Math.max(0.3, Math.min(Math.hypot(ux, uy), Math.hypot(vx, vy)) * HOLE_R);
-      g.beginPath();
-      for (const h of model.holes) {
-        const [x, y] = map(h);
-        g.moveTo(x + hr, y);
-        g.arc(x, y, hr, 0, Math.PI * 2);
-      }
-      g.fill();
-    }
+/** Twarz pełna (padel, ping-pong): korpus, okładzina i otworki. */
+function drawRacketSolidFace({ g, scene: { P, lightMode }, spec, hitting, charge, pc, ux, uy, vx, vy, map, path }: RacketFrame) {
+  const { model } = spec;
+  const r = Math.max(Math.hypot(ux, uy), Math.hypot(vx, vy));
+  const body = g.createRadialGradient(pc[0] - ux * 0.2 - vx * 0.2, pc[1] - uy * 0.2 - vy * 0.2, 0, pc[0], pc[1], r * 1.05);
+  body.addColorStop(0, P.bodyFrom); body.addColorStop(0.76, P.bodyMid); body.addColorStop(1, P.bodyTo);
+  path(model.outline, true);
+  g.fillStyle = body; g.fill();
+  /* Wewnętrzna płyta — jaśniejsza, jak okładzina w ping-pongu. */
+  const face = g.createRadialGradient(pc[0] - ux * 0.15 + vx * 0.2, pc[1] - uy * 0.15 + vy * 0.2, 0, pc[0], pc[1], r * 0.9);
+  face.addColorStop(0, hitting ? rgba(P.rubberHit, 0.9) : rgba(P.rubberIdle, 0.62 + 0.2 * charge));
+  face.addColorStop(1, hitting ? rgba(P.rubberHitEnd, 0.7) : rgba(P.rubberIdleEnd, 0.42));
+  const inset = spec.faceInset ?? 0.85;
+  path(insetOf(model, inset, inset + 0.02), true);
+  g.fillStyle = face; g.fill();
+  /* Otworki: gotowa ścieżka w układzie lokalnym, wypełniona pod tym samym
+     przekształceniem co głowa — jedno wywołanie zamiast kilkudziesięciu łuków,
+     a otworki skracają się w perspektywie razem z twarzą. */
+  g.fillStyle = lightMode ? rgba(P.handle, 0.32) : P.bodyTo;
+  const holes = holesPath(model);
+  if (holes) {
+    g.save();
+    g.transform(ux, uy, vx, vy, pc[0], pc[1]);
+    g.fill(holes);
+    g.restore();
   } else {
-    path(model.outline, true);
-    g.fillStyle = rgba(P.accent, lightMode ? 0.06 : 0.07 + 0.08 * glowK);
-    g.fill();
+    const hr = Math.max(0.3, Math.min(Math.hypot(ux, uy), Math.hypot(vx, vy)) * HOLE_R);
     g.beginPath();
-    for (const [a, b] of model.strings) {
-      const [ax, ay] = map(a), [bx, by] = map(b);
-      g.moveTo(ax, ay); g.lineTo(bx, by);
+    for (const h of model.holes) {
+      const [x, y] = map(h);
+      g.moveTo(x + hr, y);
+      g.arc(x, y, hr, 0, Math.PI * 2);
     }
-    g.strokeStyle = rgba(hitting ? P.accent : P.rubberIdle, hitting ? 0.62 + 0.25 * impact : (lightMode ? 0.4 : 0.3) + 0.15 * charge);
-    g.lineWidth = 0.55;
-    g.stroke();
+    g.fill();
   }
+}
 
-  /* Gardło / mostek. */
+/** Twarz przezroczysta z naciągiem (badminton, squash). */
+function drawRacketStrungFace({ g, scene: { P, lightMode }, spec, hitting, impact, charge, map, path }: RacketFrame) {
+  const { model } = spec;
+  const glowK = Math.max(hitting ? 1 : 0, charge * 0.6);
+  path(model.outline, true);
+  g.fillStyle = rgba(P.accent, lightMode ? 0.06 : 0.07 + 0.08 * glowK);
+  g.fill();
+  g.beginPath();
+  for (const [a, b] of model.strings) {
+    const [ax, ay] = map(a), [bx, by] = map(b);
+    g.moveTo(ax, ay); g.lineTo(bx, by);
+  }
+  g.strokeStyle = rgba(hitting ? P.accent : P.rubberIdle, hitting ? 0.62 + 0.25 * impact : (lightMode ? 0.4 : 0.3) + 0.15 * charge);
+  g.lineWidth = 0.55;
+  g.stroke();
+}
+
+/** Gardło / mostek. */
+function drawRacketThroat({ g, scene: { P }, spec, hitting, charge, map }: RacketFrame) {
   g.lineJoin = 'round';
   g.strokeStyle = hitting ? rgba(P.accent, 0.8) : rgba(P.glowIdle, 0.5 + 0.15 * charge);
   g.lineWidth = 1.3;
   g.beginPath();
-  for (const line of model.throat) {
+  for (const line of spec.model.throat) {
     line.forEach((pt, i) => {
       const [x, y] = map(pt);
       if (i) g.lineTo(x, y); else g.moveTo(x, y);
     });
   }
   g.stroke();
+}
 
-  /* Rama: poświata, właściwa krawędź i cienka linia wewnętrzna. */
+/** Rama: poświata, właściwa krawędź i cienka linia wewnętrzna. */
+function drawRacketRim({ g, scene: { P }, spec, hitting, impact, charge, path }: RacketFrame) {
+  const { model } = spec;
   path(model.outline, true);
   g.strokeStyle = hitting ? rgba(P.accent, 0.5 + 0.2 * impact) : rgba(P.glow, 0.28 + 0.12 * charge);
   g.lineWidth = 3.2 * (spec.rim ?? 1);
@@ -389,6 +400,40 @@ export function drawRacket(
     g.stroke();
   }
   g.lineJoin = 'miter';
+}
+
+export function drawRacket(
+  g: CanvasRenderingContext2D,
+  scene: SceneContext,
+  spec: RacketSpec,
+  pose: RacketPose,
+  { hitting, impact, charge = 0 }: DrawRacketOptions,
+) {
+  const { proj } = scene;
+  const { headLen, headWid } = spec;
+  const center = add(pose.hand, scale(pose.dir, spec.shaft + headLen));
+  const pc = proj(center[0], center[1], center[2]);
+  const pv = proj(...add(center, scale(pose.dir, headLen)));
+  const pu = proj(...add(center, scale(pose.width, headWid)));
+  const ux = pu[0] - pc[0], uy = pu[1] - pc[1];
+  const vx = pv[0] - pc[0], vy = pv[1] - pc[1];
+  const map = ([a, b]: L2): L2 => [pc[0] + ux * a + vx * b, pc[1] + uy * a + vy * b];
+  const path = (pts: L2[], close: boolean) => {
+    g.beginPath();
+    pts.forEach((p, i) => {
+      const [x, y] = map(p);
+      if (i) g.lineTo(x, y); else g.moveTo(x, y);
+    });
+    if (close) g.closePath();
+  };
+
+  const frame: RacketFrame = { g, scene, spec, pose, hitting, impact, charge, center, pc, ux, uy, vx, vy, map, path };
+  drawRacketHalo(frame);
+  drawRacketShaft(frame);
+  if (spec.solid) drawRacketSolidFace(frame);
+  else drawRacketStrungFace(frame);
+  drawRacketThroat(frame);
+  drawRacketRim(frame);
 }
 
 /* ── Piłka ────────────────────────────────────────────────────────── */
