@@ -1,6 +1,7 @@
 // Podział kosztów sesji dla powiadomień push.
 //
-// To port `frontend/src/utils/money.ts` + `frontend/src/utils/sessionCost.ts`.
+// To port `frontend/src/utils/money.ts` + modułów `frontend/src/utils/sessionCost/`
+// (session, limits, scanSplit, legacySplit, shares); funkcje mają te same nazwy.
 // Cloud Functions to osobny pakiet (CommonJS, bez TypeScriptu), więc nie może
 // zaimportować tamtych modułów bezpośrednio. Zgodność obu implementacji pilnuje
 // test `frontend/src/__tests__/functionsParity.test.js` — jeśli zmieniasz
@@ -115,7 +116,7 @@ function allocateNonNegative(targets, totalGrosze) {
   return splitEqually(safeTotal, count);
 }
 
-/** Imiona bez duplikatów i pustych wpisów — patrz sessionCost.ts. */
+/** Imiona bez duplikatów i pustych wpisów — patrz utils/sessionCost/session.ts. */
 function uniqueNames(names) {
   if (!Array.isArray(names)) return [];
   const seen = new Set();
@@ -127,7 +128,7 @@ function uniqueNames(names) {
 
 function parseSession(session) {
   const present = uniqueNames(session.presentPlayers || session.present);
-  // `overtimeCost` to zaszłość po usuniętej dogrywce — patrz sessionCost.ts.
+  // `overtimeCost` to zaszłość po usuniętej dogrywce — patrz utils/sessionCost/session.ts.
   const totalGrosze = Math.max(0, toGrosze(session.totalCost ?? session.cost ?? 0))
     + Math.max(0, toGrosze(session.overtimeCost ?? 0));
   const racketGrosze = Math.min(Math.max(0, toGrosze(session.racketCost ?? 0)), totalGrosze);
@@ -158,26 +159,28 @@ function parseSession(session) {
   };
 }
 
+/** Ile kart Multisport honoruje obiekt na 1 kort przez 1 godzinę — kopia z limits.ts. */
+function getMultisportPerCourtHour(sport) {
+  return MULTISPORT_PER_COURT_HOUR[sport] ?? MULTISPORT_PER_COURT_HOUR.pingpong;
+}
+
 /**
- * Zasada „odbicie dla odbijającego” (`discountModel: 'perScan'`) — kopia
- * `splitCourtPerScan` z sessionCost.ts. MS odbija się co godzinę, karta
- * jednorazowa (Medicover) tylko w 1. godzinie; limit obiektu per godzina.
+ * Zniżki wynikające z reguł: ile odbić zadziałało i ile groszy przypada każdemu
+ * odbijającemu — kopia `computeScanCredits` z `utils/sessionCost/scanSplit.ts`.
+ * MS odbija się co godzinę, karta jednorazowa (Medicover) tylko w 1. godzinie;
+ * limit obiektu działa per godzina.
  */
-function splitCourtPerScan(parsed, courtGrosze) {
+function computeScanCredits(parsed) {
   const { present, multi, singleScan, courtCount, durationHours, sport } = parsed;
-  const court = new Map();
   const discount = toGrosze(MULTISPORT_DISCOUNT);
   const hours = durationHours ?? 1;
   const hasLimits = courtCount !== undefined && durationHours !== undefined && sport !== undefined;
-  const perHourCapacity = hasLimits
-    ? courtCount * (MULTISPORT_PER_COURT_HOUR[sport] ?? MULTISPORT_PER_COURT_HOUR.pingpong)
-    : Infinity;
-  const maxMulti = hasLimits ? perHourCapacity * hours : Infinity;
+  const perHourCapacity = hasLimits ? courtCount * getMultisportPerCourtHour(sport) : Infinity;
 
   const cardHolders = present.filter(p => multi.includes(p));
   const everyHour = cardHolders.filter(p => !singleScan.includes(p));
 
-  let credit = new Map(present.map(p => [p, 0]));
+  const credit = new Map(present.map(p => [p, 0]));
   let effectiveScans = 0;
   let multiCapped = false;
   for (let hour = 1; hour <= hours; hour++) {
@@ -193,10 +196,24 @@ function splitCourtPerScan(parsed, courtGrosze) {
       credit.set(p, (credit.get(p) ?? 0) + perScan + (i < remainder ? 1 : 0));
     });
   }
+  return { credit, effectiveScans, multiCapped, perHourCapacity, hours, hasLimits };
+}
 
-  // Faktyczny zwrot wygrywa ze stałą — patrz `splitCourtPerScan` w sessionCost.ts.
-  if (parsed.courtGrossGrosze !== undefined) {
-    const actualPool = parsed.courtGrossGrosze - courtGrosze;
+/**
+ * Zasada „odbicie dla odbijającego” (`discountModel: 'perScan'`) — kopia
+ * `splitCourtPerScan` z `utils/sessionCost/scanSplit.ts`.
+ */
+function splitCourtPerScan(parsed, courtGrosze) {
+  const { present, courtGrossGrosze } = parsed;
+  const court = new Map();
+  const scans = computeScanCredits(parsed);
+  const { effectiveScans, multiCapped, perHourCapacity, hours, hasLimits } = scans;
+  let credit = scans.credit;
+
+  // Faktyczny zwrot (cena przed zwrotem − kwota po zwrocie) wygrywa ze stałą:
+  // dzielimy go między odbijających w tych samych proporcjach co zniżki z reguł.
+  if (courtGrossGrosze !== undefined) {
+    const actualPool = courtGrossGrosze - courtGrosze;
     const expectedPool = [...credit.values()].reduce((sum, c) => sum + c, 0);
     if (expectedPool > 0 && actualPool !== expectedPool) {
       const names = [...credit.keys()];
@@ -206,7 +223,10 @@ function splitCourtPerScan(parsed, courtGrosze) {
   }
 
   if (present.length === 0) {
-    return { court, unallocatedGrosze: courtGrosze, discountCapped: false, multiCapped: false, maxMulti, effectiveCards: 0 };
+    return {
+      court, unallocatedGrosze: courtGrosze, discountCapped: false, multiCapped: false,
+      maxMulti: hasLimits ? perHourCapacity * hours : Infinity, effectiveCards: 0,
+    };
   }
 
   const totalCredit = [...credit.values()].reduce((sum, c) => sum + c, 0);
@@ -220,47 +240,37 @@ function splitCourtPerScan(parsed, courtGrosze) {
     unallocatedGrosze: 0,
     discountCapped: targets.some(t => t < 0),
     multiCapped,
-    maxMulti,
+    maxMulti: hasLimits ? perHourCapacity * hours : Infinity,
     effectiveCards: effectiveScans,
   };
 }
 
 /**
- * Jedyne źródło prawdy dla podziału kosztów po stronie Cloud Functions.
- * Zwraca kwoty w złotych, identyczne z tym, co pokazuje aplikacja.
+ * Dawna zasada (sesje bez `discountModel`) — kopia `splitCourtLegacy` z
+ * `utils/sessionCost/legacySplit.ts`. Zostaje bez zmian, żeby salda ze starych
+ * sesji się nie przesunęły.
  */
-function getSessionShares(session) {
-  if (!session || typeof session !== 'object') {
-    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, baseCourtSingle: null, discountCapped: false, multiCapped: false, maxMulti: 0, effectiveCards: 0, unallocated: 0 };
-  }
+function splitCourtLegacy(parsed, courtGrosze) {
+  const { present, multi, courtCount, durationHours, sport } = parsed;
 
-  const parsed = parseSession(session);
-  const { present, multi, totalGrosze, racketGrosze, ownRacket, courtCount, durationHours, sport } = parsed;
-
-  let court = new Map();
-  const racket = new Map();
+  const court = new Map();
   let unallocatedGrosze = 0;
 
   const discount = toGrosze(MULTISPORT_DISCOUNT);
-  const courtGrosze = totalGrosze - racketGrosze;
-  const renters = present.filter(p => !ownRacket.includes(p));
   let discountCapped = false;
   let multiCapped = false;
 
   // Limit kart MultiSport: korty × godziny × limit/sport.
   // Stare sesje bez courtCount/durationHours: nie aplikujemy limitów (backward compatible).
-  let maxMulti = (courtCount !== undefined && durationHours !== undefined && sport !== undefined)
+  const maxMulti = (courtCount !== undefined && durationHours !== undefined && sport !== undefined)
     ? getMaxMulti(sport, courtCount, durationHours)
     : Infinity;
-  let effectiveCards = 0;
+  const multiPresentCount = multi.filter(p => present.includes(p)).length;
+  const effectiveCards = Math.min(multiPresentCount, maxMulti);
 
-  if (parsed.discountModel === 'perScan') {
-    ({ court, unallocatedGrosze, discountCapped, multiCapped, maxMulti, effectiveCards } = splitCourtPerScan(parsed, courtGrosze));
-  } else if (present.length === 0) {
+  if (present.length === 0) {
     unallocatedGrosze += courtGrosze;
   } else {
-    const multiPresentCount = multi.filter(p => present.includes(p)).length;
-    effectiveCards = Math.min(multiPresentCount, maxMulti);
     multiCapped = multiPresentCount > maxMulti && multiPresentCount > 0;
 
     // Odtwarzamy cenę pełną: zapłacone + efektywna zniżka (nie więcej niż limit).
@@ -290,6 +300,23 @@ function getSessionShares(session) {
     present.forEach((p, i) => court.set(p, allocated[i]));
   }
 
+  return { court, unallocatedGrosze, discountCapped, multiCapped, maxMulti, effectiveCards };
+}
+
+/** Udziały graczy z rozpisanej sesji — kopia `computeShares` z `utils/sessionCost/shares.ts`. */
+function computeShares(parsed) {
+  const { present, multi, totalGrosze, racketGrosze, ownRacket } = parsed;
+
+  const racket = new Map();
+  const courtGrosze = totalGrosze - racketGrosze;
+  const renters = present.filter(p => !ownRacket.includes(p));
+
+  const split = parsed.discountModel === 'perScan'
+    ? splitCourtPerScan(parsed, courtGrosze)
+    : splitCourtLegacy(parsed, courtGrosze);
+  const { court, discountCapped, multiCapped, maxMulti, effectiveCards } = split;
+  let unallocatedGrosze = split.unallocatedGrosze;
+
   if (renters.length === 0) {
     unallocatedGrosze += racketGrosze;
   } else {
@@ -299,8 +326,8 @@ function getSessionShares(session) {
 
   const byPlayer = {};
   for (const name of present) {
-    const courtPart = court.get(name) || 0;
-    const racketPart = racket.get(name) || 0;
+    const courtPart = court.get(name) ?? 0;
+    const racketPart = racket.get(name) ?? 0;
     byPlayer[name] = {
       court: toZloty(courtPart),
       racket: toZloty(racketPart),
@@ -308,9 +335,11 @@ function getSessionShares(session) {
     };
   }
 
-  // Stawki poglądowe biorą się z gotowego podziału — patrz sessionCost.ts.
-  const shareOf = name => (court.get(name) || 0) + (racket.get(name) || 0);
+  // Stawki poglądowe czytamy z gotowego podziału zamiast liczyć drugim wzorem.
+  const shareOf = name => (court.get(name) ?? 0) + (racket.get(name) ?? 0);
   const average = names => names.reduce((sum, n) => sum + shareOf(n), 0) / names.length;
+  // Medicover ma osobną stawkę tylko przy zasadzie `perScan`; w starych
+  // sesjach płacił tyle co Multisport, więc liczy się razem z nim.
   const withSingle = parsed.discountModel === 'perScan'
     ? present.filter(p => multi.includes(p) && parsed.singleScan.includes(p))
     : [];
@@ -333,6 +362,18 @@ function getSessionShares(session) {
     effectiveCards,
     unallocated: toZloty(unallocatedGrosze),
   };
+}
+
+/**
+ * Jedyne źródło prawdy dla podziału kosztów po stronie Cloud Functions.
+ * Zwraca kwoty w złotych, identyczne z tym, co pokazuje aplikacja.
+ */
+function getSessionShares(session) {
+  if (!session || typeof session !== 'object') {
+    return { byPlayer: {}, baseCourt: 0, baseCourtMulti: 0, baseCourtSingle: null, discountCapped: false, multiCapped: false, maxMulti: 0, effectiveCards: 0, unallocated: 0 };
+  }
+
+  return computeShares(parseSession(session));
 }
 
 module.exports = {
