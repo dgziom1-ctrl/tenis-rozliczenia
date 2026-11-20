@@ -1,7 +1,7 @@
 import { runTransaction } from 'firebase/database';
 import { dataRef } from './config';
 import { DEMO_MODE } from '@/constants';
-import type { RawAppData, TransactionResult } from '@/types/domain';
+import type { StoredAppData, TransactionResult } from '@/types/domain';
 
 const WRITE_TIMEOUT_MS = 12_000;
 
@@ -32,9 +32,9 @@ function isOffline(): boolean {
  * tego stary wpis przeżywałby każdy zapis i zostawał w bazie na zawsze.
  * Transakcja podmienia całą wartość węzła, więc pominięcie klucza go kasuje.
  */
-function withoutLegacyFields(next: RawAppData): RawAppData {
-  const { paidUntilWeek: _legacy, ...rest } = next as RawAppData & { paidUntilWeek?: unknown };
-  return rest as RawAppData;
+function withoutLegacyFields(next: StoredAppData): StoredAppData {
+  const { paidUntilWeek: _legacy, ...rest } = next;
+  return rest;
 }
 
 /** Komunikat po odmowie zapisu bez sieci — jeden, żeby nie rozjechał się między ścieżkami. */
@@ -77,7 +77,7 @@ function abortedResult(reason: unknown, fallbackErrorMsg: string): TransactionRe
 }
 
 export async function withTransaction(
-  fn: (current: RawAppData | null) => RawAppData,
+  fn: (current: StoredAppData | null) => StoredAppData,
   fallbackErrorMsg: string,
 ): Promise<TransactionResult> {
   // Tryb demo nie ma bazy, do której mógłby zapisać. Zamiast czekać na timeout
@@ -121,7 +121,7 @@ export async function withTransaction(
    * wyłącznie decyzja z próby, która zakończyła transakcję.
    */
   let abortReason: unknown = null;
-  const update = (current: RawAppData | null): RawAppData | undefined => {
+  const update = (current: StoredAppData | null): StoredAppData | undefined => {
     abortReason = null;
     try {
       return withoutLegacyFields(fn(current));

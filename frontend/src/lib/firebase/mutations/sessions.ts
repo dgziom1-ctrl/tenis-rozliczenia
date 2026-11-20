@@ -3,7 +3,7 @@ import { isValidMoney, isValidISODate, normalizePlayerList } from '@/utils/valid
 import { withTransaction, reject } from '../transaction';
 import { sortWeeksByDate } from '../transforms';
 import { SPORT, isSport } from '@/constants';
-import type { RawAppData, Sport, TransactionResult, Week } from '@/types/domain';
+import type { StoredAppData, Sport, TransactionResult, Week } from '@/types/domain';
 import { CURRENT_DISCOUNT_MODEL } from '@/utils/sessionCost';
 import { toGrosze } from '@/utils/money';
 
@@ -175,7 +175,7 @@ export async function addSession(params: AddSessionParams): Promise<TransactionR
   const addedAt = Date.now();
 
   return withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     const weeks = data.weeks || [];
 
     // Idempotencja: ponowienie transakcji nie doda drugiej kopii tej sesji.
@@ -198,7 +198,7 @@ export async function addSession(params: AddSessionParams): Promise<TransactionR
         discountModel: CURRENT_DISCOUNT_MODEL,
       }]),
       lastAddedSession: { id: newId, ts: addedAt },
-    } as RawAppData;
+    };
   }, 'Nie udało się zapisać sesji');
 }
 
@@ -230,7 +230,7 @@ export async function updateWeek(
   if ('error' in normalized) return { success: false, error: normalized.error };
 
   return withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     const weeks = data.weeks || [];
     const idx = weeks.findIndex(w => w.id === weekId);
     if (idx === -1) reject('Nie znaleziono sesji');
@@ -259,7 +259,7 @@ export async function updateWeek(
 
     const updatedWeeks = [...weeks];
     updatedWeeks[idx] = updated;
-    return { ...data, weeks: sortWeeksByDate(updatedWeeks) } as RawAppData;
+    return { ...data, weeks: sortWeeksByDate(updatedWeeks) };
   }, 'Nie udało się zaktualizować sesji');
 }
 
@@ -273,7 +273,7 @@ export async function deleteWeekWithSnapshot(weekId: string): Promise<DeleteWeek
 
   let deletedWeek: Week | undefined;
   const result = await withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     const weeks = data.weeks || [];
     const found = weeks.find(w => w.id === weekId);
 
@@ -281,7 +281,7 @@ export async function deleteWeekWithSnapshot(weekId: string): Promise<DeleteWeek
     // Zapisujemy rekord z bieżącej próby transakcji. Przy ponowieniu Firebase
     // nadpisze snapshot wartością z wersji, która faktycznie się zatwierdzi.
     deletedWeek = found;
-    return { ...data, weeks: weeks.filter(w => w.id !== weekId) } as RawAppData;
+    return { ...data, weeks: weeks.filter(w => w.id !== weekId) };
   }, 'Nie udało się usunąć sesji');
 
   return result.success && deletedWeek ? { ...result, deletedWeek } : result;
@@ -310,7 +310,7 @@ export async function restoreWeek(week: Week): Promise<TransactionResult> {
   if ('error' in normalized) return { success: false, error: normalized.error };
 
   return withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     const weeks = data.weeks || [];
     if (weeks.some(existing => existing.id === week.id)) return data;
     const restoredSport = normalized.session.sport ?? effectiveSportOf(week.sport);
@@ -331,6 +331,6 @@ export async function restoreWeek(week: Week): Promise<TransactionResult> {
       sport: restoredSport,
     };
 
-    return { ...data, weeks: sortWeeksByDate([...weeks, restored]) } as RawAppData;
+    return { ...data, weeks: sortWeeksByDate([...weeks, restored]) };
   }, 'Nie udało się przywrócić sesji');
 }

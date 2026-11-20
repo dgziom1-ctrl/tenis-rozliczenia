@@ -75,6 +75,17 @@ export interface RawAppData {
   lastAddedSession?: { id: string; ts: number };
 }
 
+/**
+ * Węzeł `appData` dokładnie tak, jak leży w bazie. Firebase nie przechowuje pustych
+ * tablic ani obiektów, więc każde pole może brakować, a przy pierwszym zapisie
+ * brakuje całego węzła. Mutacje czytają go przez `|| []`, a nie przez obietnicę
+ * `RawAppData`, której baza nie składa — dlatego typ jest częściowy.
+ */
+export type StoredAppData = Partial<RawAppData> & {
+  /** @deprecated Kursor „rozliczony do sesji X” z dawnej wersji apki; każdy zapis go usuwa (patrz `withTransaction`). */
+  paidUntilWeek?: unknown;
+};
+
 export interface NormalizedData {
   players: string[];
   weeks: Week[];

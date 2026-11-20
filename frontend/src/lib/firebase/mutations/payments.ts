@@ -2,7 +2,7 @@ import { makeId, todayISO } from '@/utils/id';
 import { toGrosze, toZloty } from '@/utils/money';
 import { isPositiveMoney, normalizePlayerName } from '@/utils/validation';
 import { withTransaction, reject } from '../transaction';
-import type { RawAppData, TransactionResult, AddPaymentResult, Payment } from '@/types/domain';
+import type { StoredAppData, TransactionResult, AddPaymentResult, Payment } from '@/types/domain';
 
 export async function addPayment(
   playerName: string,
@@ -26,7 +26,7 @@ export async function addPayment(
   };
 
   const result = await withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     const existing = data.payments?.[name] ?? [];
 
     // Idempotencja: to samo id nigdy nie zostanie dopisane dwa razy, więc
@@ -39,7 +39,7 @@ export async function addPayment(
         ...(data.payments || {}),
         [name]: [...existing, entry],
       },
-    } as RawAppData;
+    };
   }, 'Nie udało się dodać wpłaty');
 
   return result.success ? { ...result, paymentId } : result;
@@ -56,7 +56,7 @@ export async function removePayment(
   // Flaga ustawiona w próbie, która się nie zatwierdziła, przeżywała ponowienie
   // i potrafiła zgłosić błąd po zapisie, który faktycznie doszedł do skutku.
   return withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     const existing: Payment[] = data.payments?.[name] ?? [];
 
     if (!existing.some(p => p.id === paymentId)) {
@@ -69,6 +69,6 @@ export async function removePayment(
         ...(data.payments || {}),
         [name]: existing.filter(p => p.id !== paymentId),
       },
-    } as RawAppData;
+    };
   }, 'Nie udało się cofnąć wpłaty');
 }

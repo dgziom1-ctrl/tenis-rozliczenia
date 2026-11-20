@@ -4,11 +4,11 @@ import {
 } from '@/utils/validation';
 import { calculateDebt } from '@/utils/debt';
 import { withTransaction, reject } from '../transaction';
-import type { RawAppData, TransactionResult } from '@/types/domain';
+import type { StoredAppData, TransactionResult } from '@/types/domain';
 import type { CardKind } from '@/utils/sessionCost';
 
 /** Czy pod tym imieniem wisi jakakolwiek historia finansowa lub frekwencyjna. */
-function hasLedgerHistory(data: RawAppData, name: string): boolean {
+function hasLedgerHistory(data: StoredAppData, name: string): boolean {
   const hasPayments = (data.payments?.[name] ?? []).length > 0;
   const wasPresent = (data.weeks || []).some(w => (w.present || []).includes(name));
   return hasPayments || wasPresent;
@@ -28,7 +28,7 @@ export async function addPlayer(name: string): Promise<TransactionResult> {
   const joinDate = todayISO();
 
   return withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     const players = data.players || [];
     const deleted = data.deletedPlayers || [];
 
@@ -51,7 +51,7 @@ export async function addPlayer(name: string): Promise<TransactionResult> {
         ...(data.playerJoinDate || {}),
         [trimmed]: joinDate,
       },
-    } as RawAppData;
+    };
   }, 'Nie udało się dodać gracza');
 }
 
@@ -60,7 +60,7 @@ export async function softDeletePlayer(playerName: string): Promise<TransactionR
   if (!name) return { success: false, error: 'Nie wybrano gracza' };
 
   return withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     const players = data.players || [];
     if (!players.includes(name)) reject('Nie znaleziono gracza');
 
@@ -81,7 +81,7 @@ export async function softDeletePlayer(playerName: string): Promise<TransactionR
       // i wracał zaznaczony w formularzu nowej sesji.
       defaultMultiPlayers: (data.defaultMultiPlayers || []).filter(p => p !== name),
       singleScanPlayers: (data.singleScanPlayers || []).filter(p => p !== name),
-    } as RawAppData;
+    };
   }, 'Nie udało się usunąć gracza');
 }
 
@@ -90,7 +90,7 @@ export async function restorePlayer(playerName: string): Promise<TransactionResu
   if (!name) return { success: false, error: 'Nie wybrano gracza' };
 
   return withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     const players = data.players || [];
 
     return {
@@ -98,7 +98,7 @@ export async function restorePlayer(playerName: string): Promise<TransactionResu
       deletedPlayers: (data.deletedPlayers || []).filter(p => p !== name),
       // Bez tego sprawdzenia gracz mógł trafić na listę dwa razy i liczyć się podwójnie.
       players: players.includes(name) ? players : [...players, name],
-    } as RawAppData;
+    };
   }, 'Nie udało się przywrócić gracza');
 }
 
@@ -114,7 +114,7 @@ export async function permanentDeletePlayer(playerName: string): Promise<Transac
   if (!name) return { success: false, error: 'Nie wybrano gracza' };
 
   return withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
 
     if ((data.weeks || []).some(w => (w.present || []).includes(name))) {
       reject('Nie można trwale usunąć gracza, który brał udział w sesjach — pozostaw go na liście usuniętych');
@@ -136,7 +136,7 @@ export async function permanentDeletePlayer(playerName: string): Promise<Transac
       payments,
       playerJoinDate,
       playerJoinWeek,
-    } as RawAppData;
+    };
   }, 'Nie udało się trwale usunąć gracza');
 }
 
@@ -157,7 +157,7 @@ export async function setPlayerCard(playerName: string, card: CardKind): Promise
   }
 
   return withTransaction((current) => {
-    const data = (current || {}) as RawAppData;
+    const data: StoredAppData = current ?? {};
     if (!(data.players || []).includes(name)) reject('Nie znaleziono gracza');
 
     const without = (list: string[] | undefined) => (list || []).filter(p => p !== name);
@@ -165,6 +165,6 @@ export async function setPlayerCard(playerName: string, card: CardKind): Promise
       ...data,
       defaultMultiPlayers: card === 'none' ? without(data.defaultMultiPlayers) : [...without(data.defaultMultiPlayers), name],
       singleScanPlayers: card === 'single' ? [...without(data.singleScanPlayers), name] : without(data.singleScanPlayers),
-    } as RawAppData;
+    };
   }, 'Nie udało się zapisać karty gracza');
 }
