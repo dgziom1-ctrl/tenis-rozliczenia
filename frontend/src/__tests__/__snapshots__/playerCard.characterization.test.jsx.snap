@@ -1,0 +1,1969 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PlayerCard — charakteryzacja > stan: nadpłata 1`] = `
+"
+<div>
+  <div class="crt-card fifa-card fifa-card-epic glass-card" style="animation: none; border: 1px solid rgba(100, 127, 19, 0.19); display: flex; flex-direction: column; flex: 1 1 0%; height: 100%; overflow: hidden; position: relative; transform-style: preserve-3d">
+    <div aria-hidden="true" class="card-foil card-foil-epic" style="--foil-tint: color-mix(in srgb, var(--rank-weteran) 60%, transparent); --foil-x: 50%; --foil-y: 22%" />
+    <div aria-hidden="true" style="border-left: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; left: -1px; pointer-events: none; position: absolute; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-right: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; pointer-events: none; position: absolute; right: -1px; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-left: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; left: -1px; pointer-events: none; position: absolute; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-right: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; pointer-events: none; position: absolute; right: -1px; width: 14px" />
+    <div aria-hidden="true" class="glass-shine-overlay" />
+    <span aria-live="polite" class="sr-only" role="status" />
+    <div style="align-items: center; background: var(--co-tint-green); border-bottom: 1px solid var(--co-border); display: flex; justify-content: space-between; padding: 6px 14px; position: relative; z-index: 1">
+      <span style="color: var(--co-green); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "↑ Nadpłata"
+      </span>
+      <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "EPICKA"
+      </span>
+    </div>
+    <div style="align-items: stretch; border-bottom: 1px solid var(--co-separator); display: flex; gap: 14px; padding: 14px; position: relative; z-index: 2">
+      <div style="align-items: center; display: flex; flex-direction: column; flex-shrink: 0; gap: 6px; justify-content: space-between">
+        <div style="align-items: center; display: flex; flex-direction: column; gap: 2px">
+          <span class="card-ovr" style="color: var(--rank-weteran)">
+            "74"
+          </span>
+          <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; line-height: 1">
+            "OVR"
+          </span>
+        </div>
+        <div style="flex-shrink: 0; position: relative">
+          <div style="border: 1px solid rgb(100, 127, 19); box-shadow: var(--glow-box-cyan); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); height: 60px; overflow: hidden; position: relative; width: 60px">
+            <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
+              <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
+                <defs>
+                  <lineargradient id="cp-bg-_r_8_" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
+                  </lineargradient>
+                  <clippath id="cp-clip-_r_8_">
+                    <rect height="80" width="80" x="0" y="0" />
+                  </clippath>
+                </defs>
+                <rect fill="url(#cp-bg-_r_8_)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-_r_8_)">
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="65" />
+                  <rect fill="#647F13" height="10" opacity="0.45" width="64" x="8" y="21" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="0" y="0" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="74" y="0" />
+                  <line opacity="0.35" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="28" y2="52" />
+                  <line opacity="0.2" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="60" y2="40" />
+                </g>
+              </svg>
+              <span style="align-items: center; color: var(--co-text-hi); display: flex; font-family: var(--font-display); font-size: 1.25rem; inset: 0; justify-content: center; letter-spacing: normal; line-height: 1; pointer-events: none; position: absolute; text-shadow: 0 1px 8px var(--co-void); text-transform: none">
+                "AL"
+              </span>
+            </div>
+          </div>
+          <div style="background: var(--co-green); border-radius: 50%; border: 2px solid var(--co-void); bottom: -2px; box-shadow: var(--glow-box-cyan); height: 10px; position: absolute; right: -2px; width: 10px" title="Rozliczone" />
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1 1 0%; gap: 8px; justify-content: space-between; min-width: 0">
+        <div>
+          <h3 style="color: var(--co-text-hi); font-family: var(--font-display); font-size: clamp(1.5rem, 5vw, 1.85rem); letter-spacing: normal; line-height: 1; margin: 0px; overflow: hidden; text-overflow: ellipsis; text-transform: none; white-space: nowrap">
+            "Ala"
+          </h3>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+            <div style="align-items: center; display: inline-flex; gap: 4px; position: relative">
+              <button aria-expanded="false" aria-label="WETERAN 67% — ranga, pokaż próg następnej rangi" style="align-items: center; background: color-mix(in srgb, var(--rank-weteran) 6%, transparent); border: 1px solid color-mix(in srgb, var(--rank-weteran) 19%, transparent); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); cursor: pointer; display: inline-flex; gap: 4px; padding: 2px 6px 2px 4px; user-select: none" type="button">
+                <svg aria-hidden="true" class="lucide lucide-award" fill="none" focusable="false" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--rank-weteran); flex-shrink: 0" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                  <circle cx="12" cy="8" r="6" />
+                </svg>
+                <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                  "WETERAN"
+                </span>
+                <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem">
+                  "67%"
+                </span>
+              </button>
+              <span aria-hidden="true" style="color: var(--rank-weteran); flex-shrink: 0; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; line-height: 1; opacity: 0.7">
+                "?"
+              </span>
+            </div>
+            <div style="align-items: center; background: var(--co-amber-dim); border: 1px solid var(--co-amber); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); display: inline-flex; gap: 4px; padding: 2px 6px">
+              <svg aria-hidden="true" class="lucide lucide-flame" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-amber)" viewBox="0 0 24 24" width="11" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+              </svg>
+              <span style="color: var(--co-amber); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                "seria 2"
+              </span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 4px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Obecność"
+            </span>
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
+              "2/3"
+            </span>
+          </div>
+          <div style="background: var(--co-bar-track); height: 2px; overflow: hidden; position: relative">
+            <div style="background: linear-gradient(90deg, var(--co-green), var(--co-cyan)); bottom: 0px; left: 0px; position: absolute; right: 0px; top: 0px; transform-origin: left center; transform: scaleX(0.67); transition: transform 0.8s ease" />
+          </div>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px" title="Ostatnie 3 sesji">
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-02-26" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-05" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; flex: 1 1 0%; padding: 14px; position: relative; z-index: 1">
+      <div aria-label="↑ Nadpłata +20,00zł — włącz tryb edycji wpłat" aria-pressed="false" role="button" style="align-items: center; background: var(--co-tint-green); border: 1px solid var(--co-green); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); cursor: default; display: flex; flex-direction: column; justify-content: center; margin-bottom: 10px; min-height: 84px; overflow: hidden; padding: 12px; position: relative; text-align: center; transition: background 0.2s ease, border-color 0.2s ease; user-select: none" tabindex="0">
+        <div style="position: relative; z-index: 1">
+          <div style="color: var(--co-green); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; margin-bottom: 2px">
+            "↑ Nadpłata"
+          </div>
+          <p style="color: var(--co-green); font-family: var(--font-tech); font-size: 2.5rem; font-style: italic; font-weight: 700; letter-spacing: normal; line-height: 1; margin: 0px; text-transform: none">
+            "+20,00"
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-left: 4px; text-transform: none">
+              "zł"
+            </span>
+          </p>
+        </div>
+      </div>
+      <button aria-pressed="false" class="icon-btn" style="align-items: center; align-self: flex-end; background: transparent; color: var(--co-dim); cursor: pointer; display: inline-flex; font-family: var(--font-mono); font-size: 0.8125rem; gap: 6px; margin-bottom: 6px; min-height: 44px; padding: 6px 10px" type="button">
+        <svg aria-hidden="true" class="lucide lucide-pencil" fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+          <path d="m15 5 4 4" />
+        </svg>
+        "Edytuj wpłaty"
+      </button>
+      <div style="margin-bottom: 12px">
+        <button aria-expanded="false" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+          <span aria-hidden="true" style="display: inline-flex; transform: none; transition: transform 0.25s">
+            <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+          "Skąd ta kwota?"
+        </button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
+        <button class="cyber-button-outline" style="min-height: 44px; padding: 8px 12px; width: 100%">
+          "+ Wpłać więcej"
+        </button>
+      </div>
+      <div style="border-top: 1px solid var(--co-separator); margin-top: 12px; padding-top: 10px">
+        <div style="align-items: stretch; display: flex; gap: 1px; height: 18px; opacity: 0.35; overflow: hidden">
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+        </div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 2px">
+          <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal">
+            "ALA"
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+"
+`;
+
+exports[`PlayerCard — charakteryzacja > stan: rozliczony 1`] = `
+"
+<div>
+  <div class="crt-card fifa-card fifa-card-epic glass-card" style="animation: none; border: 1px solid rgba(100, 127, 19, 0.145); display: flex; flex-direction: column; flex: 1 1 0%; height: 100%; overflow: hidden; position: relative; transform-style: preserve-3d">
+    <div aria-hidden="true" class="card-foil card-foil-epic" style="--foil-tint: color-mix(in srgb, var(--rank-weteran) 60%, transparent); --foil-x: 50%; --foil-y: 22%" />
+    <div aria-hidden="true" style="border-left: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; left: -1px; pointer-events: none; position: absolute; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-right: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; pointer-events: none; position: absolute; right: -1px; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-left: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; left: -1px; pointer-events: none; position: absolute; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-right: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; pointer-events: none; position: absolute; right: -1px; width: 14px" />
+    <div aria-hidden="true" class="glass-shine-overlay" />
+    <span aria-live="polite" class="sr-only" role="status" />
+    <div style="align-items: center; background: var(--co-tint); border-bottom: 1px solid var(--co-border); display: flex; justify-content: space-between; padding: 6px 14px; position: relative; z-index: 1">
+      <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "Rozliczony"
+      </span>
+      <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "EPICKA"
+      </span>
+    </div>
+    <div style="align-items: stretch; border-bottom: 1px solid var(--co-separator); display: flex; gap: 14px; padding: 14px; position: relative; z-index: 2">
+      <div style="align-items: center; display: flex; flex-direction: column; flex-shrink: 0; gap: 6px; justify-content: space-between">
+        <div style="align-items: center; display: flex; flex-direction: column; gap: 2px">
+          <span class="card-ovr" style="color: var(--rank-weteran)">
+            "74"
+          </span>
+          <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; line-height: 1">
+            "OVR"
+          </span>
+        </div>
+        <div style="flex-shrink: 0; position: relative">
+          <div style="border: 1px solid rgb(100, 127, 19); box-shadow: var(--glow-box-cyan); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); height: 60px; overflow: hidden; position: relative; width: 60px">
+            <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
+              <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
+                <defs>
+                  <lineargradient id="cp-bg-_r_f_" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
+                  </lineargradient>
+                  <clippath id="cp-clip-_r_f_">
+                    <rect height="80" width="80" x="0" y="0" />
+                  </clippath>
+                </defs>
+                <rect fill="url(#cp-bg-_r_f_)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-_r_f_)">
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="65" />
+                  <rect fill="#647F13" height="10" opacity="0.45" width="64" x="8" y="21" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="0" y="0" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="74" y="0" />
+                  <line opacity="0.35" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="28" y2="52" />
+                  <line opacity="0.2" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="60" y2="40" />
+                </g>
+              </svg>
+              <span style="align-items: center; color: var(--co-text-hi); display: flex; font-family: var(--font-display); font-size: 1.25rem; inset: 0; justify-content: center; letter-spacing: normal; line-height: 1; pointer-events: none; position: absolute; text-shadow: 0 1px 8px var(--co-void); text-transform: none">
+                "AL"
+              </span>
+            </div>
+          </div>
+          <div style="background: var(--co-green); border-radius: 50%; border: 2px solid var(--co-void); bottom: -2px; box-shadow: var(--glow-box-cyan); height: 10px; position: absolute; right: -2px; width: 10px" title="Rozliczone" />
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1 1 0%; gap: 8px; justify-content: space-between; min-width: 0">
+        <div>
+          <h3 style="color: var(--co-text-hi); font-family: var(--font-display); font-size: clamp(1.5rem, 5vw, 1.85rem); letter-spacing: normal; line-height: 1; margin: 0px; overflow: hidden; text-overflow: ellipsis; text-transform: none; white-space: nowrap">
+            "Ala"
+          </h3>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+            <div style="align-items: center; display: inline-flex; gap: 4px; position: relative">
+              <button aria-expanded="false" aria-label="WETERAN 67% — ranga, pokaż próg następnej rangi" style="align-items: center; background: color-mix(in srgb, var(--rank-weteran) 6%, transparent); border: 1px solid color-mix(in srgb, var(--rank-weteran) 19%, transparent); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); cursor: pointer; display: inline-flex; gap: 4px; padding: 2px 6px 2px 4px; user-select: none" type="button">
+                <svg aria-hidden="true" class="lucide lucide-award" fill="none" focusable="false" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--rank-weteran); flex-shrink: 0" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                  <circle cx="12" cy="8" r="6" />
+                </svg>
+                <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                  "WETERAN"
+                </span>
+                <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem">
+                  "67%"
+                </span>
+              </button>
+              <span aria-hidden="true" style="color: var(--rank-weteran); flex-shrink: 0; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; line-height: 1; opacity: 0.7">
+                "?"
+              </span>
+            </div>
+            <div style="align-items: center; background: var(--co-amber-dim); border: 1px solid var(--co-amber); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); display: inline-flex; gap: 4px; padding: 2px 6px">
+              <svg aria-hidden="true" class="lucide lucide-flame" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-amber)" viewBox="0 0 24 24" width="11" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+              </svg>
+              <span style="color: var(--co-amber); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                "seria 2"
+              </span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 4px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Obecność"
+            </span>
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
+              "2/3"
+            </span>
+          </div>
+          <div style="background: var(--co-bar-track); height: 2px; overflow: hidden; position: relative">
+            <div style="background: linear-gradient(90deg, var(--co-green), var(--co-cyan)); bottom: 0px; left: 0px; position: absolute; right: 0px; top: 0px; transform-origin: left center; transform: scaleX(0.67); transition: transform 0.8s ease" />
+          </div>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px" title="Ostatnie 3 sesji">
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-02-26" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-05" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; flex: 1 1 0%; padding: 14px; position: relative; z-index: 1">
+      <div aria-label="0,00zł — włącz tryb edycji wpłat" aria-pressed="false" role="button" style="align-items: center; background: var(--co-tint); border: 1px solid var(--co-tint-line); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); cursor: default; display: flex; flex-direction: column; justify-content: center; margin-bottom: 10px; min-height: 84px; overflow: hidden; padding: 12px; position: relative; text-align: center; transition: background 0.2s ease, border-color 0.2s ease; user-select: none" tabindex="0">
+        <div style="position: relative; z-index: 1">
+          <p style="color: var(--co-green); font-family: var(--font-tech); font-size: 2.5rem; font-style: italic; font-weight: 700; letter-spacing: normal; line-height: 1.1; margin: 0px; text-shadow: var(--glow-cyan-md); text-transform: none">
+            "0,00"
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-left: 4px; text-transform: none">
+              "zł"
+            </span>
+          </p>
+        </div>
+      </div>
+      <button aria-pressed="false" class="icon-btn" style="align-items: center; align-self: flex-end; background: transparent; color: var(--co-dim); cursor: pointer; display: inline-flex; font-family: var(--font-mono); font-size: 0.8125rem; gap: 6px; margin-bottom: 6px; min-height: 44px; padding: 6px 10px" type="button">
+        <svg aria-hidden="true" class="lucide lucide-pencil" fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+          <path d="m15 5 4 4" />
+        </svg>
+        "Edytuj wpłaty"
+      </button>
+      <div style="margin-bottom: 12px">
+        <button aria-expanded="false" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+          <span aria-hidden="true" style="display: inline-flex; transform: none; transition: transform 0.25s">
+            <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+          "Skąd ta kwota?"
+        </button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
+        <button class="cyber-button-outline" style="min-height: 44px; padding: 8px 12px; width: 100%">
+          "+ Wpłać na zapas"
+        </button>
+      </div>
+      <div style="border-top: 1px solid var(--co-separator); margin-top: 12px; padding-top: 10px">
+        <div style="align-items: stretch; display: flex; gap: 1px; height: 18px; opacity: 0.35; overflow: hidden">
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+        </div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 2px">
+          <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal">
+            "ALA"
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+"
+`;
+
+exports[`PlayerCard — charakteryzacja > stan: skarbnik: do zebrania 1`] = `
+"
+<div>
+  <div class="crt-card fifa-card fifa-card-epic glass-card" style="animation: none; border: 1px solid rgba(190, 42, 223, 0.19); display: flex; flex-direction: column; flex: 1 1 0%; height: 100%; overflow: hidden; position: relative; transform-style: preserve-3d">
+    <div aria-hidden="true" class="card-foil card-foil-epic" style="--foil-tint: color-mix(in srgb, var(--rank-weteran) 60%, transparent); --foil-x: 50%; --foil-y: 22%" />
+    <div aria-hidden="true" style="border-left: 1px solid rgb(190, 42, 223); border-top: 1px solid rgb(190, 42, 223); height: 14px; left: -1px; pointer-events: none; position: absolute; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-right: 1px solid rgb(190, 42, 223); border-top: 1px solid rgb(190, 42, 223); height: 14px; pointer-events: none; position: absolute; right: -1px; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(190, 42, 223); border-left: 1px solid rgb(190, 42, 223); bottom: -1px; height: 14px; left: -1px; pointer-events: none; position: absolute; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(190, 42, 223); border-right: 1px solid rgb(190, 42, 223); bottom: -1px; height: 14px; pointer-events: none; position: absolute; right: -1px; width: 14px" />
+    <div aria-hidden="true" class="glass-shine-overlay" />
+    <span aria-live="polite" class="sr-only" role="status" />
+    <div style="align-items: center; background: var(--co-tint-green); border-bottom: 1px solid var(--co-border); display: flex; justify-content: space-between; padding: 6px 14px; position: relative; z-index: 1">
+      <span style="color: var(--co-green); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "↑ Do zebrania"
+      </span>
+      <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "EPICKA"
+      </span>
+    </div>
+    <div style="align-items: stretch; border-bottom: 1px solid var(--co-separator); display: flex; gap: 14px; padding: 14px; position: relative; z-index: 2">
+      <div style="align-items: center; display: flex; flex-direction: column; flex-shrink: 0; gap: 6px; justify-content: space-between">
+        <div style="align-items: center; display: flex; flex-direction: column; gap: 2px">
+          <span class="card-ovr" style="color: var(--rank-weteran)">
+            "74"
+          </span>
+          <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; line-height: 1">
+            "OVR"
+          </span>
+        </div>
+        <div style="flex-shrink: 0; position: relative">
+          <div style="border: 1px solid rgb(190, 42, 223); box-shadow: var(--glow-box-cyan); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); height: 60px; overflow: hidden; position: relative; width: 60px">
+            <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
+              <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
+                <defs>
+                  <lineargradient id="cp-bg-_r_u_" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#BE2ADF" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#BE2ADF" stop-opacity="0.08" />
+                  </lineargradient>
+                  <clippath id="cp-clip-_r_u_">
+                    <rect height="80" width="80" x="0" y="0" />
+                  </clippath>
+                </defs>
+                <rect fill="url(#cp-bg-_r_u_)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-_r_u_)">
+                  <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="1" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="1" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.33999999999999997" width="14" x="17" y="17" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.28" width="14" x="49" y="17" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="33" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="33" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="33" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.33999999999999997" width="14" x="17" y="49" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.28" width="14" x="49" y="49" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="65" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="65" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="65" />
+                  <rect fill="#BE2ADF" height="10" opacity="0.45" width="64" x="8" y="19" />
+                  <rect fill="#BE2ADF" height="80" opacity="0.35" width="6" x="0" y="0" />
+                  <rect fill="#BE2ADF" height="80" opacity="0.35" width="6" x="74" y="0" />
+                  <line opacity="0.35" stroke="#BE2ADF" stroke-width="1" x1="0" x2="80" y1="28" y2="52" />
+                  <line opacity="0.2" stroke="#BE2ADF" stroke-width="1" x1="0" x2="80" y1="60" y2="40" />
+                </g>
+              </svg>
+              <span style="align-items: center; color: var(--co-text-hi); display: flex; font-family: var(--font-display); font-size: 1.25rem; inset: 0; justify-content: center; letter-spacing: normal; line-height: 1; pointer-events: none; position: absolute; text-shadow: 0 1px 8px var(--co-void); text-transform: none">
+                "KA"
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1 1 0%; gap: 8px; justify-content: space-between; min-width: 0">
+        <div>
+          <h3 style="color: var(--co-text-hi); font-family: var(--font-display); font-size: clamp(1.5rem, 5vw, 1.85rem); letter-spacing: normal; line-height: 1; margin: 0px; overflow: hidden; text-overflow: ellipsis; text-transform: none; white-space: nowrap">
+            "Kamil"
+          </h3>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+            <div style="align-items: center; display: inline-flex; gap: 4px; position: relative">
+              <button aria-expanded="false" aria-label="WETERAN 67% — ranga, pokaż próg następnej rangi" style="align-items: center; background: color-mix(in srgb, var(--rank-weteran) 6%, transparent); border: 1px solid color-mix(in srgb, var(--rank-weteran) 19%, transparent); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); cursor: pointer; display: inline-flex; gap: 4px; padding: 2px 6px 2px 4px; user-select: none" type="button">
+                <svg aria-hidden="true" class="lucide lucide-award" fill="none" focusable="false" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--rank-weteran); flex-shrink: 0" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                  <circle cx="12" cy="8" r="6" />
+                </svg>
+                <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                  "WETERAN"
+                </span>
+                <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem">
+                  "67%"
+                </span>
+              </button>
+              <span aria-hidden="true" style="color: var(--rank-weteran); flex-shrink: 0; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; line-height: 1; opacity: 0.7">
+                "?"
+              </span>
+            </div>
+            <div style="align-items: center; background: var(--co-amber-dim); border: 1px solid var(--co-amber); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); display: inline-flex; gap: 4px; padding: 2px 6px">
+              <svg aria-hidden="true" class="lucide lucide-flame" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-amber)" viewBox="0 0 24 24" width="11" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+              </svg>
+              <span style="color: var(--co-amber); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                "seria 2"
+              </span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 4px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Obecność"
+            </span>
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
+              "2/3"
+            </span>
+          </div>
+          <div style="background: var(--co-bar-track); height: 2px; overflow: hidden; position: relative">
+            <div style="background: linear-gradient(90deg, var(--co-green), var(--co-cyan)); bottom: 0px; left: 0px; position: absolute; right: 0px; top: 0px; transform-origin: left center; transform: scaleX(0.67); transition: transform 0.8s ease" />
+          </div>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px" title="Ostatnie 3 sesji">
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-02-26" />
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-05" />
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; flex: 1 1 0%; padding: 14px; position: relative; z-index: 1">
+      <div style="align-items: center; background: var(--co-tint-green); border: 1px solid var(--co-green); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); display: flex; flex-direction: column; justify-content: center; margin-bottom: 10px; min-height: 84px; overflow: hidden; padding: 12px; position: relative; text-align: center; transition: background 0.2s ease, border-color 0.2s ease">
+        <div style="position: relative; z-index: 1">
+          <div style="color: var(--co-green); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; margin-bottom: 2px">
+            "↑ Do zebrania"
+          </div>
+          <p style="color: var(--co-green); font-family: var(--font-tech); font-size: 2.5rem; font-style: italic; font-weight: 700; letter-spacing: normal; line-height: 1; margin: 0px; text-shadow: var(--glow-green-md); text-transform: none">
+            "+77,50"
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-left: 4px; text-transform: none">
+              "zł"
+            </span>
+          </p>
+          <p style="color: var(--co-green); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; margin: 4px 0px 0px">
+            "suma wpłat do zebrania od graczy"
+          </p>
+        </div>
+      </div>
+      <div style="margin-bottom: 12px">
+        <button aria-expanded="false" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+          <span aria-hidden="true" style="display: inline-flex; transform: none; transition: transform 0.25s">
+            <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+          "Do wpłaty (1)"
+        </button>
+      </div>
+      <div style="border-top: 1px solid var(--co-separator); margin-top: auto; padding-top: 10px">
+        <div style="align-items: stretch; display: flex; gap: 1px; height: 18px; opacity: 0.35; overflow: hidden">
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+        </div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 2px">
+          <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal">
+            "KAMIL"
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+"
+`;
+
+exports[`PlayerCard — charakteryzacja > stan: skarbnik: saldo dodatnie 1`] = `
+"
+<div>
+  <div class="crt-card fifa-card fifa-card-epic glass-card" style="animation: none; border: 1px solid rgba(190, 42, 223, 0.19); display: flex; flex-direction: column; flex: 1 1 0%; height: 100%; overflow: hidden; position: relative; transform-style: preserve-3d">
+    <div aria-hidden="true" class="card-foil card-foil-epic" style="--foil-tint: color-mix(in srgb, var(--rank-weteran) 60%, transparent); --foil-x: 50%; --foil-y: 22%" />
+    <div aria-hidden="true" style="border-left: 1px solid rgb(190, 42, 223); border-top: 1px solid rgb(190, 42, 223); height: 14px; left: -1px; pointer-events: none; position: absolute; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-right: 1px solid rgb(190, 42, 223); border-top: 1px solid rgb(190, 42, 223); height: 14px; pointer-events: none; position: absolute; right: -1px; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(190, 42, 223); border-left: 1px solid rgb(190, 42, 223); bottom: -1px; height: 14px; left: -1px; pointer-events: none; position: absolute; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(190, 42, 223); border-right: 1px solid rgb(190, 42, 223); bottom: -1px; height: 14px; pointer-events: none; position: absolute; right: -1px; width: 14px" />
+    <div aria-hidden="true" class="glass-shine-overlay" />
+    <span aria-live="polite" class="sr-only" role="status" />
+    <div style="align-items: center; background: var(--co-tint); border-bottom: 1px solid var(--co-border); display: flex; justify-content: space-between; padding: 6px 14px; position: relative; z-index: 1">
+      <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "↕ Saldo"
+      </span>
+      <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "EPICKA"
+      </span>
+    </div>
+    <div style="align-items: stretch; border-bottom: 1px solid var(--co-separator); display: flex; gap: 14px; padding: 14px; position: relative; z-index: 2">
+      <div style="align-items: center; display: flex; flex-direction: column; flex-shrink: 0; gap: 6px; justify-content: space-between">
+        <div style="align-items: center; display: flex; flex-direction: column; gap: 2px">
+          <span class="card-ovr" style="color: var(--rank-weteran)">
+            "74"
+          </span>
+          <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; line-height: 1">
+            "OVR"
+          </span>
+        </div>
+        <div style="flex-shrink: 0; position: relative">
+          <div style="border: 1px solid rgb(190, 42, 223); box-shadow: var(--glow-box-cyan); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); height: 60px; overflow: hidden; position: relative; width: 60px">
+            <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
+              <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
+                <defs>
+                  <lineargradient id="cp-bg-_r_11_" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#BE2ADF" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#BE2ADF" stop-opacity="0.08" />
+                  </lineargradient>
+                  <clippath id="cp-clip-_r_11_">
+                    <rect height="80" width="80" x="0" y="0" />
+                  </clippath>
+                </defs>
+                <rect fill="url(#cp-bg-_r_11_)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-_r_11_)">
+                  <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="1" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="1" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.33999999999999997" width="14" x="17" y="17" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.28" width="14" x="49" y="17" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="33" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="33" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="33" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.33999999999999997" width="14" x="17" y="49" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.28" width="14" x="49" y="49" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="65" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="65" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="65" />
+                  <rect fill="#BE2ADF" height="10" opacity="0.45" width="64" x="8" y="19" />
+                  <rect fill="#BE2ADF" height="80" opacity="0.35" width="6" x="0" y="0" />
+                  <rect fill="#BE2ADF" height="80" opacity="0.35" width="6" x="74" y="0" />
+                  <line opacity="0.35" stroke="#BE2ADF" stroke-width="1" x1="0" x2="80" y1="28" y2="52" />
+                  <line opacity="0.2" stroke="#BE2ADF" stroke-width="1" x1="0" x2="80" y1="60" y2="40" />
+                </g>
+              </svg>
+              <span style="align-items: center; color: var(--co-text-hi); display: flex; font-family: var(--font-display); font-size: 1.25rem; inset: 0; justify-content: center; letter-spacing: normal; line-height: 1; pointer-events: none; position: absolute; text-shadow: 0 1px 8px var(--co-void); text-transform: none">
+                "KA"
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1 1 0%; gap: 8px; justify-content: space-between; min-width: 0">
+        <div>
+          <h3 style="color: var(--co-text-hi); font-family: var(--font-display); font-size: clamp(1.5rem, 5vw, 1.85rem); letter-spacing: normal; line-height: 1; margin: 0px; overflow: hidden; text-overflow: ellipsis; text-transform: none; white-space: nowrap">
+            "Kamil"
+          </h3>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+            <div style="align-items: center; display: inline-flex; gap: 4px; position: relative">
+              <button aria-expanded="false" aria-label="WETERAN 67% — ranga, pokaż próg następnej rangi" style="align-items: center; background: color-mix(in srgb, var(--rank-weteran) 6%, transparent); border: 1px solid color-mix(in srgb, var(--rank-weteran) 19%, transparent); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); cursor: pointer; display: inline-flex; gap: 4px; padding: 2px 6px 2px 4px; user-select: none" type="button">
+                <svg aria-hidden="true" class="lucide lucide-award" fill="none" focusable="false" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--rank-weteran); flex-shrink: 0" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                  <circle cx="12" cy="8" r="6" />
+                </svg>
+                <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                  "WETERAN"
+                </span>
+                <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem">
+                  "67%"
+                </span>
+              </button>
+              <span aria-hidden="true" style="color: var(--rank-weteran); flex-shrink: 0; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; line-height: 1; opacity: 0.7">
+                "?"
+              </span>
+            </div>
+            <div style="align-items: center; background: var(--co-amber-dim); border: 1px solid var(--co-amber); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); display: inline-flex; gap: 4px; padding: 2px 6px">
+              <svg aria-hidden="true" class="lucide lucide-flame" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-amber)" viewBox="0 0 24 24" width="11" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+              </svg>
+              <span style="color: var(--co-amber); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                "seria 2"
+              </span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 4px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Obecność"
+            </span>
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
+              "2/3"
+            </span>
+          </div>
+          <div style="background: var(--co-bar-track); height: 2px; overflow: hidden; position: relative">
+            <div style="background: linear-gradient(90deg, var(--co-green), var(--co-cyan)); bottom: 0px; left: 0px; position: absolute; right: 0px; top: 0px; transform-origin: left center; transform: scaleX(0.67); transition: transform 0.8s ease" />
+          </div>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px" title="Ostatnie 3 sesji">
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-02-26" />
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-05" />
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; flex: 1 1 0%; padding: 14px; position: relative; z-index: 1">
+      <div style="align-items: center; background: var(--co-tint); border: 1px solid var(--co-tint-line); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); display: flex; flex-direction: column; justify-content: center; margin-bottom: 10px; min-height: 84px; overflow: hidden; padding: 12px; position: relative; text-align: center; transition: background 0.2s ease, border-color 0.2s ease">
+        <div style="position: relative; z-index: 1">
+          <div style="color: var(--co-cyan); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; margin-bottom: 2px">
+            "↕ Saldo"
+          </div>
+          <p style="color: var(--co-cyan); font-family: var(--font-tech); font-size: 2.5rem; font-style: italic; font-weight: 700; letter-spacing: normal; line-height: 1; margin: 0px; text-shadow: var(--glow-cyan-md); text-transform: none">
+            "10,00"
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-left: 4px; text-transform: none">
+              "zł"
+            </span>
+          </p>
+          <p style="color: var(--co-cyan); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; margin: 4px 0px 0px">
+            "nadwyżka ponad zaległości"
+          </p>
+        </div>
+      </div>
+      <div style="margin-bottom: 12px">
+        <button aria-expanded="false" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+          <span aria-hidden="true" style="display: inline-flex; transform: none; transition: transform 0.25s">
+            <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+          "Do wpłaty (1)"
+        </button>
+      </div>
+      <div style="border-top: 1px solid var(--co-separator); margin-top: auto; padding-top: 10px">
+        <div style="align-items: stretch; display: flex; gap: 1px; height: 18px; opacity: 0.35; overflow: hidden">
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+        </div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 2px">
+          <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal">
+            "KAMIL"
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+"
+`;
+
+exports[`PlayerCard — charakteryzacja > stan: skarbnik: wszyscy rozliczeni 1`] = `
+"
+<div>
+  <div class="crt-card fifa-card fifa-card-epic glass-card" style="animation: none; border: 1px solid rgba(190, 42, 223, 0.19); display: flex; flex-direction: column; flex: 1 1 0%; height: 100%; overflow: hidden; position: relative; transform-style: preserve-3d">
+    <div aria-hidden="true" class="card-foil card-foil-epic" style="--foil-tint: color-mix(in srgb, var(--rank-weteran) 60%, transparent); --foil-x: 50%; --foil-y: 22%" />
+    <div aria-hidden="true" style="border-left: 1px solid rgb(190, 42, 223); border-top: 1px solid rgb(190, 42, 223); height: 14px; left: -1px; pointer-events: none; position: absolute; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-right: 1px solid rgb(190, 42, 223); border-top: 1px solid rgb(190, 42, 223); height: 14px; pointer-events: none; position: absolute; right: -1px; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(190, 42, 223); border-left: 1px solid rgb(190, 42, 223); bottom: -1px; height: 14px; left: -1px; pointer-events: none; position: absolute; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(190, 42, 223); border-right: 1px solid rgb(190, 42, 223); bottom: -1px; height: 14px; pointer-events: none; position: absolute; right: -1px; width: 14px" />
+    <div aria-hidden="true" class="glass-shine-overlay" />
+    <span aria-live="polite" class="sr-only" role="status" />
+    <div style="align-items: center; background: var(--co-tint); border-bottom: 1px solid var(--co-border); display: flex; justify-content: space-between; padding: 6px 14px; position: relative; z-index: 1">
+      <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "✓ Skarbnik"
+      </span>
+      <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "EPICKA"
+      </span>
+    </div>
+    <div style="align-items: stretch; border-bottom: 1px solid var(--co-separator); display: flex; gap: 14px; padding: 14px; position: relative; z-index: 2">
+      <div style="align-items: center; display: flex; flex-direction: column; flex-shrink: 0; gap: 6px; justify-content: space-between">
+        <div style="align-items: center; display: flex; flex-direction: column; gap: 2px">
+          <span class="card-ovr" style="color: var(--rank-weteran)">
+            "74"
+          </span>
+          <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; line-height: 1">
+            "OVR"
+          </span>
+        </div>
+        <div style="flex-shrink: 0; position: relative">
+          <div style="border: 1px solid rgb(190, 42, 223); box-shadow: var(--glow-box-cyan); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); height: 60px; overflow: hidden; position: relative; width: 60px">
+            <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
+              <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
+                <defs>
+                  <lineargradient id="cp-bg-_r_14_" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#BE2ADF" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#BE2ADF" stop-opacity="0.08" />
+                  </lineargradient>
+                  <clippath id="cp-clip-_r_14_">
+                    <rect height="80" width="80" x="0" y="0" />
+                  </clippath>
+                </defs>
+                <rect fill="url(#cp-bg-_r_14_)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-_r_14_)">
+                  <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="1" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="1" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.33999999999999997" width="14" x="17" y="17" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.28" width="14" x="49" y="17" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="33" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="33" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="33" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.33999999999999997" width="14" x="17" y="49" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.28" width="14" x="49" y="49" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.22" width="14" x="1" y="65" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.45999999999999996" width="14" x="33" y="65" />
+                  <rect fill="#BE2ADF" height="14" opacity="0.4" width="14" x="65" y="65" />
+                  <rect fill="#BE2ADF" height="10" opacity="0.45" width="64" x="8" y="19" />
+                  <rect fill="#BE2ADF" height="80" opacity="0.35" width="6" x="0" y="0" />
+                  <rect fill="#BE2ADF" height="80" opacity="0.35" width="6" x="74" y="0" />
+                  <line opacity="0.35" stroke="#BE2ADF" stroke-width="1" x1="0" x2="80" y1="28" y2="52" />
+                  <line opacity="0.2" stroke="#BE2ADF" stroke-width="1" x1="0" x2="80" y1="60" y2="40" />
+                </g>
+              </svg>
+              <span style="align-items: center; color: var(--co-text-hi); display: flex; font-family: var(--font-display); font-size: 1.25rem; inset: 0; justify-content: center; letter-spacing: normal; line-height: 1; pointer-events: none; position: absolute; text-shadow: 0 1px 8px var(--co-void); text-transform: none">
+                "KA"
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1 1 0%; gap: 8px; justify-content: space-between; min-width: 0">
+        <div>
+          <h3 style="color: var(--co-text-hi); font-family: var(--font-display); font-size: clamp(1.5rem, 5vw, 1.85rem); letter-spacing: normal; line-height: 1; margin: 0px; overflow: hidden; text-overflow: ellipsis; text-transform: none; white-space: nowrap">
+            "Kamil"
+          </h3>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+            <div style="align-items: center; display: inline-flex; gap: 4px; position: relative">
+              <button aria-expanded="false" aria-label="WETERAN 67% — ranga, pokaż próg następnej rangi" style="align-items: center; background: color-mix(in srgb, var(--rank-weteran) 6%, transparent); border: 1px solid color-mix(in srgb, var(--rank-weteran) 19%, transparent); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); cursor: pointer; display: inline-flex; gap: 4px; padding: 2px 6px 2px 4px; user-select: none" type="button">
+                <svg aria-hidden="true" class="lucide lucide-award" fill="none" focusable="false" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--rank-weteran); flex-shrink: 0" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                  <circle cx="12" cy="8" r="6" />
+                </svg>
+                <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                  "WETERAN"
+                </span>
+                <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem">
+                  "67%"
+                </span>
+              </button>
+              <span aria-hidden="true" style="color: var(--rank-weteran); flex-shrink: 0; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; line-height: 1; opacity: 0.7">
+                "?"
+              </span>
+            </div>
+            <div style="align-items: center; background: var(--co-amber-dim); border: 1px solid var(--co-amber); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); display: inline-flex; gap: 4px; padding: 2px 6px">
+              <svg aria-hidden="true" class="lucide lucide-flame" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-amber)" viewBox="0 0 24 24" width="11" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+              </svg>
+              <span style="color: var(--co-amber); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                "seria 2"
+              </span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 4px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Obecność"
+            </span>
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
+              "2/3"
+            </span>
+          </div>
+          <div style="background: var(--co-bar-track); height: 2px; overflow: hidden; position: relative">
+            <div style="background: linear-gradient(90deg, var(--co-green), var(--co-cyan)); bottom: 0px; left: 0px; position: absolute; right: 0px; top: 0px; transform-origin: left center; transform: scaleX(0.67); transition: transform 0.8s ease" />
+          </div>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px" title="Ostatnie 3 sesji">
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-02-26" />
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-05" />
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; flex: 1 1 0%; padding: 14px; position: relative; z-index: 1">
+      <div style="align-items: center; background: var(--co-tint); border: 1px solid var(--co-tint-line); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); display: flex; flex-direction: column; justify-content: center; margin-bottom: 10px; min-height: 84px; overflow: hidden; padding: 12px; position: relative; text-align: center; transition: background 0.2s ease, border-color 0.2s ease">
+        <div style="position: relative; z-index: 1">
+          <p style="color: var(--co-green); font-family: var(--font-display); font-size: 1.5rem; letter-spacing: normal; margin: 0px; text-shadow: var(--glow-green-md); text-transform: none">
+            "✓ Wszyscy rozliczeni"
+          </p>
+        </div>
+      </div>
+      <div style="margin-bottom: 12px">
+        <button aria-controls="#id1" aria-expanded="true" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+          <span aria-hidden="true" style="display: inline-flex; transform: rotate(180deg); transition: transform 0.25s">
+            <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+          "Zwiń szczegóły"
+        </button>
+        <div id="#id1" style="background: var(--co-surface-2); border: 1px solid var(--co-border); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); margin-top: 4px; max-height: min(320px, 55vh); overflow-y: auto; overflow: hidden">
+          <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
+            <span aria-hidden="true" style="color: var(--co-green)">
+              ">"
+            </span>
+            "Do wpłaty"
+          </div>
+          <div style="align-items: center; background: transparent; border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-text); font-family: var(--font-mono); font-size: 0.8125rem">
+              "Ala"
+            </span>
+            <span style="color: var(--co-rose); font-family: var(--font-mono); font-size: 0.8125rem">
+              "45,00 zł"
+            </span>
+          </div>
+          <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
+            <span aria-hidden="true" style="color: var(--co-green)">
+              ">"
+            </span>
+            "Nadpłata"
+          </div>
+          <div style="align-items: center; background: transparent; border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-text); font-family: var(--font-mono); font-size: 0.8125rem">
+              "Bartek"
+            </span>
+            <span style="color: var(--co-cyan); font-family: var(--font-mono); font-size: 0.8125rem">
+              "+10,00 zł"
+            </span>
+          </div>
+          <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
+            <span aria-hidden="true" style="color: var(--co-green)">
+              ">"
+            </span>
+            "Rozliczeni"
+          </div>
+          <div style="align-items: center; background: transparent; border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-text); font-family: var(--font-mono); font-size: 0.8125rem">
+              "Cezary"
+            </span>
+            <span style="color: var(--co-green); font-family: var(--font-mono); font-size: 0.8125rem">
+              "✓"
+            </span>
+          </div>
+          <div style="align-items: center; background: var(--co-tint-green); border-top: 1px solid var(--co-border); display: flex; gap: 10px; justify-content: space-between; padding: 10px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "◈ Do zebrania"
+            </span>
+            <span style="color: var(--co-green); font-family: var(--font-mono); font-size: 0.8125rem">
+              "35,00 zł"
+            </span>
+          </div>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--co-separator); margin-top: auto; padding-top: 10px">
+        <div style="align-items: stretch; display: flex; gap: 1px; height: 18px; opacity: 0.35; overflow: hidden">
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.6000000000000001; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 6px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(190, 42, 223); flex-shrink: 0; opacity: 0.4; width: 4px" />
+        </div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 2px">
+          <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal">
+            "KAMIL"
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+"
+`;
+
+exports[`PlayerCard — charakteryzacja > stan: zaległość 1`] = `
+"
+<div>
+  <div class="crt-card fifa-card fifa-card-epic glass-card" style="animation: none; border: 1px solid rgba(100, 127, 19, 0.19); display: flex; flex-direction: column; flex: 1 1 0%; height: 100%; overflow: hidden; position: relative; transform-style: preserve-3d">
+    <div aria-hidden="true" class="card-foil card-foil-epic" style="--foil-tint: color-mix(in srgb, var(--rank-weteran) 60%, transparent); --foil-x: 50%; --foil-y: 22%" />
+    <div aria-hidden="true" style="border-left: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; left: -1px; pointer-events: none; position: absolute; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-right: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; pointer-events: none; position: absolute; right: -1px; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-left: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; left: -1px; pointer-events: none; position: absolute; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-right: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; pointer-events: none; position: absolute; right: -1px; width: 14px" />
+    <div aria-hidden="true" class="glass-shine-overlay" />
+    <span aria-live="polite" class="sr-only" role="status" />
+    <div style="align-items: center; background: var(--co-tint-rose); border-bottom: 1px solid var(--co-border); display: flex; justify-content: space-between; padding: 6px 14px; position: relative; z-index: 1">
+      <span style="color: rgba(100, 127, 19, 0.6); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "Do wpłaty"
+      </span>
+      <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "EPICKA"
+      </span>
+    </div>
+    <div style="align-items: stretch; border-bottom: 1px solid var(--co-separator); display: flex; gap: 14px; padding: 14px; position: relative; z-index: 2">
+      <div style="align-items: center; display: flex; flex-direction: column; flex-shrink: 0; gap: 6px; justify-content: space-between">
+        <div style="align-items: center; display: flex; flex-direction: column; gap: 2px">
+          <span class="card-ovr" style="color: var(--rank-weteran)">
+            "74"
+          </span>
+          <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; line-height: 1">
+            "OVR"
+          </span>
+        </div>
+        <div style="flex-shrink: 0; position: relative">
+          <div style="border: 1px solid rgb(100, 127, 19); box-shadow: var(--glow-box-cyan); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); height: 60px; overflow: hidden; position: relative; width: 60px">
+            <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
+              <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
+                <defs>
+                  <lineargradient id="cp-bg-_r_0_" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
+                  </lineargradient>
+                  <clippath id="cp-clip-_r_0_">
+                    <rect height="80" width="80" x="0" y="0" />
+                  </clippath>
+                </defs>
+                <rect fill="url(#cp-bg-_r_0_)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-_r_0_)">
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="65" />
+                  <rect fill="#647F13" height="10" opacity="0.45" width="64" x="8" y="21" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="0" y="0" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="74" y="0" />
+                  <line opacity="0.35" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="28" y2="52" />
+                  <line opacity="0.2" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="60" y2="40" />
+                </g>
+              </svg>
+              <span style="align-items: center; color: var(--co-text-hi); display: flex; font-family: var(--font-display); font-size: 1.25rem; inset: 0; justify-content: center; letter-spacing: normal; line-height: 1; pointer-events: none; position: absolute; text-shadow: 0 1px 8px var(--co-void); text-transform: none">
+                "AL"
+              </span>
+            </div>
+          </div>
+          <div style="background: var(--co-rose); border-radius: 50%; border: 2px solid var(--co-void); bottom: -2px; box-shadow: var(--glow-box-rose); height: 10px; position: absolute; right: -2px; width: 10px" title="Niezapłacone" />
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1 1 0%; gap: 8px; justify-content: space-between; min-width: 0">
+        <div>
+          <h3 style="color: var(--co-text-hi); font-family: var(--font-display); font-size: clamp(1.5rem, 5vw, 1.85rem); letter-spacing: normal; line-height: 1; margin: 0px; overflow: hidden; text-overflow: ellipsis; text-transform: none; white-space: nowrap">
+            "Ala"
+          </h3>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+            <div style="align-items: center; display: inline-flex; gap: 4px; position: relative">
+              <button aria-expanded="false" aria-label="WETERAN 67% — ranga, pokaż próg następnej rangi" style="align-items: center; background: color-mix(in srgb, var(--rank-weteran) 6%, transparent); border: 1px solid color-mix(in srgb, var(--rank-weteran) 19%, transparent); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); cursor: pointer; display: inline-flex; gap: 4px; padding: 2px 6px 2px 4px; user-select: none" type="button">
+                <svg aria-hidden="true" class="lucide lucide-award" fill="none" focusable="false" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--rank-weteran); flex-shrink: 0" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                  <circle cx="12" cy="8" r="6" />
+                </svg>
+                <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                  "WETERAN"
+                </span>
+                <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem">
+                  "67%"
+                </span>
+              </button>
+              <span aria-hidden="true" style="color: var(--rank-weteran); flex-shrink: 0; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; line-height: 1; opacity: 0.7">
+                "?"
+              </span>
+            </div>
+            <div style="align-items: center; background: var(--co-amber-dim); border: 1px solid var(--co-amber); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); display: inline-flex; gap: 4px; padding: 2px 6px">
+              <svg aria-hidden="true" class="lucide lucide-flame" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-amber)" viewBox="0 0 24 24" width="11" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+              </svg>
+              <span style="color: var(--co-amber); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                "seria 2"
+              </span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 4px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Obecność"
+            </span>
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
+              "2/3"
+            </span>
+          </div>
+          <div style="background: var(--co-bar-track); height: 2px; overflow: hidden; position: relative">
+            <div style="background: linear-gradient(90deg, var(--co-green), var(--co-cyan)); bottom: 0px; left: 0px; position: absolute; right: 0px; top: 0px; transform-origin: left center; transform: scaleX(0.67); transition: transform 0.8s ease" />
+          </div>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px" title="Ostatnie 3 sesji">
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-02-26" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-05" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; flex: 1 1 0%; padding: 14px; position: relative; z-index: 1">
+      <div aria-label="45,00zł — włącz tryb edycji wpłat" aria-pressed="false" role="button" style="align-items: center; background: var(--co-tint-rose); border: 1px solid var(--co-rose); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); cursor: default; display: flex; flex-direction: column; justify-content: center; margin-bottom: 10px; min-height: 84px; overflow: hidden; padding: 12px; position: relative; text-align: center; transition: background 0.2s ease, border-color 0.2s ease; user-select: none" tabindex="0">
+        <div style="position: relative; z-index: 1">
+          <p style="color: var(--co-rose); font-family: var(--font-tech); font-size: 2.5rem; font-style: italic; font-weight: 700; letter-spacing: normal; line-height: 1.1; margin: 0px; text-shadow: var(--glow-rose-md); text-transform: none">
+            "45,00"
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-left: 4px; text-transform: none">
+              "zł"
+            </span>
+          </p>
+        </div>
+      </div>
+      <button aria-pressed="false" class="icon-btn" style="align-items: center; align-self: flex-end; background: transparent; color: var(--co-dim); cursor: pointer; display: inline-flex; font-family: var(--font-mono); font-size: 0.8125rem; gap: 6px; margin-bottom: 6px; min-height: 44px; padding: 6px 10px" type="button">
+        <svg aria-hidden="true" class="lucide lucide-pencil" fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+          <path d="m15 5 4 4" />
+        </svg>
+        "Edytuj wpłaty"
+      </button>
+      <div style="margin-bottom: 12px">
+        <button aria-expanded="false" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+          <span aria-hidden="true" style="display: inline-flex; transform: none; transition: transform 0.25s">
+            <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+          "Skąd ta kwota?"
+        </button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
+        <button aria-describedby="#id1" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
+          <span aria-hidden="true" class="hold-confirm-fill" style="transform: scaleX(0); transition: transform 120ms ease-out" />
+          <span style="align-items: center; display: flex; flex-direction: column; gap: 1px; position: relative; z-index: 1">
+            <span style="font-family: var(--font-display); font-size: 1.25rem; letter-spacing: normal; line-height: 1">
+              "45,00 zł"
+            </span>
+            <span id="#id1" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
+              "Przytrzymaj, aby zapisać"
+            </span>
+          </span>
+        </button>
+        <p aria-live="polite" class="sr-only" role="status" />
+        <button class="cyber-button-outline" style="min-height: 44px; padding: 8px 12px; width: 100%">
+          "+ Inna kwota"
+        </button>
+      </div>
+      <div style="border-top: 1px solid var(--co-separator); margin-top: 12px; padding-top: 10px">
+        <div style="align-items: stretch; display: flex; gap: 1px; height: 18px; opacity: 0.35; overflow: hidden">
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+        </div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 2px">
+          <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal">
+            "ALA"
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+"
+`;
+
+exports[`PlayerCard — charakteryzacja > stan: zaległość z rozwiniętym rozbiciem 1`] = `
+"
+<div>
+  <div class="crt-card fifa-card fifa-card-epic glass-card" style="animation: none; border: 1px solid rgba(100, 127, 19, 0.19); display: flex; flex-direction: column; flex: 1 1 0%; height: 100%; overflow: hidden; position: relative; transform-style: preserve-3d">
+    <div aria-hidden="true" class="card-foil card-foil-epic" style="--foil-tint: color-mix(in srgb, var(--rank-weteran) 60%, transparent); --foil-x: 50%; --foil-y: 22%" />
+    <div aria-hidden="true" style="border-left: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; left: -1px; pointer-events: none; position: absolute; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-right: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; pointer-events: none; position: absolute; right: -1px; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-left: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; left: -1px; pointer-events: none; position: absolute; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-right: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; pointer-events: none; position: absolute; right: -1px; width: 14px" />
+    <div aria-hidden="true" class="glass-shine-overlay" />
+    <span aria-live="polite" class="sr-only" role="status" />
+    <div style="align-items: center; background: var(--co-tint-rose); border-bottom: 1px solid var(--co-border); display: flex; justify-content: space-between; padding: 6px 14px; position: relative; z-index: 1">
+      <span style="color: rgba(100, 127, 19, 0.6); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "Do wpłaty"
+      </span>
+      <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "EPICKA"
+      </span>
+    </div>
+    <div style="align-items: stretch; border-bottom: 1px solid var(--co-separator); display: flex; gap: 14px; padding: 14px; position: relative; z-index: 2">
+      <div style="align-items: center; display: flex; flex-direction: column; flex-shrink: 0; gap: 6px; justify-content: space-between">
+        <div style="align-items: center; display: flex; flex-direction: column; gap: 2px">
+          <span class="card-ovr" style="color: var(--rank-weteran)">
+            "74"
+          </span>
+          <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; line-height: 1">
+            "OVR"
+          </span>
+        </div>
+        <div style="flex-shrink: 0; position: relative">
+          <div style="border: 1px solid rgb(100, 127, 19); box-shadow: var(--glow-box-cyan); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); height: 60px; overflow: hidden; position: relative; width: 60px">
+            <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
+              <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
+                <defs>
+                  <lineargradient id="cp-bg-_r_m_" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
+                  </lineargradient>
+                  <clippath id="cp-clip-_r_m_">
+                    <rect height="80" width="80" x="0" y="0" />
+                  </clippath>
+                </defs>
+                <rect fill="url(#cp-bg-_r_m_)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-_r_m_)">
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="65" />
+                  <rect fill="#647F13" height="10" opacity="0.45" width="64" x="8" y="21" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="0" y="0" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="74" y="0" />
+                  <line opacity="0.35" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="28" y2="52" />
+                  <line opacity="0.2" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="60" y2="40" />
+                </g>
+              </svg>
+              <span style="align-items: center; color: var(--co-text-hi); display: flex; font-family: var(--font-display); font-size: 1.25rem; inset: 0; justify-content: center; letter-spacing: normal; line-height: 1; pointer-events: none; position: absolute; text-shadow: 0 1px 8px var(--co-void); text-transform: none">
+                "AL"
+              </span>
+            </div>
+          </div>
+          <div style="background: var(--co-rose); border-radius: 50%; border: 2px solid var(--co-void); bottom: -2px; box-shadow: var(--glow-box-rose); height: 10px; position: absolute; right: -2px; width: 10px" title="Niezapłacone" />
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1 1 0%; gap: 8px; justify-content: space-between; min-width: 0">
+        <div>
+          <h3 style="color: var(--co-text-hi); font-family: var(--font-display); font-size: clamp(1.5rem, 5vw, 1.85rem); letter-spacing: normal; line-height: 1; margin: 0px; overflow: hidden; text-overflow: ellipsis; text-transform: none; white-space: nowrap">
+            "Ala"
+          </h3>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+            <div style="align-items: center; display: inline-flex; gap: 4px; position: relative">
+              <button aria-expanded="false" aria-label="WETERAN 67% — ranga, pokaż próg następnej rangi" style="align-items: center; background: color-mix(in srgb, var(--rank-weteran) 6%, transparent); border: 1px solid color-mix(in srgb, var(--rank-weteran) 19%, transparent); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); cursor: pointer; display: inline-flex; gap: 4px; padding: 2px 6px 2px 4px; user-select: none" type="button">
+                <svg aria-hidden="true" class="lucide lucide-award" fill="none" focusable="false" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--rank-weteran); flex-shrink: 0" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                  <circle cx="12" cy="8" r="6" />
+                </svg>
+                <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                  "WETERAN"
+                </span>
+                <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem">
+                  "67%"
+                </span>
+              </button>
+              <span aria-hidden="true" style="color: var(--rank-weteran); flex-shrink: 0; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; line-height: 1; opacity: 0.7">
+                "?"
+              </span>
+            </div>
+            <div style="align-items: center; background: var(--co-amber-dim); border: 1px solid var(--co-amber); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); display: inline-flex; gap: 4px; padding: 2px 6px">
+              <svg aria-hidden="true" class="lucide lucide-flame" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-amber)" viewBox="0 0 24 24" width="11" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+              </svg>
+              <span style="color: var(--co-amber); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                "seria 2"
+              </span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 4px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Obecność"
+            </span>
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
+              "2/3"
+            </span>
+          </div>
+          <div style="background: var(--co-bar-track); height: 2px; overflow: hidden; position: relative">
+            <div style="background: linear-gradient(90deg, var(--co-green), var(--co-cyan)); bottom: 0px; left: 0px; position: absolute; right: 0px; top: 0px; transform-origin: left center; transform: scaleX(0.67); transition: transform 0.8s ease" />
+          </div>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px" title="Ostatnie 3 sesji">
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-02-26" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-05" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; flex: 1 1 0%; padding: 14px; position: relative; z-index: 1">
+      <div aria-label="45,00zł — włącz tryb edycji wpłat" aria-pressed="false" role="button" style="align-items: center; background: var(--co-tint-rose); border: 1px solid var(--co-rose); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); cursor: default; display: flex; flex-direction: column; justify-content: center; margin-bottom: 10px; min-height: 84px; overflow: hidden; padding: 12px; position: relative; text-align: center; transition: background 0.2s ease, border-color 0.2s ease; user-select: none" tabindex="0">
+        <div style="position: relative; z-index: 1">
+          <p style="color: var(--co-rose); font-family: var(--font-tech); font-size: 2.5rem; font-style: italic; font-weight: 700; letter-spacing: normal; line-height: 1.1; margin: 0px; text-shadow: var(--glow-rose-md); text-transform: none">
+            "45,00"
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-left: 4px; text-transform: none">
+              "zł"
+            </span>
+          </p>
+        </div>
+      </div>
+      <button aria-pressed="false" class="icon-btn" style="align-items: center; align-self: flex-end; background: transparent; color: var(--co-dim); cursor: pointer; display: inline-flex; font-family: var(--font-mono); font-size: 0.8125rem; gap: 6px; margin-bottom: 6px; min-height: 44px; padding: 6px 10px" type="button">
+        <svg aria-hidden="true" class="lucide lucide-pencil" fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+          <path d="m15 5 4 4" />
+        </svg>
+        "Edytuj wpłaty"
+      </button>
+      <div style="margin-bottom: 12px">
+        <button aria-controls="#id1" aria-expanded="true" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+          <span aria-hidden="true" style="display: inline-flex; transform: rotate(180deg); transition: transform 0.25s">
+            <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+          "Zwiń szczegóły"
+        </button>
+        <div id="#id1" style="background: var(--co-surface-2); border: 1px solid var(--co-border); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); margin-top: 4px; max-height: min(320px, 55vh); overflow-y: auto; overflow: hidden">
+          <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
+            <span aria-hidden="true" style="color: var(--co-green)">
+              ">"
+            </span>
+            "Sesje"
+          </div>
+          <div style="align-items: center; background: transparent; border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.8125rem">
+              "12.03.2025"
+            </span>
+            <span style="color: var(--co-rose); font-family: var(--font-mono); font-size: 0.8125rem">
+              "-20,00 zł"
+            </span>
+          </div>
+          <div style="align-items: center; background: transparent; border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.8125rem">
+              "05.03.2025"
+            </span>
+            <span style="color: var(--co-rose); font-family: var(--font-mono); font-size: 0.8125rem">
+              "-30,00 zł"
+            </span>
+          </div>
+          <div style="align-items: center; background: var(--co-tint-rose); border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Razem sesje"
+            </span>
+            <span style="color: var(--co-rose); font-family: var(--font-mono); font-size: 0.8125rem">
+              "-50,00 zł"
+            </span>
+          </div>
+          <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
+            <span aria-hidden="true" style="color: var(--co-green)">
+              ">"
+            </span>
+            "Wpłaty"
+          </div>
+          <div style="align-items: center; background: transparent; border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.8125rem">
+              "06.03.2025"
+            </span>
+            <span style="align-items: center; display: flex; gap: 6px">
+              <span style="color: var(--co-cyan); font-family: var(--font-mono); font-size: 0.8125rem">
+                "+5,00 zł"
+              </span>
+            </span>
+          </div>
+          <div style="align-items: center; background: var(--co-tint); border-top: 1px solid var(--co-border); display: flex; gap: 10px; justify-content: space-between; padding: 10px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "◈ Saldo"
+            </span>
+            <span style="color: var(--co-rose); font-family: var(--font-mono); font-size: 0.8125rem">
+              "Do zapłaty: 45,00 zł"
+            </span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
+        <button aria-describedby="#id2" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
+          <span aria-hidden="true" class="hold-confirm-fill" style="transform: scaleX(0); transition: transform 120ms ease-out" />
+          <span style="align-items: center; display: flex; flex-direction: column; gap: 1px; position: relative; z-index: 1">
+            <span style="font-family: var(--font-display); font-size: 1.25rem; letter-spacing: normal; line-height: 1">
+              "45,00 zł"
+            </span>
+            <span id="#id2" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
+              "Przytrzymaj, aby zapisać"
+            </span>
+          </span>
+        </button>
+        <p aria-live="polite" class="sr-only" role="status" />
+        <button class="cyber-button-outline" style="min-height: 44px; padding: 8px 12px; width: 100%">
+          "+ Inna kwota"
+        </button>
+      </div>
+      <div style="border-top: 1px solid var(--co-separator); margin-top: 12px; padding-top: 10px">
+        <div style="align-items: stretch; display: flex; gap: 1px; height: 18px; opacity: 0.35; overflow: hidden">
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+        </div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 2px">
+          <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal">
+            "ALA"
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+"
+`;
+
+exports[`PlayerCard — charakteryzacja > tryb edycji wpłat: pięć kliknięć w kwotę, Enter i widoczny przycisk przełączają go 1`] = `
+"
+<div>
+  <div class="crt-card fifa-card fifa-card-epic glass-card" style="animation: none; border: 1px solid rgba(100, 127, 19, 0.19); display: flex; flex-direction: column; flex: 1 1 0%; height: 100%; overflow: hidden; position: relative; transform-style: preserve-3d">
+    <div aria-hidden="true" class="card-foil card-foil-epic" style="--foil-tint: color-mix(in srgb, var(--rank-weteran) 60%, transparent); --foil-x: 50%; --foil-y: 22%" />
+    <div aria-hidden="true" style="border-left: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; left: -1px; pointer-events: none; position: absolute; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-right: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; pointer-events: none; position: absolute; right: -1px; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-left: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; left: -1px; pointer-events: none; position: absolute; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-right: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; pointer-events: none; position: absolute; right: -1px; width: 14px" />
+    <div aria-hidden="true" class="glass-shine-overlay" />
+    <span aria-live="polite" class="sr-only" role="status" />
+    <div style="align-items: center; background: var(--co-tint-rose); border-bottom: 1px solid var(--co-border); display: flex; justify-content: space-between; padding: 6px 14px; position: relative; z-index: 1">
+      <span style="color: rgba(100, 127, 19, 0.6); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "Do wpłaty"
+      </span>
+      <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "EPICKA"
+      </span>
+    </div>
+    <div style="align-items: stretch; border-bottom: 1px solid var(--co-separator); display: flex; gap: 14px; padding: 14px; position: relative; z-index: 2">
+      <div style="align-items: center; display: flex; flex-direction: column; flex-shrink: 0; gap: 6px; justify-content: space-between">
+        <div style="align-items: center; display: flex; flex-direction: column; gap: 2px">
+          <span class="card-ovr" style="color: var(--rank-weteran)">
+            "74"
+          </span>
+          <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; line-height: 1">
+            "OVR"
+          </span>
+        </div>
+        <div style="flex-shrink: 0; position: relative">
+          <div style="border: 1px solid rgb(100, 127, 19); box-shadow: var(--glow-box-cyan); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); height: 60px; overflow: hidden; position: relative; width: 60px">
+            <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
+              <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
+                <defs>
+                  <lineargradient id="cp-bg-_r_34_" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
+                  </lineargradient>
+                  <clippath id="cp-clip-_r_34_">
+                    <rect height="80" width="80" x="0" y="0" />
+                  </clippath>
+                </defs>
+                <rect fill="url(#cp-bg-_r_34_)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-_r_34_)">
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="65" />
+                  <rect fill="#647F13" height="10" opacity="0.45" width="64" x="8" y="21" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="0" y="0" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="74" y="0" />
+                  <line opacity="0.35" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="28" y2="52" />
+                  <line opacity="0.2" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="60" y2="40" />
+                </g>
+              </svg>
+              <span style="align-items: center; color: var(--co-text-hi); display: flex; font-family: var(--font-display); font-size: 1.25rem; inset: 0; justify-content: center; letter-spacing: normal; line-height: 1; pointer-events: none; position: absolute; text-shadow: 0 1px 8px var(--co-void); text-transform: none">
+                "AL"
+              </span>
+            </div>
+          </div>
+          <div style="background: var(--co-rose); border-radius: 50%; border: 2px solid var(--co-void); bottom: -2px; box-shadow: var(--glow-box-rose); height: 10px; position: absolute; right: -2px; width: 10px" title="Niezapłacone" />
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1 1 0%; gap: 8px; justify-content: space-between; min-width: 0">
+        <div>
+          <h3 style="color: var(--co-text-hi); font-family: var(--font-display); font-size: clamp(1.5rem, 5vw, 1.85rem); letter-spacing: normal; line-height: 1; margin: 0px; overflow: hidden; text-overflow: ellipsis; text-transform: none; white-space: nowrap">
+            "Ala"
+          </h3>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+            <div style="align-items: center; display: inline-flex; gap: 4px; position: relative">
+              <button aria-expanded="false" aria-label="WETERAN 67% — ranga, pokaż próg następnej rangi" style="align-items: center; background: color-mix(in srgb, var(--rank-weteran) 6%, transparent); border: 1px solid color-mix(in srgb, var(--rank-weteran) 19%, transparent); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); cursor: pointer; display: inline-flex; gap: 4px; padding: 2px 6px 2px 4px; user-select: none" type="button">
+                <svg aria-hidden="true" class="lucide lucide-award" fill="none" focusable="false" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--rank-weteran); flex-shrink: 0" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                  <circle cx="12" cy="8" r="6" />
+                </svg>
+                <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                  "WETERAN"
+                </span>
+                <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem">
+                  "67%"
+                </span>
+              </button>
+              <span aria-hidden="true" style="color: var(--rank-weteran); flex-shrink: 0; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; line-height: 1; opacity: 0.7">
+                "?"
+              </span>
+            </div>
+            <div style="align-items: center; background: var(--co-amber-dim); border: 1px solid var(--co-amber); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); display: inline-flex; gap: 4px; padding: 2px 6px">
+              <svg aria-hidden="true" class="lucide lucide-flame" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-amber)" viewBox="0 0 24 24" width="11" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+              </svg>
+              <span style="color: var(--co-amber); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                "seria 2"
+              </span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 4px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Obecność"
+            </span>
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
+              "2/3"
+            </span>
+          </div>
+          <div style="background: var(--co-bar-track); height: 2px; overflow: hidden; position: relative">
+            <div style="background: linear-gradient(90deg, var(--co-green), var(--co-cyan)); bottom: 0px; left: 0px; position: absolute; right: 0px; top: 0px; transform-origin: left center; transform: scaleX(0.67); transition: transform 0.8s ease" />
+          </div>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px" title="Ostatnie 3 sesji">
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-02-26" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-05" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; flex: 1 1 0%; padding: 14px; position: relative; z-index: 1">
+      <div aria-label="45,00zł Tryb edycji — wyłącz tryb edycji wpłat" aria-pressed="true" role="button" style="align-items: center; background: var(--co-tint-rose); border: 1px solid var(--co-rose); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); cursor: default; display: flex; flex-direction: column; justify-content: center; margin-bottom: 10px; min-height: 84px; overflow: hidden; padding: 12px; position: relative; text-align: center; transition: background 0.2s ease, border-color 0.2s ease; user-select: none" tabindex="0">
+        <div style="position: relative; z-index: 1">
+          <p style="color: var(--co-rose); font-family: var(--font-tech); font-size: 2.5rem; font-style: italic; font-weight: 700; letter-spacing: normal; line-height: 1.1; margin: 0px; text-shadow: var(--glow-rose-md); text-transform: none">
+            "45,00"
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-left: 4px; text-transform: none">
+              "zł"
+            </span>
+          </p>
+        </div>
+        <p style="align-items: center; color: var(--co-rose); display: inline-flex; font-family: var(--font-mono); font-size: 0.75rem; gap: 4px; letter-spacing: normal; margin-top: 4px; position: relative; z-index: 1">
+          <svg aria-hidden="true" class="lucide lucide-triangle-alert" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+          "Tryb edycji"
+        </p>
+      </div>
+      <button aria-pressed="true" class="icon-btn" style="align-items: center; align-self: flex-end; background: transparent; color: var(--co-rose); cursor: pointer; display: inline-flex; font-family: var(--font-mono); font-size: 0.8125rem; gap: 6px; margin-bottom: 6px; min-height: 44px; padding: 6px 10px" type="button">
+        <svg aria-hidden="true" class="lucide lucide-pencil" fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+          <path d="m15 5 4 4" />
+        </svg>
+        "Zakończ edycję wpłat"
+      </button>
+      <div style="margin-bottom: 12px">
+        <button aria-controls="#id1" aria-expanded="true" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+          <span aria-hidden="true" style="display: inline-flex; transform: rotate(180deg); transition: transform 0.25s">
+            <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+          "Zwiń szczegóły"
+        </button>
+        <div id="#id1" style="background: var(--co-surface-2); border: 1px solid var(--co-border); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); margin-top: 4px; max-height: min(320px, 55vh); overflow-y: auto; overflow: hidden">
+          <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
+            <span aria-hidden="true" style="color: var(--co-green)">
+              ">"
+            </span>
+            "Sesje"
+          </div>
+          <div style="align-items: center; background: transparent; border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.8125rem">
+              "12.03.2025"
+            </span>
+            <span style="color: var(--co-rose); font-family: var(--font-mono); font-size: 0.8125rem">
+              "-20,00 zł"
+            </span>
+          </div>
+          <div style="align-items: center; background: transparent; border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.8125rem">
+              "05.03.2025"
+            </span>
+            <span style="color: var(--co-rose); font-family: var(--font-mono); font-size: 0.8125rem">
+              "-30,00 zł"
+            </span>
+          </div>
+          <div style="align-items: center; background: var(--co-tint-rose); border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Razem sesje"
+            </span>
+            <span style="color: var(--co-rose); font-family: var(--font-mono); font-size: 0.8125rem">
+              "-50,00 zł"
+            </span>
+          </div>
+          <div style="align-items: center; border-bottom: 1px solid var(--co-border); color: var(--co-dim); display: flex; font-family: var(--font-display); font-size: 0.75rem; gap: 6px; letter-spacing: normal; padding: 6px 12px; text-transform: none">
+            <span aria-hidden="true" style="color: var(--co-green)">
+              ">"
+            </span>
+            "Wpłaty"
+          </div>
+          <div style="align-items: center; background: transparent; border-bottom: 1px solid var(--co-separator); display: flex; gap: 10px; justify-content: space-between; padding: 6px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.8125rem">
+              "06.03.2025"
+            </span>
+            <span style="align-items: center; display: flex; gap: 6px">
+              <span style="color: var(--co-cyan); font-family: var(--font-mono); font-size: 0.8125rem">
+                "+5,00 zł"
+              </span>
+              <button aria-label="Usuń wpłatę 5,00 zł z 06.03.2025" class="danger icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); color: var(--co-rose); cursor: pointer; display: flex; flex-shrink: 0; font-size: 0.8125rem; height: 44px; justify-content: center; line-height: 1; width: 44px" title="Usuń wpłatę">
+                <svg aria-hidden="true" class="lucide lucide-x" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            </span>
+          </div>
+          <div style="align-items: center; background: var(--co-tint); border-top: 1px solid var(--co-border); display: flex; gap: 10px; justify-content: space-between; padding: 10px 12px">
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "◈ Saldo"
+            </span>
+            <span style="color: var(--co-rose); font-family: var(--font-mono); font-size: 0.8125rem">
+              "Do zapłaty: 45,00 zł"
+            </span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
+        <button aria-describedby="#id2" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
+          <span aria-hidden="true" class="hold-confirm-fill" style="transform: scaleX(0); transition: transform 120ms ease-out" />
+          <span style="align-items: center; display: flex; flex-direction: column; gap: 1px; position: relative; z-index: 1">
+            <span style="font-family: var(--font-display); font-size: 1.25rem; letter-spacing: normal; line-height: 1">
+              "45,00 zł"
+            </span>
+            <span id="#id2" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
+              "Przytrzymaj, aby zapisać"
+            </span>
+          </span>
+        </button>
+        <p aria-live="polite" class="sr-only" role="status" />
+        <button class="cyber-button-outline" style="min-height: 44px; padding: 8px 12px; width: 100%">
+          "+ Inna kwota"
+        </button>
+      </div>
+      <div style="border-top: 1px solid var(--co-separator); margin-top: 12px; padding-top: 10px">
+        <div style="align-items: stretch; display: flex; gap: 1px; height: 18px; opacity: 0.35; overflow: hidden">
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 2px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 6px" />
+          <div style="background: transparent; flex-shrink: 0; opacity: 0; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.6000000000000001; width: 4px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.8; width: 2px" />
+          <div style="background: rgb(100, 127, 19); flex-shrink: 0; opacity: 0.4; width: 6px" />
+        </div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 2px">
+          <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal">
+            "ALA"
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+"
+`;
+
+exports[`PlayerCard — charakteryzacja > wersja mobilna: bez kodu kreskowego, z mniejszą liczbą kropek sesji 1`] = `
+"
+<div>
+  <div class="crt-card fifa-card fifa-card-epic glass-card" style="animation: none; border: 1px solid rgba(100, 127, 19, 0.19); display: flex; flex-direction: column; flex: 1 1 0%; height: 100%; overflow: hidden; position: relative; transform-style: preserve-3d">
+    <div aria-hidden="true" class="card-foil card-foil-epic" style="--foil-tint: color-mix(in srgb, var(--rank-weteran) 60%, transparent); --foil-x: 50%; --foil-y: 22%" />
+    <div aria-hidden="true" style="border-left: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; left: -1px; pointer-events: none; position: absolute; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-right: 1px solid rgb(100, 127, 19); border-top: 1px solid rgb(100, 127, 19); height: 14px; pointer-events: none; position: absolute; right: -1px; top: -1px; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-left: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; left: -1px; pointer-events: none; position: absolute; width: 14px" />
+    <div aria-hidden="true" style="border-bottom: 1px solid rgb(100, 127, 19); border-right: 1px solid rgb(100, 127, 19); bottom: -1px; height: 14px; pointer-events: none; position: absolute; right: -1px; width: 14px" />
+    <div aria-hidden="true" class="glass-shine-overlay" />
+    <span aria-live="polite" class="sr-only" role="status" />
+    <div style="align-items: center; background: var(--co-tint-rose); border-bottom: 1px solid var(--co-border); display: flex; justify-content: space-between; padding: 6px 14px; position: relative; z-index: 1">
+      <span style="color: rgba(100, 127, 19, 0.6); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "Do wpłaty"
+      </span>
+      <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+        "EPICKA"
+      </span>
+    </div>
+    <div style="align-items: stretch; border-bottom: 1px solid var(--co-separator); display: flex; gap: 14px; padding: 14px; position: relative; z-index: 2">
+      <div style="align-items: center; display: flex; flex-direction: column; flex-shrink: 0; gap: 6px; justify-content: space-between">
+        <div style="align-items: center; display: flex; flex-direction: column; gap: 2px">
+          <span class="card-ovr" style="color: var(--rank-weteran)">
+            "74"
+          </span>
+          <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; line-height: 1">
+            "OVR"
+          </span>
+        </div>
+        <div style="flex-shrink: 0; position: relative">
+          <div style="border: 1px solid rgb(100, 127, 19); box-shadow: var(--glow-box-cyan); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); height: 60px; overflow: hidden; position: relative; width: 60px">
+            <div aria-hidden="true" style="background: var(--co-void); height: 100%; overflow: hidden; position: relative; width: 100%">
+              <svg height="100%" style="display: block" viewBox="0 0 80 80" width="100%">
+                <defs>
+                  <lineargradient id="cp-bg-_r_17_" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#647F13" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#647F13" stop-opacity="0.08" />
+                  </lineargradient>
+                  <clippath id="cp-clip-_r_17_">
+                    <rect height="80" width="80" x="0" y="0" />
+                  </clippath>
+                </defs>
+                <rect fill="url(#cp-bg-_r_17_)" height="80" width="80" />
+                <g clip-path="url(#cp-clip-_r_17_)">
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="1" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="17" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="33" />
+                  <rect fill="#647F13" height="14" opacity="0.33999999999999997" width="14" x="17" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.28" width="14" x="49" y="49" />
+                  <rect fill="#647F13" height="14" opacity="0.22" width="14" x="1" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.45999999999999996" width="14" x="33" y="65" />
+                  <rect fill="#647F13" height="14" opacity="0.4" width="14" x="65" y="65" />
+                  <rect fill="#647F13" height="10" opacity="0.45" width="64" x="8" y="21" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="0" y="0" />
+                  <rect fill="#647F13" height="80" opacity="0.35" width="6" x="74" y="0" />
+                  <line opacity="0.35" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="28" y2="52" />
+                  <line opacity="0.2" stroke="#647F13" stroke-width="1" x1="0" x2="80" y1="60" y2="40" />
+                </g>
+              </svg>
+              <span style="align-items: center; color: var(--co-text-hi); display: flex; font-family: var(--font-display); font-size: 1.25rem; inset: 0; justify-content: center; letter-spacing: normal; line-height: 1; pointer-events: none; position: absolute; text-shadow: 0 1px 8px var(--co-void); text-transform: none">
+                "AL"
+              </span>
+            </div>
+          </div>
+          <div style="background: var(--co-rose); border-radius: 50%; border: 2px solid var(--co-void); bottom: -2px; box-shadow: var(--glow-box-rose); height: 10px; position: absolute; right: -2px; width: 10px" title="Niezapłacone" />
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; flex: 1 1 0%; gap: 8px; justify-content: space-between; min-width: 0">
+        <div>
+          <h3 style="color: var(--co-text-hi); font-family: var(--font-display); font-size: clamp(1.5rem, 5vw, 1.85rem); letter-spacing: normal; line-height: 1; margin: 0px; overflow: hidden; text-overflow: ellipsis; text-transform: none; white-space: nowrap">
+            "Ala"
+          </h3>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+            <div style="align-items: center; display: inline-flex; gap: 4px; position: relative">
+              <button aria-expanded="false" aria-label="WETERAN 67% — ranga, pokaż próg następnej rangi" style="align-items: center; background: color-mix(in srgb, var(--rank-weteran) 6%, transparent); border: 1px solid color-mix(in srgb, var(--rank-weteran) 19%, transparent); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); cursor: pointer; display: inline-flex; gap: 4px; padding: 2px 6px 2px 4px; user-select: none" type="button">
+                <svg aria-hidden="true" class="lucide lucide-award" fill="none" focusable="false" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--rank-weteran); flex-shrink: 0" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+                  <circle cx="12" cy="8" r="6" />
+                </svg>
+                <span style="color: var(--rank-weteran); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                  "WETERAN"
+                </span>
+                <span style="color: var(--rank-weteran); font-family: var(--font-mono); font-size: 0.75rem">
+                  "67%"
+                </span>
+              </button>
+            </div>
+            <div style="align-items: center; background: var(--co-amber-dim); border: 1px solid var(--co-amber); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); display: inline-flex; gap: 4px; padding: 2px 6px">
+              <svg aria-hidden="true" class="lucide lucide-flame" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="color: var(--co-amber)" viewBox="0 0 24 24" width="11" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
+              </svg>
+              <span style="color: var(--co-amber); font-family: var(--font-display); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+                "seria 2"
+              </span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="align-items: baseline; display: flex; justify-content: space-between; margin-bottom: 4px">
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; text-transform: none">
+              "Obecność"
+            </span>
+            <span style="color: var(--co-dim); font-family: var(--font-mono); font-size: 0.75rem">
+              "2/3"
+            </span>
+          </div>
+          <div style="background: var(--co-bar-track); height: 2px; overflow: hidden; position: relative">
+            <div style="background: linear-gradient(90deg, var(--co-green), var(--co-cyan)); bottom: 0px; left: 0px; position: absolute; right: 0px; top: 0px; transform-origin: left center; transform: scaleX(0.67); transition: transform 0.8s ease" />
+          </div>
+          <div style="align-items: center; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px" title="Ostatnie 3 sesji">
+            <div style="background: transparent; border-radius: 50%; border: 1px solid var(--co-dot-empty); box-shadow: none; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-02-26" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-05" />
+            <div style="background: rgb(100, 127, 19); border-radius: 50%; border: 1px solid rgb(100, 127, 19); box-shadow: 0 0 4px #647F1380; flex-shrink: 0; height: 7px; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; width: 7px" title="2025-03-12" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; flex: 1 1 0%; padding: 14px; position: relative; z-index: 1">
+      <div aria-label="45,00zł — włącz tryb edycji wpłat" aria-pressed="false" role="button" style="align-items: center; background: var(--co-tint-rose); border: 1px solid var(--co-rose); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); cursor: default; display: flex; flex-direction: column; justify-content: center; margin-bottom: 10px; min-height: 84px; overflow: hidden; padding: 12px; position: relative; text-align: center; transition: background 0.2s ease, border-color 0.2s ease; user-select: none" tabindex="0">
+        <div style="position: relative; z-index: 1">
+          <p style="color: var(--co-rose); font-family: var(--font-tech); font-size: 2.5rem; font-style: italic; font-weight: 700; letter-spacing: normal; line-height: 1.1; margin: 0px; text-shadow: var(--glow-rose-md); text-transform: none">
+            "45,00"
+            <span style="color: var(--co-dim); font-family: var(--font-display); font-size: 1rem; letter-spacing: normal; margin-left: 4px; text-transform: none">
+              "zł"
+            </span>
+          </p>
+        </div>
+      </div>
+      <button aria-pressed="false" class="icon-btn" style="align-items: center; align-self: flex-end; background: transparent; color: var(--co-dim); cursor: pointer; display: inline-flex; font-family: var(--font-mono); font-size: 0.8125rem; gap: 6px; margin-bottom: 6px; min-height: 44px; padding: 6px 10px" type="button">
+        <svg aria-hidden="true" class="lucide lucide-pencil" fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="13" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+          <path d="m15 5 4 4" />
+        </svg>
+        "Edytuj wpłaty"
+      </button>
+      <div style="margin-bottom: 12px">
+        <button aria-expanded="false" class="icon-btn" style="align-items: center; background: transparent; border: 1px solid var(--co-border); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); color: var(--co-cyan); cursor: pointer; display: flex; font-family: var(--font-display); font-size: 0.875rem; gap: 6px; justify-content: center; letter-spacing: normal; min-height: 44px; padding: 8px 10px; text-transform: none; width: 100%" type="button">
+          <span aria-hidden="true" style="display: inline-flex; transform: none; transition: transform 0.25s">
+            <svg aria-hidden="true" class="lucide lucide-chevron-down" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+          "Skąd ta kwota?"
+        </button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto">
+        <button aria-describedby="#id1" aria-label="45,00 zł — zapisz wpłatę" class="cyber-button-yellow hold-confirm-btn" style="padding: 10px 16px; width: 100%" type="button">
+          <span aria-hidden="true" class="hold-confirm-fill" style="transform: scaleX(0); transition: transform 120ms ease-out" />
+          <span style="align-items: center; display: flex; flex-direction: column; gap: 1px; position: relative; z-index: 1">
+            <span style="font-family: var(--font-display); font-size: 1.25rem; letter-spacing: normal; line-height: 1">
+              "45,00 zł"
+            </span>
+            <span id="#id1" style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: normal; opacity: 0.8">
+              "Przytrzymaj, aby zapisać"
+            </span>
+          </span>
+        </button>
+        <p aria-live="polite" class="sr-only" role="status" />
+        <button class="cyber-button-outline" style="min-height: 44px; padding: 8px 12px; width: 100%">
+          "+ Inna kwota"
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+"
+`;
