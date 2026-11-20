@@ -4,17 +4,15 @@
 > kolor, ikonę albo ruch — zmieniasz najpierw ten plik, potem token.
 >
 > Skrócona, maszynowo czytelna wersja dla agentów AI leży w [`DESIGN.md`](DESIGN.md)
-> (format `google-labs-code/design.md`). Mapowanie 12 repozytoriów design
-> skills na konkretne zmiany: [`DESIGN-SKILLS.md`](DESIGN-SKILLS.md).
+> (format `google-labs-code/design.md`).
 >
 > ⚠️ **Kompromis po PR #14 + font z gry:** klimat Cyber‑Ponk wraca w 100%,
 > ale etykiety są zdaniami zamiast wersalików, a `--font-display` to Rajdhani.
 > Kroje: Rajdhani (tekst, główny krój HUD-u Cyberpunk 2077) i **Chakra Petch
 > Italic** (`--font-tech`, ostre pochyłe dane), self-hosted przez `@fontsource`.
 > Bebas Neue i kwadratowy Orbitron zostały usunięte. Fragmenty poniżej o „wersalikowych etykietach"
-> i o Bebas Neue dotyczą stanu sprzed kompromisu — aktualna wykładnia:
-> [`DESIGN-COMPROMISE.md`](DESIGN-COMPROMISE.md) i
-> [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md).
+> i o Bebas Neue dotyczą stanu sprzed kompromisu — aktualna wykładnia o
+> krojach: [`CYBERPUNK-FONT.md`](CYBERPUNK-FONT.md).
 
 ## Skąd się wziął ten kierunek
 

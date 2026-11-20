@@ -2,8 +2,8 @@
 /**
  * Bramka „design floor” — automatyczna część docs/DESIGN.md.
  *
- * Zasady wzięte z 12 repozytoriów opisanych w `../docs/DESIGN-SKILLS.md`, ale
- * zawężone do tego, co da się sprawdzić statycznie i co nie wymaga zgadywania
+ * Zasady wzięte z popularnych repozytoriów design skills (Hallmark, Impeccable,
+ * GSAP Skills i in.), ale zawężone do tego, co da się sprawdzić statycznie i co nie wymaga zgadywania
  * intencji projektanta. Najwięcej naruszeń w tym projekcie nie było widocznych
  * w axe ani w `npm run audit:contrast`: animacje `width` w pięciu paskach,
  * `top` w keyframes i `overflow-x: hidden` na <body>.
@@ -15,7 +15,7 @@
  *      `prefers-reduced-transparency` i `prefers-contrast`,
  *   4. kolory i kroje w komponentach wyłącznie przez tokeny `var(--…)`,
  *   5. zdania zamiast wersalików — zakaz `text-transform: uppercase`
- *      i `textTransform: 'uppercase'` (decyzja kompromisowa, docs/DESIGN-COMPROMISE.md),
+ *      i `textTransform: 'uppercase'` (decyzja kompromisowa, docs/DESIGN.md),
  *   6. kroje są częścią bundla (@fontsource), bez zewnętrznego CDN.
  *
  * Świadome wyjątki (waivers) są jawne w kodzie poniżej, nie w komentarzach
@@ -192,7 +192,7 @@ for (const file of files) {
   file.code.split(/\r?\n/).forEach((line, index) => {
     if (UPPERCASE_STYLE.test(line)) {
       errors.push(
-        `${file.relative}:${index + 1} — wersaliki przez text-transform; użyj zdania (docs/DESIGN-COMPROMISE.md)`,
+        `${file.relative}:${index + 1} — wersaliki przez text-transform; użyj zdania (docs/DESIGN.md)`,
       );
     }
   });
@@ -281,7 +281,7 @@ for (const dep of Object.keys(pkg.dependencies ?? {})) {
 if (errors.length > 0) {
   console.error('\n✗ Audyt design floor: znaleziono problemy\n');
   errors.forEach((error) => console.error(`  • ${error}`));
-  console.error('\nPatrz docs/DESIGN.md → „Do’s and Don’ts” oraz docs/DESIGN-SKILLS.md.\n');
+  console.error('\nPatrz docs/DESIGN.md → „Do’s and Don’ts”.\n');
   process.exit(1);
 }
 

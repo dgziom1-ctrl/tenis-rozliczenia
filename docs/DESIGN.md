@@ -129,8 +129,8 @@ wins”. Nowe ekrany dokładają się do niej, nie zastępują jej nowym,
 **Wyjątek od „brief wins” (PR #14 + kompromis):** pełny redesign na płaski
 styl editorial okazał się gorszy — bez neonu aplikacja straciła ducha.
 Wracamy do Cyber-Ponka w 100%, ale zatrzymujemy jedną rzecz z eksperymentu:
-**etykiety są zdaniami, nie wersalikami**. Decyzja i jej granice:
-[`DESIGN-COMPROMISE.md`](DESIGN-COMPROMISE.md).
+**etykiety są zdaniami, nie wersalikami** (pilnuje tego reguła 5 w
+`frontend/scripts/audit-design.mjs`).
 
 Ten plik jest skróconym, maszynowo czytelnym kontraktem dla agentów
 (format `google-labs-code/design.md`). Szczegółowe uzasadnienie, macierz
@@ -272,4 +272,4 @@ w ikonę; nie ładuj fontów z CDN (używaj `@fontsource`); nie dodawaj
 GSAP/React Bits/Canvas UI jako zależności bez potrzeby — wzorce z tych bibliotek są tu zaimplementowane w istniejącym
 stacku; nie rób pełnego redesignu bez pytania — to system zablokowany,
 a zmiana marki wymaga decyzji właściciela produktu (PR #14 był tą decyzją
-i został świadomie wycofany — patrz `DESIGN-COMPROMISE.md`).
+i został świadomie wycofany).
